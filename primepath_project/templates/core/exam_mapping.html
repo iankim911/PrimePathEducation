@@ -326,6 +326,11 @@
 </div>
 
 <div class="mapping-container">
+    <noscript>
+        <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            JavaScript is required for this page to function properly. Please enable JavaScript and refresh the page.
+        </div>
+    </noscript>
     <div class="mapping-header">
         <h1>Exam-to-Level Mapping Configuration</h1>
         <p>Map curriculum levels to exam versions. Each level can have up to 5 different exam versions.</p>
@@ -566,6 +571,7 @@
 </div>
 
 <script>
+try {
 // Check authentication on page load
 let isAuthenticated = false;
 
@@ -612,36 +618,51 @@ function enableAllInputs() {
 }
 
 // Store available exams for each level
-const availableExams = {
-    {% for level in core_levels %}
-    '{{ level.id }}': [
-        {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
-        {% endfor %}
-    ],
-    {% endfor %}
-    {% for level in ascent_levels %}
-    '{{ level.id }}': [
-        {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
-        {% endfor %}
-    ],
-    {% endfor %}
-    {% for level in edge_levels %}
-    '{{ level.id }}': [
-        {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
-        {% endfor %}
-    ],
-    {% endfor %}
-    {% for level in pinnacle_levels %}
-    '{{ level.id }}': [
-        {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
-        {% endfor %}
-    ],
-    {% endfor %}
-};
+const availableExams = {};
+
+// Initialize available exams from server data
+{% for level in core_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
+    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+{% for level in ascent_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
+    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+{% for level in edge_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
+    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+{% for level in pinnacle_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
+    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+// Debug: Log available exams
+console.log('Available exams loaded:', availableExams);
 
 function addExamSlot(levelId, program) {
     const container = document.getElementById(`mapping-${levelId}`);
@@ -767,40 +788,6 @@ function updateStats() {
     });
 }
 
-function saveAllMappings() {
-    const mappings = [];
-    
-    document.querySelectorAll('.exam-select').forEach(select => {
-        if (select.value) {
-            mappings.push({
-                curriculum_level_id: parseInt(select.dataset.levelId),
-                exam_id: parseInt(select.value),
-                slot: parseInt(select.dataset.slot)
-            });
-        }
-    });
-    
-    fetch('{% url "core:save_exam_mappings" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ mappings: mappings })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Exam mappings saved successfully!');
-        } else {
-            alert('Error saving exam mappings: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while saving exam mappings');
-    });
-}
 
 function getCookie(name) {
     let cookieValue = null;
@@ -908,5 +895,37 @@ document.addEventListener('DOMContentLoaded', function() {
     // Disable all inputs until authenticated
     disableAllInputs();
 });
+
+// Make functions globally accessible
+window.updateStats = updateStats;
+window.addExamSlot = addExamSlot;
+window.removeExamSlot = removeExamSlot;
+window.clearExamSlot = clearExamSlot;
+window.deleteExamMapping = deleteExamMapping;
+window.saveLevelMappings = saveLevelMappings;
+window.saveAllMappings = saveAllMappings;
+window.handleLogin = handleLogin;
+window.disableAllInputs = disableAllInputs;
+window.enableAllInputs = enableAllInputs;
+window.updateClearButton = updateClearButton;
+window.updateAllClearButtons = updateAllClearButtons;
+
+} catch (error) {
+    console.error('Error initializing exam mapping page:', error);
+    alert('There was an error loading the page. Please refresh and try again.');
+}
+
+// Add safe function wrappers for inline event handlers
+function safeCall(funcName, ...args) {
+    try {
+        if (typeof window[funcName] === 'function') {
+            return window[funcName](...args);
+        } else {
+            console.error(`Function ${funcName} is not defined`);
+        }
+    } catch (error) {
+        console.error(`Error calling ${funcName}:`, error);
+    }
+}
 </script>
 {% endblock %}
