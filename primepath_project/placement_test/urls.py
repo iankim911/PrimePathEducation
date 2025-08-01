@@ -22,7 +22,9 @@ urlpatterns = [
     path('exams/<uuid:exam_id>/delete/', views.delete_exam, name='delete_exam'),
     
     path('sessions/', views.session_list, name='session_list'),
+    path('sessions/<uuid:session_id>/', views.session_detail, name='session_detail'),
     path('sessions/<uuid:session_id>/grade/', views.grade_session, name='grade_session'),
+    path('sessions/<uuid:session_id>/export/', views.export_result, name='export_result'),
     
     path('audio/<int:audio_id>/', views.get_audio, name='get_audio'),
     path('questions/<int:question_id>/update/', views.update_question, name='update_question'),
