@@ -232,14 +232,27 @@ def exam_mapping(request):
     edge_levels = []
     pinnacle_levels = []
     
-    # Get all active exams
+    # Get all active exams and annotate with PDF status
     all_exams = Exam.objects.filter(is_active=True).order_by('name')
+    
+    # Process exam names and check for PDF files
+    processed_exams = []
+    for exam in all_exams:
+        # Remove 'PRIME' prefix and change 'Level' to 'Lv'
+        display_name = exam.name.replace('PRIME ', '').replace('Level ', 'Lv ')
+        has_pdf = bool(exam.pdf_file)
+        processed_exams.append({
+            'id': exam.id,
+            'name': exam.name,
+            'display_name': display_name,
+            'has_pdf': has_pdf
+        })
     
     for program in programs:
         for subprogram in program.subprograms.all():
             for level in subprogram.levels.all():
                 # Get all available exams (not just those mapped to this level)
-                level.available_exams = all_exams
+                level.available_exams = processed_exams
                 # Get currently mapped exams for this level
                 level.mapped_exams = Exam.objects.filter(
                     curriculum_level=level,

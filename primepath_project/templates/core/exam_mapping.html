@@ -272,6 +272,18 @@
         text-align: center;
     }
     
+    /* Style for unselected dropdowns */
+    .exam-select option[value=""] {
+        color: #999 !important;
+        font-style: italic !important;
+    }
+    
+    /* Style for exams without PDFs */
+    .exam-select option.no-pdf {
+        color: #dc3545 !important;
+        font-style: italic !important;
+    }
+    
     .level-actions {
         display: flex;
         justify-content: space-between;
@@ -316,7 +328,7 @@
     <div class="modal-content">
         <h2>Admin Login Required</h2>
         <p>Please login to edit exam mappings</p>
-        <form class="login-form" onsubmit="return handleLogin(event)">
+        <form class="login-form" onsubmit="return window.ExamMapping.handleLogin(event)">
             <input type="text" id="adminId" placeholder="Admin ID" required>
             <input type="password" id="adminPassword" placeholder="Password" required>
             <button type="submit">Login</button>
@@ -378,21 +390,23 @@
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}">
                             <div class="exam-row">
                                 <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="updateStats()">
-                                    <option value="">Select Exam</option>
+                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
                                     {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                    </option>
                                     {% endfor %}
                                 </select>
-                                <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
                             </div>
                         </div>
                         <div class="level-actions">
-                            <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'core')" id="add-btn-{{ level.id }}">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'core')" id="add-btn-{{ level.id }}">
                                 + Add Another Exam
                             </button>
-                            <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
                                 Save
                             </button>
                         </div>
@@ -431,21 +445,23 @@
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}">
                             <div class="exam-row">
                                 <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="updateStats()">
-                                    <option value="">Select Exam</option>
+                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
                                     {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                    </option>
                                     {% endfor %}
                                 </select>
-                                <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
                             </div>
                         </div>
                         <div class="level-actions">
-                            <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'ascent')" id="add-btn-{{ level.id }}">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'ascent')" id="add-btn-{{ level.id }}">
                                 + Add Another Exam
                             </button>
-                            <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
                                 Save
                             </button>
                         </div>
@@ -484,21 +500,23 @@
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}">
                             <div class="exam-row">
                                 <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="updateStats()">
-                                    <option value="">Select Exam</option>
+                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
                                     {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                    </option>
                                     {% endfor %}
                                 </select>
-                                <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
                             </div>
                         </div>
                         <div class="level-actions">
-                            <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'edge')" id="add-btn-{{ level.id }}">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'edge')" id="add-btn-{{ level.id }}">
                                 + Add Another Exam
                             </button>
-                            <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
                                 Save
                             </button>
                         </div>
@@ -537,21 +555,23 @@
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}">
                             <div class="exam-row">
                                 <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="updateStats()">
-                                    <option value="">Select Exam</option>
+                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
                                     {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                    </option>
                                     {% endfor %}
                                 </select>
-                                <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
                             </div>
                         </div>
                         <div class="level-actions">
-                            <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'pinnacle')" id="add-btn-{{ level.id }}">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'pinnacle')" id="add-btn-{{ level.id }}">
                                 + Add Another Exam
                             </button>
-                            <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
                                 Save
                             </button>
                         </div>
@@ -566,18 +586,21 @@
         </table>
     </div>
     
-    <button type="button" class="save-button" onclick="saveAllMappings()">Save All Mappings</button>
+    <button type="button" class="save-button" onclick="window.ExamMapping.saveAllMappings()">Save All Mappings</button>
     <div style="clear: both;"></div>
 </div>
 
 <script>
-try {
-// Check authentication on page load
-let isAuthenticated = false;
+(function() {
+    'use strict';
+    
+    // Check authentication on page load
+    let isAuthenticated = false;
+    
+    // Store all functions in a global object to ensure availability
+    window.ExamMapping = {};
 
-// Define functions first, then set up event handlers at the end
-
-function handleLogin(event) {
+    window.ExamMapping.handleLogin = function(event) {
     event.preventDefault();
     
     const adminId = document.getElementById('adminId').value;
@@ -587,12 +610,12 @@ function handleLogin(event) {
     if (adminId === 'admin' && password === 'admin123') {
         isAuthenticated = true;
         document.getElementById('loginModal').style.display = 'none';
-        enableAllInputs();
+        window.ExamMapping.enableAllInputs();
         
         // Initialize after authentication
         setTimeout(() => {
-            updateStats();
-            updateAllClearButtons();
+                window.ExamMapping.updateStats();
+                window.ExamMapping.updateAllClearButtons();
         }, 100);
     } else {
         document.getElementById('loginError').style.display = 'block';
@@ -602,7 +625,7 @@ function handleLogin(event) {
     return false;
 }
 
-function disableAllInputs() {
+    window.ExamMapping.disableAllInputs = function() {
     document.querySelectorAll('select, button').forEach(element => {
         if (!element.closest('#loginModal')) {
             element.disabled = true;
@@ -610,11 +633,11 @@ function disableAllInputs() {
     });
 }
 
-function enableAllInputs() {
+    window.ExamMapping.enableAllInputs = function() {
     document.querySelectorAll('select, button').forEach(element => {
         element.disabled = false;
     });
-    updateAllClearButtons();
+        window.ExamMapping.updateAllClearButtons();
 }
 
 // Store available exams for each level
@@ -624,8 +647,13 @@ const availableExams = {};
 {% for level in core_levels %}
 {% if level.id %}
 availableExams['{{ level.id }}'] = [
-    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
-    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
     {% endif %}{% endfor %}
 ].filter(x => x); // Remove any undefined entries
 {% endif %}
@@ -634,8 +662,13 @@ availableExams['{{ level.id }}'] = [
 {% for level in ascent_levels %}
 {% if level.id %}
 availableExams['{{ level.id }}'] = [
-    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
-    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
     {% endif %}{% endfor %}
 ].filter(x => x); // Remove any undefined entries
 {% endif %}
@@ -644,8 +677,13 @@ availableExams['{{ level.id }}'] = [
 {% for level in edge_levels %}
 {% if level.id %}
 availableExams['{{ level.id }}'] = [
-    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
-    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
     {% endif %}{% endfor %}
 ].filter(x => x); // Remove any undefined entries
 {% endif %}
@@ -654,8 +692,13 @@ availableExams['{{ level.id }}'] = [
 {% for level in pinnacle_levels %}
 {% if level.id %}
 availableExams['{{ level.id }}'] = [
-    {% for exam in level.available_exams %}{% if exam.id and exam.name %}
-    { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
     {% endif %}{% endfor %}
 ].filter(x => x); // Remove any undefined entries
 {% endif %}
@@ -664,7 +707,7 @@ availableExams['{{ level.id }}'] = [
 // Debug: Log available exams
 console.log('Available exams loaded:', availableExams);
 
-function addExamSlot(levelId, program) {
+    window.ExamMapping.addExamSlot = function(levelId, program) {
     const container = document.getElementById(`mapping-${levelId}`);
     const existingRows = container.querySelectorAll('.exam-row').length;
     
@@ -680,12 +723,16 @@ function addExamSlot(levelId, program) {
     newRow.className = 'exam-row';
     newRow.innerHTML = `
         <span class="exam-number">${newSlot}.</span>
-        <select class="exam-select" data-level-id="${levelId}" data-program="${program}" data-slot="${newSlot}" onchange="updateStats()">
-            <option value="">Select Exam</option>
-            ${exams.map(exam => `<option value="${exam.id}">${exam.name}</option>`).join('')}
+        <select class="exam-select" data-level-id="${levelId}" data-program="${program}" data-slot="${newSlot}" onchange="window.ExamMapping.updateStats()">
+            <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+            ${exams.map(exam => {
+                const style = !exam.has_pdf ? 'style="color: #dc3545; font-style: italic;"' : '';
+                const suffix = !exam.has_pdf ? ' (No PDF)' : '';
+                return `<option value="${exam.id}" ${style}>${exam.display_name}${suffix}</option>`;
+            }).join('')}
         </select>
-        <button class="remove-exam-btn" onclick="removeExamSlot(${levelId}, ${newSlot})">Remove</button>
-        <button class="delete-mapping-btn" onclick="deleteExamMapping(${levelId}, ${newSlot})" title="Delete this mapping">×</button>
+        <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot(${levelId}, ${newSlot})">Remove</button>
+        <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping(${levelId}, ${newSlot})" title="Delete this mapping">×</button>
     `;
     
     container.appendChild(newRow);
@@ -695,10 +742,10 @@ function addExamSlot(levelId, program) {
         document.getElementById(`add-btn-${levelId}`).disabled = true;
     }
     
-    updateStats();
+        window.ExamMapping.updateStats();
 }
 
-function removeExamSlot(levelId, slot) {
+    window.ExamMapping.removeExamSlot = function(levelId, slot) {
     const container = document.getElementById(`mapping-${levelId}`);
     const rows = container.querySelectorAll('.exam-row');
     
@@ -715,30 +762,30 @@ function removeExamSlot(levelId, slot) {
         const removeBtn = row.querySelector('.remove-exam-btn');
         if (index === 0 && remainingRows.length === 1) {
             removeBtn.textContent = 'Clear';
-            removeBtn.onclick = () => clearExamSlot(levelId, 1);
+            removeBtn.onclick = () => window.ExamMapping.clearExamSlot(levelId, 1);
         } else {
             removeBtn.textContent = 'Remove';
-            removeBtn.onclick = () => removeExamSlot(levelId, index + 1);
+            removeBtn.onclick = () => window.ExamMapping.removeExamSlot(levelId, index + 1);
         }
     });
     
     // Enable add button
     document.getElementById(`add-btn-${levelId}`).disabled = false;
     
-    updateStats();
+        window.ExamMapping.updateStats();
 }
 
-function clearExamSlot(levelId, slot) {
+    window.ExamMapping.clearExamSlot = function(levelId, slot) {
     const container = document.getElementById(`mapping-${levelId}`);
     const select = container.querySelector(`.exam-select[data-slot="${slot}"]`);
     if (select) {
         select.value = '';
-        updateStats();
-        updateClearButton(levelId, slot);
+            window.ExamMapping.updateStats();
+        window.ExamMapping.updateClearButton(levelId, slot);
     }
 }
 
-function updateClearButton(levelId, slot) {
+    window.ExamMapping.updateClearButton = function(levelId, slot) {
     const container = document.getElementById(`mapping-${levelId}`);
     const row = container.querySelectorAll('.exam-row')[slot - 1];
     if (row) {
@@ -751,20 +798,20 @@ function updateClearButton(levelId, slot) {
     }
 }
 
-function updateAllClearButtons() {
+    window.ExamMapping.updateAllClearButtons = function() {
     document.querySelectorAll('.exam-mapping-container').forEach(container => {
         const levelId = container.id.replace('mapping-', '');
         const rows = container.querySelectorAll('.exam-row');
         
         rows.forEach((row, index) => {
             if (rows.length === 1) {
-                updateClearButton(levelId, index + 1);
+                window.ExamMapping.updateClearButton(levelId, index + 1);
             }
         });
     });
 }
 
-function updateStats() {
+    window.ExamMapping.updateStats = function() {
     const programs = ['core', 'ascent', 'edge', 'pinnacle'];
     
     programs.forEach(program => {
@@ -783,13 +830,13 @@ function updateStats() {
     // Update clear buttons
     document.querySelectorAll('.exam-select').forEach(select => {
         select.addEventListener('change', function() {
-            updateClearButton(this.dataset.levelId, this.dataset.slot);
+            window.ExamMapping.updateClearButton(this.dataset.levelId, this.dataset.slot);
         });
     });
 }
 
 
-function getCookie(name) {
+    window.ExamMapping.getCookie = function(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
@@ -804,16 +851,16 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function deleteExamMapping(levelId, slot) {
+    window.ExamMapping.deleteExamMapping = function(levelId, slot) {
     const container = document.getElementById(`mapping-${levelId}`);
     const select = container.querySelector(`.exam-select[data-slot="${slot}"]`);
     if (select) {
         select.value = '';
-        updateStats();
+            window.ExamMapping.updateStats();
     }
 }
 
-function saveLevelMappings(levelId) {
+    window.ExamMapping.saveLevelMappings = function(levelId) {
     const mappings = [];
     const container = document.getElementById(`mapping-${levelId}`);
     
@@ -831,7 +878,7 @@ function saveLevelMappings(levelId) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
         },
         body: JSON.stringify({ 
             mappings: mappings,
@@ -852,7 +899,7 @@ function saveLevelMappings(levelId) {
     });
 }
 
-function saveAllMappings() {
+    window.ExamMapping.saveAllMappings = function() {
     const mappings = [];
     
     document.querySelectorAll('.exam-select').forEach(select => {
@@ -869,7 +916,7 @@ function saveAllMappings() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
         },
         body: JSON.stringify({ mappings: mappings })
     })
@@ -893,27 +940,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loginModal').style.display = 'block';
     
     // Disable all inputs until authenticated
-    disableAllInputs();
+    window.ExamMapping.disableAllInputs();
 });
 
-// Make functions globally accessible
-window.updateStats = updateStats;
-window.addExamSlot = addExamSlot;
-window.removeExamSlot = removeExamSlot;
-window.clearExamSlot = clearExamSlot;
-window.deleteExamMapping = deleteExamMapping;
-window.saveLevelMappings = saveLevelMappings;
-window.saveAllMappings = saveAllMappings;
-window.handleLogin = handleLogin;
-window.disableAllInputs = disableAllInputs;
-window.enableAllInputs = enableAllInputs;
-window.updateClearButton = updateClearButton;
-window.updateAllClearButtons = updateAllClearButtons;
-
-} catch (error) {
-    console.error('Error initializing exam mapping page:', error);
-    alert('There was an error loading the page. Please refresh and try again.');
-}
+})();
 
 // Add safe function wrappers for inline event handlers
 function safeCall(funcName, ...args) {
