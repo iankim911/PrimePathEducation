@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.db import transaction
 from .models import Teacher, Program, SubProgram, CurriculumLevel, PlacementRule
 import json
 
@@ -296,11 +297,20 @@ def save_exam_mappings(request):
     """Save curriculum level to exam mappings"""
     from .models import ExamLevelMapping
     from placement_test.models import Exam
+    import logging
+    
+    logger = logging.getLogger(__name__)
     
     try:
+        # Log the raw request body for debugging
+        logger.info(f"Request body: {request.body}")
+        
         data = json.loads(request.body)
         mappings = data.get('mappings', [])
         level_id = data.get('level_id')  # If saving for specific level only
+        
+        logger.info(f"Parsed mappings: {mappings}")
+        logger.info(f"Level ID: {level_id}")
         
         with transaction.atomic():
             if level_id:
@@ -331,5 +341,9 @@ def save_exam_mappings(request):
                     )
         
         return JsonResponse({'success': True})
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {e}")
+        return JsonResponse({'success': False, 'error': f'Invalid JSON: {str(e)}'}, status=400)
     except Exception as e:
+        logger.error(f"Error saving exam mappings: {e}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

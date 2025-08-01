@@ -964,7 +964,7 @@ console.log('Available exams loaded:', availableExams);
         if (select.value) {
             mappings.push({
                 curriculum_level_id: parseInt(levelId),
-                exam_id: parseInt(select.value),
+                exam_id: select.value,  // Keep as string - it's a UUID
                 slot: parseInt(select.dataset.slot)
             });
         }
@@ -1002,7 +1002,7 @@ console.log('Available exams loaded:', availableExams);
         if (select.value) {
             mappings.push({
                 curriculum_level_id: parseInt(select.dataset.levelId),
-                exam_id: parseInt(select.value),
+                exam_id: select.value,  // Keep as string - it's a UUID
                 slot: parseInt(select.dataset.slot)
             });
         }

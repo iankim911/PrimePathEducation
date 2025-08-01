@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('placement_test', '0001_initial'),
-        ('core', '0002_create_base_data'),
+        ('core', '0002_alter_curriculumlevel_created_at_and_more'),
     ]
 
     operations = [
