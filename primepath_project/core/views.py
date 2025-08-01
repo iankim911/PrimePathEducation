@@ -222,6 +222,7 @@ def save_placement_rules(request):
 def exam_mapping(request):
     """View for managing curriculum level to exam mappings"""
     from placement_test.models import Exam
+    from .models import ExamLevelMapping
     
     # Get all programs
     programs = Program.objects.prefetch_related('subprograms__levels').all()
@@ -242,7 +243,7 @@ def exam_mapping(request):
         display_name = exam.name.replace('PRIME ', '').replace('Level ', 'Lv ')
         has_pdf = bool(exam.pdf_file)
         processed_exams.append({
-            'id': exam.id,
+            'id': str(exam.id),  # Convert UUID to string
             'name': exam.name,
             'display_name': display_name,
             'has_pdf': has_pdf
@@ -253,11 +254,23 @@ def exam_mapping(request):
             for level in subprogram.levels.all():
                 # Get all available exams (not just those mapped to this level)
                 level.available_exams = processed_exams
-                # Get currently mapped exams for this level
-                level.mapped_exams = Exam.objects.filter(
-                    curriculum_level=level,
-                    is_active=True
-                ).order_by('name')
+                
+                # Get existing mappings for this level
+                existing_mappings = ExamLevelMapping.objects.filter(
+                    curriculum_level=level
+                ).select_related('exam').order_by('slot')
+                
+                # Prepare mapped exams data
+                level.existing_mappings = []
+                for mapping in existing_mappings:
+                    display_name = mapping.exam.name.replace('PRIME ', '').replace('Level ', 'Lv ')
+                    level.existing_mappings.append({
+                        'slot': mapping.slot,
+                        'exam_id': str(mapping.exam.id),
+                        'exam_name': mapping.exam.name,
+                        'exam_display_name': display_name,
+                        'has_pdf': bool(mapping.exam.pdf_file)
+                    })
                 
                 if program.name == 'CORE':
                     core_levels.append(level)
@@ -281,12 +294,41 @@ def exam_mapping(request):
 @require_http_methods(["POST"])
 def save_exam_mappings(request):
     """Save curriculum level to exam mappings"""
+    from .models import ExamLevelMapping
+    from placement_test.models import Exam
+    
     try:
         data = json.loads(request.body)
         mappings = data.get('mappings', [])
+        level_id = data.get('level_id')  # If saving for specific level only
         
-        # For now, we'll just return success
-        # In a real implementation, you'd need to create a model to store these mappings
+        with transaction.atomic():
+            if level_id:
+                # Delete existing mappings for this level only
+                ExamLevelMapping.objects.filter(curriculum_level_id=level_id).delete()
+                
+                # Create new mappings for this level
+                for mapping in mappings:
+                    if mapping['curriculum_level_id'] == int(level_id):
+                        ExamLevelMapping.objects.create(
+                            curriculum_level_id=mapping['curriculum_level_id'],
+                            exam_id=mapping['exam_id'],
+                            slot=mapping['slot']
+                        )
+            else:
+                # Get all unique curriculum level IDs from mappings
+                level_ids = set(m['curriculum_level_id'] for m in mappings)
+                
+                # Delete existing mappings for these levels
+                ExamLevelMapping.objects.filter(curriculum_level_id__in=level_ids).delete()
+                
+                # Create new mappings
+                for mapping in mappings:
+                    ExamLevelMapping.objects.create(
+                        curriculum_level_id=mapping['curriculum_level_id'],
+                        exam_id=mapping['exam_id'],
+                        slot=mapping['slot']
+                    )
         
         return JsonResponse({'success': True})
     except Exception as e:

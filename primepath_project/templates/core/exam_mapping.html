@@ -387,20 +387,44 @@
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
-                        <div class="exam-mapping-container" id="mapping-{{ level.id }}">
-                            <div class="exam-row">
-                                <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
-                                    {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
-                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
-                            </div>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="level-actions">
                             <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'core')" id="add-btn-{{ level.id }}">
@@ -442,20 +466,44 @@
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
-                        <div class="exam-mapping-container" id="mapping-{{ level.id }}">
-                            <div class="exam-row">
-                                <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
-                                    {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
-                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
-                            </div>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="level-actions">
                             <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'ascent')" id="add-btn-{{ level.id }}">
@@ -497,20 +545,44 @@
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
-                        <div class="exam-mapping-container" id="mapping-{{ level.id }}">
-                            <div class="exam-row">
-                                <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
-                                    {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
-                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
-                            </div>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="level-actions">
                             <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'edge')" id="add-btn-{{ level.id }}">
@@ -552,20 +624,44 @@
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
-                        <div class="exam-mapping-container" id="mapping-{{ level.id }}">
-                            <div class="exam-row">
-                                <span class="exam-number">1.</span>
-                                <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                    <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
-                                    {% for exam in level.available_exams %}
-                                    <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
-                                        {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
-                                <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
-                            </div>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="level-actions">
                             <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'pinnacle')" id="add-btn-{{ level.id }}">
@@ -941,6 +1037,28 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Disable all inputs until authenticated
     window.ExamMapping.disableAllInputs();
+    
+    // Update button states for existing mappings
+    document.querySelectorAll('.exam-mapping-container').forEach(container => {
+        const levelId = container.dataset.levelId;
+        const rows = container.querySelectorAll('.exam-row');
+        const addBtn = document.getElementById(`add-btn-${levelId}`);
+        
+        // Disable add button if we have 5 mappings
+        if (addBtn && rows.length >= 5) {
+            addBtn.disabled = true;
+        }
+        
+        // Update clear/remove button states
+        rows.forEach((row, index) => {
+            const select = row.querySelector('.exam-select');
+            const removeBtn = row.querySelector('.remove-exam-btn');
+            
+            if (select && select.value && removeBtn) {
+                removeBtn.disabled = false;
+            }
+        });
+    });
 });
 
 })();

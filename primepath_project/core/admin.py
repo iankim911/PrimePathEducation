@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import School, Teacher, Program, SubProgram, CurriculumLevel, PlacementRule
+from .models import School, Teacher, Program, SubProgram, CurriculumLevel, PlacementRule, ExamLevelMapping
 
 
 @admin.register(School)
@@ -40,3 +40,11 @@ class PlacementRuleAdmin(admin.ModelAdmin):
     list_display = ['grade', 'min_rank_percentile', 'max_rank_percentile', 'curriculum_level', 'priority']
     list_filter = ['grade', 'curriculum_level__subprogram__program']
     ordering = ['priority', 'grade']
+
+
+@admin.register(ExamLevelMapping)
+class ExamLevelMappingAdmin(admin.ModelAdmin):
+    list_display = ['curriculum_level', 'exam', 'slot', 'created_at']
+    list_filter = ['curriculum_level__subprogram__program', 'slot']
+    search_fields = ['curriculum_level__subprogram__name', 'exam__name']
+    ordering = ['curriculum_level', 'slot']
