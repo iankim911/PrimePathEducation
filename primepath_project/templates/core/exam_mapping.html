@@ -393,7 +393,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">{{ mapping.slot }}.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" 
                                             {% if exam.id == mapping.exam_id %}selected{% endif %}
@@ -414,7 +414,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">1.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
                                             {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
@@ -472,7 +472,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">{{ mapping.slot }}.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" 
                                             {% if exam.id == mapping.exam_id %}selected{% endif %}
@@ -493,7 +493,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">1.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
                                             {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
@@ -551,7 +551,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">{{ mapping.slot }}.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" 
                                             {% if exam.id == mapping.exam_id %}selected{% endif %}
@@ -572,7 +572,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">1.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
                                             {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
@@ -630,7 +630,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">{{ mapping.slot }}.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" 
                                             {% if exam.id == mapping.exam_id %}selected{% endif %}
@@ -651,7 +651,7 @@
                                 <div class="exam-row">
                                     <span class="exam-number">1.</span>
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="window.ExamMapping.updateStats()">
-                                        <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
                                         {% for exam in level.available_exams %}
                                         <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
                                             {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
@@ -820,7 +820,7 @@ console.log('Available exams loaded:', availableExams);
     newRow.innerHTML = `
         <span class="exam-number">${newSlot}.</span>
         <select class="exam-select" data-level-id="${levelId}" data-program="${program}" data-slot="${newSlot}" onchange="window.ExamMapping.updateStats()">
-            <option value="" style="color: #999; font-style: italic;">-- No exam assigned --</option>
+            <option value="" style="color: #999; font-style: italic;">Select</option>
             ${exams.map(exam => {
                 const style = !exam.has_pdf ? 'style="color: #dc3545; font-style: italic;"' : '';
                 const suffix = !exam.has_pdf ? ' (No PDF)' : '';
