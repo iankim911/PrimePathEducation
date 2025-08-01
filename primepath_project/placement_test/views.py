@@ -23,10 +23,18 @@ logger = logging.getLogger(__name__)
 
 
 @handle_errors(template_name='placement_test/error.html')
-@validate_request_data(required_fields=['student_name', 'grade', 'academic_rank'], method='POST')
 def start_test(request):
     if request.method == 'POST':
         try:
+            # Validate required fields
+            required_fields = ['student_name', 'grade', 'academic_rank']
+            missing_fields = [field for field in required_fields if not request.POST.get(field)]
+            if missing_fields:
+                raise ValidationException(
+                    f"Missing required fields: {', '.join(missing_fields)}",
+                    code="MISSING_FIELDS"
+                )
+            
             # Collect and validate student data
             student_data = {
                 'student_name': request.POST.get('student_name'),
