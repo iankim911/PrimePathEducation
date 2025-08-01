@@ -1038,6 +1038,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Disable all inputs until authenticated
     window.ExamMapping.disableAllInputs();
     
+    // Update stats based on existing mappings
+    window.ExamMapping.updateStats();
+    
     // Update button states for existing mappings
     document.querySelectorAll('.exam-mapping-container').forEach(container => {
         const levelId = container.dataset.levelId;
