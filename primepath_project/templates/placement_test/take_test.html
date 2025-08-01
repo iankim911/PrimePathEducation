@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.name }} - Taking Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ exam.name }}</h2>
+    <div class="alert alert-info">
+        <strong>Student:</strong> {{ session.student_name }}<br>
+        <strong>Time Limit:</strong> {{ exam.timer_minutes }} minutes
+    </div>
+    
+    <form method="post" id="test-form">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>Question {{ question.question_number }}</h5>
+                
+                {% if question.question_type == 'MCQ' %}
+                <div class="form-group">
+                    {% for option in "ABCDE" %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" 
+                               name="q_{{ question.id }}" 
+                               id="q{{ question.id }}_{{ option }}" 
+                               value="{{ option }}">
+                        <label class="form-check-label" for="q{{ question.id }}_{{ option }}">
+                            {{ option }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% elif question.question_type == 'SHORT' %}
+                <div class="form-group">
+                    <input type="text" class="form-control" 
+                           name="q_{{ question.id }}" 
+                           placeholder="Your answer">
+                </div>
+                {% elif question.question_type == 'LONG' %}
+                <div class="form-group">
+                    <textarea class="form-control" 
+                              name="q_{{ question.id }}" 
+                              rows="5" 
+                              placeholder="Your answer"></textarea>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary">Submit Test</button>
+    </form>
+</div>
+{% endblock %}

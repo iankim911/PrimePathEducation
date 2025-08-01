@@ -1,0 +1,414 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ exam.name }} - Placement Test{% endblock %}
+
+{% block extra_css %}
+<style>
+    .test-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .test-header {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .timer-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #dc3545;
+    }
+    
+    .question-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 30px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .question-nav-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #dee2e6;
+        background: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    
+    .question-nav-btn.answered {
+        background: #28a745;
+        color: white;
+    }
+    
+    .question-nav-btn.active {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,.25);
+    }
+    
+    .question-container {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .question-section {
+        flex: 1;
+        background: white;
+        padding: 30px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+    
+    .pdf-section {
+        flex: 1;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .pdf-viewer {
+        height: 600px;
+        overflow-y: auto;
+        text-align: center;
+        background: #f5f5f5;
+        padding: 10px;
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .question-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .audio-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background: #e3f2fd;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .audio-btn {
+        padding: 8px 16px;
+        background: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .audio-btn:hover {
+        background: #1976d2;
+    }
+    
+    .answer-options {
+        margin-top: 20px;
+    }
+    
+    .option-label {
+        display: block;
+        padding: 15px 20px;
+        margin-bottom: 10px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .option-label:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+    
+    input[type="radio"]:checked + .option-label {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
+    
+    .btn-nav {
+        padding: 10px 30px;
+        font-size: 1.1rem;
+    }
+    
+    .submit-section {
+        margin-top: 40px;
+        text-align: center;
+        padding: 30px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="test-container">
+    <!-- Test Header -->
+    <div class="test-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>{{ exam.name }}</h2>
+                <p class="mb-0"><strong>Student:</strong> {{ session.student_name }}</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <div class="timer-display" id="timer">{{ exam.timer_minutes }}:00</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Question Navigation -->
+    <div class="question-nav" id="question-nav">
+        {% for q in questions %}
+        <button type="button" 
+                class="question-nav-btn {% if forloop.first %}active{% endif %}" 
+                data-question="{{ q.question_number }}"
+                onclick="goToQuestion({{ q.question_number }})">
+            {{ q.question_number }}
+        </button>
+        {% endfor %}
+    </div>
+    
+    <!-- Main Content -->
+    <div class="question-container">
+        <!-- Question Section -->
+        <div class="question-section">
+            <form id="test-form" method="post" action="{% url 'placement_test:submit_answer' session.id %}">
+                {% csrf_token %}
+                
+                {% for question in questions %}
+                <div class="question-panel {% if not forloop.first %}hidden{% endif %}" 
+                     id="question-{{ question.question_number }}"
+                     data-question-id="{{ question.id }}">
+                    
+                    <div class="question-header">
+                        <div class="question-number">Question {{ question.question_number }}</div>
+                        <div>{{ question.points }} point{% if question.points != 1 %}s{% endif %}</div>
+                    </div>
+                    
+                    <!-- Audio Control (if question has audio) -->
+                    {% for audio in audio_files %}
+                        {% if question.question_number >= audio.start_question and question.question_number <= audio.end_question %}
+                        <div class="audio-control">
+                            <button type="button" class="audio-btn" onclick="playAudio({{ audio.id }})">
+                                🔊 Play Audio
+                            </button>
+                            <audio id="audio-{{ audio.id }}" preload="none">
+                                <source src="{% url 'placement_test:get_audio' audio.id %}" type="audio/mpeg">
+                            </audio>
+                            <span class="text-muted">Listen carefully before answering</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Answer Options -->
+                    <div class="answer-options">
+                        {% if question.question_type == 'MCQ' %}
+                            {% with letters="ABCDEFGHIJ"|slice:":"|slice:question.options_count %}
+                            {% for letter in letters %}
+                            <div style="display: none;">
+                                <input type="radio" 
+                                       name="q_{{ question.id }}" 
+                                       id="q{{ question.id }}_{{ letter }}"
+                                       value="{{ letter }}"
+                                       onchange="markAnswered({{ question.question_number }})">
+                            </div>
+                            <label for="q{{ question.id }}_{{ letter }}" class="option-label">
+                                <strong>{{ letter }}</strong>
+                            </label>
+                            {% endfor %}
+                            {% endwith %}
+                            
+                        {% elif question.question_type == 'SHORT' %}
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   name="q_{{ question.id }}"
+                                   placeholder="Type your answer here"
+                                   onchange="markAnswered({{ question.question_number }})">
+                                   
+                        {% elif question.question_type == 'LONG' %}
+                            <textarea class="form-control" 
+                                      name="q_{{ question.id }}"
+                                      rows="8"
+                                      placeholder="Write your answer here"
+                                      onchange="markAnswered({{ question.question_number }})"></textarea>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <div class="nav-buttons">
+                        <button type="button" 
+                                class="btn btn-secondary btn-nav"
+                                onclick="goToQuestion({{ question.question_number|add:"-1" }})"
+                                {% if forloop.first %}disabled{% endif %}>
+                            ← Previous
+                        </button>
+                        
+                        {% if not forloop.last %}
+                        <button type="button" 
+                                class="btn btn-primary btn-nav"
+                                onclick="goToQuestion({{ question.question_number|add:"1" }})">
+                            Next →
+                        </button>
+                        {% else %}
+                        <button type="button" 
+                                class="btn btn-success btn-nav"
+                                onclick="showSubmitSection()">
+                            Review & Submit
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Submit Section -->
+                <div class="submit-section hidden" id="submit-section">
+                    <h3>Ready to Submit?</h3>
+                    <p>Please review your answers before submitting. You cannot change them after submission.</p>
+                    <button type="submit" class="btn btn-success btn-lg">Submit Test</button>
+                    <button type="button" class="btn btn-secondary btn-lg ml-3" onclick="hideSubmitSection()">
+                        Back to Questions
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- PDF Section -->
+        <div class="pdf-section">
+            <div class="pdf-viewer">
+                {% if exam.pdf_file %}
+                <embed src="{{ exam.pdf_file.url }}" 
+                       type="application/pdf" 
+                       width="100%" 
+                       height="100%">
+                {% else %}
+                <p>No PDF available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentQuestion = 1;
+let timerInterval;
+let timeRemaining = {{ timer_seconds }};
+
+// Initialize timer
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('timer').textContent = 
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('test-form').submit();
+        }
+    }, 1000);
+}
+
+// Navigate to question
+function goToQuestion(num) {
+    if (num < 1 || num > {{ questions|length }}) return;
+    
+    // Hide current question
+    document.getElementById(`question-${currentQuestion}`).classList.add('hidden');
+    document.querySelector(`[data-question="${currentQuestion}"]`).classList.remove('active');
+    
+    // Show new question
+    document.getElementById(`question-${num}`).classList.remove('hidden');
+    document.querySelector(`[data-question="${num}"]`).classList.add('active');
+    
+    currentQuestion = num;
+}
+
+// Mark question as answered
+function markAnswered(num) {
+    document.querySelector(`[data-question="${num}"]`).classList.add('answered');
+    saveAnswer(num);
+}
+
+// Save answer via AJAX
+function saveAnswer(questionNum) {
+    const questionPanel = document.getElementById(`question-${questionNum}`);
+    const questionId = questionPanel.dataset.questionId;
+    const input = questionPanel.querySelector(`[name="q_${questionId}"]`);
+    
+    if (!input) return;
+    
+    const answer = input.type === 'radio' ? 
+        (questionPanel.querySelector(`[name="q_${questionId}"]:checked`)?.value || '') :
+        input.value;
+    
+    fetch("{% url 'placement_test:submit_answer' session.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            question_id: questionId,
+            answer: answer
+        })
+    });
+}
+
+// Play audio
+function playAudio(audioId) {
+    const audio = document.getElementById(`audio-${audioId}`);
+    if (audio) {
+        audio.play();
+    }
+}
+
+// Show/hide submit section
+function showSubmitSection() {
+    document.querySelectorAll('.question-panel').forEach(panel => {
+        panel.classList.add('hidden');
+    });
+    document.getElementById('submit-section').classList.remove('hidden');
+}
+
+function hideSubmitSection() {
+    document.getElementById('submit-section').classList.add('hidden');
+    goToQuestion(currentQuestion);
+}
+
+// Start timer on load
+document.addEventListener('DOMContentLoaded', () => {
+    startTimer();
+});
+</script>
+{% endblock %}

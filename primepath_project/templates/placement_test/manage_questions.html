@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Questions - {{ exam.name }} - PrimePath{% endblock %}
+
+{% block header %}Manage Questions: {{ exam.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .questions-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .exam-summary {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .summary-item {
+        background: white;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .questions-section {
+        margin-top: 30px;
+    }
+    
+    .question-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .question-number {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .question-type {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .type-mcq {
+        background-color: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .type-checkbox {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .type-short {
+        background-color: #e8f5e9;
+        color: #388e3c;
+    }
+    
+    .type-long {
+        background-color: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .answer-section {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .form-control {
+        margin-bottom: 10px;
+    }
+    
+    .btn-save {
+        margin-right: 10px;
+    }
+    
+    .success-message {
+        color: #28a745;
+        font-size: 0.9rem;
+        margin-left: 10px;
+        display: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="questions-container">
+    <!-- Exam Summary -->
+    <div class="exam-summary">
+        <h2>Exam Summary</h2>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <strong>Total Questions:</strong> {{ exam.total_questions }}
+            </div>
+            <div class="summary-item">
+                <strong>Duration:</strong> {{ exam.timer_minutes }} minutes
+            </div>
+            <div class="summary-item">
+                <strong>Questions Created:</strong> {{ questions.count }}
+            </div>
+            <div class="summary-item">
+                <strong>Status:</strong> 
+                {% if questions.count == exam.total_questions %}
+                    <span style="color: #28a745;">Complete</span>
+                {% else %}
+                    <span style="color: #dc3545;">Incomplete ({{ exam.total_questions|add:"-"|add:questions.count }} missing)</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Questions Section -->
+    <div class="questions-section">
+        <h3>Questions and Answer Keys</h3>
+        
+        {% if questions %}
+            {% for question in questions %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">Question {{ question.question_number }}</span>
+                    <span class="question-type type-{{ question.question_type|lower }}">
+                        {{ question.get_question_type_display }}
+                    </span>
+                </div>
+                
+                <form class="answer-form" data-question-id="{{ question.id }}">
+                    {% csrf_token %}
+                    <div class="answer-section">
+                        {% if question.question_type == 'MCQ' %}
+                            <label>Correct Answer (Single letter A-E):</label>
+                            <input type="text" class="form-control" name="correct_answer" 
+                                   value="{{ question.correct_answer }}" 
+                                   placeholder="e.g., A" maxlength="1" style="width: 100px;">
+                        {% elif question.question_type == 'CHECKBOX' %}
+                            <label>Correct Answers (Comma-separated letters):</label>
+                            <input type="text" class="form-control" name="correct_answer" 
+                                   value="{{ question.correct_answer }}" 
+                                   placeholder="e.g., A,C,D">
+                        {% elif question.question_type == 'SHORT' %}
+                            <label>Answer Key / Keywords:</label>
+                            <input type="text" class="form-control" name="correct_answer" 
+                                   value="{{ question.correct_answer }}" 
+                                   placeholder="Enter key words or phrases">
+                        {% else %}
+                            <label>Answer Guidelines:</label>
+                            <textarea class="form-control" name="correct_answer" rows="3" 
+                                      placeholder="Enter grading guidelines or key points">{{ question.correct_answer }}</textarea>
+                        {% endif %}
+                        
+                        <div style="margin-top: 10px;">
+                            <label>Points:</label>
+                            <input type="number" class="form-control" name="points" 
+                                   value="{{ question.points }}" min="1" max="10" style="width: 100px;">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-save">Save Answer</button>
+                        <span class="success-message">Saved!</span>
+                    </div>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h4>No Questions Created Yet</h4>
+                <p>Questions need to be created for this exam.</p>
+                <button class="btn btn-primary" onclick="createQuestions()">Create Questions</button>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'placement_test:exam_list' %}" class="btn btn-secondary">Back to Exam List</a>
+        {% if questions.count < exam.total_questions %}
+            <button class="btn btn-primary" onclick="createMissingQuestions()">Create Missing Questions</button>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Save answer for a question
+document.querySelectorAll('.answer-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const questionId = this.dataset.questionId;
+        const formData = new FormData(this);
+        const saveBtn = this.querySelector('.btn-save');
+        const successMsg = this.querySelector('.success-message');
+        
+        // Disable button during save
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+        
+        fetch(`/api/placement/questions/${questionId}/update/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                successMsg.style.display = 'inline';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 2000);
+            } else {
+                alert('Error saving answer: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            alert('Error saving answer: ' + error);
+        })
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Answer';
+        });
+    });
+});
+
+// Create all questions for the exam
+function createQuestions() {
+    if (confirm('This will create {{ exam.total_questions }} questions. Continue?')) {
+        createQuestionsRequest();
+    }
+}
+
+// Create missing questions
+function createMissingQuestions() {
+    const missing = {{ exam.total_questions }} - {{ questions.count }};
+    if (confirm(`This will create ${missing} missing questions. Continue?`)) {
+        createQuestionsRequest();
+    }
+}
+
+// Make request to create questions
+function createQuestionsRequest() {
+    fetch(`/api/placement/exams/{{ exam.id }}/create-questions/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error creating questions: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        alert('Error creating questions: ' + error);
+    });
+}
+</script>
+{% endblock %}

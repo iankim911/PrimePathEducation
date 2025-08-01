@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Results - {{ session.student_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Test Results</h2>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ session.student_name }}</h5>
+            <p><strong>Exam:</strong> {{ exam.name }}</p>
+            <p><strong>Score:</strong> {{ session.score }} / {{ session.total_possible_score|default:"?" }}</p>
+            <p><strong>Percentage:</strong> {{ session.percentage_score|floatformat:1 }}%</p>
+            <p><strong>Completed:</strong> {{ session.completed_at|date:"Y-m-d H:i" }}</p>
+            <p><strong>Time Spent:</strong> {{ session.time_spent_seconds|floatformat:0 }} seconds</p>
+            <p><strong>Curriculum Recommendation:</strong> {{ curriculum_recommendation.full_name }}</p>
+        </div>
+    </div>
+    
+    <h3>Answer Review</h3>
+    {% for answer in answers %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h6>Question {{ answer.question.question_number }}</h6>
+            <p><strong>Your Answer:</strong> {{ answer.answer|default:"No answer" }}</p>
+            <p><strong>Correct Answer:</strong> {{ answer.question.correct_answer|default:"Not set" }}</p>
+            <p><strong>Points Earned:</strong> {{ answer.points_earned }} / {{ answer.question.points }}</p>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <a href="{% url 'placement_test:start_test' %}" class="btn btn-primary">Take Another Test</a>
+</div>
+{% endblock %}

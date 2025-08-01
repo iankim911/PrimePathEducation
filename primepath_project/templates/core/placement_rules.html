@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load grade_tags %}
+
+{% block title %}Placement Rules{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Placement Rules</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Current Placement Rules</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Grade</th>
+                                    <th>English Class Rank Range</th>
+                                    <th>Curriculum Level</th>
+                                    <th>Priority</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rule in rules %}
+                                <tr data-rule-id="{{ rule.id }}">
+                                    <td>{{ rule.grade|format_grade }}</td>
+                                    <td>Top {{ rule.min_rank_percentile }}% - {{ rule.max_rank_percentile }}%</td>
+                                    <td>{{ rule.curriculum_level.full_name }}</td>
+                                    <td>{{ rule.priority }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger delete-rule" data-rule-id="{{ rule.id }}">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No placement rules configured</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Add New Rule</h5>
+                </div>
+                <div class="card-body">
+                    <form id="add-rule-form">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="grade" class="form-label">Grade</label>
+                            <select class="form-control" id="grade" name="grade" required>
+                                <option value="">Select Grade</option>
+                                <option value="1">Primary 1</option>
+                                <option value="2">Primary 2</option>
+                                <option value="3">Primary 3</option>
+                                <option value="4">Primary 4</option>
+                                <option value="5">Primary 5</option>
+                                <option value="6">Primary 6</option>
+                                <option value="7">Middle School 1</option>
+                                <option value="8">Middle School 2</option>
+                                <option value="9">Middle School 3</option>
+                                <option value="10">High School 1</option>
+                                <option value="11">High School 2</option>
+                                <option value="12">High School 3</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="min_rank" class="form-label">Min English Class Rank (%)</label>
+                            <input type="number" class="form-control" id="min_rank" name="min_rank" 
+                                   min="0" max="100" required placeholder="e.g., 0">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="max_rank" class="form-label">Max English Class Rank (%)</label>
+                            <input type="number" class="form-control" id="max_rank" name="max_rank" 
+                                   min="0" max="100" required placeholder="e.g., 20">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="curriculum_level" class="form-label">Curriculum Level</label>
+                            <select class="form-control" id="curriculum_level" name="curriculum_level" required>
+                                <option value="">Select Curriculum Level</option>
+                                {% for level in curriculum_levels %}
+                                <option value="{{ level.id }}">{{ level.full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <input type="number" class="form-control" id="priority" name="priority" 
+                                   value="1" min="1" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Add Rule</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add rule form submission
+    document.getElementById('add-rule-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            grade: parseInt(document.getElementById('grade').value),
+            min_rank: parseInt(document.getElementById('min_rank').value),
+            max_rank: parseInt(document.getElementById('max_rank').value),
+            curriculum_level: parseInt(document.getElementById('curriculum_level').value),
+            priority: parseInt(document.getElementById('priority').value)
+        };
+        
+        fetch('{% url "core:create_placement_rule" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Rule added successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while adding the rule');
+        });
+    });
+    
+    // Delete rule
+    document.querySelectorAll('.delete-rule').forEach(button => {
+        button.addEventListener('click', function() {
+            if (!confirm('Are you sure you want to delete this rule?')) return;
+            
+            const ruleId = this.dataset.ruleId;
+            
+            fetch(`/placement-rule/${ruleId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`tr[data-rule-id="${ruleId}"]`).remove();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the rule');
+            });
+        });
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+{% endblock %}

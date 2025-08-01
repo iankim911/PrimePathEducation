@@ -1,0 +1,177 @@
+[
+  {
+    "model": "core.program",
+    "pk": 1,
+    "fields": {
+      "name": "CORE",
+      "grade_range_start": 1,
+      "grade_range_end": 4,
+      "order": 1
+    }
+  },
+  {
+    "model": "core.program",
+    "pk": 2,
+    "fields": {
+      "name": "ASCENT",
+      "grade_range_start": 5,
+      "grade_range_end": 6,
+      "order": 2
+    }
+  },
+  {
+    "model": "core.program",
+    "pk": 3,
+    "fields": {
+      "name": "EDGE",
+      "grade_range_start": 7,
+      "grade_range_end": 9,
+      "order": 3
+    }
+  },
+  {
+    "model": "core.program",
+    "pk": 4,
+    "fields": {
+      "name": "PINNACLE",
+      "grade_range_start": 10,
+      "grade_range_end": 12,
+      "order": 4
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 1,
+    "fields": {
+      "program": 1,
+      "name": "CORE PHONICS",
+      "order": 1
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 2,
+    "fields": {
+      "program": 1,
+      "name": "CORE SIGMA",
+      "order": 2
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 3,
+    "fields": {
+      "program": 1,
+      "name": "CORE ELITE",
+      "order": 3
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 4,
+    "fields": {
+      "program": 1,
+      "name": "CORE PRO",
+      "order": 4
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 5,
+    "fields": {
+      "program": 2,
+      "name": "ASCENT NOVA",
+      "order": 1
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 6,
+    "fields": {
+      "program": 2,
+      "name": "ASCENT DRIVE",
+      "order": 2
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 7,
+    "fields": {
+      "program": 2,
+      "name": "ASCENT PRO",
+      "order": 3
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 8,
+    "fields": {
+      "program": 3,
+      "name": "EDGE SPARK",
+      "order": 1
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 9,
+    "fields": {
+      "program": 3,
+      "name": "EDGE RISE",
+      "order": 2
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 10,
+    "fields": {
+      "program": 3,
+      "name": "EDGE PURSUIT",
+      "order": 3
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 11,
+    "fields": {
+      "program": 3,
+      "name": "EDGE PRO",
+      "order": 4
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 12,
+    "fields": {
+      "program": 4,
+      "name": "PINNACLE VISION",
+      "order": 1
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 13,
+    "fields": {
+      "program": 4,
+      "name": "PINNACLE ENDEAVOR",
+      "order": 2
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 14,
+    "fields": {
+      "program": 4,
+      "name": "PINNACLE SUCCESS",
+      "order": 3
+    }
+  },
+  {
+    "model": "core.subprogram",
+    "pk": 15,
+    "fields": {
+      "program": 4,
+      "name": "PINNACLE PRO",
+      "order": 4
+    }
+  }
+]
