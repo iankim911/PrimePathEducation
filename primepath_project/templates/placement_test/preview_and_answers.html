@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Preview & Answer Keys - {{ exam.name }} - PrimePath{% endblock %}
+{% block title %}🔥 UPDATED TEMPLATE 🔥 Preview & Answer Keys - {{ exam.name }} - PrimePath{% endblock %}
 
 {% block header %}{{ exam.name }} - Preview & Answer Keys{% endblock %}
 
@@ -70,6 +70,115 @@
         margin: 0;
         word-break: break-word;
         line-height: 1.3;
+    }
+    
+    /* Responsive Design for 8-18 year olds */
+    
+    /* Desktop optimizations (1024px+) */
+    @media (min-width: 1024px) {
+        .container-main {
+            max-width: 1800px;
+            padding: 25px;
+        }
+        
+        .pdf-section {
+            height: 800px;
+        }
+        
+        .pdf-title {
+            font-size: 2.8rem;
+        }
+        
+        .pdf-controls {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .pdf-controls button {
+            min-width: 120px;
+            font-size: 1rem;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        #pdf-page-info {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0 30px;
+        }
+    }
+    
+    /* Tablet optimizations (768px to 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .container-main {
+            max-width: 100%;
+            padding: 20px 15px;
+        }
+        
+        .pdf-section {
+            height: 650px;
+        }
+        
+        .pdf-title {
+            font-size: 2.2rem;
+        }
+        
+        .pdf-controls {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pdf-controls button {
+            min-width: 100px;
+            min-height: 44px;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 6px;
+            touch-action: manipulation;
+            transition: all 0.2s ease;
+        }
+        
+        #pdf-page-info {
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+        }
+    }
+    
+    /* Touch-friendly improvements for all sizes */
+    .pdf-controls button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .pdf-controls button:active {
+        transform: translateY(0);
+        transition: all 0.1s ease;
+    }
+    
+    .pdf-controls button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Enhanced visual feedback */
+    #pdf-canvas {
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
     }
     
     .main-content {
@@ -577,16 +686,60 @@
         text-align: center;
         font-size: 0.9rem;
     }
+    
+    /* Success notification animations */
+    @keyframes slideDown {
+        from {
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: translateX(-50%) scale(1);
+        }
+        50% {
+            transform: translateX(-50%) scale(1.02);
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Success Notification Container -->
+<div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 500px;">
+    <div class="alert alert-success" style="margin: 0; padding: 25px 30px; font-size: 1.3rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 5px solid #28a745; position: relative;">
+        <button type="button" class="close-alert" onclick="document.getElementById('success-notification').style.display='none'" style="float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; margin-left: 20px;">&times;</button>
+        <span id="success-message">All answers saved successfully!</span>
+        <span style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); font-size: 2rem;">🎉</span>
+    </div>
+</div>
 <div class="container-main">
     <!-- PDF Title -->
     <div class="pdf-title-section">
         <h1 class="pdf-title">
             {{ exam.name }}
+            <span style="background: red; color: white; padding: 5px; font-size: 12px; border-radius: 3px;">🔥 TEMPLATE UPDATED</span>
         </h1>
+        
+        <!-- DEBUG SECTION -->
+        <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 2px solid #333;">
+            <h4>🔍 DEBUG INFO</h4>
+            <p><strong>Total Questions:</strong> {{ questions.count }}</p>
+            <p><strong>Questions with Audio:</strong></p>
+            <ul>
+            {% for question in questions %}
+                {% if question.audio_file %}
+                <li>Q{{ question.question_number }} → Audio {{ question.audio_file.id }} ({{ question.audio_file.name }})</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
     </div>
     
     <!-- Exam Info Bar -->
@@ -622,20 +775,34 @@
             <div class="section-header">
                 <h3 class="section-title">PDF Preview</h3>
                 <div class="pdf-controls">
-                    <button type="button" id="pdf-prev" class="btn btn-sm btn-outline-secondary" disabled>
-                        ← Previous
+                    <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
+                        <span class="d-none d-md-inline">← Previous</span>
+                        <span class="d-md-none">←</span>
                     </button>
-                    <span class="pdf-navigation">
+                    <div class="pdf-navigation" id="pdf-page-info">
                         Page <span id="current-page">1</span> of <span id="total-pages">1</span>
-                    </span>
-                    <button type="button" id="pdf-next" class="btn btn-sm btn-outline-secondary">
-                        Next →
+                    </div>
+                    <button type="button" id="pdf-next" class="btn btn-primary">
+                        <span class="d-none d-md-inline">Next →</span>
+                        <span class="d-md-none">→</span>
                     </button>
                     <div class="zoom-controls">
                         <button type="button" id="pdf-zoom-out" class="btn btn-sm btn-outline-secondary">−</button>
                         <span class="zoom-level" id="pdf-zoom-level">100%</span>
                         <button type="button" id="pdf-zoom-in" class="btn btn-sm btn-outline-secondary">+</button>
                     </div>
+                    <!-- Skip First Left Half Status (Read-only) -->
+                    {% if exam.skip_first_left_half %}
+                    <div class="skip-status" style="margin-left: 15px; border-left: 1px solid #dee2e6; padding-left: 15px;">
+                        <span style="font-size: 0.875rem; color: #6c757d;">
+                            <i class="fas fa-eye-slash" style="margin-right: 5px;"></i>
+                            First Page (Left Half) Hidden
+                        </span>
+                        <small class="d-block" style="font-size: 0.75rem; color: #6c757d; margin-top: 2px;">
+                            This setting was configured during exam upload
+                        </small>
+                    </div>
+                    {% endif %}
                     <a href="{{ exam.pdf_file.url }}" class="btn btn-sm btn-primary" download>
                         Download PDF
                     </a>
@@ -900,9 +1067,9 @@ const examId = "{{ exam.id }}";
 
 // PDF viewer variables
 let pdfDoc = null;
-let currentPage = 1;
-let totalPages = 0;
-let currentScale = 1.0;
+let virtualPageNum = 1; // Virtual page number (includes left/right columns)
+let totalVirtualPages = 0; // Total virtual pages (actual * 2)
+let currentPdfPage = null; // Store current page for fit calculations
 
 // Answer tracking
 let unsavedChanges = false;
@@ -935,7 +1102,21 @@ function getCookie(name) {
     return cookieValue;
 }
 
+console.log('🚀 NUCLEAR DEBUG - Script loading at ' + new Date().toISOString());
+
+// NUCLEAR OVERRIDE - Clear any existing assignments
+window.audioAssignments = {};
+console.log('💥 NUCLEAR: Cleared audioAssignments');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔥 NUCLEAR DEBUG - DOMContentLoaded fired! Timestamp: ' + new Date().toISOString());
+    
+    // NUCLEAR: Override any existing loading
+    window.audioAssignments = {};
+    console.log('💥 NUCLEAR: Re-cleared audioAssignments in DOMContentLoaded');
+    
+    console.log('🔍 DEBUG: audioAssignments initial state:', audioAssignments);
+    
     // Initialize PDF viewer
     initializePdfViewer();
     
@@ -945,124 +1126,434 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load saved local audio names
     loadLocalAudioNames();
     
-    // Mark questions that have audio assigned and initialize audio data
-    const audioFilesData = [
-        {% for audio in exam.audio_files.all %}
+    // Load audio assignments from Question.audio_file relationships
+    console.log('🔍 DEBUG: Template rendering questions...');
+    {% for question in questions %}
+        console.log('🔍 Question {{ question.question_number }}: audio_file = {% if question.audio_file %}{{ question.audio_file.id }}{% else %}null{% endif %}');
+    {% endfor %}
+    
+    const questionAudioData = [
+        {% for question in questions %}
+        {% if question.audio_file %}
         {
-            id: {{ audio.id }},
-            name: "{{ audio.name|escapejs }}",
-            start: {{ audio.start_question }}, 
-            end: {{ audio.end_question }}
+            questionNum: {{ question.question_number }},
+            audioId: {{ question.audio_file.id }},
+            audioName: "{{ question.audio_file.name|escapejs }}"
         },
+        {% endif %}
         {% endfor %}
     ];
     
-    audioFilesData.forEach(audio => {
-        for (let q = audio.start; q <= audio.end; q++) {
-            // Track initial assignments
-            audioAssignments[q] = audio.id;
-            console.log('Initial assignment: Q' + q + ' -> Audio ID ' + audio.id);
-            
-            const button = document.querySelector(`[data-question="${q}"].audio-button`);
-            if (button) {
-                button.classList.add('has-audio');
-                // Use local name if available, otherwise use original
-                const name = localAudioNames[audio.id] || audio.name;
-                const displayName = name.substring(0, 20) + (name.length > 20 ? '...' : '');
-                button.innerHTML = `🎵 Audio: ${displayName}`;
-            }
+    console.log('🔍 DEBUG: questionAudioData length:', questionAudioData.length);
+    
+    console.log('=== NEW AUDIO ASSIGNMENT LOADING DEBUG ===');
+    console.log('questionAudioData:', questionAudioData);
+    console.log('audioAssignments before loading:', audioAssignments);
+    
+    // NUCLEAR: Clear before loading new assignments
+    window.audioAssignments = {};
+    console.log('💥 NUCLEAR: Final clear before loading assignments');
+    
+    questionAudioData.forEach((data, index) => {
+        console.log(`🚀 NUCLEAR LOADING assignment ${index + 1}: Q${data.questionNum} -> Audio ${data.audioId}`);
+        
+        // Load direct Question -> AudioFile relationships
+        audioAssignments[data.questionNum] = data.audioId;
+        console.log('✅ NUCLEAR ASSIGNMENT: Q' + data.questionNum + ' -> Audio ID ' + data.audioId);
+        
+        const buttonSelector = `[data-question="${data.questionNum}"].audio-button`;
+        console.log('🔍 Looking for button with selector:', buttonSelector);
+        
+        const button = document.querySelector(buttonSelector);
+        console.log('🔍 Button found:', button ? 'YES' : 'NO');
+        
+        if (button) {
+            button.classList.add('has-audio');
+            // Use local name if available, otherwise use original
+            const name = localAudioNames[data.audioId] || data.audioName;
+            const displayName = name.substring(0, 20) + (name.length > 20 ? '...' : '');
+            const newText = `🎵 Audio: ${displayName}`;
+            button.innerHTML = newText;
+            console.log(`✅ Updated button for Q${data.questionNum}: "${newText}"`);
+        } else {
+            console.log(`❌ Button not found for Q${data.questionNum} with selector: ${buttonSelector}`);
         }
     });
+    
+    console.log('audioAssignments after loading:', audioAssignments);
+    console.log('=== END AUDIO ASSIGNMENT LOADING DEBUG ===');
+    
+    // NUCLEAR: Final check and protection
+    console.log('💥 NUCLEAR FINAL CHECK - audioAssignments contains:', Object.keys(audioAssignments).length, 'assignments');
+    for (const [q, audioId] of Object.entries(audioAssignments)) {
+        console.log(`💥 FINAL: Q${q} -> Audio ${audioId}`);
+    }
 });
 
 function initializePdfViewer() {
+    console.log('🔥 [PREVIEW_EXAM] initializePdfViewer() called');
+    console.log('🔥 [PREVIEW_EXAM] pdfjsLib available:', typeof pdfjsLib !== 'undefined');
+    
     if (typeof pdfjsLib === 'undefined') {
+        console.error('❌ [PREVIEW_EXAM] pdfjsLib is undefined');
         document.getElementById('pdf-loading').style.display = 'none';
         document.getElementById('pdf-error').style.display = 'block';
         return;
     }
     
     const pdfUrl = "{{ exam.pdf_file.url }}";
+    console.log('🔥 [PREVIEW_EXAM] PDF URL:', pdfUrl);
+    
+    console.log('🔥 [PREVIEW_EXAM] Calling pdfjsLib.getDocument...');
     pdfjsLib.getDocument({
         url: pdfUrl,
-        cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
-        cMapPacked: true
+        // Disable CMap loading to avoid CORS issues
+        disableFontFace: false,
+        disableStream: false,
+        disableAutoFetch: false
     }).promise.then(function(pdf) {
+        console.log('✅ [PREVIEW_EXAM] PDF loaded successfully');
         pdfDoc = pdf;
-        totalPages = pdf.numPages;
-        document.getElementById('total-pages').textContent = totalPages;
+        
+        // Convert to virtual pages (each actual page = 2 virtual pages for split view)
+        totalVirtualPages = pdf.numPages * 2;
+        
+        // Respect skip_first_left_half setting for starting page
+        const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+        virtualPageNum = skipFirstLeftHalf ? 2 : 1; // Start from page 2 if first left half is hidden
+        
+        console.log('🔥 [PREVIEW_EXAM] PDF info:', {
+            actualPages: pdf.numPages,
+            totalVirtualPages,
+            startingVirtualPage: virtualPageNum
+        });
+        
+        const totalPagesElement = document.getElementById('total-pages');
+        if (totalPagesElement) {
+            totalPagesElement.textContent = totalVirtualPages;
+            console.log('🔥 [PREVIEW_EXAM] Total pages element updated to:', totalVirtualPages);
+        } else {
+            console.warn('⚠️ [PREVIEW_EXAM] Total pages element not found');
+        }
+        
+        console.log('🔥 [PREVIEW_EXAM] Starting virtual page set to:', virtualPageNum);
+        
+        console.log('🔥 [PREVIEW_EXAM] Updating navigation buttons...');
         updateNavigationButtons();
         
-        document.getElementById('pdf-loading').style.display = 'none';
-        document.getElementById('pdf-canvas').style.display = 'block';
+        const loadingElement = document.getElementById('pdf-loading');
+        const canvasElement = document.getElementById('pdf-canvas');
         
-        renderPage(currentPage);
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+            console.log('🔥 [PREVIEW_EXAM] Loading element hidden');
+        } else {
+            console.warn('⚠️ [PREVIEW_EXAM] Loading element not found');
+        }
+        
+        if (canvasElement) {
+            canvasElement.style.display = 'block';
+            console.log('🔥 [PREVIEW_EXAM] Canvas element shown');
+        } else {
+            console.warn('⚠️ [PREVIEW_EXAM] Canvas element not found');
+        }
+        
+        console.log('🔥 [PREVIEW_EXAM] Starting first virtual page render...');
+        renderPage(virtualPageNum);
     }).catch(function(error) {
-        console.error('Error loading PDF:', error);
-        document.getElementById('pdf-loading').style.display = 'none';
-        document.getElementById('pdf-error').style.display = 'block';
+        console.error('❌ [PREVIEW_EXAM] Error loading PDF:', error);
+        
+        const loadingElement = document.getElementById('pdf-loading');
+        const errorElement = document.getElementById('pdf-error');
+        
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+            console.log('🔥 [PREVIEW_EXAM] Loading element hidden after error');
+        }
+        
+        if (errorElement) {
+            errorElement.style.display = 'block';
+            console.log('🔥 [PREVIEW_EXAM] Error element shown');
+        }
     });
 }
 
-function renderPage(pageNum) {
-    if (!pdfDoc) return;
+function renderPage(vPageNum) {
+    console.log('🔥 [PREVIEW_EXAM] renderPage() called with vPageNum:', vPageNum);
+    console.log('🔥 [PREVIEW_EXAM] pdfDoc exists:', !!pdfDoc);
+    console.log('🔥 [PREVIEW_EXAM] totalVirtualPages:', totalVirtualPages);
     
-    pdfDoc.getPage(pageNum).then(function(page) {
+    if (!pdfDoc) {
+        console.error('❌ [PREVIEW_EXAM] No pdfDoc available for rendering');
+        return;
+    }
+    
+    virtualPageNum = vPageNum;
+    
+    // Calculate actual PDF page based on virtual page
+    let actualPageNum = Math.ceil(vPageNum / 2);
+    let isLeftColumn = (vPageNum % 2) === 1;
+    
+    console.log('🔥 [PREVIEW_EXAM] Virtual to actual page mapping:', {
+        virtualPage: vPageNum,
+        actualPage: actualPageNum,
+        isLeftColumn,
+        columnText: isLeftColumn ? 'Left' : 'Right'
+    });
+    
+    console.log('🔥 [PREVIEW_EXAM] Getting actual page', actualPageNum, 'from PDF...');
+    pdfDoc.getPage(actualPageNum).then(function(page) {
+        console.log('✅ [PREVIEW_EXAM] Successfully got actual page', actualPageNum);
+        
+        currentPdfPage = page; // Store for fit calculations
         const canvas = document.getElementById('pdf-canvas');
         const ctx = canvas.getContext('2d');
         
-        const viewport = page.getViewport({ scale: currentScale });
+        console.log('🔥 [PREVIEW_EXAM] Canvas element found:', !!canvas);
+        console.log('🔥 [PREVIEW_EXAM] Canvas context obtained:', !!ctx);
         
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        // Get container dimensions
+        const container = document.getElementById('pdf-viewer');
+        const containerWidth = container.clientWidth - 20;
+        const containerHeight = container.clientHeight - 20;
         
+        console.log('🔥 [PREVIEW_EXAM] Container dimensions:', {
+            containerWidth,
+            containerHeight,
+            containerClientWidth: container.clientWidth,
+            containerClientHeight: container.clientHeight
+        });
+        
+        // Get page viewport at scale 1
+        const viewport = page.getViewport({ scale: 1 });
+        
+        console.log('🔥 [PREVIEW_EXAM] Page viewport at scale 1:', {
+            width: viewport.width,
+            height: viewport.height
+        });
+        
+        // Calculate scale to fit half-width in container (match Student interface approach)
+        const scaleX = (containerWidth * 2) / viewport.width; // Scale for half-width fitting
+        const scaleY = containerHeight / viewport.height;
+        const scale = Math.min(scaleX, scaleY) * 0.95; // 95% to add some padding
+        
+        console.log('🔥 [PREVIEW_EXAM] Scale calculations for column view:', {
+            originalViewportWidth: viewport.width,
+            halfPageWidth: viewport.width / 2,
+            scaleX,
+            scaleY,
+            finalScale: scale,
+            scalingPercentage: Math.round(scale * 100)
+        });
+        
+        // Get scaled viewport for rendering
+        const scaledViewport = page.getViewport({ scale: scale });
+        
+        console.log('🔥 [PREVIEW_EXAM] Scaled viewport:', {
+            width: scaledViewport.width,
+            height: scaledViewport.height
+        });
+        
+        // Set canvas size for column view (true half of original page width - match Student interface)
+        canvas.width = scaledViewport.width / 2; // Half of scaled viewport = true 50% of original
+        canvas.height = scaledViewport.height;
+        
+        console.log('🔥 [PREVIEW_EXAM] Canvas dimensions for column view:', {
+            width: canvas.width,
+            height: canvas.height,
+            originalPageWidth: scaledViewport.width
+        });
+        
+        // Create a temporary canvas for full page rendering
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = scaledViewport.width;
+        tempCanvas.height = scaledViewport.height;
+        
+        console.log('🔥 [PREVIEW_EXAM] Temporary canvas created for full page:', {
+            width: tempCanvas.width,
+            height: tempCanvas.height
+        });
+        
+        // Render full page to temp canvas
         const renderContext = {
-            canvasContext: ctx,
-            viewport: viewport
+            canvasContext: tempCtx,
+            viewport: scaledViewport
         };
-        page.render(renderContext);
+        
+        console.log('🔥 [PREVIEW_EXAM] Starting full page render to temp canvas...');
+        
+        const renderPromise = page.render(renderContext);
+        
+        renderPromise.promise.then(() => {
+            console.log('✅ [PREVIEW_EXAM] Full page rendered to temp canvas successfully');
+            
+            // Clear main canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Copy the half we want (left or right column)
+            const sourceX = isLeftColumn ? 0 : canvas.width;
+            
+            console.log('🔥 [PREVIEW_EXAM] Copying column from temp canvas:', {
+                isLeftColumn,
+                sourceX,
+                sourceWidth: canvas.width,
+                sourceHeight: canvas.height
+            });
+            
+            ctx.drawImage(
+                tempCanvas,
+                sourceX, 0, canvas.width, canvas.height,  // source (which half to copy)
+                0, 0, canvas.width, canvas.height         // destination (full canvas)
+            );
+            
+            console.log('✅ [PREVIEW_EXAM] Column copied to main canvas successfully');
+            
+            // Update zoom level display
+            const zoomElement = document.getElementById('pdf-zoom-level');
+            if (zoomElement) {
+                zoomElement.textContent = Math.round(scale * 100) + '%';
+                console.log('🔥 [PREVIEW_EXAM] Zoom level updated to:', Math.round(scale * 100) + '%');
+            } else {
+                console.warn('⚠️ [PREVIEW_EXAM] Zoom level element not found');
+            }
+            
+        }).catch((error) => {
+            console.error('❌ [PREVIEW_EXAM] Error rendering page:', error);
+        });
+        
+    }).catch(function(error) {
+        console.error('❌ [PREVIEW_EXAM] Error getting page', actualPageNum, ':', error);
     });
+    
+    // Update page counter
+    const pageCountElement = document.getElementById('current-page');
+    if (pageCountElement) {
+        const columnText = (vPageNum % 2) === 1 ? '(Left)' : '(Right)';
+        pageCountElement.textContent = `${vPageNum} ${columnText}`;
+        console.log('🔥 [PREVIEW_EXAM] Page counter updated to:', `${vPageNum} ${columnText}`);
+    } else {
+        console.warn('⚠️ [PREVIEW_EXAM] Page counter element not found');
+    }
 }
 
 function updateNavigationButtons() {
-    document.getElementById('pdf-prev').disabled = currentPage <= 1;
-    document.getElementById('pdf-next').disabled = currentPage >= totalPages;
+    const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+    const minPage = skipFirstLeftHalf ? 2 : 1;
+    document.getElementById('pdf-prev').disabled = virtualPageNum <= minPage;
+    document.getElementById('pdf-next').disabled = virtualPageNum >= totalVirtualPages;
 }
 
 // PDF navigation
 document.getElementById('pdf-prev').addEventListener('click', function() {
-    if (currentPage > 1) {
-        currentPage--;
-        document.getElementById('current-page').textContent = currentPage;
-        renderPage(currentPage);
-        updateNavigationButtons();
+    const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+    const minPage = skipFirstLeftHalf ? 2 : 1;
+    
+    if (!pdfDoc || virtualPageNum <= minPage) {
+        return;
     }
+    virtualPageNum--;
+    console.log('🔥 [PREVIEW_EXAM] Previous page clicked, new virtualPageNum:', virtualPageNum);
+    renderPage(virtualPageNum);
+    updateNavigationButtons();
 });
 
 document.getElementById('pdf-next').addEventListener('click', function() {
-    if (currentPage < totalPages) {
-        currentPage++;
-        document.getElementById('current-page').textContent = currentPage;
-        renderPage(currentPage);
-        updateNavigationButtons();
+    if (!pdfDoc || virtualPageNum >= totalVirtualPages) {
+        return;
     }
+    virtualPageNum++;
+    console.log('🔥 [PREVIEW_EXAM] Next page clicked, new virtualPageNum:', virtualPageNum);
+    renderPage(virtualPageNum);
+    updateNavigationButtons();
 });
 
-// Zoom controls
+// Zoom controls - simplified to use CSS transform
 document.getElementById('pdf-zoom-in').addEventListener('click', function() {
-    currentScale = Math.min(currentScale * 1.2, 3.0);
-    document.getElementById('pdf-zoom-level').textContent = Math.round(currentScale * 100) + '%';
-    renderPage(currentPage);
+    const container = document.getElementById('pdf-viewer');
+    const currentTransform = container.style.transform || 'scale(1)';
+    const currentScale = parseFloat(currentTransform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
+    const newScale = Math.min(currentScale * 1.2, 2.0);
+    container.style.transform = `scale(${newScale})`;
+    container.style.transformOrigin = 'top center';
 });
 
 document.getElementById('pdf-zoom-out').addEventListener('click', function() {
-    currentScale = Math.max(currentScale / 1.2, 0.5);
-    document.getElementById('pdf-zoom-level').textContent = Math.round(currentScale * 100) + '%';
-    renderPage(currentPage);
+    const container = document.getElementById('pdf-viewer');
+    const currentTransform = container.style.transform || 'scale(1)';
+    const currentScale = parseFloat(currentTransform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
+    const newScale = Math.max(currentScale / 1.2, 0.5);
+    container.style.transform = `scale(${newScale})`;
+    container.style.transformOrigin = 'top center';
 });
+
+// Note: Skip First Left Half control removed - setting is now configured during exam upload
+// Display behavior still respects the skip_first_left_half setting from the database
 
 // Answer tracking functions
 function initializeAnswerTracking() {
+    // Initialize questions from saved data
+    document.querySelectorAll('.question-entry').forEach(entry => {
+        const questionNum = entry.dataset.questionNumber;
+        const typeSelect = entry.querySelector('.question-type-select');
+        const answerField = entry.querySelector('.answer-field');
+        
+        // Initialize SHORT answers with multiple responses
+        if (typeSelect.value === 'SHORT' && answerField.value && answerField.value.includes('|')) {
+            const responses = answerField.value.split('|').filter(r => r.trim());
+            if (responses.length > 1) {
+                const container = document.getElementById(`responses-${questionNum}`);
+                if (container) {
+                    container.innerHTML = '';
+                    responses.forEach((response, index) => {
+                        const responseDiv = document.createElement('div');
+                        responseDiv.className = 'response-item';
+                        responseDiv.innerHTML = `
+                            <input type="text" 
+                                   value="${response}"
+                                   placeholder="Acceptable response ${index + 1}"
+                                   onchange="updateShortAnswers(${questionNum})">
+                            ${index > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                        `;
+                        container.appendChild(responseDiv);
+                    });
+                }
+            }
+        }
+        
+        // Initialize LONG answers with multiple responses
+        if (typeSelect.value === 'LONG' && answerField.value && answerField.value.includes('|||')) {
+            const responses = answerField.value.split('|||').filter(r => r.trim());
+            if (responses.length > 1) {
+                const container = document.getElementById(`responses-${questionNum}`);
+                if (container) {
+                    container.innerHTML = '';
+                    responses.forEach((response, index) => {
+                        const responseDiv = document.createElement('div');
+                        responseDiv.className = 'response-item';
+                        responseDiv.innerHTML = `
+                            <textarea placeholder="Grading guideline or sample answer ${index + 1}"
+                                      onchange="updateLongAnswers(${questionNum})"
+                                      style="min-height: 80px; width: 100%;">${response}</textarea>
+                            ${index > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                        `;
+                        container.appendChild(responseDiv);
+                    });
+                }
+            }
+        }
+        
+        // Initialize MIXED questions
+        if (typeSelect.value === 'MIXED' && answerField.value) {
+            try {
+                const mixedData = JSON.parse(answerField.value);
+                initializeMixedQuestion(questionNum, mixedData);
+            } catch (e) {
+                console.error('Error parsing mixed data for question', questionNum, e);
+            }
+        }
+    });
+    
     // Handle answer field changes
     document.querySelectorAll('.answer-field').forEach(input => {
         input.addEventListener('input', function() {
@@ -1512,19 +2003,82 @@ function selectMixedMCQ(sectionId, letter, questionNum) {
     updateMixedAnswers(questionNum);
 }
 
+// Initialize mixed question from saved data
+function initializeMixedQuestion(questionNum, mixedData) {
+    const container = document.getElementById(`mixed-sections-${questionNum}`);
+    if (!container) return;
+    
+    container.innerHTML = ''; // Clear existing content
+    
+    mixedData.forEach(section => {
+        const sectionId = `mixed-${questionNum}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'mixed-answer-section';
+        sectionDiv.id = sectionId;
+        
+        switch(section.type) {
+            case 'Multiple Choice':
+                sectionDiv.innerHTML = `
+                    <div class="mixed-type-header">
+                        <span class="mixed-type-label">Multiple Choice</span>
+                        <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                    </div>
+                    <div class="mcq-options">
+                        ${['A', 'B', 'C', 'D', 'E'].map(letter => `
+                            <button type="button" 
+                                    class="mcq-button ${section.value && section.value.includes(letter) ? 'selected' : ''}"
+                                    data-section="${sectionId}"
+                                    data-value="${letter}"
+                                    onclick="selectMixedMCQ('${sectionId}', '${letter}', ${questionNum})">
+                                ${letter}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                break;
+                
+            case 'Short Answer':
+                sectionDiv.innerHTML = `
+                    <div class="mixed-type-header">
+                        <span class="mixed-type-label">Short Answer</span>
+                        <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                    </div>
+                    <input type="text" 
+                           value="${section.value || ''}"
+                           placeholder="Enter acceptable answer"
+                           onchange="updateMixedAnswers(${questionNum})"
+                           style="width: 100%; padding: 8px;">
+                `;
+                break;
+                
+            case 'Long Answer':
+                sectionDiv.innerHTML = `
+                    <div class="mixed-type-header">
+                        <span class="mixed-type-label">Long Answer</span>
+                        <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                    </div>
+                    <textarea placeholder="Enter grading guidelines"
+                              onchange="updateMixedAnswers(${questionNum})"
+                              style="width: 100%; min-height: 80px; padding: 8px;">${section.value || ''}</textarea>
+                `;
+                break;
+        }
+        
+        container.appendChild(sectionDiv);
+    });
+}
+
 // Toggle audio for a question
 function toggleAudio(questionNum) {
     console.log('Current audio assignments:', audioAssignments);
     console.log('Toggling audio for question:', questionNum);
     
-    // Get existing audio files for this exam
+    // Get existing audio files for this exam (for assignment interface only)
     const audioFiles = [
         {% for audio in exam.audio_files.all %}
         {
             id: {{ audio.id }},
             name: "{{ audio.name|escapejs }}",
-            start: {{ audio.start_question }},
-            end: {{ audio.end_question }},
             url: "{% url 'placement_test:get_audio' audio.id %}",
             filename: "{{ audio.audio_file.name|escapejs }}"
         },
@@ -1543,10 +2097,7 @@ function toggleAudio(questionNum) {
         currentAssignedAudio = audioFiles.find(a => a.id === currentAssignedAudioId);
     }
     
-    // If no manual assignment, check original audio ranges
-    if (!currentAssignedAudio) {
-        currentAssignedAudio = audioFiles.find(a => questionNum >= a.start && questionNum <= a.end);
-    }
+    // Current assignment is already handled by audioAssignments object
     
     // Build audio list with clear indication of current assignment
     let audioList = '🎵 ASSIGN AUDIO TO QUESTION ' + questionNum + '\n';
@@ -1569,7 +2120,7 @@ function toggleAudio(questionNum) {
         displayName = storedName;
     }
     
-    audioList += `${index + 1}. ${displayName} (Original: Q${audio.start}-${audio.end})`;
+    audioList += `${index + 1}. ${displayName}`;
         if (currentAssignedAudio && currentAssignedAudio.id === audio.id) {
             audioList += ' ← CURRENTLY ASSIGNED';
         }
@@ -1660,11 +2211,64 @@ function saveAllAnswers() {
         const typeSelect = entry.querySelector('.question-type-select');
         const optionsCount = document.getElementById(`options-count-${questionNum}`);
         
+        let correctAnswer = answerField.value;
+        
+        // For SHORT answers, collect from multiple input fields
+        if (typeSelect.value === 'SHORT') {
+            const responseContainer = document.getElementById(`responses-${questionNum}`);
+            if (responseContainer) {
+                const inputs = responseContainer.querySelectorAll('input[type="text"]');
+                if (inputs.length > 0) {
+                    const values = Array.from(inputs).map(input => input.value).filter(v => v.trim());
+                    correctAnswer = values.join('|');
+                }
+            }
+        }
+        
+        // For LONG answers, collect from multiple textareas
+        if (typeSelect.value === 'LONG') {
+            const responseContainer = document.getElementById(`responses-${questionNum}`);
+            if (responseContainer) {
+                const textareas = responseContainer.querySelectorAll('textarea');
+                if (textareas.length > 0) {
+                    const values = Array.from(textareas).map(ta => ta.value).filter(v => v.trim());
+                    correctAnswer = values.join('|||');
+                }
+            }
+        }
+        
+        // For MIXED answers, collect the JSON data
+        if (typeSelect.value === 'MIXED') {
+            const sections = document.querySelectorAll(`#mixed-sections-${questionNum} .mixed-answer-section`);
+            const mixedData = [];
+            
+            sections.forEach(section => {
+                const typeLabel = section.querySelector('.mixed-type-label').textContent;
+                let value = '';
+                
+                if (typeLabel === 'Multiple Choice') {
+                    const selected = Array.from(section.querySelectorAll('.mcq-button.selected'))
+                        .map(btn => btn.dataset.value);
+                    value = selected.join(',');
+                } else if (typeLabel === 'Short Answer') {
+                    value = section.querySelector('input').value;
+                } else if (typeLabel === 'Long Answer') {
+                    value = section.querySelector('textarea').value;
+                }
+                
+                if (value) {
+                    mixedData.push({type: typeLabel, value: value});
+                }
+            });
+            
+            correctAnswer = JSON.stringify(mixedData);
+        }
+        
         const data = {
             id: questionId,
             question_number: questionNum,
             question_type: typeSelect.value,
-            correct_answer: answerField.value
+            correct_answer: correctAnswer
         };
         
         // Add options count for MCQ
@@ -1679,15 +2283,18 @@ function saveAllAnswers() {
     const saveUrl = `/api/placement/exams/{{ exam.id }}/save-answers/`;
     console.log('Saving to URL:', saveUrl);
     console.log('Data being sent:', questionsData);
+    console.log('Audio assignments being saved:', audioAssignments);
     
-    // Make API call to save all answers and types
+    // Make API call to save all answers and types INCLUDING audio assignments
     fetch(saveUrl, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ questions: questionsData })
+        body: JSON.stringify({ 
+            questions: questionsData,
+            audio_assignments: audioAssignments 
+        })
     })
     .then(response => {
         if (!response.ok) {
@@ -1699,9 +2306,36 @@ function saveAllAnswers() {
         if (data.success) {
             unsavedChanges = false;
             document.getElementById('unsaved-changes').style.display = 'none';
+            
+            // Show the prominent success notification
+            const notification = document.getElementById('success-notification');
+            const alertDiv = notification.querySelector('.alert');
+            notification.style.display = 'block';
+            
+            // Apply animations
+            alertDiv.style.animation = 'slideDown 0.5s ease-out, pulse 2s ease-in-out';
+            
+            // Scroll to top to ensure notification is visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Also show the small save indicators
             document.querySelectorAll('.save-indicator').forEach(indicator => {
                 indicator.style.display = 'inline';
             });
+            
+            // Auto-hide the notification after 8 seconds
+            setTimeout(() => {
+                const notif = document.getElementById('success-notification');
+                const alert = notif.querySelector('.alert');
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    notif.style.display = 'none';
+                    alert.style.opacity = '1';
+                }, 500);
+            }, 8000);
+            
+            // Hide small indicators after 3 seconds
             setTimeout(() => {
                 document.querySelectorAll('.save-indicator').forEach(indicator => {
                     indicator.style.display = 'none';
@@ -2026,6 +2660,8 @@ function updateAudioButtonNames() {
         }
     });
 }
+
+
 
 // Warn before leaving with unsaved changes
 window.addEventListener('beforeunload', function(e) {

@@ -119,21 +119,51 @@
         /* Alert Messages */
         .messages {
             margin-bottom: 20px;
+            position: relative;
+            z-index: 1000;
         }
         .alert {
             padding: 15px;
             border-radius: 4px;
             margin-bottom: 10px;
+            animation: fadeIn 0.5s ease-in;
         }
         .alert-success {
             background-color: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
+            padding: 25px 30px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .alert-success::before {
+            content: "✓";
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 80px;
+            opacity: 0.1;
+            color: #28a745;
         }
         .alert-error {
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
@@ -149,7 +179,7 @@
         <ul>
             <li><a href="{% url 'core:teacher_dashboard' %}" class="{% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">Dashboard</a></li>
             <li><a href="{% url 'placement_test:create_exam' %}" class="{% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}">Upload Exam</a></li>
-            <li><a href="{% url 'placement_test:exam_list' %}" class="{% if request.resolver_match.url_name == 'exam_list' %}active{% endif %}">Manage Exams</a></li>
+            <li><a href="{% url 'placement_test:exam_list' %}" class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}">Manage Exams</a></li>
             <li><a href="{% url 'core:exam_mapping' %}" class="{% if request.resolver_match.url_name == 'exam_mapping' %}active{% endif %}">Exam-to-Level Mapping</a></li>
             <li><a href="{% url 'core:placement_rules' %}" class="{% if request.resolver_match.url_name == 'placement_rules' %}active{% endif %}">Placement Rules</a></li>
             <li><a href="{% url 'placement_test:session_list' %}" class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}">Student Sessions</a></li>
@@ -158,13 +188,30 @@
     
     <div class="container">
         {% if messages %}
-            <div class="messages">
+            <div class="messages" id="message-container">
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}">
+                        <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'" style="float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; margin-left: 20px;">&times;</button>
                         {{ message }}
                     </div>
                 {% endfor %}
             </div>
+            <script>
+                // Auto-scroll to top when there's a message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Auto-hide success messages after 10 seconds
+                setTimeout(function() {
+                    const successAlerts = document.querySelectorAll('.alert-success');
+                    successAlerts.forEach(function(alert) {
+                        alert.style.transition = 'opacity 0.5s ease-out';
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.style.display = 'none';
+                        }, 500);
+                    });
+                }, 10000);
+            </script>
         {% endif %}
         
         <div class="content">

@@ -152,7 +152,6 @@
             <div class="name-edit-container">
                 <div class="exam-title">{{ exam.name }}</div>
                 <input type="text" class="exam-name-input" value="{{ exam.name }}" data-exam-id="{{ exam.id }}">
-                <button class="btn btn-small btn-primary change-name-btn" onclick="enableNameEdit('{{ exam.id }}')">Change Name</button>
                 <button class="btn btn-small btn-primary save-name-btn" onclick="saveExamName('{{ exam.id }}')">Save</button>
                 <button class="btn btn-small btn-secondary cancel-name-btn" onclick="cancelNameEdit('{{ exam.id }}')">Cancel</button>
             </div>
@@ -167,7 +166,8 @@
             {% endif %}
             
             <div class="exam-actions">
-                <a href="{% url 'placement_test:preview_exam' exam_id=exam.id %}" class="btn btn-small">Preview & Answer Keys</a>
+                <a href="{% url 'placement_test:preview_exam' exam_id=exam.id %}" class="btn btn-small btn-primary">Manage</a>
+                <button class="btn btn-small btn-secondary" onclick="enableNameEdit('{{ exam.id }}')">Update Name</button>
                 <form method="post" action="{% url 'placement_test:delete_exam' exam_id=exam.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this exam? This action cannot be undone.');">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-small btn-danger">Delete</button>
@@ -189,13 +189,13 @@ function enableNameEdit(examId) {
     const card = document.querySelector(`[data-exam-id="${examId}"]`);
     const titleDiv = card.querySelector('.exam-title');
     const input = card.querySelector('.exam-name-input');
-    const changeBtn = card.querySelector('.change-name-btn');
+    const updateNameBtn = card.querySelector('.exam-actions button[onclick*="enableNameEdit"]');
     const saveBtn = card.querySelector('.save-name-btn');
     const cancelBtn = card.querySelector('.cancel-name-btn');
     
     titleDiv.style.display = 'none';
     input.style.display = 'block';
-    changeBtn.style.display = 'none';
+    updateNameBtn.style.display = 'none';
     saveBtn.style.display = 'inline-block';
     cancelBtn.style.display = 'inline-block';
     
@@ -207,13 +207,13 @@ function cancelNameEdit(examId) {
     const card = document.querySelector(`[data-exam-id="${examId}"]`);
     const titleDiv = card.querySelector('.exam-title');
     const input = card.querySelector('.exam-name-input');
-    const changeBtn = card.querySelector('.change-name-btn');
+    const updateNameBtn = card.querySelector('.exam-actions button[onclick*="enableNameEdit"]');
     const saveBtn = card.querySelector('.save-name-btn');
     const cancelBtn = card.querySelector('.cancel-name-btn');
     
     titleDiv.style.display = 'block';
     input.style.display = 'none';
-    changeBtn.style.display = 'inline-block';
+    updateNameBtn.style.display = 'inline-block';
     saveBtn.style.display = 'none';
     cancelBtn.style.display = 'none';
     

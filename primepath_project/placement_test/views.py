@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse, Http404, FileResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.db import transaction
@@ -38,7 +38,7 @@ def start_test(request):
             # Collect and validate student data
             student_data = {
                 'student_name': request.POST.get('student_name'),
-                'parent_phone': request.POST.get('parent_phone', ''),
+                'parent_phone': request.POST.get('parent_phone', '').replace('-', '').replace(' ', ''),  # Remove hyphens and spaces
                 'school_name': request.POST.get('school_name'),
                 'academic_rank': request.POST.get('academic_rank'),
             }
@@ -87,7 +87,7 @@ def take_test(request, session_id):
         return redirect('placement_test:test_result', session_id=session_id)
     
     exam = session.exam
-    questions = exam.questions.all()
+    questions = exam.questions.select_related('audio_file').all()
     audio_files = exam.audio_files.all()
     student_answers = {sa.question_id: sa for sa in session.answers.all()}
     
@@ -241,7 +241,8 @@ def create_exam(request):
             'default_options_count': int(request.POST.get('default_options_count', 5)),
             'passing_score': 0,
             'created_by': None,  # No auth required as per PRD
-            'is_active': True
+            'is_active': True,
+            'skip_first_left_half': bool(request.POST.get('skip_first_left_half'))
         }
         
         # Use ExamService to create exam with files
@@ -312,8 +313,8 @@ def edit_exam(request, exam_id):
 def preview_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     
-    # Get or create questions for the exam
-    questions = exam.questions.all().order_by('question_number')
+    # Get or create questions for the exam with audio files prefetched
+    questions = exam.questions.select_related('audio_file').all().order_by('question_number')
     
     # If no questions exist, create them based on total_questions
     if not questions.exists():
@@ -343,6 +344,14 @@ def preview_exam(request, exam_id):
         # Set default options count for MCQ
         if not hasattr(question, 'options_count'):
             question.options_count = 5
+    
+    # Debug logging
+    logger.info(f"Preview exam view - Exam: {exam.name}")
+    logger.info(f"Questions count: {questions.count()}")
+    questions_with_audio = questions.filter(audio_file__isnull=False)
+    logger.info(f"Questions with audio: {questions_with_audio.count()}")
+    for q in questions_with_audio:
+        logger.info(f"  Q{q.question_number} -> Audio {q.audio_file.id} ({q.audio_file.name})")
     
     context = {
         'exam': exam,
@@ -417,33 +426,49 @@ def create_questions(request, exam_id):
 
 def session_list(request):
     """List all placement test sessions with filtering options."""
-    sessions = StudentSession.objects.select_related('exam', 'original_curriculum_level').all()
+    sessions = StudentSession.objects.select_related('exam', 'original_curriculum_level', 'school').all()
+    
+    # Apply search filter
+    search_query = request.GET.get('search')
+    if search_query:
+        sessions = sessions.filter(
+            Q(student_name__icontains=search_query) |
+            Q(school__name__icontains=search_query) |
+            Q(school_name_manual__icontains=search_query)
+        )
     
     # Apply filters
     status_filter = request.GET.get('status')
     if status_filter:
-        sessions = sessions.filter(status=status_filter)
+        if status_filter == 'completed':
+            sessions = sessions.filter(completed_at__isnull=False)
+        elif status_filter == 'in_progress':
+            sessions = sessions.filter(completed_at__isnull=True)
     
     grade_filter = request.GET.get('grade')
     if grade_filter:
-        sessions = sessions.filter(grade_level=grade_filter)
+        sessions = sessions.filter(grade=grade_filter)
+    
+    academic_rank_filter = request.GET.get('academic_rank')
+    if academic_rank_filter:
+        sessions = sessions.filter(academic_rank=academic_rank_filter)
     
     date_from = request.GET.get('date_from')
     if date_from:
-        sessions = sessions.filter(created_at__date__gte=date_from)
+        sessions = sessions.filter(started_at__date__gte=date_from)
     
     date_to = request.GET.get('date_to')
     if date_to:
-        sessions = sessions.filter(created_at__date__lte=date_to)
+        sessions = sessions.filter(started_at__date__lte=date_to)
     
     # Calculate statistics
     total_sessions = sessions.count()
-    completed_sessions = sessions.filter(status='completed').count()
-    in_progress_sessions = sessions.filter(status='in_progress').count()
-    not_started_sessions = sessions.filter(status='not_started').count()
+    completed_sessions = sessions.filter(completed_at__isnull=False).count()
+    in_progress_sessions = sessions.filter(completed_at__isnull=True).count()
+    not_started_sessions = 0  # Sessions are started when created
     
     # Order by most recent first
-    sessions = sessions.order_by('-created_at')
+    sessions = sessions.order_by('-started_at')
     
     # Check if there are any in-progress sessions (for auto-refresh)
     has_in_progress = in_progress_sessions > 0
@@ -462,7 +487,7 @@ def session_list(request):
 
 def session_detail(request, session_id):
     """Display detailed information about a specific session."""
-    session = get_object_or_404(StudentSession.objects.select_related('exam', 'original_curriculum_level'), session_id=session_id)
+    session = get_object_or_404(StudentSession, id=session_id)
     answers = StudentAnswer.objects.filter(session=session).select_related('question').order_by('question__question_number')
     
     context = {
@@ -479,7 +504,7 @@ def grade_session(request, session_id):
 
 def export_result(request, session_id):
     """Export session results as PDF or CSV."""
-    session = get_object_or_404(StudentSession, session_id=session_id)
+    session = get_object_or_404(StudentSession, id=session_id)
     
     # For now, return a simple CSV response
     response = HttpResponse(content_type='text/csv')
@@ -490,11 +515,11 @@ def export_result(request, session_id):
     writer.writerow(['Student Name', 'Grade', 'School', 'Test Date', 'Score', 'Assigned Level'])
     writer.writerow([
         session.student_name,
-        session.grade_level,
-        session.school_name or 'N/A',
-        session.created_at.strftime('%Y-%m-%d %H:%M'),
+        session.grade,
+        session.school.name if session.school else session.school_name_manual or 'N/A',
+        session.started_at.strftime('%Y-%m-%d %H:%M') if session.started_at else 'N/A',
         f"{session.score}%" if session.score else 'N/A',
-        session.original_curriculum_level.get_display_name() if session.original_curriculum_level else 'N/A'
+        session.original_curriculum_level.full_name if session.original_curriculum_level else 'N/A'
     ])
     
     return response
@@ -575,14 +600,22 @@ def save_exam_answers(request, exam_id):
     try:
         data = json.loads(request.body)
         questions_data = data.get('questions', [])
+        audio_assignments = data.get('audio_assignments', {})
         
         # Use ExamService to update questions
         results = ExamService.update_exam_questions(exam, questions_data)
         
+        # Handle audio assignments if provided
+        audio_results = {}
+        if audio_assignments:
+            audio_results = ExamService.update_audio_assignments(exam, audio_assignments)
+        
         return JsonResponse({
             'success': True,
             'message': f'Successfully saved {len(questions_data)} questions',
-            'details': results
+            'details': results,
+            'audio_assignments_saved': len(audio_assignments),
+            'audio_results': audio_results
         })
         
     except json.JSONDecodeError:
@@ -665,6 +698,43 @@ def delete_audio_from_exam(request, exam_id, audio_id):
         logger.error(f"Error deleting audio file: {e}")
         return JsonResponse({
             'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@require_POST
+def update_skip_first_left_half(request, exam_id):
+    """Update the skip_first_left_half setting for an exam."""
+    try:
+        exam = get_object_or_404(Exam, id=exam_id)
+        
+        import json
+        data = json.loads(request.body)
+        skip_first_left_half = data.get('skip_first_left_half', False)
+        
+        # Validate the boolean value
+        if not isinstance(skip_first_left_half, bool):
+            return JsonResponse({
+                'success': False, 
+                'error': 'skip_first_left_half must be a boolean value'
+            }, status=400)
+        
+        exam.skip_first_left_half = skip_first_left_half
+        exam.save()
+        
+        return JsonResponse({
+            'success': True,
+            'skip_first_left_half': exam.skip_first_left_half,
+            'message': f'Skip first left half {"enabled" if skip_first_left_half else "disabled"} for exam: {exam.name}'
+        })
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False, 
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False, 
             'error': str(e)
         }, status=500)
 

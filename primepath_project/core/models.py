@@ -83,6 +83,28 @@ class CurriculumLevel(models.Model):
         else:
             # Otherwise, use the full format
             return f"{program_name} {subprogram_name} - Level {self.level_number}"
+    
+    @property
+    def display_name(self):
+        """Abbreviated display name using 'Lv' instead of 'Level'"""
+        program_name = self.subprogram.program.get_name_display()
+        subprogram_name = self.subprogram.name
+        
+        # Remove "PRIME" from the beginning
+        if program_name.startswith("PRIME "):
+            program_name = program_name[6:]
+        
+        # Check if subprogram name already contains the program name
+        if subprogram_name.startswith(self.subprogram.program.name):
+            # If it does, just use subprogram name  
+            return f"{subprogram_name} - Lv {self.level_number}"
+        else:
+            # Otherwise, use the program + subprogram format
+            return f"{program_name} {subprogram_name} - Lv {self.level_number}"
+    
+    def get_display_name(self):
+        """For compatibility - returns abbreviated name"""
+        return self.display_name
 
 
 class PlacementRule(models.Model):

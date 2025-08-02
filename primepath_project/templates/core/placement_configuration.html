@@ -364,6 +364,14 @@
         background-color: #0056b3;
     }
     
+    .login-form button[type="button"] {
+        background-color: #6c757d;
+    }
+    
+    .login-form button[type="button"]:hover {
+        background-color: #5a6268;
+    }
+    
     .error-message {
         color: #dc3545;
         margin-top: 10px;
@@ -379,6 +387,9 @@
             <input type="text" id="adminId" placeholder="Admin ID" required>
             <input type="password" id="adminPassword" placeholder="Password" required>
             <button type="submit">Login</button>
+            <button type="button" onclick="window.location.href='{% url 'core:teacher_dashboard' %}'" style="background-color: #6c757d;">
+                Exit
+            </button>
             <div id="loginError" class="error-message" style="display: none;"></div>
         </form>
     </div>

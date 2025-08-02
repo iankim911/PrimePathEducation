@@ -21,6 +21,7 @@ class Exam(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    skip_first_left_half = models.BooleanField(default=False, help_text="Skip the first left half of page 1 in column view")
 
     class Meta:
         ordering = ['-created_at']
@@ -74,6 +75,7 @@ class Question(models.Model):
     correct_answer = models.TextField(help_text="For MCQ: single letter, For CHECKBOX: comma-separated letters")
     points = models.IntegerField(default=1, validators=[MinValueValidator(1)])
     options_count = models.IntegerField(default=5, validators=[MinValueValidator(2), MaxValueValidator(10)])
+    audio_file = models.ForeignKey('AudioFile', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_question')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

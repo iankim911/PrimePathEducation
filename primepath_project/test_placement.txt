@@ -1,0 +1,31 @@
+# Run these commands in Django shell (python manage.py shell)
+
+# Check ExamLevelMapping
+from core.models import ExamLevelMapping, CurriculumLevel, PlacementRule
+from placement_test.models import Exam
+
+# Check if mappings exist
+print("Exam mappings count:", ExamLevelMapping.objects.count())
+
+# Check curriculum levels
+phonics_level = CurriculumLevel.objects.filter(subprogram__name="CORE PHONICS", level_number=1).first()
+if phonics_level:
+    print(f"CORE PHONICS Level 1 ID: {phonics_level.id}")
+    mappings = ExamLevelMapping.objects.filter(curriculum_level=phonics_level)
+    print(f"Mappings for this level: {mappings.count()}")
+    for m in mappings:
+        print(f"  - Exam: {m.exam.name if m.exam else 'None'}")
+
+# Check placement rules
+rules = PlacementRule.objects.filter(grade=1)
+print(f"\nPlacement rules for grade 1: {rules.count()}")
+for rule in rules:
+    print(f"  - Rank {rule.min_rank_percentile}-{rule.max_rank_percentile}% -> {rule.curriculum_level.full_name}")
+
+# Test the placement service
+from placement_test.services import PlacementService
+try:
+    exam, level = PlacementService.match_student_to_exam(grade=1, academic_rank='top_10')
+    print(f"\nMatched exam: {exam.name}")
+except Exception as e:
+    print(f"\nError: {e}")

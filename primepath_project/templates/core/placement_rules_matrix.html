@@ -5,6 +5,15 @@
 {% block title %}Placement Rules Configuration{% endblock %}
 
 {% block content %}
+<!-- Success Notification Container (matching Upload Exam style) -->
+<div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 500px;">
+    <div class="alert alert-success" style="margin: 0; padding: 25px 30px; font-size: 1.3rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 5px solid #28a745; position: relative;">
+        <button type="button" class="close-alert" onclick="document.getElementById('success-notification').style.display='none'" style="float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; margin-left: 20px;">&times;</button>
+        <span id="success-message">Placement rules saved successfully!</span>
+        <span style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); font-size: 2rem;">🎉</span>
+    </div>
+</div>
+
 <style>
     .placement-container {
         max-width: 1800px;
@@ -73,14 +82,20 @@
     .matrix-table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 1200px;
+        table-layout: fixed;
     }
     
     .matrix-table th,
     .matrix-table td {
         border: 1px solid #ddd;
-        padding: 8px;
+        padding: 6px;
         text-align: center;
+    }
+    
+    .matrix-table th:not(:first-child),
+    .matrix-table td:not(:first-child) {
+        width: 140px;
+        max-width: 140px;
     }
     
     .matrix-table th {
@@ -108,11 +123,11 @@
     
     .level-select {
         width: 100%;
-        min-width: 120px;
-        padding: 4px;
+        padding: 8px 4px;
         border: 1px solid #ccc;
         border-radius: 4px;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
+        height: 40px;
     }
     
     .save-button {
@@ -134,6 +149,27 @@
     .grade-header {
         font-size: 0.875rem;
         font-weight: 600;
+    }
+    
+    /* Success notification animations (matching Upload Exam) */
+    @keyframes slideDown {
+        from {
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: translateX(-50%) scale(1);
+        }
+        50% {
+            transform: translateX(-50%) scale(1.02);
+        }
     }
 </style>
 
@@ -165,7 +201,7 @@
                 <thead>
                     <tr>
                         <th>School English Ranking</th>
-                        {% for grade in grades %}
+                        {% for grade in core_grades %}
                         <th class="grade-header">{{ grade|format_grade }}</th>
                         {% endfor %}
                     </tr>
@@ -174,7 +210,7 @@
                     {% for rank in rank_options %}
                     <tr>
                         <td>{{ rank.label }}</td>
-                        {% for grade in grades %}
+                        {% for grade in core_grades %}
                         <td>
                             <select class="level-select" 
                                     data-program="CORE" 
@@ -182,7 +218,7 @@
                                     data-rank="{{ rank.value }}">
                                 <option value="">Select Level</option>
                                 {% for level in core_levels %}
-                                <option value="{{ level.id }}">{{ level.full_name }}</option>
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
                                 {% endfor %}
                             </select>
                         </td>
@@ -202,7 +238,7 @@
                 <thead>
                     <tr>
                         <th>School English Ranking</th>
-                        {% for grade in grades %}
+                        {% for grade in ascent_grades %}
                         <th class="grade-header">{{ grade|format_grade }}</th>
                         {% endfor %}
                     </tr>
@@ -211,7 +247,7 @@
                     {% for rank in rank_options %}
                     <tr>
                         <td>{{ rank.label }}</td>
-                        {% for grade in grades %}
+                        {% for grade in ascent_grades %}
                         <td>
                             <select class="level-select" 
                                     data-program="ASCENT" 
@@ -219,7 +255,7 @@
                                     data-rank="{{ rank.value }}">
                                 <option value="">Select Level</option>
                                 {% for level in ascent_levels %}
-                                <option value="{{ level.id }}">{{ level.full_name }}</option>
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
                                 {% endfor %}
                             </select>
                         </td>
@@ -239,7 +275,7 @@
                 <thead>
                     <tr>
                         <th>School English Ranking</th>
-                        {% for grade in grades %}
+                        {% for grade in edge_grades %}
                         <th class="grade-header">{{ grade|format_grade }}</th>
                         {% endfor %}
                     </tr>
@@ -248,7 +284,7 @@
                     {% for rank in rank_options %}
                     <tr>
                         <td>{{ rank.label }}</td>
-                        {% for grade in grades %}
+                        {% for grade in edge_grades %}
                         <td>
                             <select class="level-select" 
                                     data-program="EDGE" 
@@ -256,7 +292,7 @@
                                     data-rank="{{ rank.value }}">
                                 <option value="">Select Level</option>
                                 {% for level in edge_levels %}
-                                <option value="{{ level.id }}">{{ level.full_name }}</option>
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
                                 {% endfor %}
                             </select>
                         </td>
@@ -276,7 +312,7 @@
                 <thead>
                     <tr>
                         <th>School English Ranking</th>
-                        {% for grade in grades %}
+                        {% for grade in pinnacle_grades %}
                         <th class="grade-header">{{ grade|format_grade }}</th>
                         {% endfor %}
                     </tr>
@@ -285,7 +321,7 @@
                     {% for rank in rank_options %}
                     <tr>
                         <td>{{ rank.label }}</td>
-                        {% for grade in grades %}
+                        {% for grade in pinnacle_grades %}
                         <td>
                             <select class="level-select" 
                                     data-program="PINNACLE" 
@@ -293,7 +329,7 @@
                                     data-rank="{{ rank.value }}">
                                 <option value="">Select Level</option>
                                 {% for level in pinnacle_levels %}
-                                <option value="{{ level.id }}">{{ level.full_name }}</option>
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
                                 {% endfor %}
                             </select>
                         </td>
@@ -356,7 +392,28 @@ function savePlacementRules() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Placement rules saved successfully!');
+            // Show the enhanced success notification (matching Upload Exam style)
+            const notification = document.getElementById('success-notification');
+            const alertDiv = notification.querySelector('.alert');
+            notification.style.display = 'block';
+            
+            // Apply animations
+            alertDiv.style.animation = 'slideDown 0.5s ease-out, pulse 2s ease-in-out';
+            
+            // Scroll to top to ensure notification is visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Auto-hide the notification after 10 seconds
+            setTimeout(() => {
+                const notif = document.getElementById('success-notification');
+                const alert = notif.querySelector('.alert');
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    notif.style.display = 'none';
+                    alert.style.opacity = '1';
+                }, 500);
+            }, 10000);
         } else {
             alert('Error saving placement rules: ' + data.error);
         }

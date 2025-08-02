@@ -80,7 +80,7 @@ class PlacementService:
     @staticmethod
     def find_exam_for_level(curriculum_level: CurriculumLevel) -> Exam:
         """
-        Find an active exam for the given curriculum level.
+        Find an active exam for the given curriculum level using exam mappings.
         
         Args:
             curriculum_level: Target curriculum level
@@ -91,18 +91,31 @@ class PlacementService:
         Raises:
             ExamNotFoundException: If no active exam exists
         """
-        exam = Exam.objects.filter(
-            curriculum_level=curriculum_level,
-            is_active=True
-        ).first()
+        from core.models import ExamLevelMapping
+        import random
         
-        if not exam:
+        # Get all exam mappings for this curriculum level
+        mappings = ExamLevelMapping.objects.filter(
+            curriculum_level=curriculum_level
+        ).select_related('exam')
+        
+        # Filter for active exams only
+        active_exams = []
+        for mapping in mappings:
+            if mapping.exam and mapping.exam.is_active:
+                active_exams.append(mapping.exam)
+        
+        if not active_exams:
             raise ExamNotFoundException(
                 f"No active exam available for curriculum level {curriculum_level.full_name}",
                 code="NO_ACTIVE_EXAM",
                 details={'curriculum_level_id': curriculum_level.id}
             )
-            
+        
+        # Randomly select one of the available exams
+        exam = random.choice(active_exams)
+        logger.info(f"Selected exam {exam.id} for curriculum level {curriculum_level.id}")
+        
         return exam
     
     @staticmethod

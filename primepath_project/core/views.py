@@ -102,7 +102,11 @@ def placement_rules(request):
     ]
     
     context = {
-        'grades': range(1, 13),
+        'grades': range(1, 13),  # Keep all grades for the full view
+        'core_grades': range(1, 5),  # Grades 1-4 for PRIME CORE
+        'ascent_grades': range(5, 7),  # Grades 5-6 for PRIME ASCENT
+        'edge_grades': range(7, 10),  # Grades 7-9 for PRIME EDGE
+        'pinnacle_grades': range(10, 13),  # Grades 10-12 for PRIME PINNACLE
         'rank_options': rank_options,
         'core_levels': core_levels,
         'ascent_levels': ascent_levels,

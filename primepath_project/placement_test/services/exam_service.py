@@ -45,7 +45,8 @@ class ExamService:
             default_options_count=exam_data.get('default_options_count', DEFAULT_OPTIONS_COUNT),
             passing_score=exam_data.get('passing_score', 0),
             created_by=exam_data.get('created_by'),
-            is_active=exam_data.get('is_active', True)
+            is_active=exam_data.get('is_active', True),
+            skip_first_left_half=exam_data.get('skip_first_left_half', False)
         )
         
         # Create placeholder questions
@@ -130,8 +131,8 @@ class ExamService:
                 audio_file=audio_file,
                 name=name,
                 order=index + 1,
-                start_question=1,  # Default, to be updated when assigned
-                end_question=1     # Default, to be updated when assigned
+                start_question=0,  # 0 indicates unassigned
+                end_question=0     # 0 indicates unassigned
             )
             audio_objects.append(audio_obj)
         
@@ -271,3 +272,68 @@ class ExamService:
         exam.delete()
         
         logger.info(f"Deleted exam {exam_id}: {exam_name}")
+    
+    @staticmethod
+    @transaction.atomic
+    def update_audio_assignments(
+        exam: Exam,
+        audio_assignments: Dict[str, int]
+    ) -> Dict[str, Any]:
+        """
+        Update audio-to-question assignments for an exam using new Question.audio_file relationship.
+        
+        Args:
+            exam: Exam instance
+            audio_assignments: Dict mapping question_number -> audio_id
+            
+        Returns:
+            Dictionary with assignment results
+        """
+        updated_count = 0
+        errors = []
+        
+        # Convert audio_assignments keys to integers and validate
+        validated_assignments = {}
+        for question_num_str, audio_id in audio_assignments.items():
+            try:
+                question_num = int(question_num_str)
+                validated_assignments[question_num] = audio_id
+            except (ValueError, TypeError):
+                errors.append(f"Invalid question number: {question_num_str}")
+                continue
+        
+        # First, clear all existing assignments for this exam
+        from ..models import Question
+        Question.objects.filter(exam=exam).update(audio_file=None)
+        
+        # Update questions with new audio assignments
+        for question_num, audio_id in validated_assignments.items():
+            try:
+                # Get the question
+                question = Question.objects.get(exam=exam, question_number=question_num)
+                
+                # Get the audio file for this exam
+                audio_file = AudioFile.objects.get(id=audio_id, exam=exam)
+                
+                # Assign audio to question
+                question.audio_file = audio_file
+                question.save()
+                
+                updated_count += 1
+                
+            except Question.DoesNotExist:
+                errors.append(f"Question {question_num} not found for exam {exam.id}")
+            except AudioFile.DoesNotExist:
+                errors.append(f"Audio file {audio_id} not found for exam {exam.id}")
+            except Exception as e:
+                errors.append(f"Error updating audio {audio_id} to question {question_num}: {str(e)}")
+        
+        logger.info(
+            f"Updated audio assignments for exam {exam.id}: {updated_count} assignments updated"
+        )
+        
+        return {
+            'updated': updated_count,
+            'errors': errors,
+            'total_assignments': len(validated_assignments)
+        }

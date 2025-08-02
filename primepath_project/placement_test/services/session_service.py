@@ -83,7 +83,7 @@ class SessionService:
     def submit_answer(
         session: StudentSession,
         question_id: int,
-        answer: str
+        answer: Any
     ) -> StudentAnswer:
         """
         Submit an answer for a specific question.
@@ -118,7 +118,47 @@ class SessionService:
                 details={'question_id': question_id, 'session_id': str(session.id)}
             )
         
-        student_answer.answer = answer
+        # Handle different answer formats
+        if isinstance(answer, dict):
+            # Check if it's MIXED type with checkboxes and text
+            if 'checkboxes' in answer or 'text' in answer:
+                # MIXED type with both checkboxes and text
+                checkboxes = answer.get('checkboxes', [])
+                text = answer.get('text', '').strip()
+                
+                # Combine checkbox answers and text answer
+                if checkboxes and text:
+                    student_answer.answer = f"{','.join(checkboxes)}|TEXT:{text}"
+                elif checkboxes:
+                    student_answer.answer = ','.join(checkboxes)
+                else:
+                    student_answer.answer = text
+            else:
+                # Multiple SHORT answers (A: answer1, B: answer2, etc.)
+                # Convert dict to formatted string
+                formatted_answers = []
+                for letter, ans in answer.items():
+                    if ans.strip():  # Only include non-empty answers
+                        formatted_answers.append(f"{letter}: {ans.strip()}")
+                student_answer.answer = " | ".join(formatted_answers)
+        elif isinstance(answer, str) and answer.startswith('{') and answer.endswith('}'):
+            # Handle JSON string from frontend
+            try:
+                import json
+                answer_dict = json.loads(answer)
+                # Process as multiple SHORT answers
+                formatted_answers = []
+                for letter, ans in answer_dict.items():
+                    if ans.strip():
+                        formatted_answers.append(f"{letter}: {ans.strip()}")
+                student_answer.answer = " | ".join(formatted_answers)
+            except json.JSONDecodeError:
+                # If JSON parsing fails, treat as regular string
+                student_answer.answer = str(answer)
+        else:
+            # Regular string answer (MCQ, SHORT, LONG, or CHECKBOX)
+            student_answer.answer = str(answer)
+        
         student_answer.save()
         
         logger.debug(
