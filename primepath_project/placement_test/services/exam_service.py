@@ -173,8 +173,8 @@ class ExamService:
                     question.question_type = q_data.get('question_type', 'MCQ')
                     question.correct_answer = q_data.get('correct_answer', '')
                     
-                    # Update options count for MCQ
-                    if question.question_type == 'MCQ' and 'options_count' in q_data:
+                    # Update options count for question types that use it
+                    if question.question_type in ['MCQ', 'CHECKBOX', 'SHORT'] and 'options_count' in q_data:
                         question.options_count = q_data['options_count']
                     
                     question.save()

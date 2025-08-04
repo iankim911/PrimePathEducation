@@ -99,7 +99,15 @@ def take_test(request, session_id):
         'student_answers': student_answers,
         'timer_seconds': exam.timer_minutes * 60,
     }
-    return render(request, 'placement_test/student_test.html', context)
+    
+    response = render(request, 'placement_test/student_test.html', context)
+    
+    # Add no-cache headers to prevent browser caching of dynamic question content
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    
+    return response
 
 
 @require_http_methods(["POST"])
@@ -331,8 +339,16 @@ def preview_exam(request, exam_id):
     
     # Process questions to add response lists for short and long answers
     for question in questions:
-        if question.question_type == 'SHORT' and question.correct_answer:
-            question.response_list = question.correct_answer.split('|')
+        # For SHORT questions, prioritize options_count over existing correct_answer
+        if question.question_type == 'SHORT':
+            if question.options_count and question.options_count >= 1:
+                # Use options_count - don't populate response_list so template uses options_count logic
+                question.response_list = []
+            elif question.correct_answer:
+                # Fallback to existing correct_answer data
+                question.response_list = question.correct_answer.split('|')
+            else:
+                question.response_list = []
         else:
             question.response_list = []
             
@@ -341,8 +357,8 @@ def preview_exam(request, exam_id):
         else:
             question.long_response_list = []
             
-        # Set default options count for MCQ
-        if not hasattr(question, 'options_count'):
+        # Ensure options_count has a reasonable value (should already be set from database)
+        if not question.options_count or question.options_count < 1:
             question.options_count = 5
     
     # Debug logging
@@ -358,7 +374,14 @@ def preview_exam(request, exam_id):
         'questions': questions,
     }
     
-    return render(request, 'placement_test/preview_and_answers.html', context)
+    response = render(request, 'placement_test/preview_and_answers.html', context)
+    
+    # Add no-cache headers to prevent browser caching of dynamic admin content
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    
+    return response
 
 
 def add_audio(request, exam_id):
