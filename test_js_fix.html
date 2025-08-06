@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test JavaScript Fix</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+</head>
+<body>
+    <h1>Testing Debug System Fix</h1>
+    <p>Open Chrome DevTools (F12) and check the Console tab.</p>
+    <p>You should see NO errors about "logHistory is not defined"</p>
+    
+    <div id="test-results"></div>
+    
+    <!-- Load the fixed debug-system.js with timestamp to bypass cache -->
+    <script src="http://127.0.0.1:8000/static/js/debug-system.js?v=<?php echo time(); ?>"></script>
+    
+    <script>
+    // Test the fix
+    setTimeout(function() {
+        const resultsDiv = document.getElementById('test-results');
+        
+        if (window.PrimeDebug && window.PrimeDebug.getLogHistory) {
+            resultsDiv.innerHTML = '<h2 style="color: green;">✓ Fix is working!</h2>' +
+                '<p>PrimeDebug.getLogHistory() is available</p>' +
+                '<p>Log count: ' + window.PrimeDebug.getLogHistory().length + '</p>';
+            
+            // Test logging
+            window.PrimeDebug.info('TEST', 'JavaScript fix is working correctly');
+        } else {
+            resultsDiv.innerHTML = '<h2 style="color: red;">✗ Fix not loaded</h2>' +
+                '<p>Browser is still using cached version</p>' +
+                '<p>Please hard refresh (Ctrl+F5)</p>';
+        }
+    }, 1000);
+    </script>
+</body>
+</html>

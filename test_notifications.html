@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notification System Test</title>
+</head>
+<body>
+    <h1>Test Notification System</h1>
+    <button onclick="testSuccess()">Test Success Notification</button>
+    <button onclick="testError()">Test Error Notification</button>
+    <button onclick="testUploadProgress()">Test Upload Progress</button>
+
+    <!-- Include the notification system from PrimePath -->
+    <script>
+        // Simulate Django messages for testing
+        window.showSuccess = function(title, message) {
+            console.log('Success:', title, message);
+            alert('SUCCESS: ' + title + ' - ' + message);
+        };
+        
+        window.showError = function(title, message) {
+            console.log('Error:', title, message);
+            alert('ERROR: ' + title + ' - ' + message);
+        };
+        
+        function testSuccess() {
+            if (window.showSuccess) {
+                showSuccess('Test Success', 'This is a test success notification!');
+            } else {
+                alert('Notification system not loaded');
+            }
+        }
+        
+        function testError() {
+            if (window.showError) {
+                showError('Test Error', 'This is a test error notification!');
+            } else {
+                alert('Notification system not loaded');
+            }
+        }
+        
+        function testUploadProgress() {
+            alert('Upload progress would show here');
+        }
+    </script>
+</body>
+</html>

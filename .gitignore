@@ -127,4 +127,4 @@ primepath_project/Scripts/
 media/exams/*
 media/audio/*
 !media/exams/.gitkeep
-!media/audio/.gitkeep
+!media/audio/.gitkeep.nul
