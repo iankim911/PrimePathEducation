@@ -360,7 +360,11 @@
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+} else {
+    console.error('PDF.js library failed to load');
+}
 </script>
 {% endblock %}
 
@@ -373,13 +377,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
         <h3 class="section-title">Exam PDF File</h3>
         
         <div class="form-group">
-            <label>Upload PDF *</label>
             <div class="file-input-wrapper">
                 <label for="pdf_file" class="file-input-label">Choose PDF File</label>
                 <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required>
                 <span class="file-name" id="pdf-file-name">No file selected</span>
             </div>
-            <div class="help-text">Maximum file size: 10MB. PDF only.</div>
+            <div class="help-text">Upload PDF * - Maximum file size: 10MB. PDF only.</div>
         </div>
     </div>
     
@@ -576,7 +579,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // File name display and preview
-document.getElementById('pdf_file').addEventListener('change', function(e) {
+document.getElementById('pdf_file')?.addEventListener('change', function(e) {
     const file = e.target.files[0];
     const fileName = file?.name || 'No file selected';
     document.getElementById('pdf-file-name').textContent = fileName;
@@ -597,6 +600,11 @@ document.getElementById('pdf_file').addEventListener('change', function(e) {
             
             // Load PDF with PDF.js
             console.log('🔥 [CREATE_EXAM] Calling pdfjsLib.getDocument...');
+            if (typeof pdfjsLib === 'undefined') {
+                console.error('❌ [CREATE_EXAM] PDF.js not loaded');
+                alert('PDF preview is not available. Please refresh the page and try again.');
+                return;
+            }
             pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
                 console.log('✅ [CREATE_EXAM] PDF loaded successfully');
                 pdfDoc = pdf;
@@ -625,9 +633,7 @@ document.getElementById('pdf_file').addEventListener('change', function(e) {
                 if (jumpInput) {
                     jumpInput.max = totalPages;
                 }
-                console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${currentPageNum} of ${totalPages}`); else {
-                    console.warn('⚠️ [CREATE_EXAM] Page info element not found');
-                }
+                console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${currentPageNum} of ${totalPages}`);
                 
                 // Update navigation buttons
                 console.log('🔥 [CREATE_EXAM] Updating navigation buttons...');
@@ -771,7 +777,7 @@ function renderPage(pageNum) {
 
 
 // Previous page
-document.getElementById('pdf-prev').addEventListener('click', function() {
+document.getElementById('pdf-prev')?.addEventListener('click', function() {
     if (!pdfDoc || currentPageNum <= 1) {
         return;
     }
@@ -782,7 +788,7 @@ document.getElementById('pdf-prev').addEventListener('click', function() {
 });
 
 // Next page
-document.getElementById('pdf-next').addEventListener('click', function() {
+document.getElementById('pdf-next')?.addEventListener('click', function() {
     if (!pdfDoc || currentPageNum >= totalPages) {
         return;
     }
@@ -793,7 +799,7 @@ document.getElementById('pdf-next').addEventListener('click', function() {
 });
 
 // Rotate left button
-document.getElementById('pdf-rotate-left').addEventListener('click', function() {
+document.getElementById('pdf-rotate-left')?.addEventListener('click', function() {
     if (!pdfDoc) return;
     
     currentRotation = (currentRotation - 90) % 360;
@@ -804,7 +810,7 @@ document.getElementById('pdf-rotate-left').addEventListener('click', function() 
 });
 
 // Rotate right button
-document.getElementById('pdf-rotate-right').addEventListener('click', function() {
+document.getElementById('pdf-rotate-right')?.addEventListener('click', function() {
     if (!pdfDoc) return;
     
     currentRotation = (currentRotation + 90) % 360;
@@ -856,15 +862,17 @@ let touchStartX = 0;
 let touchStartY = 0;
 let isSwiping = false;
 
-document.getElementById('pdf-canvas').addEventListener('touchstart', function(e) {
+const pdfCanvas = document.getElementById('pdf-canvas');
+if (pdfCanvas) {
+    pdfCanvas.addEventListener('touchstart', function(e) {
     if (e.touches.length === 1) {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         isSwiping = false;
     }
-}, { passive: true });
+    }, { passive: true });
 
-document.getElementById('pdf-canvas').addEventListener('touchmove', function(e) {
+    pdfCanvas.addEventListener('touchmove', function(e) {
     if (e.touches.length === 1) {
         const touchCurrentX = e.touches[0].clientX;
         const touchCurrentY = e.touches[0].clientY;
@@ -877,9 +885,9 @@ document.getElementById('pdf-canvas').addEventListener('touchmove', function(e) 
             e.preventDefault(); // Prevent scrolling during swipe
         }
     }
-}, { passive: false });
+    }, { passive: false });
 
-document.getElementById('pdf-canvas').addEventListener('touchend', function(e) {
+    pdfCanvas.addEventListener('touchend', function(e) {
     if (isSwiping && e.changedTouches.length === 1) {
         const touchEndX = e.changedTouches[0].clientX;
         const deltaX = touchEndX - touchStartX;
@@ -902,9 +910,10 @@ document.getElementById('pdf-canvas').addEventListener('touchend', function(e) {
                 }
             }
         }
-    }
-    isSwiping = false;
-}, { passive: true });
+        }
+        isSwiping = false;
+    }, { passive: true });
+}
 
 // Keyboard navigation support
 document.addEventListener('keydown', function(e) {
@@ -929,7 +938,7 @@ document.addEventListener('keydown', function(e) {
 let selectedAudioFiles = [];
 
 // Audio files display and details
-document.getElementById('audio_files').addEventListener('change', function(e) {
+document.getElementById('audio_files')?.addEventListener('change', function(e) {
     selectedAudioFiles = Array.from(e.target.files);
     updateAudioDisplay();
 });
@@ -1060,7 +1069,7 @@ function generateVersionedName() {
 }
 
 // Override form submission to set the correct name
-document.getElementById('examForm').addEventListener('submit', function(e) {
+document.getElementById('examForm')?.addEventListener('submit', function(e) {
     // Validate PDF file
     const pdfFile = document.getElementById('pdf_file').files[0];
     if (!pdfFile) {

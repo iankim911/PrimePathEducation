@@ -124,7 +124,8 @@
       "Bash(git commit:*)",
       "Bash(./venv/Scripts/python.exe auto_backup.py)",
       "Bash(git rm:*)",
-      "Bash(del \"C:\\Users\\ianki\\OneDrive\\2. Projects\\ClaudeCode_New\\PrimePath_\\primepath_project\\templates\\placement_test\\create_exam_renderPage_fix.js\")"
+      "Bash(del \"C:\\Users\\ianki\\OneDrive\\2. Projects\\ClaudeCode_New\\PrimePath_\\primepath_project\\templates\\placement_test\\create_exam_renderPage_fix.js\")",
+      "Bash(../venv/Scripts/pip.exe install requests)"
     ],
     "deny": []
   }
