@@ -21,7 +21,6 @@ class Exam(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    skip_first_left_half = models.BooleanField(default=False, help_text="Skip the first left half of page 1 in column view")
 
     class Meta:
         ordering = ['-created_at']

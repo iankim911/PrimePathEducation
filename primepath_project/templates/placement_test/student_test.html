@@ -1058,14 +1058,28 @@
                         <button id="pdf-top-prev" class="btn btn-sm" style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Previous Page">
                             ◀ Prev
                         </button>
+                        <button id="pdf-rotate-left" class="btn btn-sm" style="background: #6c757d; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer;" title="Rotate Left">
+                            ↺
+                        </button>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <span style="color: #333; font-size: 14px; font-weight: 500;">Page</span>
                             <input id="pdf-page-input" type="number" min="1" max="1" value="1" style="width: 50px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 14px;" title="Go to page">
                             <span id="pdf-top-page-info" style="color: #666; font-size: 14px;">of 1</span>
                         </div>
+                        <button id="pdf-rotate-right" class="btn btn-sm" style="background: #6c757d; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer;" title="Rotate Right">
+                            ↻
+                        </button>
                         <button id="pdf-top-next" class="btn btn-sm" style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Next Page">
                             Next ▶
                         </button>
+                        
+                        <!-- Quick Jump -->
+                        <div style="border-left: 1px solid #ddd; padding-left: 12px; display: flex; align-items: center; gap: 6px;">
+                            <input id="pdf-jump-input" type="number" placeholder="Go to" min="1" style="width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 14px;">
+                            <button id="pdf-jump-btn" class="btn btn-sm" style="background: #17a2b8; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer;" title="Jump to Page">
+                                🔍
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- PDF Image Display -->
@@ -1393,6 +1407,7 @@ let pdfDoc = null;
 let currentPage = 1;
 let totalPages = 0;
 let pageImages = new Map(); // Cache for converted images
+let currentRotation = 0; // Track rotation angle (0, 90, 180, 270)
 
 // Initialize timer
 function startTimer() {
@@ -1447,9 +1462,12 @@ function renderPageAsImage(pageNum) {
     const loading = document.getElementById('pdf-loading');
     const pageImage = document.getElementById('pdf-page-image');
     
+    // Clear cache when rotation changes (include rotation in cache key)
+    const cacheKey = `${pageNum}_${currentRotation}`;
+    
     // Check cache first
-    if (pageImages.has(pageNum)) {
-        pageImage.src = pageImages.get(pageNum);
+    if (pageImages.has(cacheKey)) {
+        pageImage.src = pageImages.get(cacheKey);
         loading.style.display = 'none';
         return;
     }
@@ -1461,8 +1479,8 @@ function renderPageAsImage(pageNum) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // Calculate scale for good quality
-        const viewport = page.getViewport({ scale: 2.0 });
+        // Calculate scale for good quality with rotation
+        const viewport = page.getViewport({ scale: 2.0, rotation: currentRotation });
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         
@@ -1476,8 +1494,8 @@ function renderPageAsImage(pageNum) {
             // Convert canvas to image
             const imageDataURL = canvas.toDataURL('image/png');
             
-            // Cache the image
-            pageImages.set(pageNum, imageDataURL);
+            // Cache the image with rotation key
+            pageImages.set(cacheKey, imageDataURL);
             
             // Display the image
             pageImage.src = imageDataURL;
@@ -1810,6 +1828,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // Rotate left button
+    document.getElementById('pdf-rotate-left')?.addEventListener('click', function() {
+        if (!pdfDoc) return;
+        
+        currentRotation = (currentRotation - 90) % 360;
+        if (currentRotation < 0) currentRotation += 360;
+        
+        console.log('🔥 [STUDENT_TEST] Rotate left clicked, new rotation:', currentRotation);
+        renderPageAsImage(currentPage); // Re-render current page with new rotation
+    });
+    
+    // Rotate right button
+    document.getElementById('pdf-rotate-right')?.addEventListener('click', function() {
+        if (!pdfDoc) return;
+        
+        currentRotation = (currentRotation + 90) % 360;
+        
+        console.log('🔥 [STUDENT_TEST] Rotate right clicked, new rotation:', currentRotation);
+        renderPageAsImage(currentPage); // Re-render current page with new rotation
+    });
+    
     // Page input navigation (go to specific page)
     document.getElementById('pdf-page-input')?.addEventListener('change', function() {
         const targetPage = parseInt(this.value);
@@ -1835,6 +1874,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Reset to current page if invalid input
                 this.value = currentPage;
             }
+        }
+    });
+    
+    // Jump to page functionality
+    document.getElementById('pdf-jump-btn')?.addEventListener('click', function() {
+        const jumpInput = document.getElementById('pdf-jump-input');
+        if (jumpInput) {
+            const targetPage = parseInt(jumpInput.value);
+            if (targetPage >= 1 && targetPage <= totalPages) {
+                currentPage = targetPage;
+                console.log('🔥 [STUDENT_TEST] Jump to page:', currentPage);
+                renderPageAsImage(currentPage);
+                updatePageInfo();
+                jumpInput.value = ''; // Clear after jump
+            } else if (jumpInput.value) {
+                alert(`Please enter a page number between 1 and ${totalPages}`);
+            }
+        }
+    });
+    
+    // Jump input enter key support
+    document.getElementById('pdf-jump-input')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('pdf-jump-btn')?.click();
         }
     });
     {% endif %}

@@ -836,25 +836,64 @@
         <div class="pdf-section">
             <div class="section-header">
                 <h3 class="section-title">PDF Preview</h3>
-                <div class="pdf-controls">
-                    <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
-                        <span class="d-none d-md-inline">← Previous</span>
-                        <span class="d-md-none">←</span>
-                    </button>
-                    <div class="pdf-navigation" id="pdf-page-info">
-                        Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+                <!-- Unified PDF Control Bar -->
+                <div class="pdf-controls" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <!-- Navigation Group -->
+                    <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
+                        <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
+                            <span class="d-none d-md-inline">← Previous</span>
+                            <span class="d-md-none">←</span>
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span>Page</span>
+                            <input type="number" id="pdf-page-input" value="1" min="1" max="1" 
+                                   style="width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                            <span>of <span id="total-pages">1</span></span>
+                        </div>
+                        <button type="button" id="pdf-next" class="btn btn-primary">
+                            <span class="d-none d-md-inline">Next →</span>
+                            <span class="d-md-none">→</span>
+                        </button>
                     </div>
-                    <button type="button" id="pdf-next" class="btn btn-primary">
-                        <span class="d-none d-md-inline">Next →</span>
-                        <span class="d-md-none">→</span>
-                    </button>
-                    <div class="zoom-controls">
+                    
+                    <!-- Divider -->
+                    <div class="control-divider" style="width: 1px; height: 30px; background: #dee2e6;"></div>
+                    
+                    <!-- Rotation Group -->
+                    <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
+                        <button type="button" id="pdf-rotate-left" class="btn btn-secondary" title="Rotate Left">
+                            <span>↺ Rotate</span>
+                        </button>
+                        <button type="button" id="pdf-rotate-right" class="btn btn-secondary" title="Rotate Right">
+                            <span>Rotate ↻</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Divider -->
+                    <div class="control-divider" style="width: 1px; height: 30px; background: #dee2e6;"></div>
+                    
+                    <!-- Zoom Group -->
+                    <div class="control-group zoom-controls" style="display: flex; align-items: center; gap: 10px;">
                         <button type="button" id="pdf-zoom-out" class="btn btn-sm btn-outline-secondary">−</button>
                         <span class="zoom-level" id="pdf-zoom-level">100%</span>
                         <button type="button" id="pdf-zoom-in" class="btn btn-sm btn-outline-secondary">+</button>
                     </div>
-                    <!-- Skip First Left Half Status (Read-only) -->
-                    {% if exam.skip_first_left_half %}
+                    
+                    <!-- Divider -->
+                    <div class="control-divider" style="width: 1px; height: 30px; background: #dee2e6;"></div>
+                    
+                    <!-- Quick Jump Group -->
+                    <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
+                        <label for="pdf-jump-input" style="margin: 0;">Go to:</label>
+                        <input type="number" id="pdf-jump-input" placeholder="Page #" min="1" 
+                               style="width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button type="button" id="pdf-jump-btn" class="btn btn-info">
+                            <span>🔍 Go</span>
+                        </button>
+                    </div>
+                </div>
+                    <!-- Skip First Left Half Status (Read-only) - REMOVED FEATURE -->
+                    {% comment %}{% if exam.skip_first_left_half %}
                     <div class="skip-status" style="margin-left: 15px; border-left: 1px solid #dee2e6; padding-left: 15px;">
                         <span style="font-size: 0.875rem; color: #6c757d;">
                             <i class="fas fa-eye-slash" style="margin-right: 5px;"></i>
@@ -864,7 +903,7 @@
                             This setting was configured during exam upload
                         </small>
                     </div>
-                    {% endif %}
+                    {% endif %}{% endcomment %}
                     <a href="{{ exam.pdf_file.url }}" class="btn btn-sm btn-primary" download>
                         Download PDF
                     </a>
@@ -1269,6 +1308,7 @@ let currentPage = 1;
 let totalPages = 0;
 let pageImages = new Map(); // Cache for converted images
 let currentZoomLevel = 1.0; // Zoom level for image scaling
+let currentRotation = 0; // Track rotation angle (0, 90, 180, 270)
 let minZoom = 0.5;
 let maxZoom = 3.0;
 
@@ -1307,9 +1347,12 @@ function renderPageAsImage(pageNum) {
     const loading = document.getElementById('pdf-loading');
     const pageImage = document.getElementById('pdf-page-image');
     
+    // Clear cache when rotation changes (include rotation in cache key)
+    const cacheKey = `${pageNum}_${currentRotation}`;
+    
     // Check cache first
-    if (pageImages.has(pageNum)) {
-        pageImage.src = pageImages.get(pageNum);
+    if (pageImages.has(cacheKey)) {
+        pageImage.src = pageImages.get(cacheKey);
         loading.style.display = 'none';
         return;
     }
@@ -1321,8 +1364,8 @@ function renderPageAsImage(pageNum) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // Calculate scale for good quality
-        const viewport = page.getViewport({ scale: 2.0 });
+        // Calculate scale for good quality with rotation
+        const viewport = page.getViewport({ scale: 2.0, rotation: currentRotation });
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         
@@ -1336,8 +1379,8 @@ function renderPageAsImage(pageNum) {
             // Convert canvas to image
             const imageDataURL = canvas.toDataURL('image/png');
             
-            // Cache the image
-            pageImages.set(pageNum, imageDataURL);
+            // Cache the image with rotation key
+            pageImages.set(cacheKey, imageDataURL);
             
             // Display the image
             pageImage.src = imageDataURL;
@@ -1353,14 +1396,27 @@ function renderPageAsImage(pageNum) {
 }
 
 function updatePageInfo() {
-    const pageInfo = document.getElementById('pdf-page-info');
     const prevBtn = document.getElementById('pdf-prev');
     const nextBtn = document.getElementById('pdf-next');
+    const pageInput = document.getElementById('pdf-page-input');
+    const totalPagesSpan = document.getElementById('total-pages');
+    const jumpInput = document.getElementById('pdf-jump-input');
     
-    if (pageInfo && prevBtn && nextBtn) {
-        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    if (prevBtn) {
         prevBtn.disabled = currentPage === 1;
+    }
+    if (nextBtn) {
         nextBtn.disabled = currentPage === totalPages;
+    }
+    if (pageInput) {
+        pageInput.value = currentPage;
+        pageInput.max = totalPages;
+    }
+    if (totalPagesSpan) {
+        totalPagesSpan.textContent = totalPages;
+    }
+    if (jumpInput) {
+        jumpInput.max = totalPages;
     }
 }
 
@@ -1464,27 +1520,27 @@ function initializePdfViewer_REMOVED() {
         detectedDividers.clear(); // Clear divider cache for new PDF
         
         // Convert to virtual pages (each actual page = 2 virtual pages for split view)
-        totalVirtualPages = pdf.numPages * 2;
+        totalPages = pdf.numPages * 2;
         
         // Respect skip_first_left_half setting for starting page
         const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
-        virtualPageNum = skipFirstLeftHalf ? 2 : 1; // Start from page 2 if first left half is hidden
+        currentPageNum = skipFirstLeftHalf ? 2 : 1; // Start from page 2 if first left half is hidden
         
         console.log('🔥 [PREVIEW_EXAM] PDF info:', {
             actualPages: pdf.numPages,
-            totalVirtualPages,
-            startingVirtualPage: virtualPageNum
+            totalPages,
+            startingVirtualPage: currentPageNum
         });
         
         const totalPagesElement = document.getElementById('total-pages');
         if (totalPagesElement) {
-            totalPagesElement.textContent = totalVirtualPages;
-            console.log('🔥 [PREVIEW_EXAM] Total pages element updated to:', totalVirtualPages);
+            totalPagesElement.textContent = totalPages;
+            console.log('🔥 [PREVIEW_EXAM] Total pages element updated to:', totalPages);
         } else {
             console.warn('⚠️ [PREVIEW_EXAM] Total pages element not found');
         }
         
-        console.log('🔥 [PREVIEW_EXAM] Starting virtual page set to:', virtualPageNum);
+        console.log('🔥 [PREVIEW_EXAM] Starting virtual page set to:', currentPageNum);
         
         console.log('🔥 [PREVIEW_EXAM] Updating navigation buttons...');
         updateNavigationButtons();
@@ -1507,7 +1563,7 @@ function initializePdfViewer_REMOVED() {
         }
         
         console.log('🔥 [PREVIEW_EXAM] Starting first virtual page render...');
-        renderPage(virtualPageNum);
+        renderPage(currentPageNum);
     }).catch(function(error) {
         console.error('❌ [PREVIEW_EXAM] Error loading PDF:', error);
         
@@ -1755,14 +1811,14 @@ function detectDividerLine(canvas, ctx, viewport) {
 function renderPage(vPageNum) {
     console.log('🔥 [PREVIEW_EXAM] renderPage() called with vPageNum:', vPageNum);
     console.log('🔥 [PREVIEW_EXAM] pdfDoc exists:', !!pdfDoc);
-    console.log('🔥 [PREVIEW_EXAM] totalVirtualPages:', totalVirtualPages);
+    console.log('🔥 [PREVIEW_EXAM] totalPages:', totalPages);
     
     if (!pdfDoc) {
         console.error('❌ [PREVIEW_EXAM] No pdfDoc available for rendering');
         return;
     }
     
-    virtualPageNum = vPageNum;
+    currentPageNum = vPageNum;
     
     // Calculate actual PDF page based on virtual page
     let actualPageNum = Math.ceil(vPageNum / 2);
@@ -1971,8 +2027,8 @@ function renderPage(vPageNum) {
 function updateNavigationButtons() {
     const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
     const minPage = skipFirstLeftHalf ? 2 : 1;
-    document.getElementById('pdf-prev').disabled = virtualPageNum <= minPage;
-    document.getElementById('pdf-next').disabled = virtualPageNum >= totalVirtualPages;
+    document.getElementById('pdf-prev').disabled = currentPageNum <= minPage;
+    document.getElementById('pdf-next').disabled = currentPageNum >= totalPages;
 }
 
 // PDF navigation
@@ -1980,23 +2036,82 @@ document.getElementById('pdf-prev').addEventListener('click', function() {
     const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
     const minPage = skipFirstLeftHalf ? 2 : 1;
     
-    if (!pdfDoc || virtualPageNum <= minPage) {
+    if (!pdfDoc || currentPageNum <= minPage) {
         return;
     }
-    virtualPageNum--;
-    console.log('🔥 [PREVIEW_EXAM] Previous page clicked, new virtualPageNum:', virtualPageNum);
-    renderPage(virtualPageNum);
+    currentPageNum--;
+    console.log('🔥 [PREVIEW_EXAM] Previous page clicked, new currentPageNum:', currentPageNum);
+    renderPage(currentPageNum);
     updateNavigationButtons();
 });
 
 document.getElementById('pdf-next').addEventListener('click', function() {
-    if (!pdfDoc || virtualPageNum >= totalVirtualPages) {
+    if (!pdfDoc || currentPageNum >= totalPages) {
         return;
     }
-    virtualPageNum++;
-    console.log('🔥 [PREVIEW_EXAM] Next page clicked, new virtualPageNum:', virtualPageNum);
-    renderPage(virtualPageNum);
+    currentPageNum++;
+    console.log('🔥 [PREVIEW_EXAM] Next page clicked, new currentPageNum:', currentPageNum);
+    renderPage(currentPageNum);
     updateNavigationButtons();
+});
+
+// Rotate left button
+document.getElementById('pdf-rotate-left').addEventListener('click', function() {
+    if (!pdfDoc) return;
+    
+    currentRotation = (currentRotation - 90) % 360;
+    if (currentRotation < 0) currentRotation += 360;
+    
+    console.log('🔥 [PREVIEW_EXAM] Rotate left clicked, new rotation:', currentRotation);
+    renderPageAsImage(currentPage); // Re-render current page with new rotation
+});
+
+// Rotate right button
+document.getElementById('pdf-rotate-right').addEventListener('click', function() {
+    if (!pdfDoc) return;
+    
+    currentRotation = (currentRotation + 90) % 360;
+    
+    console.log('🔥 [PREVIEW_EXAM] Rotate right clicked, new rotation:', currentRotation);
+    renderPageAsImage(currentPage); // Re-render current page with new rotation
+});
+
+// Page input navigation
+document.getElementById('pdf-page-input')?.addEventListener('change', function() {
+    const targetPage = parseInt(this.value);
+    if (targetPage >= 1 && targetPage <= totalPages && targetPage !== currentPage) {
+        currentPage = targetPage;
+        console.log('🔥 [PREVIEW_EXAM] Page input changed to:', currentPage);
+        renderPageAsImage(currentPage);
+        updatePageInfo();
+    } else {
+        // Reset to current page if invalid
+        this.value = currentPage;
+    }
+});
+
+// Jump to page functionality
+document.getElementById('pdf-jump-btn')?.addEventListener('click', function() {
+    const jumpInput = document.getElementById('pdf-jump-input');
+    if (jumpInput) {
+        const targetPage = parseInt(jumpInput.value);
+        if (targetPage >= 1 && targetPage <= totalPages) {
+            currentPage = targetPage;
+            console.log('🔥 [PREVIEW_EXAM] Jump to page:', currentPage);
+            renderPageAsImage(currentPage);
+            updatePageInfo();
+            jumpInput.value = ''; // Clear after jump
+        } else {
+            alert(`Please enter a page number between 1 and ${totalPages}`);
+        }
+    }
+});
+
+// Jump input enter key support
+document.getElementById('pdf-jump-input')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('pdf-jump-btn')?.click();
+    }
 });
 
 // Old complex zoom functions removed - replaced with simple image scaling system
@@ -2033,12 +2148,12 @@ function reRenderAtZoomLevel_REMOVED() {
         const contentBounds = detectContentBoundaries(tempCanvas, tempCtx);
         
         // Get cached divider position and scale it
-        const pageKey = `page_${Math.ceil(virtualPageNum / 2)}`;
+        const pageKey = `page_${Math.ceil(currentPageNum / 2)}`;
         let dividerX = detectedDividers.get(pageKey) || (zoomedViewport.width / 2);
         dividerX = dividerX * (combinedScale / baseRenderScale); // Scale divider to current zoom
         
         // Determine column extraction
-        const isLeftColumn = (virtualPageNum % 2 === 1);
+        const isLeftColumn = (currentPageNum % 2 === 1);
         let sourceX, sourceWidth;
         
         if (isLeftColumn) {

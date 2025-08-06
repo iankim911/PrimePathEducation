@@ -387,30 +387,52 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
     <div class="form-section" id="pdf-preview-section" style="display: none;">
         <h3 class="section-title">PDF Preview</h3>
         
-        <!-- Skip First Left Half Setting -->
-        <div class="form-group" style="margin-bottom: 20px;">
-            <div class="form-check" style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; border-left: 4px solid #3498db;">
-                <input type="checkbox" class="form-check-input" id="skip_first_left_half" name="skip_first_left_half" value="1">
-                <label class="form-check-label" for="skip_first_left_half" style="font-weight: 500;">
-                    Hide First Page (Left Half)
-                </label>
-                <small class="form-text text-muted d-block" style="margin-top: 5px;">
-                    When enabled, the first left half of page 1 will be hidden from students during the test. 
-                    This setting will be applied to both preview and student interfaces.
-                </small>
-            </div>
-        </div>
         
-        <div class="pdf-controls">
-            <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
-                <span class="d-none d-md-inline">← Previous</span>
-                <span class="d-md-none">←</span>
-            </button>
-            <div id="pdf-page-info">Page 1 of 1</div>
-            <button type="button" id="pdf-next" class="btn btn-primary">
-                <span class="d-none d-md-inline">Next →</span>
-                <span class="d-md-none">→</span>
-            </button>
+        <!-- Unified PDF Control Bar -->
+        <div class="pdf-controls" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center;">
+            <!-- Navigation Group -->
+            <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
+                <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
+                    <span class="d-none d-md-inline">← Previous</span>
+                    <span class="d-md-none">←</span>
+                </button>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span>Page</span>
+                    <input type="number" id="pdf-page-input" value="1" min="1" max="1" 
+                           style="width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                    <span>of <span id="pdf-total-pages">1</span></span>
+                </div>
+                <button type="button" id="pdf-next" class="btn btn-primary">
+                    <span class="d-none d-md-inline">Next →</span>
+                    <span class="d-md-none">→</span>
+                </button>
+            </div>
+            
+            <!-- Divider -->
+            <div class="control-divider" style="width: 1px; height: 30px; background: #dee2e6;"></div>
+            
+            <!-- Rotation Group -->
+            <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
+                <button type="button" id="pdf-rotate-left" class="btn btn-secondary" title="Rotate Left">
+                    <span>↺ Rotate Left</span>
+                </button>
+                <button type="button" id="pdf-rotate-right" class="btn btn-secondary" title="Rotate Right">
+                    <span>Rotate Right ↻</span>
+                </button>
+            </div>
+            
+            <!-- Divider -->
+            <div class="control-divider" style="width: 1px; height: 30px; background: #dee2e6;"></div>
+            
+            <!-- Quick Jump Group -->
+            <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
+                <label for="pdf-jump-input" style="margin: 0;">Go to:</label>
+                <input type="number" id="pdf-jump-input" placeholder="Page #" min="1" 
+                       style="width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                <button type="button" id="pdf-jump-btn" class="btn btn-info">
+                    <span>🔍 Go</span>
+                </button>
+            </div>
         </div>
         <div id="pdf-preview-container" style="border: 1px solid #dee2e6; border-radius: 5px; height: 600px; overflow: auto; text-align: center;">
             <canvas id="pdf-canvas"></canvas>
@@ -525,9 +547,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 <script>
 // PDF preview variables
 let pdfDoc = null;
-let virtualPageNum = 1; // Virtual page number (includes left/right columns)
-let totalVirtualPages = 0; // Total virtual pages (actual * 2)
+let currentPageNum = 1; // Current page number
+let totalPages = 0; // Total pages
 let currentPdfPage = null; // Store current page for fit calculations
+let currentRotation = 0; // Track rotation angle (0, 90, 180, 270)
 
 // Check if there's a success message and clear form
 document.addEventListener('DOMContentLoaded', function() {
@@ -547,8 +570,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset PDF and audio variables
         pdfDoc = null;
         selectedAudioFiles = [];
-        virtualPageNum = 1;
-        totalVirtualPages = 0;
+        currentPageNum = 1;
+        totalPages = 0;
     }
 });
 
@@ -578,23 +601,31 @@ document.getElementById('pdf_file').addEventListener('change', function(e) {
                 console.log('✅ [CREATE_EXAM] PDF loaded successfully');
                 pdfDoc = pdf;
                 
-                // Convert to virtual pages (each actual page = 2 virtual pages for split view)
-                totalVirtualPages = pdf.numPages * 2;
-                virtualPageNum = 1; // Start with first virtual page (left column of page 1)
+                // Set total pages
+                totalPages = pdf.numPages;
+                currentPageNum = 1; // Start with first page
                 
                 console.log('🔥 [CREATE_EXAM] PDF info:', {
-                    actualPages: pdf.numPages,
-                    totalVirtualPages,
-                    startingVirtualPage: virtualPageNum
+                    totalPages: pdf.numPages,
+                    startingPage: currentPageNum
                 });
                 
-                // Update page display to show virtual pages
-                const pageInfoElement = document.getElementById('pdf-page-info');
-                if (pageInfoElement) {
-                    const columnText = (virtualPageNum % 2) === 1 ? '(Left)' : '(Right)';
-                    pageInfoElement.textContent = `Page ${virtualPageNum} of ${totalVirtualPages} ${columnText}`;
-                    console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${virtualPageNum} of ${totalVirtualPages} ${columnText}`);
-                } else {
+                // Update page display with new UI elements
+                const pageInput = document.getElementById('pdf-page-input');
+                const totalPagesSpan = document.getElementById('pdf-total-pages');
+                const jumpInput = document.getElementById('pdf-jump-input');
+                
+                if (pageInput) {
+                    pageInput.value = currentPageNum;
+                    pageInput.max = totalPages;
+                }
+                if (totalPagesSpan) {
+                    totalPagesSpan.textContent = totalPages;
+                }
+                if (jumpInput) {
+                    jumpInput.max = totalPages;
+                }
+                console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${currentPageNum} of ${totalPages}`); else {
                     console.warn('⚠️ [CREATE_EXAM] Page info element not found');
                 }
                 
@@ -604,7 +635,7 @@ document.getElementById('pdf_file').addEventListener('change', function(e) {
                 
                 // Render first virtual page
                 console.log('🔥 [CREATE_EXAM] Starting first virtual page render...');
-                renderPage(virtualPageNum);
+                renderPage(currentPageNum);
             }).catch(function(error) {
                 console.error('❌ [CREATE_EXAM] Error loading PDF:', error);
             });
@@ -624,37 +655,33 @@ document.getElementById('pdf_file').addEventListener('change', function(e) {
 
 // Update navigation buttons
 function updateNavigationButtons() {
-    document.getElementById('pdf-prev').disabled = virtualPageNum <= 1;
-    document.getElementById('pdf-next').disabled = virtualPageNum >= totalVirtualPages;
+    document.getElementById('pdf-prev').disabled = currentPageNum <= 1;
+    document.getElementById('pdf-next').disabled = currentPageNum >= totalPages;
+    
+    // Update page input
+    const pageInput = document.getElementById('pdf-page-input');
+    if (pageInput) {
+        pageInput.value = currentPageNum;
+        pageInput.max = totalPages;
+    }
 }
 
 // Render PDF page - Split-column approach (matching student interface)
-function renderPage(vPageNum) {
-    console.log('🔥 [CREATE_EXAM] renderPage() called with vPageNum:', vPageNum);
+function renderPage(pageNum) {
+    console.log('🔥 [CREATE_EXAM] renderPage() called with pageNum:', pageNum);
     console.log('🔥 [CREATE_EXAM] pdfDoc exists:', !!pdfDoc);
-    console.log('🔥 [CREATE_EXAM] totalVirtualPages:', totalVirtualPages);
+    console.log('🔥 [CREATE_EXAM] totalPages:', totalPages);
     
     if (!pdfDoc) {
         console.error('❌ [CREATE_EXAM] No pdfDoc available for rendering');
         return;
     }
     
-    virtualPageNum = vPageNum;
+    currentPageNum = pageNum;
     
-    // Calculate actual PDF page based on virtual page
-    let actualPageNum = Math.ceil(vPageNum / 2);
-    let isLeftColumn = (vPageNum % 2) === 1;
-    
-    console.log('🔥 [CREATE_EXAM] Virtual to actual page mapping:', {
-        virtualPage: vPageNum,
-        actualPage: actualPageNum,
-        isLeftColumn,
-        columnText: isLeftColumn ? 'Left' : 'Right'
-    });
-    
-    console.log('🔥 [CREATE_EXAM] Getting actual page', actualPageNum, 'from PDF...');
-    pdfDoc.getPage(actualPageNum).then(function(page) {
-        console.log('✅ [CREATE_EXAM] Successfully got actual page', actualPageNum);
+    console.log('🔥 [CREATE_EXAM] Getting page', pageNum, 'from PDF...');
+    pdfDoc.getPage(pageNum).then(function(page) {
+        console.log('✅ [CREATE_EXAM] Successfully got page', pageNum);
         
         currentPdfPage = page; // Store for fit calculations
         const canvas = document.getElementById('pdf-canvas');
@@ -670,150 +697,158 @@ function renderPage(vPageNum) {
         
         console.log('🔥 [CREATE_EXAM] Container dimensions:', {
             containerWidth,
-            containerHeight,
-            containerClientWidth: container.clientWidth,
-            containerClientHeight: container.clientHeight,
-            cssHeight: '600px (from CSS)',
-            dynamicHeight: containerHeight
+            containerHeight
         });
         
-        // Get page viewport at scale 1
-        const viewport = page.getViewport({ scale: 1 });
+        // Get page viewport at scale 1 with rotation
+        const viewport = page.getViewport({ scale: 1, rotation: currentRotation });
         
-        console.log('🔥 [CREATE_EXAM] Page viewport at scale 1:', {
+        console.log('🔥 [CREATE_EXAM] Page viewport at scale 1 with rotation:', {
             width: viewport.width,
-            height: viewport.height
+            height: viewport.height,
+            rotation: currentRotation
         });
         
-        // Adaptive scaling based on device type
-        const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1023;
-        const isDesktop = window.innerWidth >= 1024;
-        
-        // Calculate scale to fit half-width in container (match Student interface approach)
-        const scaleX = (containerWidth * 2) / viewport.width; // Scale for half-width fitting
+        // Calculate scale to fit full page in container (accounting for rotation)
+        const scaleX = containerWidth / viewport.width;
         const scaleY = containerHeight / viewport.height;
+        const scale = Math.min(scaleX, scaleY) * 0.95; // 95% to leave some margin
         
-        // Adjust scale based on device type for optimal readability
-        let scaleFactor;
-        if (isDesktop) {
-            scaleFactor = 0.98; // Larger on desktop for better detail
-        } else if (isTablet) {
-            scaleFactor = 0.95; // Standard for tablets
-        } else {
-            scaleFactor = 0.92; // Slightly smaller on mobile for better fit
-        }
-        
-        const scale = Math.min(scaleX, scaleY) * scaleFactor;
-        
-        console.log('🔥 [CREATE_EXAM] Scale calculations for column view:', {
-            originalViewportWidth: viewport.width,
-            halfPageWidth: viewport.width / 2,
+        console.log('🔥 [CREATE_EXAM] Scale calculations:', {
             scaleX,
             scaleY,
             finalScale: scale
         });
         
-        // Get scaled viewport for rendering
-        const scaledViewport = page.getViewport({ scale: scale });
+        // Get scaled viewport for rendering with rotation
+        const scaledViewport = page.getViewport({ scale: scale, rotation: currentRotation });
         
         console.log('🔥 [CREATE_EXAM] Scaled viewport:', {
             width: scaledViewport.width,
             height: scaledViewport.height
         });
         
-        // Set canvas size for column view (match Student interface approach)
-        canvas.width = viewport.width / 2; // Half of ORIGINAL viewport (not scaled) = true 50% width
-        canvas.height = viewport.height;
+        // Set canvas size to match scaled viewport
+        canvas.width = scaledViewport.width;
+        canvas.height = scaledViewport.height;
         
-        console.log('🔥 [CREATE_EXAM] Canvas dimensions for column view:', {
+        console.log('🔥 [CREATE_EXAM] Canvas dimensions:', {
             width: canvas.width,
-            height: canvas.height,
-            originalPageWidth: viewport.width,
-            scaledPageWidth: scaledViewport.width,
-            note: 'Canvas width = original viewport / 2 (not scaled viewport / 2)'
+            height: canvas.height
         });
         
-        // Create a temporary canvas for full page rendering
-        const tempCanvas = document.createElement('canvas');
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCanvas.width = viewport.width; // Use original viewport for temp canvas
-        tempCanvas.height = viewport.height;
-        
-        console.log('🔥 [CREATE_EXAM] Temporary canvas created for full page:', {
-            width: tempCanvas.width,
-            height: tempCanvas.height
-        });
-        
-        // Render full page to temp canvas
+        // Render page directly to canvas
         const renderContext = {
-            canvasContext: tempCtx,
-            viewport: viewport // Use original viewport for rendering
+            canvasContext: ctx,
+            viewport: scaledViewport
         };
         
-        console.log('🔥 [CREATE_EXAM] Starting full page render to temp canvas...');
+        console.log('🔥 [CREATE_EXAM] Starting page render...');
         
         page.render(renderContext).promise.then(function() {
-            console.log('✅ [CREATE_EXAM] Full page rendered to temp canvas successfully');
+            console.log('✅ [CREATE_EXAM] Page rendered successfully');
             
-            // Clear main canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Update page display with new UI elements
+            const pageInput = document.getElementById('pdf-page-input');
+            const totalPagesSpan = document.getElementById('pdf-total-pages');
             
-            // Copy the half we want (left or right column)
-            const sourceX = isLeftColumn ? 0 : canvas.width;
-            
-            console.log('🔥 [CREATE_EXAM] Copying column from temp canvas:', {
-                isLeftColumn,
-                sourceX,
-                sourceWidth: canvas.width,
-                sourceHeight: canvas.height
-            });
-            
-            ctx.drawImage(
-                tempCanvas,
-                sourceX, 0, canvas.width, canvas.height,  // source (which half to copy)
-                0, 0, canvas.width, canvas.height         // destination (full canvas)
-            );
-            
-            console.log('✅ [CREATE_EXAM] Column copied to main canvas successfully');
-            
-            // Update page info display
-            const pageInfoElement = document.getElementById('pdf-page-info');
-            if (pageInfoElement) {
-                const columnText = isLeftColumn ? '(Left)' : '(Right)';
-                pageInfoElement.textContent = `Page ${vPageNum} of ${totalVirtualPages} ${columnText}`;
-                console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${vPageNum} of ${totalVirtualPages} ${columnText}`);
+            if (pageInput) {
+                pageInput.value = pageNum;
             }
+            if (totalPagesSpan) {
+                totalPagesSpan.textContent = totalPages;
+            }
+            console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${pageNum} of ${totalPages}`);
             
         }).catch(function(error) {
-            console.error('❌ [CREATE_EXAM] Error rendering full page to temp canvas:', error);
+            console.error('❌ [CREATE_EXAM] Error rendering page:', error);
         });
         
     }).catch(function(error) {
-        console.error('❌ [CREATE_EXAM] Error getting page', actualPageNum, ':', error);
+        console.error('❌ [CREATE_EXAM] Error getting page', pageNum, ':', error);
     });
 }
 
 
 // Previous page
 document.getElementById('pdf-prev').addEventListener('click', function() {
-    if (!pdfDoc || virtualPageNum <= 1) {
+    if (!pdfDoc || currentPageNum <= 1) {
         return;
     }
-    virtualPageNum--;
-    console.log('🔥 [CREATE_EXAM] Previous page clicked, new virtualPageNum:', virtualPageNum);
-    renderPage(virtualPageNum);
+    currentPageNum--;
+    console.log('🔥 [CREATE_EXAM] Previous page clicked, new currentPageNum:', currentPageNum);
+    renderPage(currentPageNum);
     updateNavigationButtons();
 });
 
 // Next page
 document.getElementById('pdf-next').addEventListener('click', function() {
-    if (!pdfDoc || virtualPageNum >= totalVirtualPages) {
+    if (!pdfDoc || currentPageNum >= totalPages) {
         return;
     }
-    virtualPageNum++;
-    console.log('🔥 [CREATE_EXAM] Next page clicked, new virtualPageNum:', virtualPageNum);
-    renderPage(virtualPageNum);
+    currentPageNum++;
+    console.log('🔥 [CREATE_EXAM] Next page clicked, new currentPageNum:', currentPageNum);
+    renderPage(currentPageNum);
     updateNavigationButtons();
+});
+
+// Rotate left button
+document.getElementById('pdf-rotate-left').addEventListener('click', function() {
+    if (!pdfDoc) return;
+    
+    currentRotation = (currentRotation - 90) % 360;
+    if (currentRotation < 0) currentRotation += 360;
+    
+    console.log('🔥 [CREATE_EXAM] Rotate left clicked, new rotation:', currentRotation);
+    renderPage(currentPageNum);
+});
+
+// Rotate right button
+document.getElementById('pdf-rotate-right').addEventListener('click', function() {
+    if (!pdfDoc) return;
+    
+    currentRotation = (currentRotation + 90) % 360;
+    
+    console.log('🔥 [CREATE_EXAM] Rotate right clicked, new rotation:', currentRotation);
+    renderPage(currentPageNum);
+});
+
+// Page input navigation
+document.getElementById('pdf-page-input')?.addEventListener('change', function() {
+    const targetPage = parseInt(this.value);
+    if (targetPage >= 1 && targetPage <= totalPages && targetPage !== currentPageNum) {
+        currentPageNum = targetPage;
+        console.log('🔥 [CREATE_EXAM] Page input changed to:', currentPageNum);
+        renderPage(currentPageNum);
+        updateNavigationButtons();
+    } else {
+        // Reset to current page if invalid
+        this.value = currentPageNum;
+    }
+});
+
+// Jump to page functionality
+document.getElementById('pdf-jump-btn')?.addEventListener('click', function() {
+    const jumpInput = document.getElementById('pdf-jump-input');
+    if (jumpInput) {
+        const targetPage = parseInt(jumpInput.value);
+        if (targetPage >= 1 && targetPage <= totalPages) {
+            currentPageNum = targetPage;
+            console.log('🔥 [CREATE_EXAM] Jump to page:', currentPageNum);
+            renderPage(currentPageNum);
+            updateNavigationButtons();
+            jumpInput.value = ''; // Clear after jump
+        } else {
+            alert(`Please enter a page number between 1 and ${totalPages}`);
+        }
+    }
+});
+
+// Jump input enter key support
+document.getElementById('pdf-jump-input')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('pdf-jump-btn')?.click();
+    }
 });
 
 // Touch gesture support for PDF navigation
@@ -853,16 +888,16 @@ document.getElementById('pdf-canvas').addEventListener('touchend', function(e) {
         if (Math.abs(deltaX) > threshold) {
             if (deltaX > 0) {
                 // Swipe right - previous page
-                if (virtualPageNum > 1) {
-                    virtualPageNum--;
-                    renderPage(virtualPageNum);
+                if (currentPageNum > 1) {
+                    currentPageNum--;
+                    renderPage(currentPageNum);
                     updateNavigationButtons();
                 }
             } else {
                 // Swipe left - next page
-                if (virtualPageNum < totalVirtualPages) {
-                    virtualPageNum++;
-                    renderPage(virtualPageNum);
+                if (currentPageNum < totalPages) {
+                    currentPageNum++;
+                    renderPage(currentPageNum);
                     updateNavigationButtons();
                 }
             }
@@ -876,15 +911,15 @@ document.addEventListener('keydown', function(e) {
     if (!pdfDoc) return;
     
     // Arrow keys for navigation
-    if (e.key === 'ArrowLeft' && virtualPageNum > 1) {
+    if (e.key === 'ArrowLeft' && currentPageNum > 1) {
         e.preventDefault();
-        virtualPageNum--;
-        renderPage(virtualPageNum);
+        currentPageNum--;
+        renderPage(currentPageNum);
         updateNavigationButtons();
-    } else if (e.key === 'ArrowRight' && virtualPageNum < totalVirtualPages) {
+    } else if (e.key === 'ArrowRight' && currentPageNum < totalPages) {
         e.preventDefault();
-        virtualPageNum++;
-        renderPage(virtualPageNum);
+        currentPageNum++;
+        renderPage(currentPageNum);
         updateNavigationButtons();
     }
 });

@@ -249,8 +249,7 @@ def create_exam(request):
             'default_options_count': int(request.POST.get('default_options_count', 5)),
             'passing_score': 0,
             'created_by': None,  # No auth required as per PRD
-            'is_active': True,
-            'skip_first_left_half': bool(request.POST.get('skip_first_left_half'))
+            'is_active': True
         }
         
         # Use ExamService to create exam with files
@@ -721,43 +720,6 @@ def delete_audio_from_exam(request, exam_id, audio_id):
         logger.error(f"Error deleting audio file: {e}")
         return JsonResponse({
             'success': False,
-            'error': str(e)
-        }, status=500)
-
-
-@require_POST
-def update_skip_first_left_half(request, exam_id):
-    """Update the skip_first_left_half setting for an exam."""
-    try:
-        exam = get_object_or_404(Exam, id=exam_id)
-        
-        import json
-        data = json.loads(request.body)
-        skip_first_left_half = data.get('skip_first_left_half', False)
-        
-        # Validate the boolean value
-        if not isinstance(skip_first_left_half, bool):
-            return JsonResponse({
-                'success': False, 
-                'error': 'skip_first_left_half must be a boolean value'
-            }, status=400)
-        
-        exam.skip_first_left_half = skip_first_left_half
-        exam.save()
-        
-        return JsonResponse({
-            'success': True,
-            'skip_first_left_half': exam.skip_first_left_half,
-            'message': f'Skip first left half {"enabled" if skip_first_left_half else "disabled"} for exam: {exam.name}'
-        })
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False, 
-            'error': 'Invalid JSON data'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'success': False, 
             'error': str(e)
         }, status=500)
 
