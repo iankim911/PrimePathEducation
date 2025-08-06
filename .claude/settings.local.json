@@ -127,7 +127,10 @@
       "Bash(del \"C:\\Users\\ianki\\OneDrive\\2. Projects\\ClaudeCode_New\\PrimePath_\\primepath_project\\templates\\placement_test\\create_exam_renderPage_fix.js\")",
       "Bash(../venv/Scripts/pip.exe install requests)",
       "Bash(git tag:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"Testing: $url\")",
+      "Bash(done)"
     ],
     "deny": []
   }

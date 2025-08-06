@@ -1,0 +1,49 @@
+{
+  "timestamp": "2025-08-06T18:52:10.589854",
+  "tests": [
+    {
+      "name": "Home Page",
+      "status": "PASS"
+    },
+    {
+      "name": "Teacher Dashboard",
+      "status": "PASS"
+    },
+    {
+      "name": "Exam List",
+      "status": "PASS"
+    },
+    {
+      "name": "Create Exam Page",
+      "status": "PASS"
+    },
+    {
+      "name": "Preview Exam Page",
+      "status": "PASS"
+    },
+    {
+      "name": "Student Sessions",
+      "status": "PASS"
+    },
+    {
+      "name": "Placement Rules",
+      "status": "PASS"
+    },
+    {
+      "name": "Exam Mapping",
+      "status": "PASS"
+    },
+    {
+      "name": "Database Integrity",
+      "status": "PASS",
+      "data": {
+        "exams": 1,
+        "questions": 20,
+        "audio_files": 3,
+        "sessions": 0
+      }
+    }
+  ],
+  "passed": 9,
+  "failed": 0
+}
