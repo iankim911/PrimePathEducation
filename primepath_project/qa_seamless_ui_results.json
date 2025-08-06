@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-08-06T19:08:29.435199",
+  "tests": [
+    {
+      "name": "Home Page",
+      "status": "PASS"
+    },
+    {
+      "name": "Teacher Dashboard",
+      "status": "PASS"
+    },
+    {
+      "name": "Exam List",
+      "status": "PASS"
+    },
+    {
+      "name": "Create Exam Page",
+      "status": "PASS"
+    },
+    {
+      "name": "Preview Exam Page - Seamless UI",
+      "status": "PASS"
+    },
+    {
+      "name": "Student Sessions",
+      "status": "PASS"
+    },
+    {
+      "name": "Placement Rules",
+      "status": "PASS"
+    },
+    {
+      "name": "Exam Mapping",
+      "status": "PASS"
+    },
+    {
+      "name": "JavaScript Functionality",
+      "status": "PASS"
+    },
+    {
+      "name": "Database Integrity",
+      "status": "PASS",
+      "data": {
+        "exams": 1,
+        "questions": 20,
+        "audio_files": 3,
+        "sessions": 0
+      }
+    },
+    {
+      "name": "Audio File Management",
+      "status": "PASS"
+    }
+  ],
+  "passed": 11,
+  "failed": 0
+}

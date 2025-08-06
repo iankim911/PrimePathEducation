@@ -12,16 +12,26 @@
         padding: 15px;
     }
     
+    /* Create unified card appearance */
+    .exam-wrapper {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
     .exam-info-bar {
         background-color: #f8f9fa;
         padding: 15px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 15px;
+        border: 1px solid #dee2e6;
+        border-bottom: none;
     }
     
     .info-items {
@@ -57,10 +67,12 @@
     
     .pdf-title-section {
         text-align: center;
-        margin-bottom: 15px;
+        margin-bottom: 0;
         padding: 15px 0;
         background-color: #f0f4f8;
-        border-radius: 8px;
+        border-radius: 8px 8px 0 0;
+        border: 1px solid #dee2e6;
+        border-bottom: 1px solid #e9ecef;
     }
     
     .pdf-title {
@@ -82,7 +94,7 @@
         }
         
         .pdf-section {
-            height: 650px;
+            height: 600px;
         }
         
         .pdf-title {
@@ -127,7 +139,7 @@
         }
         
         .pdf-section {
-            min-height: 400px;
+            min-height: 350px;
             height: auto;
             max-height: 75vh;
         }
@@ -213,13 +225,18 @@
     .main-content {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 0;
+        background: white;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        overflow: hidden;
     }
     
     .pdf-section {
         background: white;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
+        border: none;
+        border-top: 1px solid #dee2e6;
+        border-radius: 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -231,8 +248,9 @@
     
     .answers-section {
         background: white;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
+        border: none;
+        border-top: 1px solid #dee2e6;
+        border-radius: 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -240,10 +258,16 @@
         width: 100%;
     }
     
+    /* Last section gets bottom border radius */
+    .main-content > *:last-child {
+        border-radius: 0 0 8px 8px;
+    }
+    
     .audio-files-section {
         background: white;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
+        border: none;
+        border-top: 1px solid #dee2e6;
+        border-radius: 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -258,11 +282,11 @@
         display: flex;
         align-items: center;
         gap: 15px;
-        padding: 15px;
+        padding: 12px;
         background: #f8f9fa;
         border: 1px solid #e9ecef;
         border-radius: 6px;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
     
     .audio-actions {
@@ -309,17 +333,29 @@
     
     .section-header {
         background-color: #f8f9fa;
-        padding: 15px 20px;
+        padding: 12px 20px;
         border-bottom: 1px solid #dee2e6;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: relative;
+    }
+    
+    .section-header::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #007bff, #0056b3);
     }
     
     .section-title {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 600;
         margin: 0;
+        color: #2c3e50;
     }
     
     .pdf-controls {
@@ -342,7 +378,7 @@
     .answers-content {
         flex: 1;
         overflow-y: auto;
-        padding: 20px;
+        padding: 15px 20px;
         max-width: 1200px;
         margin: 0 auto;
         width: 100%;
@@ -351,9 +387,9 @@
     .question-entry {
         background: #f8f9fa;
         border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 25px;
-        margin-bottom: 20px;
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 12px;
     }
     
     .question-header {
@@ -788,40 +824,41 @@
         </h1>
     </div>
     
-    <!-- Exam Info Bar -->
-    <div class="exam-info-bar">
-        <div class="info-items">
-            <div class="info-item">
-                <span class="info-label">Duration</span>
-                <span class="info-value">{{ exam.timer_minutes }} min</span>
+    <!-- Unified Card Wrapper -->
+    <div class="exam-wrapper">
+        <!-- Exam Info Bar -->
+        <div class="exam-info-bar">
+            <div class="info-items">
+                <div class="info-item">
+                    <span class="info-label">Duration</span>
+                    <span class="info-value">{{ exam.timer_minutes }} min</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Questions</span>
+                    <span class="info-value">{{ exam.total_questions }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <span class="info-value {% if exam.is_active %}status-active{% else %}status-inactive{% endif %}">
+                        {% if exam.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Created</span>
+                    <span class="info-value">{{ exam.created_at|date:"M d, Y" }}</span>
+                </div>
             </div>
-            <div class="info-item">
-                <span class="info-label">Questions</span>
-                <span class="info-value">{{ exam.total_questions }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Status</span>
-                <span class="info-value {% if exam.is_active %}status-active{% else %}status-inactive{% endif %}">
-                    {% if exam.is_active %}Active{% else %}Inactive{% endif %}
-                </span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Created</span>
-                <span class="info-value">{{ exam.created_at|date:"M d, Y" }}</span>
-            </div>
+            <a href="{% url 'placement_test:exam_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
         </div>
-        <a href="{% url 'placement_test:exam_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
-    </div>
-    
-    
-    <!-- Main Content Grid -->
-    <div class="main-content">
+        
+        <!-- Main Content Grid -->
+        <div class="main-content">
         <!-- PDF Preview Section -->
         <div class="pdf-section">
             <div class="section-header">
                 <h3 class="section-title">PDF Preview</h3>
                 <!-- Unified PDF Control Bar -->
-                <div class="pdf-controls" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                <div class="pdf-controls" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; padding: 10px; background: #f8f9fa; border-radius: 6px; margin-bottom: 10px;">
                     <!-- Navigation Group -->
                     <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
                         <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
@@ -1154,6 +1191,7 @@
             </div>
         </div>
     </div>
+    </div> <!-- End exam-wrapper -->
 </div>
 
 <!-- PDF.js for image conversion -->
