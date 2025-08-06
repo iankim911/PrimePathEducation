@@ -893,7 +893,7 @@
                     </div>
                 </div>
                     <!-- Skip First Left Half Status (Read-only) - REMOVED FEATURE -->
-                    {% comment %}{% if exam.skip_first_left_half %}
+                    {% comment %}{% if false %}
                     <div class="skip-status" style="margin-left: 15px; border-left: 1px solid #dee2e6; padding-left: 15px;">
                         <span style="font-size: 0.875rem; color: #6c757d;">
                             <i class="fas fa-eye-slash" style="margin-right: 5px;"></i>
@@ -1522,8 +1522,8 @@ function initializePdfViewer_REMOVED() {
         // Convert to virtual pages (each actual page = 2 virtual pages for split view)
         totalPages = pdf.numPages * 2;
         
-        // Respect skip_first_left_half setting for starting page
-        const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+        // Skip first left half is disabled (field removed)
+        const skipFirstLeftHalf = false;
         currentPageNum = skipFirstLeftHalf ? 2 : 1; // Start from page 2 if first left half is hidden
         
         console.log('🔥 [PREVIEW_EXAM] PDF info:', {
@@ -2025,7 +2025,7 @@ function renderPage(vPageNum) {
 }
 
 function updateNavigationButtons() {
-    const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+    const skipFirstLeftHalf = false;
     const minPage = skipFirstLeftHalf ? 2 : 1;
     document.getElementById('pdf-prev').disabled = currentPageNum <= minPage;
     document.getElementById('pdf-next').disabled = currentPageNum >= totalPages;
@@ -2033,7 +2033,7 @@ function updateNavigationButtons() {
 
 // PDF navigation
 document.getElementById('pdf-prev').addEventListener('click', function() {
-    const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+    const skipFirstLeftHalf = false;
     const minPage = skipFirstLeftHalf ? 2 : 1;
     
     if (!pdfDoc || currentPageNum <= minPage) {
@@ -2198,7 +2198,7 @@ function reRenderAtZoomLevel_REMOVED() {
 }
 
 // Note: Skip First Left Half control removed - setting is now configured during exam upload
-// Display behavior still respects the skip_first_left_half setting from the database
+// Display behavior - skip_first_left_half is disabled (field removed)
 
 // Answer tracking functions
 function initializeAnswerTracking() {

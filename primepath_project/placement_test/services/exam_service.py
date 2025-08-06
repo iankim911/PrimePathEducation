@@ -45,8 +45,7 @@ class ExamService:
             default_options_count=exam_data.get('default_options_count', DEFAULT_OPTIONS_COUNT),
             passing_score=exam_data.get('passing_score', 0),
             created_by=exam_data.get('created_by'),
-            is_active=exam_data.get('is_active', True),
-            skip_first_left_half=exam_data.get('skip_first_left_half', False)
+            is_active=exam_data.get('is_active', True)
         )
         
         # Create placeholder questions

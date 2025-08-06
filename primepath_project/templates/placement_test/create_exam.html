@@ -1048,12 +1048,15 @@ presetSelect.addEventListener('change', function() {
 function generateVersionedName() {
     const selectedOption = presetSelect.options[presetSelect.selectedIndex];
     if (selectedOption.value) {
+        // Set a temporary name immediately in case of quick submit
+        const baseName = selectedOption.getAttribute('data-level-name');
+        finalExamName = `[PlacementTest] ${baseName}_v_a`; // Default to version 'a'
+        
         // Get the next available version
         fetch(`/api/placement/exams/check-version/?curriculum_level=${selectedOption.value}`)
             .then(response => response.json())
             .then(data => {
                 const version = data.next_version || 'a';
-                const baseName = selectedOption.getAttribute('data-level-name');
                 finalExamName = `[PlacementTest] ${baseName}_v_${version}`;
                 // Update the help text to show what name will be used
                 const helpText = presetNameGroup.querySelector('.help-text');
@@ -1061,9 +1064,11 @@ function generateVersionedName() {
                     '<strong>Note:</strong> Version (e.g., _v_a, _v_b) is automatically added based on existing exams for this level.';
             })
             .catch(error => {
-                // Fallback if API fails
-                const baseName = selectedOption.getAttribute('data-level-name');
-                finalExamName = `[PlacementTest] ${baseName}_v_a`;
+                console.error('Error fetching version:', error);
+                // Keep the fallback name we already set
+                const helpText = presetNameGroup.querySelector('.help-text');
+                helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
+                    '<strong>Note:</strong> Using default version due to connection issue.';
             });
     }
 }

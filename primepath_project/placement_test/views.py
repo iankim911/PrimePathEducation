@@ -240,28 +240,50 @@ def check_exam_version(request):
 @handle_errors(template_name='placement_test/create_exam.html')
 def create_exam(request):
     if request.method == 'POST':
-        # Prepare exam data
-        exam_data = {
-            'name': request.POST.get('name'),
-            'curriculum_level_id': request.POST.get('curriculum_level', '').strip() or None,
-            'timer_minutes': int(request.POST.get('timer_minutes', 60)),
-            'total_questions': int(request.POST.get('total_questions')),
-            'default_options_count': int(request.POST.get('default_options_count', 5)),
-            'passing_score': 0,
-            'created_by': None,  # No auth required as per PRD
-            'is_active': True
-        }
-        
-        # Use ExamService to create exam with files
-        exam = ExamService.create_exam(
-            exam_data=exam_data,
-            pdf_file=request.FILES.get('pdf_file'),
-            audio_files=request.FILES.getlist('audio_files'),
-            audio_names=request.POST.getlist('audio_names[]')
-        )
-        
-        messages.success(request, f'Exam "{exam.name}" uploaded successfully!')
-        return redirect('placement_test:create_exam')
+        try:
+            # Validate required fields
+            exam_name = request.POST.get('name')
+            if not exam_name:
+                raise ValidationException("Exam name is required", code="MISSING_NAME")
+            
+            total_questions = request.POST.get('total_questions')
+            if not total_questions:
+                raise ValidationException("Total number of questions is required", code="MISSING_QUESTIONS")
+            
+            # Prepare exam data with validation
+            exam_data = {
+                'name': exam_name,
+                'curriculum_level_id': request.POST.get('curriculum_level', '').strip() or None,
+                'timer_minutes': int(request.POST.get('timer_minutes', 60)),
+                'total_questions': int(total_questions),
+                'default_options_count': int(request.POST.get('default_options_count', 5)),
+                'passing_score': 0,
+                'created_by': None,  # No auth required as per PRD
+                'is_active': True
+            }
+            
+            # Validate PDF file
+            pdf_file = request.FILES.get('pdf_file')
+            if not pdf_file:
+                raise ValidationException("PDF file is required", code="MISSING_PDF")
+            
+            # Use ExamService to create exam with files
+            exam = ExamService.create_exam(
+                exam_data=exam_data,
+                pdf_file=pdf_file,
+                audio_files=request.FILES.getlist('audio_files'),
+                audio_names=request.POST.getlist('audio_names[]')
+            )
+            
+            messages.success(request, f'Exam "{exam.name}" uploaded successfully!')
+            return redirect('placement_test:create_exam')
+            
+        except ValueError as e:
+            messages.error(request, f"Invalid input: {str(e)}")
+            # Fall through to render the form again with error message
+        except ValidationException as e:
+            messages.error(request, e.message)
+            # Fall through to render the form again with error message
     
     # Get curriculum levels with version info
     curriculum_levels = CurriculumLevel.objects.select_related('subprogram__program').all()
