@@ -106,7 +106,7 @@
             padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
+            margin: 0 !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -225,7 +225,6 @@
     .main-content {
         display: flex;
         flex-direction: column;
-        gap: 0;
         background: white;
         border-radius: 0 0 8px 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
@@ -362,6 +361,7 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        margin: 0 !important;
     }
     
     .pdf-viewer {
@@ -858,7 +858,7 @@
             <div class="section-header">
                 <h3 class="section-title">PDF Preview</h3>
                 <!-- Unified PDF Control Bar -->
-                <div class="pdf-controls" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; padding: 10px; background: #f8f9fa; border-radius: 6px; margin-bottom: 10px;">
+                <div class="pdf-controls" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; padding: 10px; background: #f8f9fa; border-radius: 6px; margin: 0;">
                     <!-- Navigation Group -->
                     <div class="control-group" style="display: flex; align-items: center; gap: 10px;">
                         <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
@@ -1197,9 +1197,18 @@
 <!-- PDF.js for image conversion -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-if (typeof pdfjsLib !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
+// Wait for PDF.js to load properly
+window.addEventListener('DOMContentLoaded', function() {
+    // Set a timeout to ensure PDF.js is fully loaded
+    setTimeout(function() {
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            console.log('PDF.js loaded successfully');
+        } else {
+            console.error('PDF.js library failed to load');
+        }
+    }, 100);
+});
 </script>
 <script>
 // Exam ID
@@ -1338,8 +1347,10 @@ function initializePdfImageDisplay() {
     const pdfUrl = "{{ exam.pdf_file.url }}";
     
     if (typeof pdfjsLib === 'undefined') {
-        console.error('PDF.js not loaded');
-        document.getElementById('pdf-loading').innerHTML = '<p style="color: red;">Error: PDF.js not loaded</p>';
+        console.warn('PDF.js not loaded yet, retrying...');
+        setTimeout(function() {
+            initializePdfImageDisplay();
+        }, 500);
         return;
     }
     

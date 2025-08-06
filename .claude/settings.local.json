@@ -130,7 +130,9 @@
       "Bash(git branch:*)",
       "Bash(for:*)",
       "Bash(do echo \"Testing: $url\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(sed:*)",
+      "Bash(..venvScriptspython.exe -c \"import django; print(''Django OK'')\")"
     ],
     "deny": []
   }
