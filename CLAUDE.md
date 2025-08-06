@@ -3,10 +3,18 @@
 ## 🚨 MUST READ - Server Startup Protocol
 
 ### How to Start Server (ALWAYS USE THIS)
+
+#### Method 1: Direct Command (if in terminal)
 ```bash
 cd primepath_project
 ../venv/Scripts/python.exe manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite
 ```
+
+#### Method 2: PowerShell Start-Process (for automation/detached process)
+```powershell
+powershell -Command "Start-Process cmd -ArgumentList '/k', 'cd /d C:\Users\ianki\OneDrive\2. Projects\ClaudeCode_New\PrimePath_\primepath_project && ..\venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite'"
+```
+**Note**: Method 2 opens a new command window and keeps server running independently
 
 ### SUCCESS INDICATORS (DO NOT PANIC)
 ✅ **"Watching for file changes with StatReloader"** = SERVER IS RUNNING
@@ -167,6 +175,19 @@ cd primepath_project && ../venv/Scripts/python.exe manage.py runserver 127.0.0.1
 ## 🔴 REMEMBER
 **Server timeout after "StatReloader" is SUCCESS, not failure!**
 
+## 📚 Major Fixes Documentation
+
+### 1. Upload Exam Fix
+**File**: `UPLOAD_EXAM_WORKING_STATE_V1_2025_08_06.md`
+**Issue**: File upload functionality for exams
+**Status**: ✅ Resolved
+
+### 2. Gap Between Sections Fix
+**File**: `GAP_FIX_COMPLETE_DOCUMENTATION.md`
+**Issue**: Large gap between PDF Preview and Answer Keys sections
+**Root Cause**: Fixed heights on containers (not spacing between them!)
+**Status**: ✅ Resolved (August 7, 2025)
+
 ---
-*Last Updated: August 6, 2025*
+*Last Updated: August 7, 2025*
 *This file should be read at the start of every Claude session*
