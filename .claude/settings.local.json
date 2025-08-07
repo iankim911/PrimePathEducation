@@ -145,7 +145,11 @@
       "Bash(../venv/Scripts/python.exe manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite)",
       "Bash(timeout:*)",
       "Bash(../venv/Scripts/python.exe manage.py check)",
-      "Bash(../venv/Scripts/python.exe test_student_interface.py:*)"
+      "Bash(../venv/Scripts/python.exe test_student_interface.py:*)",
+      "Bash(../venv/Scripts/python.exe manage.py test --settings=primepath_project.settings_sqlite)",
+      "Bash(../venv/Scripts/python.exe manage.py test placement_test --settings=primepath_project.settings_sqlite)",
+      "Bash(../venv/Scripts/python.exe manage.py check --settings=primepath_project.settings_sqlite)",
+      "Bash(../venv/Scripts/python.exe test_backend_modularization.py:*)"
     ],
     "deny": []
   }
