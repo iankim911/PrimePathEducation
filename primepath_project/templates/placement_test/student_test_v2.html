@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.name }} - Placement Test</title>
+    
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="test-container">
+            <!-- Test Header -->
+            <div class="test-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>{{ exam.name }}</h1>
+                    {% include 'components/placement_test/timer.html' with timer_seconds=timer_seconds %}
+                </div>
+                <div id="answer-progress" style="margin-top: 10px; color: #6c757d;">
+                    0 / {{ questions|length }} answered
+                </div>
+            </div>
+            
+            <!-- Question Navigation -->
+            {% include 'components/placement_test/question_nav.html' with questions=questions %}
+            
+            <!-- Main Content Area -->
+            <div class="question-container">
+                <!-- PDF Section -->
+                {% include 'components/placement_test/pdf_viewer.html' with pdf_url=exam.pdf_file.url %}
+                
+                <!-- Question Panels -->
+                <div class="question-section">
+                    {% for question in questions %}
+                        {% include 'components/placement_test/question_panel.html' with question=question questions=questions %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="submit-container">
+                <button type="button" 
+                        id="submit-test-btn"
+                        class="submit-test-btn"
+                        data-action="submit-test">
+                    Submit Test
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- Load modular JavaScript -->
+    <script src="{% static 'js/config/app-config.js' %}"></script>
+    <script src="{% static 'js/utils/event-delegation.js' %}"></script>
+    <script src="{% static 'js/modules/base-module.js' %}"></script>
+    <script src="{% static 'js/modules/pdf-viewer.js' %}"></script>
+    <script src="{% static 'js/modules/audio-player.js' %}"></script>
+    <script src="{% static 'js/modules/timer.js' %}"></script>
+    <script src="{% static 'js/modules/answer-manager.js' %}"></script>
+    
+    <script>
+    // Inject configuration from Django
+    window.APP_CONFIG = {
+        csrf: '{{ csrf_token }}',
+        session: {
+            id: '{{ session.id }}',
+            examId: {{ exam.id }},
+            timerSeconds: {{ timer_seconds }}
+        },
+        exam: {
+            id: {{ exam.id }},
+            name: '{{ exam.name|escapejs }}',
+            pdfUrl: '{{ exam.pdf_file.url }}'
+        },
+        urls: {
+            saveAnswer: '{% url "placement_test:submit_answer" session.id %}',
+            completeTest: '{% url "placement_test:complete_test" session.id %}',
+            getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}')
+        }
+    };
+    
+    // Initialize modules
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize PDF viewer
+        const pdfViewer = new PrimePath.modules.PDFViewer({
+            scale: 1.5,
+            enableCache: true
+        });
+        pdfViewer.init('#pdf-viewer', APP_CONFIG.exam.pdfUrl);
+        
+        // Initialize timer
+        const timer = new PrimePath.modules.Timer({
+            warnings: [
+                { time: 300, message: '5 minutes remaining', class: 'warning' },
+                { time: 60, message: '1 minute remaining', class: 'danger' }
+            ],
+            onExpire: function() {
+                if (window.answerManager) {
+                    answerManager.submitTest(true);
+                }
+            }
+        });
+        
+        const timerElement = document.querySelector('[data-timer-seconds]');
+        if (timerElement) {
+            const timerSeconds = parseInt(timerElement.dataset.timerSeconds);
+            timer.init(timerSeconds, '#timer');
+            timer.start();
+        }
+        
+        // Initialize audio player
+        const audioPlayer = new PrimePath.modules.AudioPlayer({
+            allowMultiple: false
+        });
+        audioPlayer.init();
+        
+        // Initialize answer manager
+        const answerManager = new PrimePath.modules.AnswerManager({
+            sessionId: APP_CONFIG.session.id,
+            examId: APP_CONFIG.exam.id,
+            autoSave: true,
+            autoSaveInterval: 30000,
+            saveEndpoint: APP_CONFIG.urls.saveAnswer,
+            submitEndpoint: APP_CONFIG.urls.completeTest
+        });
+        answerManager.init();
+        
+        // Question navigation
+        let currentQuestion = 1;
+        
+        function showQuestion(num) {
+            document.querySelectorAll('.question-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            const targetPanel = document.getElementById(`question-${num}`);
+            if (targetPanel) {
+                targetPanel.classList.remove('hidden');
+                currentQuestion = num;
+                
+                // Update navigation buttons
+                document.querySelectorAll('.question-nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const activeBtn = document.querySelector(`.question-nav-btn[data-question="${num}"]`);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+            }
+        }
+        
+        // Setup event delegation
+        const delegation = window.PrimePath.utils.EventDelegation;
+        
+        // Question navigation
+        delegation.onClick('[data-action="navigate-question"]', function(e) {
+            const questionNum = parseInt(e.currentTarget.dataset.question);
+            showQuestion(questionNum);
+        });
+        
+        // Next/Previous buttons
+        delegation.onClick('[data-action="next-question"]', function(e) {
+            const target = parseInt(e.currentTarget.dataset.target);
+            showQuestion(target);
+        });
+        
+        delegation.onClick('[data-action="prev-question"]', function(e) {
+            const target = parseInt(e.currentTarget.dataset.target);
+            showQuestion(target);
+        });
+        
+        // Review test
+        delegation.onClick('[data-action="review-test"]', function() {
+            const stats = answerManager.getStats();
+            const unanswered = stats.unansweredQuestions;
+            
+            if (unanswered.length > 0) {
+                const message = `You have ${unanswered.length} unanswered question(s): ${unanswered.join(', ')}.\\n\\nDo you want to review them?`;
+                if (confirm(message)) {
+                    showQuestion(unanswered[0]);
+                    return;
+                }
+            }
+            
+            if (confirm('Are you ready to submit your test?')) {
+                answerManager.submitTest();
+            }
+        });
+        
+        // Submit test
+        delegation.onClick('[data-action="submit-test"]', function() {
+            const stats = answerManager.getStats();
+            
+            if (stats.unansweredCount > 0) {
+                const message = `You have ${stats.unansweredCount} unanswered question(s).\\n\\nAre you sure you want to submit?`;
+                if (!confirm(message)) return;
+            }
+            
+            answerManager.submitTest();
+        });
+        
+        // Listen to answer manager events
+        answerManager.on('questionAnswered', function(data) {
+            const navBtn = document.querySelector(`.question-nav-btn[data-question="${data.questionNum}"]`);
+            if (navBtn) {
+                navBtn.classList.add('answered');
+            }
+            
+            // Update progress
+            const stats = answerManager.getStats();
+            const progressEl = document.getElementById('answer-progress');
+            if (progressEl) {
+                progressEl.textContent = `${stats.answeredCount} / ${stats.totalQuestions} answered`;
+            }
+        });
+        
+        // Make instances globally available for debugging
+        window.pdfViewer = pdfViewer;
+        window.audioPlayer = audioPlayer;
+        window.examTimer = timer;
+        window.answerManager = answerManager;
+        
+        // Show first question
+        showQuestion(1);
+    });
+    </script>
+</body>
+</html>

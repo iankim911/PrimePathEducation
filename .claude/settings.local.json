@@ -134,7 +134,8 @@
       "Bash(sed:*)",
       "Bash(..venvScriptspython.exe -c \"import django; print(''Django OK'')\")",
       "Bash(do wc:*)",
-      "Bash(pip freeze)"
+      "Bash(pip freeze)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

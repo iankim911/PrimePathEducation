@@ -1,0 +1,121 @@
+{% comment %}
+Question Panel Component
+Usage: {% include 'components/placement_test/question_panel.html' with question=question %}
+
+Parameters:
+- question: Question object (required)
+- question_number: Question number for display
+- show_points: Show point value (default: True)
+- show_navigation: Show prev/next buttons (default: True)
+{% endcomment %}
+
+<div id="question-{{ question.question_number }}" 
+     class="question-panel {% if question.question_number != 1 %}hidden{% endif %}"
+     data-question-id="{{ question.id }}"
+     data-question-number="{{ question.question_number }}"
+     data-question-type="{{ question.question_type }}">
+    
+    <h3>Question {{ question.question_number }}</h3>
+    
+    {% if question.audio_file %}
+    {% include 'components/placement_test/audio_player.html' with audio_file=question.audio_file %}
+    {% endif %}
+    
+    {% if show_points|default:True and question.points %}
+    <div class="points-display">
+        Worth {{ question.points }} point{% if question.points != 1 %}s{% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="answer-options">
+        {% if question.question_type == 'MCQ' %}
+            {% if ',' not in question.correct_answer %}
+                <!-- Single Choice (Radio Buttons) -->
+                {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                {% for letter in letters %}
+                <label>
+                    <input type="radio" 
+                           name="q_{{ question.id }}" 
+                           value="{{ letter }}"
+                           data-question-num="{{ question.question_number }}">
+                    <span>{{ letter }}</span>
+                </label>
+                {% endfor %}
+                {% endwith %}
+            {% else %}
+                <!-- Multiple Choice (Checkboxes) -->
+                {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                {% for letter in letters %}
+                <label>
+                    <input type="checkbox" 
+                           name="q_{{ question.id }}_{{ letter }}" 
+                           value="{{ letter }}"
+                           data-question-num="{{ question.question_number }}">
+                    <span>{{ letter }}</span>
+                </label>
+                {% endfor %}
+                {% endwith %}
+            {% endif %}
+            
+        {% elif question.question_type == 'CHECKBOX' %}
+            <!-- Multiple Choice (Checkboxes) -->
+            {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+            {% for letter in letters %}
+            <label>
+                <input type="checkbox" 
+                       name="q_{{ question.id }}_{{ letter }}" 
+                       value="{{ letter }}"
+                       data-question-num="{{ question.question_number }}">
+                <span>{{ letter }}</span>
+            </label>
+            {% endfor %}
+            {% endwith %}
+            
+        {% elif question.question_type == 'SHORT' %}
+            <!-- Short Answer -->
+            <input type="text" 
+                   name="q_{{ question.id }}"
+                   class="form-control"
+                   placeholder="Type your answer here"
+                   data-question-num="{{ question.question_number }}">
+                   
+        {% elif question.question_type == 'LONG' %}
+            <!-- Long Answer -->
+            <textarea name="q_{{ question.id }}"
+                      class="form-control"
+                      rows="5"
+                      placeholder="Type your answer here"
+                      data-question-num="{{ question.question_number }}"></textarea>
+        {% endif %}
+    </div>
+    
+    {% if show_navigation|default:True %}
+    <div class="question-nav-buttons">
+        {% if question.question_number > 1 %}
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="{{ question.question_number|add:-1 }}">
+            ← Previous
+        </button>
+        {% else %}
+        <div></div>
+        {% endif %}
+        
+        {% if question.question_number < questions|length %}
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="{{ question.question_number|add:1 }}">
+            Next →
+        </button>
+        {% else %}
+        <button type="button" 
+                class="btn-review"
+                data-action="review-test">
+            Review & Submit
+        </button>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

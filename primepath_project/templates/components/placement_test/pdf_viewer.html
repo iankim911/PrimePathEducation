@@ -1,0 +1,55 @@
+{% comment %}
+PDF Viewer Component for Placement Tests
+Usage: {% include 'components/placement_test/pdf_viewer.html' with pdf_url=exam.pdf_file.url %}
+
+Parameters:
+- pdf_url: URL of the PDF file to display (required)
+- enable_navigation: Show navigation controls (default: True)
+- enable_zoom: Show zoom controls (default: True)
+- initial_page: Starting page number (default: 1)
+{% endcomment %}
+
+<div class="pdf-section">
+    <div id="pdf-viewer" data-pdf-url="{{ pdf_url }}" data-initial-page="{{ initial_page|default:1 }}">
+        <canvas id="pdf-canvas"></canvas>
+        <div class="pdf-loading" style="display: none;">
+            <div class="pdf-loading-spinner"></div>
+            <p>Loading PDF...</p>
+        </div>
+        <div class="pdf-error" style="display: none;">
+            <p>Error loading PDF. Please refresh the page.</p>
+        </div>
+    </div>
+    
+    {% if enable_navigation|default:True %}
+    <div class="pdf-controls">
+        <button type="button" data-pdf-action="prev" class="pdf-nav-btn">
+            ← Previous
+        </button>
+        
+        <div class="pdf-page-info">
+            <span>Page</span>
+            <input type="number" 
+                   class="pdf-page-input" 
+                   data-pdf-action="page-input"
+                   id="current-page" 
+                   min="1" 
+                   value="1">
+            <span>of <span id="total-pages">0</span></span>
+        </div>
+        
+        <button type="button" data-pdf-action="next" class="pdf-nav-btn">
+            Next →
+        </button>
+        
+        {% if enable_zoom|default:True %}
+        <div class="pdf-zoom-controls">
+            <button type="button" data-pdf-action="zoom-out" title="Zoom Out">−</button>
+            <button type="button" data-pdf-action="zoom-in" title="Zoom In">+</button>
+            <button type="button" data-pdf-action="rotate-ccw" title="Rotate Left">↺</button>
+            <button type="button" data-pdf-action="rotate-cw" title="Rotate Right">↻</button>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>

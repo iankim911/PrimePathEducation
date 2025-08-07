@@ -96,7 +96,8 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Feature flags for safe modularization
 FEATURE_FLAGS = {
-    'USE_MODULAR_TEMPLATES': False,  # DISABLED - Modular templates missing styles
+    'USE_MODULAR_TEMPLATES': False,  # DISABLED - Old modular templates missing styles
+    'USE_V2_TEMPLATES': False,  # NEW - Properly modularized templates with extracted CSS
     'USE_SERVICE_LAYER': True,  # Already using services
     'USE_JS_MODULES': True,  # JS modules already created
     'ENABLE_CACHING': True,  # ENABLED - Improves performance

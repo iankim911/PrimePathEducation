@@ -1,0 +1,16 @@
+{% comment %}
+Timer Component for Placement Tests
+Usage: {% include 'components/placement_test/timer.html' with timer_seconds=1800 %}
+
+Parameters:
+- timer_seconds: Total seconds for the timer (required)
+- show_label: Whether to show "Time Remaining" label (default: True)
+- auto_submit: Auto-submit when timer expires (default: True)
+{% endcomment %}
+
+<div class="timer-container" data-timer-seconds="{{ timer_seconds }}" data-auto-submit="{{ auto_submit|default:'true' }}">
+    {% if show_label|default:True %}
+    <span class="timer-label">Time Remaining:</span>
+    {% endif %}
+    <span class="timer-display" id="timer">--:--</span>
+</div>

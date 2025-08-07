@@ -101,7 +101,12 @@ def take_test(request, session_id):
         'timer_seconds': exam.timer_minutes * 60,
     }
     
-    template_name = get_template_name(request, 'placement_test/student_test.html')
+    # Check for v2 templates first, then fall back to modular, then original
+    from django.conf import settings
+    if getattr(settings, 'FEATURE_FLAGS', {}).get('USE_V2_TEMPLATES', False):
+        template_name = 'placement_test/student_test_v2.html'
+    else:
+        template_name = get_template_name(request, 'placement_test/student_test.html')
     response = render(request, template_name, context)
     
     # Add no-cache headers to prevent browser caching of dynamic question content
