@@ -263,3 +263,19 @@ class GradingService:
             'difficulty_adjustments': session.difficulty_adjustments,
             'final_level': session.final_curriculum_level.full_name if session.final_curriculum_level else None
         }
+    
+    @staticmethod
+    def get_detailed_results(session_id: str) -> Dict[str, Any]:
+        """
+        Get detailed results for a session.
+        Alias for get_session_analytics to maintain compatibility.
+        
+        Args:
+            session_id: Session ID
+            
+        Returns:
+            Dictionary with detailed results
+        """
+        from ..models import StudentSession
+        session = StudentSession.objects.get(id=session_id)
+        return GradingService.get_session_analytics(session)

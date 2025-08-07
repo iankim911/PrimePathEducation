@@ -149,7 +149,20 @@
       "Bash(../venv/Scripts/python.exe manage.py test --settings=primepath_project.settings_sqlite)",
       "Bash(../venv/Scripts/python.exe manage.py test placement_test --settings=primepath_project.settings_sqlite)",
       "Bash(../venv/Scripts/python.exe manage.py check --settings=primepath_project.settings_sqlite)",
-      "Bash(../venv/Scripts/python.exe test_backend_modularization.py:*)"
+      "Bash(../venv/Scripts/python.exe test_backend_modularization.py:*)",
+      "Bash(../venv/Scripts/python.exe test_existing_features.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase4_compatibility.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase5_compatibility.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase5_impact.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase6_compatibility.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase6_final.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase7_compatibility.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase8_compatibility.py:*)",
+      "Bash(../venv/Scripts/python.exe test_phase8_impact.py:*)",
+      "Bash(../venv/Scripts/python.exe:*)",
+      "Bash(../venv/Scripts/pip.exe install djangorestframework==3.14.0 django-filter==23.5 django-cors-headers==4.3.1)",
+      "Bash(../venv/Scripts/pip.exe install celery==5.3.4 redis==5.0.1)",
+      "Bash(tree:*)"
     ],
     "deny": []
   }
