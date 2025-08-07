@@ -309,7 +309,7 @@
             pdfUrl: '{{ exam.pdf_file.url }}'
         },
         urls: {
-            saveAnswer: '{% url "placement_test:save_answer" %}',
+            saveAnswer: '{% url "placement_test:submit_answer" session.id %}',
             completeTest: '/api/placement/session/{{ session.id }}/complete/',
             getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}')
         }
