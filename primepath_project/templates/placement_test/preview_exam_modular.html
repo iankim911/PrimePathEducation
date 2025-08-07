@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Preview Exam - {{ exam.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exam-preview-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .pdf-container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .pdf-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+    }
+    
+    .pdf-canvas {
+        border: 1px solid #dee2e6;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: 1px solid #007bff;
+        background: #007bff;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .btn:hover:not(:disabled) {
+        background: #0056b3;
+    }
+    
+    .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .page-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .page-input {
+        width: 60px;
+        padding: 6px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="exam-preview-container">
+    <h1>{{ exam.name }}</h1>
+    
+    <div class="pdf-container">
+        <!-- PDF Controls using data attributes instead of onclick -->
+        <div class="pdf-controls">
+            <button class="btn" data-pdf-action="prev" id="pdf-prev">
+                ← Previous
+            </button>
+            
+            <div class="page-info">
+                <span>Page</span>
+                <input type="number" 
+                       class="page-input" 
+                       data-pdf-action="page-input"
+                       id="current-page" 
+                       min="1" 
+                       value="1">
+                <span>of <span id="total-pages">0</span></span>
+            </div>
+            
+            <button class="btn" data-pdf-action="next" id="pdf-next">
+                Next →
+            </button>
+            
+            <div style="margin-left: 20px;">
+                <button class="btn" data-pdf-action="zoom-out">-</button>
+                <button class="btn" data-pdf-action="zoom-in">+</button>
+                <button class="btn" data-pdf-action="rotate-ccw">↺</button>
+                <button class="btn" data-pdf-action="rotate-cw">↻</button>
+            </div>
+        </div>
+        
+        <!-- PDF Display Area -->
+        <div id="pdf-viewer">
+            <canvas id="pdf-canvas"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<!-- Load modular JavaScript -->
+<script src="{% static 'js/config/app-config.js' %}"></script>
+<script src="{% static 'js/utils/event-delegation.js' %}"></script>
+<script src="{% static 'js/modules/base-module.js' %}"></script>
+<script src="{% static 'js/modules/pdf-viewer.js' %}"></script>
+
+<script>
+// Inject configuration from Django template
+window.APP_CONFIG = {
+    csrf: '{{ csrf_token }}',
+    exam: {
+        id: {{ exam.id }},
+        name: '{{ exam.name|escapejs }}',
+        pdfUrl: '{{ exam.pdf_file.url }}'
+    }
+};
+
+// Initialize PDF viewer module
+document.addEventListener('DOMContentLoaded', function() {
+    // Create PDF viewer instance
+    const pdfViewer = new PrimePath.modules.PDFViewer({
+        scale: 1.5,
+        enableCache: true,
+        debug: true
+    });
+    
+    // Listen to PDF events
+    pdfViewer.on('loaded', function(data) {
+        console.log('PDF loaded with', data.totalPages, 'pages');
+        document.getElementById('total-pages').textContent = data.totalPages;
+    });
+    
+    pdfViewer.on('pageRendered', function(data) {
+        document.getElementById('current-page').value = data.pageNum;
+    });
+    
+    pdfViewer.on('navigationUpdated', function(navState) {
+        document.getElementById('pdf-prev').disabled = !navState.canGoPrev;
+        document.getElementById('pdf-next').disabled = !navState.canGoNext;
+    });
+    
+    pdfViewer.on('error', function(error) {
+        console.error('PDF Error:', error);
+        alert('Error loading PDF: ' + error.message);
+    });
+    
+    // Initialize with container and PDF URL
+    const pdfUrl = window.APP_CONFIG.exam.pdfUrl;
+    pdfViewer.init('#pdf-viewer', pdfUrl);
+    
+    // Make instance available globally for debugging
+    window.pdfViewer = pdfViewer;
+});
+</script>
+{% endblock %}

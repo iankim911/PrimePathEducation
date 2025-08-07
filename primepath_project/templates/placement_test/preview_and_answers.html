@@ -1337,8 +1337,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // PDF Image Display System
+// PDF State Management - Properly declared variables
 let pdfDoc = null;
-let currentPage = 1;
+let currentPage = 1;  // For simple PDF navigation
+let currentPageNum = 1;  // For virtual page system (properly declared to fix scope issue)
 let totalPages = 0;
 let pageImages = new Map(); // Cache for converted images
 let currentZoomLevel = 1.0; // Zoom level for image scaling
@@ -1529,94 +1531,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // Removed complex PDF functions - replaced with image display system
 
 // Helper function to mark as unsaved
-function initializePdfViewer_REMOVED() {
-    console.log('🔥 [PREVIEW_EXAM] initializePdfViewer() called');
-    console.log('🔥 [PREVIEW_EXAM] pdfjsLib available:', typeof pdfjsLib !== 'undefined');
-    
-    if (typeof pdfjsLib === 'undefined') {
-        console.error('❌ [PREVIEW_EXAM] pdfjsLib is undefined');
-        document.getElementById('pdf-loading').style.display = 'none';
-        document.getElementById('pdf-error').style.display = 'block';
-        return;
-    }
-    
-    const pdfUrl = "{{ exam.pdf_file.url }}";
-    console.log('🔥 [PREVIEW_EXAM] PDF URL:', pdfUrl);
-    
-    console.log('🔥 [PREVIEW_EXAM] Calling pdfjsLib.getDocument...');
-    pdfjsLib.getDocument({
-        url: pdfUrl,
-        // Disable CMap loading to avoid CORS issues
-        disableFontFace: false,
-        disableStream: false,
-        disableAutoFetch: false
-    }).promise.then(function(pdf) {
-        console.log('✅ [PREVIEW_EXAM] PDF loaded successfully');
-        pdfDoc = pdf;
-        detectedDividers.clear(); // Clear divider cache for new PDF
-        
-        // Convert to virtual pages (each actual page = 2 virtual pages for split view)
-        totalPages = pdf.numPages * 2;
-        
-        // Skip first left half is disabled (field removed)
-        const skipFirstLeftHalf = false;
-        currentPageNum = skipFirstLeftHalf ? 2 : 1; // Start from page 2 if first left half is hidden
-        
-        console.log('🔥 [PREVIEW_EXAM] PDF info:', {
-            actualPages: pdf.numPages,
-            totalPages,
-            startingVirtualPage: currentPageNum
-        });
-        
-        const totalPagesElement = document.getElementById('total-pages');
-        if (totalPagesElement) {
-            totalPagesElement.textContent = totalPages;
-            console.log('🔥 [PREVIEW_EXAM] Total pages element updated to:', totalPages);
-        } else {
-            console.warn('⚠️ [PREVIEW_EXAM] Total pages element not found');
-        }
-        
-        console.log('🔥 [PREVIEW_EXAM] Starting virtual page set to:', currentPageNum);
-        
-        console.log('🔥 [PREVIEW_EXAM] Updating navigation buttons...');
-        updateNavigationButtons();
-        
-        const loadingElement = document.getElementById('pdf-loading');
-        const canvasElement = document.getElementById('pdf-canvas');
-        
-        if (loadingElement) {
-            loadingElement.style.display = 'none';
-            console.log('🔥 [PREVIEW_EXAM] Loading element hidden');
-        } else {
-            console.warn('⚠️ [PREVIEW_EXAM] Loading element not found');
-        }
-        
-        if (canvasElement) {
-            canvasElement.style.display = 'block';
-            console.log('🔥 [PREVIEW_EXAM] Canvas element shown');
-        } else {
-            console.warn('⚠️ [PREVIEW_EXAM] Canvas element not found');
-        }
-        
-        console.log('🔥 [PREVIEW_EXAM] Starting first virtual page render...');
-        renderPage(currentPageNum);
-    }).catch(function(error) {
-        console.error('❌ [PREVIEW_EXAM] Error loading PDF:', error);
-        
-        const loadingElement = document.getElementById('pdf-loading');
-        const errorElement = document.getElementById('pdf-error');
-        
-        if (loadingElement) {
-            loadingElement.style.display = 'none';
-            console.log('🔥 [PREVIEW_EXAM] Loading element hidden after error');
-        }
-        
-        if (errorElement) {
-            errorElement.style.display = 'block';
-            console.log('🔥 [PREVIEW_EXAM] Error element shown');
-        }
-    });
-}
+// [REMOVED] initializePdfViewer_REMOVED function deleted
+// This was causing duplicate initialization and scope issues
+// The active PDF system uses initializePdfImageDisplay() above
 
 // Detect content boundaries to minimize white space and improve resolution
 function detectContentBoundaries(canvas, ctx) {
