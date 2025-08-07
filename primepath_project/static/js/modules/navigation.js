@@ -333,27 +333,34 @@
                 return;
             }
             
-            // Question number buttons - FIX: Use 'this' instead of e.currentTarget
-            delegation.onClick('[data-action="navigate-question"]', (e, element) => {
-                const questionNum = parseInt(element.dataset.question);
+            // Store reference to this for use in callbacks
+            const self = this;
+            
+            // Question number buttons - Use regular function for 'this' context
+            delegation.onClick('[data-action="navigate-question"]', function(e) {
+                e.preventDefault();
+                const questionNum = parseInt(this.dataset.question);
                 if (!isNaN(questionNum)) {
-                    this.showQuestion(questionNum);
+                    self.showQuestion(questionNum);
                 }
             });
             
-            // Next button - FIX: Use second parameter 'element'
-            delegation.onClick('[data-action="next-question"]', (e, element) => {
-                this.nextQuestion();
+            // Next button - Use regular function for 'this' context
+            delegation.onClick('[data-action="next-question"]', function(e) {
+                e.preventDefault();
+                self.nextQuestion();
             });
             
-            // Previous button - FIX: Use second parameter 'element'
-            delegation.onClick('[data-action="prev-question"]', (e, element) => {
-                this.previousQuestion();
+            // Previous button - Use regular function for 'this' context
+            delegation.onClick('[data-action="prev-question"]', function(e) {
+                e.preventDefault();
+                self.previousQuestion();
             });
             
             // Review test button
-            delegation.onClick('[data-action="review-test"]', () => {
-                this.handleReviewTest();
+            delegation.onClick('[data-action="review-test"]', function(e) {
+                e.preventDefault();
+                self.handleReviewTest();
             });
             
             // Direct input navigation

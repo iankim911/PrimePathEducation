@@ -177,28 +177,9 @@
         // Setup event delegation for proper event handling
         const delegation = window.PrimePath.utils.EventDelegation;
         
-        // FIXED: Use 'this' context instead of e.currentTarget
-        delegation.onClick('[data-action="navigate-question"]', function(e) {
-            const questionNum = parseInt(this.dataset.question);
-            if (!isNaN(questionNum)) {
-                navigation.showQuestion(questionNum);
-            }
-        });
-        
-        // FIXED: Next button using 'this' context
-        delegation.onClick('[data-action="next-question"]', function(e) {
-            navigation.nextQuestion();
-        });
-        
-        // FIXED: Previous button using 'this' context
-        delegation.onClick('[data-action="prev-question"]', function(e) {
-            navigation.previousQuestion();
-        });
-        
-        // Review test remains the same
-        delegation.onClick('[data-action="review-test"]', function() {
-            navigation.handleReviewTest();
-        });
+        // NOTE: Navigation module handles these events internally
+        // We don't need to set them up here to avoid duplicate handlers
+        // The navigation.init() call already sets up all navigation event handlers
         
         // Submit test
         delegation.onClick('[data-action="submit-test"]', function() {
@@ -214,10 +195,29 @@
         
         // Handle answer input changes
         delegation.onChange('.answer-input', function(e) {
-            const questionPanel = e.target.closest('.question-panel');
+            const questionPanel = this.closest('.question-panel');
             if (questionPanel) {
                 const questionNum = parseInt(questionPanel.dataset.questionNumber);
                 answerManager.saveAnswer(questionNum);
+                // Log for debugging
+                console.log(`Answer changed for question ${questionNum}`);
+            }
+        });
+        
+        // Also handle clicks on radio buttons and checkboxes as fallback
+        delegation.onClick('input[type="radio"].answer-input, input[type="checkbox"].answer-input', function(e) {
+            const questionPanel = this.closest('.question-panel');
+            if (questionPanel) {
+                const questionNum = parseInt(questionPanel.dataset.questionNumber);
+                // For radio buttons, trigger change event
+                if (this.type === 'radio') {
+                    this.checked = true;
+                    const event = new Event('change', { bubbles: true });
+                    this.dispatchEvent(event);
+                }
+                // For checkboxes, just save the answer
+                answerManager.saveAnswer(questionNum);
+                console.log(`Click handled for question ${questionNum}`);
             }
         });
         

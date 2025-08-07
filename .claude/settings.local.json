@@ -135,7 +135,16 @@
       "Bash(..venvScriptspython.exe -c \"import django; print(''Django OK'')\")",
       "Bash(do wc:*)",
       "Bash(pip freeze)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(/c/Users/ianki/.local/bin/uv pip install serena-mcp)",
+      "Bash(/c/Users/ianki/.local/bin/uv add serena-mcp)",
+      "Bash(/c/Users/ianki/.local/bin/uv tool install --from git+https://github.com/oraios/serena serena)",
+      "Bash(/c/Users/ianki/.local/bin/uv tool install --from git+https://github.com/oraios/serena serena-agent)",
+      "Bash(/c/Users/ianki/.local/bin/uvx:*)",
+      "Bash(/c/Users/ianki/.local/bin/uv cache clean)",
+      "Bash(../venv/Scripts/python.exe manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite)",
+      "Bash(timeout:*)",
+      "Bash(../venv/Scripts/python.exe manage.py check)"
     ],
     "deny": []
   }
