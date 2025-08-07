@@ -742,28 +742,28 @@ const availableExams = {
     {% for level in core_levels %}
     '{{ level.id }}': [
         {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
         {% endfor %}
     ],
     {% endfor %}
     {% for level in ascent_levels %}
     '{{ level.id }}': [
         {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
         {% endfor %}
     ],
     {% endfor %}
     {% for level in edge_levels %}
     '{{ level.id }}': [
         {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
         {% endfor %}
     ],
     {% endfor %}
     {% for level in pinnacle_levels %}
     '{{ level.id }}': [
         {% for exam in level.available_exams %}
-        { id: {{ exam.id }}, name: '{{ exam.name|escapejs }}' },
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
         {% endfor %}
     ],
     {% endfor %}

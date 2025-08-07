@@ -92,6 +92,21 @@ def take_test(request, session_id):
     audio_files = exam.audio_files.all()
     student_answers = {sa.question_id: sa for sa in session.answers.all()}
     
+    # Prepare JavaScript configuration data (properly serialized)
+    import json
+    js_config = {
+        'session': {
+            'id': str(session.id),
+            'examId': str(exam.id),
+            'timerSeconds': exam.timer_minutes * 60
+        },
+        'exam': {
+            'id': str(exam.id),
+            'name': exam.name,
+            'pdfUrl': exam.pdf_file.url if exam.pdf_file else ''
+        }
+    }
+    
     context = {
         'session': session,
         'exam': exam,
@@ -99,6 +114,7 @@ def take_test(request, session_id):
         'audio_files': audio_files,
         'student_answers': student_answers,
         'timer_seconds': exam.timer_minutes * 60,
+        'js_config': json.dumps(js_config),  # Properly serialized JSON
     }
     
     # Check for v2 templates first, then fall back to modular, then original

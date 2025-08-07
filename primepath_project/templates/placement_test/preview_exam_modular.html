@@ -127,7 +127,7 @@
 window.APP_CONFIG = {
     csrf: '{{ csrf_token }}',
     exam: {
-        id: {{ exam.id }},
+        id: '{{ exam.id }}',
         name: '{{ exam.name|escapejs }}',
         pdfUrl: '{{ exam.pdf_file.url }}'
     }

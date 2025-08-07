@@ -63,20 +63,18 @@
     <script src="{% static 'js/modules/timer.js' %}"></script>
     <script src="{% static 'js/modules/answer-manager.js' %}"></script>
     
+    <!-- Store Django configuration data safely using json_script -->
+    {{ js_config|json_script:"django-js-config" }}
+    
     <script>
-    // Inject configuration from Django
+    // Safely parse JSON configuration from Django
+    const djangoConfig = JSON.parse(document.getElementById('django-js-config').textContent);
+    
+    // Build complete configuration object
     window.APP_CONFIG = {
         csrf: '{{ csrf_token }}',
-        session: {
-            id: '{{ session.id }}',
-            examId: {{ exam.id }},
-            timerSeconds: {{ timer_seconds }}
-        },
-        exam: {
-            id: {{ exam.id }},
-            name: '{{ exam.name|escapejs }}',
-            pdfUrl: '{{ exam.pdf_file.url }}'
-        },
+        session: djangoConfig.session,
+        exam: djangoConfig.exam,
         urls: {
             saveAnswer: '{% url "placement_test:submit_answer" session.id %}',
             completeTest: '{% url "placement_test:complete_test" session.id %}',

@@ -300,11 +300,11 @@
         csrf: '{{ csrf_token }}',
         session: {
             id: '{{ session.id }}',
-            examId: {{ exam.id }},
+            examId: '{{ exam.id }}',
             timerSeconds: {{ timer_seconds }}
         },
         exam: {
-            id: {{ exam.id }},
+            id: '{{ exam.id }}',
             name: '{{ exam.name|escapejs }}',
             pdfUrl: '{{ exam.pdf_file.url }}'
         },
