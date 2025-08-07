@@ -65,6 +65,7 @@
     <script src="{% static 'js/modules/audio-player.js' %}"></script>
     <script src="{% static 'js/modules/timer.js' %}"></script>
     <script src="{% static 'js/modules/answer-manager.js' %}"></script>
+    <script src="{% static 'js/modules/navigation.js' %}"></script>
     
     <!-- Store Django configuration data safely using json_script -->
     {{ js_config|json_script:"django-js-config" }}
@@ -154,68 +155,49 @@
         });
         answerManager.init();
         
-        // Question navigation
-        let currentQuestion = 1;
-        
-        function showQuestion(num) {
-            document.querySelectorAll('.question-panel').forEach(panel => {
-                panel.classList.add('hidden');
-                panel.classList.remove('active');
-            });
-            
-            const targetPanel = document.getElementById(`question-${num}`);
-            if (targetPanel) {
-                targetPanel.classList.remove('hidden');
-                targetPanel.classList.add('active');
-                currentQuestion = num;
-                
-                // Update navigation buttons
-                document.querySelectorAll('.question-nav-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                const activeBtn = document.querySelector(`.question-nav-btn[data-question="${num}"]`);
-                if (activeBtn) {
-                    activeBtn.classList.add('active');
-                }
+        // Initialize navigation module
+        const navigation = new PrimePath.modules.NavigationModule({
+            enableKeyboard: true,
+            enableUrlState: false,  // Disable URL state for exam security
+            autoSaveOnNavigate: true,
+            focusOnNavigate: true,
+            onBeforeNavigate: async function(from, to) {
+                // Optional: Add confirmation for unsaved changes
+                return true;
+            },
+            onAfterNavigate: function(to, from) {
+                // Optional: Track navigation for analytics
+                console.log(`Navigated from question ${from} to ${to}`);
             }
-        }
+        });
         
-        // Setup event delegation
+        // Initialize navigation after DOM is ready
+        navigation.init();
+        
+        // Setup event delegation for proper event handling
         const delegation = window.PrimePath.utils.EventDelegation;
         
-        // Question navigation
+        // FIXED: Use 'this' context instead of e.currentTarget
         delegation.onClick('[data-action="navigate-question"]', function(e) {
-            const questionNum = parseInt(e.currentTarget.dataset.question);
-            showQuestion(questionNum);
+            const questionNum = parseInt(this.dataset.question);
+            if (!isNaN(questionNum)) {
+                navigation.showQuestion(questionNum);
+            }
         });
         
-        // Next/Previous buttons
+        // FIXED: Next button using 'this' context
         delegation.onClick('[data-action="next-question"]', function(e) {
-            const target = parseInt(e.currentTarget.dataset.target);
-            showQuestion(target);
+            navigation.nextQuestion();
         });
         
+        // FIXED: Previous button using 'this' context
         delegation.onClick('[data-action="prev-question"]', function(e) {
-            const target = parseInt(e.currentTarget.dataset.target);
-            showQuestion(target);
+            navigation.previousQuestion();
         });
         
-        // Review test
+        // Review test remains the same
         delegation.onClick('[data-action="review-test"]', function() {
-            const stats = answerManager.getStats();
-            const unanswered = stats.unansweredQuestions;
-            
-            if (unanswered.length > 0) {
-                const message = `You have ${unanswered.length} unanswered question(s): ${unanswered.join(', ')}.\\n\\nDo you want to review them?`;
-                if (confirm(message)) {
-                    showQuestion(unanswered[0]);
-                    return;
-                }
-            }
-            
-            if (confirm('Are you ready to submit your test?')) {
-                answerManager.submitTest();
-            }
+            navigation.handleReviewTest();
         });
         
         // Submit test
@@ -259,9 +241,9 @@
         window.audioPlayer = audioPlayer;
         window.examTimer = timer;
         window.answerManager = answerManager;
+        window.navigation = navigation;
         
-        // Show first question
-        showQuestion(1);
+        // Navigation module handles initial question display
     });
     </script>
 </body>
