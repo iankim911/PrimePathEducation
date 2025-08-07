@@ -144,7 +144,8 @@
       "Bash(/c/Users/ianki/.local/bin/uv cache clean)",
       "Bash(../venv/Scripts/python.exe manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite)",
       "Bash(timeout:*)",
-      "Bash(../venv/Scripts/python.exe manage.py check)"
+      "Bash(../venv/Scripts/python.exe manage.py check)",
+      "Bash(../venv/Scripts/python.exe test_student_interface.py:*)"
     ],
     "deny": []
   }

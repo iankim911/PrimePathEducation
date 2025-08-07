@@ -71,20 +71,44 @@
     {{ js_config|json_script:"django-js-config" }}
     
     <script>
-    // Safely parse JSON configuration from Django
-    const djangoConfig = JSON.parse(document.getElementById('django-js-config').textContent);
-    
-    // Build complete configuration object
-    window.APP_CONFIG = {
-        csrf: '{{ csrf_token }}',
-        session: djangoConfig.session,
-        exam: djangoConfig.exam,
-        urls: {
-            saveAnswer: '{% url "placement_test:submit_answer" session.id %}',
-            completeTest: '{% url "placement_test:complete_test" session.id %}',
-            getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}')
+    // Initialize configuration with error handling
+    (function() {
+        let djangoConfig = {};
+        
+        try {
+            // Safely parse JSON configuration from Django
+            const configElement = document.getElementById('django-js-config');
+            if (configElement && configElement.textContent) {
+                djangoConfig = JSON.parse(configElement.textContent);
+                console.log('Django config loaded successfully:', djangoConfig);
+            } else {
+                console.error('Django config element not found');
+            }
+        } catch (error) {
+            console.error('Error parsing Django config:', error);
+            djangoConfig = {};
         }
-    };
+        
+        // Build complete configuration object with defensive checks
+        window.APP_CONFIG = {
+            csrf: '{{ csrf_token }}',
+            session: djangoConfig.session || {},
+            exam: djangoConfig.exam || {},
+            urls: {
+                saveAnswer: '{% url "placement_test:submit_answer" session.id %}',
+                completeTest: '{% url "placement_test:complete_test" session.id %}',
+                getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}')
+            }
+        };
+        
+        // Validate required data
+        if (!APP_CONFIG.session.id) {
+            console.error('Session ID is missing from configuration');
+        }
+        if (!APP_CONFIG.exam.id) {
+            console.error('Exam ID is missing from configuration');
+        }
+    })();
     
     // Initialize modules
     document.addEventListener('DOMContentLoaded', function() {
@@ -126,7 +150,7 @@
             ],
             onExpire: function() {
                 if (window.answerManager) {
-                    answerManager.submitTest(true);
+                    window.answerManager.submitTest(true);
                 }
             }
         });
@@ -144,16 +168,23 @@
         });
         audioPlayer.init();
         
-        // Initialize answer manager
-        const answerManager = new PrimePath.modules.AnswerManager({
-            sessionId: APP_CONFIG.session.id,
-            examId: APP_CONFIG.exam.id,
-            autoSave: true,
-            autoSaveInterval: 30000,
-            saveEndpoint: APP_CONFIG.urls.saveAnswer,
-            submitEndpoint: APP_CONFIG.urls.completeTest
-        });
-        answerManager.init();
+        // Initialize answer manager with defensive checks
+        let answerManager = null;
+        if (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id && APP_CONFIG.exam && APP_CONFIG.exam.id) {
+            answerManager = new PrimePath.modules.AnswerManager({
+                sessionId: APP_CONFIG.session.id,
+                examId: APP_CONFIG.exam.id,
+                autoSave: true,
+                autoSaveInterval: 30000,
+                saveEndpoint: APP_CONFIG.urls.saveAnswer,
+                submitEndpoint: APP_CONFIG.urls.completeTest
+            });
+            answerManager.init();
+            console.log('Answer manager initialized successfully');
+        } else {
+            console.error('Cannot initialize answer manager: missing session or exam ID');
+            console.log('APP_CONFIG:', APP_CONFIG);
+        }
         
         // Initialize navigation module
         const navigation = new PrimePath.modules.NavigationModule({
@@ -183,6 +214,11 @@
         
         // Submit test
         delegation.onClick('[data-action="submit-test"]', function() {
+            if (!answerManager) {
+                alert('Unable to submit test: Answer manager not initialized. Please refresh the page.');
+                return;
+            }
+            
             const stats = answerManager.getStats();
             
             if (stats.unansweredCount > 0) {
@@ -196,7 +232,7 @@
         // Handle answer input changes
         delegation.onChange('.answer-input', function(e) {
             const questionPanel = this.closest('.question-panel');
-            if (questionPanel) {
+            if (questionPanel && answerManager) {
                 const questionNum = parseInt(questionPanel.dataset.questionNumber);
                 answerManager.saveAnswer(questionNum);
                 // Log for debugging
@@ -207,7 +243,7 @@
         // Also handle clicks on radio buttons and checkboxes as fallback
         delegation.onClick('input[type="radio"].answer-input, input[type="checkbox"].answer-input', function(e) {
             const questionPanel = this.closest('.question-panel');
-            if (questionPanel) {
+            if (questionPanel && answerManager) {
                 const questionNum = parseInt(questionPanel.dataset.questionNumber);
                 // For radio buttons, trigger change event
                 if (this.type === 'radio') {
@@ -222,7 +258,8 @@
         });
         
         // Listen to answer manager events
-        answerManager.on('questionAnswered', function(data) {
+        if (answerManager) {
+            answerManager.on('questionAnswered', function(data) {
             const navBtn = document.querySelector(`.question-nav-btn[data-question="${data.questionNum}"]`);
             if (navBtn) {
                 navBtn.classList.add('answered');
@@ -234,7 +271,8 @@
             if (progressEl) {
                 progressEl.textContent = `${stats.answeredCount} / ${stats.totalQuestions} answered`;
             }
-        });
+            });
+        }
         
         // Make instances globally available for debugging
         window.pdfViewer = pdfViewer;

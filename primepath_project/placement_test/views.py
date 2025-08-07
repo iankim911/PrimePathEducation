@@ -114,7 +114,7 @@ def take_test(request, session_id):
         'audio_files': audio_files,
         'student_answers': student_answers,
         'timer_seconds': exam.timer_minutes * 60,
-        'js_config': json.dumps(js_config),  # Properly serialized JSON
+        'js_config': js_config,  # Pass as dict, not JSON string - json_script filter will handle encoding
     }
     
     # Check for v2 templates first, then fall back to modular, then original
