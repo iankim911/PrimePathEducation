@@ -132,7 +132,9 @@
       "Bash(do echo \"Testing: $url\")",
       "Bash(done)",
       "Bash(sed:*)",
-      "Bash(..venvScriptspython.exe -c \"import django; print(''Django OK'')\")"
+      "Bash(..venvScriptspython.exe -c \"import django; print(''Django OK'')\")",
+      "Bash(do wc:*)",
+      "Bash(pip freeze)"
     ],
     "deny": []
   }
