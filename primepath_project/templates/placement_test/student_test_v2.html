@@ -31,11 +31,14 @@
                 <!-- PDF Section -->
                 {% include 'components/placement_test/pdf_viewer.html' with pdf_url=exam.pdf_file.url %}
                 
-                <!-- Question Panels -->
+                <!-- Question Section -->
                 <div class="question-section">
-                    {% for question in questions %}
-                        {% include 'components/placement_test/question_panel.html' with question=question questions=questions %}
-                    {% endfor %}
+                    <form id="test-form" method="post">
+                        {% csrf_token %}
+                        {% for question in questions %}
+                            {% include 'components/placement_test/question_panel.html' with question=question questions=questions %}
+                        {% endfor %}
+                    </form>
                 </div>
             </div>
             
@@ -157,11 +160,13 @@
         function showQuestion(num) {
             document.querySelectorAll('.question-panel').forEach(panel => {
                 panel.classList.add('hidden');
+                panel.classList.remove('active');
             });
             
             const targetPanel = document.getElementById(`question-${num}`);
             if (targetPanel) {
                 targetPanel.classList.remove('hidden');
+                targetPanel.classList.add('active');
                 currentQuestion = num;
                 
                 // Update navigation buttons
@@ -223,6 +228,15 @@
             }
             
             answerManager.submitTest();
+        });
+        
+        // Handle answer input changes
+        delegation.onChange('.answer-input', function(e) {
+            const questionPanel = e.target.closest('.question-panel');
+            if (questionPanel) {
+                const questionNum = parseInt(questionPanel.dataset.questionNumber);
+                answerManager.saveAnswer(questionNum);
+            }
         });
         
         // Listen to answer manager events

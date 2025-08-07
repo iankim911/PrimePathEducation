@@ -1,0 +1,1324 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[PlacementTest] PRIME CORE SIGMA - Level 1_v_a - Placement Test</title>
+    
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="/static/css/pages/student-test.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="test-container">
+            <!-- Test Header -->
+            <div class="test-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>[PlacementTest] PRIME CORE SIGMA - Level 1_v_a</h1>
+                    
+
+<div class="timer-container" data-timer-seconds="3600" data-auto-submit="true">
+    
+    <span class="timer-label">Time Remaining:</span>
+    
+    <span class="timer-display" id="timer">--:--</span>
+</div>
+                </div>
+                <div id="answer-progress" style="margin-top: 10px; color: #6c757d;">
+                    0 / 10 answered
+                </div>
+            </div>
+            
+            <!-- Question Navigation -->
+            
+
+<div class="question-nav" id="question-navigation">
+    
+    <button type="button" 
+            class="question-nav-btn active" 
+            data-question="1"
+            data-question-id="860"
+            data-action="navigate-question"
+            aria-label="Go to question 1">
+        1
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="2"
+            data-question-id="861"
+            data-action="navigate-question"
+            aria-label="Go to question 2">
+        2
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="3"
+            data-question-id="862"
+            data-action="navigate-question"
+            aria-label="Go to question 3">
+        3
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="4"
+            data-question-id="863"
+            data-action="navigate-question"
+            aria-label="Go to question 4">
+        4
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="5"
+            data-question-id="864"
+            data-action="navigate-question"
+            aria-label="Go to question 5">
+        5
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="6"
+            data-question-id="865"
+            data-action="navigate-question"
+            aria-label="Go to question 6">
+        6
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="7"
+            data-question-id="866"
+            data-action="navigate-question"
+            aria-label="Go to question 7">
+        7
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="8"
+            data-question-id="867"
+            data-action="navigate-question"
+            aria-label="Go to question 8">
+        8
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="9"
+            data-question-id="868"
+            data-action="navigate-question"
+            aria-label="Go to question 9">
+        9
+    </button>
+    
+    <button type="button" 
+            class="question-nav-btn" 
+            data-question="10"
+            data-question-id="869"
+            data-action="navigate-question"
+            aria-label="Go to question 10">
+        10
+    </button>
+    
+</div>
+            
+            <!-- Main Content Area -->
+            <div class="question-container">
+                <!-- PDF Section -->
+                
+
+<div class="pdf-section">
+    <div id="pdf-viewer" data-pdf-url="/media/exams/pdfs/Prime_Path_Prime_Core_Elite_Level_3_OBHXIBa.pdf" data-initial-page="1">
+        <canvas id="pdf-canvas"></canvas>
+        <div class="pdf-loading" style="display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.9); z-index: 10;">
+            <div style="text-align: center;">
+                <div class="pdf-loading-spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                <p>Loading PDF...</p>
+            </div>
+        </div>
+        <div class="pdf-error" style="display: none; padding: 20px; text-align: center; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 4px; color: #c62828;">
+            <p>Error loading PDF. Please refresh the page.</p>
+        </div>
+    </div>
+    
+    
+    <div class="pdf-controls">
+        <button type="button" data-pdf-action="prev" class="pdf-nav-btn">
+            ← Previous
+        </button>
+        
+        <div class="pdf-page-info">
+            <span>Page</span>
+            <input type="number" 
+                   class="pdf-page-input" 
+                   data-pdf-action="page-input"
+                   id="current-page" 
+                   min="1" 
+                   value="1">
+            <span>of <span id="total-pages">0</span></span>
+        </div>
+        
+        <button type="button" data-pdf-action="next" class="pdf-nav-btn">
+            Next →
+        </button>
+        
+        
+        <div class="pdf-zoom-controls">
+            <button type="button" data-pdf-action="zoom-out" title="Zoom Out">−</button>
+            <button type="button" data-pdf-action="zoom-in" title="Zoom In">+</button>
+            <button type="button" data-pdf-action="rotate-ccw" title="Rotate Left">↺</button>
+            <button type="button" data-pdf-action="rotate-cw" title="Rotate Right">↻</button>
+        </div>
+        
+    </div>
+    
+</div>
+                
+                <!-- Question Panels -->
+                <div class="question-section">
+                    
+                        
+
+<div id="question-1" 
+     class="question-panel "
+     data-question-id="860"
+     data-question-number="1"
+     data-question-type="MCQ">
+    
+    <h3>Question 1</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_860" 
+                           value="A"
+                           data-question-num="1">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_860" 
+                           value="B"
+                           data-question-num="1">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_860" 
+                           value="C"
+                           data-question-num="1">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_860" 
+                           value="D"
+                           data-question-num="1">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_860" 
+                           value="E"
+                           data-question-num="1">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <div></div>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="2">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-2" 
+     class="question-panel hidden"
+     data-question-id="861"
+     data-question-number="2"
+     data-question-type="MCQ">
+    
+    <h3>Question 2</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_861" 
+                           value="A"
+                           data-question-num="2">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_861" 
+                           value="B"
+                           data-question-num="2">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_861" 
+                           value="C"
+                           data-question-num="2">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_861" 
+                           value="D"
+                           data-question-num="2">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_861" 
+                           value="E"
+                           data-question-num="2">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="1">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="3">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-3" 
+     class="question-panel hidden"
+     data-question-id="862"
+     data-question-number="3"
+     data-question-type="MCQ">
+    
+    <h3>Question 3</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_862" 
+                           value="A"
+                           data-question-num="3">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_862" 
+                           value="B"
+                           data-question-num="3">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_862" 
+                           value="C"
+                           data-question-num="3">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_862" 
+                           value="D"
+                           data-question-num="3">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_862" 
+                           value="E"
+                           data-question-num="3">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="2">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="4">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-4" 
+     class="question-panel hidden"
+     data-question-id="863"
+     data-question-number="4"
+     data-question-type="MCQ">
+    
+    <h3>Question 4</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_863" 
+                           value="A"
+                           data-question-num="4">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_863" 
+                           value="B"
+                           data-question-num="4">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_863" 
+                           value="C"
+                           data-question-num="4">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_863" 
+                           value="D"
+                           data-question-num="4">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_863" 
+                           value="E"
+                           data-question-num="4">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="3">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="5">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-5" 
+     class="question-panel hidden"
+     data-question-id="864"
+     data-question-number="5"
+     data-question-type="MCQ">
+    
+    <h3>Question 5</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_864" 
+                           value="A"
+                           data-question-num="5">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_864" 
+                           value="B"
+                           data-question-num="5">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_864" 
+                           value="C"
+                           data-question-num="5">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_864" 
+                           value="D"
+                           data-question-num="5">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_864" 
+                           value="E"
+                           data-question-num="5">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="4">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="6">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-6" 
+     class="question-panel hidden"
+     data-question-id="865"
+     data-question-number="6"
+     data-question-type="MCQ">
+    
+    <h3>Question 6</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_865" 
+                           value="A"
+                           data-question-num="6">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_865" 
+                           value="B"
+                           data-question-num="6">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_865" 
+                           value="C"
+                           data-question-num="6">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_865" 
+                           value="D"
+                           data-question-num="6">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_865" 
+                           value="E"
+                           data-question-num="6">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="5">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="7">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-7" 
+     class="question-panel hidden"
+     data-question-id="866"
+     data-question-number="7"
+     data-question-type="MCQ">
+    
+    <h3>Question 7</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_866" 
+                           value="A"
+                           data-question-num="7">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_866" 
+                           value="B"
+                           data-question-num="7">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_866" 
+                           value="C"
+                           data-question-num="7">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_866" 
+                           value="D"
+                           data-question-num="7">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_866" 
+                           value="E"
+                           data-question-num="7">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="6">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="8">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-8" 
+     class="question-panel hidden"
+     data-question-id="867"
+     data-question-number="8"
+     data-question-type="MCQ">
+    
+    <h3>Question 8</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_867" 
+                           value="A"
+                           data-question-num="8">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_867" 
+                           value="B"
+                           data-question-num="8">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_867" 
+                           value="C"
+                           data-question-num="8">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_867" 
+                           value="D"
+                           data-question-num="8">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_867" 
+                           value="E"
+                           data-question-num="8">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="7">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="9">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-9" 
+     class="question-panel hidden"
+     data-question-id="868"
+     data-question-number="9"
+     data-question-type="MCQ">
+    
+    <h3>Question 9</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_868" 
+                           value="A"
+                           data-question-num="9">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_868" 
+                           value="B"
+                           data-question-num="9">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_868" 
+                           value="C"
+                           data-question-num="9">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_868" 
+                           value="D"
+                           data-question-num="9">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_868" 
+                           value="E"
+                           data-question-num="9">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="8">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-next"
+                data-action="next-question"
+                data-target="10">
+            Next →
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                        
+
+<div id="question-10" 
+     class="question-panel hidden"
+     data-question-id="869"
+     data-question-number="10"
+     data-question-type="MCQ">
+    
+    <h3>Question 10</h3>
+    
+    
+    
+    
+    <div class="points-display">
+        Worth 1 point
+    </div>
+    
+    
+    <div class="answer-options">
+        
+            
+                <!-- Single Choice (Radio Buttons) -->
+                
+                
+                <label>
+                    <input type="radio" 
+                           name="q_869" 
+                           value="A"
+                           data-question-num="10">
+                    <span>A</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_869" 
+                           value="B"
+                           data-question-num="10">
+                    <span>B</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_869" 
+                           value="C"
+                           data-question-num="10">
+                    <span>C</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_869" 
+                           value="D"
+                           data-question-num="10">
+                    <span>D</span>
+                </label>
+                
+                <label>
+                    <input type="radio" 
+                           name="q_869" 
+                           value="E"
+                           data-question-num="10">
+                    <span>E</span>
+                </label>
+                
+                
+            
+            
+        
+    </div>
+    
+    
+    <div class="question-nav-buttons">
+        
+        <button type="button" 
+                class="btn-prev"
+                data-action="prev-question"
+                data-target="9">
+            ← Previous
+        </button>
+        
+        
+        
+        <button type="button" 
+                class="btn-review"
+                data-action="review-test">
+            Review & Submit
+        </button>
+        
+    </div>
+    
+</div>
+                    
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="submit-container">
+                <button type="button" 
+                        id="submit-test-btn"
+                        class="submit-test-btn"
+                        data-action="submit-test">
+                    Submit Test
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- Load modular JavaScript -->
+    <script src="/static/js/config/app-config.js"></script>
+    <script src="/static/js/utils/event-delegation.js"></script>
+    <script src="/static/js/modules/base-module.js"></script>
+    <script src="/static/js/modules/pdf-viewer.js"></script>
+    <script src="/static/js/modules/audio-player.js"></script>
+    <script src="/static/js/modules/timer.js"></script>
+    <script src="/static/js/modules/answer-manager.js"></script>
+    
+    <!-- Store Django configuration data safely using json_script -->
+    <script id="django-js-config" type="application/json">"{\"session\": {\"id\": \"1f6b3927-09a3-42d2-b3a4-072bbb0204af\", \"examId\": \"191302bc-59f2-45d3-9dda-3e80f842330a\", \"timerSeconds\": 3600}, \"exam\": {\"id\": \"191302bc-59f2-45d3-9dda-3e80f842330a\", \"name\": \"[PlacementTest] PRIME CORE SIGMA - Level 1_v_a\", \"pdfUrl\": \"/media/exams/pdfs/Prime_Path_Prime_Core_Elite_Level_3_OBHXIBa.pdf\"}}"</script>
+    
+    <script>
+    // Safely parse JSON configuration from Django
+    const djangoConfig = JSON.parse(document.getElementById('django-js-config').textContent);
+    
+    // Build complete configuration object
+    window.APP_CONFIG = {
+        csrf: 'kdk3BEWzQa0fIWOu4shxW6kQiq1P3nwMJo4BjXe18LDji8U1h0fx8mprVrV71fL4',
+        session: djangoConfig.session,
+        exam: djangoConfig.exam,
+        urls: {
+            saveAnswer: '/api/placement/session/1f6b3927-09a3-42d2-b3a4-072bbb0204af/submit/',
+            completeTest: '/api/placement/session/1f6b3927-09a3-42d2-b3a4-072bbb0204af/complete/',
+            getAudio: '/api/placement/audio/0/'.replace('0', '{id}')
+        }
+    };
+    
+    // Initialize modules
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize PDF viewer
+        const pdfViewer = new PrimePath.modules.PDFViewer({
+            scale: 1.5,
+            enableCache: true
+        });
+        
+        // Get PDF URL from multiple sources for robustness
+        const pdfViewerElement = document.querySelector('#pdf-viewer');
+        let pdfUrl = null;
+        
+        // Try to get from data attribute first (most reliable)
+        if (pdfViewerElement && pdfViewerElement.dataset.pdfUrl) {
+            pdfUrl = pdfViewerElement.dataset.pdfUrl;
+        }
+        // Fallback to APP_CONFIG
+        else if (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.pdfUrl) {
+            pdfUrl = APP_CONFIG.exam.pdfUrl;
+        }
+        
+        if (pdfUrl) {
+            pdfViewer.init('#pdf-viewer', pdfUrl);
+        } else {
+            console.error('PDF URL not found in either data attribute or APP_CONFIG');
+            // Show error message to user
+            const errorDiv = document.querySelector('.pdf-error');
+            if (errorDiv) {
+                errorDiv.style.display = 'block';
+            }
+        }
+        
+        // Initialize timer
+        const timer = new PrimePath.modules.Timer({
+            warnings: [
+                { time: 300, message: '5 minutes remaining', class: 'warning' },
+                { time: 60, message: '1 minute remaining', class: 'danger' }
+            ],
+            onExpire: function() {
+                if (window.answerManager) {
+                    answerManager.submitTest(true);
+                }
+            }
+        });
+        
+        const timerElement = document.querySelector('[data-timer-seconds]');
+        if (timerElement) {
+            const timerSeconds = parseInt(timerElement.dataset.timerSeconds);
+            timer.init(timerSeconds, '#timer');
+            timer.start();
+        }
+        
+        // Initialize audio player
+        const audioPlayer = new PrimePath.modules.AudioPlayer({
+            allowMultiple: false
+        });
+        audioPlayer.init();
+        
+        // Initialize answer manager
+        const answerManager = new PrimePath.modules.AnswerManager({
+            sessionId: APP_CONFIG.session.id,
+            examId: APP_CONFIG.exam.id,
+            autoSave: true,
+            autoSaveInterval: 30000,
+            saveEndpoint: APP_CONFIG.urls.saveAnswer,
+            submitEndpoint: APP_CONFIG.urls.completeTest
+        });
+        answerManager.init();
+        
+        // Question navigation
+        let currentQuestion = 1;
+        
+        function showQuestion(num) {
+            document.querySelectorAll('.question-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            
+            const targetPanel = document.getElementById(`question-${num}`);
+            if (targetPanel) {
+                targetPanel.classList.remove('hidden');
+                currentQuestion = num;
+                
+                // Update navigation buttons
+                document.querySelectorAll('.question-nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const activeBtn = document.querySelector(`.question-nav-btn[data-question="${num}"]`);
+                if (activeBtn) {
+                    activeBtn.classList.add('active');
+                }
+            }
+        }
+        
+        // Setup event delegation
+        const delegation = window.PrimePath.utils.EventDelegation;
+        
+        // Question navigation
+        delegation.onClick('[data-action="navigate-question"]', function(e) {
+            const questionNum = parseInt(e.currentTarget.dataset.question);
+            showQuestion(questionNum);
+        });
+        
+        // Next/Previous buttons
+        delegation.onClick('[data-action="next-question"]', function(e) {
+            const target = parseInt(e.currentTarget.dataset.target);
+            showQuestion(target);
+        });
+        
+        delegation.onClick('[data-action="prev-question"]', function(e) {
+            const target = parseInt(e.currentTarget.dataset.target);
+            showQuestion(target);
+        });
+        
+        // Review test
+        delegation.onClick('[data-action="review-test"]', function() {
+            const stats = answerManager.getStats();
+            const unanswered = stats.unansweredQuestions;
+            
+            if (unanswered.length > 0) {
+                const message = `You have ${unanswered.length} unanswered question(s): ${unanswered.join(', ')}.\\n\\nDo you want to review them?`;
+                if (confirm(message)) {
+                    showQuestion(unanswered[0]);
+                    return;
+                }
+            }
+            
+            if (confirm('Are you ready to submit your test?')) {
+                answerManager.submitTest();
+            }
+        });
+        
+        // Submit test
+        delegation.onClick('[data-action="submit-test"]', function() {
+            const stats = answerManager.getStats();
+            
+            if (stats.unansweredCount > 0) {
+                const message = `You have ${stats.unansweredCount} unanswered question(s).\\n\\nAre you sure you want to submit?`;
+                if (!confirm(message)) return;
+            }
+            
+            answerManager.submitTest();
+        });
+        
+        // Listen to answer manager events
+        answerManager.on('questionAnswered', function(data) {
+            const navBtn = document.querySelector(`.question-nav-btn[data-question="${data.questionNum}"]`);
+            if (navBtn) {
+                navBtn.classList.add('answered');
+            }
+            
+            // Update progress
+            const stats = answerManager.getStats();
+            const progressEl = document.getElementById('answer-progress');
+            if (progressEl) {
+                progressEl.textContent = `${stats.answeredCount} / ${stats.totalQuestions} answered`;
+            }
+        });
+        
+        // Make instances globally available for debugging
+        window.pdfViewer = pdfViewer;
+        window.audioPlayer = audioPlayer;
+        window.examTimer = timer;
+        window.answerManager = answerManager;
+        
+        // Show first question
+        showQuestion(1);
+    });
+    </script>
+</body>
+</html>

@@ -10,7 +10,7 @@ Parameters:
 {% endcomment %}
 
 <div id="question-{{ question.question_number }}" 
-     class="question-panel {% if question.question_number != 1 %}hidden{% endif %}"
+     class="question-panel {% if question.question_number == 1 %}active{% else %}hidden{% endif %}"
      data-question-id="{{ question.id }}"
      data-question-number="{{ question.question_number }}"
      data-question-type="{{ question.question_type }}">
@@ -33,12 +33,13 @@ Parameters:
                 <!-- Single Choice (Radio Buttons) -->
                 {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
                 {% for letter in letters %}
-                <label>
+                <label class="answer-option-label">
                     <input type="radio" 
                            name="q_{{ question.id }}" 
                            value="{{ letter }}"
-                           data-question-num="{{ question.question_number }}">
-                    <span>{{ letter }}</span>
+                           data-question-num="{{ question.question_number }}"
+                           class="answer-input">
+                    <span class="answer-letter">{{ letter }}</span>
                 </label>
                 {% endfor %}
                 {% endwith %}
@@ -46,12 +47,13 @@ Parameters:
                 <!-- Multiple Choice (Checkboxes) -->
                 {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
                 {% for letter in letters %}
-                <label>
+                <label class="answer-option-label">
                     <input type="checkbox" 
                            name="q_{{ question.id }}_{{ letter }}" 
                            value="{{ letter }}"
-                           data-question-num="{{ question.question_number }}">
-                    <span>{{ letter }}</span>
+                           data-question-num="{{ question.question_number }}"
+                           class="answer-input">
+                    <span class="answer-letter">{{ letter }}</span>
                 </label>
                 {% endfor %}
                 {% endwith %}
@@ -61,12 +63,13 @@ Parameters:
             <!-- Multiple Choice (Checkboxes) -->
             {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
             {% for letter in letters %}
-            <label>
+            <label class="answer-option-label">
                 <input type="checkbox" 
                        name="q_{{ question.id }}_{{ letter }}" 
                        value="{{ letter }}"
-                       data-question-num="{{ question.question_number }}">
-                <span>{{ letter }}</span>
+                       data-question-num="{{ question.question_number }}"
+                       class="answer-input">
+                <span class="answer-letter">{{ letter }}</span>
             </label>
             {% endfor %}
             {% endwith %}
@@ -75,14 +78,14 @@ Parameters:
             <!-- Short Answer -->
             <input type="text" 
                    name="q_{{ question.id }}"
-                   class="form-control"
+                   class="answer-input text-input"
                    placeholder="Type your answer here"
                    data-question-num="{{ question.question_number }}">
                    
         {% elif question.question_type == 'LONG' %}
             <!-- Long Answer -->
             <textarea name="q_{{ question.id }}"
-                      class="form-control"
+                      class="answer-input textarea-input"
                       rows="5"
                       placeholder="Type your answer here"
                       data-question-num="{{ question.question_number }}"></textarea>

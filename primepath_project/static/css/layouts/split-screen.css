@@ -33,30 +33,25 @@
 
 /* Main content area with split layout */
 .question-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    position: relative !important;
-    display: block !important;
-    min-height: 100vh !important;
+    display: flex;
+    gap: var(--spacing-xl);
+    min-height: calc(100vh - 200px);
+    margin-top: var(--spacing-md);
 }
 
-/* Fixed question panel on the right */
+/* Question section on the right */
 .question-section {
-    position: fixed !important;
-    top: 50% !important;
-    right: 10px !important;
-    transform: translateY(-50%) !important;
-    width: 260px !important;
-    background: var(--bg-white) !important;
-    padding: var(--spacing-md) !important;
-    padding-bottom: 90px !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: var(--border-radius) !important;
-    height: auto !important;
-    max-height: calc(100vh - 120px) !important;
-    overflow-y: auto !important;
-    z-index: var(--z-index-sticky) !important;
-    box-shadow: var(--shadow-lg) !important;
+    flex: 0 0 400px;
+    background: var(--bg-white);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    height: fit-content;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    position: sticky;
+    top: 20px;
+    box-shadow: var(--shadow-md);
 }
 
 .question-section:hover {
@@ -66,23 +61,11 @@
 
 /* PDF takes remaining space */
 .pdf-section {
-    margin-right: 280px;
-    min-height: calc(100vh - 150px);
+    flex: 1;
+    min-height: calc(100vh - 200px);
 }
 
-/* Question panels */
-.question-panel {
-    display: none;
-    animation: fadeIn var(--transition-base);
-}
-
-.question-panel.active {
-    display: block;
-}
-
-.question-panel.hidden {
-    display: none !important;
-}
+/* Question panels - moved to question-panel.css for proper component separation */
 
 @keyframes fadeIn {
     from {

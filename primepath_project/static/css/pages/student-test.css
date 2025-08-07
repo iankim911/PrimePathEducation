@@ -6,6 +6,7 @@
 @import url('../components/timer.css');
 @import url('../components/question-nav.css');
 @import url('../components/pdf-viewer.css');
+@import url('../components/question-panel.css');
 @import url('../layouts/split-screen.css');
 
 /* Page-specific overrides and additions */
