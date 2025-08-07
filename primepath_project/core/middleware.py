@@ -16,10 +16,11 @@ class FeatureFlagMiddleware:
         request.feature_flags = settings.FEATURE_FLAGS
         
         # Determine which template to use based on feature flags
+        # Note: Views must check if modular template exists before using
         if request.feature_flags.get('USE_MODULAR_TEMPLATES'):
-            request.template_suffix = '_modular'
+            request.use_modular_templates = True
         else:
-            request.template_suffix = ''
+            request.use_modular_templates = False
         
         response = self.get_response(request)
         return response

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-07T10:41:34.226334",
+  "timestamp": "2025-08-07T10:52:11.662945",
   "tests": [
     {
       "test": "Page load: Home page",
@@ -59,17 +59,17 @@
     {
       "test": "Model query: Exam",
       "status": "PASS",
-      "details": "Count: 1"
+      "details": "Count: 2"
     },
     {
       "test": "Model query: Question",
       "status": "PASS",
-      "details": "Count: 20"
+      "details": "Count: 30"
     },
     {
       "test": "Model query: StudentSession",
       "status": "PASS",
-      "details": "Count: 0"
+      "details": "Count: 1"
     },
     {
       "test": "Model query: CurriculumLevel",
@@ -79,7 +79,7 @@
     {
       "test": "Model query: PlacementRule",
       "status": "PASS",
-      "details": "Count: 15"
+      "details": "Count: 13"
     },
     {
       "test": "Exam creation flow",
@@ -89,7 +89,7 @@
     {
       "test": "Student session creation",
       "status": "PASS",
-      "details": "Session ID: 4a91a7bb-6cb6-4725-b6b0-67a4817935cb"
+      "details": "Session ID: 2348cd69-0561-4553-891b-225009ae6213"
     },
     {
       "test": "Answer submission",
@@ -98,8 +98,8 @@
     },
     {
       "test": "Grading flow",
-      "status": "SKIP",
-      "details": "No sessions to grade"
+      "status": "PASS",
+      "details": "Graded: True"
     },
     {
       "test": "AJAX endpoint: Placement rules API",
@@ -162,11 +162,10 @@
       "details": ""
     }
   ],
-  "passed": 29,
-  "failed": 3,
+  "passed": 30,
+  "failed": 2,
   "errors": [
     "Exam creation flow: ExamService.create_exam() got an unexpected keyword argument 'created_by'",
-    "Grading flow: No sessions to grade",
     "AJAX endpoint: Version check API: Status: 400"
   ]
 }

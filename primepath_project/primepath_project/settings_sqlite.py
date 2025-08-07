@@ -96,9 +96,9 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Feature flags for safe modularization
 FEATURE_FLAGS = {
-    'USE_MODULAR_TEMPLATES': False,  # Will enable after testing
+    'USE_MODULAR_TEMPLATES': True,  # ENABLED - Using safe fallback
     'USE_SERVICE_LAYER': True,  # Already using services
     'USE_JS_MODULES': True,  # JS modules already created
-    'ENABLE_CACHING': False,  # Will enable after testing
-    'ENABLE_API_V2': False,  # New API endpoints
+    'ENABLE_CACHING': True,  # ENABLED - Improves performance
+    'ENABLE_API_V2': True,  # ENABLED - New organized API endpoints
 }

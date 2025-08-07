@@ -15,6 +15,7 @@ from core.exceptions import (
 )
 from core.decorators import handle_errors, validate_request_data, teacher_required
 from .services import PlacementService, SessionService, ExamService, GradingService
+from core.utils import get_template_name
 import json
 import uuid
 import logging
@@ -100,7 +101,8 @@ def take_test(request, session_id):
         'timer_seconds': exam.timer_minutes * 60,
     }
     
-    response = render(request, 'placement_test/student_test.html', context)
+    template_name = get_template_name(request, 'placement_test/student_test.html')
+    response = render(request, template_name, context)
     
     # Add no-cache headers to prevent browser caching of dynamic question content
     response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -395,7 +397,8 @@ def preview_exam(request, exam_id):
         'questions': questions,
     }
     
-    response = render(request, 'placement_test/preview_and_answers.html', context)
+    template_name = get_template_name(request, 'placement_test/preview_and_answers.html')
+    response = render(request, template_name, context)
     
     # Add no-cache headers to prevent browser caching of dynamic admin content
     response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
