@@ -21,20 +21,22 @@ def index(request):
 
 
 def teacher_dashboard(request):
-    """Teacher dashboard with statistics using services."""
-    from placement_test.models import StudentSession, Exam
+    """Teacher dashboard with statistics using DashboardService."""
+    from .services import DashboardService
     
-    # TODO: Move these to a DashboardService
-    recent_sessions = StudentSession.objects.select_related(
-        'exam', 'school', 'original_curriculum_level', 'final_curriculum_level'
-    ).order_by('-started_at')[:10]
-    active_exams = Exam.objects.filter(is_active=True).count()
-    total_sessions = StudentSession.objects.count()
+    # Use service to get dashboard data
+    stats = DashboardService.get_dashboard_stats()
+    recent_sessions = DashboardService.get_recent_sessions(limit=10)
     
+    # Maintain exact same context structure for template compatibility
     context = {
         'recent_sessions': recent_sessions,
-        'active_exams': active_exams,
-        'total_sessions': total_sessions,
+        'active_exams': stats['active_exams'],
+        'total_sessions': stats['total_sessions'],
+        # Additional stats available but not breaking existing template
+        'completed_sessions': stats.get('completed_sessions', 0),
+        'completion_rate': stats.get('completion_rate', 0),
+        'recent_activity': stats.get('recent_sessions', 0),
     }
     return render(request, 'core/teacher_dashboard.html', context)
 

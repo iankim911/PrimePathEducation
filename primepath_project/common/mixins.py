@@ -53,6 +53,12 @@ class AjaxResponseMixin:
             response_data['errors'] = errors
         return JsonResponse(response_data, status=status)
     
+    def json_error(self, message="An error occurred", errors=None, status=400):
+        """
+        Alias for error_response for backward compatibility.
+        """
+        return self.error_response(message, errors, status)
+    
     def is_ajax(self, request):
         """
         Check if request is AJAX.

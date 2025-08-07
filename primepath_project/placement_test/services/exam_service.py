@@ -336,3 +336,57 @@ class ExamService:
             'errors': errors,
             'total_assignments': len(validated_assignments)
         }
+    
+    @staticmethod
+    def get_all_exams_with_stats() -> List[Dict[str, Any]]:
+        """
+        Get all exams with statistics.
+        
+        Returns:
+            List of dictionaries containing exam information and statistics
+        """
+        from django.db.models import Count, Q
+        
+        try:
+            exams = Exam.objects.select_related(
+                'curriculum_level',
+                'curriculum_level__subprogram',
+                'curriculum_level__subprogram__program'
+            ).annotate(
+                total_sessions=Count('sessions', distinct=True),
+                completed_sessions=Count(
+                    'sessions',
+                    filter=Q(sessions__completed_at__isnull=False),
+                    distinct=True
+                ),
+                total_questions_count=Count('questions', distinct=True),
+                audio_files_count=Count('audio_files', distinct=True)
+            ).filter(is_active=True).order_by('-created_at')
+            
+            exam_stats = []
+            for exam in exams:
+                stats = {
+                    'id': str(exam.id),
+                    'name': exam.name,
+                    'curriculum_level': exam.curriculum_level.full_name if exam.curriculum_level else 'None',
+                    'timer_minutes': exam.timer_minutes,
+                    'total_questions': exam.total_questions,
+                    'total_sessions': exam.total_sessions,
+                    'completed_sessions': exam.completed_sessions,
+                    'completion_rate': (
+                        exam.completed_sessions / exam.total_sessions * 100
+                        if exam.total_sessions > 0 else 0
+                    ),
+                    'has_pdf': bool(exam.pdf_file),
+                    'audio_files_count': exam.audio_files_count,
+                    'created_at': exam.created_at.isoformat() if exam.created_at else None,
+                    'is_active': exam.is_active
+                }
+                exam_stats.append(stats)
+            
+            logger.info(f"Retrieved stats for {len(exam_stats)} exams")
+            return exam_stats
+            
+        except Exception as e:
+            logger.error(f"Error getting exam stats: {e}")
+            return []
