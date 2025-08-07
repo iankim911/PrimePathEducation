@@ -1,0 +1,33 @@
+{% comment %}
+Mixed Question Component (Checkboxes + Text)
+{% endcomment %}
+
+<div class="question-mixed">
+    <div class="mixed-checkboxes mb-2">
+        {% for option in question.options_list %}
+        <div class="form-check">
+            <input class="form-check-input mixed-checkbox" 
+                   type="checkbox" 
+                   name="question_{{ question.id }}_checkbox_{{ option }}"
+                   id="q{{ question.id }}_checkbox_{{ option }}"
+                   value="{{ option }}"
+                   data-question-id="{{ question.id }}"
+                   data-question-type="MIXED">
+            <label class="form-check-label" for="q{{ question.id }}_checkbox_{{ option }}">
+                {{ option }}
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="mixed-text">
+        <label for="q{{ question.id }}_text">Additional answer:</label>
+        <input type="text" 
+               class="form-control" 
+               name="question_{{ question.id }}_text"
+               id="q{{ question.id }}_text"
+               placeholder="Enter additional answer if needed"
+               data-question-id="{{ question.id }}"
+               data-question-type="MIXED_TEXT">
+    </div>
+</div>
