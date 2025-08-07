@@ -89,7 +89,30 @@
             scale: 1.5,
             enableCache: true
         });
-        pdfViewer.init('#pdf-viewer', APP_CONFIG.exam.pdfUrl);
+        
+        // Get PDF URL from multiple sources for robustness
+        const pdfViewerElement = document.querySelector('#pdf-viewer');
+        let pdfUrl = null;
+        
+        // Try to get from data attribute first (most reliable)
+        if (pdfViewerElement && pdfViewerElement.dataset.pdfUrl) {
+            pdfUrl = pdfViewerElement.dataset.pdfUrl;
+        }
+        // Fallback to APP_CONFIG
+        else if (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.pdfUrl) {
+            pdfUrl = APP_CONFIG.exam.pdfUrl;
+        }
+        
+        if (pdfUrl) {
+            pdfViewer.init('#pdf-viewer', pdfUrl);
+        } else {
+            console.error('PDF URL not found in either data attribute or APP_CONFIG');
+            // Show error message to user
+            const errorDiv = document.querySelector('.pdf-error');
+            if (errorDiv) {
+                errorDiv.style.display = 'block';
+            }
+        }
         
         // Initialize timer
         const timer = new PrimePath.modules.Timer({

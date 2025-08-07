@@ -12,11 +12,13 @@ Parameters:
 <div class="pdf-section">
     <div id="pdf-viewer" data-pdf-url="{{ pdf_url }}" data-initial-page="{{ initial_page|default:1 }}">
         <canvas id="pdf-canvas"></canvas>
-        <div class="pdf-loading" style="display: none;">
-            <div class="pdf-loading-spinner"></div>
-            <p>Loading PDF...</p>
+        <div class="pdf-loading" style="display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.9); z-index: 10;">
+            <div style="text-align: center;">
+                <div class="pdf-loading-spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                <p>Loading PDF...</p>
+            </div>
         </div>
-        <div class="pdf-error" style="display: none;">
+        <div class="pdf-error" style="display: none; padding: 20px; text-align: center; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 4px; color: #c62828;">
             <p>Error loading PDF. Please refresh the page.</p>
         </div>
     </div>

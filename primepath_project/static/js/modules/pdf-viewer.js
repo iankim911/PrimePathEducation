@@ -55,6 +55,14 @@
         async init(container, pdfUrl) {
             if (this.initialized) return;
             
+            // Validate PDF URL
+            if (!pdfUrl) {
+                this.log('error', 'PDF URL is required but was not provided');
+                this.emit('error', { message: 'PDF URL is required' });
+                this.showError('PDF file not found');
+                return;
+            }
+            
             // Get container element
             if (typeof container === 'string') {
                 this.container = document.querySelector(container);
@@ -105,6 +113,7 @@
          */
         async loadPDF(url) {
             try {
+                this.showLoading();
                 this.emit('loading', { url });
                 
                 const loadingTask = pdfjsLib.getDocument({
@@ -130,10 +139,13 @@
                 
                 // Render first page
                 await this.renderPage(this.currentPage);
+                this.hideLoading();
                 
             } catch (error) {
                 this.log('error', 'Error loading PDF:', error);
                 this.emit('error', { message: 'Failed to load PDF', error });
+                this.hideLoading();
+                this.showError('Failed to load PDF. Please check if the file exists and try refreshing the page.');
             }
         }
 
@@ -419,6 +431,67 @@
                         break;
                 }
             });
+        }
+
+        /**
+         * Show error message in the PDF viewer
+         * @param {string} message Error message to display
+         */
+        showError(message) {
+            // Hide loading indicator if visible
+            const loadingEl = this.container.querySelector('.pdf-loading');
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            
+            // Show error element if it exists
+            const errorEl = this.container.querySelector('.pdf-error');
+            if (errorEl) {
+                errorEl.style.display = 'block';
+                const errorMsg = errorEl.querySelector('p');
+                if (errorMsg && message) {
+                    errorMsg.textContent = message;
+                }
+            } else {
+                // Create error element if it doesn't exist
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'pdf-error';
+                errorDiv.innerHTML = `<p>${message || 'Error loading PDF. Please refresh the page.'}</p>`;
+                
+                // Clear container and add error
+                if (this.canvas) {
+                    this.canvas.style.display = 'none';
+                }
+                this.container.appendChild(errorDiv);
+            }
+            
+            this.log('error', `PDF Error displayed: ${message}`);
+        }
+
+        /**
+         * Show loading indicator
+         */
+        showLoading() {
+            const loadingEl = this.container.querySelector('.pdf-loading');
+            if (loadingEl) {
+                loadingEl.style.display = 'flex';
+            }
+            
+            // Hide error if visible
+            const errorEl = this.container.querySelector('.pdf-error');
+            if (errorEl) {
+                errorEl.style.display = 'none';
+            }
+        }
+
+        /**
+         * Hide loading indicator
+         */
+        hideLoading() {
+            const loadingEl = this.container.querySelector('.pdf-loading');
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
         }
 
         /**
