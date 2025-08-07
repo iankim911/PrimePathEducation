@@ -186,7 +186,13 @@
             console.log('APP_CONFIG:', APP_CONFIG);
         }
         
-        // Initialize navigation module
+        // Make instances globally available BEFORE navigation init
+        window.pdfViewer = pdfViewer;
+        window.audioPlayer = audioPlayer;
+        window.examTimer = timer;
+        window.answerManager = answerManager;
+        
+        // Initialize navigation module AFTER other modules are available
         const navigation = new PrimePath.modules.NavigationModule({
             enableKeyboard: true,
             enableUrlState: false,  // Disable URL state for exam security
@@ -202,8 +208,9 @@
             }
         });
         
-        // Initialize navigation after DOM is ready
+        // Initialize navigation after dependencies are available
         navigation.init();
+        window.navigation = navigation;
         
         // Setup event delegation for proper event handling
         const delegation = window.PrimePath.utils.EventDelegation;
@@ -229,31 +236,13 @@
             answerManager.submitTest();
         });
         
-        // Handle answer input changes
+        // Handle answer input changes (covers all input types: radio, checkbox, text)
         delegation.onChange('.answer-input', function(e) {
             const questionPanel = this.closest('.question-panel');
             if (questionPanel && answerManager) {
                 const questionNum = parseInt(questionPanel.dataset.questionNumber);
                 answerManager.saveAnswer(questionNum);
-                // Log for debugging
-                console.log(`Answer changed for question ${questionNum}`);
-            }
-        });
-        
-        // Also handle clicks on radio buttons and checkboxes as fallback
-        delegation.onClick('input[type="radio"].answer-input, input[type="checkbox"].answer-input', function(e) {
-            const questionPanel = this.closest('.question-panel');
-            if (questionPanel && answerManager) {
-                const questionNum = parseInt(questionPanel.dataset.questionNumber);
-                // For radio buttons, trigger change event
-                if (this.type === 'radio') {
-                    this.checked = true;
-                    const event = new Event('change', { bubbles: true });
-                    this.dispatchEvent(event);
-                }
-                // For checkboxes, just save the answer
-                answerManager.saveAnswer(questionNum);
-                console.log(`Click handled for question ${questionNum}`);
+                console.log(`Answer saved for question ${questionNum}`);
             }
         });
         
@@ -274,14 +263,8 @@
             });
         }
         
-        // Make instances globally available for debugging
-        window.pdfViewer = pdfViewer;
-        window.audioPlayer = audioPlayer;
-        window.examTimer = timer;
-        window.answerManager = answerManager;
-        window.navigation = navigation;
-        
         // Navigation module handles initial question display
+        // Note: All instances already made globally available above before navigation init
     });
     </script>
 </body>

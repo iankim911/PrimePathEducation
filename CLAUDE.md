@@ -188,6 +188,59 @@ cd primepath_project && ../venv/Scripts/python.exe manage.py runserver 127.0.0.1
 **Root Cause**: Fixed heights on containers (not spacing between them!)
 **Status**: ✅ Resolved (August 7, 2025)
 
+### 3. Student Test Navigation & Answer Selection Fix
+**Date**: August 7, 2025
+**Issue**: Navigation buttons (1-20) and answer selection not working
+**Root Cause**: Double JSON encoding - Django view using `json.dumps()` AND template using `json_script` filter
+**Error**: "Cannot read properties of undefined (reading 'id')" at APP_CONFIG.session.id
+**Solution**: 
+- Pass dict from view instead of JSON string (views.py line 117)
+- Add defensive programming with try-catch and null checks
+- Fixed initialization order (modules available before navigation init)
+**Status**: ✅ Resolved
+
+## 🏗️ Current Architecture
+
+### Template System
+- **V2 Templates**: ENABLED via `USE_V2_TEMPLATES` feature flag
+- **Template**: `student_test_v2.html` (modular with extracted CSS)
+- **Components**: Separate component templates in `components/placement_test/`
+
+### JavaScript Module System
+```
+Initialization Order:
+1. APP_CONFIG setup (with error handling)
+2. PDF Viewer
+3. Timer
+4. Audio Player
+5. Answer Manager (with defensive checks)
+6. Global instance registration
+7. Navigation Module (after dependencies available)
+8. Event Delegation
+```
+
+### Data Flow
+```
+Django View (dict) → Template (json_script filter) → JavaScript (JSON.parse) → APP_CONFIG
+```
+
+### Key Dependencies
+- **Navigation Module**: Depends on answerManager and audioPlayer
+- **Answer Manager**: Requires session.id and exam.id from APP_CONFIG
+- **Event Delegation**: Central event handling system for all DOM interactions
+
+## ⚠️ Common Pitfalls to Avoid
+
+### JavaScript Errors
+1. **Always check console first** - "Cannot read properties of undefined" means data issue, not UI issue
+2. **Don't double-encode JSON** - Use either Django's json.dumps() OR template's json_script, not both
+3. **Initialize in correct order** - Dependencies must be available before dependent modules
+
+### Event Handling
+1. **Use onChange for inputs** - Don't add both onChange AND onClick handlers for same elements
+2. **Navigation module handles its own events** - Don't duplicate in template
+3. **Event delegation pattern** - Use `self` for module reference, `this` for DOM element
+
 ---
 *Last Updated: August 7, 2025*
 *This file should be read at the start of every Claude session*
