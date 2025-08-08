@@ -24,9 +24,10 @@
             this.answers = new Map();
             this.answeredQuestions = new Set();
             
-            // Session info
-            this.sessionId = options.sessionId || null;
-            this.examId = options.examId || null;
+            // Session info - handle multiple formats for backward compatibility
+            this.session = options.session || null;
+            this.sessionId = options.sessionId || (this.session && this.session.id) || null;
+            this.examId = options.examId || (this.session && this.session.examId) || null;
             
             // Auto-save settings
             this.autoSave = options.autoSave !== false;
@@ -186,11 +187,18 @@
             const answerData = this.answers.get(questionNum);
             if (!answerData) return false;
             
+            // Defensive check for sessionId
+            const sessionId = this.getSessionId();
+            if (!sessionId) {
+                this.log('error', 'Cannot save answer: session ID not available');
+                return false;
+            }
+            
             try {
                 const response = await this.ajax(this.saveEndpoint, {
                     method: 'POST',
                     body: JSON.stringify({
-                        session_id: this.sessionId,
+                        session_id: sessionId,
                         question_id: answerData.questionId,
                         answer: answerData.answer
                     })
@@ -309,6 +317,14 @@
          * @param {boolean} force Force submission without validation
          */
         async submitTest(force = false) {
+            // Defensive check for sessionId with multiple fallbacks
+            const sessionId = this.getSessionId();
+            if (!sessionId) {
+                this.log('error', 'Cannot submit test: session ID not available');
+                alert('Unable to submit test. Session information is missing. Please refresh the page and try again.');
+                return false;
+            }
+            
             // Validate unless forced
             if (!force) {
                 const validation = this.validateTest();
@@ -324,12 +340,12 @@
             // Submit to server
             try {
                 const endpoint = this.submitEndpoint || 
-                    `/api/placement/session/${this.sessionId}/complete/`;
+                    `/api/placement/session/${sessionId}/complete/`;
                 
                 const response = await this.ajax(endpoint, {
                     method: 'POST',
                     body: JSON.stringify({
-                        session_id: this.sessionId,
+                        session_id: sessionId,
                         answers: Object.fromEntries(this.answers)
                     })
                 });
@@ -480,6 +496,64 @@
             };
         }
 
+        /**
+         * Get session ID with multiple fallback mechanisms
+         * @returns {string|null} Session ID or null if not found
+         */
+        getSessionId() {
+            // Try primary source
+            if (this.sessionId) {
+                return this.sessionId;
+            }
+            
+            // Try from session object (for backward compatibility)
+            if (this.session && this.session.id) {
+                this.sessionId = this.session.id;
+                return this.sessionId;
+            }
+            
+            // Try from APP_CONFIG
+            if (window.APP_CONFIG && window.APP_CONFIG.session && window.APP_CONFIG.session.id) {
+                this.sessionId = window.APP_CONFIG.session.id;
+                return this.sessionId;
+            }
+            
+            // Try from global sessionId variable
+            if (window.sessionId) {
+                this.sessionId = window.sessionId;
+                return this.sessionId;
+            }
+            
+            // Try to extract from URL as last resort
+            const urlMatch = window.location.pathname.match(/session\/([a-f0-9-]+)/);
+            if (urlMatch && urlMatch[1]) {
+                this.sessionId = urlMatch[1];
+                this.log('warn', 'Session ID extracted from URL: ' + this.sessionId);
+                return this.sessionId;
+            }
+            
+            // No session ID found
+            this.log('error', 'Unable to determine session ID from any source');
+            return null;
+        }
+        
+        /**
+         * Get exam ID with fallback mechanisms
+         * @returns {string|null} Exam ID or null if not found
+         */
+        getExamId() {
+            if (this.examId) {
+                return this.examId;
+            }
+            
+            if (window.APP_CONFIG && window.APP_CONFIG.exam && window.APP_CONFIG.exam.id) {
+                this.examId = window.APP_CONFIG.exam.id;
+                return this.examId;
+            }
+            
+            return null;
+        }
+        
         /**
          * Destroy module and cleanup
          */

@@ -682,7 +682,7 @@ def save_exam_answers(request, exam_id):
             'success': True,
             'message': f'Successfully saved {len(questions_data)} questions',
             'details': results,
-            'audio_assignments_saved': len(audio_assignments),
+            'audio_assignments_saved': len(audio_assignments) if audio_assignments else 0,
             'audio_results': audio_results
         })
         

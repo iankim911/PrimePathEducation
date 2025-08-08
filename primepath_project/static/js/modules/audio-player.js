@@ -133,6 +133,9 @@
          * @param {string|number} audioId Audio element ID
          */
         async stop(audioId) {
+            // Ensure audioId is a string
+            audioId = String(audioId);
+            
             const audioElement = document.getElementById(`audio-element-${audioId}`);
             const playButton = document.getElementById(`audio-play-${audioId}`);
             const iconElement = document.getElementById(`audio-icon-${audioId}`);

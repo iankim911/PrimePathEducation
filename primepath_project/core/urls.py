@@ -1,17 +1,25 @@
+"""
+Core URLs
+
+This file maintains 100% backward compatibility.
+All existing URL patterns are preserved and continue to work exactly as before.
+
+The URLs have been organized into logical modules:
+- dashboard_urls.py: Main navigation and dashboard URLs
+- admin_urls.py: Administrative function URLs
+- api_urls.py: Core API endpoint URLs
+
+All URL patterns are imported here to maintain compatibility.
+"""
 from django.urls import path
-from . import views
+from .dashboard_urls import urlpatterns as dashboard_patterns
+from .admin_urls import urlpatterns as admin_patterns
+from .api_urls import urlpatterns as api_patterns
 
 app_name = 'core'
 
-urlpatterns = [
-    path('', views.index, name='index'),
-    path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
-    path('curriculum/levels/', views.curriculum_levels, name='curriculum_levels'),
-    path('placement-rules/', views.placement_rules, name='placement_rules'),
-    path('placement-rules/create/', views.create_placement_rule, name='create_placement_rule'),
-    path('placement-rules/<int:pk>/delete/', views.delete_placement_rule, name='delete_placement_rule'),
-    path('api/placement-rules/', views.get_placement_rules, name='get_placement_rules'),
-    path('api/placement-rules/save/', views.save_placement_rules, name='save_placement_rules'),
-    path('exam-mapping/', views.exam_mapping, name='exam_mapping'),
-    path('api/exam-mappings/save/', views.save_exam_mappings, name='save_exam_mappings'),
-]
+# Combine all URL patterns from modular files
+urlpatterns = []
+urlpatterns.extend(dashboard_patterns)
+urlpatterns.extend(admin_patterns)
+urlpatterns.extend(api_patterns)

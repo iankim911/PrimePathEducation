@@ -1,23 +1,17 @@
 """
-API URL patterns for placement test.
+AJAX/API URLs
+URLs for AJAX endpoints and API functionality
 """
 from django.urls import path
-from . import api_views
-
-app_name = 'placement_api'
+from . import views
 
 urlpatterns = [
-    # Exam endpoints
-    path('exams/', api_views.api_exam_list, name='exam_list'),
-    path('exams/<uuid:exam_id>/', api_views.api_exam_detail, name='exam_detail'),
-    
-    # Session endpoints
-    path('sessions/<uuid:session_id>/status/', api_views.api_session_status, name='session_status'),
-    path('sessions/complete/', api_views.api_complete_session, name='complete_session'),
-    
-    # Answer endpoints
-    path('answers/submit/', api_views.api_submit_answer, name='submit_answer'),
-    
-    # Rules
-    path('rules/', api_views.api_placement_rules, name='placement_rules'),
+    # AJAX/API endpoints
+    path('audio/<int:audio_id>/', views.get_audio, name='get_audio'),
+    path('questions/<int:question_id>/update/', views.update_question, name='update_question'),
+    path('exams/<uuid:exam_id>/create-questions/', views.create_questions, name='create_questions'),
+    path('exams/<uuid:exam_id>/save-answers/', views.save_exam_answers, name='save_exam_answers'),
+    path('exams/<uuid:exam_id>/update-audio-names/', views.update_audio_names, name='update_audio_names'),
+    path('exams/<uuid:exam_id>/audio/<int:audio_id>/delete/', views.delete_audio_from_exam, name='delete_audio_from_exam'),
+    path('exams/<uuid:exam_id>/update-name/', views.update_exam_name, name='update_exam_name'),
 ]

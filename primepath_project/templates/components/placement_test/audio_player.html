@@ -9,21 +9,22 @@ Parameters:
 <div class="question-audio" data-audio-id="{{ audio_file.id }}">
     <div class="audio-controls">
         <button type="button" 
+                id="audio-play-{{ audio_file.id }}"
                 class="audio-play-btn" 
                 data-audio-play="{{ audio_file.id }}"
                 aria-label="Play audio">
-            <span class="audio-icon">▶</span>
+            <span id="audio-icon-{{ audio_file.id }}" class="audio-icon">▶</span>
             <span class="audio-text">Play Audio</span>
         </button>
         
         <div class="audio-info">
             <span class="audio-name">{{ audio_file.name|default:"Audio File" }}</span>
-            <span class="audio-duration" data-duration="{{ audio_file.id }}">0:00</span>
+            <span id="audio-duration-{{ audio_file.id }}" class="audio-duration" data-duration="{{ audio_file.id }}">0:00</span>
         </div>
     </div>
     
-    <div class="audio-progress" data-progress="{{ audio_file.id }}">
-        <div class="audio-progress-bar" data-progress-bar="{{ audio_file.id }}"></div>
+    <div id="progress-track-{{ audio_file.id }}" class="audio-progress" data-progress="{{ audio_file.id }}">
+        <div id="progress-fill-{{ audio_file.id }}" class="audio-progress-bar" data-progress-bar="{{ audio_file.id }}"></div>
     </div>
     
     <audio id="audio-element-{{ audio_file.id }}" 

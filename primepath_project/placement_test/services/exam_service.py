@@ -291,6 +291,10 @@ class ExamService:
         updated_count = 0
         errors = []
         
+        # Handle None or empty audio_assignments
+        if not audio_assignments:
+            audio_assignments = {}
+        
         # Convert audio_assignments keys to integers and validate
         validated_assignments = {}
         for question_num_str, audio_id in audio_assignments.items():

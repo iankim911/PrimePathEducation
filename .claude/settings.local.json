@@ -168,7 +168,26 @@
       "Bash(\"..\\venv\\Scripts\\python.exe\" quick_test_answer_keys.py)",
       "Bash(\"..\\venv\\Scripts\\python.exe\" test_student_interface_fix.py)",
       "Bash(\"..\\venv\\Scripts\\python.exe\" quick_test_student_fix.py)",
-      "Bash(\"..\\venv\\Scripts\\python.exe\" test_template_consolidation.py)"
+      "Bash(\"..\\venv\\Scripts\\python.exe\" test_template_consolidation.py)",
+      "Bash(npm install:*)",
+      "Bash(npm search:*)",
+      "Bash(mcp-chrome-bridge register:*)",
+      "Bash(/Users/ian/.npm-global/bin/mcp-chrome-bridge register)",
+      "Bash(../venv/bin/python manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite)",
+      "Bash(../venv/bin/python manage.py shell:*)",
+      "Bash(../venv/bin/python3 manage.py shell:*)",
+      "Bash(venv/bin/python:*)",
+      "Bash(../venv/bin/python manage.py check:*)",
+      "Bash(../venv/bin/python test_phase9_readiness.py:*)",
+      "Bash(../venv/bin/python test_phase9_implementation.py:*)",
+      "Bash(../venv/bin/python:*)",
+      "Bash(# Move placement test related tests\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_exam_creation.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/placement_test/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_submit_answer.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/placement_test/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_answer_inputs.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/placement_test/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_answer_input_analysis.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/placement_test/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_navigation.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/placement_test/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_phone_validation.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/placement_test/tests/)",
+      "Bash(# Move core tests\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_exam_mapping.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/core/tests/\n\n# Move API tests\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_api_versioning.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/api/tests/\n\n# Move integration tests to project-level tests directory\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_all_features_comprehensive.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_existing_features_final.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_backend_modularization.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_seamless_ui.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_submit_fix_comprehensive.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/)",
+      "Bash(# Move remaining phase and UI tests to integration tests\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_phase*.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_template_consolidation.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_height_gap_fix.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_gap_fix.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/\nmv /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_answer_keys_restoration.py /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/tests/)",
+      "Bash(pkill:*)",
+      "Bash(kill:*)",
+      "Bash(./verify_fixes.sh:*)",
+      "Bash(sudo rm:*)"
     ],
     "deny": []
   }

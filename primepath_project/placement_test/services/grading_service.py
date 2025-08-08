@@ -62,8 +62,8 @@ class GradingService:
         Grade a short answer question.
         
         Args:
-            student_answer: Student's answer
-            correct_answer: Correct answer(s) separated by |
+            student_answer: Student's answer (can be JSON for multiple parts)
+            correct_answer: Correct answer(s) - single or comma-separated letters
             case_sensitive: Whether to check case
             
         Returns:
@@ -72,19 +72,45 @@ class GradingService:
         if not correct_answer:
             # No automatic grading possible
             return None
+        
+        # Check if this is a multiple short answer (correct_answer has comma)
+        if ',' in correct_answer:
+            # Multiple short answers expected
+            try:
+                # Try to parse student answer as JSON
+                import json
+                student_answers = json.loads(student_answer)
+                
+                # Check if we have answers for all required parts
+                expected_parts = [part.strip().upper() for part in correct_answer.split(',')]
+                
+                # For multiple short answers, we require manual grading
+                # because we can't automatically grade text answers
+                # Just check if all parts are answered
+                for part in expected_parts:
+                    if part not in student_answers or not student_answers[part].strip():
+                        return False  # Missing a required part
+                
+                # All parts answered, but needs manual grading for correctness
+                return None
+                
+            except (json.JSONDecodeError, TypeError):
+                # Invalid format for multiple answers
+                return False
+        else:
+            # Single short answer
+            # Get all acceptable answers
+            acceptable_answers = [
+                ans.strip() for ans in correct_answer.split('|')
+            ]
             
-        # Get all acceptable answers
-        acceptable_answers = [
-            ans.strip() for ans in correct_answer.split('|')
-        ]
-        
-        student_ans = student_answer.strip()
-        
-        if not case_sensitive:
-            student_ans = student_ans.lower()
-            acceptable_answers = [ans.lower() for ans in acceptable_answers]
-        
-        return student_ans in acceptable_answers
+            student_ans = student_answer.strip()
+            
+            if not case_sensitive:
+                student_ans = student_ans.lower()
+                acceptable_answers = [ans.lower() for ans in acceptable_answers]
+            
+            return student_ans in acceptable_answers
     
     @staticmethod
     def auto_grade_answer(answer: StudentAnswer) -> Dict[str, Any]:

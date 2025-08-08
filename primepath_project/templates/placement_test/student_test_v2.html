@@ -112,6 +112,13 @@
     
     // Initialize modules
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize event delegation first
+        if (window.PrimePath && window.PrimePath.utils && window.PrimePath.utils.EventDelegation) {
+            window.PrimePath.utils.EventDelegation.init();
+        } else {
+            console.error('EventDelegation not loaded');
+        }
+        
         // Initialize PDF viewer
         const pdfViewer = new PrimePath.modules.PDFViewer({
             scale: 1.5,
@@ -168,22 +175,48 @@
         });
         audioPlayer.init();
         
-        // Initialize answer manager with defensive checks
+        // Initialize answer manager with enhanced defensive checks and fallbacks
         let answerManager = null;
-        if (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id && APP_CONFIG.exam && APP_CONFIG.exam.id) {
-            answerManager = new PrimePath.modules.AnswerManager({
-                sessionId: APP_CONFIG.session.id,
-                examId: APP_CONFIG.exam.id,
-                autoSave: true,
-                autoSaveInterval: 30000,
-                saveEndpoint: APP_CONFIG.urls.saveAnswer,
-                submitEndpoint: APP_CONFIG.urls.completeTest
-            });
-            answerManager.init();
-            console.log('Answer manager initialized successfully');
+        
+        // Ensure AnswerManager class is available
+        if (!window.PrimePath || !window.PrimePath.modules || !window.PrimePath.modules.AnswerManager) {
+            console.error('AnswerManager module not loaded');
         } else {
-            console.error('Cannot initialize answer manager: missing session or exam ID');
-            console.log('APP_CONFIG:', APP_CONFIG);
+            // Try to initialize with multiple fallback sources
+            const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
+                              window.sessionId || 
+                              '{{ session.id }}' || 
+                              null;
+            
+            const examId = (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.id) || 
+                           window.examId || 
+                           '{{ exam.id }}' || 
+                           null;
+            
+            if (sessionId && examId) {
+                try {
+                    answerManager = new PrimePath.modules.AnswerManager({
+                        session: APP_CONFIG && APP_CONFIG.session,  // Pass full session object for compatibility
+                        sessionId: sessionId,
+                        examId: examId,
+                        autoSave: true,
+                        autoSaveInterval: 30000,
+                        saveEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.saveAnswer) || 
+                                      '{% url "placement_test:submit_answer" session.id %}',
+                        submitEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest) || 
+                                        '{% url "placement_test:complete_test" session.id %}'
+                    });
+                    answerManager.init();
+                    console.log('Answer manager initialized successfully with session:', sessionId);
+                } catch (error) {
+                    console.error('Error initializing answer manager:', error);
+                    answerManager = null;
+                }
+            } else {
+                console.error('Cannot initialize answer manager: missing session or exam ID');
+                console.log('Session ID:', sessionId, 'Exam ID:', examId);
+                console.log('APP_CONFIG:', APP_CONFIG);
+            }
         }
         
         // Make instances globally available BEFORE navigation init
@@ -219,21 +252,61 @@
         // We don't need to set them up here to avoid duplicate handlers
         // The navigation.init() call already sets up all navigation event handlers
         
-        // Submit test
+        // Submit test with enhanced error handling and fallback
         delegation.onClick('[data-action="submit-test"]', function() {
             if (!answerManager) {
-                alert('Unable to submit test: Answer manager not initialized. Please refresh the page.');
+                console.error('Answer manager not initialized, attempting fallback submission...');
+                
+                // Try to create a minimal answer manager just for submission
+                const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
+                                  '{{ session.id }}';
+                
+                if (sessionId) {
+                    // Direct submission without answer manager as fallback
+                    if (confirm('There was an issue with the test system. Do you want to submit your test anyway?')) {
+                        const csrfToken = '{{ csrf_token }}';
+                        fetch(`/api/placement/session/${sessionId}/complete/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                alert('Error submitting test. Please contact support.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Submission error:', error);
+                            alert('Unable to submit test. Please contact support.');
+                        });
+                    }
+                } else {
+                    alert('Unable to submit test: Session information is missing. Please refresh the page and try again.');
+                }
                 return;
             }
             
-            const stats = answerManager.getStats();
-            
-            if (stats.unansweredCount > 0) {
-                const message = `You have ${stats.unansweredCount} unanswered question(s).\\n\\nAre you sure you want to submit?`;
-                if (!confirm(message)) return;
+            // Normal submission path with answer manager
+            try {
+                const stats = answerManager.getStats();
+                
+                if (stats.unansweredCount > 0) {
+                    const message = `You have ${stats.unansweredCount} unanswered question(s).\\n\\nAre you sure you want to submit?`;
+                    if (!confirm(message)) return;
+                }
+                
+                answerManager.submitTest();
+            } catch (error) {
+                console.error('Error during submission:', error);
+                if (confirm('There was an error preparing your submission. Do you want to try again?')) {
+                    answerManager.submitTest(true); // Force submission
+                }
             }
-            
-            answerManager.submitTest();
         });
         
         // Handle answer input changes (covers all input types: radio, checkbox, text)

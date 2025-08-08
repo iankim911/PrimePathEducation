@@ -3,6 +3,16 @@ from django import template
 register = template.Library()
 
 @register.filter
+def split(value, delimiter=','):
+    """
+    Split a string by delimiter and return a list
+    Usage: {{ value|split:',' }}
+    """
+    if value is None:
+        return []
+    return [item.strip() for item in str(value).split(delimiter)]
+
+@register.filter
 def format_grade(grade):
     """Format grade number to Korean school system format"""
     try:

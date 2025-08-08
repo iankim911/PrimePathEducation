@@ -1222,7 +1222,7 @@ let unsavedChanges = false;
 const answers = {};
 
 // Audio assignments tracking
-const audioAssignments = {};
+let audioAssignments = {};
 
 // Track changed audio names
 const changedAudioNames = new Set();
@@ -1248,18 +1248,10 @@ function getCookie(name) {
     return cookieValue;
 }
 
-console.log('🚀 NUCLEAR DEBUG - Script loading at ' + new Date().toISOString());
-
-// NUCLEAR OVERRIDE - Clear any existing assignments
-window.audioAssignments = {};
-console.log('💥 NUCLEAR: Cleared audioAssignments');
+console.log('🚀 Script loading at ' + new Date().toISOString());
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔥 NUCLEAR DEBUG - DOMContentLoaded fired! Timestamp: ' + new Date().toISOString());
-    
-    // NUCLEAR: Override any existing loading
-    window.audioAssignments = {};
-    console.log('💥 NUCLEAR: Re-cleared audioAssignments in DOMContentLoaded');
+    console.log('🔥 DOMContentLoaded fired! Timestamp: ' + new Date().toISOString());
     
     console.log('🔍 DEBUG: audioAssignments initial state:', audioAssignments);
     
@@ -1292,20 +1284,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('🔍 DEBUG: questionAudioData length:', questionAudioData.length);
     
-    console.log('=== NEW AUDIO ASSIGNMENT LOADING DEBUG ===');
+    console.log('=== AUDIO ASSIGNMENT LOADING ===');
     console.log('questionAudioData:', questionAudioData);
     console.log('audioAssignments before loading:', audioAssignments);
     
-    // NUCLEAR: Clear before loading new assignments
-    window.audioAssignments = {};
-    console.log('💥 NUCLEAR: Final clear before loading assignments');
-    
     questionAudioData.forEach((data, index) => {
-        console.log(`🚀 NUCLEAR LOADING assignment ${index + 1}: Q${data.questionNum} -> Audio ${data.audioId}`);
+        console.log(`Loading assignment ${index + 1}: Q${data.questionNum} -> Audio ${data.audioId}`);
         
         // Load direct Question -> AudioFile relationships
         audioAssignments[data.questionNum] = data.audioId;
-        console.log('✅ NUCLEAR ASSIGNMENT: Q' + data.questionNum + ' -> Audio ID ' + data.audioId);
+        console.log('✅ Assignment: Q' + data.questionNum + ' -> Audio ID ' + data.audioId);
         
         const buttonSelector = `[data-question="${data.questionNum}"].audio-button`;
         console.log('🔍 Looking for button with selector:', buttonSelector);
@@ -1327,12 +1315,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     console.log('audioAssignments after loading:', audioAssignments);
-    console.log('=== END AUDIO ASSIGNMENT LOADING DEBUG ===');
+    console.log('=== END AUDIO ASSIGNMENT LOADING ===');
     
-    // NUCLEAR: Final check and protection
-    console.log('💥 NUCLEAR FINAL CHECK - audioAssignments contains:', Object.keys(audioAssignments).length, 'assignments');
-    for (const [q, audioId] of Object.entries(audioAssignments)) {
-        console.log(`💥 FINAL: Q${q} -> Audio ${audioId}`);
+    // Final check
+    if (audioAssignments && typeof audioAssignments === 'object') {
+        console.log('Final check - audioAssignments contains:', Object.keys(audioAssignments).length, 'assignments');
+        for (const [q, audioId] of Object.entries(audioAssignments)) {
+            console.log(`💥 FINAL: Q${q} -> Audio ${audioId}`);
+        }
+    } else {
+        console.log('Final check - audioAssignments is not properly initialized');
     }
 });
 
@@ -2777,8 +2769,8 @@ function toggleAudio(questionNum) {
         }
         
         // Check localStorage for updated name
-    const localAudioNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
-    const storedName = localAudioNames[audio.id];
+    const storedAudioNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
+    const storedName = storedAudioNames[audio.id];
     if (storedName) {
         displayName = storedName;
     }
@@ -2820,8 +2812,8 @@ function assignAudioToQuestion(questionNum, audio) {
     audioAssignments[questionNum] = audio.id;
     
     // Get the display name from localStorage or use original
-    const localAudioNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
-    const displayName = localAudioNames[audio.id] || audio.name;
+    const cachedAudioNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
+    const displayName = cachedAudioNames[audio.id] || audio.name;
     console.log('Display name:', displayName, 'for audio ID:', audio.id);
     
     // Update the UI
@@ -3294,18 +3286,34 @@ function loadLocalAudioNames() {
     
     if (saved) {
         try {
-            const savedNames = JSON.parse(saved);
-            Object.assign(localAudioNames, savedNames);
+            // Check for corrupted localStorage values
+            if (saved === 'null' || saved === 'undefined' || saved === '') {
+                console.warn('Corrupted localStorage detected, clearing...');
+                localStorage.removeItem(storageKey);
+                return;
+            }
             
-            // Apply saved names to input fields
-            Object.keys(savedNames).forEach(audioId => {
-                const input = document.getElementById(`audio-name-${audioId}`);
-                if (input) {
-                    input.value = savedNames[audioId];
-                }
-            });
+            const savedNames = JSON.parse(saved);
+            
+            // Ensure savedNames is a valid object before using it
+            if (savedNames && typeof savedNames === 'object' && !Array.isArray(savedNames)) {
+                Object.assign(localAudioNames, savedNames);
+                
+                // Apply saved names to input fields
+                Object.keys(savedNames).forEach(audioId => {
+                    const input = document.getElementById(`audio-name-${audioId}`);
+                    if (input) {
+                        input.value = savedNames[audioId];
+                    }
+                });
+            } else {
+                console.warn('Invalid saved names format, clearing localStorage');
+                localStorage.removeItem(storageKey);
+            }
         } catch (e) {
             console.error('Error loading saved audio names:', e);
+            // Clear corrupted data
+            localStorage.removeItem(storageKey);
         }
     }
 }
@@ -3313,10 +3321,20 @@ function loadLocalAudioNames() {
 // Update audio button names after saving
 function updateAudioButtonNames() {
     // Get the latest saved names from localStorage
-    const savedNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
+    let savedNames = {};
+    try {
+        const stored = localStorage.getItem(`exam_${examId}_audio_names`);
+        if (stored && stored !== 'null' && stored !== 'undefined') {
+            savedNames = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.error('Error parsing saved names:', e);
+        savedNames = {};
+    }
     
     // Update all audio buttons based on current assignments
-    Object.entries(audioAssignments).forEach(([questionNum, audioId]) => {
+    if (audioAssignments && typeof audioAssignments === 'object') {
+        Object.entries(audioAssignments).forEach(([questionNum, audioId]) => {
         const button = document.querySelector(`[data-question="${questionNum}"].audio-button`);
         if (button) {
             // Get the display name
@@ -3328,6 +3346,7 @@ function updateAudioButtonNames() {
             button.innerHTML = `🎵 Audio: ${shortName}`;
         }
     });
+    }  // End of null check for audioAssignments
 }
 
 
