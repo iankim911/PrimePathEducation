@@ -190,7 +190,7 @@ def preview_exam(request, exam_id):
     # Get audio files
     audio_files = exam.audio_files.all()
     
-    return render(request, 'placement_test/preview_exam.html', {
+    return render(request, 'placement_test/preview_and_answers.html', {
         'exam': exam,
         'questions': questions,
         'audio_files': audio_files,

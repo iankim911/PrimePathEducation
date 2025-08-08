@@ -135,7 +135,12 @@ def take_test(request, session_id):
         }
     }
     
-    template_name = get_template_name('placement_test/student_test.html', 'placement_test/take_test.html')
+    # Check for v2 templates first (based on feature flag)
+    from django.conf import settings
+    if getattr(settings, 'FEATURE_FLAGS', {}).get('USE_V2_TEMPLATES', False):
+        template_name = 'placement_test/student_test_v2.html'
+    else:
+        template_name = get_template_name(request, 'placement_test/student_test.html')
     
     return render(request, template_name, {
         'session': session,
@@ -143,7 +148,8 @@ def take_test(request, session_id):
         'questions': questions,
         'audio_files': audio_files,
         'student_answers': student_answers,
-        'js_config': json.dumps(js_config)  # Pass as JSON string
+        'timer_seconds': exam.timer_minutes * 60,
+        'js_config': js_config  # Pass as dict, not JSON string - json_script filter will handle encoding
     })
 
 

@@ -162,7 +162,13 @@
       "Bash(../venv/Scripts/python.exe:*)",
       "Bash(../venv/Scripts/pip.exe install djangorestframework==3.14.0 django-filter==23.5 django-cors-headers==4.3.1)",
       "Bash(../venv/Scripts/pip.exe install celery==5.3.4 redis==5.0.1)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(..venvScriptspython.exe test_answer_keys_restoration.py)",
+      "Bash(\"..\\venv\\Scripts\\python.exe\" test_answer_keys_restoration.py)",
+      "Bash(\"..\\venv\\Scripts\\python.exe\" quick_test_answer_keys.py)",
+      "Bash(\"..\\venv\\Scripts\\python.exe\" test_student_interface_fix.py)",
+      "Bash(\"..\\venv\\Scripts\\python.exe\" quick_test_student_fix.py)",
+      "Bash(\"..\\venv\\Scripts\\python.exe\" test_template_consolidation.py)"
     ],
     "deny": []
   }
