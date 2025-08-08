@@ -17,7 +17,6 @@ from core.exceptions import (
 )
 from core.decorators import handle_errors, validate_request_data
 from ..services import PlacementService, SessionService, ExamService, GradingService
-from core.utils import get_template_name
 import json
 import uuid
 import logging
@@ -135,12 +134,8 @@ def take_test(request, session_id):
         }
     }
     
-    # Check for v2 templates first (based on feature flag)
-    from django.conf import settings
-    if getattr(settings, 'FEATURE_FLAGS', {}).get('USE_V2_TEMPLATES', False):
-        template_name = 'placement_test/student_test_v2.html'
-    else:
-        template_name = get_template_name(request, 'placement_test/student_test.html')
+    # Use the standard V2 template (component-based)
+    template_name = 'placement_test/student_test_v2.html'
     
     return render(request, template_name, {
         'session': session,

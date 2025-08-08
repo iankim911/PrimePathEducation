@@ -101,12 +101,11 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Feature flags for safe modularization
 FEATURE_FLAGS = {
-    'USE_MODULAR_TEMPLATES': False,  # DISABLED - Old modular templates missing styles
-    'USE_V2_TEMPLATES': True,  # NEW - Properly modularized templates with extracted CSS
-    'USE_SERVICE_LAYER': True,  # Already using services
-    'USE_JS_MODULES': True,  # JS modules already created
-    'ENABLE_CACHING': True,  # ENABLED - Improves performance
-    'ENABLE_API_V2': True,  # ENABLED - New organized API endpoints
+    # Template consolidation complete - V2 templates are now the standard
+    'USE_SERVICE_LAYER': True,  # Services working well
+    'USE_JS_MODULES': True,  # JS modules active
+    'ENABLE_CACHING': True,  # Improves performance
+    'ENABLE_API_V2': True,  # New organized API endpoints
 }
 
 # Django REST Framework Configuration

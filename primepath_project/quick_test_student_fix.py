@@ -38,11 +38,11 @@ def quick_test():
         session = StudentSession.objects.create(
             student_name="Test Student",
             parent_phone="0101234567",
-            school_name="Test School",
+            school_name_manual="Test School",
             grade=5,
             academic_rank="top",
             exam=exam,
-            curriculum_level=exam.curriculum_level,
+            original_curriculum_level=exam.curriculum_level,
             ip_address="127.0.0.1"
         )
     
