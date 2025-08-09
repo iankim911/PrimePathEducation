@@ -1,0 +1,38 @@
+{
+  "passed": 44,
+  "failed": 4,
+  "categories": {
+    "Models": {
+      "passed": 9,
+      "failed": 0
+    },
+    "Views": {
+      "passed": 8,
+      "failed": 0
+    },
+    "API": {
+      "passed": 2,
+      "failed": 0
+    },
+    "Templates": {
+      "passed": 9,
+      "failed": 0
+    },
+    "Services": {
+      "passed": 1,
+      "failed": 2
+    },
+    "Modular": {
+      "passed": 3,
+      "failed": 0
+    },
+    "Cleanup": {
+      "passed": 6,
+      "failed": 2
+    },
+    "Features": {
+      "passed": 6,
+      "failed": 0
+    }
+  }
+}
