@@ -1,0 +1,41 @@
+{
+  "passed": 6,
+  "failed": 1,
+  "details": [
+    {
+      "test": "API update endpoint",
+      "passed": true,
+      "details": "Successfully updated options_count to 8"
+    },
+    {
+      "test": "Database persistence",
+      "passed": true,
+      "details": "Options count correctly saved as 8"
+    },
+    {
+      "test": "Template filter integration",
+      "passed": true,
+      "details": "MCQ component uses 8 options correctly"
+    },
+    {
+      "test": "Preview page access",
+      "passed": false,
+      "details": "HTTP 404: b'<!DOCTYPE html>\\n<html lang=\"en\">\\n<head>\\n  <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">\\n  <title>Page not found at /placement/exams/63d64157-afcb-4f50-bfe8-9b06192be59e/preview/</title>\\n  <meta name=\"robots\" content=\"NONE,NOARCHIVE\">\\n  <style type=\"text/css\">\\n    html * { padding:0; margin:0; }\\n    body * { padding:10px 20px; }\\n    body * * { padding:0; }\\n    body { font:small sans-serif; background:#eee; color:#000; }\\n    body>div { border-bottom:1px solid #ddd; }\\n    h1 { font-weight:normal; margin-bottom:.4em; }\\n    h1 span { font-size:60%; color:#666; font-weight:normal; }\\n    table { border:none; border-collapse: collapse; width:100%; }\\n    td, th { vertical-align:top; padding:2px 3px; }\\n    th { width:12em; text-align:right; color:#666; padding-right:.5em; }\\n    #info { background:#f6f6f6; }\\n    #info ol { margin: 0.5em 4em; }\\n    #info ol li { font-family: monospace; }\\n    #summary { background: #ffc; }\\n    #explanation { background:#eee; border-bottom: 0px none; }\\n    pre.exception_value { font-family: sans-serif; color: #575757; font-size: 1.5em; margin: 10px 0 10px 0; }\\n  </style>\\n</head>\\n<body>\\n  <div id=\"summary\">\\n    <h1>Page not found <span>(404)</span></h1>\\n    \\n    <table class=\"meta\">\\n      <tr>\\n        <th>Request Method:</th>\\n        <td>GET</td>\\n      </tr>\\n      <tr>\\n        <th>Request URL:</th>\\n        <td>http://testserver/placement/exams/63d64157-afcb-4f50-bfe8-9b06192be59e/preview/</td>\\n      </tr>\\n      \\n    </table>\\n  </div>\\n  <div id=\"info\">\\n    \\n      <p>\\n      Using the URLconf defined in <code>primepath_project.urls</code>,\\n      Django tried these URL patterns, in this order:\\n      </p>\\n      <ol>\\n        \\n          <li>\\n            \\n                admin/\\n                \\n            \\n          </li>\\n        \\n          <li>\\n            \\n                api/placement/\\n                \\n            \\n          </li>\\n        \\n          <li>\\n            \\n                api/v2/placement/\\n                \\n            \\n          </li>\\n        \\n          <li>\\n            \\n                api/\\n                \\n            \\n          </li>\\n        \\n          <li>\\n            \\n                api-auth/\\n                \\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                \\n                [name=\\'index\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                teacher/dashboard/\\n                [name=\\'teacher_dashboard\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                curriculum/levels/\\n                [name=\\'curriculum_levels\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                placement-rules/\\n                [name=\\'placement_rules\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                placement-rules/create/\\n                [name=\\'create_placement_rule\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                placement-rules/&lt;int:pk&gt;/delete/\\n                [name=\\'delete_placement_rule\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                exam-mapping/\\n                [name=\\'exam_mapping\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                api/placement-rules/\\n                [name=\\'get_placement_rules\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                api/placement-rules/save/\\n                [name=\\'save_placement_rules\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                \\n                \\n            \\n                api/exam-mappings/save/\\n                [name=\\'save_exam_mappings\\']\\n            \\n          </li>\\n        \\n          <li>\\n            \\n                ^media/(?P&lt;path&gt;.*)$\\n                \\n            \\n          </li>\\n        \\n          <li>\\n            \\n                ^static/(?P&lt;path&gt;.*)$\\n                \\n            \\n          </li>\\n        \\n      </ol>\\n      <p>\\n        \\n          The current path, <code>placement/exams/63d64157-afcb-4f50-bfe8-9b06192be59e/preview/</code>,\\n        \\n        didn\\xe2\\x80\\x99t match any of these.\\n      </p>\\n    \\n  </div>\\n\\n  <div id=\"explanation\">\\n    <p>\\n      You\\xe2\\x80\\x99re seeing this error because you have <code>DEBUG = True</code> in\\n      your Django settings file. Change that to <code>False</code>, and Django\\n      will display a standard 404 page.\\n    </p>\\n  </div>\\n</body>\\n</html>\\n'"
+    },
+    {
+      "test": "Invalid options count (high)",
+      "passed": true,
+      "details": "API correctly rejects options_count > 10"
+    },
+    {
+      "test": "Invalid options count (low)",
+      "passed": true,
+      "details": "API correctly rejects options_count < 2"
+    },
+    {
+      "test": "Invalid MCQ answer validation",
+      "passed": true,
+      "details": "API correctly rejects invalid MCQ answers"
+    }
+  ]
+}

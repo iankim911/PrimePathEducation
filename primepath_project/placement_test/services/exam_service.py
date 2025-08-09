@@ -172,8 +172,16 @@ class ExamService:
                     question.question_type = q_data.get('question_type', 'MCQ')
                     question.correct_answer = q_data.get('correct_answer', '')
                     
-                    # Update options count for question types that use it
-                    if question.question_type in ['MCQ', 'CHECKBOX', 'SHORT'] and 'options_count' in q_data:
+                    # Calculate correct options_count based on answer data
+                    if question.question_type in ['SHORT', 'LONG', 'MIXED']:
+                        # For SHORT/LONG/MIXED, calculate from actual answer data
+                        calculated_count = ExamService._calculate_options_count(
+                            question.question_type, 
+                            question.correct_answer
+                        )
+                        question.options_count = calculated_count
+                    elif question.question_type in ['MCQ', 'CHECKBOX'] and 'options_count' in q_data:
+                        # For MCQ/CHECKBOX, use provided value
                         question.options_count = q_data['options_count']
                     
                     question.save()
@@ -186,15 +194,26 @@ class ExamService:
             else:
                 # Create new question
                 question_num = int(q_data.get('question_number'))
+                question_type = q_data.get('question_type', 'MCQ')
+                correct_answer = q_data.get('correct_answer', '')
+                
+                # Calculate options_count for SHORT/LONG/MIXED questions
+                if question_type in ['SHORT', 'LONG', 'MIXED']:
+                    options_count = ExamService._calculate_options_count(
+                        question_type, 
+                        correct_answer
+                    )
+                else:
+                    options_count = q_data.get('options_count', DEFAULT_OPTIONS_COUNT)
                 
                 Question.objects.update_or_create(
                     exam=exam,
                     question_number=question_num,
                     defaults={
-                        'question_type': q_data.get('question_type', 'MCQ'),
-                        'correct_answer': q_data.get('correct_answer', ''),
+                        'question_type': question_type,
+                        'correct_answer': correct_answer,
                         'points': q_data.get('points', DEFAULT_QUESTION_POINTS),
-                        'options_count': q_data.get('options_count', DEFAULT_OPTIONS_COUNT)
+                        'options_count': options_count
                     }
                 )
                 created_count += 1
@@ -340,6 +359,57 @@ class ExamService:
             'errors': errors,
             'total_assignments': len(validated_assignments)
         }
+    
+    @staticmethod
+    def _calculate_options_count(question_type: str, correct_answer: str) -> int:
+        """
+        Calculate the correct options_count based on the answer data.
+        
+        Args:
+            question_type: Type of question (SHORT, LONG, MIXED, etc.)
+            correct_answer: The answer data string
+            
+        Returns:
+            Calculated number of options/answers
+        """
+        if not correct_answer:
+            return 1
+        
+        answer = str(correct_answer).strip()
+        
+        # For MIXED questions with JSON structure
+        if question_type == 'MIXED':
+            try:
+                import json
+                parsed = json.loads(answer)
+                if isinstance(parsed, list):
+                    return max(len(parsed), 1)
+            except:
+                pass
+        
+        # For LONG questions
+        if question_type == 'LONG':
+            # Check for multiple parts separated by triple pipe
+            if '|||' in answer:
+                parts = [p.strip() for p in answer.split('|||') if p.strip()]
+                return max(len(parts), 1)
+        
+        # For SHORT questions
+        if question_type == 'SHORT':
+            # Check for multiple parts separated by pipe
+            if '|' in answer:
+                parts = [p.strip() for p in answer.split('|') if p.strip()]
+                return max(len(parts), 1)
+            elif ',' in answer:
+                # Check if it's letter format or actual answers
+                parts = [p.strip() for p in answer.split(',') if p.strip()]
+                # If all parts are single letters, it's MCQ format
+                if all(len(p) == 1 and p.isalpha() for p in parts):
+                    return len(parts)
+                return max(len(parts), 1)
+        
+        # Default to 1
+        return 1
     
     @staticmethod
     def get_all_exams_with_stats() -> List[Dict[str, Any]]:

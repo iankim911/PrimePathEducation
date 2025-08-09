@@ -89,6 +89,7 @@
             }
             
             const questionId = questionPanel.dataset.questionId;
+            const questionType = questionPanel.dataset.questionType;
             let answer = '';
             let answerType = '';
             
@@ -99,41 +100,146 @@
                 answerType = 'radio';
             }
             
-            // Check for checkboxes (multiple choice)
-            const checkboxInputs = questionPanel.querySelectorAll(`input[type="checkbox"][name^="q_${questionId}_"]:checked`);
-            if (checkboxInputs.length > 0) {
-                answer = Array.from(checkboxInputs).map(cb => cb.value).join(',');
-                answerType = 'checkbox';
+            // Special handling for MIXED questions with MCQ components
+            if (questionType === 'MIXED') {
+                // Check for MIXED MCQ components (format: q_{id}_{index}_{option})
+                const mixedCheckboxes = questionPanel.querySelectorAll(`input[type="checkbox"][name^="q_${questionId}_"]:checked`);
+                
+                if (mixedCheckboxes.length > 0) {
+                    // Group checkboxes by component index
+                    const componentAnswers = {};
+                    
+                    mixedCheckboxes.forEach(checkbox => {
+                        const nameParts = checkbox.name.split('_');
+                        // Format: q_{questionId}_{componentIndex}_{option}
+                        if (nameParts.length === 4) {
+                            const componentIndex = nameParts[2];
+                            const option = nameParts[3];
+                            
+                            if (!componentAnswers[componentIndex]) {
+                                componentAnswers[componentIndex] = [];
+                            }
+                            componentAnswers[componentIndex].push(option);
+                        } else if (nameParts.length === 3) {
+                            // Old format for regular checkboxes: q_{questionId}_{letter}
+                            const letter = nameParts[2];
+                            if (!componentAnswers[letter]) {
+                                componentAnswers[letter] = checkbox.value;
+                            }
+                        }
+                    });
+                    
+                    // Format answer based on component structure
+                    if (Object.keys(componentAnswers).length > 0) {
+                        // Check if we have numeric indices (new MCQ format)
+                        const hasNumericIndices = Object.keys(componentAnswers).some(key => !isNaN(parseInt(key)));
+                        
+                        if (hasNumericIndices) {
+                            // New format: organize by component with letters A, B, C
+                            const letters = ['A', 'B', 'C', 'D', 'E'];
+                            const formattedAnswers = {};
+                            
+                            Object.keys(componentAnswers).sort().forEach((index, i) => {
+                                const componentLetter = letters[i] || `Component${index}`;
+                                formattedAnswers[componentLetter] = componentAnswers[index].join(',');
+                            });
+                            
+                            answer = JSON.stringify(formattedAnswers);
+                            answerType = 'mixed-mcq';
+                        } else {
+                            // Old format or text inputs
+                            answer = JSON.stringify(componentAnswers);
+                            answerType = 'mixed';
+                        }
+                    }
+                }
+                
+                // Also check for text inputs and textareas in MIXED questions
+                const mixedTextInputs = questionPanel.querySelectorAll(`input[type="text"][name^="q_${questionId}_"]`);
+                const mixedTextareas = questionPanel.querySelectorAll(`textarea[name^="q_${questionId}_"]`);
+                
+                if ((mixedTextInputs.length > 0 || mixedTextareas.length > 0) && !answer) {
+                    const textAnswers = {};
+                    
+                    // Collect text input answers
+                    mixedTextInputs.forEach(input => {
+                        const letter = input.name.split('_').pop();
+                        if (input.value) {
+                            textAnswers[letter] = input.value;
+                        }
+                    });
+                    
+                    // Collect textarea answers
+                    mixedTextareas.forEach(textarea => {
+                        const letter = textarea.name.split('_').pop();
+                        if (textarea.value) {
+                            textAnswers[letter] = textarea.value;
+                        }
+                    });
+                    
+                    if (Object.keys(textAnswers).length > 0) {
+                        answer = JSON.stringify(textAnswers);
+                        answerType = 'mixed-text';
+                    }
+                }
+            } else {
+                // Regular checkbox handling for non-MIXED questions
+                const checkboxInputs = questionPanel.querySelectorAll(`input[type="checkbox"][name^="q_${questionId}_"]:checked`);
+                if (checkboxInputs.length > 0) {
+                    answer = Array.from(checkboxInputs).map(cb => cb.value).join(',');
+                    answerType = 'checkbox';
+                }
             }
             
             // Check for text input
             const textInput = questionPanel.querySelector(`input[type="text"][name="q_${questionId}"]`);
-            if (textInput && textInput.value) {
+            if (textInput && textInput.value && !answer) {
                 answer = textInput.value;
                 answerType = 'text';
             }
             
             // Check for textarea
             const textareaInput = questionPanel.querySelector(`textarea[name="q_${questionId}"]`);
-            if (textareaInput && textareaInput.value) {
+            if (textareaInput && textareaInput.value && !answer) {
                 answer = textareaInput.value;
                 answerType = 'textarea';
             }
             
-            // Check for multiple short answers
-            const shortAnswerInputs = questionPanel.querySelectorAll(`input[name^="q_${questionId}_"]`);
-            if (shortAnswerInputs.length > 0 && answerType !== 'checkbox') {
-                const answers = {};
-                shortAnswerInputs.forEach(input => {
-                    const letter = input.name.split('_').pop();
-                    if (input.value) {
-                        answers[letter] = input.value;
+            // Check for multiple short answers (non-MIXED)
+            if (!answer && questionType !== 'MIXED') {
+                const shortAnswerInputs = questionPanel.querySelectorAll(`input[type="text"][name^="q_${questionId}_"]`);
+                if (shortAnswerInputs.length > 0) {
+                    const answers = {};
+                    shortAnswerInputs.forEach(input => {
+                        const letter = input.name.split('_').pop();
+                        if (input.value) {
+                            answers[letter] = input.value;
+                        }
+                    });
+                    
+                    if (Object.keys(answers).length > 0) {
+                        answer = JSON.stringify(answers);
+                        answerType = 'multiple-short';
                     }
-                });
-                
-                if (Object.keys(answers).length > 0) {
-                    answer = JSON.stringify(answers);
-                    answerType = 'multiple-short';
+                }
+            }
+            
+            // Check for multiple textareas (LONG questions)
+            if (!answer) {
+                const textareaInputs = questionPanel.querySelectorAll(`textarea[name^="q_${questionId}_"]`);
+                if (textareaInputs.length > 0) {
+                    const answers = {};
+                    textareaInputs.forEach(input => {
+                        const letter = input.name.split('_').pop();
+                        if (input.value) {
+                            answers[letter] = input.value;
+                        }
+                    });
+                    
+                    if (Object.keys(answers).length > 0) {
+                        answer = JSON.stringify(answers);
+                        answerType = 'multiple-long';
+                    }
                 }
             }
             

@@ -1206,11 +1206,12 @@
                             {% endwith %}
                             
                         {% elif question.question_type == 'SHORT' %}
-                            {% if question.options_count > 1 %}
+                            {% load grade_tags %}
+                            {% if question|has_multiple_answers %}
                                 <!-- Multiple short answer inputs -->
                                 <div class="multiple-short-answer">
-                                    {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
-                                    {% for letter in letters %}
+                                    {% with answer_letters=question|get_answer_letters %}
+                                    {% for letter in answer_letters %}
                                     <div class="short-answer-item">
                                         <label class="short-answer-label">
                                             Answer {{ letter }}:
@@ -1234,40 +1235,104 @@
                             {% endif %}
                                    
                         {% elif question.question_type == 'LONG' %}
-                            <textarea class="form-control" 
-                                      name="q_{{ question.id }}"
-                                      rows="8"
-                                      placeholder="Write your answer here"
-                                      onchange="markAnswered({{ question.question_number }})"></textarea>
+                            {% load grade_tags %}
+                            {% if question|has_multiple_answers %}
+                                <!-- Multiple long answer textareas -->
+                                <div class="multiple-long-answer">
+                                    {% with answer_letters=question|get_answer_letters %}
+                                    {% for letter in answer_letters %}
+                                    <div class="long-answer-item" style="margin-bottom: 20px;">
+                                        <label class="long-answer-label" style="font-weight: 600; margin-bottom: 8px; display: block;">
+                                            Response {{ letter }}:
+                                        </label>
+                                        <textarea class="form-control" 
+                                                  name="q_{{ question.id }}_{{ letter }}"
+                                                  rows="6"
+                                                  placeholder="Write your response for {{ letter }}"
+                                                  onchange="markAnswered({{ question.question_number }})"></textarea>
+                                    </div>
+                                    {% endfor %}
+                                    {% endwith %}
+                                </div>
+                            {% else %}
+                                <!-- Single long answer textarea -->
+                                <textarea class="form-control" 
+                                          name="q_{{ question.id }}"
+                                          rows="8"
+                                          placeholder="Write your answer here"
+                                          onchange="markAnswered({{ question.question_number }})"></textarea>
+                            {% endif %}
                                       
                         {% elif question.question_type == 'MIXED' %}
-                            <!-- For mixed type, show both text input and multiple choice options -->
-                            <div style="margin-bottom: 20px;">
-                                <p style="font-weight: bold; margin-bottom: 10px;">Select all that apply OR provide your own answer:</p>
-                                {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
-                                {% for letter in letters %}
-                                <div style="margin-bottom: 10px;">
-                                    <label style="display: flex; align-items: center; cursor: pointer;">
-                                        <input type="checkbox" 
-                                               name="q_{{ question.id }}_{{ letter }}" 
-                                               value="{{ letter }}"
-                                               onchange="markAnswered({{ question.question_number }})">
-                                        <span class="option-label" style="margin: 0; flex-grow: 1; margin-left: 10px;">
-                                            <strong>{{ letter }}</strong>
-                                        </span>
-                                    </label>
+                            {% load grade_tags %}
+                            <!-- Mixed type with multiple components -->
+                            {% with components=question|get_mixed_components %}
+                            {% if components %}
+                                <div class="mixed-answer-section">
+                                    {% for component in components %}
+                                        {% if component.type == 'input' %}
+                                            <div class="short-answer-item" style="margin-bottom: 15px;">
+                                                <label class="short-answer-label" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                                    Answer {{ component.letter }}:
+                                                </label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       name="q_{{ question.id }}_{{ component.letter }}"
+                                                       placeholder="Enter answer {{ component.letter }}"
+                                                       onchange="markAnswered({{ question.question_number }})"
+                                                       style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">
+                                            </div>
+                                        {% elif component.type == 'mcq' %}
+                                            <div class="mcq-component" style="margin-bottom: 20px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                                                <div class="component-label" style="font-weight: bold; margin-bottom: 10px;">
+                                                    Multiple Choice {{ component.letter }}:
+                                                </div>
+                                                {% for option in component.options %}
+                                                <div class="mcq-option" style="margin-left: 20px; margin-bottom: 8px;">
+                                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                                        <input type="checkbox" 
+                                                               name="q_{{ question.id }}_{{ component.index }}_{{ option }}" 
+                                                               value="{{ option }}"
+                                                               onchange="markAnswered({{ question.question_number }})">
+                                                        <span class="option-label" style="margin: 0; flex-grow: 1; margin-left: 10px;">
+                                                            <strong>{{ option }}</strong>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
-                                {% endwith %}
-                                <div style="margin-top: 20px;">
-                                    <label style="font-weight: bold; display: block; margin-bottom: 10px;">Or write your answer:</label>
+                            {% else %}
+                                <!-- Fallback for MIXED questions without parsed components -->
+                                {% if question.options_count > 1 %}
+                                    <div class="multiple-short-answer">
+                                        {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                                        {% for letter in letters %}
+                                        <div class="short-answer-item" style="margin-bottom: 15px;">
+                                            <label class="short-answer-label" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                                Answer {{ letter }}:
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   name="q_{{ question.id }}_{{ letter }}"
+                                                   placeholder="Enter answer {{ letter }}"
+                                                   onchange="markAnswered({{ question.question_number }})"
+                                                   style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">
+                                        </div>
+                                        {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                {% else %}
                                     <textarea class="form-control" 
-                                              name="q_{{ question.id }}_text"
+                                              name="q_{{ question.id }}"
                                               rows="4"
-                                              placeholder="Type your answer here"
+                                              placeholder="Write your answer here"
                                               onchange="markAnswered({{ question.question_number }})"></textarea>
-                                </div>
-                            </div>
+                                {% endif %}
+                            {% endif %}
+                            {% endwith %}
                         {% endif %}
                     </div>
                     

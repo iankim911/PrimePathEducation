@@ -7,11 +7,24 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
+# Security Configuration - Use environment variables in production
+import os
+from django.core.management.utils import get_random_secret_key
 
-DEBUG = True
+# Generate a new secret key if not provided
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production')
+if not os.environ.get('SECRET_KEY'):
+    print("WARNING: Using default SECRET_KEY. Set SECRET_KEY environment variable in production!")
 
-ALLOWED_HOSTS = ['*']
+# Debug should be False in production
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+if DEBUG:
+    print("WARNING: DEBUG is True. Set DEBUG=False in production!")
+
+# Properly configure allowed hosts
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,*').split(',')
+if '*' in ALLOWED_HOSTS and not DEBUG:
+    print("WARNING: ALLOWED_HOSTS contains '*' in production mode!")
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -39,6 +52,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'core.middleware.FeatureFlagMiddleware',  # Add feature flags
     'core.middleware.APIVersionMiddleware',  # Add API versioning
+    'core.middleware.SecurityHeadersMiddleware',  # Security headers
+    'core.middleware.RateLimitMiddleware',  # Rate limiting
 ]
 
 
@@ -71,7 +86,40 @@ DATABASES = {
     }
 }
 
-AUTH_PASSWORD_VALIDATORS = []
+# Cache configuration for rate limiting and performance
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
+    }
+}
+
+# Rate limiting configuration
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+
+# Password validation - Essential for security
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
 LANGUAGE_CODE = 'en-us'
 
@@ -96,17 +144,38 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 SESSION_COOKIE_AGE = 86400  
 SESSION_SAVE_EVERY_REQUEST = True
 
-# Allow PDFs to be displayed in iframes from same origin
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+# Security Settings
+X_FRAME_OPTIONS = 'SAMEORIGIN'  # Allow PDFs in iframes from same origin
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+CSRF_COOKIE_SECURE = not DEBUG  # Use secure cookies in production
+SESSION_COOKIE_SECURE = not DEBUG  # Use secure cookies in production
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# File Upload Security
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+ALLOWED_AUDIO_EXTENSIONS = ['mp3', 'wav', 'm4a', 'ogg']
+ALLOWED_PDF_EXTENSIONS = ['pdf']
+ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif']
+
+# Content Security Policy (Basic)
+SECURE_REFERRER_POLICY = 'same-origin'
 
 # Feature flags for safe modularization
 FEATURE_FLAGS = {
-    # Template consolidation complete - V2 templates are now the standard
+    'USE_V2_TEMPLATES': True,  # Use modular V2 templates (fixes multiple short answers)
     'USE_SERVICE_LAYER': True,  # Services working well
     'USE_JS_MODULES': True,  # JS modules active
     'ENABLE_CACHING': True,  # Improves performance
     'ENABLE_API_V2': True,  # New organized API endpoints
 }
+
+# Data format standardization
+DATA_SEPARATOR_FORMAT = 'comma'  # Standardize on comma for new data
+LEGACY_SEPARATOR_SUPPORT = True  # Support pipe separators for existing data
 
 # Django REST Framework Configuration
 REST_FRAMEWORK = {

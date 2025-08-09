@@ -1156,6 +1156,32 @@
                                        class="answer-field">
                                 <div class="answer-help">Add multiple grading guidelines or sample answers</div>
                             {% elif question.question_type == 'MIXED' %}
+                                <!-- MCQ Options Count Selector for MIXED questions -->
+                                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px; padding: 10px; background: #f0f4f8; border-radius: 5px;">
+                                    <div>
+                                        <label style="font-weight: 600; margin-bottom: 5px; display: block;">MCQ Options Count:</label>
+                                        <select class="form-control mixed-options-count-selector" name="mixed_options_count" 
+                                                data-question-id="{{ question.id }}" 
+                                                data-question-num="{{ question.question_number }}"
+                                                id="mixed-options-count-{{ question.question_number }}"
+                                                style="width: 80px;">
+                                            {% for i in "2,3,4,5,6,7,8,9,10"|make_list %}
+                                                <option value="{{ i }}" {% if question.options_count == i|add:0 %}selected{% endif %}>{{ i }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label style="font-weight: 600; margin-bottom: 5px; display: block;">MCQ Component Options:</label>
+                                        <div class="mixed-available-options" data-question-num="{{ question.question_number }}" 
+                                             style="font-size: 1.1rem; font-weight: 500; color: #2c3e50;">
+                                            {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                                                {{ letters|join:", " }}
+                                            {% endwith %}
+                                        </div>
+                                        <small class="text-muted">This affects Multiple Choice components within this mixed question</small>
+                                    </div>
+                                </div>
+                                
                                 <div id="mixed-container-{{ question.question_number }}">
                                     <div class="mixed-sections" id="mixed-sections-{{ question.question_number }}">
                                         <!-- Mixed sections will be populated via JS if data exists -->
@@ -2247,6 +2273,78 @@ function initializeAnswerTracking() {
             document.getElementById(`saved-${questionNum}`).style.display = 'none';
         });
     });
+    
+    // Handle MIXED question options count changes
+    document.querySelectorAll('.mixed-options-count-selector').forEach(selector => {
+        selector.addEventListener('change', function() {
+            const questionNum = this.dataset.questionNum;
+            const questionId = this.dataset.questionId;
+            const newCount = parseInt(this.value);
+            
+            // Update the display of available options
+            const availableOptionsDiv = document.querySelector(`.mixed-available-options[data-question-num="${questionNum}"]`);
+            if (availableOptionsDiv) {
+                const letters = 'ABCDEFGHIJ'.slice(0, newCount);
+                availableOptionsDiv.textContent = letters.split('').join(', ');
+            }
+            
+            // Update any existing MCQ components to use the new options count
+            const existingMcqSections = document.querySelectorAll(`#mixed-sections-${questionNum} .mixed-answer-section`);
+            existingMcqSections.forEach(section => {
+                const typeLabel = section.querySelector('.mixed-type-label');
+                if (typeLabel && typeLabel.textContent === 'Multiple Choice') {
+                    // Recreate the MCQ options with new count
+                    const mcqOptionsDiv = section.querySelector('.mcq-options');
+                    if (mcqOptionsDiv) {
+                        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].slice(0, newCount);
+                        const sectionId = section.id;
+                        
+                        // Preserve selected values if they're still valid
+                        const selectedButtons = section.querySelectorAll('.mcq-button.selected');
+                        const selectedValues = Array.from(selectedButtons).map(btn => btn.dataset.value).filter(val => letters.includes(val));
+                        
+                        // Recreate buttons
+                        mcqOptionsDiv.innerHTML = letters.map(letter => `
+                            <button type="button" 
+                                    class="mcq-button ${selectedValues.includes(letter) ? 'selected' : ''}"
+                                    data-section="${sectionId}"
+                                    data-value="${letter}"
+                                    onclick="selectMixedMCQ('${sectionId}', '${letter}', ${questionNum})">
+                                ${letter}
+                            </button>
+                        `).join('');
+                    }
+                }
+            });
+            
+            // Save the options count to the question
+            if (questionId) {
+                const formData = new FormData();
+                formData.append('options_count', newCount);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                
+                fetch(`/api/placement/questions/${questionId}/update/`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log(`Updated MIXED question ${questionNum} options count to ${newCount}`);
+                    } else {
+                        console.error('Failed to update options count:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating options count:', error);
+                });
+            }
+            
+            unsavedChanges = true;
+            document.getElementById('unsaved-changes').style.display = 'inline';
+            document.getElementById(`saved-${questionNum}`).style.display = 'none';
+        });
+    });
 }
 
 // Update answer input based on question type
@@ -2360,7 +2458,34 @@ function updateAnswerInput(questionNum, questionType) {
             break;
             
         case 'MIXED':
+            // Get existing options count from the DOM if available
+            const existingSelector = document.getElementById(`mixed-options-count-${questionNum}`);
+            const currentOptionsCount = existingSelector ? existingSelector.value : 5;
+            
             newHtml = `
+                <!-- MCQ Options Count Selector for MIXED questions -->
+                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px; padding: 10px; background: #f0f4f8; border-radius: 5px;">
+                    <div>
+                        <label style="font-weight: 600; margin-bottom: 5px; display: block;">MCQ Options Count:</label>
+                        <select class="form-control mixed-options-count-selector" name="mixed_options_count" 
+                                data-question-num="${questionNum}"
+                                id="mixed-options-count-${questionNum}"
+                                style="width: 80px;">
+                            ${[2,3,4,5,6,7,8,9,10].map(i => `
+                                <option value="${i}" ${currentOptionsCount == i ? 'selected' : ''}>${i}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-weight: 600; margin-bottom: 5px; display: block;">MCQ Component Options:</label>
+                        <div class="mixed-available-options" data-question-num="${questionNum}" 
+                             style="font-size: 1.1rem; font-weight: 500; color: #2c3e50;">
+                            ${'ABCDEFGHIJ'.slice(0, currentOptionsCount).split('').join(', ')}
+                        </div>
+                        <small class="text-muted">This affects Multiple Choice components within this mixed question</small>
+                    </div>
+                </div>
+                
                 <div id="mixed-container-${questionNum}">
                     <div class="mixed-sections" id="mixed-sections-${questionNum}">
                         <!-- Mixed sections will be added here -->
@@ -2392,6 +2517,55 @@ function updateAnswerInput(questionNum, questionType) {
     } else if (questionType === 'MIXED') {
         // Initialize mixed with empty data
         updateMixedAnswers(questionNum);
+        
+        // Re-attach event handlers for MIXED options count selector
+        const selector = document.getElementById(`mixed-options-count-${questionNum}`);
+        if (selector) {
+            selector.addEventListener('change', function() {
+                const questionNum = this.dataset.questionNum;
+                const newCount = parseInt(this.value);
+                
+                // Update the display of available options
+                const availableOptionsDiv = document.querySelector(`.mixed-available-options[data-question-num="${questionNum}"]`);
+                if (availableOptionsDiv) {
+                    const letters = 'ABCDEFGHIJ'.slice(0, newCount);
+                    availableOptionsDiv.textContent = letters.split('').join(', ');
+                }
+                
+                // Update any existing MCQ components to use the new options count
+                const existingMcqSections = document.querySelectorAll(`#mixed-sections-${questionNum} .mixed-answer-section`);
+                existingMcqSections.forEach(section => {
+                    const typeLabel = section.querySelector('.mixed-type-label');
+                    if (typeLabel && typeLabel.textContent === 'Multiple Choice') {
+                        // Recreate the MCQ options with new count
+                        const mcqOptionsDiv = section.querySelector('.mcq-options');
+                        if (mcqOptionsDiv) {
+                            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].slice(0, newCount);
+                            const sectionId = section.id;
+                            
+                            // Preserve selected values if they're still valid
+                            const selectedButtons = section.querySelectorAll('.mcq-button.selected');
+                            const selectedValues = Array.from(selectedButtons).map(btn => btn.dataset.value).filter(val => letters.includes(val));
+                            
+                            // Recreate buttons
+                            mcqOptionsDiv.innerHTML = letters.map(letter => `
+                                <button type="button" 
+                                        class="mcq-button ${selectedValues.includes(letter) ? 'selected' : ''}"
+                                        data-section="${sectionId}"
+                                        data-value="${letter}"
+                                        onclick="selectMixedMCQ('${sectionId}', '${letter}', ${questionNum})">
+                                    ${letter}
+                                </button>
+                            `).join('');
+                        }
+                    }
+                });
+                
+                unsavedChanges = true;
+                document.getElementById('unsaved-changes').style.display = 'inline';
+                document.getElementById(`saved-${questionNum}`).style.display = 'none';
+            });
+        }
     }
 }
 
@@ -2454,6 +2628,16 @@ function updateShortAnswers(questionNum) {
     const values = Array.from(inputs).map(input => input.value).filter(v => v.trim()).join('|');
     document.getElementById(`answer-${questionNum}`).value = values;
     answers[questionNum] = values;
+    
+    // Update options_count to match actual number of responses
+    const optionsCountField = document.getElementById(`options-count-${questionNum}`);
+    if (optionsCountField) {
+        const actualCount = inputs.length;
+        if (optionsCountField.value != actualCount) {
+            optionsCountField.value = actualCount;
+        }
+    }
+    
     markUnsaved(questionNum);
 }
 
@@ -2470,6 +2654,14 @@ function addResponse(questionNum) {
         <button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>
     `;
     container.appendChild(newResponse);
+    
+    // Update options_count
+    const optionsCountField = document.getElementById(`options-count-${questionNum}`);
+    if (optionsCountField) {
+        optionsCountField.value = responseCount + 1;
+    }
+    
+    updateShortAnswers(questionNum);
 }
 
 // Remove response for short/long answer
@@ -2482,6 +2674,13 @@ function removeResponse(questionNum, button) {
         updateLongAnswers(questionNum);
     } else {
         updateShortAnswers(questionNum);
+        
+        // Update options_count after removal
+        const optionsCountField = document.getElementById(`options-count-${questionNum}`);
+        if (optionsCountField) {
+            const inputs = container.querySelectorAll('input[type="text"]');
+            optionsCountField.value = inputs.length;
+        }
     }
 }
 
@@ -2566,13 +2765,18 @@ function addMixedSection(questionNum, type) {
     
     switch(type) {
         case 'MCQ':
+            // Get the current options count for this MIXED question
+            const optionsCountSelector = document.getElementById(`mixed-options-count-${questionNum}`);
+            const optionsCount = optionsCountSelector ? parseInt(optionsCountSelector.value) : 5;
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].slice(0, optionsCount);
+            
             sectionDiv.innerHTML = `
                 <div class="mixed-type-header">
                     <span class="mixed-type-label">Multiple Choice</span>
                     <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
                 </div>
                 <div class="mcq-options">
-                    ${['A', 'B', 'C', 'D', 'E'].map(letter => `
+                    ${letters.map(letter => `
                         <button type="button" 
                                 class="mcq-button"
                                 data-section="${sectionId}"
@@ -2673,13 +2877,18 @@ function initializeMixedQuestion(questionNum, mixedData) {
         
         switch(section.type) {
             case 'Multiple Choice':
+                // Get the current options count for this MIXED question
+                const optionsCountSelector = document.getElementById(`mixed-options-count-${questionNum}`);
+                const optionsCount = optionsCountSelector ? parseInt(optionsCountSelector.value) : 5;
+                const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].slice(0, optionsCount);
+                
                 sectionDiv.innerHTML = `
                     <div class="mixed-type-header">
                         <span class="mixed-type-label">Multiple Choice</span>
                         <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
                     </div>
                     <div class="mcq-options">
-                        ${['A', 'B', 'C', 'D', 'E'].map(letter => `
+                        ${letters.map(letter => `
                             <button type="button" 
                                     class="mcq-button ${section.value && section.value.includes(letter) ? 'selected' : ''}"
                                     data-section="${sectionId}"

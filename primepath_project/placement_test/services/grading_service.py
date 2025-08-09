@@ -73,8 +73,29 @@ class GradingService:
             # No automatic grading possible
             return None
         
-        # Check if this is a multiple short answer (correct_answer has comma)
+        # Check if this is a multiple short answer
+        # It could have comma-separated OR pipe-separated values for multiple fields
+        is_multiple_fields = False
+        separator = ','
+        
         if ',' in correct_answer:
+            # Comma always means multiple fields for SHORT answers
+            is_multiple_fields = True
+            separator = ','
+        elif '|' in correct_answer:
+            # Pipe could mean alternatives OR multiple fields
+            # Check if the parts look like answer letters (B|C) vs alternatives (cat|feline)
+            parts = correct_answer.split('|')
+            # If all parts are single letters, it's likely multiple fields
+            if all(len(p.strip()) == 1 and p.strip().upper() in 'ABCDEFGHIJ' for p in parts):
+                is_multiple_fields = True
+                separator = '|'
+            # Also check if it's non-letter but identical (like 111|111)
+            elif len(parts) > 1 and len(set(parts)) == 1:
+                is_multiple_fields = True
+                separator = '|'
+        
+        if is_multiple_fields:
             # Multiple short answers expected
             try:
                 # Try to parse student answer as JSON
@@ -82,7 +103,7 @@ class GradingService:
                 student_answers = json.loads(student_answer)
                 
                 # Check if we have answers for all required parts
-                expected_parts = [part.strip().upper() for part in correct_answer.split(',')]
+                expected_parts = [part.strip().upper() for part in correct_answer.split(separator)]
                 
                 # For multiple short answers, we require manual grading
                 # because we can't automatically grade text answers

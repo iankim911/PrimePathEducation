@@ -77,23 +77,22 @@ Parameters:
             
         {% elif question.question_type == 'SHORT' %}
             <!-- Short Answer -->
-            {% with answer_letters=question.correct_answer|split:',' %}
-            {% if answer_letters|length > 1 %}
+            {% if question|has_multiple_answers %}
                 <!-- Multiple Short Answers -->
+                {% with answer_letters=question|get_answer_letters %}
                 {% for letter in answer_letters %}
-                    {% if letter %}
                     <div class="short-answer-row">
                         <label class="short-answer-label">
-                            <span class="answer-letter">{{ letter|upper }}</span>
+                            <span class="answer-letter">{{ letter }}</span>
                             <input type="text" 
-                                   name="q_{{ question.id }}_{{ letter|upper }}"
+                                   name="q_{{ question.id }}_{{ letter }}"
                                    class="answer-input text-input"
-                                   placeholder="Answer for {{ letter|upper }}"
+                                   placeholder="Answer for {{ letter }}"
                                    data-question-num="{{ question.question_number }}">
                         </label>
                     </div>
-                    {% endif %}
                 {% endfor %}
+                {% endwith %}
             {% else %}
                 <!-- Single Short Answer -->
                 <input type="text" 
@@ -102,15 +101,110 @@ Parameters:
                        placeholder="Type your answer here"
                        data-question-num="{{ question.question_number }}">
             {% endif %}
-            {% endwith %}
                    
         {% elif question.question_type == 'LONG' %}
             <!-- Long Answer -->
-            <textarea name="q_{{ question.id }}"
-                      class="answer-input textarea-input"
-                      rows="5"
-                      placeholder="Type your answer here"
-                      data-question-num="{{ question.question_number }}"></textarea>
+            {% if question|has_multiple_answers %}
+                <!-- Multiple long answer textareas -->
+                <div class="multiple-long-answer">
+                    {% with answer_letters=question|get_answer_letters %}
+                    {% for letter in answer_letters %}
+                    <div class="long-answer-item">
+                        <label class="long-answer-label">
+                            Response {{ letter }}:
+                        </label>
+                        <textarea name="q_{{ question.id }}_{{ letter }}"
+                                  class="answer-input textarea-input"
+                                  rows="5"
+                                  placeholder="Write your response for {{ letter }}"
+                                  data-question-num="{{ question.question_number }}"></textarea>
+                    </div>
+                    {% endfor %}
+                    {% endwith %}
+                </div>
+            {% else %}
+                <!-- Single long answer textarea -->
+                <textarea name="q_{{ question.id }}"
+                          class="answer-input textarea-input"
+                          rows="5"
+                          placeholder="Type your answer here"
+                          data-question-num="{{ question.question_number }}"></textarea>
+            {% endif %}
+                      
+        {% elif question.question_type == 'MIXED' %}
+            <!-- Mixed Type with Multiple Components -->
+            {% with components=question|get_mixed_components %}
+            {% if components %}
+                {% for component in components %}
+                    {% if component.type == 'input' %}
+                        <div class="short-answer-row">
+                            <label class="short-answer-label">
+                                <span class="answer-letter">{{ component.letter }}</span>
+                                <input type="text" 
+                                       name="q_{{ question.id }}_{{ component.letter }}"
+                                       class="answer-input text-input"
+                                       placeholder="Answer for {{ component.letter }}"
+                                       data-question-num="{{ question.question_number }}">
+                            </label>
+                        </div>
+                    {% elif component.type == 'textarea' %}
+                        <div class="long-answer-row" style="margin-bottom: 15px;">
+                            <label class="long-answer-label" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                Response {{ component.letter }}:
+                            </label>
+                            <textarea name="q_{{ question.id }}_{{ component.letter }}"
+                                      class="answer-input textarea-input"
+                                      rows="5"
+                                      placeholder="Write your response for {{ component.letter }}"
+                                      data-question-num="{{ question.question_number }}"
+                                      style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; font-family: inherit;"></textarea>
+                        </div>
+                    {% elif component.type == 'mcq' %}
+                        <div class="mcq-component" style="margin-bottom: 20px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                            <div class="component-label" style="font-weight: bold; margin-bottom: 10px;">
+                                Multiple Choice {{ component.letter }}:
+                            </div>
+                            {% for option in component.options %}
+                            <div class="mcq-option" style="margin-left: 20px; margin-bottom: 8px;">
+                                <label class="answer-option-label" style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" 
+                                           name="q_{{ question.id }}_{{ component.index }}_{{ option }}" 
+                                           value="{{ option }}"
+                                           data-question-num="{{ question.question_number }}"
+                                           class="answer-input">
+                                    <span class="answer-letter" style="margin-left: 10px;">{{ option }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <!-- Fallback for MIXED questions without parsed components -->
+                {% if question.options_count > 1 %}
+                    {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                    {% for letter in letters %}
+                        <div class="short-answer-row">
+                            <label class="short-answer-label">
+                                <span class="answer-letter">{{ letter }}</span>
+                                <input type="text" 
+                                       name="q_{{ question.id }}_{{ letter }}"
+                                       class="answer-input text-input"
+                                       placeholder="Answer for {{ letter }}"
+                                       data-question-num="{{ question.question_number }}">
+                            </label>
+                        </div>
+                    {% endfor %}
+                    {% endwith %}
+                {% else %}
+                    <textarea name="q_{{ question.id }}"
+                              class="answer-input textarea-input"
+                              rows="4"
+                              placeholder="Type your answer here"
+                              data-question-num="{{ question.question_number }}"></textarea>
+                {% endif %}
+            {% endif %}
+            {% endwith %}
         {% endif %}
     </div>
     

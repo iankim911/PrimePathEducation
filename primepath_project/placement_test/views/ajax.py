@@ -32,11 +32,102 @@ def update_question(request, question_id):
     question = get_object_or_404(Question, id=question_id)
     
     try:
+        # Update basic fields
         question.correct_answer = request.POST.get('correct_answer', '')
         question.points = int(request.POST.get('points', 1))
+        
+        # Handle options_count update for MCQ/CHECKBOX questions
+        if 'options_count' in request.POST:
+            new_options_count = int(request.POST.get('options_count'))
+            
+            # Validate options_count range
+            if not (2 <= new_options_count <= 10):
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Options count must be between 2 and 10'
+                })
+            
+            # For MCQ and CHECKBOX questions, validate that answers are within range
+            if question.question_type in ['MCQ', 'CHECKBOX']:
+                old_count = question.options_count
+                
+                # If reducing options, check if current answer is still valid
+                if new_options_count < old_count and question.correct_answer:
+                    # Get letter options based on new count
+                    valid_letters = "ABCDEFGHIJ"[:new_options_count]
+                    
+                    if question.question_type == 'MCQ':
+                        # Single answer - check if it's still valid
+                        if question.correct_answer and question.correct_answer not in valid_letters:
+                            return JsonResponse({
+                                'success': False,
+                                'error': f'Current answer "{question.correct_answer}" would be invalid with {new_options_count} options. Please update the answer first.',
+                                'requires_answer_update': True
+                            })
+                    else:  # CHECKBOX
+                        # Multiple answers - check each one
+                        if question.correct_answer:
+                            answers = [a.strip() for a in question.correct_answer.split(',')]
+                            invalid_answers = [a for a in answers if a and a not in valid_letters]
+                            if invalid_answers:
+                                return JsonResponse({
+                                    'success': False,
+                                    'error': f'Answers {", ".join(invalid_answers)} would be invalid with {new_options_count} options. Please update the answer first.',
+                                    'requires_answer_update': True
+                                })
+                
+                # Set the options_count and bypass clean() method's auto-calculation
+                question.options_count = new_options_count
+            
+            # For MIXED questions, validate MCQ components if they exist
+            elif question.question_type == 'MIXED':
+                # Check if MIXED question has MCQ components that would be affected
+                if question.correct_answer:
+                    try:
+                        parsed = json.loads(question.correct_answer)
+                        mcq_components = [comp for comp in parsed if comp.get('type') == 'Multiple Choice']
+                        
+                        # If reducing options, validate MCQ component answers
+                        if new_options_count < question.options_count and mcq_components:
+                            valid_letters = "ABCDEFGHIJ"[:new_options_count]
+                            invalid_mcq_answers = []
+                            
+                            for i, comp in enumerate(mcq_components):
+                                value = comp.get('value', '')
+                                if value:
+                                    answers = [a.strip() for a in value.split(',') if a.strip()]
+                                    for answer in answers:
+                                        if answer and answer not in valid_letters:
+                                            invalid_mcq_answers.append(f"MCQ component {i+1}: {answer}")
+                            
+                            if invalid_mcq_answers:
+                                return JsonResponse({
+                                    'success': False,
+                                    'error': f'These MCQ component answers would be invalid with {new_options_count} options: {", ".join(invalid_mcq_answers[:3])}. Please update the answers first.',
+                                    'requires_answer_update': True
+                                })
+                        
+                        # Set the options_count - this will affect MCQ component rendering
+                        question.options_count = new_options_count
+                        
+                    except:
+                        # If JSON parsing fails, still update options_count
+                        question.options_count = new_options_count
+                else:
+                    question.options_count = new_options_count
+            else:
+                # For other question types, just update the count
+                question.options_count = new_options_count
+        
+        # Save the question - the model's save() method now preserves options_count for MIXED questions
         question.save()
         
-        return JsonResponse({'success': True})
+        return JsonResponse({
+            'success': True,
+            'options_count': question.options_count
+        })
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': f'Invalid value: {str(e)}'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
 
