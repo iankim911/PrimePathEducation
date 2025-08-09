@@ -19,6 +19,7 @@ from .student import (
     take_test,
     submit_answer,
     adjust_difficulty,
+    manual_adjust_difficulty,
     complete_test,
     test_result
 )
@@ -59,6 +60,7 @@ __all__ = [
     'take_test',
     'submit_answer',
     'adjust_difficulty',
+    'manual_adjust_difficulty',
     'complete_test',
     'test_result',
     

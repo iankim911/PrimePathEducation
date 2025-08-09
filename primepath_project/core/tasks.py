@@ -256,8 +256,8 @@ def cleanup_orphaned_files():
         audio_count = orphaned_audio.count()
         
         for audio in orphaned_audio:
-            if audio.file:
-                FileService.delete_file(audio.file.name)
+            if audio.audio_file:
+                FileService.delete_file(audio.audio_file.name)
         
         orphaned_audio.delete()
         

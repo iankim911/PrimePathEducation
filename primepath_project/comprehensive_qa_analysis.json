@@ -1,0 +1,1705 @@
+{
+  "apps": {
+    "placement_test": {
+      "models": {
+        "Exam": {
+          "field_count": 16,
+          "fields": {
+            "regular": [
+              "id",
+              "name",
+              "pdf_file",
+              "timer_minutes",
+              "total_questions",
+              "default_options_count",
+              "passing_score",
+              "created_at",
+              "updated_at",
+              "is_active"
+            ],
+            "foreign_keys": [
+              "curriculum_level",
+              "created_by"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "audio_files",
+              "questions",
+              "sessions",
+              "level_mappings"
+            ]
+          },
+          "db_table": "placement_test_exam"
+        },
+        "AudioFile": {
+          "field_count": 9,
+          "fields": {
+            "regular": [
+              "id",
+              "name",
+              "audio_file",
+              "start_question",
+              "end_question",
+              "order",
+              "created_at"
+            ],
+            "foreign_keys": [
+              "exam"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "assigned_question"
+            ]
+          },
+          "db_table": "placement_test_audiofile"
+        },
+        "Question": {
+          "field_count": 10,
+          "fields": {
+            "regular": [
+              "id",
+              "question_number",
+              "question_type",
+              "correct_answer",
+              "points",
+              "options_count",
+              "created_at"
+            ],
+            "foreign_keys": [
+              "exam",
+              "audio_file"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "studentanswer"
+            ]
+          },
+          "db_table": "placement_test_question"
+        },
+        "StudentSession": {
+          "field_count": 20,
+          "fields": {
+            "regular": [
+              "id",
+              "student_name",
+              "parent_phone",
+              "school_name_manual",
+              "grade",
+              "academic_rank",
+              "difficulty_adjustments",
+              "started_at",
+              "completed_at",
+              "time_spent_seconds",
+              "score",
+              "percentage_score",
+              "ip_address",
+              "user_agent"
+            ],
+            "foreign_keys": [
+              "school",
+              "exam",
+              "original_curriculum_level",
+              "final_curriculum_level"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "answers",
+              "adjustments"
+            ]
+          },
+          "db_table": "placement_test_studentsession"
+        },
+        "StudentAnswer": {
+          "field_count": 8,
+          "fields": {
+            "regular": [
+              "id",
+              "answer",
+              "is_correct",
+              "points_earned",
+              "answered_at",
+              "updated_at"
+            ],
+            "foreign_keys": [
+              "session",
+              "question"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": []
+          },
+          "db_table": "placement_test_studentanswer"
+        },
+        "DifficultyAdjustment": {
+          "field_count": 6,
+          "fields": {
+            "regular": [
+              "id",
+              "adjustment",
+              "adjusted_at"
+            ],
+            "foreign_keys": [
+              "session",
+              "from_level",
+              "to_level"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": []
+          },
+          "db_table": "placement_test_difficultyadjustment"
+        }
+      },
+      "model_count": 6
+    },
+    "core": {
+      "models": {
+        "School": {
+          "field_count": 5,
+          "fields": {
+            "regular": [
+              "id",
+              "name",
+              "address",
+              "created_at"
+            ],
+            "foreign_keys": [],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "studentsession"
+            ]
+          },
+          "db_table": "core_school"
+        },
+        "Teacher": {
+          "field_count": 9,
+          "fields": {
+            "regular": [
+              "id",
+              "name",
+              "email",
+              "phone",
+              "is_head_teacher",
+              "created_at",
+              "updated_at"
+            ],
+            "foreign_keys": [],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "exam",
+              "placementrule"
+            ]
+          },
+          "db_table": "core_teacher"
+        },
+        "Program": {
+          "field_count": 7,
+          "fields": {
+            "regular": [
+              "id",
+              "name",
+              "grade_range_start",
+              "grade_range_end",
+              "order",
+              "created_at"
+            ],
+            "foreign_keys": [],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "subprograms"
+            ]
+          },
+          "db_table": "core_program"
+        },
+        "SubProgram": {
+          "field_count": 6,
+          "fields": {
+            "regular": [
+              "id",
+              "name",
+              "order",
+              "created_at"
+            ],
+            "foreign_keys": [
+              "program"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "levels"
+            ]
+          },
+          "db_table": "core_subprogram"
+        },
+        "CurriculumLevel": {
+          "field_count": 12,
+          "fields": {
+            "regular": [
+              "id",
+              "level_number",
+              "description",
+              "created_at"
+            ],
+            "foreign_keys": [
+              "subprogram"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": [
+              "exams",
+              "original_sessions",
+              "final_sessions",
+              "adjustments_from",
+              "adjustments_to",
+              "placementrule",
+              "exam_mappings"
+            ]
+          },
+          "db_table": "core_curriculumlevel"
+        },
+        "PlacementRule": {
+          "field_count": 8,
+          "fields": {
+            "regular": [
+              "id",
+              "grade",
+              "min_rank_percentile",
+              "max_rank_percentile",
+              "priority",
+              "created_at"
+            ],
+            "foreign_keys": [
+              "curriculum_level",
+              "created_by"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": []
+          },
+          "db_table": "core_placementrule"
+        },
+        "ExamLevelMapping": {
+          "field_count": 5,
+          "fields": {
+            "regular": [
+              "id",
+              "slot",
+              "created_at"
+            ],
+            "foreign_keys": [
+              "curriculum_level",
+              "exam"
+            ],
+            "many_to_many": [],
+            "one_to_one": [],
+            "reverse_relations": []
+          },
+          "db_table": "core_examlevelmapping"
+        }
+      },
+      "model_count": 7
+    },
+    "api": {
+      "models": {},
+      "model_count": 0
+    },
+    "rest_framework": {
+      "models": {},
+      "model_count": 0
+    },
+    "django_filters": {
+      "models": {},
+      "model_count": 0
+    },
+    "corsheaders": {
+      "models": {},
+      "model_count": 0
+    }
+  },
+  "models": {},
+  "views": {
+    "placement_test": {
+      "add_audio": {
+        "type": "function",
+        "decorators": []
+      },
+      "adjust_difficulty": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "check_exam_version": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "complete_test": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "create_exam": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "create_questions": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "delete_audio_from_exam": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "delete_exam": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "edit_exam": {
+        "type": "function",
+        "decorators": []
+      }
+    },
+    "core": {
+      "CurriculumLevel": {
+        "type": "class",
+        "decorators": []
+      },
+      "JsonResponse": {
+        "type": "class",
+        "decorators": []
+      },
+      "PlacementRule": {
+        "type": "class",
+        "decorators": []
+      },
+      "Program": {
+        "type": "class",
+        "decorators": []
+      },
+      "SubProgram": {
+        "type": "class",
+        "decorators": []
+      },
+      "Teacher": {
+        "type": "class",
+        "decorators": []
+      },
+      "create_placement_rule": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "curriculum_levels": {
+        "type": "function",
+        "decorators": []
+      },
+      "delete_placement_rule": {
+        "type": "function",
+        "decorators": [
+          "decorated"
+        ]
+      },
+      "exam_mapping": {
+        "type": "function",
+        "decorators": []
+      }
+    }
+  },
+  "urls": {
+    "root": [
+      {
+        "pattern": "admin/",
+        "name": "index",
+        "callback": "index"
+      },
+      {
+        "pattern": "admin/login/",
+        "name": "login",
+        "callback": "login"
+      },
+      {
+        "pattern": "admin/logout/",
+        "name": "logout",
+        "callback": "logout"
+      },
+      {
+        "pattern": "admin/password_change/",
+        "name": "password_change",
+        "callback": "password_change"
+      },
+      {
+        "pattern": "admin/password_change/done/",
+        "name": "password_change_done",
+        "callback": "password_change_done"
+      },
+      {
+        "pattern": "admin/autocomplete/",
+        "name": "autocomplete",
+        "callback": "autocomplete_view"
+      },
+      {
+        "pattern": "admin/jsi18n/",
+        "name": "jsi18n",
+        "callback": "i18n_javascript"
+      },
+      {
+        "pattern": "admin/r/<int:content_type_id>/<path:object_id>/",
+        "name": "view_on_site",
+        "callback": "shortcut"
+      },
+      {
+        "pattern": "admin/auth/group/",
+        "name": "auth_group_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/auth/group/add/",
+        "name": "auth_group_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/auth/group/<path:object_id>/history/",
+        "name": "auth_group_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/auth/group/<path:object_id>/delete/",
+        "name": "auth_group_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/auth/group/<path:object_id>/change/",
+        "name": "auth_group_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/auth/group/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/auth/user/<id>/password/",
+        "name": "auth_user_password_change",
+        "callback": "user_change_password"
+      },
+      {
+        "pattern": "admin/auth/user/",
+        "name": "auth_user_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/auth/user/add/",
+        "name": "auth_user_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/auth/user/<path:object_id>/history/",
+        "name": "auth_user_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/auth/user/<path:object_id>/delete/",
+        "name": "auth_user_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/auth/user/<path:object_id>/change/",
+        "name": "auth_user_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/auth/user/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/placement_test/audiofile/",
+        "name": "placement_test_audiofile_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/placement_test/audiofile/add/",
+        "name": "placement_test_audiofile_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/placement_test/audiofile/<path:object_id>/history/",
+        "name": "placement_test_audiofile_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/placement_test/audiofile/<path:object_id>/delete/",
+        "name": "placement_test_audiofile_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/placement_test/audiofile/<path:object_id>/change/",
+        "name": "placement_test_audiofile_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/placement_test/audiofile/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/placement_test/exam/",
+        "name": "placement_test_exam_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/placement_test/exam/add/",
+        "name": "placement_test_exam_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/placement_test/exam/<path:object_id>/history/",
+        "name": "placement_test_exam_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/placement_test/exam/<path:object_id>/delete/",
+        "name": "placement_test_exam_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/placement_test/exam/<path:object_id>/change/",
+        "name": "placement_test_exam_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/placement_test/exam/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/placement_test/studentsession/",
+        "name": "placement_test_studentsession_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentsession/add/",
+        "name": "placement_test_studentsession_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentsession/<path:object_id>/history/",
+        "name": "placement_test_studentsession_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentsession/<path:object_id>/delete/",
+        "name": "placement_test_studentsession_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentsession/<path:object_id>/change/",
+        "name": "placement_test_studentsession_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentsession/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/placement_test/studentanswer/",
+        "name": "placement_test_studentanswer_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentanswer/add/",
+        "name": "placement_test_studentanswer_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentanswer/<path:object_id>/history/",
+        "name": "placement_test_studentanswer_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentanswer/<path:object_id>/delete/",
+        "name": "placement_test_studentanswer_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentanswer/<path:object_id>/change/",
+        "name": "placement_test_studentanswer_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/placement_test/studentanswer/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/placement_test/difficultyadjustment/",
+        "name": "placement_test_difficultyadjustment_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/placement_test/difficultyadjustment/add/",
+        "name": "placement_test_difficultyadjustment_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/placement_test/difficultyadjustment/<path:object_id>/history/",
+        "name": "placement_test_difficultyadjustment_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/placement_test/difficultyadjustment/<path:object_id>/delete/",
+        "name": "placement_test_difficultyadjustment_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/placement_test/difficultyadjustment/<path:object_id>/change/",
+        "name": "placement_test_difficultyadjustment_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/placement_test/difficultyadjustment/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/core/school/",
+        "name": "core_school_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/core/school/add/",
+        "name": "core_school_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/core/school/<path:object_id>/history/",
+        "name": "core_school_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/core/school/<path:object_id>/delete/",
+        "name": "core_school_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/core/school/<path:object_id>/change/",
+        "name": "core_school_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/core/school/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/core/teacher/",
+        "name": "core_teacher_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/core/teacher/add/",
+        "name": "core_teacher_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/core/teacher/<path:object_id>/history/",
+        "name": "core_teacher_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/core/teacher/<path:object_id>/delete/",
+        "name": "core_teacher_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/core/teacher/<path:object_id>/change/",
+        "name": "core_teacher_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/core/teacher/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/core/program/",
+        "name": "core_program_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/core/program/add/",
+        "name": "core_program_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/core/program/<path:object_id>/history/",
+        "name": "core_program_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/core/program/<path:object_id>/delete/",
+        "name": "core_program_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/core/program/<path:object_id>/change/",
+        "name": "core_program_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/core/program/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/core/subprogram/",
+        "name": "core_subprogram_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/core/subprogram/add/",
+        "name": "core_subprogram_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/core/subprogram/<path:object_id>/history/",
+        "name": "core_subprogram_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/core/subprogram/<path:object_id>/delete/",
+        "name": "core_subprogram_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/core/subprogram/<path:object_id>/change/",
+        "name": "core_subprogram_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/core/subprogram/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/core/curriculumlevel/",
+        "name": "core_curriculumlevel_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/core/curriculumlevel/add/",
+        "name": "core_curriculumlevel_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/core/curriculumlevel/<path:object_id>/history/",
+        "name": "core_curriculumlevel_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/core/curriculumlevel/<path:object_id>/delete/",
+        "name": "core_curriculumlevel_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/core/curriculumlevel/<path:object_id>/change/",
+        "name": "core_curriculumlevel_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/core/curriculumlevel/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/core/placementrule/",
+        "name": "core_placementrule_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/core/placementrule/add/",
+        "name": "core_placementrule_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/core/placementrule/<path:object_id>/history/",
+        "name": "core_placementrule_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/core/placementrule/<path:object_id>/delete/",
+        "name": "core_placementrule_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/core/placementrule/<path:object_id>/change/",
+        "name": "core_placementrule_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/core/placementrule/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/core/examlevelmapping/",
+        "name": "core_examlevelmapping_changelist",
+        "callback": "changelist_view"
+      },
+      {
+        "pattern": "admin/core/examlevelmapping/add/",
+        "name": "core_examlevelmapping_add",
+        "callback": "add_view"
+      },
+      {
+        "pattern": "admin/core/examlevelmapping/<path:object_id>/history/",
+        "name": "core_examlevelmapping_history",
+        "callback": "history_view"
+      },
+      {
+        "pattern": "admin/core/examlevelmapping/<path:object_id>/delete/",
+        "name": "core_examlevelmapping_delete",
+        "callback": "delete_view"
+      },
+      {
+        "pattern": "admin/core/examlevelmapping/<path:object_id>/change/",
+        "name": "core_examlevelmapping_change",
+        "callback": "change_view"
+      },
+      {
+        "pattern": "admin/core/examlevelmapping/<path:object_id>/",
+        "name": null,
+        "callback": "view"
+      },
+      {
+        "pattern": "admin/^(?P<app_label>auth|placement_test|core)/$",
+        "name": "app_list",
+        "callback": "app_index"
+      },
+      {
+        "pattern": "admin/(?P<url>.*)$",
+        "name": null,
+        "callback": "catch_all_view"
+      },
+      {
+        "pattern": "api/placement/start/",
+        "name": "start_test",
+        "callback": "start_test"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:session_id>/",
+        "name": "take_test",
+        "callback": "take_test"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:session_id>/submit/",
+        "name": "submit_answer",
+        "callback": "submit_answer"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:session_id>/adjust-difficulty/",
+        "name": "adjust_difficulty",
+        "callback": "adjust_difficulty"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:session_id>/manual-adjust/",
+        "name": "manual_adjust_difficulty",
+        "callback": "manual_adjust_difficulty"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:session_id>/complete/",
+        "name": "complete_test",
+        "callback": "complete_test"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:session_id>/result/",
+        "name": "test_result",
+        "callback": "test_result"
+      },
+      {
+        "pattern": "api/placement/exams/",
+        "name": "exam_list",
+        "callback": "exam_list"
+      },
+      {
+        "pattern": "api/placement/exams/create/",
+        "name": "create_exam",
+        "callback": "create_exam"
+      },
+      {
+        "pattern": "api/placement/exams/check-version/",
+        "name": "check_exam_version",
+        "callback": "check_exam_version"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/",
+        "name": "exam_detail",
+        "callback": "exam_detail"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/edit/",
+        "name": "edit_exam",
+        "callback": "edit_exam"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/preview/",
+        "name": "preview_exam",
+        "callback": "preview_exam"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/audio/add/",
+        "name": "add_audio",
+        "callback": "add_audio"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/questions/",
+        "name": "manage_questions",
+        "callback": "manage_questions"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/delete/",
+        "name": "delete_exam",
+        "callback": "delete_exam"
+      },
+      {
+        "pattern": "api/placement/sessions/",
+        "name": "session_list",
+        "callback": "session_list"
+      },
+      {
+        "pattern": "api/placement/sessions/<uuid:session_id>/",
+        "name": "session_detail",
+        "callback": "session_detail"
+      },
+      {
+        "pattern": "api/placement/sessions/<uuid:session_id>/grade/",
+        "name": "grade_session",
+        "callback": "grade_session"
+      },
+      {
+        "pattern": "api/placement/sessions/<uuid:session_id>/export/",
+        "name": "export_result",
+        "callback": "export_result"
+      },
+      {
+        "pattern": "api/placement/audio/<int:audio_id>/",
+        "name": "get_audio",
+        "callback": "get_audio"
+      },
+      {
+        "pattern": "api/placement/questions/<int:question_id>/update/",
+        "name": "update_question",
+        "callback": "update_question"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/create-questions/",
+        "name": "create_questions",
+        "callback": "create_questions"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/save-answers/",
+        "name": "save_exam_answers",
+        "callback": "save_exam_answers"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/update-audio-names/",
+        "name": "update_audio_names",
+        "callback": "update_audio_names"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/audio/<int:audio_id>/delete/",
+        "name": "delete_audio_from_exam",
+        "callback": "delete_audio_from_exam"
+      },
+      {
+        "pattern": "api/placement/exams/<uuid:exam_id>/update-name/",
+        "name": "update_exam_name",
+        "callback": "update_exam_name"
+      },
+      {
+        "pattern": "api/v2/placement/audio/<int:audio_id>/",
+        "name": "get_audio",
+        "callback": "get_audio"
+      },
+      {
+        "pattern": "api/v2/placement/questions/<int:question_id>/update/",
+        "name": "update_question",
+        "callback": "update_question"
+      },
+      {
+        "pattern": "api/v2/placement/exams/<uuid:exam_id>/create-questions/",
+        "name": "create_questions",
+        "callback": "create_questions"
+      },
+      {
+        "pattern": "api/v2/placement/exams/<uuid:exam_id>/save-answers/",
+        "name": "save_exam_answers",
+        "callback": "save_exam_answers"
+      },
+      {
+        "pattern": "api/v2/placement/exams/<uuid:exam_id>/update-audio-names/",
+        "name": "update_audio_names",
+        "callback": "update_audio_names"
+      },
+      {
+        "pattern": "api/v2/placement/exams/<uuid:exam_id>/audio/<int:audio_id>/delete/",
+        "name": "delete_audio_from_exam",
+        "callback": "delete_audio_from_exam"
+      },
+      {
+        "pattern": "api/v2/placement/exams/<uuid:exam_id>/update-name/",
+        "name": "update_exam_name",
+        "callback": "update_exam_name"
+      },
+      {
+        "pattern": "api/v1/^exams/$",
+        "name": "exam-list",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-list",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)/$",
+        "name": "exam-detail",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-detail",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)/questions/$",
+        "name": "exam-questions",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)/questions\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-questions",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)/statistics/$",
+        "name": "exam-statistics",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)/statistics\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-statistics",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)/upload_pdf/$",
+        "name": "exam-upload-pdf",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^exams/(?P<pk>[^/.]+)/upload_pdf\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-upload-pdf",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/$",
+        "name": "studentsession-list",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-list",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/$",
+        "name": "studentsession-detail",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-detail",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/complete/$",
+        "name": "studentsession-complete",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/complete\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-complete",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/status/$",
+        "name": "studentsession-status",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/status\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-status",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/submit_answer/$",
+        "name": "studentsession-submit-answer",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/submit_answer\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-submit-answer",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/submit_batch/$",
+        "name": "studentsession-submit-batch",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^sessions/(?P<pk>[^/.]+)/submit_batch\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-submit-batch",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/^schools/$",
+        "name": "school-list",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/v1/^schools\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "school-list",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/v1/^schools/(?P<pk>[^/.]+)/$",
+        "name": "school-detail",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/v1/^schools/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "school-detail",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/v1/^programs/$",
+        "name": "program-list",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/v1/^programs\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "program-list",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/v1/^programs/(?P<pk>[^/.]+)/$",
+        "name": "program-detail",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/v1/^programs/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "program-detail",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/v1/^$",
+        "name": "api-root",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/v1/^\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "api-root",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/v1/dashboard/",
+        "name": "dashboard",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/v1/health/",
+        "name": "health",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/v1/placement/start/",
+        "name": "start_test",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/placement/session/<uuid:pk>/submit/",
+        "name": "submit_answer",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/v1/placement/session/<uuid:pk>/complete/",
+        "name": "complete_test",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^exams/$",
+        "name": "exam-list",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-list",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)/$",
+        "name": "exam-detail",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-detail",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)/questions/$",
+        "name": "exam-questions",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)/questions\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-questions",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)/statistics/$",
+        "name": "exam-statistics",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)/statistics\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-statistics",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)/upload_pdf/$",
+        "name": "exam-upload-pdf",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^exams/(?P<pk>[^/.]+)/upload_pdf\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "exam-upload-pdf",
+        "callback": "ExamViewSet"
+      },
+      {
+        "pattern": "api/^sessions/$",
+        "name": "studentsession-list",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-list",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/$",
+        "name": "studentsession-detail",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-detail",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/complete/$",
+        "name": "studentsession-complete",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/complete\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-complete",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/status/$",
+        "name": "studentsession-status",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/status\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-status",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/submit_answer/$",
+        "name": "studentsession-submit-answer",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/submit_answer\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-submit-answer",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/submit_batch/$",
+        "name": "studentsession-submit-batch",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^sessions/(?P<pk>[^/.]+)/submit_batch\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "studentsession-submit-batch",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/^schools/$",
+        "name": "school-list",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/^schools\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "school-list",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/^schools/(?P<pk>[^/.]+)/$",
+        "name": "school-detail",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/^schools/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "school-detail",
+        "callback": "SchoolViewSet"
+      },
+      {
+        "pattern": "api/^programs/$",
+        "name": "program-list",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/^programs\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "program-list",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/^programs/(?P<pk>[^/.]+)/$",
+        "name": "program-detail",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/^programs/(?P<pk>[^/.]+)\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "program-detail",
+        "callback": "ProgramViewSet"
+      },
+      {
+        "pattern": "api/^$",
+        "name": "api-root",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/^\\.(?P<format>[a-z0-9]+)/?$",
+        "name": "api-root",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/dashboard/",
+        "name": "dashboard",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/health/",
+        "name": "health",
+        "callback": "view"
+      },
+      {
+        "pattern": "api/placement/start/",
+        "name": "start_test",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:pk>/submit/",
+        "name": "submit_answer",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api/placement/session/<uuid:pk>/complete/",
+        "name": "complete_test",
+        "callback": "StudentSessionViewSet"
+      },
+      {
+        "pattern": "api-auth/login/",
+        "name": "login",
+        "callback": "view"
+      },
+      {
+        "pattern": "api-auth/logout/",
+        "name": "logout",
+        "callback": "view"
+      },
+      {
+        "pattern": "",
+        "name": "index",
+        "callback": "index"
+      },
+      {
+        "pattern": "teacher/dashboard/",
+        "name": "teacher_dashboard",
+        "callback": "teacher_dashboard"
+      },
+      {
+        "pattern": "curriculum/levels/",
+        "name": "curriculum_levels",
+        "callback": "curriculum_levels"
+      },
+      {
+        "pattern": "placement-rules/",
+        "name": "placement_rules",
+        "callback": "placement_rules"
+      },
+      {
+        "pattern": "placement-rules/create/",
+        "name": "create_placement_rule",
+        "callback": "create_placement_rule"
+      },
+      {
+        "pattern": "placement-rules/<int:pk>/delete/",
+        "name": "delete_placement_rule",
+        "callback": "delete_placement_rule"
+      },
+      {
+        "pattern": "exam-mapping/",
+        "name": "exam_mapping",
+        "callback": "exam_mapping"
+      },
+      {
+        "pattern": "api/placement-rules/",
+        "name": "get_placement_rules",
+        "callback": "get_placement_rules"
+      },
+      {
+        "pattern": "api/placement-rules/save/",
+        "name": "save_placement_rules",
+        "callback": "save_placement_rules"
+      },
+      {
+        "pattern": "api/exam-mappings/save/",
+        "name": "save_exam_mappings",
+        "callback": "save_exam_mappings"
+      },
+      {
+        "pattern": "^media/(?P<path>.*)$",
+        "name": null,
+        "callback": "serve"
+      },
+      {
+        "pattern": "^static/(?P<path>.*)$",
+        "name": null,
+        "callback": "serve"
+      }
+    ]
+  },
+  "templates": {
+    "total": 34,
+    "groups": {
+      "root": [
+        "base.html"
+      ],
+      "core": [
+        "core/teacher_dashboard.html",
+        "core/index.html",
+        "core/placement_rules_matrix.html",
+        "core/placement_rules.html",
+        "core/exam_mapping.html",
+        "core/placement_configuration.html"
+      ],
+      "components": [
+        "components/pdf/viewer.html",
+        "components/audio/player.html",
+        "components/placement_test/question_nav.html",
+        "components/placement_test/pdf_viewer.html",
+        "components/placement_test/audio_player.html",
+        "components/placement_test/timer.html",
+        "components/placement_test/question_panel.html",
+        "components/exam/question_short.html",
+        "components/exam/question_checkbox.html",
+        "components/exam/timer.html",
+        "components/exam/question_long.html",
+        "components/exam/question_mcq.html",
+        "components/exam/question_mixed.html"
+      ],
+      "placement_test": [
+        "placement_test/grade_session.html",
+        "placement_test/student_test_v2.html",
+        "placement_test/edit_exam.html",
+        "placement_test/exam_list.html",
+        "placement_test/session_detail.html",
+        "placement_test/student_test.html",
+        "placement_test/session_list.html",
+        "placement_test/start_test.html",
+        "placement_test/exam_detail.html",
+        "placement_test/test_result.html",
+        "placement_test/preview_and_answers.html",
+        "placement_test/manage_questions.html",
+        "placement_test/error.html",
+        "placement_test/create_exam.html"
+      ]
+    },
+    "base_templates": [
+      "base.html"
+    ]
+  },
+  "static": {
+    "css_count": 8,
+    "js_count": 11,
+    "css_files": [
+      "css/components/question-panel.css",
+      "css/components/pdf-viewer.css",
+      "css/components/timer.css",
+      "css/components/question-nav.css",
+      "css/layouts/split-screen.css",
+      "css/pages/student-test.css",
+      "css/base/reset.css",
+      "css/base/variables.css"
+    ],
+    "js_files": [
+      "js/config/app-config.js",
+      "js/utils/form-validation.js",
+      "js/utils/event-delegation.js",
+      "js/modules/timer.js",
+      "js/modules/memory-manager.js",
+      "js/modules/answer-manager.js",
+      "js/modules/error-handler.js",
+      "js/modules/navigation.js",
+      "js/modules/base-module.js",
+      "js/modules/pdf-viewer.js",
+      "js/modules/audio-player.js"
+    ]
+  },
+  "relationships": {},
+  "settings": {
+    "DEBUG": true,
+    "DATABASES": [
+      "default"
+    ],
+    "INSTALLED_APPS": [
+      "placement_test",
+      "core",
+      "api",
+      "rest_framework",
+      "django_filters",
+      "corsheaders"
+    ],
+    "MIDDLEWARE": 12,
+    "TEMPLATES": 1,
+    "STATIC_URL": "/static/",
+    "MEDIA_URL": "/media/",
+    "USE_TZ": true
+  },
+  "issues": [
+    "Relationship issue: Question.exam",
+    "Relationship issue: Question.audio_file",
+    "Relationship issue: StudentSession.exam",
+    "Relationship issue: StudentSession.original_curriculum_level",
+    "Relationship issue: StudentSession.final_curriculum_level",
+    "Relationship issue: AudioFile.exam",
+    "Relationship issue: DifficultyAdjustment.session",
+    "Relationship issue: DifficultyAdjustment.from_level",
+    "Relationship issue: DifficultyAdjustment.to_level",
+    "Relationship issue: CurriculumLevel.subprogram",
+    "Relationship issue: SubProgram.program",
+    "Relationship issue: PlacementRule.curriculum_level"
+  ],
+  "warnings": [],
+  "interactions": {
+    "frontend_backend": [
+      {
+        "template": "core/placement_rules_matrix.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/placement_rules_matrix.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/placement_rules.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/exam_mapping.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/exam_mapping.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/exam_mapping.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/placement_configuration.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/placement_configuration.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/placement_configuration.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "core/placement_configuration.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "placement_test/grade_session.html",
+        "endpoint": "{% url ",
+        "type": "FORM"
+      },
+      {
+        "template": "placement_test/exam_list.html",
+        "endpoint": "{% url ",
+        "type": "FORM"
+      },
+      {
+        "template": "placement_test/student_test.html",
+        "endpoint": "{% url ",
+        "type": "AJAX"
+      },
+      {
+        "template": "placement_test/start_test.html",
+        "endpoint": "{% url ",
+        "type": "FORM"
+      }
+    ],
+    "model_view": [],
+    "view_template": [],
+    "api_endpoints": []
+  }
+}

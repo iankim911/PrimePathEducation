@@ -1,0 +1,61 @@
+{
+  "models": {
+    "total": 13,
+    "issues": []
+  },
+  "views": {
+    "total": 5,
+    "issues": [
+      "Missing view file: placement_test/views/teacher.py",
+      "Missing view file: placement_test/views/api.py"
+    ]
+  },
+  "urls": {
+    "total": 217,
+    "issues": [
+      "/api/placement/session/ returned 404"
+    ]
+  },
+  "templates": {
+    "total": 34,
+    "issues": []
+  },
+  "static": {
+    "total": 19,
+    "issues": []
+  },
+  "relationships": {
+    "total": 14,
+    "broken": [
+      "Question.exam has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "Question.audio_file has <function SET_NULL at 0x10457da60>, expected SET_NULL",
+      "StudentSession.exam has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "StudentSession.original_curriculum_level has <function SET_NULL at 0x10457da60>, expected SET_NULL",
+      "StudentSession.final_curriculum_level has <function SET_NULL at 0x10457da60>, expected SET_NULL",
+      "AudioFile.exam has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "DifficultyAdjustment.session has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "DifficultyAdjustment.from_level has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "DifficultyAdjustment.to_level has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "CurriculumLevel.subprogram has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "SubProgram.program has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "PlacementRule.curriculum_level has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "ExamLevelMapping.exam has <function CASCADE at 0x1045709d0>, expected CASCADE",
+      "ExamLevelMapping.curriculum_level has <function CASCADE at 0x1045709d0>, expected CASCADE"
+    ]
+  },
+  "interactions": {
+    "total": 0,
+    "broken": []
+  },
+  "critical_features": {
+    "MIXED_MCQ": true,
+    "DIFFICULTY_ADJUSTMENT": true,
+    "AUDIO": true,
+    "SESSION_TRACKING": true,
+    "QUESTION_TYPES": true
+  },
+  "test_results": {
+    "passed": 4,
+    "failed": 0
+  }
+}

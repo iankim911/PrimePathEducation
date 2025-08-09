@@ -5,6 +5,7 @@
 {% block title %}Exam-to-Level Mapping - Curriculum to Exam Configuration{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <style>
     .mapping-container {
         max-width: 1800px;
@@ -1109,6 +1110,15 @@ console.log('Available exams loaded:', availableExams);
             }
         }
     }
+    
+    // Fallback: try to get CSRF token from the input field
+    if (!cookieValue && name === 'csrftoken') {
+        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) {
+            cookieValue = csrfInput.value;
+        }
+    }
+    
     return cookieValue;
 }
 
@@ -1125,6 +1135,12 @@ console.log('Available exams loaded:', availableExams);
     const mappings = [];
     const container = document.getElementById(`mapping-${levelId}`);
     
+    if (!container) {
+        console.error('Container not found for level:', levelId);
+        alert('Error: Cannot find mapping container');
+        return;
+    }
+    
     container.querySelectorAll('.exam-select').forEach(select => {
         if (select.value) {
             mappings.push({
@@ -1135,28 +1151,40 @@ console.log('Available exams loaded:', availableExams);
         }
     });
     
+    const csrfToken = window.ExamMapping.getCookie('csrftoken');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        alert('Error: Security token not found. Please refresh the page and try again.');
+        return;
+    }
+    
     fetch('{% url "core:save_exam_mappings" %}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ 
             mappings: mappings,
             level_id: levelId 
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             alert('Mappings saved successfully for this level!');
         } else {
-            alert('Error saving mappings: ' + data.error);
+            alert('Error saving mappings: ' + (data.error || 'Unknown error'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving mappings');
+        alert('An error occurred while saving mappings: ' + error.message);
     });
 }
 
@@ -1173,25 +1201,42 @@ console.log('Available exams loaded:', availableExams);
         }
     });
     
+    if (mappings.length === 0) {
+        alert('No mappings to save. Please select at least one exam.');
+        return;
+    }
+    
+    const csrfToken = window.ExamMapping.getCookie('csrftoken');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        alert('Error: Security token not found. Please refresh the page and try again.');
+        return;
+    }
+    
     fetch('{% url "core:save_exam_mappings" %}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ mappings: mappings })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             alert('All exam mappings saved successfully!');
         } else {
-            alert('Error saving exam mappings: ' + data.error);
+            alert('Error saving exam mappings: ' + (data.error || 'Unknown error'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving exam mappings');
+        alert('An error occurred while saving exam mappings: ' + error.message);
     });
 }
 
@@ -1282,11 +1327,14 @@ console.log('Available exams loaded:', availableExams);
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Show login modal
-    document.getElementById('loginModal').style.display = 'block';
+    // Remove automatic login modal display - make it optional
+    // document.getElementById('loginModal').style.display = 'block';
     
-    // Disable all inputs until authenticated
-    window.ExamMapping.disableAllInputs();
+    // Remove automatic disabling of inputs
+    // window.ExamMapping.disableAllInputs();
+    
+    // Mark as authenticated by default for now
+    isAuthenticated = true;
     
     // Update stats based on existing mappings
     window.ExamMapping.updateStats();

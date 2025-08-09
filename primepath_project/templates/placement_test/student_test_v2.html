@@ -8,6 +8,63 @@
     
     <!-- Modular CSS -->
     <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}">
+    
+    <style>
+        /* Difficulty Adjustment Buttons */
+        .difficulty-adjustment-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn-difficulty-adjust {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn-difficulty-adjust:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-difficulty-adjust:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #6c757d;
+        }
+        
+        .btn-difficulty-adjust[data-direction="down"] {
+            background: linear-gradient(135deg, #667eea 0%, #4facfe 100%);
+        }
+        
+        .btn-difficulty-adjust[data-direction="up"] {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .test-header > div {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .difficulty-adjustment-buttons {
+                margin-top: 10px;
+                width: 100%;
+            }
+            
+            .btn-difficulty-adjust {
+                flex: 1;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="page-wrapper">
@@ -18,8 +75,27 @@
                     <h1>{{ exam.name }}</h1>
                     {% include 'components/placement_test/timer.html' with timer_seconds=timer_seconds %}
                 </div>
-                <div id="answer-progress" style="margin-top: 10px; color: #6c757d;">
-                    0 / {{ questions|length }} answered
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <div id="answer-progress" style="color: #6c757d;">
+                        0 / {{ questions|length }} answered
+                    </div>
+                    <!-- Difficulty Adjustment Buttons -->
+                    <div class="difficulty-adjustment-buttons" style="display: flex; gap: 10px;">
+                        <button type="button" 
+                                id="decrease-difficulty-btn"
+                                class="btn-difficulty-adjust"
+                                data-direction="down"
+                                title="Switch to an easier exam">
+                            📉 Easier Exam
+                        </button>
+                        <button type="button" 
+                                id="increase-difficulty-btn"
+                                class="btn-difficulty-adjust"
+                                data-direction="up"
+                                title="Switch to a harder exam">
+                            📈 Harder Exam
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -97,7 +173,8 @@
             urls: {
                 saveAnswer: '{% url "placement_test:submit_answer" session.id %}',
                 completeTest: '{% url "placement_test:complete_test" session.id %}',
-                getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}')
+                getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}'),
+                adjustDifficulty: '{% url "placement_test:manual_adjust_difficulty" session.id %}'
             }
         };
         
@@ -338,6 +415,74 @@
         
         // Navigation module handles initial question display
         // Note: All instances already made globally available above before navigation init
+        
+        // Difficulty Adjustment Feature
+        const difficultyButtons = document.querySelectorAll('.btn-difficulty-adjust');
+        
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const direction = this.dataset.direction;
+                const isIncreasing = direction === 'up';
+                
+                // Create warning message
+                const warningTitle = isIncreasing ? '⚠️ Increase Test Difficulty?' : '⚠️ Decrease Test Difficulty?';
+                const warningMessage = `
+                    This will:
+                    • Load a ${isIncreasing ? 'more challenging' : 'easier'} exam
+                    • RESET all your current answers
+                    • Restart the timer
+                    • You'll lose all progress on this exam
+                    
+                    Are you sure you want a ${isIncreasing ? 'harder' : 'easier'} test?`;
+                
+                // Show confirmation dialog
+                if (!confirm(warningTitle + warningMessage)) {
+                    return;
+                }
+                
+                // Disable buttons during request
+                difficultyButtons.forEach(btn => btn.disabled = true);
+                
+                // Send request to adjust difficulty
+                fetch(APP_CONFIG.urls.adjustDifficulty, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': APP_CONFIG.csrf
+                    },
+                    body: JSON.stringify({
+                        direction: direction
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alert(`✅ Success!\n\nExam adjusted to: ${data.new_level}\n\nThe page will now reload with your new exam.`);
+                        
+                        // Reload the page to get the new exam
+                        window.location.reload();
+                    } else {
+                        // Handle boundary cases or errors
+                        if (data.at_boundary) {
+                            alert(data.error);
+                        } else {
+                            alert('❌ Error: ' + (data.error || 'Unable to adjust difficulty'));
+                        }
+                        
+                        // Re-enable buttons
+                        difficultyButtons.forEach(btn => btn.disabled = false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adjusting difficulty:', error);
+                    alert('❌ An error occurred while adjusting difficulty. Please try again.');
+                    
+                    // Re-enable buttons
+                    difficultyButtons.forEach(btn => btn.disabled = false);
+                });
+            });
+        });
     });
     </script>
 </body>

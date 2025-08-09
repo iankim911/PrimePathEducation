@@ -1,0 +1,211 @@
+{
+  "passed": 28,
+  "failed": 1,
+  "categories": {
+    "MIXED MCQ": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Question 1016 options customization",
+          "passed": true,
+          "details": "All counts (2-10) work correctly"
+        },
+        {
+          "name": "Question 1017 options customization",
+          "passed": true,
+          "details": "All counts (2-10) work correctly"
+        },
+        {
+          "name": "Question 1019 options customization",
+          "passed": true,
+          "details": "All counts (2-10) work correctly"
+        },
+        {
+          "name": "Exam default_options_count",
+          "passed": true,
+          "details": "Set to 7, got 7"
+        }
+      ]
+    },
+    "Questions": {
+      "passed": 5,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "MCQ modification",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "CHECKBOX modification",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "SHORT modification",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "LONG modification",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "MIXED modification",
+          "passed": true,
+          "details": ""
+        }
+      ]
+    },
+    "Audio": {
+      "passed": 1,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Question-Audio assignment",
+          "passed": true,
+          "details": "Can modify audio assignments"
+        }
+      ]
+    },
+    "Session": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Session creation",
+          "passed": true,
+          "details": "Session f16c7c2b-c1f5-4d05-939e-8d94e814d112"
+        },
+        {
+          "name": "Answer submission",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Answer modification",
+          "passed": true,
+          "details": ""
+        }
+      ]
+    },
+    "Exam": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Timer modification",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Total questions modification",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Active status toggle",
+          "passed": true,
+          "details": ""
+        }
+      ]
+    },
+    "Placement": {
+      "passed": 2,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Grade modification",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Curriculum level link",
+          "passed": true,
+          "details": "Rule links to PRIME CORE PHONICS - Level 1"
+        }
+      ]
+    },
+    "Mapping": {
+      "passed": 2,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Exam-Level mapping exists",
+          "passed": true,
+          "details": "[PlacementTest] PRIME CORE PHONICS - Level 2_v_a \u2192 PRIME CORE PHONICS - Level 1"
+        },
+        {
+          "name": "Exam can find levels",
+          "passed": true,
+          "details": "Found 1 level(s)"
+        }
+      ]
+    },
+    "API": {
+      "passed": 1,
+      "failed": 1,
+      "tests": [
+        {
+          "name": "Exam list API",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Questions API",
+          "passed": false,
+          "details": ""
+        }
+      ]
+    },
+    "Views": {
+      "passed": 4,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Homepage",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Teacher Dashboard",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Placement Rules",
+          "passed": true,
+          "details": ""
+        },
+        {
+          "name": "Exam Mapping",
+          "passed": true,
+          "details": ""
+        }
+      ]
+    },
+    "Database": {
+      "passed": 3,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "No orphaned questions",
+          "passed": true,
+          "details": "All questions have exams"
+        },
+        {
+          "name": "No orphaned audio files",
+          "passed": true,
+          "details": "All audio files have exams"
+        },
+        {
+          "name": "Session integrity",
+          "passed": true,
+          "details": "All sessions valid"
+        }
+      ]
+    }
+  }
+}

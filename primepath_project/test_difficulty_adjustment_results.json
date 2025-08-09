@@ -1,0 +1,71 @@
+{
+  "passed": 13,
+  "failed": 0,
+  "details": [
+    {
+      "test": "Upward adjustment",
+      "passed": true,
+      "details": "PRIME CORE PHONICS - Level 1 -> PRIME CORE PHONICS - Level 2"
+    },
+    {
+      "test": "Downward adjustment",
+      "passed": true,
+      "details": "At bottom level (None returned)"
+    },
+    {
+      "test": "API: Increase difficulty",
+      "passed": true,
+      "details": "New level: PRIME CORE PHONICS - Level 2"
+    },
+    {
+      "test": "API: Decrease difficulty",
+      "passed": true,
+      "details": "New level: PRIME CORE PHONICS - Level 1"
+    },
+    {
+      "test": "API: Invalid direction handling",
+      "passed": true,
+      "details": "Correctly rejected"
+    },
+    {
+      "test": "Difficulty adjustments tracked",
+      "passed": true,
+      "details": "2 adjustments found"
+    },
+    {
+      "test": "Session difficulty_adjustments counter",
+      "passed": true,
+      "details": "Count: 2"
+    },
+    {
+      "test": "Final curriculum level set",
+      "passed": true,
+      "details": "Level: PRIME CORE PHONICS - Level 1"
+    },
+    {
+      "test": "Cannot go higher than highest",
+      "passed": true,
+      "details": "Highest: PRIME PINNACLE PRO - Level 3"
+    },
+    {
+      "test": "Cannot go lower than lowest",
+      "passed": true,
+      "details": "Lowest: PRIME CORE PHONICS - Level 1"
+    },
+    {
+      "test": "Easier Exam button present",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "Harder Exam button present",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "test": "JavaScript integration",
+      "passed": true,
+      "details": ""
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "passed": 26,
+  "failed": 0,
+  "details": [
+    {
+      "category": "Student",
+      "name": "Session creation",
+      "passed": true,
+      "details": "Session 6ad9b15c-d96d-4160-a789-959d1f385601"
+    },
+    {
+      "category": "Student",
+      "name": "Answer submission",
+      "passed": true,
+      "details": "Answered 5 questions"
+    },
+    {
+      "category": "Student",
+      "name": "Session completion",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "MIXED",
+      "name": "All option counts (2-10)",
+      "passed": true,
+      "details": "Tested 5 questions"
+    },
+    {
+      "category": "MIXED",
+      "name": "Exam default_options_count",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Teacher",
+      "name": "Exam field modifications",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Teacher",
+      "name": "Exam list API",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Teacher",
+      "name": "Dashboard access",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Audio",
+      "name": "Audio file modifications",
+      "passed": true,
+      "details": "Tested 3 files"
+    },
+    {
+      "category": "Audio",
+      "name": "Question assignment",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Grading",
+      "name": "Score calculation",
+      "passed": true,
+      "details": "0/30 correct"
+    },
+    {
+      "category": "Questions",
+      "name": "All 5 types functional",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Placement",
+      "name": "Rule modifications",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Placement",
+      "name": "Curriculum level link",
+      "passed": true,
+      "details": "PRIME CORE PHONICS - Level 1"
+    },
+    {
+      "category": "Placement",
+      "name": "Exam-Level mappings",
+      "passed": true,
+      "details": "6 mappings"
+    },
+    {
+      "category": "Database",
+      "name": "No orphaned questions",
+      "passed": true,
+      "details": "All linked"
+    },
+    {
+      "category": "Database",
+      "name": "No orphaned audio",
+      "passed": true,
+      "details": "All linked"
+    },
+    {
+      "category": "Database",
+      "name": "Session integrity",
+      "passed": true,
+      "details": "All valid"
+    },
+    {
+      "category": "Database",
+      "name": "Answer integrity",
+      "passed": true,
+      "details": "All valid"
+    },
+    {
+      "category": "API",
+      "name": "Exam list",
+      "passed": true,
+      "details": "Status: 200"
+    },
+    {
+      "category": "API",
+      "name": "Dashboard",
+      "passed": true,
+      "details": "Status: 200"
+    },
+    {
+      "category": "API",
+      "name": "Placement rules",
+      "passed": true,
+      "details": "Status: 200"
+    },
+    {
+      "category": "API",
+      "name": "Exam mapping",
+      "passed": true,
+      "details": "Status: 200"
+    },
+    {
+      "category": "API",
+      "name": "Question update",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Compatibility",
+      "name": "Sessions without adjustment",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "category": "Compatibility",
+      "name": "Adjustment field exists",
+      "passed": true,
+      "details": "Count: 4"
+    }
+  ],
+  "broken_features": []
+}

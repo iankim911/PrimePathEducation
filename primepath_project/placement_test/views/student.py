@@ -281,6 +281,103 @@ def adjust_difficulty(request, session_id):
 
 
 @require_POST
+def manual_adjust_difficulty(request, session_id):
+    """
+    Manual difficulty adjustment by student request.
+    This resets the exam with a new difficulty level.
+    """
+    try:
+        session = get_object_or_404(StudentSession, id=session_id)
+        
+        # Check if session is already completed
+        if session.is_completed:
+            return JsonResponse({
+                'success': False,
+                'error': 'Cannot adjust difficulty for a completed test'
+            }, status=400)
+        
+        # Parse request data
+        data = json.loads(request.body)
+        direction = data.get('direction')  # 'up' or 'down'
+        
+        if direction not in ['up', 'down']:
+            return JsonResponse({
+                'success': False,
+                'error': 'Invalid direction. Must be "up" or "down"'
+            }, status=400)
+        
+        adjustment = 1 if direction == 'up' else -1
+        
+        # Get current curriculum level
+        current_level = session.final_curriculum_level or session.original_curriculum_level
+        if not current_level:
+            return JsonResponse({
+                'success': False,
+                'error': 'No curriculum level associated with current session'
+            }, status=400)
+        
+        # Try to adjust difficulty using PlacementService
+        result = PlacementService.adjust_difficulty(current_level, adjustment)
+        
+        if not result:
+            # No level available in that direction
+            if direction == 'up':
+                message = "You're already at the most advanced level available."
+            else:
+                message = "You're already at the foundational level."
+            
+            return JsonResponse({
+                'success': False,
+                'error': message,
+                'at_boundary': True
+            }, status=200)
+        
+        new_level, new_exam = result
+        
+        with transaction.atomic():
+            # Track the adjustment
+            DifficultyAdjustment.objects.create(
+                session=session,
+                from_level=current_level,
+                to_level=new_level,
+                adjustment=adjustment
+            )
+            
+            # Update session with new exam and level
+            session.exam = new_exam
+            session.final_curriculum_level = new_level
+            session.difficulty_adjustments += 1
+            
+            # Clear all existing answers (reset progress)
+            session.answers.all().delete()
+            
+            # Reset timer by updating started_at
+            session.started_at = timezone.now()
+            
+            session.save()
+        
+        logger.info(
+            f"Manual difficulty adjusted for session {session_id}: "
+            f"{current_level.full_name} -> {new_level.full_name}"
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'new_level': new_level.full_name,
+            'new_exam_id': str(new_exam.id),
+            'new_exam_name': new_exam.name,
+            'message': f'Difficulty adjusted to {new_level.full_name}'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in manual difficulty adjustment: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'An error occurred while adjusting difficulty'
+        }, status=500)
+
+
+@require_POST
 def complete_test(request, session_id):
     """Completes the test and calculates final score"""
     session = get_object_or_404(StudentSession, id=session_id)

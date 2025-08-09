@@ -63,15 +63,15 @@ class AudioFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = AudioFile
         fields = [
-            'id', 'name', 'file', 'file_url',
+            'id', 'name', 'audio_file', 'file_url',
             'start_question', 'end_question'
         ]
     
     def get_file_url(self, obj):
         """Get full URL for audio file."""
         request = self.context.get('request')
-        if obj.file and request:
-            return request.build_absolute_uri(obj.file.url)
+        if obj.audio_file and request:
+            return request.build_absolute_uri(obj.audio_file.url)
         return None
 
 

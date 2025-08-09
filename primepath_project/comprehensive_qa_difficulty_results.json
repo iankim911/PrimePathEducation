@@ -1,0 +1,46 @@
+{
+  "passed": 30,
+  "failed": 2,
+  "categories": {
+    "Models": {
+      "passed": 7,
+      "failed": 0
+    },
+    "Views": {
+      "passed": 5,
+      "failed": 0
+    },
+    "Workflow": {
+      "passed": 2,
+      "failed": 1
+    },
+    "API": {
+      "passed": 2,
+      "failed": 0
+    },
+    "Placement": {
+      "passed": 0,
+      "failed": 1
+    },
+    "Templates": {
+      "passed": 4,
+      "failed": 0
+    },
+    "Curriculum": {
+      "passed": 2,
+      "failed": 0
+    },
+    "Data": {
+      "passed": 3,
+      "failed": 0
+    },
+    "Boundaries": {
+      "passed": 2,
+      "failed": 0
+    },
+    "UI": {
+      "passed": 3,
+      "failed": 0
+    }
+  }
+}

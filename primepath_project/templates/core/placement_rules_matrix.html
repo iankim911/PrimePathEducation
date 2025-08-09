@@ -5,6 +5,7 @@
 {% block title %}Placement Rules Configuration{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <!-- Success Notification Container (matching Upload Exam style) -->
 <div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 500px;">
     <div class="alert alert-success" style="margin: 0; padding: 25px 30px; font-size: 1.3rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 5px solid #28a745; position: relative;">
@@ -425,6 +426,15 @@ function savePlacementRules() {
 }
 
 function getCookie(name) {
+    // First try to get CSRF token from the DOM (more secure)
+    if (name === 'csrftoken') {
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (tokenInput) {
+            return tokenInput.value;
+        }
+    }
+    
+    // Fallback to cookie method
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');

@@ -235,8 +235,8 @@ def delete_exam(request, exam_id):
         
         # Delete audio files
         for audio in exam.audio_files.all():
-            if audio.file:
-                audio.file.delete()
+            if audio.audio_file:
+                audio.audio_file.delete()
             audio.delete()
         
         # Delete the exam (questions will cascade)
