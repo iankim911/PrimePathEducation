@@ -79,7 +79,14 @@
                     
                     // Update UI
                     if (playButton) playButton.classList.add('playing');
-                    if (iconElement) iconElement.textContent = '⏸';
+                    if (iconElement) {
+                        // Use SVG for pause icon
+                        iconElement.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="white" style="width: 16px !important; height: 16px !important;">
+                                <path d="M5 2v12h2V2H5zm4 0v12h2V2H9z"/>
+                            </svg>
+                        `;
+                    }
                     if (progressTrack) progressTrack.classList.add('active');
                     
                     // Track playback
@@ -120,7 +127,14 @@
             
             // Update UI
             if (playButton) playButton.classList.remove('playing');
-            if (iconElement) iconElement.textContent = '▶';
+            if (iconElement) {
+                // Use SVG for play icon
+                iconElement.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="white" style="width: 16px !important; height: 16px !important;">
+                        <path d="M3 2v12l10-6z"/>
+                    </svg>
+                `;
+            }
             
             // Stop progress tracking
             this.stopProgressTracking();
@@ -150,7 +164,14 @@
             
             // Update UI
             if (playButton) playButton.classList.remove('playing');
-            if (iconElement) iconElement.textContent = '▶';
+            if (iconElement) {
+                // Use SVG for play icon
+                iconElement.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="white" style="width: 16px !important; height: 16px !important;">
+                        <path d="M3 2v12l10-6z"/>
+                    </svg>
+                `;
+            }
             if (progressTrack) progressTrack.classList.remove('active');
             if (progressFill) progressFill.style.width = '0%';
             
@@ -274,8 +295,14 @@
             
             // Play button clicks
             delegation.onClick('[data-audio-play]', (e) => {
-                const audioId = e.currentTarget.dataset.audioPlay;
-                this.play(audioId);
+                // Use the element passed by event delegation, not currentTarget
+                const element = e.target.closest('[data-audio-play]');
+                if (element && element.dataset.audioPlay) {
+                    const audioId = element.dataset.audioPlay;
+                    this.play(audioId);
+                } else {
+                    console.error('Audio button clicked but no audio ID found', e.target);
+                }
             });
             
             // Audio ended events (using event delegation)

@@ -29,11 +29,24 @@
         }
 
         /**
+         * Check if we're in debug mode
+         * @returns {boolean} True if in debug mode
+         */
+        isDebugMode() {
+            return window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1' ||
+                   window.location.hostname.includes('dev') ||
+                   window.location.search.includes('debug=true');
+        }
+
+        /**
          * Register a module for memory management
          */
         registerModule(name, module) {
             this.modules.set(name, module);
-            console.log(`MemoryManager: Registered module ${name}`);
+            if (this.isDebugMode()) {
+                console.log(`MemoryManager: Registered module ${name}`);
+            }
         }
 
         /**
@@ -68,7 +81,9 @@
          * Clean up all registered resources
          */
         cleanup() {
-            console.log('MemoryManager: Starting cleanup...');
+            if (this.isDebugMode()) {
+                console.log('MemoryManager: Starting cleanup...');
+            }
             
             // Clear all timers
             this.timers.forEach(timerId => {
@@ -116,7 +131,9 @@
             // Clean up localStorage for old sessions
             this.cleanupLocalStorage();
             
-            console.log('MemoryManager: Cleanup complete');
+            if (this.isDebugMode()) {
+                console.log('MemoryManager: Cleanup complete');
+            }
         }
 
         /**

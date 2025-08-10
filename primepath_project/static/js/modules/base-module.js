@@ -33,7 +33,10 @@
                 return;
             }
 
-            this.log('info', `Initializing module: ${this.name}`);
+            // Only log initialization in debug mode
+            if (this.isDebugMode()) {
+                this.log('info', `Initializing module: ${this.name}`);
+            }
             this.initialized = true;
         }
 
@@ -67,6 +70,23 @@
                 default:
                     console.log(prefix, message, data || '');
             }
+        }
+
+        /**
+         * Check if we're in debug mode
+         * @returns {boolean} True if in debug mode
+         */
+        isDebugMode() {
+            // Check if AppConfig is available and has debug info
+            if (window.PrimePath && window.PrimePath.config && window.PrimePath.config.isDebugMode) {
+                return window.PrimePath.config.isDebugMode();
+            }
+            
+            // Fallback: check URL and hostname
+            return window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1' ||
+                   window.location.hostname.includes('dev') ||
+                   window.location.search.includes('debug=true');
         }
 
         /**
@@ -190,7 +210,25 @@
             }
             
             if (!options.headers['X-CSRFToken']) {
-                options.headers['X-CSRFToken'] = this.config.getCsrfToken();
+                // Try to get CSRF token from config or APP_CONFIG
+                let csrfToken = '';
+                if (this.config && typeof this.config.getCsrfToken === 'function') {
+                    csrfToken = this.config.getCsrfToken();
+                } else if (window.APP_CONFIG && window.APP_CONFIG.csrf) {
+                    csrfToken = window.APP_CONFIG.csrf;
+                } else {
+                    // Try to get from cookie as fallback
+                    const match = document.cookie.match(/csrftoken=([^;]+)/);
+                    if (match) {
+                        csrfToken = match[1];
+                    }
+                }
+                
+                if (!csrfToken) {
+                    console.warn('CSRF token not found for AJAX request');
+                }
+                
+                options.headers['X-CSRFToken'] = csrfToken;
             }
 
             // Add default content type for JSON

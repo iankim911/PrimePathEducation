@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ exam.name }} - Placement Test</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
 <style>
     * {
         margin: 0;
@@ -1100,7 +1105,9 @@
                     <!-- Fallback for no PDF -->
                     <div id="pdf-error" style="display: none; text-align: center; padding: 50px;">
                         <p>Error loading PDF. Please try again.</p>
+                        {% if exam.pdf_file %}
                         <a href="{{ exam.pdf_file.url }}" target="_blank" class="btn btn-primary">Download PDF</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -1492,7 +1499,18 @@ function startTimer() {
 
 // PDF Image Display Functions
 function initializePdfImageDisplay() {
+    {% if exam.pdf_file %}
     const pdfUrl = "{{ exam.pdf_file.url }}";
+    {% else %}
+    const pdfUrl = null;
+    {% endif %}
+    
+    if (!pdfUrl) {
+        console.warn('No PDF file available for this exam');
+        document.getElementById('pdf-error').style.display = 'block';
+        document.getElementById('pdf-error').innerHTML = '<p class="text-muted">No PDF file uploaded for this exam</p>';
+        return;
+    }
     
     if (typeof pdfjsLib === 'undefined') {
         console.error('PDF.js not loaded');

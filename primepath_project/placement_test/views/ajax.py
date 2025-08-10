@@ -173,6 +173,17 @@ def save_exam_answers(request, exam_id):
         data = json.loads(request.body)
         questions_data = data.get('questions', [])
         audio_assignments = data.get('audio_assignments', {})
+        pdf_rotation = data.get('pdf_rotation', None)
+        
+        # Save PDF rotation if provided
+        if pdf_rotation is not None:
+            # Ensure rotation is valid (0, 90, 180, or 270)
+            if pdf_rotation in [0, 90, 180, 270]:
+                exam.pdf_rotation = pdf_rotation
+                exam.save(update_fields=['pdf_rotation'])
+                logger.info(f"Updated PDF rotation for exam {exam_id} to {pdf_rotation} degrees")
+            else:
+                logger.warning(f"Invalid PDF rotation value: {pdf_rotation}")
         
         # Use ExamService to update questions
         results = ExamService.update_exam_questions(exam, questions_data)
@@ -187,7 +198,8 @@ def save_exam_answers(request, exam_id):
             'message': f'Successfully saved {len(questions_data)} questions',
             'details': results,
             'audio_assignments_saved': len(audio_assignments) if audio_assignments else 0,
-            'audio_results': audio_results
+            'audio_results': audio_results,
+            'pdf_rotation_saved': pdf_rotation if pdf_rotation is not None else exam.pdf_rotation
         })
         
     except json.JSONDecodeError:

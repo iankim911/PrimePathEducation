@@ -187,7 +187,18 @@
       "Bash(pkill:*)",
       "Bash(kill:*)",
       "Bash(./verify_fixes.sh:*)",
-      "Bash(sudo rm:*)"
+      "Bash(sudo rm:*)",
+      "Bash(sudo touch:*)",
+      "Bash(sudo chmod:*)",
+      "Bash(echo:*)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python primepath_project/test_js_error_fix.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite --noreload)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python -c \"\nimport os, sys\nsys.path.append(''/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project'')\nos.environ.setdefault(''DJANGO_SETTINGS_MODULE'', ''primepath_project.settings_sqlite'')\nimport django\ndjango.setup()\n\nfrom placement_test.models import StudentSession\nsession = StudentSession.objects.filter(exam__questions__audio_file__isnull=False, completed_at__isnull=True).first()\nif session:\n    print(f''http://127.0.0.1:8000/placement/test/{session.id}/'')\nelse:\n    print(''No test sessions with audio found'')\n\")",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_audio_button_fix_live.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_console_fixes_comprehensive.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python manage.py collectstatic --noinput --settings=primepath_project.settings_sqlite)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python -c \"\nimport os, django\nos.environ.setdefault(''DJANGO_SETTINGS_MODULE'', ''primepath_project.settings_sqlite'')\ndjango.setup()\n\nfrom django.template.loader import get_template\nfrom django.template import Context\n\ntemplate = get_template(''core/index.html'')\nprint(''Template found:'', template.origin.name if hasattr(template, ''origin'') else ''Unknown'')\n\ntry:\n    rendered = template.render({''request'': None})\n    if ''favicon'' in rendered:\n        print(''✅ Favicon found in rendered template'')\n    else:\n        print(''❌ Favicon NOT found in rendered template'')\n        # Print first part to debug\n        print(''First 500 chars:'')\n        print(rendered[:500])\nexcept Exception as e:\n    print(''Error rendering:'', e)\n\")",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_submission_fix_comprehensive.py)"
     ],
     "deny": []
   }

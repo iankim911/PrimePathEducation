@@ -1083,9 +1083,13 @@
                         </small>
                     </div>
                     {% endif %}{% endcomment %}
+                    {% if exam.pdf_file %}
                     <a href="{{ exam.pdf_file.url }}" class="btn btn-sm btn-primary" download>
                         Download PDF
                     </a>
+                    {% else %}
+                    <span class="text-muted">No PDF uploaded</span>
+                    {% endif %}
                 </div>
             </div>
             <div class="pdf-viewer" id="pdf-viewer">
@@ -1544,12 +1548,22 @@ let currentPageNum = 1;  // For virtual page system (properly declared to fix sc
 let totalPages = 0;
 let pageImages = new Map(); // Cache for converted images
 let currentZoomLevel = 1.0; // Zoom level for image scaling
-let currentRotation = 0; // Track rotation angle (0, 90, 180, 270)
+let currentRotation = {{ exam.pdf_rotation|default:0 }}; // Initialize rotation from saved value
 let minZoom = 0.5;
 let maxZoom = 3.0;
 
 function initializePdfImageDisplay() {
+    {% if exam.pdf_file %}
     const pdfUrl = "{{ exam.pdf_file.url }}";
+    {% else %}
+    const pdfUrl = null;
+    {% endif %}
+    
+    if (!pdfUrl) {
+        console.warn('No PDF file available for this exam');
+        document.getElementById('pdf-loading').innerHTML = '<p class="text-muted">No PDF file uploaded for this exam</p>';
+        return;
+    }
     
     if (typeof pdfjsLib === 'undefined') {
         console.warn('PDF.js not loaded yet, retrying...');
@@ -1602,8 +1616,8 @@ function renderPageAsImage(pageNum) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // Calculate scale for good quality with rotation
-        const viewport = page.getViewport({ scale: 2.0, rotation: currentRotation });
+        // Calculate scale for good quality with rotation - increased for better readability
+        const viewport = page.getViewport({ scale: 2.5, rotation: currentRotation });
         canvas.width = viewport.width;
         canvas.height = viewport.height;
         
@@ -2024,7 +2038,7 @@ function renderPage(vPageNum) {
         const scaleY = targetHeight / viewport.height;
         
         // Use higher minimum scale for better readability, prioritize content size
-        const scale = Math.max(Math.min(scaleX, scaleY), 1.5); // Increased minimum from 0.95 to 1.5
+        const scale = Math.max(Math.min(scaleX, scaleY), 1.8); // Optimized minimum scale for readability
         
         console.log('🔥 [PREVIEW_EXAM] Scale calculations for column view:', {
             originalViewportWidth: viewport.width,
@@ -3339,7 +3353,7 @@ function saveAllAnswers() {
     console.log('Data being sent:', questionsData);
     console.log('Audio assignments being saved:', audioAssignments);
     
-    // Make API call to save all answers and types INCLUDING audio assignments
+    // Make API call to save all answers and types INCLUDING audio assignments and PDF rotation
     fetch(saveUrl, {
         method: 'POST',
         headers: {
@@ -3347,7 +3361,8 @@ function saveAllAnswers() {
         },
         body: JSON.stringify({ 
             questions: questionsData,
-            audio_assignments: audioAssignments 
+            audio_assignments: audioAssignments,
+            pdf_rotation: currentRotation  // Include current PDF rotation
         })
     })
     .then(response => {

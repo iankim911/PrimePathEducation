@@ -371,6 +371,7 @@ if (typeof pdfjsLib !== 'undefined') {
 {% block content %}
 <form method="post" enctype="multipart/form-data" class="upload-form" id="examForm">
     {% csrf_token %}
+    <input type="hidden" name="pdf_rotation" id="pdf_rotation" value="0">
     
     <!-- PDF Upload - Moved to top -->
     <div class="form-section">
@@ -805,6 +806,9 @@ document.getElementById('pdf-rotate-left')?.addEventListener('click', function()
     currentRotation = (currentRotation - 90) % 360;
     if (currentRotation < 0) currentRotation += 360;
     
+    // Update hidden field for form submission
+    document.getElementById('pdf_rotation').value = currentRotation;
+    
     console.log('🔥 [CREATE_EXAM] Rotate left clicked, new rotation:', currentRotation);
     renderPage(currentPageNum);
 });
@@ -814,6 +818,9 @@ document.getElementById('pdf-rotate-right')?.addEventListener('click', function(
     if (!pdfDoc) return;
     
     currentRotation = (currentRotation + 90) % 360;
+    
+    // Update hidden field for form submission
+    document.getElementById('pdf_rotation').value = currentRotation;
     
     console.log('🔥 [CREATE_EXAM] Rotate right clicked, new rotation:', currentRotation);
     renderPage(currentPageNum);

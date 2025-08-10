@@ -10,21 +10,9 @@ Parameters:
 {% endcomment %}
 
 <div class="pdf-section">
-    <div id="pdf-viewer" data-pdf-url="{{ pdf_url }}" data-initial-page="{{ initial_page|default:1 }}">
-        <canvas id="pdf-canvas"></canvas>
-        <div class="pdf-loading" style="display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.9); z-index: 10;">
-            <div style="text-align: center;">
-                <div class="pdf-loading-spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
-                <p>Loading PDF...</p>
-            </div>
-        </div>
-        <div class="pdf-error" style="display: none; padding: 20px; text-align: center; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 4px; color: #c62828;">
-            <p>Error loading PDF. Please refresh the page.</p>
-        </div>
-    </div>
-    
+    {% if pdf_url %}
     {% if enable_navigation|default:True %}
-    <div class="pdf-controls">
+    <div class="pdf-controls pdf-controls-top">
         <button type="button" data-pdf-action="prev" class="pdf-nav-btn">
             ← Previous
         </button>
@@ -52,6 +40,35 @@ Parameters:
             <button type="button" data-pdf-action="rotate-cw" title="Rotate Right">↻</button>
         </div>
         {% endif %}
+    </div>
+    {% endif %}
+    
+    <div id="pdf-viewer" data-pdf-url="{{ pdf_url }}" data-initial-page="{{ initial_page|default:1 }}">
+        <canvas id="pdf-canvas"></canvas>
+        <div class="pdf-loading" style="display: flex; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.9); z-index: 10;">
+            <div style="text-align: center;">
+                <div class="pdf-loading-spinner" style="border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px;"></div>
+                <p>Loading PDF...</p>
+            </div>
+        </div>
+        <div class="pdf-error" style="display: none; padding: 20px; text-align: center; background: #ffebee; border: 1px solid #ffcdd2; border-radius: 4px; color: #c62828;">
+            <p>Error loading PDF. Please refresh the page.</p>
+        </div>
+    </div>
+    {% else %}
+    <!-- No PDF file available -->
+    <div id="pdf-viewer" style="display: flex; align-items: center; justify-content: center; min-height: 400px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
+        <div style="text-align: center; color: #6c757d;">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 16px;">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <p style="font-size: 1.1rem; margin-bottom: 8px;">No PDF File Available</p>
+            <p style="font-size: 0.9rem;">This exam does not have a PDF file uploaded yet.</p>
+        </div>
     </div>
     {% endif %}
 </div>

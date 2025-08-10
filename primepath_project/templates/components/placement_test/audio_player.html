@@ -12,9 +12,14 @@ Parameters:
                 id="audio-play-{{ audio_file.id }}"
                 class="audio-play-btn" 
                 data-audio-play="{{ audio_file.id }}"
-                aria-label="Play audio">
-            <span id="audio-icon-{{ audio_file.id }}" class="audio-icon">▶</span>
-            <span class="audio-text">Play Audio</span>
+                aria-label="Play audio"
+                style="display: inline-flex !important; align-items: center !important; gap: 8px !important; padding: 10px 20px !important; background: #007bff !important; color: white !important; border: 2px solid #0056b3 !important; border-radius: 6px !important; cursor: pointer !important; font-weight: 500 !important; min-height: 40px !important; min-width: 120px !important;">
+            <span id="audio-icon-{{ audio_file.id }}" class="audio-icon" style="display: inline-flex !important; width: 20px !important; height: 20px !important;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="white" style="width: 16px !important; height: 16px !important;">
+                    <path d="M3 2v12l10-6z"/>
+                </svg>
+            </span>
+            <span class="audio-text" style="display: inline !important; color: white !important; font-size: 14px !important;">Play Audio</span>
         </button>
         
         <div class="audio-info">

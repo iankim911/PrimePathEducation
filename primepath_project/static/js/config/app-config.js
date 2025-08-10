@@ -19,6 +19,32 @@
             // Get configuration from window.APP_CONFIG
             // This is injected by Django templates
             this.config = window.APP_CONFIG || {};
+            
+            // Log initialization status (only in debug mode)
+            if (this.isDebugMode()) {
+                if (this.config && Object.keys(this.config).length > 0) {
+                    console.log('AppConfig initialized with configuration');
+                } else {
+                    console.warn('AppConfig initialized without configuration - APP_CONFIG may not be set yet');
+                }
+            }
+        }
+
+        /**
+         * Check if we're in debug mode
+         * @returns {boolean} True if in debug mode
+         */
+        isDebugMode() {
+            // Check multiple sources for debug status
+            if (this.config && this.config.debug !== undefined) {
+                return this.config.debug;
+            }
+            
+            // Fallback: check if hostname is localhost or contains 'dev'
+            return window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1' ||
+                   window.location.hostname.includes('dev') ||
+                   window.location.search.includes('debug=true');
         }
 
         /**

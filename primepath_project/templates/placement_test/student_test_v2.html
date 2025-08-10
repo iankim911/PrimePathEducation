@@ -4,10 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>{{ exam.name }} - Placement Test</title>
     
-    <!-- Modular CSS -->
-    <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- Modular CSS with cache busting -->
+    {% load cache %}
+    {% now "U" as current_timestamp %}
+    <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}?v={{ current_timestamp }}">
     
     <style>
         /* Difficulty Adjustment Buttons */
@@ -105,7 +115,11 @@
             <!-- Main Content Area -->
             <div class="question-container">
                 <!-- PDF Section -->
-                {% include 'components/placement_test/pdf_viewer.html' with pdf_url=exam.pdf_file.url %}
+                {% if exam.pdf_file %}
+                    {% include 'components/placement_test/pdf_viewer.html' with pdf_url=exam.pdf_file.url enable_navigation=True enable_zoom=True %}
+                {% else %}
+                    {% include 'components/placement_test/pdf_viewer.html' with pdf_url=None enable_navigation=True enable_zoom=True %}
+                {% endif %}
                 
                 <!-- Question Section -->
                 <div class="question-section">
@@ -133,21 +147,12 @@
     <!-- Load PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
-    <!-- Load modular JavaScript -->
-    <script src="{% static 'js/config/app-config.js' %}"></script>
-    <script src="{% static 'js/utils/event-delegation.js' %}"></script>
-    <script src="{% static 'js/modules/base-module.js' %}"></script>
-    <script src="{% static 'js/modules/pdf-viewer.js' %}"></script>
-    <script src="{% static 'js/modules/audio-player.js' %}"></script>
-    <script src="{% static 'js/modules/timer.js' %}"></script>
-    <script src="{% static 'js/modules/answer-manager.js' %}"></script>
-    <script src="{% static 'js/modules/navigation.js' %}"></script>
-    
     <!-- Store Django configuration data safely using json_script -->
     {{ js_config|json_script:"django-js-config" }}
     
+    <!-- Initialize APP_CONFIG BEFORE loading modules -->
     <script>
-    // Initialize configuration with error handling
+    // Initialize configuration with error handling - MUST be before modules load
     (function() {
         let djangoConfig = {};
         
@@ -156,7 +161,7 @@
             const configElement = document.getElementById('django-js-config');
             if (configElement && configElement.textContent) {
                 djangoConfig = JSON.parse(configElement.textContent);
-                console.log('Django config loaded successfully:', djangoConfig);
+                console.log('Django config loaded successfully');
             } else {
                 console.error('Django config element not found');
             }
@@ -175,7 +180,10 @@
                 completeTest: '{% url "placement_test:complete_test" session.id %}',
                 getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}'),
                 adjustDifficulty: '{% url "placement_test:manual_adjust_difficulty" session.id %}'
-            }
+            },
+            questions: djangoConfig.questions || [],
+            audioFiles: djangoConfig.audioFiles || [],
+            studentAnswers: djangoConfig.studentAnswers || {}
         };
         
         // Validate required data
@@ -185,9 +193,24 @@
         if (!APP_CONFIG.exam.id) {
             console.error('Exam ID is missing from configuration');
         }
+        
+        // Make session ID globally available for backward compatibility
+        window.sessionId = APP_CONFIG.session.id;
     })();
+    </script>
     
-    // Initialize modules
+    <!-- Load modular JavaScript AFTER APP_CONFIG is set (with cache busting) -->
+    <script src="{% static 'js/config/app-config.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/utils/event-delegation.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/base-module.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/pdf-viewer.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/audio-player.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/timer.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/answer-manager.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/navigation.js' %}?v={{ current_timestamp }}"></script>
+    
+    <script>
+    // Initialize modules after DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize event delegation first
         if (window.PrimePath && window.PrimePath.utils && window.PrimePath.utils.EventDelegation) {
@@ -196,9 +219,9 @@
             console.error('EventDelegation not loaded');
         }
         
-        // Initialize PDF viewer
+        // Initialize PDF viewer with optimized scale for readability
         const pdfViewer = new PrimePath.modules.PDFViewer({
-            scale: 1.5,
+            // scale: defaults to 1.8 in module for better readability
             enableCache: true
         });
         
@@ -214,6 +237,11 @@
         else if (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.pdfUrl) {
             pdfUrl = APP_CONFIG.exam.pdfUrl;
         }
+        
+        // The PDF viewer will now handle rotation internally:
+        // - Admin-set default rotation is applied automatically
+        // - Per-page student rotations are saved in sessionStorage
+        // - Rotations persist as students navigate between pages
         
         if (pdfUrl) {
             pdfViewer.init('#pdf-viewer', pdfUrl);
@@ -234,7 +262,8 @@
             ],
             onExpire: function() {
                 if (window.answerManager) {
-                    window.answerManager.submitTest(true);
+                    // Pass true for force, true for isTimerExpiry
+                    window.answerManager.submitTest(true, true);
                 }
             }
         });
@@ -283,8 +312,13 @@
                         submitEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest) || 
                                         '{% url "placement_test:complete_test" session.id %}'
                     });
-                    answerManager.init();
-                    console.log('Answer manager initialized successfully with session:', sessionId);
+                    // Pass sessionId to init method
+                    answerManager.init(sessionId);
+                    
+                    // Only log in debug mode  
+                    if (window.PrimePath && window.PrimePath.config && window.PrimePath.config.isDebugMode && window.PrimePath.config.isDebugMode()) {
+                        console.log('Answer manager initialized successfully with session:', sessionId);
+                    }
                 } catch (error) {
                     console.error('Error initializing answer manager:', error);
                     answerManager = null;
@@ -313,8 +347,10 @@
                 return true;
             },
             onAfterNavigate: function(to, from) {
-                // Optional: Track navigation for analytics
-                console.log(`Navigated from question ${from} to ${to}`);
+                // Optional: Track navigation for analytics (only in debug mode)
+                if (window.PrimePath && window.PrimePath.config && window.PrimePath.config.isDebugMode && window.PrimePath.config.isDebugMode()) {
+                    console.log(`Navigated from question ${from} to ${to}`);
+                }
             }
         });
         

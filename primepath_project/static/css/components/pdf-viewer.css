@@ -35,8 +35,12 @@
     display: block;
     margin: 0 auto;
     max-width: 100%;
+    width: auto;  /* Allow natural width based on scale */
     height: auto;
     box-shadow: var(--shadow-md);
+    /* Optimize rendering for better text clarity */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
 }
 
 .pdf-controls {
@@ -46,8 +50,15 @@
     gap: var(--spacing-md);
     padding: var(--spacing-md);
     background: var(--bg-light);
-    border-top: 1px solid var(--border-color);
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* Additional styling for controls at top */
+.pdf-controls-top {
+    border-bottom: 1px solid var(--border-color);
+    border-top: none;
+    margin-bottom: 0;
 }
 
 .pdf-controls button {
@@ -166,4 +177,36 @@
         margin-left: 0;
         margin-top: var(--spacing-sm);
     }
+}
+
+/* Quick zoom preset buttons for better UX */
+.pdf-zoom-presets {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-left: var(--spacing-md);
+}
+
+.pdf-zoom-preset {
+    padding: 6px 12px;
+    background: var(--bg-light);
+    color: var(--color-gray-700);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    transition: var(--transition-base);
+    white-space: nowrap;
+}
+
+.pdf-zoom-preset:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.pdf-zoom-preset.active {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
 }

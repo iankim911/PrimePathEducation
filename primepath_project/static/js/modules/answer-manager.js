@@ -328,9 +328,12 @@
 
         /**
          * Save all pending answers to server
+         * @returns {Object} Save results with succeeded and failed counts
          */
         async saveAllPending() {
-            if (this.pendingChanges.size === 0) return;
+            if (this.pendingChanges.size === 0) {
+                return { succeeded: 0, failed: 0, total: 0 };
+            }
             
             const promises = Array.from(this.pendingChanges).map(questionNum => 
                 this.saveToServer(questionNum)
@@ -346,6 +349,12 @@
             if (failed > 0) {
                 this.log('warn', `Failed to save ${failed} answers`);
             }
+            
+            return {
+                succeeded,
+                failed,
+                total: results.length
+            };
         }
 
         /**
@@ -421,8 +430,9 @@
         /**
          * Submit test
          * @param {boolean} force Force submission without validation
+         * @param {boolean} isTimerExpiry Whether this is triggered by timer expiry
          */
-        async submitTest(force = false) {
+        async submitTest(force = false, isTimerExpiry = false) {
             // Defensive check for sessionId with multiple fallbacks
             const sessionId = this.getSessionId();
             if (!sessionId) {
@@ -431,8 +441,8 @@
                 return false;
             }
             
-            // Validate unless forced
-            if (!force) {
+            // Validate unless forced or timer expired
+            if (!force && !isTimerExpiry) {
                 const validation = this.validateTest();
                 if (!validation.valid) {
                     this.emit('validationFailed', validation);
@@ -440,8 +450,26 @@
                 }
             }
             
-            // Save any pending answers
-            await this.saveAllPending();
+            // Save any pending answers - CRITICAL: Check results
+            const saveResults = await this.saveAllPending();
+            
+            // If saves failed and this is not a timer expiry, don't complete the test
+            if (saveResults.failed > 0 && !isTimerExpiry) {
+                this.log('error', `Cannot submit test: ${saveResults.failed} answers failed to save`);
+                this.emit('submitError', { 
+                    error: `Failed to save ${saveResults.failed} answer(s). Please try again.`,
+                    saveResults 
+                });
+                
+                // Alert user
+                alert(`Failed to save ${saveResults.failed} answer(s). Please check your connection and try again.`);
+                return false;
+            }
+            
+            // For timer expiry, log warning but continue
+            if (saveResults.failed > 0 && isTimerExpiry) {
+                this.log('warn', `Timer expired with ${saveResults.failed} unsaved answers. Completing test anyway.`);
+            }
             
             // Submit to server
             try {
@@ -452,7 +480,9 @@
                     method: 'POST',
                     body: JSON.stringify({
                         session_id: sessionId,
-                        answers: Object.fromEntries(this.answers)
+                        answers: Object.fromEntries(this.answers),
+                        timer_expired: isTimerExpiry,
+                        unsaved_count: saveResults.failed
                     })
                 });
                 
@@ -475,6 +505,13 @@
             } catch (error) {
                 this.log('error', 'Failed to submit test:', error);
                 this.emit('submitError', { error: error.message });
+                
+                // For timer expiry, still try to redirect even if submission failed
+                if (isTimerExpiry) {
+                    this.log('warn', 'Timer expired but submission failed. Redirecting to results.');
+                    window.location.href = `/api/placement/session/${sessionId}/result/`;
+                }
+                
                 return false;
             }
         }

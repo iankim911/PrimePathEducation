@@ -382,15 +382,37 @@ function savePlacementRules() {
         }
     });
     
+    // Get CSRF token and log for debugging
+    const csrfToken = getCookie('csrftoken');
+    if (!csrfToken) {
+        console.error('CSRF token not found!');
+        alert('Security token not found. Please refresh the page and try again.');
+        return;
+    }
+    console.log('CSRF token found, proceeding with save...');
+    
     fetch('{% url "core:save_placement_rules" %}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ rules: rules })
     })
-    .then(response => response.json())
+    .then(response => {
+        // Check if response is OK before trying to parse JSON
+        if (!response.ok) {
+            // Handle non-200 responses
+            if (response.status === 403) {
+                throw new Error('Authentication failed. Please refresh the page and try again.');
+            } else if (response.status === 500) {
+                throw new Error('Server error. Please try again later.');
+            } else {
+                throw new Error(`Server returned ${response.status} ${response.statusText}`);
+            }
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Show the enhanced success notification (matching Upload Exam style)
@@ -416,12 +438,12 @@ function savePlacementRules() {
                 }, 500);
             }, 10000);
         } else {
-            alert('Error saving placement rules: ' + data.error);
+            alert('Error saving placement rules: ' + (data.error || 'Unknown error'));
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving placement rules');
+        alert(error.message || 'An error occurred while saving placement rules');
     });
 }
 

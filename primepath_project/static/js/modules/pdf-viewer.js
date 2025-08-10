@@ -27,11 +27,16 @@
             this.pageRendering = false;
             this.pageNumPending = null;
             
-            // Display settings
-            this.scale = options.scale || 1.5;
+            // Display settings - optimized for readability
+            this.scale = options.scale || 1.8;  // Increased from 1.5 for better readability
             this.rotation = 0;
             this.minScale = options.minScale || 0.5;
-            this.maxScale = options.maxScale || 3.0;
+            this.maxScale = options.maxScale || 4.0;  // Increased max zoom capability
+            
+            // Per-page rotation tracking
+            this.pageRotations = new Map();
+            this.sessionId = null;
+            this.defaultRotation = 0;
             
             // DOM elements
             this.container = null;
@@ -97,6 +102,18 @@
                 pdfjsLib.GlobalWorkerOptions.workerSrc = 
                     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
             }
+            
+            // Initialize session ID and default rotation
+            if (window.APP_CONFIG && window.APP_CONFIG.session) {
+                this.sessionId = window.APP_CONFIG.session.id;
+            }
+            if (window.APP_CONFIG && window.APP_CONFIG.exam && window.APP_CONFIG.exam.pdfRotation) {
+                this.defaultRotation = window.APP_CONFIG.exam.pdfRotation;
+                this.rotation = this.defaultRotation;
+            }
+            
+            // Load saved rotations from sessionStorage
+            this.loadSavedRotations();
             
             // Load PDF
             await this.loadPDF(pdfUrl);
@@ -326,6 +343,15 @@
                 return;
             }
             
+            // Restore saved rotation for this page
+            const savedRotation = this.getPageRotation(pageNum);
+            if (savedRotation !== null) {
+                this.rotation = savedRotation;
+            } else {
+                // Use default rotation if no saved rotation
+                this.rotation = this.defaultRotation;
+            }
+            
             await this.renderPage(pageNum);
         }
 
@@ -358,9 +384,10 @@
          */
         async rotateClockwise() {
             this.rotation = (this.rotation + 90) % 360;
+            this.savePageRotation(this.currentPage, this.rotation);
             this.pageCache.clear(); // Clear cache on rotation
             await this.renderPage(this.currentPage);
-            this.emit('rotationChanged', { rotation: this.rotation });
+            this.emit('rotationChanged', { rotation: this.rotation, page: this.currentPage });
         }
 
         /**
@@ -368,9 +395,10 @@
          */
         async rotateCounterClockwise() {
             this.rotation = (this.rotation - 90 + 360) % 360;
+            this.savePageRotation(this.currentPage, this.rotation);
             this.pageCache.clear(); // Clear cache on rotation
             await this.renderPage(this.currentPage);
-            this.emit('rotationChanged', { rotation: this.rotation });
+            this.emit('rotationChanged', { rotation: this.rotation, page: this.currentPage });
         }
 
         /**
@@ -491,6 +519,106 @@
             const loadingEl = this.container.querySelector('.pdf-loading');
             if (loadingEl) {
                 loadingEl.style.display = 'none';
+            }
+        }
+
+        /**
+         * Save rotation for a specific page to sessionStorage
+         * @param {number} pageNum Page number
+         * @param {number} rotation Rotation angle
+         */
+        savePageRotation(pageNum, rotation) {
+            if (!this.sessionId) return;
+            
+            // Store in memory
+            this.pageRotations.set(pageNum, rotation);
+            
+            // Store in sessionStorage
+            try {
+                const key = `pdf_rotation_${this.sessionId}_page_${pageNum}`;
+                sessionStorage.setItem(key, rotation.toString());
+                this.log('debug', `Saved rotation ${rotation}° for page ${pageNum}`);
+            } catch (e) {
+                this.log('warn', 'Could not save rotation to sessionStorage:', e);
+            }
+        }
+        
+        /**
+         * Get saved rotation for a specific page
+         * @param {number} pageNum Page number
+         * @returns {number|null} Saved rotation or null if not found
+         */
+        getPageRotation(pageNum) {
+            // Check memory first
+            if (this.pageRotations.has(pageNum)) {
+                return this.pageRotations.get(pageNum);
+            }
+            
+            // Check sessionStorage
+            if (this.sessionId) {
+                try {
+                    const key = `pdf_rotation_${this.sessionId}_page_${pageNum}`;
+                    const savedRotation = sessionStorage.getItem(key);
+                    if (savedRotation !== null) {
+                        const rotation = parseInt(savedRotation, 10);
+                        this.pageRotations.set(pageNum, rotation);
+                        return rotation;
+                    }
+                } catch (e) {
+                    this.log('warn', 'Could not read rotation from sessionStorage:', e);
+                }
+            }
+            
+            return null;
+        }
+        
+        /**
+         * Load all saved rotations from sessionStorage
+         */
+        loadSavedRotations() {
+            if (!this.sessionId) return;
+            
+            try {
+                const prefix = `pdf_rotation_${this.sessionId}_page_`;
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    if (key && key.startsWith(prefix)) {
+                        const pageNum = parseInt(key.replace(prefix, ''), 10);
+                        const rotation = parseInt(sessionStorage.getItem(key), 10);
+                        if (!isNaN(pageNum) && !isNaN(rotation)) {
+                            this.pageRotations.set(pageNum, rotation);
+                        }
+                    }
+                }
+                this.log('debug', `Loaded ${this.pageRotations.size} saved rotations`);
+            } catch (e) {
+                this.log('warn', 'Could not load saved rotations:', e);
+            }
+        }
+        
+        /**
+         * Clear all saved rotations for this session
+         */
+        clearSavedRotations() {
+            if (!this.sessionId) return;
+            
+            // Clear memory
+            this.pageRotations.clear();
+            
+            // Clear sessionStorage
+            try {
+                const prefix = `pdf_rotation_${this.sessionId}_page_`;
+                const keysToRemove = [];
+                for (let i = 0; i < sessionStorage.length; i++) {
+                    const key = sessionStorage.key(i);
+                    if (key && key.startsWith(prefix)) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => sessionStorage.removeItem(key));
+                this.log('debug', 'Cleared all saved rotations');
+            } catch (e) {
+                this.log('warn', 'Could not clear saved rotations:', e);
             }
         }
 

@@ -63,6 +63,7 @@ def create_exam(request):
                 'total_questions': int(total_questions),
                 'default_options_count': int(request.POST.get('default_options_count', 5)),
                 'passing_score': 0,
+                'pdf_rotation': int(request.POST.get('pdf_rotation', 0)),  # Add rotation from form
                 'created_by': None,  # No auth required as per PRD
                 'is_active': True
             }

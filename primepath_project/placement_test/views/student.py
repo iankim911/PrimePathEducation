@@ -107,7 +107,8 @@ def take_test(request, session_id):
             'name': exam.name,
             'totalQuestions': exam.total_questions,
             'timerMinutes': exam.timer_minutes,
-            'pdfUrl': exam.pdf_file.url if exam.pdf_file else None
+            'pdfUrl': exam.pdf_file.url if exam.pdf_file else None,
+            'pdfRotation': getattr(exam, 'pdf_rotation', 0)  # Include PDF rotation
         },
         'questions': [
             {
@@ -157,7 +158,18 @@ def submit_answer(request, session_id):
         
         # Check if session is completed
         if session.completed_at:
-            raise SessionAlreadyCompletedException("Cannot submit answers to a completed test")
+            # Allow a grace period of 60 seconds after completion for pending saves
+            from django.utils import timezone
+            import datetime
+            
+            time_since_completion = timezone.now() - session.completed_at
+            grace_period = datetime.timedelta(seconds=60)
+            
+            if time_since_completion > grace_period:
+                raise SessionAlreadyCompletedException("Cannot submit answers to a completed test")
+            else:
+                # Log that this is a grace period save
+                logger.info(f"Grace period save for session {session_id}: {time_since_completion.total_seconds():.1f}s after completion")
         
         # Check if session has exceeded time limit
         if session.exam.timer_minutes:
@@ -191,8 +203,8 @@ def submit_answer(request, session_id):
             raise ValidationException("Invalid question ID", code="INVALID_QUESTION")
         
         # Save or update the answer using SessionService
-        student_answer = SessionService.save_answer(
-            session_id=session_id,
+        student_answer = SessionService.submit_answer(
+            session=session,
             question_id=question_id,
             answer=answer
         )
@@ -385,6 +397,21 @@ def complete_test(request, session_id):
     if session.completed_at:
         return redirect('placement_test:test_result', session_id=session_id)
     
+    # Check if this was triggered by timer expiry
+    timer_expired = False
+    unsaved_count = 0
+    
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body)
+            timer_expired = data.get('timer_expired', False)
+            unsaved_count = data.get('unsaved_count', 0)
+            
+            if timer_expired:
+                logger.info(f"Session {session_id} completed due to timer expiry. Unsaved answers: {unsaved_count}")
+        except json.JSONDecodeError:
+            pass
+    
     # Use GradingService to calculate final score
     results = GradingService.grade_session(session)
     
@@ -392,7 +419,11 @@ def complete_test(request, session_id):
     session.completed_at = timezone.now()
     session.save()
     
-    messages.success(request, 'Test completed successfully!')
+    if timer_expired and unsaved_count > 0:
+        messages.warning(request, f'Test time expired. {unsaved_count} answer(s) may not have been saved.')
+    else:
+        messages.success(request, 'Test completed successfully!')
+    
     return redirect('placement_test:test_result', session_id=session_id)
 
 

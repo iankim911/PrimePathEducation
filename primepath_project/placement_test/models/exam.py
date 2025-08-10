@@ -34,6 +34,11 @@ class Exam(models.Model):
         blank=True, 
         validators=[MinValueValidator(0), MaxValueValidator(100)]
     )
+    pdf_rotation = models.IntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(270)],
+        help_text="PDF rotation angle in degrees (0, 90, 180, 270)"
+    )
     created_by = models.ForeignKey('core.Teacher', on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
