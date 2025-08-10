@@ -106,17 +106,15 @@ class SessionService:
                 code="SESSION_COMPLETED"
             )
         
-        try:
-            student_answer = StudentAnswer.objects.get(
-                session=session,
-                question_id=question_id
-            )
-        except StudentAnswer.DoesNotExist:
-            raise ValidationException(
-                "Invalid question for this session",
-                code="INVALID_QUESTION",
-                details={'question_id': question_id, 'session_id': str(session.id)}
-            )
+        # Get or create the student answer
+        student_answer, created = StudentAnswer.objects.get_or_create(
+            session=session,
+            question_id=question_id,
+            defaults={'answer': ''}
+        )
+        
+        if created:
+            logger.debug(f"Created new answer record for session {session.id}, question {question_id}")
         
         # Handle different answer formats
         if isinstance(answer, dict):
