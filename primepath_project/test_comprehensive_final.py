@@ -251,16 +251,19 @@ def test_short_answer_display():
     all_passed = True
     
     # Update questions with correct answers for display test
-    questions = exam.questions.order_by('question_number')
+    questions = list(exam.questions.order_by('question_number'))
     
     # Set various SHORT answer patterns
-    questions[1].correct_answer = 'C'  # Single letter
+    questions[1].correct_answer = 'C'  # Single letter (Q2 is SHORT)
     questions[1].save()
     
-    questions[3].correct_answer = 'A,B,C'  # Comma-separated letters
+    questions[3].correct_answer = 'A,B,C'  # Comma-separated letters (Q4 is SHORT)
     questions[3].save()
     
     print("✅ Updated SHORT answers for display test")
+    
+    # Re-fetch questions from database to get updated values
+    questions = list(exam.questions.order_by('question_number'))
     
     # Test response_list generation (simulating preview_exam view logic)
     from placement_test.views.exam import preview_exam

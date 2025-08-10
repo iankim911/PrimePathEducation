@@ -154,6 +154,9 @@
                     virtualPages: this.virtualPages 
                 });
                 
+                // Update total pages in DOM
+                this.updateTotalPagesDisplay();
+                
                 // Render first page
                 await this.renderPage(this.currentPage);
                 this.hideLoading();
@@ -414,6 +417,27 @@
                 rotation: this.rotation
             };
             
+            // Update current page input
+            const pageInput = document.getElementById('current-page');
+            if (pageInput) {
+                pageInput.value = this.currentPage;
+                pageInput.max = this.totalPages;
+            }
+            
+            // Update total pages display
+            this.updateTotalPagesDisplay();
+            
+            // Update button states
+            const prevBtn = document.querySelector('[data-pdf-action="prev"]');
+            const nextBtn = document.querySelector('[data-pdf-action="next"]');
+            
+            if (prevBtn) {
+                prevBtn.disabled = !navState.canGoPrev;
+            }
+            if (nextBtn) {
+                nextBtn.disabled = !navState.canGoNext;
+            }
+            
             this.emit('navigationUpdated', navState);
         }
 
@@ -593,6 +617,22 @@
                 this.log('debug', `Loaded ${this.pageRotations.size} saved rotations`);
             } catch (e) {
                 this.log('warn', 'Could not load saved rotations:', e);
+            }
+        }
+        
+        /**
+         * Update total pages display in DOM
+         */
+        updateTotalPagesDisplay() {
+            const totalPagesElement = document.getElementById('total-pages');
+            if (totalPagesElement) {
+                totalPagesElement.textContent = this.totalPages || 0;
+            }
+            
+            // Also update the page input max attribute
+            const pageInput = document.getElementById('current-page');
+            if (pageInput && this.totalPages > 0) {
+                pageInput.max = this.totalPages;
             }
         }
         
