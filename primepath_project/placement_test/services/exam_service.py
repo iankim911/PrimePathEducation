@@ -44,6 +44,7 @@ class ExamService:
             total_questions=exam_data['total_questions'],
             default_options_count=exam_data.get('default_options_count', DEFAULT_OPTIONS_COUNT),
             passing_score=exam_data.get('passing_score', 0),
+            pdf_rotation=exam_data.get('pdf_rotation', 0),  # Add PDF rotation field
             created_by=exam_data.get('created_by'),
             is_active=exam_data.get('is_active', True)
         )
