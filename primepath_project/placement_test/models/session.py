@@ -67,6 +67,107 @@ class StudentSession(models.Model):
     @property
     def is_completed(self):
         return self.completed_at is not None
+    
+    @property
+    def correct_answers(self):
+        """Return count of correct answers for this session."""
+        return self.answers.filter(is_correct=True).count()
+    
+    @property
+    def total_questions(self):
+        """Return total questions from the associated exam."""
+        return self.exam.total_questions
+    
+    def get_timer_expiry_time(self):
+        """
+        Calculate when the timer should expire based on exam duration.
+        
+        Returns:
+            datetime: The theoretical timer expiry time, or None if no timer
+        """
+        if not self.exam.timer_minutes:
+            return None
+            
+        from django.utils import timezone
+        import datetime
+        
+        return self.started_at + datetime.timedelta(minutes=self.exam.timer_minutes)
+    
+    def is_timer_expired(self):
+        """
+        Check if the timer has expired based on exam duration.
+        
+        Returns:
+            bool: True if timer has expired, False if no timer or still active
+        """
+        expiry_time = self.get_timer_expiry_time()
+        if not expiry_time:
+            return False
+            
+        from django.utils import timezone
+        return timezone.now() > expiry_time
+    
+    def is_in_grace_period(self, grace_period_seconds=300):
+        """
+        Check if the session is in grace period for answer submissions.
+        
+        CRITICAL FIX: Uses timer expiry time as reference, not completed_at.
+        This prevents race conditions where completed_at is set before saves finish.
+        
+        Args:
+            grace_period_seconds: Grace period duration in seconds (default: 300 = 5 minutes)
+            
+        Returns:
+            bool: True if timer expired but within grace period for saves
+        """
+        # For non-timed exams, no grace period concept applies
+        if not self.exam.timer_minutes:
+            return False
+            
+        # If timer hasn't expired yet, not in grace period
+        if not self.is_timer_expired():
+            return False
+            
+        from django.utils import timezone
+        import datetime
+        
+        # Calculate time since timer expiry (not completion detection)
+        timer_expiry_time = self.get_timer_expiry_time()
+        time_since_expiry = timezone.now() - timer_expiry_time
+        grace_period = datetime.timedelta(seconds=grace_period_seconds)
+        
+        # Allow submissions for 5 minutes after timer expires
+        return time_since_expiry <= grace_period
+    
+    def can_accept_answers(self):
+        """
+        Check if the session can accept new answer submissions.
+        
+        ENHANCED LOGIC FOR TIMER-BASED GRACE PERIOD:
+        
+        For timed exams:
+        1. Timer not expired: Always allow submissions
+        2. Timer expired but in grace period: Allow submissions  
+        3. Timer expired and grace period over: Block submissions
+        
+        For non-timed exams:
+        1. Not completed: Allow submissions
+        2. Completed: Block submissions (no grace period concept)
+        
+        Returns:
+            bool: True if answers can be submitted
+        """
+        # For timed exams, use timer-based logic
+        if self.exam.timer_minutes:
+            # If timer hasn't expired yet, always allow
+            if not self.is_timer_expired():
+                return True
+            
+            # Timer expired - check if in grace period
+            return self.is_in_grace_period()
+        
+        # For non-timed exams, use completion-based logic  
+        return not self.is_completed
 
 
 class StudentAnswer(models.Model):

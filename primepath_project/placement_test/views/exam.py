@@ -25,6 +25,8 @@ def exam_list(request):
 @handle_errors(ajax_only=True)
 def check_exam_version(request):
     """API endpoint to get the next available version for a curriculum level"""
+    from datetime import datetime
+    
     curriculum_level_id = request.GET.get('curriculum_level')
     if not curriculum_level_id:
         raise ValidationException(
@@ -33,12 +35,21 @@ def check_exam_version(request):
         )
     
     try:
-        next_version = ExamService.get_next_version_letter(int(curriculum_level_id))
-        return JsonResponse({'next_version': next_version})
-    except ExamConfigurationException as e:
+        # Get today's date in YYMMDD format
+        date_str = datetime.now().strftime('%y%m%d')
+        
+        # Get next version number (will be None if no same-day uploads)
+        next_version = ExamService.get_next_version_number(int(curriculum_level_id), date_str)
+        
+        return JsonResponse({
+            'next_version': next_version,
+            'date_str': date_str
+        })
+    except Exception as e:
         return JsonResponse({
             'error': str(e),
-            'next_version': None
+            'next_version': None,
+            'date_str': datetime.now().strftime('%y%m%d')
         }, status=400)
 
 
@@ -92,34 +103,28 @@ def create_exam(request):
             # Fall through to render the form again with error message
     
     # Get curriculum levels with version info
+    from datetime import datetime
     curriculum_levels = CurriculumLevel.objects.select_related('subprogram__program').all()
     
-    # Add version info to each level using ExamService
+    # Get today's date for checking same-day uploads
+    today_str = datetime.now().strftime('%y%m%d')
+    
+    # Add version info to each level using new naming convention
     levels_with_versions = []
     for level in curriculum_levels:
-        try:
-            next_version = ExamService.get_next_version_letter(level.id)
-        except ExamConfigurationException:
-            next_version = 'N/A'  # All versions used
+        # Check if there are existing uploads today for this level
+        next_version = ExamService.get_next_version_number(level.id, today_str)
         
-        # Get existing versions for display
-        existing_exams = Exam.objects.filter(
-            curriculum_level=level,
-            name__regex=r'^\[PlacementTest\].*_v_[a-z]$'
-        ).values_list('name', flat=True)
-        
-        used_versions = []
-        for exam_name in existing_exams:
-            if '_v_' in exam_name:
-                version = exam_name.split('_v_')[-1]
-                if len(version) == 1 and version.isalpha() and version.islower():
-                    used_versions.append(version)
+        # Get count of existing exams for this level (for info display)
+        existing_count = Exam.objects.filter(curriculum_level=level).count()
         
         levels_with_versions.append({
             'id': level.id,
-            'full_name': level.full_name,
+            'display_name': level.display_name,  # Use new display_name property
+            'exam_base_name': level.exam_base_name,  # Use new exam_base_name property
             'next_version': next_version,
-            'existing_versions': ', '.join(used_versions) if used_versions else 'none'
+            'existing_count': existing_count,
+            'date_str': today_str
         })
     
     return render(request, 'placement_test/create_exam.html', {

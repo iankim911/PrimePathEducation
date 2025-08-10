@@ -471,16 +471,20 @@ if (typeof pdfjsLib !== 'undefined') {
             <select class="form-control" id="preset_exam_name" name="preset_exam_name" required>
                 <option value="">Select exam name</option>
                 {% for level in curriculum_levels %}
-                    <option value="{{ level.id }}" data-level-name="{{ level.full_name }}">
-                        {{ level.full_name }} Placement 
-                        {% if level.existing_versions != 'none' %}
-                            (existing: {{ level.existing_versions }})
+                    <option value="{{ level.id }}" 
+                            data-display-name="{{ level.display_name }}"
+                            data-base-name="{{ level.exam_base_name }}"
+                            data-next-version="{{ level.next_version|default:'' }}"
+                            data-date-str="{{ level.date_str }}">
+                        {{ level.display_name }} Placement 
+                        {% if level.existing_count > 0 %}
+                            ({{ level.existing_count }} existing)
                         {% endif %}
                     </option>
                 {% endfor %}
             </select>
             <div class="help-text">
-                <strong>Note:</strong> Version (e.g., _v_a, _v_b) will be automatically added based on existing exams for this level.
+                <strong>Note:</strong> Date will be added automatically. Version number (e.g., _v2, _v3) will only be added if uploading multiple exams for the same level on the same day.
             </div>
         </div>
         
@@ -490,9 +494,10 @@ if (typeof pdfjsLib !== 'undefined') {
                    placeholder="Enter your custom exam name">
             <div class="help-text">
                 <strong>Naming Guidelines:</strong><br>
-                • Be descriptive and include grade/level information<br>
-                • Consider adding version info if you plan multiple versions<br>
-                • Example: "Grade 5 Advanced Math Assessment - Version A"
+                • Format: [PT]_Subject_Lv#_Modifier_YYMMDD<br>
+                • Use abbreviations: Math, Eng, Sci for subjects<br>
+                • Version (_v2, _v3) added automatically for same-day uploads<br>
+                • Example: "[PT]_Math_Lv5_Advanced_250810"
             </div>
         </div>
         
@@ -1051,31 +1056,46 @@ presetSelect.addEventListener('change', function() {
     }
 });
 
-// Function to generate versioned name
+// Function to generate versioned name with new convention
 function generateVersionedName() {
     const selectedOption = presetSelect.options[presetSelect.selectedIndex];
     if (selectedOption.value) {
-        // Set a temporary name immediately in case of quick submit
-        const baseName = selectedOption.getAttribute('data-level-name');
-        finalExamName = `[PlacementTest] ${baseName}_v_a`; // Default to version 'a'
+        // Get the base name and date from the option
+        const baseName = selectedOption.getAttribute('data-base-name');
+        const dateStr = selectedOption.getAttribute('data-date-str');
+        const existingVersion = selectedOption.getAttribute('data-next-version');
         
-        // Get the next available version
+        // Set initial name with date
+        if (existingVersion && existingVersion !== '') {
+            // Multiple uploads today for this level
+            finalExamName = `[PT]_${baseName}_${dateStr}_v${existingVersion}`;
+        } else {
+            // First upload today for this level
+            finalExamName = `[PT]_${baseName}_${dateStr}`;
+        }
+        
+        // Check for updates from server
         fetch(`/api/placement/exams/check-version/?curriculum_level=${selectedOption.value}`)
             .then(response => response.json())
             .then(data => {
-                const version = data.next_version || 'a';
-                finalExamName = `[PlacementTest] ${baseName}_v_${version}`;
+                // Update name based on server response
+                if (data.next_version) {
+                    finalExamName = `[PT]_${baseName}_${data.date_str}_v${data.next_version}`;
+                } else {
+                    finalExamName = `[PT]_${baseName}_${data.date_str}`;
+                }
+                
                 // Update the help text to show what name will be used
                 const helpText = presetNameGroup.querySelector('.help-text');
                 helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
-                    '<strong>Note:</strong> Version (e.g., _v_a, _v_b) is automatically added based on existing exams for this level.';
+                    '<strong>Note:</strong> Date is added automatically. Version number only added for multiple same-day uploads.';
             })
             .catch(error => {
                 console.error('Error fetching version:', error);
-                // Keep the fallback name we already set
+                // Keep the name we already set
                 const helpText = presetNameGroup.querySelector('.help-text');
                 helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
-                    '<strong>Note:</strong> Using default version due to connection issue.';
+                    '<strong>Note:</strong> Using local version information.';
             });
     }
 }

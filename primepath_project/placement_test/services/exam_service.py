@@ -230,8 +230,60 @@ class ExamService:
         }
     
     @staticmethod
+    def get_next_version_number(curriculum_level_id: int, date_str: str = None) -> int:
+        """
+        Get the next available version number for a curriculum level on a specific date.
+        Only returns version number if there are existing uploads for the same level on the same day.
+        
+        Args:
+            curriculum_level_id: Curriculum level ID
+            date_str: Date in YYMMDD format (if None, uses today)
+            
+        Returns:
+            Next available version number (2, 3, etc.) or None if no version needed
+        """
+        from datetime import datetime
+        
+        # Get today's date in YYMMDD format if not provided
+        if not date_str:
+            date_str = datetime.now().strftime('%y%m%d')
+        
+        # Look for exams with the new naming pattern for this level and date
+        existing_exams = Exam.objects.filter(
+            curriculum_level_id=curriculum_level_id,
+            name__contains=f'_{date_str}'  # Contains today's date
+        ).values_list('name', flat=True)
+        
+        # Check if any exam exists for this level and date
+        exams_today = []
+        for exam_name in existing_exams:
+            # Check if it matches our date pattern
+            if f'_{date_str}' in exam_name:
+                exams_today.append(exam_name)
+        
+        if not exams_today:
+            # No exams for this level today, no version needed
+            return None
+        
+        # Find the highest version number
+        max_version = 1
+        for exam_name in exams_today:
+            # Check for version pattern _v2, _v3, etc.
+            if f'_{date_str}_v' in exam_name:
+                try:
+                    version_part = exam_name.split(f'_{date_str}_v')[-1]
+                    version_num = int(version_part.split('_')[0]) if '_' in version_part else int(version_part)
+                    max_version = max(max_version, version_num)
+                except (ValueError, IndexError):
+                    continue
+        
+        # Return the next version number
+        return max_version + 1
+    
+    @staticmethod
     def get_next_version_letter(curriculum_level_id: int) -> str:
         """
+        DEPRECATED: Kept for backward compatibility.
         Get the next available version letter for a curriculum level.
         
         Args:

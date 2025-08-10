@@ -100,7 +100,7 @@ class SessionService:
             SessionAlreadyCompletedException: If session is completed
             ValidationException: If question is invalid
         """
-        if session.is_completed:
+        if not session.can_accept_answers():
             raise SessionAlreadyCompletedException(
                 "Cannot submit answers to a completed test",
                 code="SESSION_COMPLETED"

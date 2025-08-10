@@ -4,9 +4,11 @@ Handles the student experience: starting, taking, and completing tests
 """
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+import datetime
 from django.db import transaction
 from django.contrib import messages
 from ..models import Exam, AudioFile, Question, StudentSession, StudentAnswer, DifficultyAdjustment
@@ -156,29 +158,27 @@ def submit_answer(request, session_id):
         # Get and validate session
         session = get_object_or_404(StudentSession, id=session_id)
         
-        # Check if session is completed
-        if session.completed_at:
-            # Allow a grace period of 60 seconds after completion for pending saves
-            from django.utils import timezone
-            import datetime
-            
-            time_since_completion = timezone.now() - session.completed_at
-            grace_period = datetime.timedelta(seconds=60)
-            
-            if time_since_completion > grace_period:
-                raise SessionAlreadyCompletedException("Cannot submit answers to a completed test")
+        # Check if session can accept answers (handles timer expiry and grace period automatically)
+        if not session.can_accept_answers():
+            if session.exam.timer_minutes and session.is_timer_expired():
+                if session.is_in_grace_period():
+                    # This should not happen due to can_accept_answers logic, but log for debugging
+                    logger.warning(f"Session {session_id} rejected despite being in grace period")
+                    
+                # Log the rejection with timing details
+                timer_expiry_time = session.get_timer_expiry_time()
+                time_since_expiry = timezone.now() - timer_expiry_time if timer_expiry_time else None
+                logger.info(f"Answer submission rejected for session {session_id}: timer expired {time_since_expiry.total_seconds():.1f}s ago")
             else:
-                # Log that this is a grace period save
-                logger.info(f"Grace period save for session {session_id}: {time_since_completion.total_seconds():.1f}s after completion")
+                logger.info(f"Answer submission rejected for session {session_id}: session completed")
+                
+            raise SessionAlreadyCompletedException("Cannot submit answers to a completed test")
         
-        # Check if session has exceeded time limit
-        if session.exam.timer_minutes:
-            time_elapsed = (timezone.now() - session.started_at).total_seconds() / 60
-            if time_elapsed > session.exam.timer_minutes:
-                # Mark session as complete due to timeout
-                session.completed_at = timezone.now()
-                session.save()
-                raise SessionAlreadyCompletedException("Test time has expired")
+        # Log grace period saves for monitoring
+        if session.exam.timer_minutes and session.is_timer_expired() and session.is_in_grace_period():
+            timer_expiry_time = session.get_timer_expiry_time()
+            time_since_expiry = timezone.now() - timer_expiry_time
+            logger.info(f"Grace period save for session {session_id}: {time_since_expiry.total_seconds():.1f}s after timer expiry")
         
         # Parse request data
         if request.content_type == 'application/json':
@@ -395,17 +395,24 @@ def complete_test(request, session_id):
     session = get_object_or_404(StudentSession, id=session_id)
     
     if session.completed_at:
+        if request.content_type == 'application/json':
+            return JsonResponse({
+                'success': True,
+                'redirect_url': reverse('placement_test:test_result', kwargs={'session_id': session_id})
+            })
         return redirect('placement_test:test_result', session_id=session_id)
     
     # Check if this was triggered by timer expiry
     timer_expired = False
     unsaved_count = 0
+    skip_difficulty_choice = False
     
     if request.content_type == 'application/json':
         try:
             data = json.loads(request.body)
             timer_expired = data.get('timer_expired', False)
             unsaved_count = data.get('unsaved_count', 0)
+            skip_difficulty_choice = data.get('skip_difficulty_choice', False)
             
             if timer_expired:
                 logger.info(f"Session {session_id} completed due to timer expiry. Unsaved answers: {unsaved_count}")
@@ -424,7 +431,123 @@ def complete_test(request, session_id):
     else:
         messages.success(request, 'Test completed successfully!')
     
+    # For AJAX requests, return JSON response
+    if request.content_type == 'application/json':
+        # Check if we should show difficulty choice modal
+        # Don't show for timer expiry or if explicitly skipped
+        show_difficulty_choice = not timer_expired and not skip_difficulty_choice
+        
+        # Check if alternative difficulty levels are available
+        if show_difficulty_choice:
+            current_level = session.final_curriculum_level or session.original_curriculum_level
+            if current_level:
+                # Check if there are other difficulty levels available
+                easier_available = PlacementService.find_alternate_difficulty_exam(current_level, -1) is not None
+                harder_available = PlacementService.find_alternate_difficulty_exam(current_level, 1) is not None
+                show_difficulty_choice = easier_available or harder_available
+        
+        return JsonResponse({
+            'success': True,
+            'show_difficulty_choice': show_difficulty_choice,
+            'session_id': str(session_id),
+            'redirect_url': reverse('placement_test:test_result', kwargs={'session_id': session_id})
+        })
+    
     return redirect('placement_test:test_result', session_id=session_id)
+
+
+@require_POST
+def post_submit_difficulty_choice(request, session_id):
+    """
+    Handle difficulty choice immediately after submitting the test.
+    This is different from request_difficulty_change which is used on the results page.
+    """
+    session = get_object_or_404(StudentSession, id=session_id)
+    
+    # Ensure test is completed
+    if not session.completed_at:
+        return JsonResponse({'success': False, 'error': 'Test not completed'}, status=400)
+    
+    # Parse request data
+    if request.content_type == 'application/json':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    else:
+        data = request.POST
+    
+    adjustment = int(data.get('adjustment', 0))
+    
+    # If adjustment is 0, just go to results
+    if adjustment == 0:
+        return JsonResponse({
+            'success': True,
+            'action': 'show_results',
+            'redirect_url': reverse('placement_test:test_result', kwargs={'session_id': session_id})
+        })
+    
+    # Find appropriate difficulty level
+    current_level = session.final_curriculum_level or session.original_curriculum_level
+    
+    if not current_level:
+        return JsonResponse({
+            'success': False,
+            'error': 'No curriculum level assigned',
+            'redirect_url': reverse('placement_test:test_result', kwargs={'session_id': session_id})
+        }, status=400)
+    
+    # Use PlacementService to find an exam from a different difficulty tier
+    result = PlacementService.find_alternate_difficulty_exam(current_level, adjustment)
+    
+    if not result:
+        # No alternate difficulty available, show results
+        messages.info(request, 'No alternative difficulty level available.')
+        return JsonResponse({
+            'success': True,
+            'action': 'show_results',
+            'message': 'No alternative difficulty level available',
+            'redirect_url': reverse('placement_test:test_result', kwargs={'session_id': session_id})
+        })
+    
+    new_level, new_exam = result
+    
+    # Create a new session with the new exam
+    try:
+        new_session = StudentSession.objects.create(
+            student_name=session.student_name,
+            parent_phone=session.parent_phone,
+            school=session.school,
+            grade=session.grade,
+            academic_rank=session.academic_rank,
+            exam=new_exam,
+            original_curriculum_level=new_level,
+            # Track that this is a difficulty adjustment
+            notes=f"Post-submit difficulty adjustment from {current_level.full_name} (adjustment: {adjustment:+d})"
+        )
+        
+        # Log the difficulty change
+        logger.info(f"Created new session {new_session.id} for post-submit difficulty adjustment. "
+                   f"Student: {session.student_name}, "
+                   f"Previous level: {current_level.full_name}, "
+                   f"New level: {new_level.full_name}, "
+                   f"Adjustment: {adjustment:+d}")
+        
+        # Return success with new test URL
+        return JsonResponse({
+            'success': True,
+            'action': 'start_new_test',
+            'message': f'Starting {"easier" if adjustment < 0 else "harder"} test...',
+            'redirect_url': reverse('placement_test:take_test', kwargs={'session_id': new_session.id})
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creating new session for difficulty adjustment: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Failed to create new test session',
+            'redirect_url': reverse('placement_test:test_result', kwargs={'session_id': session_id})
+        }, status=500)
 
 
 def test_result(request, session_id):
@@ -443,3 +566,78 @@ def test_result(request, session_id):
         'exam': session.exam,
         'final_level': session.final_curriculum_level
     })
+
+
+@require_POST
+def request_difficulty_change(request):
+    """
+    Handle request to try a different difficulty level after completing an exam.
+    Creates a new session with an exam from a different difficulty tier.
+    """
+    from ..services import PlacementService
+    from django.contrib import messages
+    
+    session_id = request.POST.get('session_id')
+    adjustment = int(request.POST.get('adjustment', 0))  # +1 for harder, -1 for easier
+    
+    if not session_id or adjustment not in [-1, 1]:
+        messages.error(request, "Invalid difficulty adjustment request")
+        return redirect('placement_test:start_test')
+    
+    # Get the original session
+    original_session = get_object_or_404(StudentSession, id=session_id)
+    
+    if not original_session.completed_at:
+        messages.error(request, "Please complete the current test first")
+        return redirect('placement_test:take_test', session_id=session_id)
+    
+    # Get the original curriculum level
+    original_level = original_session.original_curriculum_level
+    if not original_level:
+        original_level = original_session.final_curriculum_level
+    
+    if not original_level:
+        messages.error(request, "Unable to determine difficulty level")
+        return redirect('placement_test:test_result', session_id=session_id)
+    
+    try:
+        # Find an exam from a different difficulty tier
+        result = PlacementService.find_alternate_difficulty_exam(original_level, adjustment)
+        
+        if not result:
+            if adjustment > 0:
+                messages.info(request, "No harder difficulty level available. You're already at an advanced level!")
+            else:
+                messages.info(request, "No easier difficulty level available. You're already at a basic level!")
+            return redirect('placement_test:test_result', session_id=session_id)
+        
+        new_level, new_exam = result
+        
+        # Create a new session with the alternate difficulty exam
+        new_session = StudentSession.objects.create(
+            student_name=original_session.student_name,
+            parent_phone=original_session.parent_phone,
+            school=original_session.school,
+            school_name_manual=original_session.school_name_manual,
+            grade=original_session.grade,
+            academic_rank=original_session.academic_rank,
+            exam=new_exam,
+            original_curriculum_level=new_level,
+            difficulty_adjustments=adjustment,
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        
+        # Log the difficulty change
+        logger.info(
+            f"Created new session {new_session.id} with {['easier', '', 'harder'][adjustment + 1]} "
+            f"difficulty for student {new_session.student_name}"
+        )
+        
+        messages.success(request, f"Starting {'easier' if adjustment < 0 else 'harder'} difficulty test!")
+        return redirect('placement_test:take_test', session_id=new_session.id)
+        
+    except Exception as e:
+        logger.error(f"Error creating alternate difficulty session: {e}", exc_info=True)
+        messages.error(request, "Unable to load alternate difficulty test. Please try again.")
+        return redirect('placement_test:test_result', session_id=session_id)

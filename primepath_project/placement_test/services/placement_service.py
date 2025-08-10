@@ -78,6 +78,104 @@ class PlacementService:
         return matching_rule
     
     @staticmethod
+    def find_alternate_difficulty_exam(current_level: CurriculumLevel, adjustment: int) -> Optional[Tuple[CurriculumLevel, Exam]]:
+        """
+        Find an exam from a different difficulty tier.
+        
+        Args:
+            current_level: Current curriculum level
+            adjustment: +1 for harder, -1 for easier
+            
+        Returns:
+            Tuple of (new_level, exam) or None if no alternate found
+        """
+        from core.models import ExamLevelMapping
+        
+        # Get current difficulty tier
+        current_difficulty = current_level.internal_difficulty if hasattr(current_level, 'internal_difficulty') else None
+        
+        if current_difficulty is None:
+            # If no difficulty set, fall back to level-based logic
+            logger.warning(
+                f"No internal difficulty set for level {current_level.id}, using level-based logic"
+            )
+            return PlacementService._find_alternate_by_level(current_level, adjustment)
+        
+        # Calculate target difficulty
+        target_difficulty = current_difficulty + adjustment
+        
+        if target_difficulty < 1:
+            logger.info("Already at lowest difficulty tier")
+            return None
+        
+        # Find levels with target difficulty
+        alternate_levels = CurriculumLevel.objects.filter(
+            internal_difficulty=target_difficulty
+        ).exclude(id=current_level.id)
+        
+        # Try to find a level with an exam
+        for level in alternate_levels:
+            mappings = ExamLevelMapping.objects.filter(
+                curriculum_level=level
+            ).select_related('exam')
+            
+            # Get active exams
+            active_exams = [m.exam for m in mappings if m.exam.is_active]
+            
+            if active_exams:
+                # Return the first available exam
+                import random
+                selected_exam = random.choice(active_exams)
+                logger.info(
+                    f"Found alternate difficulty exam: {selected_exam.name} (difficulty {target_difficulty})"
+                )
+                return (level, selected_exam)
+        
+        logger.info(f"No exams found for difficulty tier {target_difficulty}")
+        return None
+    
+    @staticmethod
+    def _find_alternate_by_level(current_level: CurriculumLevel, adjustment: int) -> Optional[Tuple[CurriculumLevel, Exam]]:
+        """
+        Fallback method to find alternate exam by curriculum level order.
+        Used when difficulty tiers are not configured.
+        """
+        from core.models import ExamLevelMapping
+        
+        # Get all levels ordered by program hierarchy
+        all_levels = list(CurriculumLevel.objects.select_related(
+            'subprogram__program'
+        ).order_by('subprogram__program__order', 'subprogram__order', 'level_number'))
+        
+        # Find current position
+        try:
+            current_index = all_levels.index(current_level)
+        except ValueError:
+            return None
+        
+        # Calculate target index
+        target_index = current_index + adjustment
+        
+        if target_index < 0 or target_index >= len(all_levels):
+            return None
+        
+        target_level = all_levels[target_index]
+        
+        # Try to find an exam for the target level
+        mappings = ExamLevelMapping.objects.filter(
+            curriculum_level=target_level
+        ).select_related('exam')
+        
+        active_exams = [m.exam for m in mappings if m.exam.is_active]
+        
+        if active_exams:
+            import random
+            selected_exam = random.choice(active_exams)
+            return (target_level, selected_exam)
+        
+        return None
+    
+    @staticmethod
     def find_exam_for_level(curriculum_level: CurriculumLevel) -> Exam:
         """
         Find an active exam for the given curriculum level using exam mappings.

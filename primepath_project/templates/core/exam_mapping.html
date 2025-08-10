@@ -526,8 +526,9 @@
         <table class="mapping-table">
             <thead>
                 <tr>
-                    <th width="35%">Curriculum Level</th>
-                    <th width="65%">Mapped Exams (Max 5)</th>
+                    <th width="30%">Curriculum Level</th>
+                    <th width="15%">Difficulty Tier</th>
+                    <th width="55%">Mapped Exams (Max 5)</th>
                 </tr>
             </thead>
             <tbody>
@@ -536,6 +537,16 @@
                     <td>
                         <div class="subprogram-name">{{ level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <input type="number" 
+                               class="difficulty-input" 
+                               data-level-id="{{ level.id }}" 
+                               value="{{ level.internal_difficulty_value|default:'' }}" 
+                               min="1" 
+                               placeholder="-"
+                               title="Internal difficulty tier (1=easiest, higher=harder)"
+                               style="width: 60px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 4px;">
                     </td>
                     <td>
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
@@ -605,8 +616,9 @@
         <table class="mapping-table">
             <thead>
                 <tr>
-                    <th width="35%">Curriculum Level</th>
-                    <th width="65%">Mapped Exams (Max 5)</th>
+                    <th width="30%">Curriculum Level</th>
+                    <th width="15%">Difficulty Tier</th>
+                    <th width="55%">Mapped Exams (Max 5)</th>
                 </tr>
             </thead>
             <tbody>
@@ -615,6 +627,16 @@
                     <td>
                         <div class="subprogram-name">{{ level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <input type="number" 
+                               class="difficulty-input" 
+                               data-level-id="{{ level.id }}" 
+                               value="{{ level.internal_difficulty_value|default:'' }}" 
+                               min="1" 
+                               placeholder="-"
+                               title="Internal difficulty tier (1=easiest, higher=harder)"
+                               style="width: 60px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 4px;">
                     </td>
                     <td>
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
@@ -684,8 +706,9 @@
         <table class="mapping-table">
             <thead>
                 <tr>
-                    <th width="35%">Curriculum Level</th>
-                    <th width="65%">Mapped Exams (Max 5)</th>
+                    <th width="30%">Curriculum Level</th>
+                    <th width="15%">Difficulty Tier</th>
+                    <th width="55%">Mapped Exams (Max 5)</th>
                 </tr>
             </thead>
             <tbody>
@@ -694,6 +717,16 @@
                     <td>
                         <div class="subprogram-name">{{ level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <input type="number" 
+                               class="difficulty-input" 
+                               data-level-id="{{ level.id }}" 
+                               value="{{ level.internal_difficulty_value|default:'' }}" 
+                               min="1" 
+                               placeholder="-"
+                               title="Internal difficulty tier (1=easiest, higher=harder)"
+                               style="width: 60px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 4px;">
                     </td>
                     <td>
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
@@ -763,8 +796,9 @@
         <table class="mapping-table">
             <thead>
                 <tr>
-                    <th width="35%">Curriculum Level</th>
-                    <th width="65%">Mapped Exams (Max 5)</th>
+                    <th width="30%">Curriculum Level</th>
+                    <th width="15%">Difficulty Tier</th>
+                    <th width="55%">Mapped Exams (Max 5)</th>
                 </tr>
             </thead>
             <tbody>
@@ -773,6 +807,16 @@
                     <td>
                         <div class="subprogram-name">{{ level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <input type="number" 
+                               class="difficulty-input" 
+                               data-level-id="{{ level.id }}" 
+                               value="{{ level.internal_difficulty_value|default:'' }}" 
+                               min="1" 
+                               placeholder="-"
+                               title="Internal difficulty tier (1=easiest, higher=harder)"
+                               style="width: 60px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 4px;">
                     </td>
                     <td>
                         <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
@@ -1267,7 +1311,9 @@ console.log('Available exams loaded:', availableExams);
         btnText.textContent = 'Saving...';
         
         const mappings = [];
+        const difficultyUpdates = [];
         
+        // Collect exam mappings
         document.querySelectorAll('.exam-select').forEach(select => {
             if (select.value) {
                 mappings.push({
@@ -1278,6 +1324,17 @@ console.log('Available exams loaded:', availableExams);
             }
         });
         
+        // Collect difficulty levels
+        document.querySelectorAll('.difficulty-input').forEach(input => {
+            const levelId = parseInt(input.dataset.levelId);
+            const difficulty = input.value ? parseInt(input.value) : null;
+            difficultyUpdates.push({
+                level_id: levelId,
+                difficulty: difficulty
+            });
+        });
+        
+        // Save mappings first
         fetch('{% url "core:save_exam_mappings" %}', {
             method: 'POST',
             headers: {
@@ -1285,6 +1342,22 @@ console.log('Available exams loaded:', availableExams);
                 'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
             },
             body: JSON.stringify({ mappings: mappings })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Now save difficulty levels
+                return fetch('{% url "core:save_difficulty_levels" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ difficulty_updates: difficultyUpdates })
+                });
+            } else {
+                throw new Error('Failed to save mappings');
+            }
         })
         .then(response => response.json())
         .then(data => {

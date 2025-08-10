@@ -392,6 +392,34 @@
             📚 Back to Dashboard
         </a>
     </div>
+    
+    <!-- Difficulty Adjustment Options -->
+    <div class="difficulty-adjustment-section" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f5f3ff, #e8f4fd); border-radius: 15px; text-align: center;">
+        <h3 style="color: #5f27cd; margin-bottom: 15px; font-size: 1.5rem;">
+            💭 How was the difficulty?
+        </h3>
+        <p style="color: #636e72; margin-bottom: 20px; font-size: 1.1rem;">
+            If you found this test too easy or too hard, you can try a different difficulty level
+        </p>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <form method="post" action="{% url 'placement_test:request_difficulty_change' %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="session_id" value="{{ session.id }}">
+                <input type="hidden" name="adjustment" value="-1">
+                <button type="submit" class="btn-fun" style="background: linear-gradient(135deg, #55efc4, #00b894);">
+                    ⬇️ Try Easier Level
+                </button>
+            </form>
+            <form method="post" action="{% url 'placement_test:request_difficulty_change' %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="session_id" value="{{ session.id }}">
+                <input type="hidden" name="adjustment" value="1">
+                <button type="submit" class="btn-fun" style="background: linear-gradient(135deg, #ff7979, #eb4d4b);">
+                    ⬆️ Try Harder Level
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>

@@ -47,6 +47,11 @@ class CurriculumLevel(models.Model):
     subprogram = models.ForeignKey(SubProgram, on_delete=models.CASCADE, related_name='levels')
     level_number = models.IntegerField()
     description = models.TextField(blank=True)
+    internal_difficulty = models.IntegerField(
+        null=True, 
+        blank=True,
+        help_text="Internal difficulty tier (1=easiest, higher=harder). Multiple levels can share the same difficulty."
+    )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     class Meta:
@@ -86,6 +91,28 @@ class CurriculumLevel(models.Model):
         else:
             # Otherwise, use the program + subprogram format
             return f"{program_name} {subprogram_name} - Lv {self.level_number}"
+    
+    @property
+    def exam_base_name(self):
+        """Base name for exam files - simplified format without PRIME and spaces replaced with underscores"""
+        program_name = self.subprogram.program.get_name_display()
+        subprogram_name = self.subprogram.name
+        
+        # Remove "PRIME" from the beginning
+        if program_name.startswith("PRIME "):
+            program_name = program_name[6:]
+        
+        # Replace spaces with underscores for cleaner file names
+        program_name = program_name.replace(" ", "_")
+        subprogram_name = subprogram_name.replace(" ", "_")
+        
+        # Check if subprogram name already contains the program name
+        if subprogram_name.startswith(self.subprogram.program.name):
+            # If it does, just use subprogram name  
+            return f"{subprogram_name}_Lv{self.level_number}"
+        else:
+            # Otherwise, use the program + subprogram format
+            return f"{program_name}_{subprogram_name}_Lv{self.level_number}"
     
     def get_display_name(self):
         """For compatibility - returns abbreviated name"""

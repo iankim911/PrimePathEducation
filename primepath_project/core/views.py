@@ -277,6 +277,9 @@ def exam_mapping(request):
                         'has_pdf': bool(mapping.exam.pdf_file)
                     })
                 
+                # Add internal difficulty information
+                level.internal_difficulty_value = level.internal_difficulty if hasattr(level, 'internal_difficulty') else None
+                
                 if program.name == 'CORE':
                     core_levels.append(level)
                 elif program.name == 'ASCENT':
@@ -350,4 +353,39 @@ def save_exam_mappings(request):
         return JsonResponse({'success': False, 'error': f'Invalid JSON: {str(e)}'}, status=400)
     except Exception as e:
         logger.error(f"Error saving exam mappings: {e}", exc_info=True)
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@require_http_methods(["POST"])
+def save_difficulty_levels(request):
+    """Save internal difficulty levels for curriculum levels"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        data = json.loads(request.body)
+        difficulty_updates = data.get('difficulty_updates', [])
+        
+        logger.info(f"Updating difficulty levels: {difficulty_updates}")
+        
+        with transaction.atomic():
+            for update in difficulty_updates:
+                level_id = update.get('level_id')
+                difficulty = update.get('difficulty')
+                
+                if level_id:
+                    try:
+                        level = CurriculumLevel.objects.get(id=level_id)
+                        level.internal_difficulty = difficulty if difficulty else None
+                        level.save()
+                        logger.info(f"Updated level {level_id} with difficulty {difficulty}")
+                    except CurriculumLevel.DoesNotExist:
+                        logger.warning(f"CurriculumLevel {level_id} not found")
+        
+        return JsonResponse({'success': True, 'message': 'Difficulty levels updated successfully'})
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON decode error: {e}")
+        return JsonResponse({'success': False, 'error': f'Invalid JSON: {str(e)}'}, status=400)
+    except Exception as e:
+        logger.error(f"Error saving difficulty levels: {e}", exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

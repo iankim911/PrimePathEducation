@@ -1,0 +1,25 @@
+{
+  "working": [
+    "/api/placement/session/dff2f1c1-e8cc-473f-b070-8903722fb664/",
+    "/api/placement/session/dff2f1c1-e8cc-473f-b070-8903722fb664/submit/",
+    "/api/placement/session/dff2f1c1-e8cc-473f-b070-8903722fb664/complete/",
+    "/api/placement/session/dff2f1c1-e8cc-473f-b070-8903722fb664/result/",
+    "/api/placement/start/",
+    "/api/placement/sessions/",
+    "/api/placement/exams/",
+    "URL_NAME:placement_test:start_test",
+    "URL_NAME:core:teacher_dashboard",
+    "URL_NAME:core:exam_mapping"
+  ],
+  "broken": [
+    "URL_NAME:placement_test:take_test",
+    "URL_NAME:placement_test:submit_answer",
+    "URL_NAME:placement_test:complete_test",
+    "URL_NAME:placement_test:test_result",
+    "URL_NAME:placement_test:post_submit_difficulty_choice"
+  ],
+  "analysis": [
+    "/placement/test/dff2f1c1-e8cc-473f-b070-8903722fb664/: 404 NOT FOUND",
+    "/placement/session/dff2f1c1-e8cc-473f-b070-8903722fb664/: 404 NOT FOUND"
+  ]
+}

@@ -18,6 +18,7 @@
     {% load cache %}
     {% now "U" as current_timestamp %}
     <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}?v={{ current_timestamp }}">
+    <link rel="stylesheet" href="{% static 'css/components/difficulty-modal.css' %}?v={{ current_timestamp }}">
     
     <style>
         /* Difficulty Adjustment Buttons */
@@ -143,6 +144,9 @@
             </div>
         </div>
     </div>
+    
+    <!-- Include Difficulty Choice Modal -->
+    {% include 'components/placement_test/difficulty_choice_modal.html' %}
     
     <!-- Load PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>

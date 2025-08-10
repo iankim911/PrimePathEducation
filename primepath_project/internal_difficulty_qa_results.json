@@ -1,0 +1,27 @@
+{
+  "passed": [
+    "\u2705 internal_difficulty field exists",
+    "\u2705 Field can be set and retrieved: Value: 5",
+    "\u2705 Exam mapping view loads: Status: 200",
+    "\u2705 Difficulty column header present",
+    "\u2705 Difficulty input fields present",
+    "\u2705 Save difficulty endpoint responds: Status: 200",
+    "\u2705 Difficulty value saved correctly: Saved value: 3",
+    "\u2705 find_alternate_difficulty_exam method exists",
+    "\u2705 Find easier exam works: Result: None available",
+    "\u2705 Find harder exam works: Result: None available",
+    "\u2705 Test result page loads: Status: 200",
+    "\u2705 Difficulty adjustment section present",
+    "\u2705 Try Easier Level button present",
+    "\u2705 Try Harder Level button present",
+    "\u2705 request_difficulty_change URL exists: /api/placement/request-difficulty-change/",
+    "\u2705 Difficulty change endpoint responds: Status: 200",
+    "\u2705 Exam list still works",
+    "\u2705 Create exam still works",
+    "\u2705 Start test still works",
+    "\u2705 Placement rules still works",
+    "\u2705 Handles None difficulty gracefully: Falls back to level-based logic"
+  ],
+  "failed": [],
+  "warnings": []
+}

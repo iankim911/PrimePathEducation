@@ -1,0 +1,210 @@
+/* Difficulty Choice Modal Styles */
+.difficulty-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.difficulty-modal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
+}
+
+.difficulty-modal .modal-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 700px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+.difficulty-modal .modal-header {
+    padding: 30px 30px 20px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.difficulty-modal .modal-header h2 {
+    margin: 0 0 10px;
+    font-size: 28px;
+    color: #333;
+}
+
+.difficulty-modal .modal-header p {
+    margin: 0;
+    font-size: 18px;
+    color: #666;
+}
+
+.difficulty-modal .modal-body {
+    padding: 30px;
+}
+
+.difficulty-feedback .feedback-prompt {
+    text-align: center;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.difficulty-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.difficulty-btn {
+    flex: 1;
+    min-width: 180px;
+    padding: 20px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.difficulty-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.difficulty-btn .emoji {
+    display: block;
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.difficulty-btn .title {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.difficulty-btn .description {
+    display: block;
+    font-size: 13px;
+    color: #777;
+}
+
+/* Button specific colors */
+.easier-btn {
+    border-color: #4CAF50;
+}
+.easier-btn:hover {
+    background: #f1f8e9;
+    border-color: #4CAF50;
+}
+
+.justright-btn {
+    border-color: #2196F3;
+}
+.justright-btn:hover {
+    background: #e3f2fd;
+    border-color: #2196F3;
+}
+
+.harder-btn {
+    border-color: #FF5722;
+}
+.harder-btn:hover {
+    background: #fbe9e7;
+    border-color: #FF5722;
+}
+
+.modal-note {
+    margin-top: 25px;
+    padding: 15px;
+    background: #fff8e1;
+    border-radius: 8px;
+    border-left: 4px solid #FFC107;
+}
+
+.modal-note p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.difficulty-modal .modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #f0f0f0;
+    text-align: center;
+}
+
+.difficulty-modal .btn-secondary {
+    padding: 10px 25px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.difficulty-modal .btn-secondary:hover {
+    background: #e8e8e8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .difficulty-options {
+        flex-direction: column;
+    }
+    
+    .difficulty-btn {
+        min-width: 100%;
+    }
+    
+    .difficulty-modal .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .difficulty-modal .modal-header h2 {
+        font-size: 24px;
+    }
+    
+    .difficulty-modal .modal-header p {
+        font-size: 16px;
+    }
+}

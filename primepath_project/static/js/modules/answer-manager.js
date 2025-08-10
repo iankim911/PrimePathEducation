@@ -399,6 +399,118 @@
         }
 
         /**
+         * Show difficulty choice modal after test submission
+         * @param {string} sessionId - Current session ID
+         * @param {string} defaultRedirectUrl - Default URL to redirect to if modal is closed
+         */
+        showDifficultyChoiceModal(sessionId, defaultRedirectUrl) {
+            const modal = document.getElementById('difficulty-choice-modal');
+            if (!modal) {
+                this.log('warn', 'Difficulty choice modal not found, redirecting to results');
+                window.location.href = defaultRedirectUrl;
+                return;
+            }
+            
+            // Show the modal
+            modal.style.display = 'flex';
+            
+            // Store session data for later use
+            modal.dataset.sessionId = sessionId;
+            modal.dataset.defaultRedirectUrl = defaultRedirectUrl;
+            
+            // Add event listeners if not already added
+            if (!modal.dataset.listenersAdded) {
+                this.setupDifficultyModalListeners(modal);
+                modal.dataset.listenersAdded = 'true';
+            }
+        }
+        
+        /**
+         * Setup event listeners for difficulty choice modal
+         * @param {HTMLElement} modal - The modal element
+         */
+        setupDifficultyModalListeners(modal) {
+            const self = this;
+            const sessionId = modal.dataset.sessionId;
+            
+            // Handle difficulty choice buttons
+            modal.querySelectorAll('[data-action="difficulty-choice"]').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const adjustment = parseInt(this.dataset.adjustment);
+                    await self.handleDifficultyChoice(sessionId, adjustment);
+                });
+            });
+            
+            // Handle skip button
+            const skipBtn = modal.querySelector('[data-action="skip-difficulty-choice"]');
+            if (skipBtn) {
+                skipBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                    window.location.href = modal.dataset.defaultRedirectUrl;
+                });
+            }
+            
+            // Handle overlay click (close modal)
+            const overlay = modal.querySelector('.modal-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                    window.location.href = modal.dataset.defaultRedirectUrl;
+                });
+            }
+        }
+        
+        /**
+         * Handle difficulty choice selection
+         * @param {string} sessionId - Current session ID
+         * @param {number} adjustment - Difficulty adjustment (-1, 0, 1)
+         */
+        async handleDifficultyChoice(sessionId, adjustment) {
+            const modal = document.getElementById('difficulty-choice-modal');
+            
+            // Show loading state
+            const buttons = modal.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            try {
+                const endpoint = `/api/placement/session/${sessionId}/post-submit-difficulty/`;
+                const response = await this.ajax(endpoint, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        adjustment: adjustment
+                    })
+                });
+                
+                if (response.success) {
+                    // Hide modal
+                    modal.style.display = 'none';
+                    
+                    // Redirect based on action
+                    if (response.redirect_url) {
+                        if (response.action === 'start_new_test') {
+                            // Show message before redirecting to new test
+                            if (response.message) {
+                                // You could show a brief message here if desired
+                                console.log(response.message);
+                            }
+                        }
+                        window.location.href = response.redirect_url;
+                    }
+                } else {
+                    throw new Error(response.error || 'Failed to process difficulty choice');
+                }
+            } catch (error) {
+                this.log('error', 'Failed to process difficulty choice:', error);
+                alert('Failed to process your choice. Redirecting to results...');
+                modal.style.display = 'none';
+                window.location.href = modal.dataset.defaultRedirectUrl;
+            } finally {
+                // Re-enable buttons
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        /**
          * Validate test before submission
          * @returns {Object} Validation result
          */
@@ -491,6 +603,12 @@
                     
                     // Clear auto-save
                     this.stopAutoSave();
+                    
+                    // Check if we should show difficulty choice modal
+                    if (response.show_difficulty_choice) {
+                        this.showDifficultyChoiceModal(sessionId, response.redirect_url);
+                        return true;
+                    }
                     
                     // Redirect if URL provided
                     if (response.redirect_url) {

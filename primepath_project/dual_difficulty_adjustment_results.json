@@ -1,0 +1,35 @@
+{
+  "passed": [
+    "\u2705 Test interface loads: Status: 200",
+    "\u2705 Easier exam button present",
+    "\u2705 Harder exam button present",
+    "\u2705 Manual adjust difficulty URL exists: /api/placement/session/492cd8ba-df07-4b3a-8a78-c505d21db71e/manual-adjust/",
+    "\u2705 Complete test endpoint responds: Status: 200",
+    "\u2705 Response has success flag",
+    "\u2705 Response has show_difficulty_choice flag",
+    "\u2705 Difficulty choice modal triggered: Modal should be shown",
+    "\u2705 Post-submit choice endpoint works: Status: 200",
+    "\u2705 Choice returns redirect URL",
+    "\u2705 Results page loads: Status: 200",
+    "\u2705 Difficulty adjustment section present",
+    "\u2705 Try Easier Level option present",
+    "\u2705 Try Harder Level option present",
+    "\u2705 Request difficulty change URL exists: /api/placement/request-difficulty-change/",
+    "\u2705 Difficulty modal template exists",
+    "\u2705 Difficulty modal CSS exists",
+    "\u2705 Modal included in test template",
+    "\u2705 Modal CSS linked in template",
+    "\u2705 JS checks for show_difficulty_choice flag",
+    "\u2705 JS has showDifficultyChoiceModal method",
+    "\u2705 JS has handleDifficultyChoice method",
+    "\u2705 PlacementService can find easier exam: None available",
+    "\u2705 PlacementService can find harder exam: None available"
+  ],
+  "failed": [],
+  "warnings": [],
+  "summary": {
+    "total_passed": 24,
+    "total_failed": 0,
+    "total_warnings": 0
+  }
+}

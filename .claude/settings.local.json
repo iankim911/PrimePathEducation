@@ -206,7 +206,12 @@
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python -c \"\nimport os, sys\nsys.path.append(''/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project'')\nos.environ.setdefault(''DJANGO_SETTINGS_MODULE'', ''primepath_project.settings_sqlite'')\nimport django\ndjango.setup()\n\nfrom placement_test.models import Exam, StudentSession\n\n# Find an exam with a PDF file\nexam_with_pdf = Exam.objects.filter(pdf_file__isnull=False).first()\nif exam_with_pdf:\n    print(f''✅ Found exam with PDF: {exam_with_pdf.name}'')\n    print(f''   PDF URL: {exam_with_pdf.pdf_file.url}'')\n    \n    # Find or create a test session for this exam\n    session = StudentSession.objects.filter(exam=exam_with_pdf, completed_at__isnull=True).first()\n    if session:\n        print(f''✅ Test session available: http://127.0.0.1:8000/placement/test/{session.id}/'')\n    else:\n        print(''   No active test session, create one via Start Test page'')\nelse:\n    print(''❌ No exams with PDF files found in database'')\n\")",
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_pdf_navigation_fix.py)",
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_pdf_rotation_persistence.py)",
-      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_all_features_comprehensive.py)"
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_all_features_comprehensive.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_all_features_final_check.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_critical_features.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_comprehensive_post_fix_qa.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_timer_expiry_grace_period_fix.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python:*)"
     ],
     "deny": []
   }

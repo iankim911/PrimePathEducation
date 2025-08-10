@@ -1,7 +1,6 @@
 {
-  "total_tests": 11,
-  "passed": 11,
+  "passed": 23,
   "failed": 0,
-  "warnings": 0,
-  "errors": []
+  "issues": [],
+  "success_rate": 100.0
 }

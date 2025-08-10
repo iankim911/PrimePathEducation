@@ -1,0 +1,32 @@
+{
+  "passed": [
+    "\u2705 Programs exist: Found 4 programs",
+    "\u2705 SubPrograms exist: Found 23 subprograms",
+    "\u2705 CurriculumLevels exist: Found 53 levels",
+    "\u2705 CurriculumLevel.display_name property: CORE PHONICS - Lv 1",
+    "\u2705 CurriculumLevel.exam_base_name property: CORE PHONICS_Lv1",
+    "\u2705 Existing exams accessible: Found 36 exams",
+    "\u2705 Create exam with new naming: [PT]_Test_Lv1_250810_QA",
+    "\u2705 Exam-Question relationship: 0 questions",
+    "\u2705 ExamService.get_next_version_number(): Version: 3",
+    "\u2705 ExamService.get_next_version_letter() (backward compat): Version: b",
+    "\u2705 Exam list view: Status: 200",
+    "\u2705 Create exam view: Status: 200",
+    "\u2705 Version check API: Status: 200",
+    "\u2705 Version API response format: date_str: 250810, version: 3",
+    "\u2705 Start test page: Status: 200",
+    "\u2705 Question type MCQ: Created successfully",
+    "\u2705 Question type SHORT: Created successfully",
+    "\u2705 Question type LONG: Created successfully",
+    "\u2705 Question type CHECKBOX: Created successfully",
+    "\u2705 Question type MIXED: Created successfully",
+    "\u2705 Audio files accessible: Found 8 audio files",
+    "\u2705 Audio-Question relationship: Audio 87 assigned to 1 questions",
+    "\u2705 Placement rules page: Status: 200"
+  ],
+  "failed": [
+    "\u274c Create exam view: argument of type 'NoneType' is not iterable",
+    "\u274c Student test interface: Status: 404"
+  ],
+  "warnings": []
+}
