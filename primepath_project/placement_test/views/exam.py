@@ -166,15 +166,21 @@ def preview_exam(request, exam_id):
     
     # Process questions to add response lists for short and long answers
     for question in questions:
-        # For SHORT questions, prioritize options_count over existing correct_answer
+        # For SHORT questions, populate response_list with saved values
         if question.question_type == 'SHORT':
-            if question.options_count and question.options_count >= 1:
-                # Use options_count - don't populate response_list so template uses options_count logic
-                question.response_list = []
-            elif question.correct_answer:
-                # Fallback to existing correct_answer data
-                question.response_list = question.correct_answer.split('|')
+            if question.correct_answer:
+                # Check which separator is used
+                if '|' in question.correct_answer:
+                    # Pipe-separated values
+                    question.response_list = question.correct_answer.split('|')
+                elif ',' in question.correct_answer and question.options_count and question.options_count > 1:
+                    # Comma-separated values with multiple fields expected
+                    question.response_list = [s.strip() for s in question.correct_answer.split(',')]
+                else:
+                    # Single value or no special separator
+                    question.response_list = [question.correct_answer] if question.correct_answer else []
             else:
+                # No saved answer yet
                 question.response_list = []
         else:
             question.response_list = []

@@ -1264,12 +1264,12 @@
                                 {% endwith %}
                             {% elif question.question_type == 'SHORT' %}
                                 <div class="short-answer-responses" id="responses-{{ question.question_number }}">
-                                    {% if question.options_count and question.options_count > 1 %}
-                                        <!-- Create multiple response fields based on options_count for SHORT answers -->
-                                        {% for i in "12345678910"|slice:question.options_count %}
+                                    {% if question.response_list %}
+                                        <!-- Use response_list when available (populated with saved values) -->
+                                        {% for response in question.response_list %}
                                             <div class="response-item">
                                                 <input type="text" 
-                                                       value=""
+                                                       value="{{ response }}"
                                                        placeholder="Acceptable response {{ forloop.counter }}"
                                                        onchange="updateShortAnswers({{ question.question_number }})">
                                                 {% if not forloop.first %}
@@ -1277,11 +1277,12 @@
                                                 {% endif %}
                                             </div>
                                         {% endfor %}
-                                    {% elif question.response_list %}
-                                        {% for response in question.response_list %}
+                                    {% elif question.options_count and question.options_count > 1 %}
+                                        <!-- Create empty fields if no saved values but multiple fields expected -->
+                                        {% for i in "12345678910"|slice:question.options_count %}
                                             <div class="response-item">
                                                 <input type="text" 
-                                                       value="{{ response }}"
+                                                       value=""
                                                        placeholder="Acceptable response {{ forloop.counter }}"
                                                        onchange="updateShortAnswers({{ question.question_number }})">
                                                 {% if not forloop.first %}
