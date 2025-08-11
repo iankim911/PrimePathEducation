@@ -1,0 +1,233 @@
+{
+  "timestamp": "2025-08-11T23:27:01.346104",
+  "categories": {
+    "student_flow": [
+      {
+        "name": "Start test page access",
+        "endpoint": "/api/placement/start/",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true
+      },
+      {
+        "name": "Create test session",
+        "endpoint": "/api/placement/start/",
+        "method": "POST",
+        "expected": "Redirect to test",
+        "actual_status": 400,
+        "session_created": false,
+        "passed": false
+      }
+    ],
+    "teacher_features": [
+      {
+        "name": "Dashboard protection",
+        "endpoint": "/teacher/dashboard/",
+        "expected": "Redirect to login",
+        "actual_status": 302,
+        "redirects_to_login": true,
+        "passed": true
+      },
+      {
+        "name": "Exam List protection",
+        "endpoint": "/api/placement/exams/",
+        "expected": "Redirect to login",
+        "actual_status": 302,
+        "redirects_to_login": true,
+        "passed": true
+      },
+      {
+        "name": "Create Exam protection",
+        "endpoint": "/api/placement/exams/create/",
+        "expected": "Redirect to login",
+        "actual_status": 302,
+        "redirects_to_login": true,
+        "passed": true
+      },
+      {
+        "name": "Session List protection",
+        "endpoint": "/api/placement/sessions/",
+        "expected": "Redirect to login",
+        "actual_status": 302,
+        "redirects_to_login": true,
+        "passed": true
+      },
+      {
+        "name": "Exam Mapping protection",
+        "endpoint": "/exam-mapping/",
+        "expected": "Redirect to login",
+        "actual_status": 302,
+        "redirects_to_login": true,
+        "passed": true
+      },
+      {
+        "name": "Placement Rules protection",
+        "endpoint": "/placement-rules/",
+        "expected": "Redirect to login",
+        "actual_status": 302,
+        "redirects_to_login": true,
+        "passed": true
+      },
+      {
+        "name": "Teacher login",
+        "username": "admin",
+        "passed": true
+      },
+      {
+        "name": "Dashboard access (authenticated)",
+        "endpoint": "/teacher/dashboard/",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true
+      },
+      {
+        "name": "Exam List access (authenticated)",
+        "endpoint": "/api/placement/exams/",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true
+      },
+      {
+        "name": "Create Exam access (authenticated)",
+        "endpoint": "/api/placement/exams/create/",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true
+      },
+      {
+        "name": "Session List access (authenticated)",
+        "endpoint": "/api/placement/sessions/",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true
+      },
+      {
+        "name": "Exam Mapping access (authenticated)",
+        "endpoint": "/exam-mapping/",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true
+      },
+      {
+        "name": "Placement Rules access (authenticated)",
+        "endpoint": "/placement-rules/",
+        "expected_status": 200,
+        "actual_status": 200,
+        "passed": true
+      },
+      {
+        "name": "Create exam",
+        "endpoint": "/api/placement/exams/create/",
+        "method": "POST",
+        "expected": "Success (200 or 302)",
+        "actual_status": 200,
+        "passed": true
+      }
+    ],
+    "api_endpoints": [
+      {
+        "name": "Start Test API (no auth)",
+        "endpoint": "/api/placement/start/",
+        "status_code": 200,
+        "requires_auth": false,
+        "passed": true
+      },
+      {
+        "name": "Submit Answer API (no auth)",
+        "endpoint": "/api/placement/submit-answer/",
+        "status_code": 404,
+        "requires_auth": false,
+        "passed": true
+      },
+      {
+        "name": "Exams API protection",
+        "endpoint": "/api/placement/exams/",
+        "status_code": 302,
+        "protected": true,
+        "passed": true
+      },
+      {
+        "name": "Sessions API protection",
+        "endpoint": "/api/placement/sessions/",
+        "status_code": 302,
+        "protected": true,
+        "passed": true
+      },
+      {
+        "name": "Create Exam API protection",
+        "endpoint": "/api/placement/exams/create/",
+        "status_code": 302,
+        "protected": true,
+        "passed": true
+      }
+    ],
+    "navigation_ui": [
+      {
+        "name": "Home page access",
+        "endpoint": "/",
+        "status_code": 200,
+        "has_student_section": true,
+        "has_teacher_section": true,
+        "has_login_tab": false,
+        "passed": true
+      },
+      {
+        "name": "Authenticated navigation",
+        "shows_username": true,
+        "shows_logout": true,
+        "no_login_tab": true,
+        "passed": true
+      }
+    ],
+    "database": [
+      {
+        "name": "Exams exist",
+        "count": 1,
+        "passed": true
+      },
+      {
+        "name": "Sessions exist",
+        "count": 0,
+        "passed": true
+      },
+      {
+        "name": "Teachers exist",
+        "count": 2,
+        "passed": true
+      },
+      {
+        "name": "Teacher-User relationships",
+        "count": 2,
+        "passed": true
+      }
+    ]
+  },
+  "summary": {
+    "total": 27,
+    "passed": 26,
+    "failed": 1,
+    "success_rate": "96.3%",
+    "categories": {
+      "student_flow": {
+        "total": 2,
+        "passed": 1
+      },
+      "teacher_features": {
+        "total": 14,
+        "passed": 14
+      },
+      "api_endpoints": {
+        "total": 5,
+        "passed": 5
+      },
+      "navigation_ui": {
+        "total": 2,
+        "passed": 2
+      },
+      "database": {
+        "total": 4,
+        "passed": 4
+      }
+    }
+  }
+}

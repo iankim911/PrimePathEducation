@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Logout - PrimePath{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Logout Confirmation Styles */
+    .logout-container {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .logout-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        padding: 40px;
+        width: 100%;
+        max-width: 420px;
+        text-align: center;
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .logout-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: #f56565;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 36px;
+    }
+    
+    .logout-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 12px;
+    }
+    
+    .logout-message {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+    
+    .logout-user {
+        background: #f7fafc;
+        padding: 12px 20px;
+        border-radius: 6px;
+        margin-bottom: 30px;
+        font-size: 14px;
+        color: #4a5568;
+    }
+    
+    .logout-user-label {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .logout-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+    
+    .btn-logout {
+        padding: 12px 24px;
+        background: #f56565;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 120px;
+    }
+    
+    .btn-logout:hover {
+        background: #e53e3e;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+    }
+    
+    .btn-cancel {
+        padding: 12px 24px;
+        background: #e2e8f0;
+        color: #4a5568;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 120px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-cancel:hover {
+        background: #cbd5e0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 480px) {
+        .logout-card {
+            padding: 30px 20px;
+        }
+        
+        .logout-title {
+            font-size: 20px;
+        }
+        
+        .logout-message {
+            font-size: 14px;
+        }
+        
+        .logout-buttons {
+            flex-direction: column;
+        }
+        
+        .btn-logout,
+        .btn-cancel {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="logout-container">
+    <div class="logout-card">
+        <div class="logout-icon">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+        </div>
+        
+        <h1 class="logout-title">Sign Out?</h1>
+        
+        <p class="logout-message">
+            Are you sure you want to sign out of your account?
+        </p>
+        
+        {% if user.is_authenticated %}
+        <div class="logout-user">
+            <span class="logout-user-label">Signed in as:</span>
+            {{ user.get_full_name|default:user.username }}
+        </div>
+        {% endif %}
+        
+        <div class="logout-buttons">
+            <form method="post" action="{% url 'core:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout" id="confirmLogout">
+                    Sign Out
+                </button>
+            </form>
+            
+            <a href="{% url 'core:dashboard' %}" class="btn-cancel">
+                Cancel
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Logout confirmation logging
+document.addEventListener('DOMContentLoaded', function() {
+    // Log page load
+    console.log('[AUTH_LOGOUT_PAGE]', {
+        action: 'logout_confirmation_loaded',
+        user: '{{ user.username }}',
+        timestamp: new Date().toISOString()
+    });
+    
+    // Log logout confirmation
+    const confirmButton = document.getElementById('confirmLogout');
+    if (confirmButton) {
+        confirmButton.addEventListener('click', function() {
+            console.log('[AUTH_LOGOUT_CONFIRM]', {
+                action: 'logout_confirmed',
+                user: '{{ user.username }}',
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

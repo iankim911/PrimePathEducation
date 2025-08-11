@@ -1,0 +1,68 @@
+{
+  "timestamp": "2025-08-11T23:43:53.969224",
+  "tests": [
+    {
+      "test": "Teacher login",
+      "username": "teacher1",
+      "passed": true
+    },
+    {
+      "test": "Authenticated access",
+      "endpoint": "/teacher/dashboard/",
+      "status_code": 200,
+      "passed": true
+    },
+    {
+      "test": "Logout with GET request",
+      "endpoint": "/logout/",
+      "method": "GET",
+      "status_code": 302,
+      "is_redirect": true,
+      "redirect_url": "/login/",
+      "passed": true
+    },
+    {
+      "test": "Verify logged out",
+      "endpoint": "/teacher/dashboard/",
+      "status_code": 302,
+      "redirects_to_login": true,
+      "passed": true
+    },
+    {
+      "test": "Multiple login/logout cycles",
+      "cycles": [
+        {
+          "cycle": 1,
+          "login": true,
+          "logout": true,
+          "logout_status": 302
+        },
+        {
+          "cycle": 2,
+          "login": true,
+          "logout": true,
+          "logout_status": 302
+        },
+        {
+          "cycle": 3,
+          "login": true,
+          "logout": true,
+          "logout_status": 302
+        }
+      ],
+      "passed": true
+    },
+    {
+      "test": "Logout success message",
+      "has_message": false,
+      "final_url": "/login/",
+      "passed": true
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "success_rate": "100.0%"
+  }
+}

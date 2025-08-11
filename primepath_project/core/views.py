@@ -2,17 +2,26 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from .models import Teacher, Program, SubProgram, CurriculumLevel, PlacementRule
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def index(request):
     return render(request, 'core/index.html')
 
 
+@login_required
 def teacher_dashboard(request):
     from placement_test.models import StudentSession, Exam
+    
+    # Log dashboard access
+    logger.info(f"[DASHBOARD_ACCESS] User: {request.user.username}, Full Name: {request.user.get_full_name()}")
+    print(f"[DASHBOARD_ACCESS] User: {request.user.username}, Full Name: {request.user.get_full_name()}")
     
     recent_sessions = StudentSession.objects.select_related('exam', 'school', 'original_curriculum_level', 'final_curriculum_level').order_by('-started_at')[:10]
     active_exams = Exam.objects.filter(is_active=True).count()
@@ -26,6 +35,7 @@ def teacher_dashboard(request):
     return render(request, 'core/teacher_dashboard.html', context)
 
 
+@login_required
 def curriculum_levels(request):
     programs = Program.objects.prefetch_related('subprograms__levels').all()
     
@@ -58,6 +68,7 @@ def curriculum_levels(request):
     return render(request, 'core/curriculum_levels.html', {'programs': programs})
 
 
+@login_required
 def placement_rules(request):
     from placement_test.models import Exam
     
@@ -117,6 +128,7 @@ def placement_rules(request):
 
 
 @require_http_methods(["POST"])
+@login_required
 def create_placement_rule(request):
     try:
         data = json.loads(request.body)
@@ -144,6 +156,7 @@ def create_placement_rule(request):
 
 
 @require_http_methods(["DELETE"])
+@login_required
 def delete_placement_rule(request, pk):
     try:
         rule = get_object_or_404(PlacementRule, pk=pk)
@@ -154,6 +167,7 @@ def delete_placement_rule(request, pk):
 
 
 @require_http_methods(["GET"])
+@login_required
 def get_placement_rules(request):
     """Get all placement rules in a format suitable for the matrix view"""
     rules = PlacementRule.objects.all()
@@ -187,6 +201,7 @@ def get_placement_rules(request):
 
 
 @require_http_methods(["POST"]) 
+@login_required
 def save_placement_rules(request):
     """Save placement rules from the matrix view"""
     try:
@@ -224,6 +239,7 @@ def save_placement_rules(request):
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
 
 
+@login_required
 def exam_mapping(request):
     """View for managing curriculum level to exam mappings"""
     from placement_test.models import Exam
@@ -300,6 +316,7 @@ def exam_mapping(request):
 
 
 @require_http_methods(["POST"])
+@login_required
 def save_exam_mappings(request):
     """Save curriculum level to exam mappings"""
     from .models import ExamLevelMapping
@@ -357,6 +374,7 @@ def save_exam_mappings(request):
 
 
 @require_http_methods(["POST"])
+@login_required
 def save_difficulty_levels(request):
     """Save internal difficulty levels for curriculum levels"""
     import logging

@@ -1,0 +1,94 @@
+{
+  "timestamp": "2025-08-11T22:56:24.567199",
+  "tests": [
+    {
+      "test": "Teacher name update",
+      "expected": "Taehyun Kim",
+      "actual": "Taehyun Kim",
+      "passed": true
+    },
+    {
+      "test": "Login tab removal",
+      "description": "Login tab should not exist in navigation",
+      "found_login_tab": false,
+      "passed": true
+    },
+    {
+      "test": "Protected view: Dashboard",
+      "url": "/teacher/dashboard/",
+      "status_code": 302,
+      "redirects_to_login": true,
+      "redirect_url": "/login/?next=/teacher/dashboard/",
+      "passed": true
+    },
+    {
+      "test": "Protected view: Create Exam",
+      "url": "/api/placement/exams/create/",
+      "status_code": 302,
+      "redirects_to_login": true,
+      "redirect_url": "/login/?next=/api/placement/exams/create/",
+      "passed": true
+    },
+    {
+      "test": "Protected view: Exam List",
+      "url": "/api/placement/exams/",
+      "status_code": 302,
+      "redirects_to_login": true,
+      "redirect_url": "/login/?next=/api/placement/exams/",
+      "passed": true
+    },
+    {
+      "test": "Protected view: Session List",
+      "url": "/api/placement/sessions/",
+      "status_code": 302,
+      "redirects_to_login": true,
+      "redirect_url": "/login/?next=/api/placement/sessions/",
+      "passed": true
+    },
+    {
+      "test": "Protected view: Exam Mapping",
+      "url": "/exam-mapping/",
+      "status_code": 302,
+      "redirects_to_login": true,
+      "redirect_url": "/login/?next=/exam-mapping/",
+      "passed": true
+    },
+    {
+      "test": "Protected view: Placement Rules",
+      "url": "/placement-rules/",
+      "status_code": 302,
+      "redirects_to_login": true,
+      "redirect_url": "/login/?next=/placement-rules/",
+      "passed": true
+    },
+    {
+      "test": "Student page: Start Test",
+      "url": "/api/placement/start/",
+      "status_code": 200,
+      "passed": true
+    },
+    {
+      "test": "Student page: Home Page",
+      "url": "/",
+      "status_code": 200,
+      "passed": true
+    },
+    {
+      "test": "Authenticated dashboard access",
+      "status_code": 200,
+      "passed": true
+    },
+    {
+      "test": "User info in navigation",
+      "has_user_name": true,
+      "has_logout": true,
+      "passed": true
+    }
+  ],
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "success_rate": "100.0%"
+  }
+}

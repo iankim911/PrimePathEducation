@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Teacher Login - PrimePath{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Login Page Styles - Mobile Responsive */
+    .login-container {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        padding: 40px;
+        width: 100%;
+        max-width: 420px;
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .login-logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 36px;
+        font-weight: bold;
+    }
+    
+    .login-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    
+    .login-subtitle {
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-input.error {
+        border-color: #f56565;
+    }
+    
+    .form-checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .form-checkbox {
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        cursor: pointer;
+    }
+    
+    .form-checkbox-label {
+        color: #666;
+        font-size: 14px;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .login-button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+    }
+    
+    .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    .login-button:active {
+        transform: translateY(0);
+    }
+    
+    .login-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .error-message {
+        background: #fee;
+        border: 1px solid #fcc;
+        color: #c33;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    
+    .success-message {
+        background: #efe;
+        border: 1px solid #cfc;
+        color: #3c3;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    
+    .login-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .login-footer-text {
+        color: #666;
+        font-size: 13px;
+    }
+    
+    .login-footer-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .login-footer-link:hover {
+        text-decoration: underline;
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 480px) {
+        .login-card {
+            padding: 30px 20px;
+        }
+        
+        .login-title {
+            font-size: 20px;
+        }
+        
+        .form-input {
+            padding: 10px 14px;
+        }
+        
+        .login-button {
+            padding: 12px;
+            font-size: 15px;
+        }
+    }
+    
+    /* Loading spinner */
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s linear infinite;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-logo">P</div>
+            <h1 class="login-title">Teacher Login</h1>
+            <p class="login-subtitle">Access your PrimePath dashboard</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" action="{% url 'core:login' %}" id="loginForm">
+            {% csrf_token %}
+            
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="username" class="form-label">Username or Email</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    class="form-input" 
+                    required
+                    autofocus
+                    placeholder="Enter your username"
+                    autocomplete="username"
+                >
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-input" 
+                    required
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                >
+            </div>
+            
+            <div class="form-checkbox-group">
+                <input type="checkbox" id="remember_me" name="remember_me" class="form-checkbox">
+                <label for="remember_me" class="form-checkbox-label">Remember me for 2 weeks</label>
+            </div>
+            
+            <button type="submit" class="login-button" id="loginButton">
+                Sign In
+            </button>
+        </form>
+        
+        <div class="login-footer">
+            <p class="login-footer-text">
+                Don't have an account? 
+                <a href="#" class="login-footer-link" onclick="alert('Please contact your administrator to create an account.'); return false;">Contact Admin</a>
+            </p>
+            <p class="login-footer-text" style="margin-top: 10px;">
+                <a href="/" class="login-footer-link">← Back to Home</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Login form handler with logging
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    const button = document.getElementById('loginButton');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    
+    // Enhanced console logging
+    console.log('[AUTH_LOGIN_PAGE] Login page loaded');
+    
+    const loginPageData = {
+        action: 'page_loaded',
+        has_next: '{{ next }}' !== '',
+        next_url: '{{ next }}',
+        referrer: document.referrer,
+        came_from_logout: document.referrer.includes('/logout'),
+        timestamp: new Date().toISOString()
+    };
+    
+    console.log('[AUTH_LOGIN_PAGE]', loginPageData);
+    
+    // Check if user just logged out
+    if (document.referrer.includes('/logout')) {
+        console.log('[AUTH_POST_LOGOUT]', {
+            action: 'arrived_after_logout',
+            message: 'User successfully logged out and redirected to login',
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    // Check for logout success message
+    const messages = document.querySelector('.messages');
+    if (messages && messages.textContent.includes('logged out')) {
+        console.log('[AUTH_LOGOUT_CONFIRMED]', {
+            action: 'logout_success_message_displayed',
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        // Log submission attempt
+        console.log('[AUTH_LOGIN_SUBMIT]', {
+            action: 'form_submit',
+            username: usernameInput.value,
+            remember_me: document.getElementById('remember_me').checked,
+            timestamp: new Date().toISOString()
+        });
+        
+        // Disable button and show loading
+        button.disabled = true;
+        button.innerHTML = 'Signing In<span class="spinner"></span>';
+        
+        // Validate inputs
+        let hasError = false;
+        
+        if (!usernameInput.value.trim()) {
+            usernameInput.classList.add('error');
+            hasError = true;
+        } else {
+            usernameInput.classList.remove('error');
+        }
+        
+        if (!passwordInput.value) {
+            passwordInput.classList.add('error');
+            hasError = true;
+        } else {
+            passwordInput.classList.remove('error');
+        }
+        
+        if (hasError) {
+            e.preventDefault();
+            button.disabled = false;
+            button.innerHTML = 'Sign In';
+            
+            console.log('[AUTH_LOGIN_ERROR]', {
+                action: 'validation_failed',
+                username_empty: !usernameInput.value.trim(),
+                password_empty: !passwordInput.value
+            });
+            return false;
+        }
+        
+        // Log successful validation
+        console.log('[AUTH_LOGIN_VALIDATED]', {
+            action: 'validation_passed',
+            submitting: true
+        });
+    });
+    
+    // Remove error states on input
+    usernameInput.addEventListener('input', function() {
+        this.classList.remove('error');
+    });
+    
+    passwordInput.addEventListener('input', function() {
+        this.classList.remove('error');
+    });
+    
+    // Focus username field
+    if (usernameInput) {
+        usernameInput.focus();
+    }
+});
+</script>
+{% endblock %}

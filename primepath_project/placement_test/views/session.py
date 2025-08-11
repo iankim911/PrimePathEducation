@@ -5,6 +5,7 @@ Handles viewing and managing student test sessions
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 from ..models import StudentSession, StudentAnswer
 import csv
 import logging
@@ -12,6 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@login_required
 def session_list(request):
     """List all placement test sessions with filtering options."""
     sessions = StudentSession.objects.select_related('exam', 'original_curriculum_level', 'school').all()
@@ -73,6 +75,7 @@ def session_list(request):
     return render(request, 'placement_test/session_list.html', context)
 
 
+@login_required
 def session_detail(request, session_id):
     """Display detailed information about a specific session."""
     session = get_object_or_404(StudentSession, id=session_id)
@@ -85,11 +88,13 @@ def session_detail(request, session_id):
     return render(request, 'placement_test/session_detail.html', context)
 
 
+@login_required
 def grade_session(request, session_id):
     session = get_object_or_404(StudentSession, id=session_id)
     return render(request, 'placement_test/grade_session.html', {'session': session})
 
 
+@login_required
 def export_result(request, session_id):
     """Export session results as PDF or CSV."""
     session = get_object_or_404(StudentSession, id=session_id)

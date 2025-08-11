@@ -95,7 +95,7 @@
             font-weight: 500;
         }
         
-        /* Navigation Tabs */
+        /* Navigation Tabs - Fixed highlight coverage */
         .nav-tabs {
             background-color: #34495e;
             padding: 0;
@@ -113,7 +113,9 @@
             padding: 0 20px;
         }
         .nav-tabs li {
-            margin-right: 2px;
+            margin: 0; /* Fixed: Removed margin-right that was causing highlight issues */
+            padding: 0;
+            display: flex; /* Ensure li stretches to contain the anchor */
         }
         .nav-tabs a {
             display: block;
@@ -123,6 +125,8 @@
             transition: background-color 0.3s;
             font-weight: 500;
             position: relative;
+            height: 100%; /* Ensure full height coverage */
+            white-space: nowrap; /* Prevent text wrapping */
         }
         .nav-tabs a:hover {
             background-color: #2c3e50;
@@ -131,6 +135,19 @@
             background-color: #3498db !important;
             color: white;
             font-weight: 600;
+            box-shadow: inset 0 -3px 0 rgba(255,255,255,0.2); /* Add subtle bottom highlight */
+        }
+        
+        /* Profile Link Fix - Prevent name wrapping */
+        .nav-tabs .profile-link {
+            display: flex !important;
+            align-items: center;
+            white-space: nowrap !important;
+            min-width: fit-content;
+        }
+        .nav-tabs .profile-link span {
+            display: inline-block;
+            vertical-align: middle;
         }
         
         /* Alert Messages */
@@ -193,13 +210,23 @@
     </div>
     
     <nav class="nav-tabs">
-        <ul>
-            <li><a href="{% url 'core:teacher_dashboard' %}" class="{% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">Dashboard</a></li>
-            <li><a href="{% url 'placement_test:create_exam' %}" class="{% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}">Upload Exam</a></li>
-            <li><a href="{% url 'placement_test:exam_list' %}" class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}">Manage Exams</a></li>
-            <li><a href="{% url 'core:exam_mapping' %}" class="{% if request.resolver_match.url_name == 'exam_mapping' %}active{% endif %}">Exam-to-Level Mapping</a></li>
-            <li><a href="{% url 'core:placement_rules' %}" class="{% if request.resolver_match.url_name == 'placement_rules' %}active{% endif %}">Placement Rules</a></li>
-            <li><a href="{% url 'placement_test:session_list' %}" class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}">Student Sessions</a></li>
+        <ul style="display: flex; justify-content: space-between;">
+            <div style="display: flex;">
+                <li><a href="{% url 'core:teacher_dashboard' %}" class="{% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">Dashboard</a></li>
+                <li><a href="{% url 'placement_test:create_exam' %}" class="{% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}">Upload Exam</a></li>
+                <li><a href="{% url 'placement_test:exam_list' %}" class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}">Manage Exams</a></li>
+                <li><a href="{% url 'core:exam_mapping' %}" class="{% if request.resolver_match.url_name == 'exam_mapping' %}active{% endif %}">Exam-to-Level Mapping</a></li>
+                <li><a href="{% url 'core:placement_rules' %}" class="{% if request.resolver_match.url_name == 'placement_rules' %}active{% endif %}">Placement Rules</a></li>
+                <li><a href="{% url 'placement_test:session_list' %}" class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}">Student Sessions</a></li>
+            </div>
+            <div style="display: flex; margin-left: auto; align-items: stretch;">
+                {% if user.is_authenticated %}
+                    <li style="display: flex;"><a href="{% url 'core:profile' %}" class="profile-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" title="My Profile" style="white-space: nowrap; padding-right: 30px;">
+                        <span style="display: inline-block; margin-right: 5px;">👤</span><span style="display: inline-block;">{{ user.get_full_name|default:user.username }}</span>
+                    </a></li>
+                    <li style="display: flex;"><a href="{% url 'core:logout' %}" id="logout-link" style="background-color: #e74c3c; white-space: nowrap;">Logout</a></li>
+                {% endif %}
+            </div>
         </ul>
     </nav>
     
@@ -237,5 +264,149 @@
     </div>
     
     {% block extra_js %}{% endblock %}
+    
+    <!-- Authentication State Logging -->
+    <script>
+        // Enhanced authentication state logging
+        const authState = {
+            authenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
+            username: {% if user.is_authenticated %}'{{ user.username }}'{% else %}null{% endif %},
+            fullName: {% if user.is_authenticated %}'{{ user.get_full_name }}'{% else %}null{% endif %},
+            is_staff: {% if user.is_authenticated %}{{ user.is_staff|lower }}{% else %}false{% endif %},
+            is_superuser: {% if user.is_authenticated %}{{ user.is_superuser|lower }}{% else %}false{% endif %},
+            page: '{{ request.resolver_match.url_name }}',
+            path: '{{ request.path }}',
+            nextUrl: '{{ request.GET.next }}',
+            timestamp: new Date().toISOString()
+        };
+        
+        console.log('[AUTH_STATE]', authState);
+        console.log('[NAV_BEHAVIOR] Login tab removed, all teacher features require authentication');
+        
+        // Log navigation tab fixes
+        console.log('[UI_FIX_1] Tab highlight CSS fixes applied:');
+        console.log('  - Removed margin-right from li elements');
+        console.log('  - Added display: flex to li elements');
+        console.log('  - Added height: 100% to anchor tags');
+        console.log('  - Added white-space: nowrap to prevent text wrapping');
+        console.log('  - Added box-shadow for active state');
+        
+        // Log profile name fix implementation
+        console.log('[UI_FIX_2] Profile name wrapping fix applied:');
+        console.log('  - Added profile-link class with flex display');
+        console.log('  - Applied white-space: nowrap with !important');
+        console.log('  - Separated emoji and name into spans');
+        console.log('  - Added min-width: fit-content');
+        console.log('  - Added align-items: center for vertical alignment');
+        
+        // Check active tab highlighting
+        const activeTab = document.querySelector('.nav-tabs a.active');
+        if (activeTab) {
+            const computedStyle = window.getComputedStyle(activeTab);
+            console.log('[UI_FIX_1_ACTIVE] Active tab styles:', {
+                backgroundColor: computedStyle.backgroundColor,
+                padding: computedStyle.padding,
+                height: computedStyle.height,
+                display: computedStyle.display,
+                whiteSpace: computedStyle.whiteSpace
+            });
+        }
+        
+        // Check profile link styling and layout
+        const profileLink = document.querySelector('.nav-tabs .profile-link');
+        if (profileLink) {
+            const profileStyle = window.getComputedStyle(profileLink);
+            const spans = profileLink.querySelectorAll('span');
+            
+            console.log('[UI_FIX_2_PROFILE] Profile link verification:', {
+                display: profileStyle.display,
+                whiteSpace: profileStyle.whiteSpace,
+                alignItems: profileStyle.alignItems,
+                minWidth: profileStyle.minWidth,
+                width: profileStyle.width,
+                spansCount: spans.length,
+                textContent: profileLink.textContent.trim(),
+                clientWidth: profileLink.clientWidth
+            });
+            
+            // Check each span
+            spans.forEach((span, index) => {
+                const spanStyle = window.getComputedStyle(span);
+                console.log(`[UI_FIX_2_SPAN_${index}] Span ${index + 1}:`, {
+                    display: spanStyle.display,
+                    content: span.textContent,
+                    verticalAlign: spanStyle.verticalAlign
+                });
+            });
+            
+            // Test if name is on single line
+            const nameSpan = spans[1]; // Second span should be the name
+            if (nameSpan) {
+                const isWrapping = nameSpan.scrollHeight > nameSpan.clientHeight + 2; // +2 for tolerance
+                console.log('[UI_FIX_2_WRAP_TEST]', {
+                    nameText: nameSpan.textContent,
+                    isWrapping: isWrapping,
+                    scrollHeight: nameSpan.scrollHeight,
+                    clientHeight: nameSpan.clientHeight,
+                    status: isWrapping ? '❌ WRAPPING DETECTED' : '✅ SINGLE LINE CONFIRMED'
+                });
+            }
+        } else {
+            console.log('[UI_FIX_2_PROFILE] ⚠️ Profile link not found - user might not be logged in');
+        }
+        
+        // Track navigation clicks with enhanced logging
+        document.querySelectorAll('.nav-tabs a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const clickData = {
+                    link: this.href,
+                    text: this.textContent.trim(),
+                    authenticated: authState.authenticated,
+                    willRedirect: !authState.authenticated && !this.href.includes('/placement/test/'),
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log('[NAV_CLICK]', clickData);
+                
+                // Log warning if clicking protected link while unauthenticated
+                if (!authState.authenticated && !this.href.includes('/placement/test/')) {
+                    console.warn('[AUTH_REDIRECT] User will be redirected to login page');
+                }
+            });
+        });
+        
+        // Enhanced logout link tracking
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                console.log('[LOGOUT_CLICK]', {
+                    action: 'logout_initiated',
+                    user: authState.username,
+                    fullName: authState.fullName,
+                    method: 'GET',
+                    url: this.href,
+                    timestamp: new Date().toISOString()
+                });
+                console.log('[LOGOUT_INFO] Using simplified GET logout (industry standard)');
+                console.log('[LOGOUT_INFO] No CSRF token needed for GET request');
+                console.log('[LOGOUT_INFO] User will be logged out immediately and redirected to login');
+            });
+        }
+        
+        // Log if this is a post-login redirect
+        if (authState.authenticated && authState.nextUrl) {
+            console.log('[POST_LOGIN_REDIRECT] User logged in and redirected from:', authState.nextUrl);
+        }
+        
+        // Log post-logout state
+        if (!authState.authenticated && document.referrer && document.referrer.includes('/logout')) {
+            console.log('[POST_LOGOUT]', {
+                action: 'user_logged_out',
+                redirected_to: window.location.pathname,
+                from: document.referrer,
+                timestamp: new Date().toISOString()
+            });
+        }
+    </script>
 </body>
 </html>

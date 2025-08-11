@@ -36,6 +36,7 @@ def exam_list(request):
 
 
 @handle_errors(ajax_only=True)
+@login_required
 def check_exam_version(request):
     """API endpoint to get the next available version for a curriculum level"""
     from datetime import datetime
@@ -157,6 +158,7 @@ def create_exam(request):
     })
 
 
+@login_required
 def exam_detail(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     questions = exam.questions.all()
@@ -170,11 +172,13 @@ def exam_detail(request, exam_id):
     return render(request, 'placement_test/exam_detail.html', context)
 
 
+@login_required
 def edit_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     return render(request, 'placement_test/edit_exam.html', {'exam': exam})
 
 
+@login_required
 def preview_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     
@@ -234,6 +238,7 @@ def preview_exam(request, exam_id):
     })
 
 
+@login_required
 def manage_questions(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     questions = exam.questions.all().order_by('question_number')
@@ -261,6 +266,7 @@ def manage_questions(request, exam_id):
 
 
 @require_http_methods(["POST"])
+@login_required
 def delete_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     exam_name = exam.name
