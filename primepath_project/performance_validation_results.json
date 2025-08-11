@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-08-11T17:30:35.576556",
+  "query_performance": {
+    "exam_list": {
+      "queries": 3,
+      "time": 0.004561185836791992,
+      "optimized": true
+    },
+    "session_list": {
+      "queries": 2,
+      "time": 0.0034742355346679688,
+      "optimized": true
+    }
+  },
+  "response_times": {
+    "/api/placement/exams/": {
+      "time": 0.060279130935668945,
+      "status": 200,
+      "fast": true
+    },
+    "/api/placement/sessions/": {
+      "time": 0.009946107864379883,
+      "status": 200,
+      "fast": true
+    },
+    "/": {
+      "time": 0.0008237361907958984,
+      "status": 200,
+      "fast": true
+    }
+  },
+  "optimization_checks": {
+    "index_count": 53,
+    "has_exam_id_index": true,
+    "has_session_id_index": true,
+    "has_question_id_index": true
+  }
+}

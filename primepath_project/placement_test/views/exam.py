@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from ..models import Exam, AudioFile, Question
 from core.models import CurriculumLevel
@@ -13,11 +14,23 @@ from core.exceptions import ValidationException, ExamConfigurationException
 from core.decorators import handle_errors
 from ..services import ExamService
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
 
+@login_required
 def exam_list(request):
+    """List all exams (requires authentication)"""
+    # Log authentication check
+    console_log = {
+        "view": "exam_list",
+        "user": str(request.user),
+        "authenticated": request.user.is_authenticated,
+        "method": request.method
+    }
+    logger.info(f"[EXAM_LIST] {json.dumps(console_log)}")
+    
     exams = Exam.objects.select_related('curriculum_level__subprogram__program').all()
     return render(request, 'placement_test/exam_list.html', {'exams': exams})
 
@@ -53,8 +66,20 @@ def check_exam_version(request):
         }, status=400)
 
 
+@login_required
 @handle_errors(template_name='placement_test/create_exam.html')
 def create_exam(request):
+    """Create a new exam (requires authentication)"""
+    # Log authentication check
+    console_log = {
+        "view": "create_exam",
+        "user": str(request.user),
+        "authenticated": request.user.is_authenticated,
+        "method": request.method
+    }
+    logger.info(f"[CREATE_EXAM] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_AUTH] {json.dumps(console_log)}")
+    
     if request.method == 'POST':
         try:
             # Validate required fields
@@ -75,7 +100,7 @@ def create_exam(request):
                 'default_options_count': int(request.POST.get('default_options_count', 5)),
                 'passing_score': 0,
                 'pdf_rotation': int(request.POST.get('pdf_rotation', 0)),  # Add rotation from form
-                'created_by': None,  # No auth required as per PRD
+                'created_by': request.user if request.user.is_authenticated else None,  # Track who created the exam
                 'is_active': True
             }
             

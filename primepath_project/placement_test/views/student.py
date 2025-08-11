@@ -154,9 +154,40 @@ def take_test(request, session_id):
 @handle_errors(ajax_only=True)
 @require_POST
 def submit_answer(request, session_id):
+    """
+    Submit an answer for a question in a test session.
+    Supports multiple URL patterns for backward compatibility.
+    """
+    # Comprehensive logging for debugging
+    console_log = {
+        "view": "submit_answer",
+        "action": "request_received",
+        "session_id": str(session_id),
+        "method": request.method,
+        "path": request.path,
+        "content_type": request.content_type,
+        "user": str(request.user) if request.user.is_authenticated else "anonymous",
+        "timestamp": timezone.now().isoformat()
+    }
+    print(f"[SUBMIT_ANSWER] {json.dumps(console_log)}")
+    logger.info(f"Submit answer request for session {session_id} from path {request.path}")
+    
     try:
         # Get and validate session
         session = get_object_or_404(StudentSession, id=session_id)
+        
+        # Log session state
+        session_log = {
+            "view": "submit_answer",
+            "action": "session_loaded",
+            "session_id": str(session_id),
+            "exam_id": str(session.exam.id),
+            "completed": session.completed_at is not None,
+            "timer_expired": session.is_timer_expired() if hasattr(session, 'is_timer_expired') else None,
+            "in_grace_period": session.is_in_grace_period() if hasattr(session, 'is_in_grace_period') else None
+        }
+        print(f"[SUBMIT_ANSWER_SESSION] {json.dumps(session_log)}")
+        logger.debug(f"Session state: {session_log}")
         
         # Check if session can accept answers (handles timer expiry and grace period automatically)
         if not session.can_accept_answers():
@@ -192,6 +223,18 @@ def submit_answer(request, session_id):
         # Get question and answer
         question_id = data.get('question_id')
         answer = data.get('answer', '').strip()
+        
+        # Log received data
+        data_log = {
+            "view": "submit_answer",
+            "action": "data_received",
+            "session_id": str(session_id),
+            "question_id": str(question_id) if question_id else None,
+            "answer_length": len(answer) if answer else 0,
+            "answer_preview": answer[:50] if answer else None
+        }
+        print(f"[SUBMIT_ANSWER_DATA] {json.dumps(data_log)}")
+        logger.debug(f"Answer data: {data_log}")
         
         if not question_id:
             raise ValidationException("Question ID is required", code="MISSING_QUESTION_ID")

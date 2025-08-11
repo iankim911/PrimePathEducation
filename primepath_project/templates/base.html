@@ -10,6 +10,17 @@
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- Mobile Responsive CSS - Only affects mobile viewports -->
+    <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}">
+    
+    <!-- Debug logging for mobile styles -->
+    <script>
+        if (window.innerWidth <= 767) {
+            console.log('[MOBILE_CSS] Mobile responsive styles loaded - viewport width:', window.innerWidth);
+        }
+    </script>
+    
     <style>
         * {
             margin: 0;

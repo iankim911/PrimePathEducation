@@ -1,0 +1,87 @@
+{
+  "timestamp": "2025-08-11T20:46:38.025544",
+  "url_redirects": [
+    {
+      "url": "/placement/",
+      "status": 302,
+      "redirected_to": "/",
+      "test": "PASS",
+      "description": "Placement home redirect"
+    },
+    {
+      "url": "/placement/start-test/",
+      "status": 301,
+      "redirected_to": "/api/placement/start/",
+      "test": "PASS",
+      "description": "Start test redirect"
+    },
+    {
+      "url": "/placement/create-exam/",
+      "status": 301,
+      "redirected_to": "/api/placement/exams/create/",
+      "test": "FAIL",
+      "description": "Create exam (should work directly)"
+    },
+    {
+      "url": "/placement/sessions/",
+      "status": 301,
+      "redirected_to": "/api/placement/sessions/",
+      "test": "PASS",
+      "description": "Sessions redirect"
+    },
+    {
+      "url": "/core/",
+      "status": 301,
+      "redirected_to": "/",
+      "test": "PASS",
+      "description": "Core dashboard redirect"
+    },
+    {
+      "url": "/core/dashboard/",
+      "status": 301,
+      "redirected_to": "/",
+      "test": "PASS",
+      "description": "Dashboard redirect"
+    }
+  ],
+  "authentication": [
+    {
+      "url": "/api/placement/start/",
+      "user": "anonymous",
+      "status": 200,
+      "test": "PASS"
+    },
+    {
+      "url": "/api/placement/sessions/",
+      "user": "anonymous",
+      "status": 200,
+      "test": "PASS"
+    },
+    {
+      "url": "/api/placement/exams/create/",
+      "protection": "missing",
+      "test": "WARNING"
+    },
+    {
+      "url": "/api/placement-rules/",
+      "protection": "missing",
+      "test": "WARNING"
+    }
+  ],
+  "mobile_css": [
+    {
+      "file": "mobile-responsive.css",
+      "exists": true,
+      "test": "PASS"
+    },
+    {
+      "file": "mobile-handler.js",
+      "exists": true,
+      "test": "PASS"
+    }
+  ],
+  "summary": {
+    "passed": 21,
+    "failed": 4
+  }
+}

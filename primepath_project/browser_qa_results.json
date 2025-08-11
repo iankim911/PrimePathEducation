@@ -1,0 +1,50 @@
+{
+  "timestamp": "2025-08-11T17:30:01.626498",
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "warnings": 1
+  },
+  "results": [
+    {
+      "test": "Homepage",
+      "status": "PASS",
+      "details": "Loaded successfully"
+    },
+    {
+      "test": "Homepage Content",
+      "status": "PASS",
+      "details": "PrimePath branding found"
+    },
+    {
+      "test": "Exams API",
+      "status": "PASS",
+      "details": "Status: 200"
+    },
+    {
+      "test": "Sessions API",
+      "status": "PASS",
+      "details": "Status: 200"
+    },
+    {
+      "test": "Version Check API",
+      "status": "WARNING",
+      "details": "Status: 400"
+    },
+    {
+      "test": "Exam Creation Page",
+      "status": "PASS",
+      "details": "Page loads"
+    },
+    {
+      "test": "Exam Form Elements",
+      "status": "PASS",
+      "details": "Form elements found"
+    },
+    {
+      "test": "Student Test Interface",
+      "status": "FAIL",
+      "details": "Expecting value: line 2 column 1 (char 1)"
+    }
+  ]
+}

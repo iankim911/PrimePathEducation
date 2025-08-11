@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.middleware.URLRedirectMiddleware',  # URL redirect handling (early in chain)
     'core.middleware.FeatureFlagMiddleware',  # Add feature flags
     'core.middleware.APIVersionMiddleware',  # Add API versioning
     'core.middleware.SecurityHeadersMiddleware',  # Security headers
@@ -180,10 +181,11 @@ LEGACY_SEPARATOR_SUPPORT = True  # Support pipe separators for existing data
 # Django REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'core.permissions.SmartAPIPermission',  # Use our intelligent permission system
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',  # For API testing
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -245,6 +247,54 @@ CORS_ALLOW_HEADERS = [
 CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Message broker
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # Result storage
 CELERY_ACCEPT_CONTENT = ['json']  # Allowed content types
+
+# Logging Configuration for debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'primepath.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+        'placement_test': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'core': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+    },
+}
 CELERY_TASK_SERIALIZER = 'json'  # Task serialization format
 CELERY_RESULT_SERIALIZER = 'json'  # Result serialization format
 CELERY_TIMEZONE = TIME_ZONE  # Use Django's timezone

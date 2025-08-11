@@ -19,6 +19,8 @@
     {% now "U" as current_timestamp %}
     <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}?v={{ current_timestamp }}">
     <link rel="stylesheet" href="{% static 'css/components/difficulty-modal.css' %}?v={{ current_timestamp }}">
+    <!-- Mobile Responsive CSS - Only affects mobile viewports -->
+    <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}?v={{ current_timestamp }}">
     
     <style>
         /* Difficulty Adjustment Buttons */
@@ -212,6 +214,9 @@
     <script src="{% static 'js/modules/timer.js' %}?v={{ current_timestamp }}"></script>
     <script src="{% static 'js/modules/answer-manager.js' %}?v={{ current_timestamp }}"></script>
     <script src="{% static 'js/modules/navigation.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Mobile Handler for touch events and responsive behavior -->
+    <script src="{% static 'js/modules/mobile-handler.js' %}?v={{ current_timestamp }}"></script>
     
     <script>
     // Initialize modules after DOM is ready

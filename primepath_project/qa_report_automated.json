@@ -1,0 +1,484 @@
+{
+  "timestamp": "2025-08-11T17:28:47.806767",
+  "phase_results": {
+    "phase1": {
+      "model_counts": {
+        "Exams": 3,
+        "Questions": 60,
+        "StudentSessions": 12,
+        "AudioFiles": 6,
+        "StudentAnswers": 190,
+        "DifficultyAdjustments": 2,
+        "Schools": 20,
+        "Teachers": 0,
+        "Programs": 4,
+        "PlacementRules": 6,
+        "ExamLevelMappings": 3
+      },
+      "relationships": {
+        "exam_sample": {
+          "name": "[PlacementTest] PRIME CORE PHONICS - Level 3_v_a",
+          "questions": 30,
+          "audio_files": 3,
+          "sessions": 2
+        }
+      },
+      "integrity_checks": []
+    },
+    "phase2": {
+      "timer_fix": {},
+      "pdf_rotation": {
+        "field_exists": true,
+        "value": 270
+      },
+      "answer_submission": {
+        "api_works": false
+      },
+      "short_answer": {
+        "exists": true
+      }
+    },
+    "phase3": {
+      "endpoints": [
+        {
+          "url": "/",
+          "name": "Homepage",
+          "status_code": 200,
+          "success": true
+        },
+        {
+          "url": "/placement/",
+          "name": "Placement Test Main",
+          "status_code": 404,
+          "success": false
+        },
+        {
+          "url": "/placement/start-test/",
+          "name": "Start Test",
+          "status_code": 404,
+          "success": false
+        },
+        {
+          "url": "/placement/create-exam/",
+          "name": "Create Exam",
+          "status_code": 404,
+          "success": false
+        },
+        {
+          "url": "/core/",
+          "name": "Core Dashboard",
+          "status_code": 404,
+          "success": false
+        },
+        {
+          "url": "/admin/",
+          "name": "Admin Interface",
+          "status_code": 200,
+          "success": true
+        },
+        {
+          "url": "/api/",
+          "name": "API Root",
+          "status_code": 200,
+          "success": true
+        }
+      ],
+      "api_endpoints": [
+        {
+          "url": "/api/placement/exams/",
+          "name": "Exams API",
+          "status_code": 200,
+          "success": true
+        },
+        {
+          "url": "/api/placement/sessions/",
+          "name": "Sessions API",
+          "status_code": 200,
+          "success": true
+        },
+        {
+          "url": "/api/core/schools/",
+          "name": "Schools API",
+          "status_code": 404,
+          "success": false
+        },
+        {
+          "url": "/api/core/programs/",
+          "name": "Programs API",
+          "status_code": 404,
+          "success": false
+        }
+      ]
+    },
+    "phase4": {
+      "exam_creation": {},
+      "student_test": {},
+      "difficulty_adjustment": {
+        "exists": true,
+        "internal_field": false
+      },
+      "placement_rules": {
+        "count": 6
+      }
+    },
+    "phase5": {
+      "query_counts": {
+        "exam_list": 3
+      },
+      "response_times": [
+        {
+          "operation": "exam_list",
+          "time": 0.0019080638885498047,
+          "queries": 3
+        }
+      ],
+      "database_stats": {
+        "tables": 24,
+        "indexes": 60
+      }
+    },
+    "phase6": {
+      "csrf_protection": false,
+      "auth_required": [
+        {
+          "url": "/placement/create-exam/",
+          "protected": false
+        },
+        {
+          "url": "/core/dashboard/",
+          "protected": false
+        },
+        {
+          "url": "/api/placement/exams/",
+          "protected": false
+        }
+      ],
+      "data_validation": []
+    }
+  },
+  "critical_issues": [],
+  "warnings": [
+    {
+      "test": "Timer Grace Period",
+      "status": "FAIL",
+      "details": "Cannot resolve keyword 'time_limit' into field. Choices are: audio_files, created_at, created_by, created_by_id, curriculum_level, curriculum_level_id, default_options_count, id, is_active, level_mappings, name, passing_score, pdf_file, pdf_rotation, questions, sessions, timer_minutes, total_questions, updated_at",
+      "timestamp": "2025-08-11T17:28:47.814012"
+    },
+    {
+      "test": "Answer Submission API",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.885717"
+    },
+    {
+      "test": "URL Placement Test Main",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.905130"
+    },
+    {
+      "test": "URL Start Test",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.907214"
+    },
+    {
+      "test": "URL Create Exam",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.909174"
+    },
+    {
+      "test": "URL Core Dashboard",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.911280"
+    },
+    {
+      "test": "API Schools API",
+      "status": "WARNING",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.941617"
+    },
+    {
+      "test": "API Programs API",
+      "status": "WARNING",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.944412"
+    },
+    {
+      "test": "Exam Creation",
+      "status": "FAIL",
+      "details": "Teacher() got unexpected keyword arguments: 'user', 'school', 'full_name'",
+      "timestamp": "2025-08-11T17:28:48.096474"
+    },
+    {
+      "test": "Internal Difficulty Field",
+      "status": "INFO",
+      "details": "Using standard field name",
+      "timestamp": "2025-08-11T17:28:48.097240"
+    },
+    {
+      "test": "CSRF Protection",
+      "status": "WARNING",
+      "details": "Unexpected status: 404",
+      "timestamp": "2025-08-11T17:28:48.101698"
+    },
+    {
+      "test": "Auth Required /placement/create-exam/",
+      "status": "WARNING",
+      "details": "Not protected",
+      "timestamp": "2025-08-11T17:28:48.105428"
+    },
+    {
+      "test": "Auth Required /core/dashboard/",
+      "status": "WARNING",
+      "details": "Not protected",
+      "timestamp": "2025-08-11T17:28:48.107229"
+    },
+    {
+      "test": "Auth Required /api/placement/exams/",
+      "status": "WARNING",
+      "details": "Not protected",
+      "timestamp": "2025-08-11T17:28:48.109410"
+    }
+  ],
+  "success_count": 25,
+  "failure_count": 14,
+  "test_details": [
+    {
+      "test": "Model Exams",
+      "status": "PASS",
+      "details": "Count: 3",
+      "timestamp": "2025-08-11T17:28:47.811775"
+    },
+    {
+      "test": "Model Questions",
+      "status": "PASS",
+      "details": "Count: 60",
+      "timestamp": "2025-08-11T17:28:47.811779"
+    },
+    {
+      "test": "Model StudentSessions",
+      "status": "PASS",
+      "details": "Count: 12",
+      "timestamp": "2025-08-11T17:28:47.811781"
+    },
+    {
+      "test": "Model AudioFiles",
+      "status": "PASS",
+      "details": "Count: 6",
+      "timestamp": "2025-08-11T17:28:47.811782"
+    },
+    {
+      "test": "Model StudentAnswers",
+      "status": "PASS",
+      "details": "Count: 190",
+      "timestamp": "2025-08-11T17:28:47.811783"
+    },
+    {
+      "test": "Model DifficultyAdjustments",
+      "status": "PASS",
+      "details": "Count: 2",
+      "timestamp": "2025-08-11T17:28:47.811784"
+    },
+    {
+      "test": "Model Schools",
+      "status": "PASS",
+      "details": "Count: 20",
+      "timestamp": "2025-08-11T17:28:47.811785"
+    },
+    {
+      "test": "Model Teachers",
+      "status": "PASS",
+      "details": "Count: 0",
+      "timestamp": "2025-08-11T17:28:47.811786"
+    },
+    {
+      "test": "Model Programs",
+      "status": "PASS",
+      "details": "Count: 4",
+      "timestamp": "2025-08-11T17:28:47.811787"
+    },
+    {
+      "test": "Model PlacementRules",
+      "status": "PASS",
+      "details": "Count: 6",
+      "timestamp": "2025-08-11T17:28:47.811788"
+    },
+    {
+      "test": "Model ExamLevelMappings",
+      "status": "PASS",
+      "details": "Count: 3",
+      "timestamp": "2025-08-11T17:28:47.811789"
+    },
+    {
+      "test": "Exam Relationships",
+      "status": "PASS",
+      "details": "Exam '[PlacementTest] PRIME CORE PHONICS - Level 3_v_a' has 30 questions",
+      "timestamp": "2025-08-11T17:28:47.813552"
+    },
+    {
+      "test": "Question Integrity",
+      "status": "PASS",
+      "details": "No orphaned questions",
+      "timestamp": "2025-08-11T17:28:47.813980"
+    },
+    {
+      "test": "Answer Integrity",
+      "status": "PASS",
+      "details": "No orphaned answers",
+      "timestamp": "2025-08-11T17:28:47.813983"
+    },
+    {
+      "test": "Timer Grace Period",
+      "status": "FAIL",
+      "details": "Cannot resolve keyword 'time_limit' into field. Choices are: audio_files, created_at, created_by, created_by_id, curriculum_level, curriculum_level_id, default_options_count, id, is_active, level_mappings, name, passing_score, pdf_file, pdf_rotation, questions, sessions, timer_minutes, total_questions, updated_at",
+      "timestamp": "2025-08-11T17:28:47.814012"
+    },
+    {
+      "test": "PDF Rotation Field",
+      "status": "PASS",
+      "details": "Rotation: 270 degrees",
+      "timestamp": "2025-08-11T17:28:47.814255"
+    },
+    {
+      "test": "Answer Submission API",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.885717"
+    },
+    {
+      "test": "Short Answer Questions",
+      "status": "PASS",
+      "details": "Found 10 SHORT questions",
+      "timestamp": "2025-08-11T17:28:47.886615"
+    },
+    {
+      "test": "URL Homepage",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2025-08-11T17:28:47.903137"
+    },
+    {
+      "test": "URL Placement Test Main",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.905130"
+    },
+    {
+      "test": "URL Start Test",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.907214"
+    },
+    {
+      "test": "URL Create Exam",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.909174"
+    },
+    {
+      "test": "URL Core Dashboard",
+      "status": "FAIL",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.911280"
+    },
+    {
+      "test": "URL Admin Interface",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2025-08-11T17:28:47.925273"
+    },
+    {
+      "test": "URL API Root",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2025-08-11T17:28:47.927679"
+    },
+    {
+      "test": "API Exams API",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2025-08-11T17:28:47.930726"
+    },
+    {
+      "test": "API Sessions API",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2025-08-11T17:28:47.938666"
+    },
+    {
+      "test": "API Schools API",
+      "status": "WARNING",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.941617"
+    },
+    {
+      "test": "API Programs API",
+      "status": "WARNING",
+      "details": "Status: 404",
+      "timestamp": "2025-08-11T17:28:47.944412"
+    },
+    {
+      "test": "Exam Creation",
+      "status": "FAIL",
+      "details": "Teacher() got unexpected keyword arguments: 'user', 'school', 'full_name'",
+      "timestamp": "2025-08-11T17:28:48.096474"
+    },
+    {
+      "test": "Difficulty Adjustments",
+      "status": "PASS",
+      "details": "Found 2 adjustments",
+      "timestamp": "2025-08-11T17:28:48.096737"
+    },
+    {
+      "test": "Internal Difficulty Field",
+      "status": "INFO",
+      "details": "Using standard field name",
+      "timestamp": "2025-08-11T17:28:48.097240"
+    },
+    {
+      "test": "Placement Rules",
+      "status": "PASS",
+      "details": "Found 6 rules",
+      "timestamp": "2025-08-11T17:28:48.097525"
+    },
+    {
+      "test": "Exam List Optimization",
+      "status": "PASS",
+      "details": "3 queries in 0.00s",
+      "timestamp": "2025-08-11T17:28:48.099580"
+    },
+    {
+      "test": "Database Structure",
+      "status": "PASS",
+      "details": "24 tables, 60 indexes",
+      "timestamp": "2025-08-11T17:28:48.099639"
+    },
+    {
+      "test": "CSRF Protection",
+      "status": "WARNING",
+      "details": "Unexpected status: 404",
+      "timestamp": "2025-08-11T17:28:48.101698"
+    },
+    {
+      "test": "Auth Required /placement/create-exam/",
+      "status": "WARNING",
+      "details": "Not protected",
+      "timestamp": "2025-08-11T17:28:48.105428"
+    },
+    {
+      "test": "Auth Required /core/dashboard/",
+      "status": "WARNING",
+      "details": "Not protected",
+      "timestamp": "2025-08-11T17:28:48.107229"
+    },
+    {
+      "test": "Auth Required /api/placement/exams/",
+      "status": "WARNING",
+      "details": "Not protected",
+      "timestamp": "2025-08-11T17:28:48.109410"
+    }
+  ]
+}
