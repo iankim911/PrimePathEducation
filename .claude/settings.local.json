@@ -211,7 +211,15 @@
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_critical_features.py)",
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_comprehensive_post_fix_qa.py)",
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_timer_expiry_grace_period_fix.py)",
-      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python:*)"
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python:*)",
+      "Bash(sudo cp:*)",
+      "mcp__chrome-mcp__get_windows_and_tabs",
+      "mcp__chrome-mcp__chrome_navigate",
+      "Bash(source:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(unzip:*)",
+      "Bash(~/.npm-global/bin/mcp-chrome-bridge:*)"
     ],
     "deny": []
   }

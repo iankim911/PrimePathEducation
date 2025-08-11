@@ -1,0 +1,26 @@
+{
+  "workbench.colorCustomizations": {
+    // Terminal colors
+    "terminal.foreground": "#00FF41",           // Matrix green for text
+    "terminal.background": "#0A0E27",           // Dark blue background
+    "terminal.ansiBlack": "#1E1E1E",
+    "terminal.ansiRed": "#FF6B6B",             // Soft red
+    "terminal.ansiGreen": "#4ECDC4",           // Teal green
+    "terminal.ansiYellow": "#FFE66D",          // Soft yellow
+    "terminal.ansiBlue": "#4A90E2",            // Sky blue
+    "terminal.ansiMagenta": "#FF6AC1",         // Pink
+    "terminal.ansiCyan": "#57C7FF",            // Bright cyan
+    "terminal.ansiWhite": "#F7F7F7",
+    "terminal.ansiBrightBlack": "#686868",
+    "terminal.ansiBrightRed": "#FF9999",
+    "terminal.ansiBrightGreen": "#6BFFB8",
+    "terminal.ansiBrightYellow": "#FFFFA5",
+    "terminal.ansiBrightBlue": "#6EAFFF",
+    "terminal.ansiBrightMagenta": "#FF92DF",
+    "terminal.ansiBrightCyan": "#9AEDFE",
+    "terminal.ansiBrightWhite": "#FFFFFF",
+    "terminalCursor.foreground": "#FFE66D",    // Yellow cursor
+    "terminalCursor.background": "#000000",
+    "terminal.selectionBackground": "#264F78"
+  }
+}

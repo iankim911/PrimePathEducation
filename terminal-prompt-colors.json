@@ -1,0 +1,15 @@
+// Add this to your VS Code settings.json
+{
+  "workbench.colorCustomizations": {
+    // Makes your command input stand out
+    "terminal.foreground": "#FFFFFF",           // White for general text
+    "terminalCursor.foreground": "#00FF00",     // Green cursor where you type
+    "terminal.selectionBackground": "#264F78",   // Selection color
+    
+    // ANSI colors - your prompt likely uses one of these
+    "terminal.ansiGreen": "#00FF00",            // Bright green - often used for prompts
+    "terminal.ansiCyan": "#00FFFF",             // Cyan - another common prompt color
+    "terminal.ansiBrightGreen": "#50FA7B",      // Bright green variant
+    "terminal.ansiBrightCyan": "#8BE9FD"        // Bright cyan variant
+  }
+}

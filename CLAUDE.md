@@ -1,5 +1,28 @@
 # PrimePath Project - Critical Knowledge Base
 
+## 🔧 Chrome MCP Setup - Quick Start
+
+### To Use Chrome MCP Tools in Claude:
+1. **Open Chrome first**
+2. Go to `chrome://extensions/`
+3. Click "service worker" link for chrome-mcp-server extension
+4. **Keep the DevTools window open** (can minimize but don't close!)
+5. Chrome MCP tools will work in Claude
+
+**Note**: Service worker goes inactive after 30 seconds without DevTools open. This is a Chrome limitation.
+
+### Troubleshooting Chrome MCP:
+```bash
+# Check connection status
+claude mcp list
+
+# If not working, re-register
+mcp-chrome-bridge register --force
+mcp-chrome-bridge fix-permissions
+```
+
+**Full Setup Guide**: See `chrome-mcp-troubleshooting-log.md`
+
 ## 🚨 MUST READ - Server Startup Protocol
 
 ### How to Start Server (ALWAYS USE THIS)
@@ -198,6 +221,13 @@ cd primepath_project && ../venv/Scripts/python.exe manage.py runserver 127.0.0.1
 - Add defensive programming with try-catch and null checks
 - Fixed initialization order (modules available before navigation init)
 **Status**: ✅ Resolved
+
+### 4. Chrome MCP Server Setup
+**Date**: August 11, 2025
+**File**: `chrome-mcp-troubleshooting-log.md`
+**Issue**: Chrome MCP tools not connecting despite installation
+**Solution**: Fixed native messaging host registration and permissions
+**Status**: ✅ Resolved and documented
 
 ## 🏗️ Current Architecture
 
