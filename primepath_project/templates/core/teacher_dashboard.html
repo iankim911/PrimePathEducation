@@ -23,14 +23,14 @@
         <div class="flow-step">
             <div class="flow-number">2</div>
             <div>
-                <strong>System uses Placement Rules:</strong> Determines curriculum level based on student profile (e.g., Primary 3 + Top 10% → PRIME CORE SIGMA - Level 1)
+                <strong>System uses Student Levels:</strong> Determines curriculum level based on student profile (e.g., Primary 3 + Top 10% → PRIME CORE SIGMA - Level 1)
             </div>
         </div>
         <div class="flow-arrow">↓</div>
         <div class="flow-step">
             <div class="flow-number">3</div>
             <div>
-                <strong>System uses Exam-to-Level Mapping:</strong> Randomly selects one exam from those mapped to the curriculum level (e.g., if Level 1 has versions a, b, and c, student gets one randomly)
+                <strong>System uses Level Exams:</strong> Randomly selects one exam from those mapped to the curriculum level (e.g., if Level 1 has versions a, b, and c, student gets one randomly)
             </div>
         </div>
         <div class="flow-arrow">↓</div>
@@ -46,16 +46,16 @@
     <ul>
         <li><strong>Upload Exam:</strong> Upload PDF exams with naming convention [PlacementTest] followed by level and version (e.g., [PlacementTest] PRIME CORE PHONICS - Level 1_v_a)</li>
         <li><strong>Manage Exams:</strong> View, preview, and manage all uploaded exams and their audio files</li>
-        <li><strong>Placement Rules:</strong> Configure which curriculum level students are assigned to based on grade + English class rank</li>
-        <li><strong>Exam-to-Level Mapping:</strong> Map up to 5 exam versions to each curriculum level for random selection</li>
+        <li><strong>Student Levels:</strong> Configure which curriculum level students are assigned to based on grade + English class rank</li>
+        <li><strong>Level Exams:</strong> Map up to 5 exam versions to each curriculum level for random selection</li>
         <li><strong>Student Sessions:</strong> Monitor and track all student test sessions and results</li>
     </ul>
     
     <h3>Quick Setup Steps</h3>
     <ol>
         <li>Upload exam PDFs using the <strong>Upload Exam</strong> tab (system will auto-name with version)</li>
-        <li>Configure <strong>Placement Rules</strong> to map student profiles to curriculum levels</li>
-        <li>Set up <strong>Exam-to-Level Mapping</strong> to assign exam versions to each level</li>
+        <li>Configure <strong>Student Levels</strong> to map student profiles to curriculum levels</li>
+        <li>Set up <strong>Level Exams</strong> to assign exam versions to each level</li>
         <li>Share the student portal link for students to begin their placement tests</li>
     </ol>
 </div>
@@ -239,7 +239,7 @@
 <div class="action-buttons">
     <a href="{% url 'placement_test:exam_list' %}" class="btn btn-primary">Manage Exams</a>
     <a href="{% url 'placement_test:create_exam' %}" class="btn btn-primary">Upload New Exam</a>
-    <a href="{% url 'core:placement_rules' %}" class="btn btn-secondary">Placement Rules</a>
+    <a href="{% url 'core:placement_rules' %}" class="btn btn-secondary">Student Levels</a>
     <a href="{% url 'core:curriculum_levels' %}" class="btn btn-secondary">View Curriculum</a>
     <a href="/admin/" class="btn btn-secondary">Admin Panel</a>
 </div>

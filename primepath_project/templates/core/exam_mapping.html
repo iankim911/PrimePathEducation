@@ -2,7 +2,13 @@
 {% load static %}
 {% load grade_tags %}
 
-{% block title %}Exam-to-Level Mapping - Curriculum to Exam Configuration{% endblock %}
+{% block title %}Level Exams - Curriculum to Exam Configuration{% endblock %}
+
+{% block extra_head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
 
 {% block content %}
 {% csrf_token %}
@@ -495,13 +501,14 @@
     </div>
     
     <div class="mapping-header">
-        <h1>Exam-to-Level Mapping Configuration</h1>
+        <h1>Level Exams Configuration</h1>
         <p>Map curriculum levels to exam versions. Each level can have up to 5 different exam versions.</p>
+        <!-- Template updated: {% now "Y-m-d H:i:s" %} -->
     </div>
     
     <div class="info-box">
-        <h4>What is Exam-to-Level Mapping?</h4>
-        <p>This is the second step in the placement process. After a student is assigned to a curriculum level (based on Placement Rules), the system needs to know which exam papers are available for that level.</p>
+        <h4>What are Level Exams?</h4>
+        <p>This is the second step in the placement process. After a student is assigned to a curriculum level (based on Student Levels configuration), the system needs to know which exam papers are available for that level.</p>
         
         <p><strong>How it works:</strong></p>
         <ul style="margin: 0; padding-left: 20px;">
@@ -533,9 +540,15 @@
             </thead>
             <tbody>
                 {% for level in core_levels %}
+                {% comment %}
+                EMERGENCY FIX: Skip any test subprograms that somehow made it through
+                {% endcomment %}
+                {% if "INACTIVE" in level.subprogram.name or "Test" in level.subprogram.name %}
+                    <!-- SKIPPED TEST SUBPROGRAM: {{ level.subprogram.name }} -->
+                {% else %}
                 <tr>
                     <td>
-                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="subprogram-name">{{ level.display_data.subprogram_display|default:level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
@@ -598,6 +611,7 @@
                         </div>
                     </td>
                 </tr>
+                {% endif %}
                 {% empty %}
                 <tr>
                     <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME CORE</td>
@@ -623,9 +637,12 @@
             </thead>
             <tbody>
                 {% for level in ascent_levels %}
+                {% if "INACTIVE" in level.subprogram.name or "Test" in level.subprogram.name %}
+                    <!-- SKIPPED TEST SUBPROGRAM: {{ level.subprogram.name }} -->
+                {% else %}
                 <tr>
                     <td>
-                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="subprogram-name">{{ level.display_data.subprogram_display|default:level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
@@ -688,6 +705,7 @@
                         </div>
                     </td>
                 </tr>
+                {% endif %}
                 {% empty %}
                 <tr>
                     <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME ASCENT</td>
@@ -713,9 +731,12 @@
             </thead>
             <tbody>
                 {% for level in edge_levels %}
+                {% if "INACTIVE" in level.subprogram.name or "Test" in level.subprogram.name %}
+                    <!-- SKIPPED TEST SUBPROGRAM: {{ level.subprogram.name }} -->
+                {% else %}
                 <tr>
                     <td>
-                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="subprogram-name">{{ level.display_data.subprogram_display|default:level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
@@ -778,6 +799,7 @@
                         </div>
                     </td>
                 </tr>
+                {% endif %}
                 {% empty %}
                 <tr>
                     <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME EDGE</td>
@@ -803,9 +825,12 @@
             </thead>
             <tbody>
                 {% for level in pinnacle_levels %}
+                {% if "INACTIVE" in level.subprogram.name or "Test" in level.subprogram.name %}
+                    <!-- SKIPPED TEST SUBPROGRAM: {{ level.subprogram.name }} -->
+                {% else %}
                 <tr>
                     <td>
-                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="subprogram-name">{{ level.display_data.subprogram_display|default:level.subprogram.name }}</div>
                         <div class="level-name">Level {{ level.level_number }}</div>
                     </td>
                     <td>
@@ -868,6 +893,7 @@
                         </div>
                     </td>
                 </tr>
+                {% endif %}
                 {% empty %}
                 <tr>
                     <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME PINNACLE</td>
@@ -892,6 +918,83 @@
 <div id="saveMessage" class="save-message" style="display: none;"></div>
 
 <script>
+// ========================================
+// CURRICULUM DISPLAY DEBUGGING
+// ========================================
+console.group('📚 Curriculum Structure Display Check');
+
+// Log CORE levels
+console.group('PRIME CORE Levels (Expected: 4 subprograms × 3 levels = 12)');
+{% for level in core_levels %}
+console.log('Level {{ level.id }}:', {
+    raw_subprogram: '{{ level.subprogram.name }}',
+    display_subprogram: '{{ level.display_data.subprogram_display|default:"NOT SET" }}',
+    full_display: '{{ level.display_data.full_display|default:"NOT SET" }}',
+    level_number: {{ level.level_number }}
+});
+{% endfor %}
+console.log('Total CORE levels:', {{ core_levels|length }});
+console.groupEnd();
+
+// Log ASCENT levels
+console.group('PRIME ASCENT Levels (Expected: 4 subprograms × 3 levels = 12)');
+{% for level in ascent_levels %}
+console.log('Level {{ level.id }}:', {
+    raw_subprogram: '{{ level.subprogram.name }}',
+    display_subprogram: '{{ level.display_data.subprogram_display|default:"NOT SET" }}',
+    full_display: '{{ level.display_data.full_display|default:"NOT SET" }}',
+    level_number: {{ level.level_number }}
+});
+{% endfor %}
+console.log('Total ASCENT levels:', {{ ascent_levels|length }});
+console.groupEnd();
+
+// Log EDGE levels
+console.group('PRIME EDGE Levels (Expected: 4 subprograms × 3 levels = 12)');
+{% for level in edge_levels %}
+console.log('Level {{ level.id }}:', {
+    raw_subprogram: '{{ level.subprogram.name }}',
+    display_subprogram: '{{ level.display_data.subprogram_display|default:"NOT SET" }}',
+    full_display: '{{ level.display_data.full_display|default:"NOT SET" }}',
+    level_number: {{ level.level_number }}
+});
+{% endfor %}
+console.log('Total EDGE levels:', {{ edge_levels|length }});
+console.groupEnd();
+
+// Log PINNACLE levels
+console.group('PRIME PINNACLE Levels (Expected: 4 subprograms × 2 levels = 8)');
+{% for level in pinnacle_levels %}
+console.log('Level {{ level.id }}:', {
+    raw_subprogram: '{{ level.subprogram.name }}',
+    display_subprogram: '{{ level.display_data.subprogram_display|default:"NOT SET" }}',
+    full_display: '{{ level.display_data.full_display|default:"NOT SET" }}',
+    level_number: {{ level.level_number }},
+    WARNING: {{ level.level_number }} > 2 ? '⚠️ Should only have levels 1-2!' : 'OK'
+});
+{% endfor %}
+console.log('Total PINNACLE levels:', {{ pinnacle_levels|length }});
+console.groupEnd();
+
+// Summary with validation
+const expectedTotal = 12 + 12 + 12 + 8; // 44 total levels
+const actualTotal = {{ core_levels|length }} + {{ ascent_levels|length }} + {{ edge_levels|length }} + {{ pinnacle_levels|length }};
+
+console.group('📊 Curriculum Structure Summary');
+console.table({
+    'PRIME CORE': { Expected: 12, Actual: {{ core_levels|length }}, Status: {{ core_levels|length }} === 12 ? '✅' : '❌' },
+    'PRIME ASCENT': { Expected: 12, Actual: {{ ascent_levels|length }}, Status: {{ ascent_levels|length }} === 12 ? '✅' : '❌' },
+    'PRIME EDGE': { Expected: 12, Actual: {{ edge_levels|length }}, Status: {{ edge_levels|length }} === 12 ? '✅' : '❌' },
+    'PRIME PINNACLE': { Expected: 8, Actual: {{ pinnacle_levels|length }}, Status: {{ pinnacle_levels|length }} === 8 ? '✅' : '❌' },
+    'TOTAL': { Expected: expectedTotal, Actual: actualTotal, Status: actualTotal === expectedTotal ? '✅' : '❌' }
+});
+console.groupEnd();
+
+console.groupEnd(); // End main curriculum group
+
+// ========================================
+// ORIGINAL EXAM MAPPING CODE
+// ========================================
 (function() {
     'use strict';
     
@@ -951,6 +1054,7 @@ const availableExams = {};
 
 // Initialize available exams from server data
 {% for level in core_levels %}
+{% if "[INACTIVE]" not in level.subprogram.name and "Test" not in level.subprogram.name and "test" not in level.subprogram.name %}
 {% if level.id %}
 availableExams['{{ level.id }}'] = [
     {% for exam in level.available_exams %}{% if exam.id %}
@@ -962,6 +1066,7 @@ availableExams['{{ level.id }}'] = [
     },
     {% endif %}{% endfor %}
 ].filter(x => x); // Remove any undefined entries
+{% endif %}
 {% endif %}
 {% endfor %}
 
@@ -1010,10 +1115,12 @@ availableExams['{{ level.id }}'] = [
 {% endif %}
 {% endfor %}
 
-// Debug: Log available exams
-console.log('Available exams loaded:', availableExams);
+// Exams loaded and ready for use
 
-    window.ExamMapping.addExamSlot = function(levelId, program) {
+// Initialize exam mapping functionality
+window.ExamMapping = window.ExamMapping || {};
+
+window.ExamMapping.addExamSlot = function(levelId, program) {
     const container = document.getElementById(`mapping-${levelId}`);
     const existingRows = container.querySelectorAll('.exam-row').length;
     
@@ -1297,6 +1404,9 @@ console.log('Available exams loaded:', availableExams);
     }
 
     window.ExamMapping.saveAllMappingsWithFeedback = function() {
+        console.group('[LEVEL_EXAMS] Saving Level Exams Configuration');
+        console.log('📝 Initiating save for Level Exams mappings');
+        
         const globalBtn = document.getElementById('globalSaveBtn');
         const topBtn = document.querySelector('.save-button-top');
         const btnText = document.getElementById('saveButtonText');
@@ -1371,6 +1481,9 @@ console.log('Available exams loaded:', availableExams);
             btnText.textContent = 'Save All Mappings';
             
             if (data.success) {
+                console.log('✅ [LEVEL_EXAMS] Successfully saved all Level Exams mappings');
+                console.log('Mappings saved:', mappings.length, 'mappings');
+                console.groupEnd();
                 window.ExamMapping.showMessage('All exam mappings saved successfully!', 'success');
                 
                 // Flash the button green
@@ -1379,11 +1492,14 @@ console.log('Available exams loaded:', availableExams);
                     globalBtn.style.backgroundColor = '';
                 }, 1000);
             } else {
+                console.error('❌ [LEVEL_EXAMS] Error saving Level Exams mappings:', data.error);
+                console.groupEnd();
                 window.ExamMapping.showMessage('Error saving exam mappings: ' + data.error, 'error');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('❌ [LEVEL_EXAMS] Network error saving Level Exams:', error);
+            console.groupEnd();
             
             // Re-enable buttons
             globalBtn.disabled = false;
@@ -1400,6 +1516,14 @@ console.log('Available exams loaded:', availableExams);
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    // Comprehensive console logging for Level Exams page
+    console.group('[LEVEL_EXAMS] Page Initialization');
+    console.log('📚 Level Exams Configuration page loaded');
+    console.log('🔄 New naming: "Level Exams" (previously "Exam-to-Level Mapping")');
+    console.log('Page URL:', window.location.pathname);
+    console.log('User:', '{{ user.username }}');
+    console.groupEnd();
+    
     // Remove automatic login modal display - make it optional
     // document.getElementById('loginModal').style.display = 'block';
     
@@ -1410,6 +1534,7 @@ document.addEventListener('DOMContentLoaded', function() {
     isAuthenticated = true;
     
     // Update stats based on existing mappings
+    console.log('[LEVEL_EXAMS] Updating statistics for existing mappings...');
     window.ExamMapping.updateStats();
     
     // Update button states for existing mappings

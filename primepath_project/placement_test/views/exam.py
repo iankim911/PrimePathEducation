@@ -31,8 +31,62 @@ def exam_list(request):
     }
     logger.info(f"[EXAM_LIST] {json.dumps(console_log)}")
     
-    exams = Exam.objects.select_related('curriculum_level__subprogram__program').all()
-    return render(request, 'placement_test/exam_list.html', {'exams': exams})
+    # Fetch exams with related data and prefetch questions for answer mapping check
+    exams = Exam.objects.select_related(
+        'curriculum_level__subprogram__program'
+    ).prefetch_related(
+        'questions',  # Prefetch questions to avoid N+1 queries
+        'audio_files'  # Also prefetch audio files for display
+    ).all()
+    
+    # Add answer mapping status to each exam
+    exams_with_status = []
+    for exam in exams:
+        # Get answer mapping status
+        mapping_status = exam.get_answer_mapping_status()
+        
+        # Log the mapping status for each exam
+        console_log = {
+            "view": "exam_list",
+            "action": "answer_mapping_check",
+            "exam_id": str(exam.id),
+            "exam_name": exam.name,
+            "total_questions": mapping_status['total_questions'],
+            "mapped_questions": mapping_status['mapped_questions'],
+            "unmapped_questions": mapping_status['unmapped_questions'],
+            "percentage_complete": mapping_status['percentage_complete'],
+            "status": mapping_status['status_label']
+        }
+        logger.info(f"[EXAM_LIST_MAPPING] {json.dumps(console_log)}")
+        
+        # Add the status to the exam object for template access
+        exam.answer_mapping_status = mapping_status
+        exams_with_status.append(exam)
+    
+    # Log summary of answer mapping statuses
+    complete_count = sum(1 for e in exams_with_status if e.answer_mapping_status['is_complete'])
+    partial_count = sum(1 for e in exams_with_status if e.answer_mapping_status['status_label'] == 'Partial')
+    not_started_count = sum(1 for e in exams_with_status if e.answer_mapping_status['status_label'] == 'Not Started')
+    
+    console_log = {
+        "view": "exam_list",
+        "action": "answer_mapping_summary",
+        "total_exams": len(exams_with_status),
+        "complete": complete_count,
+        "partial": partial_count,
+        "not_started": not_started_count
+    }
+    logger.info(f"[EXAM_LIST_SUMMARY] {json.dumps(console_log)}")
+    
+    return render(request, 'placement_test/exam_list.html', {
+        'exams': exams_with_status,
+        'mapping_summary': {
+            'total': len(exams_with_status),
+            'complete': complete_count,
+            'partial': partial_count,
+            'not_started': not_started_count
+        }
+    })
 
 
 @handle_errors(ajax_only=True)
@@ -71,11 +125,49 @@ def check_exam_version(request):
 @handle_errors(template_name='placement_test/create_exam.html')
 def create_exam(request):
     """Create a new exam (requires authentication)"""
+    # Get Teacher profile for the authenticated user
+    teacher_profile = None
+    if request.user.is_authenticated:
+        try:
+            teacher_profile = request.user.teacher_profile
+            console_log = {
+                "view": "create_exam",
+                "action": "teacher_profile_found",
+                "user": str(request.user),
+                "teacher_id": teacher_profile.id,
+                "teacher_name": teacher_profile.name,
+                "is_head_teacher": teacher_profile.is_head_teacher
+            }
+            logger.info(f"[CREATE_EXAM_TEACHER] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_TEACHER] {json.dumps(console_log)}")
+        except AttributeError as e:
+            # Handle case where teacher_profile doesn't exist
+            # Create a Teacher profile on-the-fly for authenticated users
+            from core.models import Teacher
+            teacher_profile = Teacher.objects.create(
+                user=request.user,
+                name=request.user.get_full_name() or request.user.username,
+                email=request.user.email or f"{request.user.username}@example.com",
+                is_head_teacher=request.user.is_superuser
+            )
+            console_log = {
+                "view": "create_exam",
+                "action": "teacher_profile_created",
+                "user": str(request.user),
+                "teacher_id": teacher_profile.id,
+                "teacher_name": teacher_profile.name,
+                "reason": "Profile did not exist, created automatically"
+            }
+            logger.warning(f"[CREATE_EXAM_TEACHER_CREATED] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_TEACHER_CREATED] {json.dumps(console_log)}")
+    
     # Log authentication check
     console_log = {
         "view": "create_exam",
         "user": str(request.user),
         "authenticated": request.user.is_authenticated,
+        "has_teacher_profile": teacher_profile is not None,
+        "teacher_id": teacher_profile.id if teacher_profile else None,
         "method": request.method
     }
     logger.info(f"[CREATE_EXAM] {json.dumps(console_log)}")
@@ -92,6 +184,18 @@ def create_exam(request):
             if not total_questions:
                 raise ValidationException("Total number of questions is required", code="MISSING_QUESTIONS")
             
+            # Log exam creation attempt
+            console_log = {
+                "view": "create_exam",
+                "action": "exam_creation_attempt",
+                "exam_name": exam_name,
+                "total_questions": total_questions,
+                "created_by_teacher_id": teacher_profile.id if teacher_profile else None,
+                "created_by_teacher_name": teacher_profile.name if teacher_profile else None
+            }
+            logger.info(f"[CREATE_EXAM_ATTEMPT] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_ATTEMPT] {json.dumps(console_log)}")
+            
             # Prepare exam data with validation
             exam_data = {
                 'name': exam_name,
@@ -101,7 +205,7 @@ def create_exam(request):
                 'default_options_count': int(request.POST.get('default_options_count', 5)),
                 'passing_score': 0,
                 'pdf_rotation': int(request.POST.get('pdf_rotation', 0)),  # Add rotation from form
-                'created_by': request.user if request.user.is_authenticated else None,  # Track who created the exam
+                'created_by': teacher_profile,  # Use Teacher instance, not User instance
                 'is_active': True
             }
             
@@ -118,19 +222,120 @@ def create_exam(request):
                 audio_names=request.POST.getlist('audio_names[]')
             )
             
+            # Log successful exam creation
+            console_log = {
+                "view": "create_exam",
+                "action": "exam_created_successfully",
+                "exam_id": str(exam.id),
+                "exam_name": exam.name,
+                "created_by_teacher_id": exam.created_by.id if exam.created_by else None,
+                "created_by_teacher_name": exam.created_by.name if exam.created_by else None,
+                "total_questions": exam.total_questions,
+                "pdf_file": exam.pdf_file.name if exam.pdf_file else None
+            }
+            logger.info(f"[CREATE_EXAM_SUCCESS] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_SUCCESS] {json.dumps(console_log)}")
+            
             messages.success(request, f'Exam "{exam.name}" uploaded successfully!')
             return redirect('placement_test:create_exam')
             
         except ValueError as e:
+            console_log = {
+                "view": "create_exam",
+                "action": "value_error",
+                "error": str(e),
+                "user": str(request.user)
+            }
+            logger.error(f"[CREATE_EXAM_ERROR] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_ERROR] {json.dumps(console_log)}")
             messages.error(request, f"Invalid input: {str(e)}")
             # Fall through to render the form again with error message
         except ValidationException as e:
-            messages.error(request, e.message)
+            console_log = {
+                "view": "create_exam",
+                "action": "validation_error",
+                "error_code": e.code if hasattr(e, 'code') else None,
+                "error_message": e.message if hasattr(e, 'message') else str(e),
+                "user": str(request.user)
+            }
+            logger.error(f"[CREATE_EXAM_VALIDATION_ERROR] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_VALIDATION_ERROR] {json.dumps(console_log)}")
+            messages.error(request, e.message if hasattr(e, 'message') else str(e))
+            # Fall through to render the form again with error message
+        except Exception as e:
+            console_log = {
+                "view": "create_exam",
+                "action": "unexpected_error",
+                "error_type": type(e).__name__,
+                "error": str(e),
+                "user": str(request.user)
+            }
+            logger.exception(f"[CREATE_EXAM_UNEXPECTED_ERROR] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_UNEXPECTED_ERROR] {json.dumps(console_log)}")
+            messages.error(request, f"An unexpected error occurred: {str(e)}")
             # Fall through to render the form again with error message
     
     # Get curriculum levels with version info
     from datetime import datetime
-    curriculum_levels = CurriculumLevel.objects.select_related('subprogram__program').all()
+    
+    # Define whitelist of allowed placement test curriculum levels
+    # Format: (program_name, subprogram_name, level_number)
+    # Note: subprogram names in DB include program prefix (e.g., "CORE PHONICS")
+    PLACEMENT_TEST_WHITELIST = [
+        # CORE Program
+        ('CORE', 'CORE PHONICS', 1), ('CORE', 'CORE PHONICS', 2), ('CORE', 'CORE PHONICS', 3),
+        ('CORE', 'CORE SIGMA', 1), ('CORE', 'CORE SIGMA', 2), ('CORE', 'CORE SIGMA', 3),
+        ('CORE', 'CORE ELITE', 1), ('CORE', 'CORE ELITE', 2), ('CORE', 'CORE ELITE', 3),
+        ('CORE', 'CORE PRO', 1), ('CORE', 'CORE PRO', 2), ('CORE', 'CORE PRO', 3),
+        # ASCENT Program
+        ('ASCENT', 'ASCENT NOVA', 1), ('ASCENT', 'ASCENT NOVA', 2), ('ASCENT', 'ASCENT NOVA', 3),
+        ('ASCENT', 'ASCENT DRIVE', 1), ('ASCENT', 'ASCENT DRIVE', 2), ('ASCENT', 'ASCENT DRIVE', 3),
+        ('ASCENT', 'ASCENT PRO', 1), ('ASCENT', 'ASCENT PRO', 2), ('ASCENT', 'ASCENT PRO', 3),
+        # EDGE Program
+        ('EDGE', 'EDGE SPARK', 1), ('EDGE', 'EDGE SPARK', 2), ('EDGE', 'EDGE SPARK', 3),
+        ('EDGE', 'EDGE RISE', 1), ('EDGE', 'EDGE RISE', 2), ('EDGE', 'EDGE RISE', 3),
+        ('EDGE', 'EDGE PURSUIT', 1), ('EDGE', 'EDGE PURSUIT', 2), ('EDGE', 'EDGE PURSUIT', 3),
+        ('EDGE', 'EDGE PRO', 1), ('EDGE', 'EDGE PRO', 2), ('EDGE', 'EDGE PRO', 3),
+        # PINNACLE Program
+        ('PINNACLE', 'PINNACLE VISION', 1), ('PINNACLE', 'PINNACLE VISION', 2),
+        ('PINNACLE', 'PINNACLE ENDEAVOR', 1), ('PINNACLE', 'PINNACLE ENDEAVOR', 2),
+        ('PINNACLE', 'PINNACLE SUCCESS', 1), ('PINNACLE', 'PINNACLE SUCCESS', 2),
+        ('PINNACLE', 'PINNACLE PRO', 1), ('PINNACLE', 'PINNACLE PRO', 2),
+    ]
+    
+    # Log whitelist configuration
+    console_log = {
+        "view": "create_exam",
+        "action": "whitelist_configured",
+        "total_allowed_levels": len(PLACEMENT_TEST_WHITELIST),
+        "programs": list(set(item[0] for item in PLACEMENT_TEST_WHITELIST))
+    }
+    logger.info(f"[CREATE_EXAM_WHITELIST] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_WHITELIST] {json.dumps(console_log)}")
+    
+    # Get all curriculum levels but filter to whitelist
+    all_levels = CurriculumLevel.objects.select_related('subprogram__program').all()
+    curriculum_levels = []
+    
+    for level in all_levels:
+        # Check if this level is in the whitelist
+        program_name = level.subprogram.program.name
+        subprogram_name = level.subprogram.name
+        level_number = level.level_number
+        
+        if (program_name, subprogram_name, level_number) in PLACEMENT_TEST_WHITELIST:
+            curriculum_levels.append(level)
+    
+    # Log filtering results
+    console_log = {
+        "view": "create_exam",
+        "action": "levels_filtered",
+        "total_levels_in_db": all_levels.count(),
+        "levels_after_filter": len(curriculum_levels),
+        "filtered_programs": list(set(level.subprogram.program.name for level in curriculum_levels))
+    }
+    logger.info(f"[CREATE_EXAM_FILTER] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_FILTER] {json.dumps(console_log)}")
     
     # Get today's date for checking same-day uploads
     today_str = datetime.now().strftime('%y%m%d')
@@ -144,14 +349,45 @@ def create_exam(request):
         # Get count of existing exams for this level (for info display)
         existing_count = Exam.objects.filter(curriculum_level=level).count()
         
+        # Create placement test specific display name
+        # Format: "[PT] PROGRAM, SUBPROGRAM, Level X"
+        program_name = level.subprogram.program.name
+        subprogram_name = level.subprogram.name
+        level_number = level.level_number
+        
+        # Remove program prefix from subprogram name if it exists
+        # e.g., "CORE PHONICS" -> "Phonics"
+        clean_subprogram = subprogram_name
+        if subprogram_name.startswith(program_name + ' '):
+            clean_subprogram = subprogram_name[len(program_name) + 1:]
+        
+        # Clean display name for placement tests (no "SubProgram" text)
+        pt_display_name = f"[PT] {program_name}, {clean_subprogram}, Level {level_number}"
+        
+        # Clean base name for file generation (used in exam name)
+        # Format: "PROGRAM_SUBPROGRAM_LvX"
+        pt_base_name = f"{program_name}_{clean_subprogram}_Lv{level_number}".replace(" ", "_")
+        
         levels_with_versions.append({
             'id': level.id,
-            'display_name': level.display_name,  # Use new display_name property
-            'exam_base_name': level.exam_base_name,  # Use new exam_base_name property
+            'display_name': pt_display_name,  # Use PT-specific display name
+            'exam_base_name': pt_base_name,  # Use PT-specific base name
             'next_version': next_version,
             'existing_count': existing_count,
             'date_str': today_str
         })
+        
+        # Log each level being added
+        console_log = {
+            "view": "create_exam",
+            "action": "level_added",
+            "level_id": level.id,
+            "pt_display_name": pt_display_name,
+            "pt_base_name": pt_base_name,
+            "existing_count": existing_count
+        }
+        logger.debug(f"[CREATE_EXAM_LEVEL] {json.dumps(console_log)}")
+        print(f"[CREATE_EXAM_LEVEL] {json.dumps(console_log)}")
     
     return render(request, 'placement_test/create_exam.html', {
         'curriculum_levels': levels_with_versions

@@ -2,7 +2,7 @@
 {% load static %}
 {% load grade_tags %}
 
-{% block title %}Placement Rules Configuration{% endblock %}
+{% block title %}Student Levels Configuration{% endblock %}
 
 {% block content %}
 {% csrf_token %}
@@ -175,11 +175,11 @@
 </style>
 
 <div class="placement-container">
-    <h1>Placement Rules Configuration</h1>
+    <h1>Student Levels Configuration</h1>
     
     <div class="info-box">
-        <h3>What are Placement Rules?</h3>
-        <p>Placement Rules determine which curriculum level a student is assigned to based on their grade and English class rank. This is the first step in the placement process.</p>
+        <h3>What are Student Levels?</h3>
+        <p>Student Levels determine which curriculum level a student is assigned to based on their grade and English class rank. This is the first step in the placement process.</p>
         
         <p><strong>How it works:</strong></p>
         <ul>
@@ -342,7 +342,7 @@
         </div>
     </div>
     
-    <button type="button" class="save-button" onclick="savePlacementRules()">Save All Placement Rules</button>
+    <button type="button" class="save-button" onclick="savePlacementRules()">Save All Student Levels</button>
     <div style="clear: both;"></div>
 </div>
 
@@ -470,5 +470,186 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+// Comprehensive console logging for curriculum level debugging
+(function() {
+    'use strict';
+    
+    console.group('%c[PLACEMENT_RULES] Page Initialization', 'color: #2196F3; font-weight: bold');
+    
+    // Log page load information
+    console.log('[STUDENT_LEVELS] Student Levels Matrix page loaded');
+    console.log('[PLACEMENT_RULES] Timestamp:', new Date().toISOString());
+    console.log('[PLACEMENT_RULES] URL:', window.location.href);
+    
+    // Count and log curriculum levels by program
+    const levelCounts = {
+        CORE: 0,
+        ASCENT: 0,
+        EDGE: 0,
+        PINNACLE: 0
+    };
+    
+    // Collect all displayed curriculum levels
+    const displayedLevels = [];
+    
+    // Check CORE levels
+    const coreSection = document.querySelector('.program-section:nth-of-type(1)');
+    if (coreSection) {
+        const coreHeaders = coreSection.querySelectorAll('th.level-header');
+        levelCounts.CORE = coreHeaders.length;
+        coreHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'CORE', level: levelName });
+        });
+    }
+    
+    // Check ASCENT levels
+    const ascentSection = document.querySelector('.program-section:nth-of-type(2)');
+    if (ascentSection) {
+        const ascentHeaders = ascentSection.querySelectorAll('th.level-header');
+        levelCounts.ASCENT = ascentHeaders.length;
+        ascentHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'ASCENT', level: levelName });
+        });
+    }
+    
+    // Check EDGE levels
+    const edgeSection = document.querySelector('.program-section:nth-of-type(3)');
+    if (edgeSection) {
+        const edgeHeaders = edgeSection.querySelectorAll('th.level-header');
+        levelCounts.EDGE = edgeHeaders.length;
+        edgeHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'EDGE', level: levelName });
+        });
+    }
+    
+    // Check PINNACLE levels
+    const pinnacleSection = document.querySelector('.program-section:nth-of-type(4)');
+    if (pinnacleSection) {
+        const pinnacleHeaders = pinnacleSection.querySelectorAll('th.level-header');
+        levelCounts.PINNACLE = pinnacleHeaders.length;
+        pinnacleHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'PINNACLE', level: levelName });
+        });
+    }
+    
+    // Log summary
+    console.log('[PLACEMENT_RULES] Curriculum Level Counts:', levelCounts);
+    console.log('[PLACEMENT_RULES] Total Levels Displayed:', 
+        levelCounts.CORE + levelCounts.ASCENT + levelCounts.EDGE + levelCounts.PINNACLE);
+    
+    // Log all displayed levels
+    console.group('[PLACEMENT_RULES] Displayed Curriculum Levels');
+    displayedLevels.forEach((item, index) => {
+        console.log(`${index + 1}. ${item.program}: ${item.level}`);
+    });
+    console.groupEnd();
+    
+    // Check for test/QA subprograms
+    const testIndicators = ['Test', 'TEST', 'SHORT Answer', 'SHORT Display', 'Comprehensive Test', 'Management Test'];
+    const foundTestSubprograms = [];
+    
+    displayedLevels.forEach(item => {
+        testIndicators.forEach(indicator => {
+            if (item.level.includes(indicator)) {
+                foundTestSubprograms.push(item.level);
+            }
+        });
+    });
+    
+    if (foundTestSubprograms.length > 0) {
+        console.warn('[PLACEMENT_RULES] ⚠️ WARNING: Test/QA subprograms detected in display!');
+        console.warn('[PLACEMENT_RULES] Found test subprograms:', foundTestSubprograms);
+        console.warn('[PLACEMENT_RULES] These should have been filtered out by the backend.');
+    } else {
+        console.log('[PLACEMENT_RULES] ✅ No test/QA subprograms detected - filtering working correctly');
+    }
+    
+    // Monitor save operations
+    const saveButton = document.querySelector('button[onclick*="savePlacementRules"]');
+    if (saveButton) {
+        saveButton.addEventListener('click', function() {
+            console.group('[PLACEMENT_RULES] Save Operation');
+            console.log('Timestamp:', new Date().toISOString());
+            console.log('User action: Saving placement rules');
+            console.groupEnd();
+        });
+    }
+    
+    // Log the exam-to-level mapping tab status
+    const examMappingTab = document.querySelector('a[href="#exam-level-mapping"]');
+    if (examMappingTab) {
+        examMappingTab.addEventListener('click', function() {
+            console.group('[STUDENT_LEVELS] Level Exams Tab');
+            console.log('Tab clicked at:', new Date().toISOString());
+            
+            // Count exam mappings after a short delay for content to load
+            setTimeout(() => {
+                const mappingRows = document.querySelectorAll('#exam-level-mapping .level-row');
+                console.log('Total mapping rows displayed:', mappingRows.length);
+                
+                // Check each row for test subprograms
+                mappingRows.forEach((row, index) => {
+                    const levelName = row.querySelector('.level-name')?.textContent?.trim();
+                    if (levelName) {
+                        testIndicators.forEach(indicator => {
+                            if (levelName.includes(indicator)) {
+                                console.warn(`Row ${index + 1} contains test subprogram: ${levelName}`);
+                            }
+                        });
+                    }
+                });
+                console.groupEnd();
+            }, 100);
+        });
+    }
+    
+    console.groupEnd();
+    
+    // Add a global function to check current state
+    window.checkPlacementRulesState = function() {
+        console.group('[PLACEMENT_RULES] Current State Check');
+        console.log('Timestamp:', new Date().toISOString());
+        
+        // Re-count levels
+        const currentCounts = {
+            CORE: document.querySelectorAll('.program-section:nth-of-type(1) th.level-header').length,
+            ASCENT: document.querySelectorAll('.program-section:nth-of-type(2) th.level-header').length,
+            EDGE: document.querySelectorAll('.program-section:nth-of-type(3) th.level-header').length,
+            PINNACLE: document.querySelectorAll('.program-section:nth-of-type(4) th.level-header').length
+        };
+        
+        console.log('Current level counts:', currentCounts);
+        
+        // Check for test subprograms again
+        const allHeaders = document.querySelectorAll('th.level-header');
+        const currentTestSubprograms = [];
+        allHeaders.forEach(header => {
+            const text = header.textContent.trim();
+            testIndicators.forEach(indicator => {
+                if (text.includes(indicator)) {
+                    currentTestSubprograms.push(text);
+                }
+            });
+        });
+        
+        if (currentTestSubprograms.length > 0) {
+            console.warn('Test subprograms still present:', currentTestSubprograms);
+        } else {
+            console.log('✅ No test subprograms found');
+        }
+        
+        console.groupEnd();
+    };
+    
+    // Log when user leaves the page
+    window.addEventListener('beforeunload', function() {
+        console.log('[STUDENT_LEVELS] User leaving Student Levels page');
+    });
+})();
 </script>
 {% endblock %}

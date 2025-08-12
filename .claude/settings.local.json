@@ -222,7 +222,17 @@
       "Bash(~/.npm-global/bin/mcp-chrome-bridge:*)",
       "Bash(sudo mkdir:*)",
       "mcp__chrome-mcp__chrome_screenshot",
-      "mcp__chrome-mcp__chrome_get_web_content"
+      "mcp__chrome-mcp__chrome_get_web_content",
+      "mcp__ide__getDiagnostics",
+      "mcp__chrome-control__open_url",
+      "mcp__chrome-control__get_current_tab",
+      "mcp__chrome-control__list_tabs",
+      "mcp__chrome-control__get_page_content",
+      "mcp__chrome-control__execute_javascript",
+      "Bash(sudo find /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project -name \"*.pyc\" -delete)",
+      "mcp__chrome-control__switch_to_tab",
+      "mcp__chrome-control__reload_tab",
+      "Bash(open:*)"
     ],
     "deny": []
   }

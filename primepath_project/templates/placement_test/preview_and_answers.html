@@ -1596,10 +1596,18 @@ function initializePdfImageDisplay() {
 }
 
 function renderPageAsImage(pageNum) {
-    if (!pdfDoc) return;
+    if (!pdfDoc) {
+        console.warn('[PREVIEW_EXAM] renderPageAsImage called but pdfDoc is null');
+        return;
+    }
     
     const loading = document.getElementById('pdf-loading');
     const pageImage = document.getElementById('pdf-page-image');
+    
+    if (!pageImage) {
+        console.error('[PREVIEW_EXAM] PDF image display element not found');
+        return;
+    }
     
     // Clear cache when rotation changes (include rotation in cache key)
     const cacheKey = `${pageNum}_${currentRotation}`;
@@ -1607,16 +1615,23 @@ function renderPageAsImage(pageNum) {
     // Check cache first
     if (pageImages.has(cacheKey)) {
         pageImage.src = pageImages.get(cacheKey);
-        loading.style.display = 'none';
+        if (loading) loading.style.display = 'none';
+        console.log('[PREVIEW_EXAM] Page loaded from cache:', { page: pageNum, rotation: currentRotation });
         return;
     }
     
-    loading.style.display = 'block';
+    if (loading) loading.style.display = 'block';
     
     pdfDoc.getPage(pageNum).then(function(page) {
-        // Create canvas for rendering
+        // Create canvas for rendering with willReadFrequently for performance
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        if (!ctx) {
+            console.error('[PREVIEW_EXAM] Failed to get canvas context');
+            if (loading) loading.style.display = 'none';
+            return;
+        }
         
         // Calculate scale for good quality with rotation - increased for better readability
         const viewport = page.getViewport({ scale: 2.5, rotation: currentRotation });
@@ -1637,31 +1652,55 @@ function renderPageAsImage(pageNum) {
             pageImages.set(cacheKey, imageDataURL);
             
             // Display the image
-            pageImage.src = imageDataURL;
-            loading.style.display = 'none';
+            if (pageImage) {
+                pageImage.src = imageDataURL;
+            }
+            if (loading) {
+                loading.style.display = 'none';
+            }
             
             // Apply current zoom level to new image
             applyZoomToImage();
             updateZoomDisplay();
             
-            console.log('✅ Page', pageNum, 'rendered as image');
+            console.log('[PREVIEW_EXAM] Page rendered as image:', { page: pageNum, rotation: currentRotation, cached: true });
+        }).catch(function(error) {
+            console.error('[PREVIEW_EXAM] Error rendering page:', error);
+            if (loading) loading.style.display = 'none';
         });
+    }).catch(function(error) {
+        console.error('[PREVIEW_EXAM] Error getting PDF page:', error);
+        if (loading) loading.style.display = 'none';
     });
 }
 
 function updatePageInfo() {
-    const prevBtn = document.getElementById('pdf-prev');
-    const nextBtn = document.getElementById('pdf-next');
+    // Update all navigation buttons (handle duplicate IDs)
+    const prevButtons = document.querySelectorAll('[id="pdf-prev"]');
+    const nextButtons = document.querySelectorAll('[id="pdf-next"]');
     const pageInput = document.getElementById('pdf-page-input');
     const totalPagesSpan = document.getElementById('total-pages');
     const jumpInput = document.getElementById('pdf-jump-input');
+    const pageInfo = document.getElementById('pdf-page-info');
     
-    if (prevBtn) {
-        prevBtn.disabled = currentPage === 1;
+    // Update page counter display
+    if (pageInfo) {
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
     }
-    if (nextBtn) {
-        nextBtn.disabled = currentPage === totalPages;
-    }
+    
+    // Update previous buttons
+    prevButtons.forEach(btn => {
+        if (btn) {
+            btn.disabled = currentPage === 1;
+        }
+    });
+    
+    // Update next buttons
+    nextButtons.forEach(btn => {
+        if (btn) {
+            btn.disabled = currentPage === totalPages;
+        }
+    });
     if (pageInput) {
         pageInput.value = currentPage;
         pageInput.max = totalPages;
@@ -1683,6 +1722,10 @@ function updateZoomDisplay() {
 
 function applyZoomToImage() {
     const pageImage = document.getElementById('pdf-page-image');
+    if (!pageImage) {
+        console.warn('[PREVIEW_EXAM] Cannot apply zoom - image element not found');
+        return;
+    }
     if (pageImage) {
         pageImage.style.transform = `scale(${currentZoomLevel})`;
         pageImage.style.transformOrigin = 'center center';
@@ -1977,21 +2020,28 @@ function detectDividerLine(canvas, ctx, viewport) {
     return finalDividerX;
 }
 
+// Legacy renderPage function - now safely redirects to image rendering
 function renderPage(vPageNum) {
-    console.log('🔥 [PREVIEW_EXAM] renderPage() called with vPageNum:', vPageNum);
-    console.log('🔥 [PREVIEW_EXAM] pdfDoc exists:', !!pdfDoc);
-    console.log('🔥 [PREVIEW_EXAM] totalPages:', totalPages);
+    console.log('[PREVIEW_EXAM] Legacy renderPage called, redirecting to renderPageAsImage:', vPageNum);
     
     if (!pdfDoc) {
-        console.error('❌ [PREVIEW_EXAM] No pdfDoc available for rendering');
+        console.error('[PREVIEW_EXAM] No pdfDoc available for rendering');
         return;
     }
     
-    currentPageNum = vPageNum;
+    // Ensure page number is valid
+    const pageNum = Math.min(Math.max(1, vPageNum), totalPages);
     
-    // Calculate actual PDF page based on virtual page
-    let actualPageNum = Math.ceil(vPageNum / 2);
-    let isLeftColumn = (vPageNum % 2) === 1;
+    // Update current page and render as image
+    currentPage = pageNum;
+    currentPageNum = pageNum; // Keep legacy variable in sync
+    renderPageAsImage(pageNum);
+    updatePageInfo();
+    updateNavigationButtons();
+    return;
+    
+    // The rest of this function is no longer used
+    return;
     
     console.log('🔥 [PREVIEW_EXAM] Virtual to actual page mapping:', {
         virtualPage: vPageNum,
@@ -2200,28 +2250,43 @@ function updateNavigationButtons() {
     document.getElementById('pdf-next').disabled = currentPageNum >= totalPages;
 }
 
-// PDF navigation
-document.getElementById('pdf-prev').addEventListener('click', function() {
-    const skipFirstLeftHalf = false;
-    const minPage = skipFirstLeftHalf ? 2 : 1;
-    
-    if (!pdfDoc || currentPageNum <= minPage) {
-        return;
-    }
-    currentPageNum--;
-    console.log('🔥 [PREVIEW_EXAM] Previous page clicked, new currentPageNum:', currentPageNum);
-    renderPage(currentPageNum);
-    updateNavigationButtons();
+// PDF navigation - Fixed to use image rendering and handle duplicate IDs
+// Handle all navigation buttons (both control bar and overlay have same IDs)
+const prevButtons = document.querySelectorAll('[id="pdf-prev"]');
+const nextButtons = document.querySelectorAll('[id="pdf-next"]');
+
+console.log('[PREVIEW_EXAM] Found navigation buttons:', { prevCount: prevButtons.length, nextCount: nextButtons.length });
+
+prevButtons.forEach((button, index) => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!pdfDoc || currentPage <= 1) {
+            console.log('[PREVIEW_EXAM] Cannot go to previous page:', { currentPage, totalPages });
+            return;
+        }
+        currentPage--;
+        console.log('[PREVIEW_EXAM] Previous button clicked:', { buttonIndex: index, newPage: currentPage, totalPages });
+        renderPageAsImage(currentPage);
+        updatePageInfo();
+    });
 });
 
-document.getElementById('pdf-next').addEventListener('click', function() {
-    if (!pdfDoc || currentPageNum >= totalPages) {
-        return;
-    }
-    currentPageNum++;
-    console.log('🔥 [PREVIEW_EXAM] Next page clicked, new currentPageNum:', currentPageNum);
-    renderPage(currentPageNum);
-    updateNavigationButtons();
+nextButtons.forEach((button, index) => {
+    button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (!pdfDoc || currentPage >= totalPages) {
+            console.log('[PREVIEW_EXAM] Cannot go to next page:', { currentPage, totalPages });
+            return;
+        }
+        currentPage++;
+        console.log('[PREVIEW_EXAM] Next button clicked:', { buttonIndex: index, newPage: currentPage, totalPages });
+        renderPageAsImage(currentPage);
+        updatePageInfo();
+    });
 });
 
 // Rotate left button

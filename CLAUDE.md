@@ -1,27 +1,30 @@
 # PrimePath Project - Critical Knowledge Base
 
-## 🔧 Chrome MCP Setup - Quick Start
+## 🔧 Chrome Control MCP - Working Setup
 
-### To Use Chrome MCP Tools in Claude:
-1. **Open Chrome first**
-2. Go to `chrome://extensions/`
-3. Click "service worker" link for chrome-mcp-server extension
-4. **Keep the DevTools window open** (can minimize but don't close!)
-5. Chrome MCP tools will work in Claude
-
-**Note**: Service worker goes inactive after 30 seconds without DevTools open. This is a Chrome limitation.
-
-### Troubleshooting Chrome MCP:
+### Quick Setup (One Command!)
 ```bash
-# Check connection status
-claude mcp list
+claude mcp add chrome-control "node" "$HOME/Library/Application Support/Claude/Claude Extensions/ant.dir.ant.anthropic.chrome-control/server/index.js"
+```
+Then **restart Claude** for tools to become available.
 
-# If not working, re-register
-mcp-chrome-bridge register --force
-mcp-chrome-bridge fix-permissions
+### Verify Setup
+```bash
+claude mcp list
+# Should show: chrome-control ... ✓ Connected
 ```
 
-**Full Setup Guide**: See `chrome-mcp-troubleshooting-log.md`
+### Available Chrome Tools
+After setup, these tools work in Claude:
+- `open_url` - Open URLs in Chrome
+- `get_current_tab` - Get tab info
+- `list_tabs` - List all tabs
+- `execute_javascript` - Run JS in tabs
+- `get_page_content` - Get page text
+
+**Full Setup Guide**: See `CHROME_CONTROL_MCP_SETUP.md`
+
+**Note**: Uses Claude's built-in Chrome extension. No browser extension needed, no DevTools required!
 
 ## 🚨 MUST READ - Server Startup Protocol
 
@@ -197,6 +200,82 @@ cd primepath_project && ../venv/Scripts/python.exe manage.py runserver 127.0.0.1
 
 ## 🔴 REMEMBER
 **Server timeout after "StatReloader" is SUCCESS, not failure!**
+
+## 📚 CURRICULUM STRUCTURE - CRITICAL REFERENCE
+
+### COMPLETE CURRICULUM HIERARCHY (44 Total Levels)
+
+**PRIME CORE** (4 subprograms × 3 levels = 12 levels)
+- CORE Phonics Level 1, Level 2, Level 3
+- CORE Sigma Level 1, Level 2, Level 3  
+- CORE Elite Level 1, Level 2, Level 3
+- CORE Pro Level 1, Level 2, Level 3
+
+**PRIME ASCENT** (4 subprograms × 3 levels = 12 levels)
+- ASCENT Nova Level 1, Level 2, Level 3
+- ASCENT Drive Level 1, Level 2, Level 3
+- ASCENT Pro Level 1, Level 2, Level 3
+- (Missing one subprogram in original list - should be 4 total)
+
+**PRIME EDGE** (4 subprograms × 3 levels = 12 levels)
+- EDGE Spark Level 1, Level 2, Level 3
+- EDGE Rise Level 1, Level 2, Level 3
+- EDGE Pursuit Level 1, Level 2, Level 3
+- EDGE Pro Level 1, Level 2, Level 3
+
+**PRIME PINNACLE** (4 subprograms × 2 levels = 8 levels)
+- PINNACLE Vision Level 1, Level 2
+- PINNACLE Endeavor Level 1, Level 2
+- PINNACLE Success Level 1, Level 2
+- PINNACLE Pro Level 1, Level 2
+
+### NAMING CONVENTION
+Format: `[PROGRAM] [SubProgram] Level [Number]`
+- Example: "CORE Phonics Level 1" NOT "PHONICS Level 1"
+- Example: "PINNACLE Vision Level 1" NOT "PINNACLE Level 1"
+
+### KEY POINTS
+- Every program has a "Pro" track as the highest subprogram
+- PINNACLE has only 2 levels per subprogram (advanced tier)
+- All other programs have 3 levels per subprogram
+- NO standalone "PHONICS" - always "CORE Phonics"
+- Total of 44 curriculum levels across all programs
+
+## 🧹 Test Data Cleanup & Maintenance
+
+### QA-Generated Test SubPrograms
+**Issue**: Test/QA activities create test subprograms in the database that pollute the curriculum structure.
+
+**Known Test SubPrograms to Filter**:
+- Test SubProgram
+- SHORT Answer Test SubProgram
+- Comprehensive Test SubProgram
+- Management Test SubProgram
+- SHORT Display Test SubProgram
+- Submit Test SubProgram
+- Final Test SubProgram
+
+**Solution Implemented** (August 12, 2025):
+- Created `core/curriculum_constants.py` with valid curriculum whitelist
+- Updated `placement_rules` view to filter test subprograms
+- Added comprehensive console logging for debugging
+- Test subprograms remain in database but are filtered from display
+
+**Maintenance Required**:
+```bash
+# Check what test data exists
+python test_curriculum_filtering.py
+
+# Clean test subprograms from database (when management command is available)
+python manage.py clean_test_subprograms --dry-run
+python manage.py clean_test_subprograms --force
+```
+
+**Prevention**:
+- Always prefix test data with "TEST_" or "QA_"
+- Use fixtures for test data instead of production database
+- Run cleanup regularly (weekly recommended)
+- Monitor console logs for filtered items
 
 ## 📚 Major Fixes Documentation
 

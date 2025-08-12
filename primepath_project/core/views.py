@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from .models import Teacher, Program, SubProgram, CurriculumLevel, PlacementRule
+from .curriculum_constants import is_valid_subprogram, is_test_subprogram, log_filtered_subprograms
+from .utils.curriculum_display import get_curriculum_level_display_data
 import json
 import logging
 
@@ -72,11 +74,26 @@ def curriculum_levels(request):
 def placement_rules(request):
     from placement_test.models import Exam
     
+    # Log the start of student levels loading
+    logger.info("[STUDENT_LEVELS] Loading student levels matrix")
+    console_log = {
+        "view": "placement_rules",
+        "action": "loading",
+        "user": str(request.user),
+        "timestamp": str(json.dumps(None, default=str))
+    }
+    print(f"[STUDENT_LEVELS_INIT] {json.dumps(console_log)}")
+    
     # Get all programs
     programs = Program.objects.prefetch_related('subprograms__levels').all()
     
     # Get all active exams for mapping
     all_exams = Exam.objects.filter(is_active=True).order_by('name')
+    
+    # Track filtered subprograms for logging
+    filtered_subprograms = []
+    total_subprograms_checked = 0
+    valid_subprograms_count = 0
     
     # Separate levels by program
     core_levels = []
@@ -86,7 +103,33 @@ def placement_rules(request):
     
     for program in programs:
         for subprogram in program.subprograms.all():
+            total_subprograms_checked += 1
+            
+            # Filter out test/QA subprograms
+            if is_test_subprogram(subprogram.name):
+                filtered_subprograms.append(f"{program.name} - {subprogram.name}")
+                logger.debug(f"[STUDENT_LEVELS_FILTER] Filtering out test subprogram: {subprogram.name}")
+                continue  # Skip this subprogram entirely
+            
+            # Only process valid subprograms
+            if not is_valid_subprogram(subprogram.name):
+                # Double-check: if it's not test and not valid, log warning
+                logger.warning(f"[STUDENT_LEVELS_WARNING] Unknown subprogram (not test, not valid): {subprogram.name}")
+                filtered_subprograms.append(f"{program.name} - {subprogram.name} (unknown)")
+                continue
+            
+            valid_subprograms_count += 1
+            
             for level in subprogram.levels.all():
+                # Add display data for proper formatting
+                level.display_data = get_curriculum_level_display_data(level)
+                # Enhanced logging for display data
+                if hasattr(level, 'display_data') and level.display_data:
+                    logger.debug(f"[DISPLAY_DATA_SET] Level {level.id}: {level.display_data.get('subprogram_display')}")
+                else:
+                    logger.warning(f"[DISPLAY_DATA_MISSING] Level {level.id}: No display data!")
+
+                
                 # Add available exams to each level
                 level.available_exams = all_exams
                 level.mapped_exams = Exam.objects.filter(
@@ -102,6 +145,28 @@ def placement_rules(request):
                     edge_levels.append(level)
                 elif program.name == 'PINNACLE':
                     pinnacle_levels.append(level)
+    
+    # Log filtering results
+    if filtered_subprograms:
+        log_filtered_subprograms(logger, filtered_subprograms)
+    
+    # Comprehensive logging of what's being displayed
+    console_log = {
+        "view": "placement_rules",
+        "action": "subprograms_processed",
+        "total_checked": total_subprograms_checked,
+        "valid_count": valid_subprograms_count,
+        "filtered_count": len(filtered_subprograms),
+        "filtered_items": filtered_subprograms[:5] if filtered_subprograms else [],  # Show first 5 for debugging
+        "levels_count": {
+            "CORE": len(core_levels),
+            "ASCENT": len(ascent_levels),
+            "EDGE": len(edge_levels),
+            "PINNACLE": len(pinnacle_levels)
+        }
+    }
+    logger.info(f"[STUDENT_LEVELS_SUMMARY] {json.dumps(console_log)}")
+    print(f"[STUDENT_LEVELS_SUMMARY] {json.dumps(console_log, indent=2)}")
     
     # Define rank options
     rank_options = [
@@ -124,7 +189,12 @@ def placement_rules(request):
         'edge_levels': edge_levels,
         'pinnacle_levels': pinnacle_levels,
     }
-    return render(request, 'core/placement_rules_matrix.html', context)
+    response = render(request, 'core/placement_rules_matrix.html', context)
+    # Add cache-busting headers
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 
 @require_http_methods(["POST"])
@@ -245,8 +315,23 @@ def exam_mapping(request):
     from placement_test.models import Exam
     from .models import ExamLevelMapping
     
+    # Log the start of level exams loading
+    logger.info("[LEVEL_EXAMS] Loading level exams configuration view")
+    console_log = {
+        "view": "exam_mapping",
+        "action": "loading",
+        "user": str(request.user),
+        "timestamp": str(json.dumps(None, default=str))
+    }
+    print(f"[LEVEL_EXAMS_INIT] {json.dumps(console_log)}")
+    
     # Get all programs
     programs = Program.objects.prefetch_related('subprograms__levels').all()
+    
+    # Track filtered subprograms for logging
+    filtered_subprograms = []
+    total_subprograms_checked = 0
+    valid_subprograms_count = 0
     
     # Separate levels by program
     core_levels = []
@@ -272,7 +357,33 @@ def exam_mapping(request):
     
     for program in programs:
         for subprogram in program.subprograms.all():
+            total_subprograms_checked += 1
+            
+            # Filter out test/QA subprograms - SAME AS placement_rules view
+            if is_test_subprogram(subprogram.name):
+                filtered_subprograms.append(f"{program.name} - {subprogram.name}")
+                logger.debug(f"[LEVEL_EXAMS_FILTER] Filtering out test subprogram: {subprogram.name}")
+                continue  # Skip this subprogram entirely
+            
+            # Only process valid subprograms
+            if not is_valid_subprogram(subprogram.name):
+                # Double-check: if it's not test and not valid, log warning
+                logger.warning(f"[LEVEL_EXAMS_WARNING] Unknown subprogram (not test, not valid): {subprogram.name}")
+                filtered_subprograms.append(f"{program.name} - {subprogram.name} (unknown)")
+                continue
+            
+            valid_subprograms_count += 1
+            
             for level in subprogram.levels.all():
+                # Add display data for proper formatting
+                level.display_data = get_curriculum_level_display_data(level)
+                # Enhanced logging for display data
+                if hasattr(level, 'display_data') and level.display_data:
+                    logger.debug(f"[DISPLAY_DATA_SET] Level {level.id}: {level.display_data.get('subprogram_display')}")
+                else:
+                    logger.warning(f"[DISPLAY_DATA_MISSING] Level {level.id}: No display data!")
+
+                
                 # Get all available exams (not just those mapped to this level)
                 level.available_exams = processed_exams
                 
@@ -305,6 +416,28 @@ def exam_mapping(request):
                 elif program.name == 'PINNACLE':
                     pinnacle_levels.append(level)
     
+    # Log filtering results  
+    if filtered_subprograms:
+        log_filtered_subprograms(logger, filtered_subprograms)
+    
+    # Comprehensive logging of what's being displayed
+    console_log = {
+        "view": "exam_mapping",
+        "action": "subprograms_processed",
+        "total_checked": total_subprograms_checked,
+        "valid_count": valid_subprograms_count,
+        "filtered_count": len(filtered_subprograms),
+        "filtered_items": filtered_subprograms[:5] if filtered_subprograms else [],  # Show first 5 for debugging
+        "levels_count": {
+            "CORE": len(core_levels),
+            "ASCENT": len(ascent_levels),
+            "EDGE": len(edge_levels),
+            "PINNACLE": len(pinnacle_levels)
+        }
+    }
+    logger.info(f"[LEVEL_EXAMS_SUMMARY] {json.dumps(console_log)}")
+    print(f"[LEVEL_EXAMS_SUMMARY] {json.dumps(console_log, indent=2)}")
+    
     context = {
         'core_levels': core_levels,
         'ascent_levels': ascent_levels,
@@ -312,7 +445,14 @@ def exam_mapping(request):
         'pinnacle_levels': pinnacle_levels,
     }
     
-    return render(request, 'core/exam_mapping.html', context)
+    response = render(request, 'core/exam_mapping.html', context)
+    # Add aggressive cache-busting headers
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, private, max-age=0'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    response['X-Content-Type-Options'] = 'nosniff'
+    response['Vary'] = 'Cookie'
+    return response
 
 
 @require_http_methods(["POST"])

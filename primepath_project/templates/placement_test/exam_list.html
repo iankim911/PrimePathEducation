@@ -25,10 +25,115 @@
         border-radius: 8px;
         padding: 20px;
         transition: box-shadow 0.2s;
+        position: relative;
     }
     
     .exam-card:hover {
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Answer Mapping Status Indicator */
+    .answer-mapping-indicator {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        cursor: help;
+    }
+    
+    .answer-mapping-indicator.complete {
+        background-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+    }
+    
+    .answer-mapping-indicator.partial {
+        background-color: #ffc107;
+        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        animation: pulse 2s infinite;
+    }
+    
+    .answer-mapping-indicator.not-started {
+        background-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+        50% {
+            box-shadow: 0 0 0 6px rgba(255, 193, 7, 0.1);
+        }
+        100% {
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+    }
+    
+    .answer-mapping-status {
+        margin: 10px 0;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    
+    .answer-mapping-status.complete {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .answer-mapping-status.partial {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+    }
+    
+    .answer-mapping-status.not-started {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .answer-mapping-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 5px;
+    }
+    
+    .answer-progress-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 5px 0;
+    }
+    
+    .answer-progress-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    
+    .answer-progress-fill.complete {
+        background-color: #28a745;
+    }
+    
+    .answer-progress-fill.partial {
+        background-color: #ffc107;
+    }
+    
+    .answer-progress-fill.not-started {
+        background-color: #dc3545;
+    }
+    
+    .unmapped-list {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
     }
     
     .exam-title {
@@ -36,6 +141,7 @@
         font-weight: bold;
         margin-bottom: 10px;
         color: #2c3e50;
+        padding-right: 25px; /* Make room for the indicator */
     }
     
     .exam-info {
@@ -59,6 +165,74 @@
     }
     
     .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    /* Tooltip for answer mapping indicator */
+    .mapping-tooltip {
+        position: absolute;
+        background: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        top: -35px;
+        right: 0;
+    }
+    
+    .mapping-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        right: 10px;
+        border: 5px solid transparent;
+        border-top-color: #333;
+    }
+    
+    .answer-mapping-indicator:hover + .mapping-tooltip {
+        opacity: 1;
+    }
+    
+    /* Summary stats at the top */
+    .mapping-summary {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .summary-stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .summary-stat .stat-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .stat-badge.complete {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .stat-badge.partial {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .stat-badge.not-started {
         background: #f8d7da;
         color: #721c24;
     }
@@ -145,16 +319,89 @@
     <a href="{% url 'placement_test:create_exam' %}" class="btn btn-primary">Upload New Exam</a>
 </div>
 
+{% if mapping_summary %}
+<div class="mapping-summary">
+    <div class="summary-stat">
+        <span>Total Exams:</span>
+        <span class="stat-badge">{{ mapping_summary.total }}</span>
+    </div>
+    <div class="summary-stat">
+        <span>Complete:</span>
+        <span class="stat-badge complete">{{ mapping_summary.complete }}</span>
+    </div>
+    <div class="summary-stat">
+        <span>Partial:</span>
+        <span class="stat-badge partial">{{ mapping_summary.partial }}</span>
+    </div>
+    <div class="summary-stat">
+        <span>Not Started:</span>
+        <span class="stat-badge not-started">{{ mapping_summary.not_started }}</span>
+    </div>
+</div>
+{% endif %}
+
 {% if exams %}
     <div class="exam-grid">
         {% for exam in exams %}
-        <div class="exam-card" data-exam-id="{{ exam.id }}">
+        <div class="exam-card" data-exam-id="{{ exam.id }}" 
+             data-mapping-status="{{ exam.answer_mapping_status.status_label|lower|slugify }}"
+             data-mapping-percentage="{{ exam.answer_mapping_status.percentage_complete }}">
+            
+            <!-- Answer Mapping Indicator -->
+            <div class="answer-mapping-indicator {{ exam.answer_mapping_status.status_label|lower|slugify }}" 
+                 title="Answer Mapping: {{ exam.answer_mapping_status.status_label }}"></div>
+            <div class="mapping-tooltip">
+                {{ exam.answer_mapping_status.mapped_questions }}/{{ exam.answer_mapping_status.total_questions }} answers mapped
+            </div>
+            
             <div class="name-edit-container">
                 <div class="exam-title">{{ exam.name }}</div>
                 <input type="text" class="exam-name-input" value="{{ exam.name }}" data-exam-id="{{ exam.id }}">
                 <button class="btn btn-small btn-primary save-name-btn" onclick="saveExamName('{{ exam.id }}')">Save</button>
                 <button class="btn btn-small btn-secondary cancel-name-btn" onclick="cancelNameEdit('{{ exam.id }}')">Cancel</button>
             </div>
+            
+            <!-- Answer Mapping Status Section -->
+            <div class="answer-mapping-status {{ exam.answer_mapping_status.status_label|lower|slugify }}">
+                <div class="answer-mapping-details">
+                    <span>
+                        <strong>Answer Keys:</strong> 
+                        {% if exam.answer_mapping_status.status_label == 'Complete' %}
+                            ✓ All mapped
+                        {% elif exam.answer_mapping_status.status_label == 'Partial' %}
+                            ⚠ {{ exam.answer_mapping_status.mapped_questions }}/{{ exam.answer_mapping_status.total_questions }} mapped
+                        {% elif exam.answer_mapping_status.status_label == 'Not Started' %}
+                            ✗ Not mapped
+                        {% else %}
+                            {{ exam.answer_mapping_status.status_label }}
+                        {% endif %}
+                    </span>
+                    <span style="font-size: 0.85rem; color: #6c757d;">
+                        {{ exam.answer_mapping_status.percentage_complete }}%
+                    </span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="answer-progress-bar">
+                    <div class="answer-progress-fill {{ exam.answer_mapping_status.status_label|lower|slugify }}" 
+                         style="width: {{ exam.answer_mapping_status.percentage_complete }}%"></div>
+                </div>
+                
+                <!-- Show unmapped questions if any -->
+                {% if exam.answer_mapping_status.unmapped_question_numbers %}
+                <div class="unmapped-list">
+                    <small>Missing: Questions 
+                        {% for num in exam.answer_mapping_status.unmapped_question_numbers %}
+                            {{ num }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                        {% if exam.answer_mapping_status.unmapped_questions > 10 %}
+                            ... ({{ exam.answer_mapping_status.unmapped_questions|add:"-10" }} more)
+                        {% endif %}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+            
             <div class="exam-info">Questions: {{ exam.total_questions }}</div>
             <div class="exam-info">Duration: {{ exam.timer_minutes }} minutes</div>
             <div class="exam-info">Audio Files: {{ exam.audio_files.count }}</div>
@@ -185,7 +432,111 @@
 {% endif %}
 
 <script>
+// Comprehensive console logging for Answer Mapping Status debugging
+(function() {
+    'use strict';
+    
+    console.group('%c[ANSWER_MAPPING_UI] Page Initialization', 'color: #2196F3; font-weight: bold');
+    
+    // Log page load information
+    console.log('[ANSWER_MAPPING_UI] Exam List page loaded');
+    console.log('[ANSWER_MAPPING_UI] Timestamp:', new Date().toISOString());
+    console.log('[ANSWER_MAPPING_UI] URL:', window.location.href);
+    
+    // Log summary statistics if available
+    const summaryElement = document.querySelector('.mapping-summary');
+    if (summaryElement) {
+        const stats = {
+            total: summaryElement.querySelector('.summary-stat:nth-child(1) .stat-badge')?.textContent || '0',
+            complete: summaryElement.querySelector('.summary-stat:nth-child(2) .stat-badge')?.textContent || '0',
+            partial: summaryElement.querySelector('.summary-stat:nth-child(3) .stat-badge')?.textContent || '0',
+            notStarted: summaryElement.querySelector('.summary-stat:nth-child(4) .stat-badge')?.textContent || '0'
+        };
+        console.log('[ANSWER_MAPPING_UI] Summary Statistics:', stats);
+    }
+    
+    // Log all exam cards with their mapping status
+    const examCards = document.querySelectorAll('.exam-card');
+    console.log(`[ANSWER_MAPPING_UI] Found ${examCards.length} exam cards`);
+    
+    examCards.forEach((card, index) => {
+        const examId = card.dataset.examId;
+        const mappingStatus = card.dataset.mappingStatus;
+        const mappingPercentage = card.dataset.mappingPercentage;
+        const examName = card.querySelector('.exam-title')?.textContent || 'Unknown';
+        
+        console.group(`[ANSWER_MAPPING_UI] Exam ${index + 1}: ${examName}`);
+        console.log('Exam ID:', examId);
+        console.log('Mapping Status:', mappingStatus);
+        console.log('Mapping Percentage:', mappingPercentage + '%');
+        
+        // Log detailed status from the status section
+        const statusSection = card.querySelector('.answer-mapping-status');
+        if (statusSection) {
+            const statusText = statusSection.querySelector('.answer-mapping-details span')?.textContent?.trim();
+            console.log('Status Text:', statusText);
+            
+            // Log unmapped questions if any
+            const unmappedList = statusSection.querySelector('.unmapped-list');
+            if (unmappedList) {
+                const unmappedText = unmappedList.textContent.trim();
+                console.warn('Unmapped Questions:', unmappedText);
+            }
+        }
+        
+        // Check indicator status
+        const indicator = card.querySelector('.answer-mapping-indicator');
+        if (indicator) {
+            const indicatorClasses = Array.from(indicator.classList);
+            console.log('Indicator Classes:', indicatorClasses);
+            console.log('Indicator Title:', indicator.title);
+        }
+        
+        console.groupEnd();
+    });
+    
+    console.groupEnd();
+    
+    // Log performance metrics
+    if (window.performance && window.performance.timing) {
+        const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+        console.log(`[ANSWER_MAPPING_UI] Page load time: ${loadTime}ms`);
+    }
+    
+    // Add event listeners for interactive debugging
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('[ANSWER_MAPPING_UI] DOM fully loaded and parsed');
+        
+        // Monitor hover events on indicators
+        document.querySelectorAll('.answer-mapping-indicator').forEach(indicator => {
+            indicator.addEventListener('mouseenter', function() {
+                const card = this.closest('.exam-card');
+                const examName = card.querySelector('.exam-title')?.textContent || 'Unknown';
+                console.log(`[ANSWER_MAPPING_UI] Hovering over indicator for exam: ${examName}`);
+            });
+        });
+        
+        // Monitor clicks on Manage buttons
+        document.querySelectorAll('.exam-actions a[href*="preview_exam"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const card = this.closest('.exam-card');
+                const examName = card.querySelector('.exam-title')?.textContent || 'Unknown';
+                const mappingStatus = card.dataset.mappingStatus;
+                console.log(`[ANSWER_MAPPING_UI] Opening Manage for exam: ${examName} (Status: ${mappingStatus})`);
+                
+                // Log warning if exam has unmapped questions
+                if (mappingStatus !== 'complete') {
+                    console.warn(`[ANSWER_MAPPING_UI] WARNING: Exam "${examName}" has unmapped questions!`);
+                }
+            });
+        });
+    });
+})();
+
+// Existing functions with enhanced logging
 function enableNameEdit(examId) {
+    console.log(`[ANSWER_MAPPING_UI] Enabling name edit for exam: ${examId}`);
+    
     const card = document.querySelector(`[data-exam-id="${examId}"]`);
     const titleDiv = card.querySelector('.exam-title');
     const input = card.querySelector('.exam-name-input');
@@ -201,9 +552,13 @@ function enableNameEdit(examId) {
     
     input.focus();
     input.select();
+    
+    console.log(`[ANSWER_MAPPING_UI] Name edit enabled for exam: ${titleDiv.textContent}`);
 }
 
 function cancelNameEdit(examId) {
+    console.log(`[ANSWER_MAPPING_UI] Cancelling name edit for exam: ${examId}`);
+    
     const card = document.querySelector(`[data-exam-id="${examId}"]`);
     const titleDiv = card.querySelector('.exam-title');
     const input = card.querySelector('.exam-name-input');
@@ -219,20 +574,32 @@ function cancelNameEdit(examId) {
     
     // Reset input value to original
     input.value = titleDiv.textContent;
+    
+    console.log(`[ANSWER_MAPPING_UI] Name edit cancelled for exam: ${titleDiv.textContent}`);
 }
 
 function saveExamName(examId) {
     const card = document.querySelector(`[data-exam-id="${examId}"]`);
     const titleDiv = card.querySelector('.exam-title');
     const input = card.querySelector('.exam-name-input');
+    const oldName = titleDiv.textContent;
     const newName = input.value.trim();
     
+    console.log(`[ANSWER_MAPPING_UI] Saving exam name change:`, {
+        examId: examId,
+        oldName: oldName,
+        newName: newName
+    });
+    
     if (!newName) {
+        console.error('[ANSWER_MAPPING_UI] Exam name cannot be empty');
         alert('Exam name cannot be empty');
         return;
     }
     
     // Send update request
+    console.log(`[ANSWER_MAPPING_UI] Sending name update request to API...`);
+    
     fetch(`/api/placement/exams/${examId}/update-name/`, {
         method: 'POST',
         headers: {
@@ -241,17 +608,26 @@ function saveExamName(examId) {
         },
         body: JSON.stringify({ name: newName })
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log(`[ANSWER_MAPPING_UI] API Response status: ${response.status}`);
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
+            console.log(`[ANSWER_MAPPING_UI] Name update successful:`, data);
             titleDiv.textContent = newName;
             cancelNameEdit(examId);
+            
+            // Log the update in the console with the mapping status
+            const mappingStatus = card.dataset.mappingStatus;
+            console.log(`[ANSWER_MAPPING_UI] Exam renamed: "${oldName}" → "${newName}" (Mapping: ${mappingStatus})`);
         } else {
+            console.error('[ANSWER_MAPPING_UI] Name update failed:', data);
             alert('Error updating exam name: ' + (data.error || 'Unknown error'));
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('[ANSWER_MAPPING_UI] Network error:', error);
         alert('An error occurred while updating the exam name');
     });
 }
@@ -270,5 +646,19 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+// Auto-refresh answer mapping status via API (optional enhancement)
+function refreshAnswerMappingStatus(examId) {
+    console.log(`[ANSWER_MAPPING_UI] Refreshing answer mapping status for exam: ${examId}`);
+    
+    // This could be implemented to fetch updated status via API
+    // For now, it's a placeholder for future enhancement
+    console.log('[ANSWER_MAPPING_UI] Note: Live refresh not yet implemented. Reload page to see latest status.');
+}
+
+// Log when user leaves the page
+window.addEventListener('beforeunload', function() {
+    console.log('[ANSWER_MAPPING_UI] User leaving Exam List page');
+});
 </script>
 {% endblock %}

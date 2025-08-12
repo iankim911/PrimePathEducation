@@ -215,8 +215,8 @@
                 <li><a href="{% url 'core:teacher_dashboard' %}" class="{% if request.resolver_match.url_name == 'teacher_dashboard' %}active{% endif %}">Dashboard</a></li>
                 <li><a href="{% url 'placement_test:create_exam' %}" class="{% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}">Upload Exam</a></li>
                 <li><a href="{% url 'placement_test:exam_list' %}" class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}">Manage Exams</a></li>
-                <li><a href="{% url 'core:exam_mapping' %}" class="{% if request.resolver_match.url_name == 'exam_mapping' %}active{% endif %}">Exam-to-Level Mapping</a></li>
-                <li><a href="{% url 'core:placement_rules' %}" class="{% if request.resolver_match.url_name == 'placement_rules' %}active{% endif %}">Placement Rules</a></li>
+                <li><a href="{% url 'core:exam_mapping' %}" class="{% if request.resolver_match.url_name == 'exam_mapping' %}active{% endif %}">Level Exams</a></li>
+                <li><a href="{% url 'core:placement_rules' %}" class="{% if request.resolver_match.url_name == 'placement_rules' %}active{% endif %}">Student Levels</a></li>
                 <li><a href="{% url 'placement_test:session_list' %}" class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}">Student Sessions</a></li>
             </div>
             <div style="display: flex; margin-left: auto; align-items: stretch;">

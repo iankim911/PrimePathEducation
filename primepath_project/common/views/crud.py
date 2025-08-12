@@ -76,7 +76,28 @@ class BaseCreateView(LoginRequiredMixin, CreateView):
         """Handle valid form submission"""
         # Add created_by if model has it
         if hasattr(form.instance, 'created_by'):
-            form.instance.created_by = self.request.user
+            # Check if created_by expects a Teacher instance
+            from core.models import Teacher
+            field = form.instance._meta.get_field('created_by')
+            if field.related_model == Teacher:
+                # Get or create Teacher profile for the user
+                try:
+                    teacher_profile = self.request.user.teacher_profile
+                except (AttributeError, Teacher.DoesNotExist):
+                    # Create Teacher profile if it doesn't exist
+                    teacher_profile = Teacher.objects.create(
+                        user=self.request.user,
+                        name=self.request.user.get_full_name() or self.request.user.username,
+                        email=self.request.user.email or f"{self.request.user.username}@example.com",
+                        is_head_teacher=self.request.user.is_superuser
+                    )
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"[CRUD_CREATE] Created Teacher profile for user {self.request.user.username}")
+                form.instance.created_by = teacher_profile
+            else:
+                # For non-Teacher created_by fields, use User directly
+                form.instance.created_by = self.request.user
         
         response = super().form_valid(form)
         messages.success(self.request, self.success_message)
@@ -106,7 +127,28 @@ class BaseUpdateView(LoginRequiredMixin, UpdateView):
         """Handle valid form submission"""
         # Add updated_by if model has it
         if hasattr(form.instance, 'updated_by'):
-            form.instance.updated_by = self.request.user
+            # Check if updated_by expects a Teacher instance
+            from core.models import Teacher
+            field = form.instance._meta.get_field('updated_by')
+            if field.related_model == Teacher:
+                # Get or create Teacher profile for the user
+                try:
+                    teacher_profile = self.request.user.teacher_profile
+                except (AttributeError, Teacher.DoesNotExist):
+                    # Create Teacher profile if it doesn't exist
+                    teacher_profile = Teacher.objects.create(
+                        user=self.request.user,
+                        name=self.request.user.get_full_name() or self.request.user.username,
+                        email=self.request.user.email or f"{self.request.user.username}@example.com",
+                        is_head_teacher=self.request.user.is_superuser
+                    )
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"[CRUD_UPDATE] Created Teacher profile for user {self.request.user.username}")
+                form.instance.updated_by = teacher_profile
+            else:
+                # For non-Teacher updated_by fields, use User directly
+                form.instance.updated_by = self.request.user
         
         # Track changes if needed
         if hasattr(self, 'track_changes'):

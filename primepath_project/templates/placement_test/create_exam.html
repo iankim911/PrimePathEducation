@@ -476,7 +476,7 @@ if (typeof pdfjsLib !== 'undefined') {
                             data-base-name="{{ level.exam_base_name }}"
                             data-next-version="{{ level.next_version|default:'' }}"
                             data-date-str="{{ level.date_str }}">
-                        {{ level.display_name }} Placement 
+                        {{ level.display_name }}
                         {% if level.existing_count > 0 %}
                             ({{ level.existing_count }} existing)
                         {% endif %}
@@ -1050,9 +1050,19 @@ customNameRadio.addEventListener('change', updateNameFields);
 presetSelect.addEventListener('change', function() {
     if (this.value) {
         curriculumLevelHidden.value = this.value;
+        console.log('[EXAM_NAME_SELECTION]', {
+            action: 'preset_changed',
+            level_id: this.value,
+            level_text: this.options[this.selectedIndex].text,
+            timestamp: new Date().toISOString()
+        });
         generateVersionedName();
     } else {
         curriculumLevelHidden.value = '';
+        console.log('[EXAM_NAME_SELECTION]', {
+            action: 'preset_cleared',
+            timestamp: new Date().toISOString()
+        });
     }
 });
 
@@ -1064,6 +1074,18 @@ function generateVersionedName() {
         const baseName = selectedOption.getAttribute('data-base-name');
         const dateStr = selectedOption.getAttribute('data-date-str');
         const existingVersion = selectedOption.getAttribute('data-next-version');
+        const displayName = selectedOption.text;
+        
+        // Log selection for debugging
+        console.log('[EXAM_NAME_GENERATION]', {
+            action: 'generating_name',
+            selected_level_id: selectedOption.value,
+            display_name: displayName,
+            base_name: baseName,
+            date_str: dateStr,
+            existing_version: existingVersion,
+            timestamp: new Date().toISOString()
+        });
         
         // Set initial name with date
         if (existingVersion && existingVersion !== '') {
@@ -1085,13 +1107,22 @@ function generateVersionedName() {
                     finalExamName = `[PT]_${baseName}_${data.date_str}`;
                 }
                 
+                // Log final name generation
+                console.log('[EXAM_NAME_GENERATION]', {
+                    action: 'name_finalized',
+                    final_exam_name: finalExamName,
+                    has_version: !!data.next_version,
+                    version_number: data.next_version || 'none',
+                    timestamp: new Date().toISOString()
+                });
+                
                 // Update the help text to show what name will be used
                 const helpText = presetNameGroup.querySelector('.help-text');
                 helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
                     '<strong>Note:</strong> Date is added automatically. Version number only added for multiple same-day uploads.';
             })
             .catch(error => {
-                console.error('Error fetching version:', error);
+                console.error('[EXAM_NAME_GENERATION] Error fetching version:', error);
                 // Keep the name we already set
                 const helpText = presetNameGroup.querySelector('.help-text');
                 helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
@@ -1138,6 +1169,42 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
         nameInput.name = 'name';
         nameInput.value = customNameInput.value;
         this.appendChild(nameInput);
+    }
+});
+
+// Log initialization of exam creation page
+document.addEventListener('DOMContentLoaded', function() {
+    const availableLevels = [];
+    const presetOptions = presetSelect.options;
+    
+    for (let i = 1; i < presetOptions.length; i++) {
+        const option = presetOptions[i];
+        if (option.value) {
+            availableLevels.push({
+                id: option.value,
+                display_name: option.text,
+                base_name: option.getAttribute('data-base-name'),
+                existing_count: option.text.match(/\((\d+) existing\)/) ? 
+                    parseInt(option.text.match(/\((\d+) existing\)/)[1]) : 0
+            });
+        }
+    }
+    
+    console.log('[EXAM_CREATE_PAGE_INIT]', {
+        action: 'page_loaded',
+        total_curriculum_levels: availableLevels.length,
+        levels_available: availableLevels,
+        has_pt_prefix: availableLevels.length > 0 ? availableLevels[0].display_name.startsWith('[PT]') : false,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Log if whitelist filtering is working
+    if (availableLevels.length === 40) {
+        console.log('[EXAM_CREATE_PAGE_INIT] ✅ Whitelist applied correctly: 40 placement test levels available');
+    } else if (availableLevels.length < 40) {
+        console.warn('[EXAM_CREATE_PAGE_INIT] ⚠️ Fewer than expected levels:', availableLevels.length, 'of 40 expected');
+    } else {
+        console.warn('[EXAM_CREATE_PAGE_INIT] ⚠️ More levels than expected:', availableLevels.length, 'vs 40 expected');
     }
 });
 
