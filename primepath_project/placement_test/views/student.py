@@ -411,17 +411,26 @@ def manual_adjust_difficulty(request, session_id):
             
             session.save()
         
+        # Get difficulty info for both levels
+        old_difficulty_info = PlacementService.get_difficulty_info(current_level)
+        new_difficulty_info = PlacementService.get_difficulty_info(new_level)
+        
         logger.info(
             f"Manual difficulty adjusted for session {session_id}: "
-            f"{current_level.full_name} -> {new_level.full_name}"
+            f"{current_level.full_name} (diff {old_difficulty_info['current_difficulty']}) -> "
+            f"{new_level.full_name} (diff {new_difficulty_info['current_difficulty']})"
         )
+        
+        print(f"[STUDENT_DIFFICULTY_SUCCESS] {{\"session\": \"{session_id}\", \"from_level\": \"{current_level.full_name}\", \"to_level\": \"{new_level.full_name}\", \"from_difficulty\": {old_difficulty_info['current_difficulty']}, \"to_difficulty\": {new_difficulty_info['current_difficulty']}, \"new_exam\": \"{new_exam.name}\"}}")
         
         return JsonResponse({
             'success': True,
             'new_level': new_level.full_name,
             'new_exam_id': str(new_exam.id),
             'new_exam_name': new_exam.name,
-            'message': f'Difficulty adjusted to {new_level.full_name}'
+            'difficulty_info': new_difficulty_info,
+            'difficulty_jump': new_difficulty_info['current_difficulty'] - old_difficulty_info['current_difficulty'],
+            'message': f'Difficulty adjusted to {new_level.full_name} (Level {new_difficulty_info["current_difficulty"]})'
         })
         
     except Exception as e:
