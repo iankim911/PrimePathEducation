@@ -1,0 +1,445 @@
+{
+  "timestamp": "2025-08-13T12:52:36.691832",
+  "dry_run": true,
+  "results": {
+    "commented_code_removed": 0,
+    "debug_statements_removed": 0,
+    "unused_imports_removed": 0,
+    "duplicate_functions_marked": 0,
+    "javascript_cleaned": 0,
+    "css_cleaned": 4,
+    "html_cleaned": 0,
+    "files_modified": [],
+    "errors": [],
+    "preserved_relationships": [
+      {
+        "model": "Teacher",
+        "field": "user",
+        "related_to": "User",
+        "type": "OneToOneField"
+      },
+      {
+        "model": "SubProgram",
+        "field": "program",
+        "related_to": "Program",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "CurriculumLevel",
+        "field": "subprogram",
+        "related_to": "SubProgram",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "PlacementRule",
+        "field": "curriculum_level",
+        "related_to": "CurriculumLevel",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "PlacementRule",
+        "field": "created_by",
+        "related_to": "Teacher",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "ExamLevelMapping",
+        "field": "curriculum_level",
+        "related_to": "CurriculumLevel",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "ExamLevelMapping",
+        "field": "exam",
+        "related_to": "Exam",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "Exam",
+        "field": "curriculum_level",
+        "related_to": "CurriculumLevel",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "Exam",
+        "field": "created_by",
+        "related_to": "Teacher",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "AudioFile",
+        "field": "exam",
+        "related_to": "Exam",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "Question",
+        "field": "exam",
+        "related_to": "Exam",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "Question",
+        "field": "audio_file",
+        "related_to": "AudioFile",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "StudentSession",
+        "field": "school",
+        "related_to": "School",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "StudentSession",
+        "field": "exam",
+        "related_to": "Exam",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "StudentSession",
+        "field": "original_curriculum_level",
+        "related_to": "CurriculumLevel",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "StudentSession",
+        "field": "final_curriculum_level",
+        "related_to": "CurriculumLevel",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "StudentAnswer",
+        "field": "session",
+        "related_to": "StudentSession",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "StudentAnswer",
+        "field": "question",
+        "related_to": "Question",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "DifficultyAdjustment",
+        "field": "session",
+        "related_to": "StudentSession",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "DifficultyAdjustment",
+        "field": "from_level",
+        "related_to": "CurriculumLevel",
+        "type": "ForeignKey"
+      },
+      {
+        "model": "DifficultyAdjustment",
+        "field": "to_level",
+        "related_to": "CurriculumLevel",
+        "type": "ForeignKey"
+      }
+    ]
+  },
+  "console_logs": [
+    {
+      "timestamp": "2025-08-13T12:52:36.685995",
+      "level": "info",
+      "message": "Cleaning JavaScript file: phase1_console_qa.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686097",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/debug-system.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686208",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/config/app-config.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686272",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/utils/event-delegation.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686332",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/modules/timer.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686402",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/modules/memory-manager.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686479",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/modules/answer-manager.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686563",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/modules/error-handler.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686635",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/modules/navigation.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686709",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/js/modules/base-module.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686771",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/admin/js/core.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686825",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/admin/js/actions.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686884",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/admin/js/cancel.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686930",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/admin/js/calendar.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.686987",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/admin/js/admin/RelatedObjectLookups.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687046",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/rest_framework/js/prettify-min.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687098",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/rest_framework/js/coreapi-0.1.1.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687279",
+      "level": "info",
+      "message": "Cleaning JavaScript file: staticfiles/rest_framework/docs/js/highlight.pack.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687522",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/phase6_monitoring.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687581",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/cleanup_monitoring.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687629",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/config/app-config.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687683",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/utils/event-delegation.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687777",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/modules/timer.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.687932",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/modules/memory-manager.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688032",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/modules/answer-manager.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688182",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/modules/mobile-handler.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688312",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/modules/error-handler.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688444",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/modules/navigation.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688552",
+      "level": "info",
+      "message": "Cleaning JavaScript file: static/js/modules/base-module.js"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688637",
+      "level": "info",
+      "message": "Cleaning CSS file: staticfiles/css/pages/student-test.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688709",
+      "level": "info",
+      "message": "Cleaning CSS file: staticfiles/rest_framework/css/bootstrap.min.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688837",
+      "level": "info",
+      "message": "Cleaning CSS file: staticfiles/rest_framework/css/font-awesome-4.0.3.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688909",
+      "level": "info",
+      "message": "Cleaning CSS file: staticfiles/rest_framework/css/bootstrap-tweaks.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.688970",
+      "level": "info",
+      "message": "Cleaning CSS file: staticfiles/rest_framework/css/bootstrap-theme.min.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689051",
+      "level": "info",
+      "message": "Cleaning CSS file: staticfiles/rest_framework/docs/css/jquery.json-view.min.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689125",
+      "level": "info",
+      "message": "Cleaning CSS file: static/css/mobile-responsive.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689215",
+      "level": "info",
+      "message": "Cleaning CSS file: static/css/components/test-warning-modal.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689285",
+      "level": "info",
+      "message": "Cleaning CSS file: static/css/components/difficulty-modal.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689342",
+      "level": "info",
+      "message": "Cleaning CSS file: static/css/pages/student-test.css"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689425",
+      "level": "info",
+      "message": "Cleaning HTML file: exam_mapping_output.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689832",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/base.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689920",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/core/index.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.689980",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/core/placement_rules_matrix.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690069",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/core/exam_mapping.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690231",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/core/placement_configuration.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690330",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/core/auth/login.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690385",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/components/audio/player.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690440",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/components/placement_test/pdf_viewer.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690497",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/components/placement_test/timer.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690552",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/components/placement_test/question_panel.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690613",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/student_test_v2.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690691",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/exam_list.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690765",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/student_test.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690934",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/start_test.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.690990",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/test_result.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.691058",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/preview_and_answers.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.691296",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/manage_questions.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.691360",
+      "level": "info",
+      "message": "Cleaning HTML file: templates/placement_test/create_exam.html"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.691447",
+      "level": "info",
+      "message": "Verifying model relationships"
+    },
+    {
+      "timestamp": "2025-08-13T12:52:36.691587",
+      "level": "info",
+      "message": "All 21 relationships preserved"
+    }
+  ]
+}
