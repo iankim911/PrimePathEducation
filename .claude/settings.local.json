@@ -234,7 +234,8 @@
       "mcp__chrome-control__reload_tab",
       "Bash(open:*)",
       "Bash(awk:*)",
-      "Bash(./cleanup_navigation_fix.sh:*)"
+      "Bash(./cleanup_navigation_fix.sh:*)",
+      "Bash(do rm -f \"$file\")"
     ],
     "deny": []
   }
