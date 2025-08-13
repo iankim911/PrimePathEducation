@@ -1,0 +1,2092 @@
+{
+  "timestamp": "2025-08-13T15:42:05.840932",
+  "summary": {
+    "files_moved": 165,
+    "failed_moves": 0,
+    "root_files_remaining": 8
+  },
+  "moved_files": [
+    {
+      "from": "API.md",
+      "to": "docs/current/guides/API.md",
+      "reason": "Active documentation"
+    },
+    {
+      "from": "DEPLOYMENT.md",
+      "to": "docs/current/guides/DEPLOYMENT.md",
+      "reason": "Active documentation"
+    },
+    {
+      "from": "CONTRIBUTING.md",
+      "to": "docs/current/guides/CONTRIBUTING.md",
+      "reason": "Active documentation"
+    },
+    {
+      "from": "PHASE8_COMPLETE_REPORT.md",
+      "to": "docs/archive/phases/PHASE8_COMPLETE_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE5_VERIFICATION_REPORT.md",
+      "to": "docs/archive/phases/PHASE5_VERIFICATION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE2_MODULARIZATION_COMPLETE.md",
+      "to": "docs/archive/phases/PHASE2_MODULARIZATION_COMPLETE.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE6_COMPLETE_SUMMARY.md",
+      "to": "docs/archive/phases/PHASE6_COMPLETE_SUMMARY.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE6_CLEANUP_PLAN.md",
+      "to": "docs/archive/phases/PHASE6_CLEANUP_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE6_COMPLETE_REPORT.md",
+      "to": "docs/archive/phases/PHASE6_COMPLETE_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE4_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE4_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE7_CLEANUP_PLAN.md",
+      "to": "docs/archive/phases/PHASE7_CLEANUP_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+      "to": "docs/archive/phases/PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE7_READY_SUMMARY.md",
+      "to": "docs/archive/phases/PHASE7_READY_SUMMARY.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE9_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE9_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE4_FINAL_REPORT.md",
+      "to": "docs/archive/phases/PHASE4_FINAL_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE7_COMPLETE_REPORT.md",
+      "to": "docs/archive/phases/PHASE7_COMPLETE_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE_11_COMPLETE.md",
+      "to": "docs/archive/phases/PHASE_11_COMPLETE.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "PHASE5_PROGRESS_REPORT.md",
+      "to": "docs/archive/phases/PHASE5_PROGRESS_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "primepath_project/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_2_IMPLEMENTATION_PLAN_20250813_154205.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "primepath_project/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_11_IMPLEMENTATION_PLAN_20250813_154205.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "primepath_project/PHASE7_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE7_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "primepath_project/PHASE8_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE8_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "from": "MIXED_QUESTIONS_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/MIXED_QUESTIONS_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+      "to": "docs/archive/fixes/TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "CORE_DROPDOWN_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/CORE_DROPDOWN_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+      "to": "docs/archive/fixes/MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+      "to": "docs/archive/fixes/COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "PHONE_PATTERN_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PHONE_PATTERN_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+      "to": "docs/archive/fixes/MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "ANSWER_KEYS_RESTORATION_COMPLETE.md",
+      "to": "docs/archive/fixes/ANSWER_KEYS_RESTORATION_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "STUDENT_INTERFACE_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/STUDENT_INTERFACE_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "VERTICAL_SPLIT_FIX.md",
+      "to": "docs/archive/fixes/VERTICAL_SPLIT_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "PDF_NAVIGATION_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PDF_NAVIGATION_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "PHASE4_CRITICAL_FIXES.md",
+      "to": "docs/archive/fixes/PHASE4_CRITICAL_FIXES.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "SUBMIT_TEST_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/SUBMIT_TEST_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "MULTIPLE_SHORT_ANSWER_FIX.md",
+      "to": "docs/archive/fixes/MULTIPLE_SHORT_ANSWER_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "AUDIO_PLAYBACK_FIX.md",
+      "to": "docs/archive/fixes/AUDIO_PLAYBACK_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "PDF_ROTATION_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/PDF_ROTATION_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PDF_UPLOAD_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/PDF_UPLOAD_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/GAP_FIX_SUCCESS_REPORT.md",
+      "to": "docs/archive/fixes/GAP_FIX_SUCCESS_REPORT.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/AUDIOFILE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/AUDIOFILE_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "to": "docs/archive/fixes/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PDF_FILE_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PDF_FILE_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/COMPLETE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/COMPLETE_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/EXAM_MAPPING_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/EXAM_MAPPING_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/SUBMISSION_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/SUBMISSION_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/FIXES_IMPLEMENTED_SUMMARY.md",
+      "to": "docs/archive/fixes/FIXES_IMPLEMENTED_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "to": "docs/archive/fixes/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/PDF_UPLOAD_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/PDF_UPLOAD_FIX_SUMMARY_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/GAP_FIX_SUCCESS_REPORT.md",
+      "to": "docs/archive/fixes/GAP_FIX_SUCCESS_REPORT_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/AUDIOFILE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/AUDIOFILE_FIX_SUMMARY_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "to": "docs/archive/fixes/FINAL_TEST_SUBPROGRAM_FIX_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/PDF_FILE_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PDF_FILE_FIX_COMPLETE_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/COMPLETE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/COMPLETE_FIX_SUMMARY_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/EXAM_MAPPING_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/EXAM_MAPPING_FIX_SUMMARY_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/SUBMISSION_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/SUBMISSION_FIX_COMPLETE_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/FIXES_IMPLEMENTED_SUMMARY.md",
+      "to": "docs/archive/fixes/FIXES_IMPLEMENTED_SUMMARY_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "primepath_project/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "to": "docs/archive/fixes/PDF_NAVIGATION_FIX_DOCUMENTATION_20250813_154205.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "from": "PLACEMENT_TEST_GAP_ANALYSIS.md",
+      "to": "docs/archive/qa/PLACEMENT_TEST_GAP_ANALYSIS.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+      "to": "docs/archive/qa/CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "FEATURE_VERIFICATION_REPORT.md",
+      "to": "docs/archive/qa/FEATURE_VERIFICATION_REPORT.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "COMPREHENSIVE_QA_REPORT_FINAL.md",
+      "to": "docs/archive/qa/COMPREHENSIVE_QA_REPORT_FINAL.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "PRIMEPATH_QA_INSTRUCTIONS.md",
+      "to": "docs/archive/qa/PRIMEPATH_QA_INSTRUCTIONS.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "FINAL_FEATURE_VERIFICATION_REPORT.md",
+      "to": "docs/archive/qa/FINAL_FEATURE_VERIFICATION_REPORT.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "PHASE2_FINAL_VERIFICATION.md",
+      "to": "docs/archive/qa/PHASE2_FINAL_VERIFICATION.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "FEATURE_VERIFICATION_COMPLETE.md",
+      "to": "docs/archive/qa/FEATURE_VERIFICATION_COMPLETE.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/qa/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/COMPREHENSIVE_QA_REPORT.md",
+      "to": "docs/archive/qa/COMPREHENSIVE_QA_REPORT.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/manual_test_report.md",
+      "to": "docs/archive/qa/manual_test_report.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "primepath_project/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/qa/TEST_SUBPROGRAM_FILTERING_SUMMARY_20250813_154205.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "primepath_project/COMPREHENSIVE_QA_REPORT.md",
+      "to": "docs/archive/qa/COMPREHENSIVE_QA_REPORT_20250813_154205.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "primepath_project/manual_test_report.md",
+      "to": "docs/archive/qa/manual_test_report_20250813_154205.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "from": "CLEANUP_COMPLETE_REPORT.md",
+      "to": "docs/archive/analysis/CLEANUP_COMPLETE_REPORT.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "STUDENT_NAME_ERROR_INVESTIGATION.md",
+      "to": "docs/archive/analysis/STUDENT_NAME_ERROR_INVESTIGATION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "PDF_TROUBLESHOOTING.md",
+      "to": "docs/archive/analysis/PDF_TROUBLESHOOTING.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "OUTER_MARGIN_REDUCTION.md",
+      "to": "docs/archive/analysis/OUTER_MARGIN_REDUCTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "NAMING_CONVENTION_UPDATE_COMPLETE.md",
+      "to": "docs/archive/analysis/NAMING_CONVENTION_UPDATE_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "PROJECT_CONTEXT_FOR_MAC.md",
+      "to": "docs/archive/analysis/PROJECT_CONTEXT_FOR_MAC.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "PHASE6_ANALYSIS.md",
+      "to": "docs/archive/analysis/PHASE6_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "EXAM_MAPPING_ANALYSIS.md",
+      "to": "docs/archive/analysis/EXAM_MAPPING_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "PHASE5_ANALYSIS.md",
+      "to": "docs/archive/analysis/PHASE5_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "MODULARIZATION_PHASE_2_ANALYSIS.md",
+      "to": "docs/archive/analysis/MODULARIZATION_PHASE_2_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "LAYOUT_IMPROVEMENTS.md",
+      "to": "docs/archive/analysis/LAYOUT_IMPROVEMENTS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "PHASE2_ULTRA_ANALYSIS.md",
+      "to": "docs/archive/analysis/PHASE2_ULTRA_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "CLEANUP_COMPLETE_SUMMARY.md",
+      "to": "docs/archive/analysis/CLEANUP_COMPLETE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+      "to": "docs/archive/analysis/COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "ROLLBACK_PLAN.md",
+      "to": "docs/archive/analysis/ROLLBACK_PLAN.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "TECHNICAL_DEBT_SUMMARY.md",
+      "to": "docs/archive/analysis/TECHNICAL_DEBT_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "BACKEND_MODULARIZATION_COMPLETE.md",
+      "to": "docs/archive/analysis/BACKEND_MODULARIZATION_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "SAFE_MODULARIZATION_PLAN.md",
+      "to": "docs/archive/analysis/SAFE_MODULARIZATION_PLAN.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "API_SESSION_ID_DOCUMENTATION.md",
+      "to": "docs/archive/analysis/API_SESSION_ID_DOCUMENTATION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "BACKEND_MODULARIZATION_PHASE3.md",
+      "to": "docs/archive/analysis/BACKEND_MODULARIZATION_PHASE3.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "DOUBLE_CHECK_COMPLETE.md",
+      "to": "docs/archive/analysis/DOUBLE_CHECK_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "MODULARIZATION_PROGRESS.md",
+      "to": "docs/archive/analysis/MODULARIZATION_PROGRESS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+      "to": "docs/archive/analysis/ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+      "to": "docs/archive/analysis/MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+      "to": "docs/archive/analysis/PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "BACKEND_COMPLETE.md",
+      "to": "docs/archive/analysis/BACKEND_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "TEMPLATE_CONSOLIDATION_COMPLETE.md",
+      "to": "docs/archive/analysis/TEMPLATE_CONSOLIDATION_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "MODULARIZATION_SUCCESS.md",
+      "to": "docs/archive/analysis/MODULARIZATION_SUCCESS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "DEPLOYMENT_INSTRUCTIONS.md",
+      "to": "docs/archive/analysis/DEPLOYMENT_INSTRUCTIONS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "QUICK_START.md",
+      "to": "docs/archive/analysis/QUICK_START.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "MARGIN_REDUCTION_COMPLETE.md",
+      "to": "docs/archive/analysis/MARGIN_REDUCTION_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/CURRICULUM_PRD.md",
+      "to": "docs/archive/analysis/CURRICULUM_PRD.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "to": "docs/archive/analysis/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "to": "docs/archive/analysis/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/MUST_READ_SOLUTION.md",
+      "to": "docs/archive/analysis/MUST_READ_SOLUTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/DAILY_EXECUTION_CARDS.md",
+      "to": "docs/archive/analysis/DAILY_EXECUTION_CARDS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/CLEANUP_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "to": "docs/archive/analysis/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/FILE_STORAGE_EXPLAINED.md",
+      "to": "docs/archive/analysis/FILE_STORAGE_EXPLAINED.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/CURRICULUM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/analysis/CURRICULUM_FILTERING_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/NAVIGATION_CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/NAVIGATION_CLEANUP_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/CLEANUP_STRATEGY_PHASE_1.md",
+      "to": "docs/archive/analysis/CLEANUP_STRATEGY_PHASE_1.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/MODULARIZATION_EXECUTION_PLAN.md",
+      "to": "docs/archive/analysis/MODULARIZATION_EXECUTION_PLAN.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "to": "docs/archive/analysis/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "to": "docs/archive/analysis/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "to": "docs/archive/analysis/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "to": "docs/archive/analysis/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "to": "docs/archive/analysis/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/EXAM_DELETION_CASCADE_REPORT.md",
+      "to": "docs/archive/analysis/EXAM_DELETION_CASCADE_REPORT.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/CURRICULUM_PRD.md",
+      "to": "docs/archive/analysis/CURRICULUM_PRD_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "to": "docs/archive/analysis/COMPREHENSIVE_CODEBASE_ANALYSIS_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "to": "docs/archive/analysis/DEBUG_REMOVAL_LESSONS_LEARNED_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/MUST_READ_SOLUTION.md",
+      "to": "docs/archive/analysis/MUST_READ_SOLUTION_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/DAILY_EXECUTION_CARDS.md",
+      "to": "docs/archive/analysis/DAILY_EXECUTION_CARDS_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/CLEANUP_SUMMARY_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "to": "docs/archive/analysis/PLACEMENT_NAME_UPDATE_SUMMARY_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/FILE_STORAGE_EXPLAINED.md",
+      "to": "docs/archive/analysis/FILE_STORAGE_EXPLAINED_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/CURRICULUM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/analysis/CURRICULUM_FILTERING_SUMMARY_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/NAVIGATION_CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/NAVIGATION_CLEANUP_SUMMARY_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/CLEANUP_STRATEGY_PHASE_1.md",
+      "to": "docs/archive/analysis/CLEANUP_STRATEGY_PHASE_1_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/MODULARIZATION_EXECUTION_PLAN.md",
+      "to": "docs/archive/analysis/MODULARIZATION_EXECUTION_PLAN_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "to": "docs/archive/analysis/MCQ_UI_IMPROVEMENTS_SUMMARY_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "to": "docs/archive/analysis/ANSWER_MAPPING_FEATURE_SUMMARY_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "to": "docs/archive/analysis/CLAUDE_VIBE_CODING_EXECUTION_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "to": "docs/archive/analysis/PDF_LAYOUT_IMPROVEMENTS_COMPLETE_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "to": "docs/archive/analysis/UPLOAD_EXAM_QUICK_REFERENCE_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "primepath_project/EXAM_DELETION_CASCADE_REPORT.md",
+      "to": "docs/archive/analysis/EXAM_DELETION_CASCADE_REPORT_20250813_154205.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "docs/api/v1/endpoints.md",
+      "to": "docs/archive/analysis/endpoints.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "from": "MIGRATION_TO_MAC_GUIDE.md",
+      "to": "docs/archive/implementation/MIGRATION_TO_MAC_GUIDE.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+      "to": "docs/archive/implementation/INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/PDF_ROTATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/PDF_ROTATION_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/MODULARIZATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/MODULARIZATION_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/TAB_RENAMING_IMPLEMENTATION_SUMMARY_20250813_154205.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project/PDF_ROTATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/PDF_ROTATION_IMPLEMENTATION_20250813_154205.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/CURRICULUM_IMPLEMENTATION_SUMMARY_20250813_154205.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project/MODULARIZATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/MODULARIZATION_IMPLEMENTATION_20250813_154205.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/TEMPLATE_AUDIT_REPORT.md",
+      "to": "docs/archive/legacy/TEMPLATE_AUDIT_REPORT.md",
+      "reason": "Historical legacy"
+    },
+    {
+      "from": "primepath_project/TEMPLATE_AUDIT_REPORT.md",
+      "to": "docs/archive/legacy/TEMPLATE_AUDIT_REPORT_20250813_154205.md",
+      "reason": "Historical legacy"
+    },
+    {
+      "from": "CHROME_CONTROL_MCP_SETUP.md",
+      "to": "docs/archive/config/CHROME_CONTROL_MCP_SETUP.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "MAC_SETUP_FOR_CLAUDE.md",
+      "to": "docs/archive/config/MAC_SETUP_FOR_CLAUDE.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "INSTALLATION_COMPLETE_REPORT.md",
+      "to": "docs/archive/config/INSTALLATION_COMPLETE_REPORT.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "CUSTOM_CONFIGURATIONS_MAC.md",
+      "to": "docs/archive/config/CUSTOM_CONFIGURATIONS_MAC.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "SETUP_GUIDE.md",
+      "to": "docs/archive/config/SETUP_GUIDE.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/INSTALLATION_ANALYSIS_REPORT.md",
+      "to": "docs/archive/config/INSTALLATION_ANALYSIS_REPORT.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "primepath_project_backup_20250813_111206/SETUP_STATUS.md",
+      "to": "docs/archive/config/SETUP_STATUS.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "primepath_project/INSTALLATION_ANALYSIS_REPORT.md",
+      "to": "docs/archive/config/INSTALLATION_ANALYSIS_REPORT_20250813_154205.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "from": "primepath_project/SETUP_STATUS.md",
+      "to": "docs/archive/config/SETUP_STATUS_20250813_154205.md",
+      "reason": "Historical configuration"
+    }
+  ],
+  "failed_moves": [],
+  "console_logs": [
+    {
+      "timestamp": "2025-08-13T15:42:05.821258",
+      "category": "SAFETY",
+      "message": "All safety checks passed",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821415",
+      "category": "MOVE",
+      "message": "Moved: API.md \u2192 docs/current/guides/API.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821505",
+      "category": "MOVE",
+      "message": "Moved: DEPLOYMENT.md \u2192 docs/current/guides/DEPLOYMENT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821588",
+      "category": "MOVE",
+      "message": "Moved: CONTRIBUTING.md \u2192 docs/current/guides/CONTRIBUTING.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821685",
+      "category": "MOVE",
+      "message": "Moved: PHASE8_COMPLETE_REPORT.md \u2192 docs/archive/phases/PHASE8_COMPLETE_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821775",
+      "category": "MOVE",
+      "message": "Moved: PHASE5_VERIFICATION_REPORT.md \u2192 docs/archive/phases/PHASE5_VERIFICATION_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821851",
+      "category": "MOVE",
+      "message": "Moved: PHASE2_MODULARIZATION_COMPLETE.md \u2192 docs/archive/phases/PHASE2_MODULARIZATION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821926",
+      "category": "MOVE",
+      "message": "Moved: PHASE6_COMPLETE_SUMMARY.md \u2192 docs/archive/phases/PHASE6_COMPLETE_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.821998",
+      "category": "MOVE",
+      "message": "Moved: PHASE6_CLEANUP_PLAN.md \u2192 docs/archive/phases/PHASE6_CLEANUP_PLAN.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822071",
+      "category": "MOVE",
+      "message": "Moved: PHASE6_COMPLETE_REPORT.md \u2192 docs/archive/phases/PHASE6_COMPLETE_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822198",
+      "category": "MOVE",
+      "message": "Moved: PHASE4_COMPLETION_REPORT.md \u2192 docs/archive/phases/PHASE4_COMPLETION_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822290",
+      "category": "MOVE",
+      "message": "Moved: PHASE7_CLEANUP_PLAN.md \u2192 docs/archive/phases/PHASE7_CLEANUP_PLAN.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822420",
+      "category": "MOVE",
+      "message": "Moved: PHASE9_MODEL_MODULARIZATION_COMPLETE.md \u2192 docs/archive/phases/PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822522",
+      "category": "MOVE",
+      "message": "Moved: PHASE7_READY_SUMMARY.md \u2192 docs/archive/phases/PHASE7_READY_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822612",
+      "category": "MOVE",
+      "message": "Moved: PHASE9_COMPLETION_REPORT.md \u2192 docs/archive/phases/PHASE9_COMPLETION_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822705",
+      "category": "MOVE",
+      "message": "Moved: PHASE4_FINAL_REPORT.md \u2192 docs/archive/phases/PHASE4_FINAL_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822785",
+      "category": "MOVE",
+      "message": "Moved: PHASE7_COMPLETE_REPORT.md \u2192 docs/archive/phases/PHASE7_COMPLETE_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822869",
+      "category": "MOVE",
+      "message": "Moved: PHASE_11_COMPLETE.md \u2192 docs/archive/phases/PHASE_11_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.822950",
+      "category": "MOVE",
+      "message": "Moved: PHASE5_PROGRESS_REPORT.md \u2192 docs/archive/phases/PHASE5_PROGRESS_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823048",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PHASE_2_IMPLEMENTATION_PLAN.md \u2192 docs/archive/phases/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823134",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PHASE_11_IMPLEMENTATION_PLAN.md \u2192 docs/archive/phases/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823153",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/phases/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823239",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PHASE_2_IMPLEMENTATION_PLAN.md \u2192 docs/archive/phases/PHASE_2_IMPLEMENTATION_PLAN_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823257",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/phases/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823338",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PHASE_11_IMPLEMENTATION_PLAN.md \u2192 docs/archive/phases/PHASE_11_IMPLEMENTATION_PLAN_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823422",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PHASE7_COMPLETION_REPORT.md \u2192 docs/archive/phases/PHASE7_COMPLETION_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823496",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PHASE8_COMPLETION_REPORT.md \u2192 docs/archive/phases/PHASE8_COMPLETION_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823572",
+      "category": "MOVE",
+      "message": "Moved: MIXED_QUESTIONS_FIX_COMPLETE.md \u2192 docs/archive/fixes/MIXED_QUESTIONS_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823653",
+      "category": "MOVE",
+      "message": "Moved: TIMER_EXPIRY_FIX_FINAL_SUMMARY.md \u2192 docs/archive/fixes/TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823730",
+      "category": "MOVE",
+      "message": "Moved: CORE_DROPDOWN_FIX_COMPLETE.md \u2192 docs/archive/fixes/CORE_DROPDOWN_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823804",
+      "category": "MOVE",
+      "message": "Moved: MULTIPLE_SHORT_ANSWER_FINAL_FIX.md \u2192 docs/archive/fixes/MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.823903",
+      "category": "MOVE",
+      "message": "Moved: COMPREHENSIVE_FIX_IMPLEMENTATION.md \u2192 docs/archive/fixes/COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824004",
+      "category": "MOVE",
+      "message": "Moved: TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md \u2192 docs/archive/fixes/TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824127",
+      "category": "MOVE",
+      "message": "Moved: PHONE_PATTERN_FIX_COMPLETE.md \u2192 docs/archive/fixes/PHONE_PATTERN_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824237",
+      "category": "MOVE",
+      "message": "Moved: MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md \u2192 docs/archive/fixes/MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824344",
+      "category": "MOVE",
+      "message": "Moved: ANSWER_KEYS_RESTORATION_COMPLETE.md \u2192 docs/archive/fixes/ANSWER_KEYS_RESTORATION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824461",
+      "category": "MOVE",
+      "message": "Moved: STUDENT_INTERFACE_FIX_COMPLETE.md \u2192 docs/archive/fixes/STUDENT_INTERFACE_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824570",
+      "category": "MOVE",
+      "message": "Moved: VERTICAL_SPLIT_FIX.md \u2192 docs/archive/fixes/VERTICAL_SPLIT_FIX.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824681",
+      "category": "MOVE",
+      "message": "Moved: PDF_NAVIGATION_FIX_COMPLETE.md \u2192 docs/archive/fixes/PDF_NAVIGATION_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824798",
+      "category": "MOVE",
+      "message": "Moved: PHASE4_CRITICAL_FIXES.md \u2192 docs/archive/fixes/PHASE4_CRITICAL_FIXES.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824896",
+      "category": "MOVE",
+      "message": "Moved: SUBMIT_TEST_FIX_COMPLETE.md \u2192 docs/archive/fixes/SUBMIT_TEST_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.824999",
+      "category": "MOVE",
+      "message": "Moved: MULTIPLE_SHORT_ANSWER_FIX.md \u2192 docs/archive/fixes/MULTIPLE_SHORT_ANSWER_FIX.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.825147",
+      "category": "MOVE",
+      "message": "Moved: AUDIO_PLAYBACK_FIX.md \u2192 docs/archive/fixes/AUDIO_PLAYBACK_FIX.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.825296",
+      "category": "MOVE",
+      "message": "Moved: PDF_ROTATION_FIX_SUMMARY.md \u2192 docs/archive/fixes/PDF_ROTATION_FIX_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.825419",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PDF_UPLOAD_FIX_SUMMARY.md \u2192 docs/archive/fixes/PDF_UPLOAD_FIX_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.825566",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/GAP_FIX_SUCCESS_REPORT.md \u2192 docs/archive/fixes/GAP_FIX_SUCCESS_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.825716",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/AUDIOFILE_FIX_SUMMARY.md \u2192 docs/archive/fixes/AUDIOFILE_FIX_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.825827",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/FINAL_TEST_SUBPROGRAM_FIX.md \u2192 docs/archive/fixes/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.825934",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PDF_FILE_FIX_COMPLETE.md \u2192 docs/archive/fixes/PDF_FILE_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826047",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/COMPLETE_FIX_SUMMARY.md \u2192 docs/archive/fixes/COMPLETE_FIX_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826172",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/EXAM_MAPPING_FIX_SUMMARY.md \u2192 docs/archive/fixes/EXAM_MAPPING_FIX_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826286",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/SUBMISSION_FIX_COMPLETE.md \u2192 docs/archive/fixes/SUBMISSION_FIX_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826376",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/FIXES_IMPLEMENTED_SUMMARY.md \u2192 docs/archive/fixes/FIXES_IMPLEMENTED_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826473",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PDF_NAVIGATION_FIX_DOCUMENTATION.md \u2192 docs/archive/fixes/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826525",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/PDF_UPLOAD_FIX_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826643",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PDF_UPLOAD_FIX_SUMMARY.md \u2192 docs/archive/fixes/PDF_UPLOAD_FIX_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826676",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/GAP_FIX_SUCCESS_REPORT.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826837",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/GAP_FIX_SUCCESS_REPORT.md \u2192 docs/archive/fixes/GAP_FIX_SUCCESS_REPORT_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826858",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/AUDIOFILE_FIX_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826956",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/AUDIOFILE_FIX_SUMMARY.md \u2192 docs/archive/fixes/AUDIOFILE_FIX_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.826977",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827066",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/FINAL_TEST_SUBPROGRAM_FIX.md \u2192 docs/archive/fixes/FINAL_TEST_SUBPROGRAM_FIX_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827085",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/PDF_FILE_FIX_COMPLETE.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827172",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PDF_FILE_FIX_COMPLETE.md \u2192 docs/archive/fixes/PDF_FILE_FIX_COMPLETE_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827236",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/COMPLETE_FIX_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827322",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/COMPLETE_FIX_SUMMARY.md \u2192 docs/archive/fixes/COMPLETE_FIX_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827345",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/EXAM_MAPPING_FIX_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827440",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/EXAM_MAPPING_FIX_SUMMARY.md \u2192 docs/archive/fixes/EXAM_MAPPING_FIX_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827466",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/SUBMISSION_FIX_COMPLETE.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827547",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/SUBMISSION_FIX_COMPLETE.md \u2192 docs/archive/fixes/SUBMISSION_FIX_COMPLETE_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827565",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/FIXES_IMPLEMENTED_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827653",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/FIXES_IMPLEMENTED_SUMMARY.md \u2192 docs/archive/fixes/FIXES_IMPLEMENTED_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827671",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/fixes/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827764",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PDF_NAVIGATION_FIX_DOCUMENTATION.md \u2192 docs/archive/fixes/PDF_NAVIGATION_FIX_DOCUMENTATION_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827839",
+      "category": "MOVE",
+      "message": "Moved: PLACEMENT_TEST_GAP_ANALYSIS.md \u2192 docs/archive/qa/PLACEMENT_TEST_GAP_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.827910",
+      "category": "MOVE",
+      "message": "Moved: CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md \u2192 docs/archive/qa/CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828001",
+      "category": "MOVE",
+      "message": "Moved: FEATURE_VERIFICATION_REPORT.md \u2192 docs/archive/qa/FEATURE_VERIFICATION_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828095",
+      "category": "MOVE",
+      "message": "Moved: COMPREHENSIVE_QA_REPORT_FINAL.md \u2192 docs/archive/qa/COMPREHENSIVE_QA_REPORT_FINAL.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828191",
+      "category": "MOVE",
+      "message": "Moved: PRIMEPATH_QA_INSTRUCTIONS.md \u2192 docs/archive/qa/PRIMEPATH_QA_INSTRUCTIONS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828264",
+      "category": "MOVE",
+      "message": "Moved: FINAL_FEATURE_VERIFICATION_REPORT.md \u2192 docs/archive/qa/FINAL_FEATURE_VERIFICATION_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828379",
+      "category": "MOVE",
+      "message": "Moved: PHASE2_FINAL_VERIFICATION.md \u2192 docs/archive/qa/PHASE2_FINAL_VERIFICATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828519",
+      "category": "MOVE",
+      "message": "Moved: FEATURE_VERIFICATION_COMPLETE.md \u2192 docs/archive/qa/FEATURE_VERIFICATION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828628",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/TEST_SUBPROGRAM_FILTERING_SUMMARY.md \u2192 docs/archive/qa/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828736",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/COMPREHENSIVE_QA_REPORT.md \u2192 docs/archive/qa/COMPREHENSIVE_QA_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828853",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/manual_test_report.md \u2192 docs/archive/qa/manual_test_report.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.828981",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/qa/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829155",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/TEST_SUBPROGRAM_FILTERING_SUMMARY.md \u2192 docs/archive/qa/TEST_SUBPROGRAM_FILTERING_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829210",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/qa/COMPREHENSIVE_QA_REPORT.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829324",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/COMPREHENSIVE_QA_REPORT.md \u2192 docs/archive/qa/COMPREHENSIVE_QA_REPORT_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829364",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/qa/manual_test_report.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829487",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/manual_test_report.md \u2192 docs/archive/qa/manual_test_report_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829613",
+      "category": "MOVE",
+      "message": "Moved: CLEANUP_COMPLETE_REPORT.md \u2192 docs/archive/analysis/CLEANUP_COMPLETE_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829748",
+      "category": "MOVE",
+      "message": "Moved: STUDENT_NAME_ERROR_INVESTIGATION.md \u2192 docs/archive/analysis/STUDENT_NAME_ERROR_INVESTIGATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.829906",
+      "category": "MOVE",
+      "message": "Moved: PDF_TROUBLESHOOTING.md \u2192 docs/archive/analysis/PDF_TROUBLESHOOTING.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830015",
+      "category": "MOVE",
+      "message": "Moved: OUTER_MARGIN_REDUCTION.md \u2192 docs/archive/analysis/OUTER_MARGIN_REDUCTION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830115",
+      "category": "MOVE",
+      "message": "Moved: NAMING_CONVENTION_UPDATE_COMPLETE.md \u2192 docs/archive/analysis/NAMING_CONVENTION_UPDATE_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830206",
+      "category": "MOVE",
+      "message": "Moved: PROJECT_CONTEXT_FOR_MAC.md \u2192 docs/archive/analysis/PROJECT_CONTEXT_FOR_MAC.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830292",
+      "category": "MOVE",
+      "message": "Moved: PHASE6_ANALYSIS.md \u2192 docs/archive/analysis/PHASE6_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830381",
+      "category": "MOVE",
+      "message": "Moved: EXAM_MAPPING_ANALYSIS.md \u2192 docs/archive/analysis/EXAM_MAPPING_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830473",
+      "category": "MOVE",
+      "message": "Moved: PHASE5_ANALYSIS.md \u2192 docs/archive/analysis/PHASE5_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830600",
+      "category": "MOVE",
+      "message": "Moved: MODULARIZATION_PHASE_2_ANALYSIS.md \u2192 docs/archive/analysis/MODULARIZATION_PHASE_2_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830717",
+      "category": "MOVE",
+      "message": "Moved: LAYOUT_IMPROVEMENTS.md \u2192 docs/archive/analysis/LAYOUT_IMPROVEMENTS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830825",
+      "category": "MOVE",
+      "message": "Moved: PHASE2_ULTRA_ANALYSIS.md \u2192 docs/archive/analysis/PHASE2_ULTRA_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.830929",
+      "category": "MOVE",
+      "message": "Moved: CLEANUP_COMPLETE_SUMMARY.md \u2192 docs/archive/analysis/CLEANUP_COMPLETE_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831054",
+      "category": "MOVE",
+      "message": "Moved: COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md \u2192 docs/archive/analysis/COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831153",
+      "category": "MOVE",
+      "message": "Moved: ROLLBACK_PLAN.md \u2192 docs/archive/analysis/ROLLBACK_PLAN.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831248",
+      "category": "MOVE",
+      "message": "Moved: TECHNICAL_DEBT_SUMMARY.md \u2192 docs/archive/analysis/TECHNICAL_DEBT_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831354",
+      "category": "MOVE",
+      "message": "Moved: BACKEND_MODULARIZATION_COMPLETE.md \u2192 docs/archive/analysis/BACKEND_MODULARIZATION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831459",
+      "category": "MOVE",
+      "message": "Moved: SAFE_MODULARIZATION_PLAN.md \u2192 docs/archive/analysis/SAFE_MODULARIZATION_PLAN.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831569",
+      "category": "MOVE",
+      "message": "Moved: API_SESSION_ID_DOCUMENTATION.md \u2192 docs/archive/analysis/API_SESSION_ID_DOCUMENTATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831668",
+      "category": "MOVE",
+      "message": "Moved: BACKEND_MODULARIZATION_PHASE3.md \u2192 docs/archive/analysis/BACKEND_MODULARIZATION_PHASE3.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831772",
+      "category": "MOVE",
+      "message": "Moved: DOUBLE_CHECK_COMPLETE.md \u2192 docs/archive/analysis/DOUBLE_CHECK_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.831907",
+      "category": "MOVE",
+      "message": "Moved: MODULARIZATION_PROGRESS.md \u2192 docs/archive/analysis/MODULARIZATION_PROGRESS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832015",
+      "category": "MOVE",
+      "message": "Moved: ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md \u2192 docs/archive/analysis/ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832139",
+      "category": "MOVE",
+      "message": "Moved: MODULARIZATION_PROJECT_COMPLETE_REPORT.md \u2192 docs/archive/analysis/MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832222",
+      "category": "MOVE",
+      "message": "Moved: PDF_ROTATION_PERSISTENCE_COMPLETE.md \u2192 docs/archive/analysis/PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832309",
+      "category": "MOVE",
+      "message": "Moved: BACKEND_COMPLETE.md \u2192 docs/archive/analysis/BACKEND_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832441",
+      "category": "MOVE",
+      "message": "Moved: TEMPLATE_CONSOLIDATION_COMPLETE.md \u2192 docs/archive/analysis/TEMPLATE_CONSOLIDATION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832563",
+      "category": "MOVE",
+      "message": "Moved: MODULARIZATION_SUCCESS.md \u2192 docs/archive/analysis/MODULARIZATION_SUCCESS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832656",
+      "category": "MOVE",
+      "message": "Moved: DEPLOYMENT_INSTRUCTIONS.md \u2192 docs/archive/analysis/DEPLOYMENT_INSTRUCTIONS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832725",
+      "category": "MOVE",
+      "message": "Moved: QUICK_START.md \u2192 docs/archive/analysis/QUICK_START.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832805",
+      "category": "MOVE",
+      "message": "Moved: MARGIN_REDUCTION_COMPLETE.md \u2192 docs/archive/analysis/MARGIN_REDUCTION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832877",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/CURRICULUM_PRD.md \u2192 docs/archive/analysis/CURRICULUM_PRD.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.832946",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/COMPREHENSIVE_CODEBASE_ANALYSIS.md \u2192 docs/archive/analysis/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833026",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/DEBUG_REMOVAL_LESSONS_LEARNED.md \u2192 docs/archive/analysis/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833098",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/MUST_READ_SOLUTION.md \u2192 docs/archive/analysis/MUST_READ_SOLUTION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833173",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/DAILY_EXECUTION_CARDS.md \u2192 docs/archive/analysis/DAILY_EXECUTION_CARDS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833243",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/CLEANUP_SUMMARY.md \u2192 docs/archive/analysis/CLEANUP_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833309",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PLACEMENT_NAME_UPDATE_SUMMARY.md \u2192 docs/archive/analysis/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833376",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/FILE_STORAGE_EXPLAINED.md \u2192 docs/archive/analysis/FILE_STORAGE_EXPLAINED.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833446",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/CURRICULUM_FILTERING_SUMMARY.md \u2192 docs/archive/analysis/CURRICULUM_FILTERING_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833523",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/NAVIGATION_CLEANUP_SUMMARY.md \u2192 docs/archive/analysis/NAVIGATION_CLEANUP_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833593",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/CLEANUP_STRATEGY_PHASE_1.md \u2192 docs/archive/analysis/CLEANUP_STRATEGY_PHASE_1.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833666",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/MODULARIZATION_EXECUTION_PLAN.md \u2192 docs/archive/analysis/MODULARIZATION_EXECUTION_PLAN.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833733",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/MCQ_UI_IMPROVEMENTS_SUMMARY.md \u2192 docs/archive/analysis/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833801",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/ANSWER_MAPPING_FEATURE_SUMMARY.md \u2192 docs/archive/analysis/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833869",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/CLAUDE_VIBE_CODING_EXECUTION.md \u2192 docs/archive/analysis/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.833939",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md \u2192 docs/archive/analysis/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834012",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/UPLOAD_EXAM_QUICK_REFERENCE.md \u2192 docs/archive/analysis/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834085",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/EXAM_DELETION_CASCADE_REPORT.md \u2192 docs/archive/analysis/EXAM_DELETION_CASCADE_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834104",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/CURRICULUM_PRD.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834174",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/CURRICULUM_PRD.md \u2192 docs/archive/analysis/CURRICULUM_PRD_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834190",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834267",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/COMPREHENSIVE_CODEBASE_ANALYSIS.md \u2192 docs/archive/analysis/COMPREHENSIVE_CODEBASE_ANALYSIS_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834283",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834360",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/DEBUG_REMOVAL_LESSONS_LEARNED.md \u2192 docs/archive/analysis/DEBUG_REMOVAL_LESSONS_LEARNED_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834376",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/MUST_READ_SOLUTION.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834450",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/MUST_READ_SOLUTION.md \u2192 docs/archive/analysis/MUST_READ_SOLUTION_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834466",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/DAILY_EXECUTION_CARDS.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834537",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/DAILY_EXECUTION_CARDS.md \u2192 docs/archive/analysis/DAILY_EXECUTION_CARDS_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834552",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/CLEANUP_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834618",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/CLEANUP_SUMMARY.md \u2192 docs/archive/analysis/CLEANUP_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834634",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834707",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PLACEMENT_NAME_UPDATE_SUMMARY.md \u2192 docs/archive/analysis/PLACEMENT_NAME_UPDATE_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834723",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/FILE_STORAGE_EXPLAINED.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834799",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/FILE_STORAGE_EXPLAINED.md \u2192 docs/archive/analysis/FILE_STORAGE_EXPLAINED_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834814",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/CURRICULUM_FILTERING_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834889",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/CURRICULUM_FILTERING_SUMMARY.md \u2192 docs/archive/analysis/CURRICULUM_FILTERING_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834904",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/NAVIGATION_CLEANUP_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834973",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/NAVIGATION_CLEANUP_SUMMARY.md \u2192 docs/archive/analysis/NAVIGATION_CLEANUP_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.834989",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/CLEANUP_STRATEGY_PHASE_1.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835057",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/CLEANUP_STRATEGY_PHASE_1.md \u2192 docs/archive/analysis/CLEANUP_STRATEGY_PHASE_1_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835073",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/MODULARIZATION_EXECUTION_PLAN.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835154",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/MODULARIZATION_EXECUTION_PLAN.md \u2192 docs/archive/analysis/MODULARIZATION_EXECUTION_PLAN_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835169",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835239",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/MCQ_UI_IMPROVEMENTS_SUMMARY.md \u2192 docs/archive/analysis/MCQ_UI_IMPROVEMENTS_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835256",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835333",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/ANSWER_MAPPING_FEATURE_SUMMARY.md \u2192 docs/archive/analysis/ANSWER_MAPPING_FEATURE_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835353",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835422",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/CLAUDE_VIBE_CODING_EXECUTION.md \u2192 docs/archive/analysis/CLAUDE_VIBE_CODING_EXECUTION_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835437",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835507",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md \u2192 docs/archive/analysis/PDF_LAYOUT_IMPROVEMENTS_COMPLETE_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835522",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835592",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/UPLOAD_EXAM_QUICK_REFERENCE.md \u2192 docs/archive/analysis/UPLOAD_EXAM_QUICK_REFERENCE_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835606",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/analysis/EXAM_DELETION_CASCADE_REPORT.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835675",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/EXAM_DELETION_CASCADE_REPORT.md \u2192 docs/archive/analysis/EXAM_DELETION_CASCADE_REPORT_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835771",
+      "category": "MOVE",
+      "message": "Moved: docs/api/v1/endpoints.md \u2192 docs/archive/analysis/endpoints.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835879",
+      "category": "MOVE",
+      "message": "Moved: MIGRATION_TO_MAC_GUIDE.md \u2192 docs/archive/implementation/MIGRATION_TO_MAC_GUIDE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.835969",
+      "category": "MOVE",
+      "message": "Moved: INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md \u2192 docs/archive/implementation/INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836052",
+      "category": "MOVE",
+      "message": "Moved: SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md \u2192 docs/archive/implementation/SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836141",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md \u2192 docs/archive/implementation/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836215",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/PDF_ROTATION_IMPLEMENTATION.md \u2192 docs/archive/implementation/PDF_ROTATION_IMPLEMENTATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836291",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/CURRICULUM_IMPLEMENTATION_SUMMARY.md \u2192 docs/archive/implementation/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836393",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/MODULARIZATION_IMPLEMENTATION.md \u2192 docs/archive/implementation/MODULARIZATION_IMPLEMENTATION.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836439",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/implementation/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836553",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md \u2192 docs/archive/implementation/TAB_RENAMING_IMPLEMENTATION_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836583",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/implementation/PDF_ROTATION_IMPLEMENTATION.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836701",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/PDF_ROTATION_IMPLEMENTATION.md \u2192 docs/archive/implementation/PDF_ROTATION_IMPLEMENTATION_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836746",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/implementation/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836855",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/CURRICULUM_IMPLEMENTATION_SUMMARY.md \u2192 docs/archive/implementation/CURRICULUM_IMPLEMENTATION_SUMMARY_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.836901",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/implementation/MODULARIZATION_IMPLEMENTATION.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837006",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/MODULARIZATION_IMPLEMENTATION.md \u2192 docs/archive/implementation/MODULARIZATION_IMPLEMENTATION_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837124",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/TEMPLATE_AUDIT_REPORT.md \u2192 docs/archive/legacy/TEMPLATE_AUDIT_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837159",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/legacy/TEMPLATE_AUDIT_REPORT.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837277",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/TEMPLATE_AUDIT_REPORT.md \u2192 docs/archive/legacy/TEMPLATE_AUDIT_REPORT_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837458",
+      "category": "MOVE",
+      "message": "Moved: CHROME_CONTROL_MCP_SETUP.md \u2192 docs/archive/config/CHROME_CONTROL_MCP_SETUP.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837561",
+      "category": "MOVE",
+      "message": "Moved: MAC_SETUP_FOR_CLAUDE.md \u2192 docs/archive/config/MAC_SETUP_FOR_CLAUDE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837670",
+      "category": "MOVE",
+      "message": "Moved: INSTALLATION_COMPLETE_REPORT.md \u2192 docs/archive/config/INSTALLATION_COMPLETE_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837786",
+      "category": "MOVE",
+      "message": "Moved: CUSTOM_CONFIGURATIONS_MAC.md \u2192 docs/archive/config/CUSTOM_CONFIGURATIONS_MAC.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.837904",
+      "category": "MOVE",
+      "message": "Moved: SETUP_GUIDE.md \u2192 docs/archive/config/SETUP_GUIDE.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838019",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/INSTALLATION_ANALYSIS_REPORT.md \u2192 docs/archive/config/INSTALLATION_ANALYSIS_REPORT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838123",
+      "category": "MOVE",
+      "message": "Moved: primepath_project_backup_20250813_111206/SETUP_STATUS.md \u2192 docs/archive/config/SETUP_STATUS.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838152",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/config/INSTALLATION_ANALYSIS_REPORT.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838254",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/INSTALLATION_ANALYSIS_REPORT.md \u2192 docs/archive/config/INSTALLATION_ANALYSIS_REPORT_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838282",
+      "category": "MOVE",
+      "message": "Destination exists: docs/archive/config/SETUP_STATUS.md",
+      "level": "warning"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838390",
+      "category": "MOVE",
+      "message": "Moved: primepath_project/SETUP_STATUS.md \u2192 docs/archive/config/SETUP_STATUS_20250813_154205.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838561",
+      "category": "REDIRECT",
+      "message": "Created redirect for API.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838667",
+      "category": "REDIRECT",
+      "message": "Created redirect for DEPLOYMENT.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:42:05.838775",
+      "category": "REDIRECT",
+      "message": "Created redirect for CONTRIBUTING.md",
+      "level": "success"
+    }
+  ]
+}

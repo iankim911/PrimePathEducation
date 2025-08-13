@@ -1,0 +1,1040 @@
+{
+  "keep_in_root": [
+    {
+      "file": "README.md",
+      "reason": "Essential root file"
+    },
+    {
+      "file": "CLAUDE.md",
+      "reason": "Essential root file"
+    },
+    {
+      "file": "README.md",
+      "reason": "Essential root file"
+    },
+    {
+      "file": "README.md",
+      "reason": "Essential root file"
+    },
+    {
+      "file": "README.md",
+      "reason": "Essential root file"
+    }
+  ],
+  "move_to_current": [
+    {
+      "file": "API.md",
+      "from": "API.md",
+      "to": "docs/current/guides/API.md",
+      "reason": "Active documentation"
+    },
+    {
+      "file": "DEPLOYMENT.md",
+      "from": "DEPLOYMENT.md",
+      "to": "docs/current/guides/DEPLOYMENT.md",
+      "reason": "Active documentation"
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "from": "CONTRIBUTING.md",
+      "to": "docs/current/guides/CONTRIBUTING.md",
+      "reason": "Active documentation"
+    }
+  ],
+  "move_to_archive": [
+    {
+      "file": "PHASE8_COMPLETE_REPORT.md",
+      "from": "PHASE8_COMPLETE_REPORT.md",
+      "to": "docs/archive/phases/PHASE8_COMPLETE_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE5_VERIFICATION_REPORT.md",
+      "from": "PHASE5_VERIFICATION_REPORT.md",
+      "to": "docs/archive/phases/PHASE5_VERIFICATION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE2_MODULARIZATION_COMPLETE.md",
+      "from": "PHASE2_MODULARIZATION_COMPLETE.md",
+      "to": "docs/archive/phases/PHASE2_MODULARIZATION_COMPLETE.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE6_COMPLETE_SUMMARY.md",
+      "from": "PHASE6_COMPLETE_SUMMARY.md",
+      "to": "docs/archive/phases/PHASE6_COMPLETE_SUMMARY.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE6_CLEANUP_PLAN.md",
+      "from": "PHASE6_CLEANUP_PLAN.md",
+      "to": "docs/archive/phases/PHASE6_CLEANUP_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE6_COMPLETE_REPORT.md",
+      "from": "PHASE6_COMPLETE_REPORT.md",
+      "to": "docs/archive/phases/PHASE6_COMPLETE_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE4_COMPLETION_REPORT.md",
+      "from": "PHASE4_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE4_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE7_CLEANUP_PLAN.md",
+      "from": "PHASE7_CLEANUP_PLAN.md",
+      "to": "docs/archive/phases/PHASE7_CLEANUP_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+      "from": "PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+      "to": "docs/archive/phases/PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE7_READY_SUMMARY.md",
+      "from": "PHASE7_READY_SUMMARY.md",
+      "to": "docs/archive/phases/PHASE7_READY_SUMMARY.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE9_COMPLETION_REPORT.md",
+      "from": "PHASE9_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE9_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE4_FINAL_REPORT.md",
+      "from": "PHASE4_FINAL_REPORT.md",
+      "to": "docs/archive/phases/PHASE4_FINAL_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE7_COMPLETE_REPORT.md",
+      "from": "PHASE7_COMPLETE_REPORT.md",
+      "to": "docs/archive/phases/PHASE7_COMPLETE_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE_11_COMPLETE.md",
+      "from": "PHASE_11_COMPLETE.md",
+      "to": "docs/archive/phases/PHASE_11_COMPLETE.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE5_PROGRESS_REPORT.md",
+      "from": "PHASE5_PROGRESS_REPORT.md",
+      "to": "docs/archive/phases/PHASE5_PROGRESS_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE_2_IMPLEMENTATION_PLAN.md",
+      "from": "primepath_project_backup_20250813_111206/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE_11_IMPLEMENTATION_PLAN.md",
+      "from": "primepath_project_backup_20250813_111206/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE_2_IMPLEMENTATION_PLAN.md",
+      "from": "primepath_project/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_2_IMPLEMENTATION_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE_11_IMPLEMENTATION_PLAN.md",
+      "from": "primepath_project/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "to": "docs/archive/phases/PHASE_11_IMPLEMENTATION_PLAN.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE7_COMPLETION_REPORT.md",
+      "from": "primepath_project/PHASE7_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE7_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "PHASE8_COMPLETION_REPORT.md",
+      "from": "primepath_project/PHASE8_COMPLETION_REPORT.md",
+      "to": "docs/archive/phases/PHASE8_COMPLETION_REPORT.md",
+      "reason": "Historical phase reports"
+    },
+    {
+      "file": "MIXED_QUESTIONS_FIX_COMPLETE.md",
+      "from": "MIXED_QUESTIONS_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/MIXED_QUESTIONS_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+      "from": "TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+      "to": "docs/archive/fixes/TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "CORE_DROPDOWN_FIX_COMPLETE.md",
+      "from": "CORE_DROPDOWN_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/CORE_DROPDOWN_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+      "from": "MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+      "to": "docs/archive/fixes/MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+      "from": "COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+      "to": "docs/archive/fixes/COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+      "from": "TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PHONE_PATTERN_FIX_COMPLETE.md",
+      "from": "PHONE_PATTERN_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PHONE_PATTERN_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+      "from": "MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+      "to": "docs/archive/fixes/MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "ANSWER_KEYS_RESTORATION_COMPLETE.md",
+      "from": "ANSWER_KEYS_RESTORATION_COMPLETE.md",
+      "to": "docs/archive/fixes/ANSWER_KEYS_RESTORATION_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "STUDENT_INTERFACE_FIX_COMPLETE.md",
+      "from": "STUDENT_INTERFACE_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/STUDENT_INTERFACE_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "VERTICAL_SPLIT_FIX.md",
+      "from": "VERTICAL_SPLIT_FIX.md",
+      "to": "docs/archive/fixes/VERTICAL_SPLIT_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_NAVIGATION_FIX_COMPLETE.md",
+      "from": "PDF_NAVIGATION_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PDF_NAVIGATION_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PHASE4_CRITICAL_FIXES.md",
+      "from": "PHASE4_CRITICAL_FIXES.md",
+      "to": "docs/archive/fixes/PHASE4_CRITICAL_FIXES.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "SUBMIT_TEST_FIX_COMPLETE.md",
+      "from": "SUBMIT_TEST_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/SUBMIT_TEST_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "MULTIPLE_SHORT_ANSWER_FIX.md",
+      "from": "MULTIPLE_SHORT_ANSWER_FIX.md",
+      "to": "docs/archive/fixes/MULTIPLE_SHORT_ANSWER_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "AUDIO_PLAYBACK_FIX.md",
+      "from": "AUDIO_PLAYBACK_FIX.md",
+      "to": "docs/archive/fixes/AUDIO_PLAYBACK_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_ROTATION_FIX_SUMMARY.md",
+      "from": "PDF_ROTATION_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/PDF_ROTATION_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_UPLOAD_FIX_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/PDF_UPLOAD_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/PDF_UPLOAD_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "GAP_FIX_SUCCESS_REPORT.md",
+      "from": "primepath_project_backup_20250813_111206/GAP_FIX_SUCCESS_REPORT.md",
+      "to": "docs/archive/fixes/GAP_FIX_SUCCESS_REPORT.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "AUDIOFILE_FIX_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/AUDIOFILE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/AUDIOFILE_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "FINAL_TEST_SUBPROGRAM_FIX.md",
+      "from": "primepath_project_backup_20250813_111206/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "to": "docs/archive/fixes/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_FILE_FIX_COMPLETE.md",
+      "from": "primepath_project_backup_20250813_111206/PDF_FILE_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PDF_FILE_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "COMPLETE_FIX_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/COMPLETE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/COMPLETE_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "EXAM_MAPPING_FIX_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/EXAM_MAPPING_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/EXAM_MAPPING_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "SUBMISSION_FIX_COMPLETE.md",
+      "from": "primepath_project_backup_20250813_111206/SUBMISSION_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/SUBMISSION_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "FIXES_IMPLEMENTED_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/FIXES_IMPLEMENTED_SUMMARY.md",
+      "to": "docs/archive/fixes/FIXES_IMPLEMENTED_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "from": "primepath_project_backup_20250813_111206/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "to": "docs/archive/fixes/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_UPLOAD_FIX_SUMMARY.md",
+      "from": "primepath_project/PDF_UPLOAD_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/PDF_UPLOAD_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "GAP_FIX_SUCCESS_REPORT.md",
+      "from": "primepath_project/GAP_FIX_SUCCESS_REPORT.md",
+      "to": "docs/archive/fixes/GAP_FIX_SUCCESS_REPORT.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "AUDIOFILE_FIX_SUMMARY.md",
+      "from": "primepath_project/AUDIOFILE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/AUDIOFILE_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "FINAL_TEST_SUBPROGRAM_FIX.md",
+      "from": "primepath_project/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "to": "docs/archive/fixes/FINAL_TEST_SUBPROGRAM_FIX.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_FILE_FIX_COMPLETE.md",
+      "from": "primepath_project/PDF_FILE_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/PDF_FILE_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "COMPLETE_FIX_SUMMARY.md",
+      "from": "primepath_project/COMPLETE_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/COMPLETE_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "EXAM_MAPPING_FIX_SUMMARY.md",
+      "from": "primepath_project/EXAM_MAPPING_FIX_SUMMARY.md",
+      "to": "docs/archive/fixes/EXAM_MAPPING_FIX_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "SUBMISSION_FIX_COMPLETE.md",
+      "from": "primepath_project/SUBMISSION_FIX_COMPLETE.md",
+      "to": "docs/archive/fixes/SUBMISSION_FIX_COMPLETE.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "FIXES_IMPLEMENTED_SUMMARY.md",
+      "from": "primepath_project/FIXES_IMPLEMENTED_SUMMARY.md",
+      "to": "docs/archive/fixes/FIXES_IMPLEMENTED_SUMMARY.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "from": "primepath_project/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "to": "docs/archive/fixes/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+      "reason": "Historical fix documentation"
+    },
+    {
+      "file": "PLACEMENT_TEST_GAP_ANALYSIS.md",
+      "from": "PLACEMENT_TEST_GAP_ANALYSIS.md",
+      "to": "docs/archive/qa/PLACEMENT_TEST_GAP_ANALYSIS.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+      "from": "CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+      "to": "docs/archive/qa/CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "FEATURE_VERIFICATION_REPORT.md",
+      "from": "FEATURE_VERIFICATION_REPORT.md",
+      "to": "docs/archive/qa/FEATURE_VERIFICATION_REPORT.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "COMPREHENSIVE_QA_REPORT_FINAL.md",
+      "from": "COMPREHENSIVE_QA_REPORT_FINAL.md",
+      "to": "docs/archive/qa/COMPREHENSIVE_QA_REPORT_FINAL.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "PRIMEPATH_QA_INSTRUCTIONS.md",
+      "from": "PRIMEPATH_QA_INSTRUCTIONS.md",
+      "to": "docs/archive/qa/PRIMEPATH_QA_INSTRUCTIONS.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "FINAL_FEATURE_VERIFICATION_REPORT.md",
+      "from": "FINAL_FEATURE_VERIFICATION_REPORT.md",
+      "to": "docs/archive/qa/FINAL_FEATURE_VERIFICATION_REPORT.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "PHASE2_FINAL_VERIFICATION.md",
+      "from": "PHASE2_FINAL_VERIFICATION.md",
+      "to": "docs/archive/qa/PHASE2_FINAL_VERIFICATION.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "FEATURE_VERIFICATION_COMPLETE.md",
+      "from": "FEATURE_VERIFICATION_COMPLETE.md",
+      "to": "docs/archive/qa/FEATURE_VERIFICATION_COMPLETE.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/qa/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "COMPREHENSIVE_QA_REPORT.md",
+      "from": "primepath_project_backup_20250813_111206/COMPREHENSIVE_QA_REPORT.md",
+      "to": "docs/archive/qa/COMPREHENSIVE_QA_REPORT.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "manual_test_report.md",
+      "from": "primepath_project_backup_20250813_111206/manual_test_report.md",
+      "to": "docs/archive/qa/manual_test_report.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "from": "primepath_project/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/qa/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "COMPREHENSIVE_QA_REPORT.md",
+      "from": "primepath_project/COMPREHENSIVE_QA_REPORT.md",
+      "to": "docs/archive/qa/COMPREHENSIVE_QA_REPORT.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "manual_test_report.md",
+      "from": "primepath_project/manual_test_report.md",
+      "to": "docs/archive/qa/manual_test_report.md",
+      "reason": "Historical qa reports"
+    },
+    {
+      "file": "CLEANUP_COMPLETE_REPORT.md",
+      "from": "CLEANUP_COMPLETE_REPORT.md",
+      "to": "docs/archive/analysis/CLEANUP_COMPLETE_REPORT.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "STUDENT_NAME_ERROR_INVESTIGATION.md",
+      "from": "STUDENT_NAME_ERROR_INVESTIGATION.md",
+      "to": "docs/archive/analysis/STUDENT_NAME_ERROR_INVESTIGATION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PDF_TROUBLESHOOTING.md",
+      "from": "PDF_TROUBLESHOOTING.md",
+      "to": "docs/archive/analysis/PDF_TROUBLESHOOTING.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "OUTER_MARGIN_REDUCTION.md",
+      "from": "OUTER_MARGIN_REDUCTION.md",
+      "to": "docs/archive/analysis/OUTER_MARGIN_REDUCTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "NAMING_CONVENTION_UPDATE_COMPLETE.md",
+      "from": "NAMING_CONVENTION_UPDATE_COMPLETE.md",
+      "to": "docs/archive/analysis/NAMING_CONVENTION_UPDATE_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PROJECT_CONTEXT_FOR_MAC.md",
+      "from": "PROJECT_CONTEXT_FOR_MAC.md",
+      "to": "docs/archive/analysis/PROJECT_CONTEXT_FOR_MAC.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PHASE6_ANALYSIS.md",
+      "from": "PHASE6_ANALYSIS.md",
+      "to": "docs/archive/analysis/PHASE6_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "EXAM_MAPPING_ANALYSIS.md",
+      "from": "EXAM_MAPPING_ANALYSIS.md",
+      "to": "docs/archive/analysis/EXAM_MAPPING_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PHASE5_ANALYSIS.md",
+      "from": "PHASE5_ANALYSIS.md",
+      "to": "docs/archive/analysis/PHASE5_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MODULARIZATION_PHASE_2_ANALYSIS.md",
+      "from": "MODULARIZATION_PHASE_2_ANALYSIS.md",
+      "to": "docs/archive/analysis/MODULARIZATION_PHASE_2_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "LAYOUT_IMPROVEMENTS.md",
+      "from": "LAYOUT_IMPROVEMENTS.md",
+      "to": "docs/archive/analysis/LAYOUT_IMPROVEMENTS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PHASE2_ULTRA_ANALYSIS.md",
+      "from": "PHASE2_ULTRA_ANALYSIS.md",
+      "to": "docs/archive/analysis/PHASE2_ULTRA_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CLEANUP_COMPLETE_SUMMARY.md",
+      "from": "CLEANUP_COMPLETE_SUMMARY.md",
+      "to": "docs/archive/analysis/CLEANUP_COMPLETE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+      "from": "COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+      "to": "docs/archive/analysis/COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "ROLLBACK_PLAN.md",
+      "from": "ROLLBACK_PLAN.md",
+      "to": "docs/archive/analysis/ROLLBACK_PLAN.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "TECHNICAL_DEBT_SUMMARY.md",
+      "from": "TECHNICAL_DEBT_SUMMARY.md",
+      "to": "docs/archive/analysis/TECHNICAL_DEBT_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "BACKEND_MODULARIZATION_COMPLETE.md",
+      "from": "BACKEND_MODULARIZATION_COMPLETE.md",
+      "to": "docs/archive/analysis/BACKEND_MODULARIZATION_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "SAFE_MODULARIZATION_PLAN.md",
+      "from": "SAFE_MODULARIZATION_PLAN.md",
+      "to": "docs/archive/analysis/SAFE_MODULARIZATION_PLAN.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "API_SESSION_ID_DOCUMENTATION.md",
+      "from": "API_SESSION_ID_DOCUMENTATION.md",
+      "to": "docs/archive/analysis/API_SESSION_ID_DOCUMENTATION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "BACKEND_MODULARIZATION_PHASE3.md",
+      "from": "BACKEND_MODULARIZATION_PHASE3.md",
+      "to": "docs/archive/analysis/BACKEND_MODULARIZATION_PHASE3.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "DOUBLE_CHECK_COMPLETE.md",
+      "from": "DOUBLE_CHECK_COMPLETE.md",
+      "to": "docs/archive/analysis/DOUBLE_CHECK_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MODULARIZATION_PROGRESS.md",
+      "from": "MODULARIZATION_PROGRESS.md",
+      "to": "docs/archive/analysis/MODULARIZATION_PROGRESS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+      "from": "ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+      "to": "docs/archive/analysis/ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+      "from": "MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+      "to": "docs/archive/analysis/MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+      "from": "PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+      "to": "docs/archive/analysis/PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "BACKEND_COMPLETE.md",
+      "from": "BACKEND_COMPLETE.md",
+      "to": "docs/archive/analysis/BACKEND_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "TEMPLATE_CONSOLIDATION_COMPLETE.md",
+      "from": "TEMPLATE_CONSOLIDATION_COMPLETE.md",
+      "to": "docs/archive/analysis/TEMPLATE_CONSOLIDATION_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MODULARIZATION_SUCCESS.md",
+      "from": "MODULARIZATION_SUCCESS.md",
+      "to": "docs/archive/analysis/MODULARIZATION_SUCCESS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "DEPLOYMENT_INSTRUCTIONS.md",
+      "from": "DEPLOYMENT_INSTRUCTIONS.md",
+      "to": "docs/archive/analysis/DEPLOYMENT_INSTRUCTIONS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "QUICK_START.md",
+      "from": "QUICK_START.md",
+      "to": "docs/archive/analysis/QUICK_START.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MARGIN_REDUCTION_COMPLETE.md",
+      "from": "MARGIN_REDUCTION_COMPLETE.md",
+      "to": "docs/archive/analysis/MARGIN_REDUCTION_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CURRICULUM_PRD.md",
+      "from": "primepath_project_backup_20250813_111206/CURRICULUM_PRD.md",
+      "to": "docs/archive/analysis/CURRICULUM_PRD.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "from": "primepath_project_backup_20250813_111206/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "to": "docs/archive/analysis/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "from": "primepath_project_backup_20250813_111206/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "to": "docs/archive/analysis/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MUST_READ_SOLUTION.md",
+      "from": "primepath_project_backup_20250813_111206/MUST_READ_SOLUTION.md",
+      "to": "docs/archive/analysis/MUST_READ_SOLUTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "DAILY_EXECUTION_CARDS.md",
+      "from": "primepath_project_backup_20250813_111206/DAILY_EXECUTION_CARDS.md",
+      "to": "docs/archive/analysis/DAILY_EXECUTION_CARDS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CLEANUP_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/CLEANUP_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "to": "docs/archive/analysis/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "FILE_STORAGE_EXPLAINED.md",
+      "from": "primepath_project_backup_20250813_111206/FILE_STORAGE_EXPLAINED.md",
+      "to": "docs/archive/analysis/FILE_STORAGE_EXPLAINED.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CURRICULUM_FILTERING_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/CURRICULUM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/analysis/CURRICULUM_FILTERING_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "NAVIGATION_CLEANUP_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/NAVIGATION_CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/NAVIGATION_CLEANUP_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CLEANUP_STRATEGY_PHASE_1.md",
+      "from": "primepath_project_backup_20250813_111206/CLEANUP_STRATEGY_PHASE_1.md",
+      "to": "docs/archive/analysis/CLEANUP_STRATEGY_PHASE_1.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MODULARIZATION_EXECUTION_PLAN.md",
+      "from": "primepath_project_backup_20250813_111206/MODULARIZATION_EXECUTION_PLAN.md",
+      "to": "docs/archive/analysis/MODULARIZATION_EXECUTION_PLAN.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "to": "docs/archive/analysis/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "to": "docs/archive/analysis/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CLAUDE_VIBE_CODING_EXECUTION.md",
+      "from": "primepath_project_backup_20250813_111206/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "to": "docs/archive/analysis/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "from": "primepath_project_backup_20250813_111206/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "to": "docs/archive/analysis/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "from": "primepath_project_backup_20250813_111206/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "to": "docs/archive/analysis/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "EXAM_DELETION_CASCADE_REPORT.md",
+      "from": "primepath_project_backup_20250813_111206/EXAM_DELETION_CASCADE_REPORT.md",
+      "to": "docs/archive/analysis/EXAM_DELETION_CASCADE_REPORT.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CURRICULUM_PRD.md",
+      "from": "primepath_project/CURRICULUM_PRD.md",
+      "to": "docs/archive/analysis/CURRICULUM_PRD.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "from": "primepath_project/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "to": "docs/archive/analysis/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "from": "primepath_project/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "to": "docs/archive/analysis/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MUST_READ_SOLUTION.md",
+      "from": "primepath_project/MUST_READ_SOLUTION.md",
+      "to": "docs/archive/analysis/MUST_READ_SOLUTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "DAILY_EXECUTION_CARDS.md",
+      "from": "primepath_project/DAILY_EXECUTION_CARDS.md",
+      "to": "docs/archive/analysis/DAILY_EXECUTION_CARDS.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CLEANUP_SUMMARY.md",
+      "from": "primepath_project/CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/CLEANUP_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "from": "primepath_project/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "to": "docs/archive/analysis/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "FILE_STORAGE_EXPLAINED.md",
+      "from": "primepath_project/FILE_STORAGE_EXPLAINED.md",
+      "to": "docs/archive/analysis/FILE_STORAGE_EXPLAINED.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CURRICULUM_FILTERING_SUMMARY.md",
+      "from": "primepath_project/CURRICULUM_FILTERING_SUMMARY.md",
+      "to": "docs/archive/analysis/CURRICULUM_FILTERING_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "NAVIGATION_CLEANUP_SUMMARY.md",
+      "from": "primepath_project/NAVIGATION_CLEANUP_SUMMARY.md",
+      "to": "docs/archive/analysis/NAVIGATION_CLEANUP_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CLEANUP_STRATEGY_PHASE_1.md",
+      "from": "primepath_project/CLEANUP_STRATEGY_PHASE_1.md",
+      "to": "docs/archive/analysis/CLEANUP_STRATEGY_PHASE_1.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MODULARIZATION_EXECUTION_PLAN.md",
+      "from": "primepath_project/MODULARIZATION_EXECUTION_PLAN.md",
+      "to": "docs/archive/analysis/MODULARIZATION_EXECUTION_PLAN.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "from": "primepath_project/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "to": "docs/archive/analysis/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "from": "primepath_project/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "to": "docs/archive/analysis/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "CLAUDE_VIBE_CODING_EXECUTION.md",
+      "from": "primepath_project/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "to": "docs/archive/analysis/CLAUDE_VIBE_CODING_EXECUTION.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "from": "primepath_project/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "to": "docs/archive/analysis/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "from": "primepath_project/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "to": "docs/archive/analysis/UPLOAD_EXAM_QUICK_REFERENCE.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "EXAM_DELETION_CASCADE_REPORT.md",
+      "from": "primepath_project/EXAM_DELETION_CASCADE_REPORT.md",
+      "to": "docs/archive/analysis/EXAM_DELETION_CASCADE_REPORT.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "endpoints.md",
+      "from": "docs/api/v1/endpoints.md",
+      "to": "docs/archive/analysis/endpoints.md",
+      "reason": "Historical analysis"
+    },
+    {
+      "file": "MIGRATION_TO_MAC_GUIDE.md",
+      "from": "MIGRATION_TO_MAC_GUIDE.md",
+      "to": "docs/archive/implementation/MIGRATION_TO_MAC_GUIDE.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+      "from": "INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+      "to": "docs/archive/implementation/INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+      "from": "SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "PDF_ROTATION_IMPLEMENTATION.md",
+      "from": "primepath_project_backup_20250813_111206/PDF_ROTATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/PDF_ROTATION_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "from": "primepath_project_backup_20250813_111206/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "MODULARIZATION_IMPLEMENTATION.md",
+      "from": "primepath_project_backup_20250813_111206/MODULARIZATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/MODULARIZATION_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "from": "primepath_project/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "PDF_ROTATION_IMPLEMENTATION.md",
+      "from": "primepath_project/PDF_ROTATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/PDF_ROTATION_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "from": "primepath_project/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "to": "docs/archive/implementation/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "MODULARIZATION_IMPLEMENTATION.md",
+      "from": "primepath_project/MODULARIZATION_IMPLEMENTATION.md",
+      "to": "docs/archive/implementation/MODULARIZATION_IMPLEMENTATION.md",
+      "reason": "Historical implementation"
+    },
+    {
+      "file": "TEMPLATE_AUDIT_REPORT.md",
+      "from": "primepath_project_backup_20250813_111206/TEMPLATE_AUDIT_REPORT.md",
+      "to": "docs/archive/legacy/TEMPLATE_AUDIT_REPORT.md",
+      "reason": "Historical legacy"
+    },
+    {
+      "file": "TEMPLATE_AUDIT_REPORT.md",
+      "from": "primepath_project/TEMPLATE_AUDIT_REPORT.md",
+      "to": "docs/archive/legacy/TEMPLATE_AUDIT_REPORT.md",
+      "reason": "Historical legacy"
+    },
+    {
+      "file": "CHROME_CONTROL_MCP_SETUP.md",
+      "from": "CHROME_CONTROL_MCP_SETUP.md",
+      "to": "docs/archive/config/CHROME_CONTROL_MCP_SETUP.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "MAC_SETUP_FOR_CLAUDE.md",
+      "from": "MAC_SETUP_FOR_CLAUDE.md",
+      "to": "docs/archive/config/MAC_SETUP_FOR_CLAUDE.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "INSTALLATION_COMPLETE_REPORT.md",
+      "from": "INSTALLATION_COMPLETE_REPORT.md",
+      "to": "docs/archive/config/INSTALLATION_COMPLETE_REPORT.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "CUSTOM_CONFIGURATIONS_MAC.md",
+      "from": "CUSTOM_CONFIGURATIONS_MAC.md",
+      "to": "docs/archive/config/CUSTOM_CONFIGURATIONS_MAC.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "SETUP_GUIDE.md",
+      "from": "SETUP_GUIDE.md",
+      "to": "docs/archive/config/SETUP_GUIDE.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "INSTALLATION_ANALYSIS_REPORT.md",
+      "from": "primepath_project_backup_20250813_111206/INSTALLATION_ANALYSIS_REPORT.md",
+      "to": "docs/archive/config/INSTALLATION_ANALYSIS_REPORT.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "SETUP_STATUS.md",
+      "from": "primepath_project_backup_20250813_111206/SETUP_STATUS.md",
+      "to": "docs/archive/config/SETUP_STATUS.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "INSTALLATION_ANALYSIS_REPORT.md",
+      "from": "primepath_project/INSTALLATION_ANALYSIS_REPORT.md",
+      "to": "docs/archive/config/INSTALLATION_ANALYSIS_REPORT.md",
+      "reason": "Historical configuration"
+    },
+    {
+      "file": "SETUP_STATUS.md",
+      "from": "primepath_project/SETUP_STATUS.md",
+      "to": "docs/archive/config/SETUP_STATUS.md",
+      "reason": "Historical configuration"
+    }
+  ],
+  "consider_deletion": [
+    {
+      "file": "MARGIN_ADJUSTMENT_FINAL.md",
+      "path": "MARGIN_ADJUSTMENT_FINAL.md",
+      "reason": "Possible duplicate"
+    },
+    {
+      "file": "FINAL_STATUS_REPORT.md",
+      "path": "FINAL_STATUS_REPORT.md",
+      "reason": "Possible duplicate"
+    },
+    {
+      "file": "PHASE_2_PRD_FINAL.md",
+      "path": "primepath_project_backup_20250813_111206/PHASE_2_PRD_FINAL.md",
+      "reason": "Possible duplicate"
+    },
+    {
+      "file": "PHASE_2_PRD_FINAL.md",
+      "path": "primepath_project/PHASE_2_PRD_FINAL.md",
+      "reason": "Possible duplicate"
+    }
+  ]
+}

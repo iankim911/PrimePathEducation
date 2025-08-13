@@ -1,42 +1,39 @@
 # PrimePath Documentation
 
-Welcome to the PrimePath documentation. This directory contains comprehensive documentation for the PrimePath placement test system.
+Welcome to the PrimePath documentation directory.
 
-## Documentation Structure
+## 📁 Documentation Structure
 
-### 📦 [Installation](./installation/)
-- [Requirements](./installation/requirements.md) - System requirements and dependencies
-- [Setup Guide](./installation/setup.md) - Step-by-step installation instructions
+### Active Documentation
+- [`CLAUDE.md`](./CLAUDE.md) - Critical operational knowledge and procedures
+- [`api/`](./api/) - API documentation and specifications
+- [`deployment/`](./deployment/) - Deployment guides and procedures
+- [`development/`](./development/) - Development guides and standards
+- [`guides/`](./guides/) - User and developer guides
 
-### 🔌 [API Documentation](./api/)
-- [API v1](./api/v1/) - Current stable API version
-- [Changelog](./api/changelog.md) - API version history and changes
+### Archived Documentation
+- [`archive/`](./archive/) - Historical documentation organized by category
+  - `phases/` - Phase completion reports
+  - `fixes/` - Bug fix documentation
+  - `qa/` - QA and testing reports
+  - `analysis/` - Analysis documents
+  - `implementation/` - Implementation plans
+  - `cleanup/` - Cleanup reports and logs
 
-### 🛠️ [Development](./development/)
-- [Architecture](./development/architecture.md) - System architecture overview
-- [Testing](./development/testing.md) - Testing guidelines and procedures
-- [Deployment](./development/deployment.md) - Deployment instructions
+## 🔍 Finding Documentation
 
-### 📚 [User Guide](./user_guide/)
-- [Teacher Guide](./user_guide/teacher_guide.md) - Guide for teachers and administrators
-- [Student Guide](./user_guide/student_guide.md) - Guide for students taking tests
+1. **For operational procedures**: See [`CLAUDE.md`](./CLAUDE.md)
+2. **For API reference**: Check [`api/`](./api/)
+3. **For deployment**: See [`deployment/`](./deployment/)
+4. **For development**: Check [`development/`](./development/)
+5. **For historical reference**: Browse [`archive/`](./archive/)
 
-## Quick Links
+## 📋 Quick Links
 
-- [Getting Started](./installation/setup.md)
-- [API Endpoints](./api/v1/endpoints.md)
-- [Contributing Guidelines](./development/contributing.md)
-
-## Project Status
-
-- **Version**: 1.0.0
-- **Status**: Production Ready
-- **Last Updated**: August 8, 2025
-
-## Support
-
-For support, please contact the development team or open an issue in the project repository.
+- [Main README](../README.md) - Project overview
+- [API Documentation](./guides/API.md) - Complete API reference
+- [Deployment Guide](./guides/DEPLOYMENT.md) - Production deployment
+- [Contributing Guide](./guides/CONTRIBUTING.md) - How to contribute
 
 ---
-
-*Part of Phase 11: Final Integration & Testing*
+*Last updated: 2025-08-13*

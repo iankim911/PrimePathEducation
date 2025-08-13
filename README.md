@@ -344,6 +344,17 @@ window.PHASE8_CONFIG
 window.PHASE9_API_DOCS.showEndpoints()
 ```
 
+
+## 📚 Documentation
+
+All documentation is organized in the [`/docs`](./docs) directory:
+
+- **[Operational Procedures](./docs/CLAUDE.md)** - Critical operational knowledge
+- **[API Documentation](./docs/guides/API.md)** - Complete API reference
+- **[Deployment Guide](./docs/guides/DEPLOYMENT.md)** - Production deployment
+- **[Contributing Guide](./docs/guides/CONTRIBUTING.md)** - Contribution guidelines
+- **[Documentation Index](./docs/README.md)** - Complete documentation overview
+
 ## 🧪 Testing
 
 ### Run All Tests

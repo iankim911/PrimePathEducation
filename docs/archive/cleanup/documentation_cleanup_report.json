@@ -1,0 +1,1766 @@
+{
+  "timestamp": "2025-08-13T15:40:32.872963",
+  "summary": {
+    "total_files": 174,
+    "categorized": {
+      "current_essential": 5,
+      "active_guides": 3,
+      "phase_reports": 21,
+      "fix_documentation": 37,
+      "qa_reports": 14,
+      "legacy": 2,
+      "duplicates": 4,
+      "configuration": 9,
+      "analysis": 68,
+      "implementation": 11
+    },
+    "code_references": 51
+  },
+  "categories": {
+    "current_essential": [
+      {
+        "name": "README.md",
+        "path": "README.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/README.md",
+        "lines": 475,
+        "size": 13278,
+        "modified": "2025-08-13T13:29:41.437836"
+      },
+      {
+        "name": "CLAUDE.md",
+        "path": "CLAUDE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CLAUDE.md",
+        "lines": 396,
+        "size": 13158,
+        "modified": "2025-08-12T18:13:13.976900"
+      },
+      {
+        "name": "README.md",
+        "path": "primepath_project_backup_20250813_111206/README.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/README.md",
+        "lines": 79,
+        "size": 1910,
+        "modified": "2025-08-13T11:12:07.032948"
+      },
+      {
+        "name": "README.md",
+        "path": "primepath_project/README.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/README.md",
+        "lines": 79,
+        "size": 1910,
+        "modified": "2025-07-31T22:01:41"
+      },
+      {
+        "name": "README.md",
+        "path": "docs/README.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/docs/README.md",
+        "lines": 42,
+        "size": 1447,
+        "modified": "2025-08-08T19:49:58.058203"
+      }
+    ],
+    "active_guides": [
+      {
+        "name": "API.md",
+        "path": "API.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/API.md",
+        "lines": 668,
+        "size": 11718,
+        "modified": "2025-08-13T13:31:05.681047"
+      },
+      {
+        "name": "DEPLOYMENT.md",
+        "path": "DEPLOYMENT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/DEPLOYMENT.md",
+        "lines": 577,
+        "size": 13123,
+        "modified": "2025-08-13T13:32:22.510421"
+      },
+      {
+        "name": "CONTRIBUTING.md",
+        "path": "CONTRIBUTING.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CONTRIBUTING.md",
+        "lines": 576,
+        "size": 12004,
+        "modified": "2025-08-13T13:33:32.019359"
+      }
+    ],
+    "phase_reports": [
+      {
+        "name": "PHASE8_COMPLETE_REPORT.md",
+        "path": "PHASE8_COMPLETE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE8_COMPLETE_REPORT.md",
+        "lines": 294,
+        "size": 8706,
+        "modified": "2025-08-07T23:15:49"
+      },
+      {
+        "name": "PHASE5_VERIFICATION_REPORT.md",
+        "path": "PHASE5_VERIFICATION_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE5_VERIFICATION_REPORT.md",
+        "lines": 121,
+        "size": 4264,
+        "modified": "2025-08-07T22:28:23"
+      },
+      {
+        "name": "PHASE2_MODULARIZATION_COMPLETE.md",
+        "path": "PHASE2_MODULARIZATION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE2_MODULARIZATION_COMPLETE.md",
+        "lines": 192,
+        "size": 5113,
+        "modified": "2025-08-08T01:08:30"
+      },
+      {
+        "name": "PHASE6_COMPLETE_SUMMARY.md",
+        "path": "PHASE6_COMPLETE_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE6_COMPLETE_SUMMARY.md",
+        "lines": 172,
+        "size": 4141,
+        "modified": "2025-08-13T12:25:16.133578"
+      },
+      {
+        "name": "PHASE6_CLEANUP_PLAN.md",
+        "path": "PHASE6_CLEANUP_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE6_CLEANUP_PLAN.md",
+        "lines": 143,
+        "size": 3526,
+        "modified": "2025-08-13T12:08:19.284077"
+      },
+      {
+        "name": "PHASE6_COMPLETE_REPORT.md",
+        "path": "PHASE6_COMPLETE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE6_COMPLETE_REPORT.md",
+        "lines": 228,
+        "size": 6215,
+        "modified": "2025-08-07T22:37:33"
+      },
+      {
+        "name": "PHASE4_COMPLETION_REPORT.md",
+        "path": "PHASE4_COMPLETION_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE4_COMPLETION_REPORT.md",
+        "lines": 248,
+        "size": 7181,
+        "modified": "2025-08-07T21:52:22"
+      },
+      {
+        "name": "PHASE7_CLEANUP_PLAN.md",
+        "path": "PHASE7_CLEANUP_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE7_CLEANUP_PLAN.md",
+        "lines": 177,
+        "size": 4087,
+        "modified": "2025-08-13T12:53:44.119822"
+      },
+      {
+        "name": "PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+        "path": "PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE9_MODEL_MODULARIZATION_COMPLETE.md",
+        "lines": 237,
+        "size": 7116,
+        "modified": "2025-08-08T16:06:32.106995"
+      },
+      {
+        "name": "PHASE7_READY_SUMMARY.md",
+        "path": "PHASE7_READY_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE7_READY_SUMMARY.md",
+        "lines": 111,
+        "size": 2974,
+        "modified": "2025-08-13T12:55:10.506143"
+      },
+      {
+        "name": "PHASE9_COMPLETION_REPORT.md",
+        "path": "PHASE9_COMPLETION_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE9_COMPLETION_REPORT.md",
+        "lines": 243,
+        "size": 6923,
+        "modified": "2025-08-13T13:36:14.355595"
+      },
+      {
+        "name": "PHASE4_FINAL_REPORT.md",
+        "path": "PHASE4_FINAL_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE4_FINAL_REPORT.md",
+        "lines": 155,
+        "size": 4926,
+        "modified": "2025-08-07T22:02:40"
+      },
+      {
+        "name": "PHASE7_COMPLETE_REPORT.md",
+        "path": "PHASE7_COMPLETE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE7_COMPLETE_REPORT.md",
+        "lines": 217,
+        "size": 7027,
+        "modified": "2025-08-07T22:50:24"
+      },
+      {
+        "name": "PHASE_11_COMPLETE.md",
+        "path": "PHASE_11_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE_11_COMPLETE.md",
+        "lines": 211,
+        "size": 6234,
+        "modified": "2025-08-08T19:55:11.724338"
+      },
+      {
+        "name": "PHASE5_PROGRESS_REPORT.md",
+        "path": "PHASE5_PROGRESS_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE5_PROGRESS_REPORT.md",
+        "lines": 192,
+        "size": 5470,
+        "modified": "2025-08-07T22:22:01"
+      },
+      {
+        "name": "PHASE_2_IMPLEMENTATION_PLAN.md",
+        "path": "primepath_project_backup_20250813_111206/PHASE_2_IMPLEMENTATION_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PHASE_2_IMPLEMENTATION_PLAN.md",
+        "lines": 614,
+        "size": 15525,
+        "modified": "2025-08-13T11:12:06.928799"
+      },
+      {
+        "name": "PHASE_11_IMPLEMENTATION_PLAN.md",
+        "path": "primepath_project_backup_20250813_111206/PHASE_11_IMPLEMENTATION_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PHASE_11_IMPLEMENTATION_PLAN.md",
+        "lines": 276,
+        "size": 6265,
+        "modified": "2025-08-13T11:12:07.031350"
+      },
+      {
+        "name": "PHASE_2_IMPLEMENTATION_PLAN.md",
+        "path": "primepath_project/PHASE_2_IMPLEMENTATION_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PHASE_2_IMPLEMENTATION_PLAN.md",
+        "lines": 614,
+        "size": 15525,
+        "modified": "2025-08-13T01:11:30.562672"
+      },
+      {
+        "name": "PHASE_11_IMPLEMENTATION_PLAN.md",
+        "path": "primepath_project/PHASE_11_IMPLEMENTATION_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PHASE_11_IMPLEMENTATION_PLAN.md",
+        "lines": 276,
+        "size": 6265,
+        "modified": "2025-08-08T19:29:24.732290"
+      },
+      {
+        "name": "PHASE7_COMPLETION_REPORT.md",
+        "path": "primepath_project/PHASE7_COMPLETION_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PHASE7_COMPLETION_REPORT.md",
+        "lines": 183,
+        "size": 4782,
+        "modified": "2025-08-13T13:14:19.321576"
+      },
+      {
+        "name": "PHASE8_COMPLETION_REPORT.md",
+        "path": "primepath_project/PHASE8_COMPLETION_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PHASE8_COMPLETION_REPORT.md",
+        "lines": 241,
+        "size": 6047,
+        "modified": "2025-08-13T13:24:32.868307"
+      }
+    ],
+    "fix_documentation": [
+      {
+        "name": "MIXED_QUESTIONS_FIX_COMPLETE.md",
+        "path": "MIXED_QUESTIONS_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MIXED_QUESTIONS_FIX_COMPLETE.md",
+        "lines": 145,
+        "size": 4842,
+        "modified": "2025-08-08T23:57:30.565259"
+      },
+      {
+        "name": "TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+        "path": "TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/TIMER_EXPIRY_FIX_FINAL_SUMMARY.md",
+        "lines": 180,
+        "size": 6059,
+        "modified": "2025-08-11T01:40:04.029873"
+      },
+      {
+        "name": "CORE_DROPDOWN_FIX_COMPLETE.md",
+        "path": "CORE_DROPDOWN_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CORE_DROPDOWN_FIX_COMPLETE.md",
+        "lines": 111,
+        "size": 3316,
+        "modified": "2025-08-08T01:49:08"
+      },
+      {
+        "name": "MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+        "path": "MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MULTIPLE_SHORT_ANSWER_FINAL_FIX.md",
+        "lines": 132,
+        "size": 3994,
+        "modified": "2025-08-08T22:56:35.776636"
+      },
+      {
+        "name": "COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+        "path": "COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/COMPREHENSIVE_FIX_IMPLEMENTATION.md",
+        "lines": 231,
+        "size": 6440,
+        "modified": "2025-08-08T23:38:32.849844"
+      },
+      {
+        "name": "TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+        "path": "TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/TIMER_EXPIRY_GRACE_PERIOD_FIX_COMPLETE.md",
+        "lines": 207,
+        "size": 7185,
+        "modified": "2025-08-11T01:38:42.485725"
+      },
+      {
+        "name": "PHONE_PATTERN_FIX_COMPLETE.md",
+        "path": "PHONE_PATTERN_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHONE_PATTERN_FIX_COMPLETE.md",
+        "lines": 78,
+        "size": 2874,
+        "modified": "2025-08-08T01:28:12"
+      },
+      {
+        "name": "MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+        "path": "MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md",
+        "lines": 174,
+        "size": 5390,
+        "modified": "2025-08-09T00:15:45.807126"
+      },
+      {
+        "name": "ANSWER_KEYS_RESTORATION_COMPLETE.md",
+        "path": "ANSWER_KEYS_RESTORATION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/ANSWER_KEYS_RESTORATION_COMPLETE.md",
+        "lines": 158,
+        "size": 5194,
+        "modified": "2025-08-08T02:11:59"
+      },
+      {
+        "name": "STUDENT_INTERFACE_FIX_COMPLETE.md",
+        "path": "STUDENT_INTERFACE_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/STUDENT_INTERFACE_FIX_COMPLETE.md",
+        "lines": 203,
+        "size": 6514,
+        "modified": "2025-08-08T02:29:25"
+      },
+      {
+        "name": "VERTICAL_SPLIT_FIX.md",
+        "path": "VERTICAL_SPLIT_FIX.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/VERTICAL_SPLIT_FIX.md",
+        "lines": 55,
+        "size": 1914,
+        "modified": "2025-08-06T14:27:15"
+      },
+      {
+        "name": "PDF_NAVIGATION_FIX_COMPLETE.md",
+        "path": "PDF_NAVIGATION_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PDF_NAVIGATION_FIX_COMPLETE.md",
+        "lines": 99,
+        "size": 3199,
+        "modified": "2025-08-10T21:40:25.322205"
+      },
+      {
+        "name": "PHASE4_CRITICAL_FIXES.md",
+        "path": "PHASE4_CRITICAL_FIXES.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE4_CRITICAL_FIXES.md",
+        "lines": 131,
+        "size": 3424,
+        "modified": "2025-08-07T21:46:55"
+      },
+      {
+        "name": "SUBMIT_TEST_FIX_COMPLETE.md",
+        "path": "SUBMIT_TEST_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/SUBMIT_TEST_FIX_COMPLETE.md",
+        "lines": 252,
+        "size": 6846,
+        "modified": "2025-08-08T18:12:49.461085"
+      },
+      {
+        "name": "MULTIPLE_SHORT_ANSWER_FIX.md",
+        "path": "MULTIPLE_SHORT_ANSWER_FIX.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MULTIPLE_SHORT_ANSWER_FIX.md",
+        "lines": 215,
+        "size": 7935,
+        "modified": "2025-08-08T21:04:17.757937"
+      },
+      {
+        "name": "AUDIO_PLAYBACK_FIX.md",
+        "path": "AUDIO_PLAYBACK_FIX.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/AUDIO_PLAYBACK_FIX.md",
+        "lines": 156,
+        "size": 4364,
+        "modified": "2025-08-08T22:19:30.626013"
+      },
+      {
+        "name": "PDF_ROTATION_FIX_SUMMARY.md",
+        "path": "PDF_ROTATION_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PDF_ROTATION_FIX_SUMMARY.md",
+        "lines": 136,
+        "size": 4416,
+        "modified": "2025-08-10T22:36:55.665383"
+      },
+      {
+        "name": "PDF_UPLOAD_FIX_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/PDF_UPLOAD_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PDF_UPLOAD_FIX_SUMMARY.md",
+        "lines": 114,
+        "size": 3483,
+        "modified": "2025-08-13T11:12:06.929229"
+      },
+      {
+        "name": "GAP_FIX_SUCCESS_REPORT.md",
+        "path": "primepath_project_backup_20250813_111206/GAP_FIX_SUCCESS_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/GAP_FIX_SUCCESS_REPORT.md",
+        "lines": 106,
+        "size": 3308,
+        "modified": "2025-08-13T11:12:06.933204"
+      },
+      {
+        "name": "AUDIOFILE_FIX_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/AUDIOFILE_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/AUDIOFILE_FIX_SUMMARY.md",
+        "lines": 84,
+        "size": 2661,
+        "modified": "2025-08-13T11:12:06.934679"
+      },
+      {
+        "name": "FINAL_TEST_SUBPROGRAM_FIX.md",
+        "path": "primepath_project_backup_20250813_111206/FINAL_TEST_SUBPROGRAM_FIX.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/FINAL_TEST_SUBPROGRAM_FIX.md",
+        "lines": 105,
+        "size": 3268,
+        "modified": "2025-08-13T11:12:06.965966"
+      },
+      {
+        "name": "PDF_FILE_FIX_COMPLETE.md",
+        "path": "primepath_project_backup_20250813_111206/PDF_FILE_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PDF_FILE_FIX_COMPLETE.md",
+        "lines": 128,
+        "size": 3915,
+        "modified": "2025-08-13T11:12:06.968813"
+      },
+      {
+        "name": "COMPLETE_FIX_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/COMPLETE_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/COMPLETE_FIX_SUMMARY.md",
+        "lines": 136,
+        "size": 4402,
+        "modified": "2025-08-13T11:12:07.076629"
+      },
+      {
+        "name": "EXAM_MAPPING_FIX_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/EXAM_MAPPING_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/EXAM_MAPPING_FIX_SUMMARY.md",
+        "lines": 142,
+        "size": 4761,
+        "modified": "2025-08-13T11:12:07.096289"
+      },
+      {
+        "name": "SUBMISSION_FIX_COMPLETE.md",
+        "path": "primepath_project_backup_20250813_111206/SUBMISSION_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/SUBMISSION_FIX_COMPLETE.md",
+        "lines": 128,
+        "size": 4012,
+        "modified": "2025-08-13T11:12:07.100688"
+      },
+      {
+        "name": "FIXES_IMPLEMENTED_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/FIXES_IMPLEMENTED_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/FIXES_IMPLEMENTED_SUMMARY.md",
+        "lines": 229,
+        "size": 7127,
+        "modified": "2025-08-13T11:12:07.101897"
+      },
+      {
+        "name": "PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+        "path": "primepath_project_backup_20250813_111206/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+        "lines": 149,
+        "size": 4795,
+        "modified": "2025-08-13T11:12:07.105151"
+      },
+      {
+        "name": "PDF_UPLOAD_FIX_SUMMARY.md",
+        "path": "primepath_project/PDF_UPLOAD_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PDF_UPLOAD_FIX_SUMMARY.md",
+        "lines": 114,
+        "size": 3483,
+        "modified": "2025-08-12T11:51:08.330563"
+      },
+      {
+        "name": "GAP_FIX_SUCCESS_REPORT.md",
+        "path": "primepath_project/GAP_FIX_SUCCESS_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/GAP_FIX_SUCCESS_REPORT.md",
+        "lines": 106,
+        "size": 3308,
+        "modified": "2025-08-07T07:48:00"
+      },
+      {
+        "name": "AUDIOFILE_FIX_SUMMARY.md",
+        "path": "primepath_project/AUDIOFILE_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/AUDIOFILE_FIX_SUMMARY.md",
+        "lines": 84,
+        "size": 2661,
+        "modified": "2025-08-09T22:34:33.941633"
+      },
+      {
+        "name": "FINAL_TEST_SUBPROGRAM_FIX.md",
+        "path": "primepath_project/FINAL_TEST_SUBPROGRAM_FIX.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/FINAL_TEST_SUBPROGRAM_FIX.md",
+        "lines": 105,
+        "size": 3268,
+        "modified": "2025-08-12T15:34:46.502649"
+      },
+      {
+        "name": "PDF_FILE_FIX_COMPLETE.md",
+        "path": "primepath_project/PDF_FILE_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PDF_FILE_FIX_COMPLETE.md",
+        "lines": 128,
+        "size": 3915,
+        "modified": "2025-08-10T16:52:13.721334"
+      },
+      {
+        "name": "COMPLETE_FIX_SUMMARY.md",
+        "path": "primepath_project/COMPLETE_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/COMPLETE_FIX_SUMMARY.md",
+        "lines": 136,
+        "size": 4402,
+        "modified": "2025-08-12T16:02:28.678950"
+      },
+      {
+        "name": "EXAM_MAPPING_FIX_SUMMARY.md",
+        "path": "primepath_project/EXAM_MAPPING_FIX_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/EXAM_MAPPING_FIX_SUMMARY.md",
+        "lines": 142,
+        "size": 4761,
+        "modified": "2025-08-09T23:07:09.225516"
+      },
+      {
+        "name": "SUBMISSION_FIX_COMPLETE.md",
+        "path": "primepath_project/SUBMISSION_FIX_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/SUBMISSION_FIX_COMPLETE.md",
+        "lines": 128,
+        "size": 4012,
+        "modified": "2025-08-10T16:31:53.853544"
+      },
+      {
+        "name": "FIXES_IMPLEMENTED_SUMMARY.md",
+        "path": "primepath_project/FIXES_IMPLEMENTED_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/FIXES_IMPLEMENTED_SUMMARY.md",
+        "lines": 229,
+        "size": 7127,
+        "modified": "2025-08-11T21:39:45.786899"
+      },
+      {
+        "name": "PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+        "path": "primepath_project/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PDF_NAVIGATION_FIX_DOCUMENTATION.md",
+        "lines": 149,
+        "size": 4795,
+        "modified": "2025-08-07T08:49:59"
+      }
+    ],
+    "qa_reports": [
+      {
+        "name": "PLACEMENT_TEST_GAP_ANALYSIS.md",
+        "path": "PLACEMENT_TEST_GAP_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PLACEMENT_TEST_GAP_ANALYSIS.md",
+        "lines": 162,
+        "size": 4666,
+        "modified": "2025-08-11T02:15:06.063988"
+      },
+      {
+        "name": "CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+        "path": "CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CRITICAL_SUBMIT_TEST_ERROR_ANALYSIS.md",
+        "lines": 315,
+        "size": 8196,
+        "modified": "2025-08-08T17:33:15.834562"
+      },
+      {
+        "name": "FEATURE_VERIFICATION_REPORT.md",
+        "path": "FEATURE_VERIFICATION_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/FEATURE_VERIFICATION_REPORT.md",
+        "lines": 196,
+        "size": 6127,
+        "modified": "2025-08-07T19:01:14"
+      },
+      {
+        "name": "COMPREHENSIVE_QA_REPORT_FINAL.md",
+        "path": "COMPREHENSIVE_QA_REPORT_FINAL.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/COMPREHENSIVE_QA_REPORT_FINAL.md",
+        "lines": 446,
+        "size": 12470,
+        "modified": "2025-08-11T17:32:01.186735"
+      },
+      {
+        "name": "PRIMEPATH_QA_INSTRUCTIONS.md",
+        "path": "PRIMEPATH_QA_INSTRUCTIONS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PRIMEPATH_QA_INSTRUCTIONS.md",
+        "lines": 259,
+        "size": 7012,
+        "modified": "2025-08-11T17:05:29.070978"
+      },
+      {
+        "name": "FINAL_FEATURE_VERIFICATION_REPORT.md",
+        "path": "FINAL_FEATURE_VERIFICATION_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/FINAL_FEATURE_VERIFICATION_REPORT.md",
+        "lines": 158,
+        "size": 4146,
+        "modified": "2025-08-10T22:48:14.076890"
+      },
+      {
+        "name": "PHASE2_FINAL_VERIFICATION.md",
+        "path": "PHASE2_FINAL_VERIFICATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE2_FINAL_VERIFICATION.md",
+        "lines": 84,
+        "size": 2459,
+        "modified": "2025-08-08T01:16:07"
+      },
+      {
+        "name": "FEATURE_VERIFICATION_COMPLETE.md",
+        "path": "FEATURE_VERIFICATION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/FEATURE_VERIFICATION_COMPLETE.md",
+        "lines": 164,
+        "size": 4220,
+        "modified": "2025-08-08T00:42:22"
+      },
+      {
+        "name": "TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+        "lines": 161,
+        "size": 4516,
+        "modified": "2025-08-13T11:12:06.931297"
+      },
+      {
+        "name": "COMPREHENSIVE_QA_REPORT.md",
+        "path": "primepath_project_backup_20250813_111206/COMPREHENSIVE_QA_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/COMPREHENSIVE_QA_REPORT.md",
+        "lines": 324,
+        "size": 8382,
+        "modified": "2025-08-13T11:12:06.976115"
+      },
+      {
+        "name": "manual_test_report.md",
+        "path": "primepath_project_backup_20250813_111206/manual_test_report.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/manual_test_report.md",
+        "lines": 99,
+        "size": 2810,
+        "modified": "2025-08-13T11:12:07.112445"
+      },
+      {
+        "name": "TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+        "path": "primepath_project/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/TEST_SUBPROGRAM_FILTERING_SUMMARY.md",
+        "lines": 161,
+        "size": 4516,
+        "modified": "2025-08-12T15:22:11.507603"
+      },
+      {
+        "name": "COMPREHENSIVE_QA_REPORT.md",
+        "path": "primepath_project/COMPREHENSIVE_QA_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/COMPREHENSIVE_QA_REPORT.md",
+        "lines": 324,
+        "size": 8382,
+        "modified": "2025-08-09T18:17:33.813410"
+      },
+      {
+        "name": "manual_test_report.md",
+        "path": "primepath_project/manual_test_report.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/manual_test_report.md",
+        "lines": 99,
+        "size": 2810,
+        "modified": "2025-08-06T17:45:14"
+      }
+    ],
+    "legacy": [
+      {
+        "name": "TEMPLATE_AUDIT_REPORT.md",
+        "path": "primepath_project_backup_20250813_111206/TEMPLATE_AUDIT_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/TEMPLATE_AUDIT_REPORT.md",
+        "lines": 194,
+        "size": 5966,
+        "modified": "2025-08-13T11:12:07.029176"
+      },
+      {
+        "name": "TEMPLATE_AUDIT_REPORT.md",
+        "path": "primepath_project/TEMPLATE_AUDIT_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/TEMPLATE_AUDIT_REPORT.md",
+        "lines": 194,
+        "size": 5966,
+        "modified": "2025-08-08T02:35:23"
+      }
+    ],
+    "duplicates": [
+      {
+        "name": "MARGIN_ADJUSTMENT_FINAL.md",
+        "path": "MARGIN_ADJUSTMENT_FINAL.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MARGIN_ADJUSTMENT_FINAL.md",
+        "lines": 62,
+        "size": 2002,
+        "modified": "2025-08-06T14:27:15"
+      },
+      {
+        "name": "FINAL_STATUS_REPORT.md",
+        "path": "FINAL_STATUS_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/FINAL_STATUS_REPORT.md",
+        "lines": 103,
+        "size": 3508,
+        "modified": "2025-08-10T22:19:09.809326"
+      },
+      {
+        "name": "PHASE_2_PRD_FINAL.md",
+        "path": "primepath_project_backup_20250813_111206/PHASE_2_PRD_FINAL.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PHASE_2_PRD_FINAL.md",
+        "lines": 562,
+        "size": 19560,
+        "modified": "2025-08-13T11:12:07.095624"
+      },
+      {
+        "name": "PHASE_2_PRD_FINAL.md",
+        "path": "primepath_project/PHASE_2_PRD_FINAL.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PHASE_2_PRD_FINAL.md",
+        "lines": 562,
+        "size": 19560,
+        "modified": "2025-08-13T01:09:59.975248"
+      }
+    ],
+    "configuration": [
+      {
+        "name": "CHROME_CONTROL_MCP_SETUP.md",
+        "path": "CHROME_CONTROL_MCP_SETUP.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CHROME_CONTROL_MCP_SETUP.md",
+        "lines": 111,
+        "size": 3792,
+        "modified": "2025-08-12T13:30:20.325420"
+      },
+      {
+        "name": "MAC_SETUP_FOR_CLAUDE.md",
+        "path": "MAC_SETUP_FOR_CLAUDE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MAC_SETUP_FOR_CLAUDE.md",
+        "lines": 442,
+        "size": 13283,
+        "modified": "2025-08-08T12:47:19"
+      },
+      {
+        "name": "INSTALLATION_COMPLETE_REPORT.md",
+        "path": "INSTALLATION_COMPLETE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/INSTALLATION_COMPLETE_REPORT.md",
+        "lines": 226,
+        "size": 6236,
+        "modified": "2025-08-08T00:23:15"
+      },
+      {
+        "name": "CUSTOM_CONFIGURATIONS_MAC.md",
+        "path": "CUSTOM_CONFIGURATIONS_MAC.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CUSTOM_CONFIGURATIONS_MAC.md",
+        "lines": 468,
+        "size": 11456,
+        "modified": "2025-08-08T12:49:25"
+      },
+      {
+        "name": "SETUP_GUIDE.md",
+        "path": "SETUP_GUIDE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/SETUP_GUIDE.md",
+        "lines": 121,
+        "size": 3068,
+        "modified": "2025-07-31T22:14:46"
+      },
+      {
+        "name": "INSTALLATION_ANALYSIS_REPORT.md",
+        "path": "primepath_project_backup_20250813_111206/INSTALLATION_ANALYSIS_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/INSTALLATION_ANALYSIS_REPORT.md",
+        "lines": 282,
+        "size": 8196,
+        "modified": "2025-08-13T11:12:06.959924"
+      },
+      {
+        "name": "SETUP_STATUS.md",
+        "path": "primepath_project_backup_20250813_111206/SETUP_STATUS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/SETUP_STATUS.md",
+        "lines": 75,
+        "size": 2307,
+        "modified": "2025-08-13T11:12:07.056960"
+      },
+      {
+        "name": "INSTALLATION_ANALYSIS_REPORT.md",
+        "path": "primepath_project/INSTALLATION_ANALYSIS_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/INSTALLATION_ANALYSIS_REPORT.md",
+        "lines": 282,
+        "size": 8196,
+        "modified": "2025-08-08T00:03:17"
+      },
+      {
+        "name": "SETUP_STATUS.md",
+        "path": "primepath_project/SETUP_STATUS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/SETUP_STATUS.md",
+        "lines": 75,
+        "size": 2307,
+        "modified": "2025-07-31T22:10:04"
+      }
+    ],
+    "analysis": [
+      {
+        "name": "CLEANUP_COMPLETE_REPORT.md",
+        "path": "CLEANUP_COMPLETE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CLEANUP_COMPLETE_REPORT.md",
+        "lines": 177,
+        "size": 5009,
+        "modified": "2025-08-08T17:12:12.488115"
+      },
+      {
+        "name": "STUDENT_NAME_ERROR_INVESTIGATION.md",
+        "path": "STUDENT_NAME_ERROR_INVESTIGATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/STUDENT_NAME_ERROR_INVESTIGATION.md",
+        "lines": 112,
+        "size": 4690,
+        "modified": "2025-08-08T01:23:10"
+      },
+      {
+        "name": "PDF_TROUBLESHOOTING.md",
+        "path": "PDF_TROUBLESHOOTING.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PDF_TROUBLESHOOTING.md",
+        "lines": 55,
+        "size": 1953,
+        "modified": "2025-08-06T14:27:15"
+      },
+      {
+        "name": "OUTER_MARGIN_REDUCTION.md",
+        "path": "OUTER_MARGIN_REDUCTION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/OUTER_MARGIN_REDUCTION.md",
+        "lines": 82,
+        "size": 2625,
+        "modified": "2025-08-06T14:27:15"
+      },
+      {
+        "name": "NAMING_CONVENTION_UPDATE_COMPLETE.md",
+        "path": "NAMING_CONVENTION_UPDATE_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/NAMING_CONVENTION_UPDATE_COMPLETE.md",
+        "lines": 105,
+        "size": 3888,
+        "modified": "2025-08-10T23:25:23.292372"
+      },
+      {
+        "name": "PROJECT_CONTEXT_FOR_MAC.md",
+        "path": "PROJECT_CONTEXT_FOR_MAC.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PROJECT_CONTEXT_FOR_MAC.md",
+        "lines": 297,
+        "size": 9363,
+        "modified": "2025-08-08T12:48:24"
+      },
+      {
+        "name": "PHASE6_ANALYSIS.md",
+        "path": "PHASE6_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE6_ANALYSIS.md",
+        "lines": 313,
+        "size": 7509,
+        "modified": "2025-08-07T22:30:34"
+      },
+      {
+        "name": "EXAM_MAPPING_ANALYSIS.md",
+        "path": "EXAM_MAPPING_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/EXAM_MAPPING_ANALYSIS.md",
+        "lines": 145,
+        "size": 4363,
+        "modified": "2025-08-08T01:37:35"
+      },
+      {
+        "name": "PHASE5_ANALYSIS.md",
+        "path": "PHASE5_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE5_ANALYSIS.md",
+        "lines": 221,
+        "size": 6299,
+        "modified": "2025-08-07T22:15:01"
+      },
+      {
+        "name": "MODULARIZATION_PHASE_2_ANALYSIS.md",
+        "path": "MODULARIZATION_PHASE_2_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MODULARIZATION_PHASE_2_ANALYSIS.md",
+        "lines": 291,
+        "size": 7479,
+        "modified": "2025-08-08T00:34:14"
+      },
+      {
+        "name": "LAYOUT_IMPROVEMENTS.md",
+        "path": "LAYOUT_IMPROVEMENTS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/LAYOUT_IMPROVEMENTS.md",
+        "lines": 55,
+        "size": 2064,
+        "modified": "2025-08-06T14:27:15"
+      },
+      {
+        "name": "PHASE2_ULTRA_ANALYSIS.md",
+        "path": "PHASE2_ULTRA_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PHASE2_ULTRA_ANALYSIS.md",
+        "lines": 289,
+        "size": 7425,
+        "modified": "2025-08-08T00:46:12"
+      },
+      {
+        "name": "CLEANUP_COMPLETE_SUMMARY.md",
+        "path": "CLEANUP_COMPLETE_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/CLEANUP_COMPLETE_SUMMARY.md",
+        "lines": 151,
+        "size": 3916,
+        "modified": "2025-08-13T11:46:30.300815"
+      },
+      {
+        "name": "COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+        "path": "COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/COMPREHENSIVE_REGRESSION_ANALYSIS_COMPLETE.md",
+        "lines": 210,
+        "size": 7502,
+        "modified": "2025-08-11T01:48:35.444710"
+      },
+      {
+        "name": "ROLLBACK_PLAN.md",
+        "path": "ROLLBACK_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/ROLLBACK_PLAN.md",
+        "lines": 60,
+        "size": 1290,
+        "modified": "2025-08-07T10:48:06"
+      },
+      {
+        "name": "TECHNICAL_DEBT_SUMMARY.md",
+        "path": "TECHNICAL_DEBT_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/TECHNICAL_DEBT_SUMMARY.md",
+        "lines": 96,
+        "size": 2995,
+        "modified": "2025-08-09T00:33:35.600286"
+      },
+      {
+        "name": "BACKEND_MODULARIZATION_COMPLETE.md",
+        "path": "BACKEND_MODULARIZATION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/BACKEND_MODULARIZATION_COMPLETE.md",
+        "lines": 195,
+        "size": 5274,
+        "modified": "2025-08-07T18:54:03"
+      },
+      {
+        "name": "SAFE_MODULARIZATION_PLAN.md",
+        "path": "SAFE_MODULARIZATION_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/SAFE_MODULARIZATION_PLAN.md",
+        "lines": 280,
+        "size": 7483,
+        "modified": "2025-08-08T00:35:47"
+      },
+      {
+        "name": "API_SESSION_ID_DOCUMENTATION.md",
+        "path": "API_SESSION_ID_DOCUMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/API_SESSION_ID_DOCUMENTATION.md",
+        "lines": 77,
+        "size": 2464,
+        "modified": "2025-08-11T01:06:41.376545"
+      },
+      {
+        "name": "BACKEND_MODULARIZATION_PHASE3.md",
+        "path": "BACKEND_MODULARIZATION_PHASE3.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/BACKEND_MODULARIZATION_PHASE3.md",
+        "lines": 288,
+        "size": 7090,
+        "modified": "2025-08-07T18:53:29"
+      },
+      {
+        "name": "DOUBLE_CHECK_COMPLETE.md",
+        "path": "DOUBLE_CHECK_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/DOUBLE_CHECK_COMPLETE.md",
+        "lines": 191,
+        "size": 5323,
+        "modified": "2025-08-08T12:37:15"
+      },
+      {
+        "name": "MODULARIZATION_PROGRESS.md",
+        "path": "MODULARIZATION_PROGRESS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MODULARIZATION_PROGRESS.md",
+        "lines": 115,
+        "size": 3314,
+        "modified": "2025-08-07T10:41:10"
+      },
+      {
+        "name": "ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+        "path": "ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/ULTRA_DEEP_CORE_DROPDOWN_ANALYSIS.md",
+        "lines": 192,
+        "size": 5917,
+        "modified": "2025-08-08T01:43:43"
+      },
+      {
+        "name": "MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+        "path": "MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MODULARIZATION_PROJECT_COMPLETE_REPORT.md",
+        "lines": 300,
+        "size": 9819,
+        "modified": "2025-08-08T17:29:12.183541"
+      },
+      {
+        "name": "PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+        "path": "PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/PDF_ROTATION_PERSISTENCE_COMPLETE.md",
+        "lines": 151,
+        "size": 5064,
+        "modified": "2025-08-10T22:12:11.207281"
+      },
+      {
+        "name": "BACKEND_COMPLETE.md",
+        "path": "BACKEND_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/BACKEND_COMPLETE.md",
+        "lines": 91,
+        "size": 2785,
+        "modified": "2025-07-31T22:03:16"
+      },
+      {
+        "name": "TEMPLATE_CONSOLIDATION_COMPLETE.md",
+        "path": "TEMPLATE_CONSOLIDATION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/TEMPLATE_CONSOLIDATION_COMPLETE.md",
+        "lines": 216,
+        "size": 6300,
+        "modified": "2025-08-08T12:27:41"
+      },
+      {
+        "name": "MODULARIZATION_SUCCESS.md",
+        "path": "MODULARIZATION_SUCCESS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MODULARIZATION_SUCCESS.md",
+        "lines": 150,
+        "size": 4085,
+        "modified": "2025-08-07T10:54:05"
+      },
+      {
+        "name": "DEPLOYMENT_INSTRUCTIONS.md",
+        "path": "DEPLOYMENT_INSTRUCTIONS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/DEPLOYMENT_INSTRUCTIONS.md",
+        "lines": 178,
+        "size": 5662,
+        "modified": "2025-08-08T21:18:22.754811"
+      },
+      {
+        "name": "QUICK_START.md",
+        "path": "QUICK_START.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/QUICK_START.md",
+        "lines": 61,
+        "size": 1838,
+        "modified": "2025-07-31T22:19:47"
+      },
+      {
+        "name": "MARGIN_REDUCTION_COMPLETE.md",
+        "path": "MARGIN_REDUCTION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MARGIN_REDUCTION_COMPLETE.md",
+        "lines": 51,
+        "size": 1720,
+        "modified": "2025-08-06T14:27:15"
+      },
+      {
+        "name": "CURRICULUM_PRD.md",
+        "path": "primepath_project_backup_20250813_111206/CURRICULUM_PRD.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/CURRICULUM_PRD.md",
+        "lines": 122,
+        "size": 4331,
+        "modified": "2025-08-13T11:12:06.926776"
+      },
+      {
+        "name": "COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+        "path": "primepath_project_backup_20250813_111206/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+        "lines": 624,
+        "size": 16845,
+        "modified": "2025-08-13T11:12:06.931621"
+      },
+      {
+        "name": "DEBUG_REMOVAL_LESSONS_LEARNED.md",
+        "path": "primepath_project_backup_20250813_111206/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+        "lines": 56,
+        "size": 2115,
+        "modified": "2025-08-13T11:12:06.951993"
+      },
+      {
+        "name": "MUST_READ_SOLUTION.md",
+        "path": "primepath_project_backup_20250813_111206/MUST_READ_SOLUTION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/MUST_READ_SOLUTION.md",
+        "lines": 78,
+        "size": 2217,
+        "modified": "2025-08-13T11:12:06.958491"
+      },
+      {
+        "name": "DAILY_EXECUTION_CARDS.md",
+        "path": "primepath_project_backup_20250813_111206/DAILY_EXECUTION_CARDS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/DAILY_EXECUTION_CARDS.md",
+        "lines": 715,
+        "size": 24312,
+        "modified": "2025-08-13T11:12:06.960925"
+      },
+      {
+        "name": "CLEANUP_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/CLEANUP_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/CLEANUP_SUMMARY.md",
+        "lines": 103,
+        "size": 3284,
+        "modified": "2025-08-13T11:12:06.968494"
+      },
+      {
+        "name": "PLACEMENT_NAME_UPDATE_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+        "lines": 143,
+        "size": 3909,
+        "modified": "2025-08-13T11:12:06.975049"
+      },
+      {
+        "name": "FILE_STORAGE_EXPLAINED.md",
+        "path": "primepath_project_backup_20250813_111206/FILE_STORAGE_EXPLAINED.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/FILE_STORAGE_EXPLAINED.md",
+        "lines": 40,
+        "size": 1052,
+        "modified": "2025-08-13T11:12:06.975372"
+      },
+      {
+        "name": "CURRICULUM_FILTERING_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/CURRICULUM_FILTERING_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/CURRICULUM_FILTERING_SUMMARY.md",
+        "lines": 145,
+        "size": 4509,
+        "modified": "2025-08-13T11:12:07.029640"
+      },
+      {
+        "name": "NAVIGATION_CLEANUP_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/NAVIGATION_CLEANUP_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/NAVIGATION_CLEANUP_SUMMARY.md",
+        "lines": 83,
+        "size": 2581,
+        "modified": "2025-08-13T11:12:07.030811"
+      },
+      {
+        "name": "CLEANUP_STRATEGY_PHASE_1.md",
+        "path": "primepath_project_backup_20250813_111206/CLEANUP_STRATEGY_PHASE_1.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/CLEANUP_STRATEGY_PHASE_1.md",
+        "lines": 374,
+        "size": 8231,
+        "modified": "2025-08-13T11:12:07.039878"
+      },
+      {
+        "name": "MODULARIZATION_EXECUTION_PLAN.md",
+        "path": "primepath_project_backup_20250813_111206/MODULARIZATION_EXECUTION_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/MODULARIZATION_EXECUTION_PLAN.md",
+        "lines": 802,
+        "size": 21626,
+        "modified": "2025-08-13T11:12:07.042093"
+      },
+      {
+        "name": "MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+        "lines": 129,
+        "size": 4492,
+        "modified": "2025-08-13T11:12:07.043205"
+      },
+      {
+        "name": "ANSWER_MAPPING_FEATURE_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+        "lines": 160,
+        "size": 5212,
+        "modified": "2025-08-13T11:12:07.059230"
+      },
+      {
+        "name": "CLAUDE_VIBE_CODING_EXECUTION.md",
+        "path": "primepath_project_backup_20250813_111206/CLAUDE_VIBE_CODING_EXECUTION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/CLAUDE_VIBE_CODING_EXECUTION.md",
+        "lines": 639,
+        "size": 17391,
+        "modified": "2025-08-13T11:12:07.103613"
+      },
+      {
+        "name": "PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+        "path": "primepath_project_backup_20250813_111206/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+        "lines": 252,
+        "size": 6891,
+        "modified": "2025-08-13T11:12:07.104002"
+      },
+      {
+        "name": "UPLOAD_EXAM_QUICK_REFERENCE.md",
+        "path": "primepath_project_backup_20250813_111206/UPLOAD_EXAM_QUICK_REFERENCE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/UPLOAD_EXAM_QUICK_REFERENCE.md",
+        "lines": 135,
+        "size": 3524,
+        "modified": "2025-08-13T11:12:07.107057"
+      },
+      {
+        "name": "EXAM_DELETION_CASCADE_REPORT.md",
+        "path": "primepath_project_backup_20250813_111206/EXAM_DELETION_CASCADE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/EXAM_DELETION_CASCADE_REPORT.md",
+        "lines": 226,
+        "size": 7120,
+        "modified": "2025-08-13T11:12:07.110895"
+      },
+      {
+        "name": "CURRICULUM_PRD.md",
+        "path": "primepath_project/CURRICULUM_PRD.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/CURRICULUM_PRD.md",
+        "lines": 122,
+        "size": 4331,
+        "modified": "2025-08-12T18:13:53.149701"
+      },
+      {
+        "name": "COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+        "path": "primepath_project/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/COMPREHENSIVE_CODEBASE_ANALYSIS.md",
+        "lines": 624,
+        "size": 16845,
+        "modified": "2025-08-07T10:08:22"
+      },
+      {
+        "name": "DEBUG_REMOVAL_LESSONS_LEARNED.md",
+        "path": "primepath_project/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/DEBUG_REMOVAL_LESSONS_LEARNED.md",
+        "lines": 56,
+        "size": 2115,
+        "modified": "2025-08-12T18:01:20.316875"
+      },
+      {
+        "name": "MUST_READ_SOLUTION.md",
+        "path": "primepath_project/MUST_READ_SOLUTION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/MUST_READ_SOLUTION.md",
+        "lines": 78,
+        "size": 2217,
+        "modified": "2025-08-12T16:27:06.870728"
+      },
+      {
+        "name": "DAILY_EXECUTION_CARDS.md",
+        "path": "primepath_project/DAILY_EXECUTION_CARDS.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/DAILY_EXECUTION_CARDS.md",
+        "lines": 715,
+        "size": 24312,
+        "modified": "2025-08-07T10:16:14"
+      },
+      {
+        "name": "CLEANUP_SUMMARY.md",
+        "path": "primepath_project/CLEANUP_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/CLEANUP_SUMMARY.md",
+        "lines": 103,
+        "size": 3284,
+        "modified": "2025-08-12T16:40:03.494048"
+      },
+      {
+        "name": "PLACEMENT_NAME_UPDATE_SUMMARY.md",
+        "path": "primepath_project/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PLACEMENT_NAME_UPDATE_SUMMARY.md",
+        "lines": 143,
+        "size": 3909,
+        "modified": "2025-08-12T12:09:55.408140"
+      },
+      {
+        "name": "FILE_STORAGE_EXPLAINED.md",
+        "path": "primepath_project/FILE_STORAGE_EXPLAINED.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/FILE_STORAGE_EXPLAINED.md",
+        "lines": 40,
+        "size": 1052,
+        "modified": "2025-07-31T22:37:30"
+      },
+      {
+        "name": "CURRICULUM_FILTERING_SUMMARY.md",
+        "path": "primepath_project/CURRICULUM_FILTERING_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/CURRICULUM_FILTERING_SUMMARY.md",
+        "lines": 145,
+        "size": 4509,
+        "modified": "2025-08-12T14:20:01.488654"
+      },
+      {
+        "name": "NAVIGATION_CLEANUP_SUMMARY.md",
+        "path": "primepath_project/NAVIGATION_CLEANUP_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/NAVIGATION_CLEANUP_SUMMARY.md",
+        "lines": 83,
+        "size": 2581,
+        "modified": "2025-08-12T23:39:44.427317"
+      },
+      {
+        "name": "CLEANUP_STRATEGY_PHASE_1.md",
+        "path": "primepath_project/CLEANUP_STRATEGY_PHASE_1.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/CLEANUP_STRATEGY_PHASE_1.md",
+        "lines": 374,
+        "size": 8231,
+        "modified": "2025-08-13T01:14:36.779135"
+      },
+      {
+        "name": "MODULARIZATION_EXECUTION_PLAN.md",
+        "path": "primepath_project/MODULARIZATION_EXECUTION_PLAN.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/MODULARIZATION_EXECUTION_PLAN.md",
+        "lines": 802,
+        "size": 21626,
+        "modified": "2025-08-07T10:13:53"
+      },
+      {
+        "name": "MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+        "path": "primepath_project/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/MCQ_UI_IMPROVEMENTS_SUMMARY.md",
+        "lines": 129,
+        "size": 4492,
+        "modified": "2025-08-09T22:51:57.840112"
+      },
+      {
+        "name": "ANSWER_MAPPING_FEATURE_SUMMARY.md",
+        "path": "primepath_project/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/ANSWER_MAPPING_FEATURE_SUMMARY.md",
+        "lines": 160,
+        "size": 5212,
+        "modified": "2025-08-12T13:57:14.318112"
+      },
+      {
+        "name": "CLAUDE_VIBE_CODING_EXECUTION.md",
+        "path": "primepath_project/CLAUDE_VIBE_CODING_EXECUTION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/CLAUDE_VIBE_CODING_EXECUTION.md",
+        "lines": 639,
+        "size": 17391,
+        "modified": "2025-08-07T10:22:07"
+      },
+      {
+        "name": "PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+        "path": "primepath_project/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PDF_LAYOUT_IMPROVEMENTS_COMPLETE.md",
+        "lines": 252,
+        "size": 6891,
+        "modified": "2025-08-10T17:05:38.722833"
+      },
+      {
+        "name": "UPLOAD_EXAM_QUICK_REFERENCE.md",
+        "path": "primepath_project/UPLOAD_EXAM_QUICK_REFERENCE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/UPLOAD_EXAM_QUICK_REFERENCE.md",
+        "lines": 135,
+        "size": 3524,
+        "modified": "2025-08-06T18:32:49"
+      },
+      {
+        "name": "EXAM_DELETION_CASCADE_REPORT.md",
+        "path": "primepath_project/EXAM_DELETION_CASCADE_REPORT.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/EXAM_DELETION_CASCADE_REPORT.md",
+        "lines": 226,
+        "size": 7120,
+        "modified": "2025-08-09T22:30:09.237970"
+      },
+      {
+        "name": "endpoints.md",
+        "path": "docs/api/v1/endpoints.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/docs/api/v1/endpoints.md",
+        "lines": 200,
+        "size": 3206,
+        "modified": "2025-08-08T19:50:21.643873"
+      }
+    ],
+    "implementation": [
+      {
+        "name": "MIGRATION_TO_MAC_GUIDE.md",
+        "path": "MIGRATION_TO_MAC_GUIDE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/MIGRATION_TO_MAC_GUIDE.md",
+        "lines": 293,
+        "size": 7665,
+        "modified": "2025-08-08T12:44:44"
+      },
+      {
+        "name": "INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+        "path": "INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/INTERNAL_DIFFICULTY_IMPLEMENTATION_COMPLETE.md",
+        "lines": 131,
+        "size": 4652,
+        "modified": "2025-08-10T23:44:38.442032"
+      },
+      {
+        "name": "SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+        "path": "SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md",
+        "lines": 76,
+        "size": 2632,
+        "modified": "2025-08-06T14:27:15"
+      },
+      {
+        "name": "TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+        "lines": 193,
+        "size": 7059,
+        "modified": "2025-08-13T11:12:06.930237"
+      },
+      {
+        "name": "PDF_ROTATION_IMPLEMENTATION.md",
+        "path": "primepath_project_backup_20250813_111206/PDF_ROTATION_IMPLEMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/PDF_ROTATION_IMPLEMENTATION.md",
+        "lines": 159,
+        "size": 4585,
+        "modified": "2025-08-13T11:12:07.043966"
+      },
+      {
+        "name": "CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+        "path": "primepath_project_backup_20250813_111206/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+        "lines": 101,
+        "size": 3448,
+        "modified": "2025-08-13T11:12:07.107648"
+      },
+      {
+        "name": "MODULARIZATION_IMPLEMENTATION.md",
+        "path": "primepath_project_backup_20250813_111206/MODULARIZATION_IMPLEMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project_backup_20250813_111206/MODULARIZATION_IMPLEMENTATION.md",
+        "lines": 288,
+        "size": 8034,
+        "modified": "2025-08-13T11:12:07.111986"
+      },
+      {
+        "name": "TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+        "path": "primepath_project/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/TAB_RENAMING_IMPLEMENTATION_SUMMARY.md",
+        "lines": 193,
+        "size": 7059,
+        "modified": "2025-08-12T19:49:22.505913"
+      },
+      {
+        "name": "PDF_ROTATION_IMPLEMENTATION.md",
+        "path": "primepath_project/PDF_ROTATION_IMPLEMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PDF_ROTATION_IMPLEMENTATION.md",
+        "lines": 159,
+        "size": 4585,
+        "modified": "2025-08-10T02:40:07.634927"
+      },
+      {
+        "name": "CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+        "path": "primepath_project/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/CURRICULUM_IMPLEMENTATION_SUMMARY.md",
+        "lines": 101,
+        "size": 3448,
+        "modified": "2025-08-12T18:37:05.949812"
+      },
+      {
+        "name": "MODULARIZATION_IMPLEMENTATION.md",
+        "path": "primepath_project/MODULARIZATION_IMPLEMENTATION.md",
+        "full_path": "/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/MODULARIZATION_IMPLEMENTATION.md",
+        "lines": 288,
+        "size": 8034,
+        "modified": "2025-08-07T09:19:22"
+      }
+    ]
+  },
+  "relationships": {
+    "code_references": {
+      "README_MAC.md": [
+        "prepare_for_migration.py"
+      ],
+      "   \u2713 Created README_MAC.md": [
+        "prepare_for_migration.py"
+      ],
+      "4. Follow instructions in README_MAC.md": [
+        "prepare_for_migration.py"
+      ],
+      "- README_MAC.md": [
+        "prepare_for_migration.py"
+      ],
+      "README.md": [
+        "documentation_cleanup_analyzer.py",
+        "documentation_cleanup_analyzer.py",
+        "primepath_project_backup_20250813_111206/phase11_analysis.py",
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/test_phase9_no_breaking_changes.py",
+        "primepath_project/verify_phase9_changes_only.py",
+        "primepath_project/phase11_analysis.py"
+      ],
+      "CLAUDE.md": [
+        "documentation_cleanup_analyzer.py",
+        "documentation_cleanup_analyzer.py",
+        "primepath_project_backup_20250813_111206/post_cleanup_final_qa.py",
+        "primepath_project/post_cleanup_final_qa.py"
+      ],
+      "*.md": [
+        "documentation_cleanup_analyzer.py",
+        "primepath_project_backup_20250813_111206/phase11_analysis.py",
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/phase11_analysis.py"
+      ],
+      "API.md": [
+        "documentation_cleanup_analyzer.py",
+        "documentation_cleanup_analyzer.py",
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/test_phase9_no_breaking_changes.py",
+        "primepath_project/verify_phase9_changes_only.py"
+      ],
+      "DEPLOYMENT.md": [
+        "documentation_cleanup_analyzer.py",
+        "documentation_cleanup_analyzer.py",
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/test_phase9_no_breaking_changes.py",
+        "primepath_project/verify_phase9_changes_only.py"
+      ],
+      "CONTRIBUTING.md": [
+        "documentation_cleanup_analyzer.py",
+        "documentation_cleanup_analyzer.py",
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/test_phase9_no_breaking_changes.py",
+        "primepath_project/verify_phase9_changes_only.py"
+      ],
+      "DOCUMENTATION_INDEX.md": [
+        "documentation_cleanup_analyzer.py",
+        "documentation_cleanup_analyzer.py"
+      ],
+      "Created DOCUMENTATION_INDEX.md": [
+        "documentation_cleanup_analyzer.py"
+      ],
+      "/README.md": [
+        "documentation_cleanup_analyzer.py"
+      ],
+      "/DOCUMENTATION_INDEX.md": [
+        "documentation_cleanup_analyzer.py"
+      ],
+      "/docs/current/guides/API.md": [
+        "documentation_cleanup_analyzer.py"
+      ],
+      "docs/README.md": [
+        "primepath_project_backup_20250813_111206/phase11_comprehensive_qa.py",
+        "primepath_project/phase11_comprehensive_qa.py"
+      ],
+      "docs/api/v1/endpoints.md": [
+        "primepath_project_backup_20250813_111206/phase11_comprehensive_qa.py",
+        "primepath_project/phase11_comprehensive_qa.py"
+      ],
+      "GAP_FIX_COMPLETE_DOCUMENTATION.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "GAP_FIX_FINAL_REPORT.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "FINAL_FIX_REPORT.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "SERVER_CACHE_FIX_REPORT.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MIXED_MCQ_FIX_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MIXED_MCQ_PREVIEW_FIX_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "UPLOAD_EXAM_WORKING_STATE_V1_2025_08_06.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "TECHNICAL_DEBT_SUMMARY.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "TECHNICAL_DEBT_ASSESSMENT.md": [
+        "primepath_project_backup_20250813_111206/comprehensive_codebase_audit.py",
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MIXED_MCQ_V2_FIX_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MIXED_MCQ_OPTIONS_FIX_FINAL.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "COMPREHENSIVE_FIX_IMPLEMENTATION.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MIXED_QUESTIONS_FIX_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MULTIPLE_INPUTS_FIX_COMPREHENSIVE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MULTIPLE_SHORT_ANSWER_FINAL_FIX.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "EXISTING_FEATURES_VERIFICATION_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "FINAL_FIX_REPORT_MIXED_MCQ_SUBMIT.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "FINAL_VERIFICATION_REPORT.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "FIX_LONG_ANSWERS_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "FIX_MULTIPLE_INPUTS_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "FIX_OPTIONS_COUNT_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "LAYOUT_IMPROVEMENTS.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MARGIN_ADJUSTMENT_FINAL.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "MARGIN_REDUCTION_COMPLETE.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "OUTER_MARGIN_REDUCTION.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "PDF_TROUBLESHOOTING.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "SKIP_FIRST_LEFT_HALF_IMPLEMENTATION.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "VERTICAL_SPLIT_FIX.md": [
+        "primepath_project_backup_20250813_111206/execute_cleanup.py",
+        "primepath_project/execute_cleanup.py"
+      ],
+      "readme.md": [
+        "primepath_project_backup_20250813_111206/phase11_analysis.py",
+        "primepath_project/phase11_analysis.py"
+      ],
+      "/static/docs/README.md": [
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/static/js/phase9_documentation_monitoring.js"
+      ],
+      "/static/docs/API.md": [
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/static/js/phase9_documentation_monitoring.js"
+      ],
+      "/static/docs/DEPLOYMENT.md": [
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/static/js/phase9_documentation_monitoring.js"
+      ],
+      ".md": [
+        "primepath_project/phase9_documentation_analyzer.py",
+        "primepath_project/static/js/phase9_documentation_monitoring.js"
+      ],
+      "PHASE9_COMPLETION_REPORT.md": [
+        "primepath_project/test_phase9_no_breaking_changes.py",
+        "primepath_project/verify_phase9_changes_only.py"
+      ]
+    },
+    "internal_links": {},
+    "external_references": {}
+  },
+  "console_logs": [
+    {
+      "timestamp": "2025-08-13T15:40:32.484350",
+      "category": "ANALYSIS",
+      "message": "Found 174 markdown files",
+      "level": "info"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.511141",
+      "category": "REFS",
+      "message": "Scanning code for documentation references",
+      "level": "info"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871375",
+      "category": "STRUCTURE",
+      "message": "Created: docs",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871470",
+      "category": "STRUCTURE",
+      "message": "Created: docs/current",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871513",
+      "category": "STRUCTURE",
+      "message": "Created: docs/current/guides",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871554",
+      "category": "STRUCTURE",
+      "message": "Created: docs/current/api",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871591",
+      "category": "STRUCTURE",
+      "message": "Created: docs/current/deployment",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871635",
+      "category": "STRUCTURE",
+      "message": "Created: docs/current/config",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871673",
+      "category": "STRUCTURE",
+      "message": "Created: docs/archive",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871708",
+      "category": "STRUCTURE",
+      "message": "Created: docs/archive/phases",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871741",
+      "category": "STRUCTURE",
+      "message": "Created: docs/archive/fixes",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871779",
+      "category": "STRUCTURE",
+      "message": "Created: docs/archive/qa",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871815",
+      "category": "STRUCTURE",
+      "message": "Created: docs/archive/analysis",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871850",
+      "category": "STRUCTURE",
+      "message": "Created: docs/archive/implementation",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.871883",
+      "category": "STRUCTURE",
+      "message": "Created: docs/archive/legacy",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.872847",
+      "category": "INDEX",
+      "message": "Created DOCUMENTATION_INDEX.md",
+      "level": "success"
+    },
+    {
+      "timestamp": "2025-08-13T15:40:32.872960",
+      "category": "MONITOR",
+      "message": "Created documentation_cleanup_monitoring.js",
+      "level": "success"
+    }
+  ]
+}
