@@ -1,0 +1,1062 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load grade_tags %}
+
+{% block title %}Placement Configuration - Rules & Exam Mapping{% endblock %}
+
+{% block content %}
+<style>
+    .placement-container {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .config-section {
+        margin-bottom: 60px;
+    }
+    
+    .section-header {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        border-left: 5px solid #007bff;
+    }
+    
+    .section-header h2 {
+        margin: 0 0 10px 0;
+        color: #333;
+    }
+    
+    .section-header p {
+        margin: 0;
+        color: #666;
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 4px;
+    }
+    
+    .info-box h3 {
+        margin: 0 0 15px 0;
+        color: #1976d2;
+        font-size: 1.3rem;
+    }
+    
+    .info-box p {
+        margin: 0 0 10px 0;
+        line-height: 1.6;
+    }
+    
+    .info-box ul {
+        margin: 10px 0;
+        padding-left: 25px;
+    }
+    
+    .info-box li {
+        margin-bottom: 8px;
+    }
+    
+    .example-box {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 15px;
+        font-style: italic;
+    }
+    
+    /* Placement Rules Styles */
+    .program-section {
+        margin-bottom: 40px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+    
+    .program-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    
+    .placement-matrix {
+        overflow-x: auto;
+        margin-bottom: 30px;
+    }
+    
+    .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1200px;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    
+    .matrix-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .matrix-table th:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #e9ecef;
+        z-index: 11;
+        min-width: 150px;
+    }
+    
+    .matrix-table td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .level-select {
+        width: 100%;
+        min-width: 120px;
+        padding: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.875rem;
+    }
+    
+    /* Exam Mapping Styles */
+    .mapping-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .mapping-table th,
+    .mapping-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+    }
+    
+    .mapping-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+    }
+    
+    .mapping-table tr:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .subprogram-name {
+        font-weight: 600;
+        color: #555;
+    }
+    
+    .level-name {
+        margin-left: 20px;
+    }
+    
+    .exam-mapping-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .exam-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .exam-number {
+        min-width: 25px;
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .exam-select {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+    
+    .remove-exam-btn {
+        padding: 6px 12px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        min-width: 70px;
+    }
+    
+    .remove-exam-btn:hover {
+        background-color: #c82333;
+    }
+    
+    .remove-exam-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .add-exam-btn {
+        padding: 6px 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+    
+    .add-exam-btn:hover {
+        background-color: #0056b3;
+    }
+    
+    .add-exam-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .save-button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 40px;
+        border-radius: 4px;
+        font-size: 18px;
+        cursor: pointer;
+        float: right;
+        margin-top: 20px;
+    }
+    
+    .save-button:hover {
+        background-color: #218838;
+    }
+    
+    .stats-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+    
+    .stats-box span {
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .level-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+    
+    .save-level-btn {
+        padding: 6px 16px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+    
+    .save-level-btn:hover {
+        background-color: #218838;
+    }
+    
+    .delete-mapping-btn {
+        padding: 4px 8px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        margin-left: 5px;
+    }
+    
+    .delete-mapping-btn:hover {
+        background-color: #c82333;
+    }
+    
+    .grade-header {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .rank-options {
+        text-align: left;
+        padding-left: 10px;
+        font-weight: 600;
+    }
+    
+    /* Login Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 400px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .login-form input {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    .login-form button {
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .login-form button:hover {
+        background-color: #0056b3;
+    }
+    
+    .login-form button[type="button"] {
+        background-color: #6c757d;
+    }
+    
+    .login-form button[type="button"]:hover {
+        background-color: #5a6268;
+    }
+    
+    .error-message {
+        color: #dc3545;
+        margin-top: 10px;
+    }
+</style>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <h2>Admin Login Required</h2>
+        <p>Please login to edit placement configuration</p>
+        <form class="login-form" onsubmit="return handleLogin(event)">
+            <input type="text" id="adminId" placeholder="Admin ID" required>
+            <input type="password" id="adminPassword" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <button type="button" onclick="window.location.href='{% url 'core:teacher_dashboard' %}'" style="background-color: #6c757d;">
+                Exit
+            </button>
+            <div id="loginError" class="error-message" style="display: none;"></div>
+        </form>
+    </div>
+</div>
+
+<div class="placement-container">
+    <h1>Placement Configuration</h1>
+    
+    <!-- Section 1: Exam-to-Level Mapping -->
+    <div class="config-section">
+        <div class="section-header">
+            <h2>Step 1: Exam-to-Level Mapping</h2>
+            <p>Map exam papers to curriculum levels. Each level can have up to 5 different exam versions.</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>What is Exam-to-Level Mapping?</h3>
+            <p>This is the first configuration step. You need to specify which exam papers are available for each curriculum level.</p>
+            
+            <p><strong>Key Points:</strong></p>
+            <ul>
+                <li>Each curriculum level can have multiple exam versions</li>
+                <li>When a student is placed in a level, the system will randomly select one of the mapped exams</li>
+                <li><strong>The same exam can be mapped to multiple curriculum levels</strong> (e.g., Exam C can be used for both Core Phonics Level 1 and Core Phonics Level 2)</li>
+                <li>Use the "+" button to add more exam slots and "Clear" button to remove exams</li>
+            </ul>
+        </div>
+        
+        <!-- PRIME CORE Exam Mapping -->
+        <div class="program-section">
+            <h2 class="program-title">PRIME CORE - Exam Mapping</h2>
+            <div class="stats-box">
+                <span id="core-mapped">0</span> of <span id="core-total">{{ core_levels|length }}</span> levels have exams mapped
+            </div>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th width="35%">Curriculum Level</th>
+                        <th width="65%">Mapped Exams (Max 5)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for level in core_levels %}
+                    <tr>
+                        <td>
+                            <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                            <div class="level-name">Level {{ level.level_number }}</div>
+                        </td>
+                        <td>
+                            <div class="exam-mapping-container" id="mapping-{{ level.id }}">
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="updateStats()">
+                                        <option value="">Select Exam</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            </div>
+                            <div class="level-actions">
+                                <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'core')" id="add-btn-{{ level.id }}">
+                                    + Add Another Exam
+                                </button>
+                                <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                                    Save
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- PRIME ASCENT Exam Mapping -->
+        <div class="program-section">
+            <h2 class="program-title">PRIME ASCENT - Exam Mapping</h2>
+            <div class="stats-box">
+                <span id="ascent-mapped">0</span> of <span id="ascent-total">{{ ascent_levels|length }}</span> levels have exams mapped
+            </div>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th width="35%">Curriculum Level</th>
+                        <th width="65%">Mapped Exams (Max 5)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for level in ascent_levels %}
+                    <tr>
+                        <td>
+                            <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                            <div class="level-name">Level {{ level.level_number }}</div>
+                        </td>
+                        <td>
+                            <div class="exam-mapping-container" id="mapping-{{ level.id }}">
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="updateStats()">
+                                        <option value="">Select Exam</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            </div>
+                            <div class="level-actions">
+                                <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'ascent')" id="add-btn-{{ level.id }}">
+                                    + Add Another Exam
+                                </button>
+                                <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                                    Save
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- PRIME EDGE Exam Mapping -->
+        <div class="program-section">
+            <h2 class="program-title">PRIME EDGE - Exam Mapping</h2>
+            <div class="stats-box">
+                <span id="edge-mapped">0</span> of <span id="edge-total">{{ edge_levels|length }}</span> levels have exams mapped
+            </div>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th width="35%">Curriculum Level</th>
+                        <th width="65%">Mapped Exams (Max 5)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for level in edge_levels %}
+                    <tr>
+                        <td>
+                            <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                            <div class="level-name">Level {{ level.level_number }}</div>
+                        </td>
+                        <td>
+                            <div class="exam-mapping-container" id="mapping-{{ level.id }}">
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="updateStats()">
+                                        <option value="">Select Exam</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            </div>
+                            <div class="level-actions">
+                                <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'edge')" id="add-btn-{{ level.id }}">
+                                    + Add Another Exam
+                                </button>
+                                <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                                    Save
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- PRIME PINNACLE Exam Mapping -->
+        <div class="program-section">
+            <h2 class="program-title">PRIME PINNACLE - Exam Mapping</h2>
+            <div class="stats-box">
+                <span id="pinnacle-mapped">0</span> of <span id="pinnacle-total">{{ pinnacle_levels|length }}</span> levels have exams mapped
+            </div>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th width="35%">Curriculum Level</th>
+                        <th width="65%">Mapped Exams (Max 5)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for level in pinnacle_levels %}
+                    <tr>
+                        <td>
+                            <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                            <div class="level-name">Level {{ level.level_number }}</div>
+                        </td>
+                        <td>
+                            <div class="exam-mapping-container" id="mapping-{{ level.id }}">
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="updateStats()">
+                                        <option value="">Select Exam</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            </div>
+                            <div class="level-actions">
+                                <button class="add-exam-btn" onclick="addExamSlot({{ level.id }}, 'pinnacle')" id="add-btn-{{ level.id }}">
+                                    + Add Another Exam
+                                </button>
+                                <button class="save-level-btn" onclick="saveLevelMappings({{ level.id }})">
+                                    Save
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <button type="button" class="save-button" onclick="saveAllMappings()">Save All Exam Mappings</button>
+        <div style="clear: both;"></div>
+    </div>
+    
+    <!-- Section 2: Placement Rules -->
+    <div class="config-section">
+        <div class="section-header">
+            <h2>Step 2: Placement Rules</h2>
+            <p>Configure which curriculum level each student should be placed into based on their grade and English class rank.</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>What are Placement Rules?</h3>
+            <p>Placement Rules determine which curriculum level a student is assigned to based on their grade and English class rank.</p>
+            
+            <p><strong>How it works:</strong></p>
+            <ul>
+                <li>Each cell in the matrix represents a combination of student grade and English class rank</li>
+                <li>Select the appropriate curriculum level for each combination</li>
+                <li>When a student takes a placement test, the system will use these rules to determine their curriculum level</li>
+                <li>Once the curriculum level is determined, the system will randomly select one of the exams mapped to that level</li>
+            </ul>
+            
+            <div class="example-box">
+                <strong>Example:</strong> If you set Primary 3 + Top 10% → PRIME CORE SIGMA - Level 1, then any Primary 3 student in the top 10% of their English class will be placed in PRIME CORE SIGMA - Level 1.
+            </div>
+        </div>
+        
+        <!-- PRIME CORE Placement Rules -->
+        <div class="program-section">
+            <h2 class="program-title">PRIME CORE - Placement Rules</h2>
+            <div class="placement-matrix">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>School English Ranking</th>
+                            {% for grade in grades %}
+                            <th class="grade-header">{{ grade|format_grade }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rank in rank_options %}
+                        <tr>
+                            <td>{{ rank.label }}</td>
+                            {% for grade in grades %}
+                            <td>
+                                <select class="level-select" 
+                                        data-program="CORE" 
+                                        data-grade="{{ grade }}" 
+                                        data-rank="{{ rank.value }}">
+                                    <option value="">Select Level</option>
+                                    {% for level in core_levels %}
+                                    <option value="{{ level.id }}">{{ level.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Similar sections for ASCENT, EDGE, PINNACLE would go here -->
+        
+        <button type="button" class="save-button" onclick="savePlacementRules()">Save All Placement Rules</button>
+        <div style="clear: both;"></div>
+    </div>
+</div>
+
+<script>
+// Check authentication on page load
+let isAuthenticated = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Show login modal
+    document.getElementById('loginModal').style.display = 'block';
+    
+    // Disable all inputs until authenticated
+    disableAllInputs();
+});
+
+function handleLogin(event) {
+    event.preventDefault();
+    
+    const adminId = document.getElementById('adminId').value;
+    const password = document.getElementById('adminPassword').value;
+    
+    // Check credentials
+    if (adminId === 'admin' && password === 'admin123') {
+        isAuthenticated = true;
+        document.getElementById('loginModal').style.display = 'none';
+        enableAllInputs();
+        
+        // Load existing data
+        loadExistingRules();
+        loadExistingMappings();
+        updateStats();
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginError').textContent = 'Invalid credentials. Please try again.';
+    }
+    
+    return false;
+}
+
+function disableAllInputs() {
+    document.querySelectorAll('select, button').forEach(element => {
+        if (!element.closest('#loginModal')) {
+            element.disabled = true;
+        }
+    });
+}
+
+function enableAllInputs() {
+    document.querySelectorAll('select, button').forEach(element => {
+        element.disabled = false;
+    });
+    updateAllClearButtons();
+}
+
+// Store available exams for each level
+const availableExams = {
+    {% for level in core_levels %}
+    '{{ level.id }}': [
+        {% for exam in level.available_exams %}
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
+        {% endfor %}
+    ],
+    {% endfor %}
+    {% for level in ascent_levels %}
+    '{{ level.id }}': [
+        {% for exam in level.available_exams %}
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
+        {% endfor %}
+    ],
+    {% endfor %}
+    {% for level in edge_levels %}
+    '{{ level.id }}': [
+        {% for exam in level.available_exams %}
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
+        {% endfor %}
+    ],
+    {% endfor %}
+    {% for level in pinnacle_levels %}
+    '{{ level.id }}': [
+        {% for exam in level.available_exams %}
+        { id: '{{ exam.id }}', name: '{{ exam.name|escapejs }}' },
+        {% endfor %}
+    ],
+    {% endfor %}
+};
+
+// Exam Mapping Functions
+function addExamSlot(levelId, program) {
+    if (!isAuthenticated) return;
+    
+    const container = document.getElementById(`mapping-${levelId}`);
+    const existingRows = container.querySelectorAll('.exam-row').length;
+    
+    if (existingRows >= 5) {
+        alert('Maximum 5 exams per curriculum level');
+        return;
+    }
+    
+    const newSlot = existingRows + 1;
+    const exams = availableExams[levelId] || [];
+    
+    const newRow = document.createElement('div');
+    newRow.className = 'exam-row';
+    newRow.innerHTML = `
+        <span class="exam-number">${newSlot}.</span>
+        <select class="exam-select" data-level-id="${levelId}" data-program="${program}" data-slot="${newSlot}" onchange="updateStats()">
+            <option value="">Select Exam</option>
+            ${exams.map(exam => `<option value="${exam.id}">${exam.name}</option>`).join('')}
+        </select>
+        <button class="remove-exam-btn" onclick="removeExamSlot(${levelId}, ${newSlot})">Remove</button>
+        <button class="delete-mapping-btn" onclick="deleteExamMapping(${levelId}, ${newSlot})" title="Delete this mapping">×</button>
+    `;
+    
+    container.appendChild(newRow);
+    
+    if (existingRows + 1 >= 5) {
+        document.getElementById(`add-btn-${levelId}`).disabled = true;
+    }
+    
+    updateStats();
+}
+
+function removeExamSlot(levelId, slot) {
+    if (!isAuthenticated) return;
+    
+    const container = document.getElementById(`mapping-${levelId}`);
+    const rows = container.querySelectorAll('.exam-row');
+    
+    rows[slot - 1].remove();
+    
+    const remainingRows = container.querySelectorAll('.exam-row');
+    remainingRows.forEach((row, index) => {
+        row.querySelector('.exam-number').textContent = `${index + 1}.`;
+        row.querySelector('.exam-select').dataset.slot = index + 1;
+        
+        const removeBtn = row.querySelector('.remove-exam-btn');
+        if (index === 0 && remainingRows.length === 1) {
+            removeBtn.textContent = 'Clear';
+            removeBtn.onclick = () => clearExamSlot(levelId, 1);
+        } else {
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = () => removeExamSlot(levelId, index + 1);
+        }
+    });
+    
+    document.getElementById(`add-btn-${levelId}`).disabled = false;
+    updateStats();
+}
+
+function clearExamSlot(levelId, slot) {
+    if (!isAuthenticated) return;
+    
+    const container = document.getElementById(`mapping-${levelId}`);
+    const select = container.querySelector(`.exam-select[data-slot="${slot}"]`);
+    if (select) {
+        select.value = '';
+        updateStats();
+        updateClearButton(levelId, slot);
+    }
+}
+
+function updateClearButton(levelId, slot) {
+    const container = document.getElementById(`mapping-${levelId}`);
+    const row = container.querySelectorAll('.exam-row')[slot - 1];
+    if (row) {
+        const select = row.querySelector('.exam-select');
+        const button = row.querySelector('.remove-exam-btn');
+        
+        if (container.querySelectorAll('.exam-row').length === 1) {
+            button.disabled = !select.value;
+        }
+    }
+}
+
+function updateAllClearButtons() {
+    document.querySelectorAll('.exam-mapping-container').forEach(container => {
+        const levelId = container.id.replace('mapping-', '');
+        const rows = container.querySelectorAll('.exam-row');
+        
+        rows.forEach((row, index) => {
+            if (rows.length === 1) {
+                updateClearButton(levelId, index + 1);
+            }
+        });
+    });
+}
+
+function updateStats() {
+    const programs = ['core', 'ascent', 'edge', 'pinnacle'];
+    
+    programs.forEach(program => {
+        const selects = document.querySelectorAll(`.exam-select[data-program="${program}"]`);
+        const levelIds = new Set();
+        
+        selects.forEach(select => {
+            if (select.value) {
+                levelIds.add(select.dataset.levelId);
+            }
+        });
+        
+        const mappedElement = document.getElementById(`${program}-mapped`);
+        if (mappedElement) {
+            mappedElement.textContent = levelIds.size;
+        }
+    });
+    
+    document.querySelectorAll('.exam-select').forEach(select => {
+        select.addEventListener('change', function() {
+            updateClearButton(this.dataset.levelId, this.dataset.slot);
+        });
+    });
+}
+
+function deleteExamMapping(levelId, slot) {
+    if (!isAuthenticated) return;
+    
+    const container = document.getElementById(`mapping-${levelId}`);
+    const select = container.querySelector(`.exam-select[data-slot="${slot}"]`);
+    if (select) {
+        select.value = '';
+        updateStats();
+    }
+}
+
+function saveLevelMappings(levelId) {
+    if (!isAuthenticated) return;
+    
+    const mappings = [];
+    const container = document.getElementById(`mapping-${levelId}`);
+    
+    container.querySelectorAll('.exam-select').forEach(select => {
+        if (select.value) {
+            mappings.push({
+                curriculum_level_id: parseInt(levelId),
+                exam_id: parseInt(select.value),
+                slot: parseInt(select.dataset.slot)
+            });
+        }
+    });
+    
+    fetch('{% url "core:save_exam_mappings" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ 
+            mappings: mappings,
+            level_id: levelId 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Mappings saved successfully for this level!');
+        } else {
+            alert('Error saving mappings: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving mappings');
+    });
+}
+
+function saveAllMappings() {
+    if (!isAuthenticated) return;
+    
+    const mappings = [];
+    
+    document.querySelectorAll('.exam-select').forEach(select => {
+        if (select.value) {
+            mappings.push({
+                curriculum_level_id: parseInt(select.dataset.levelId),
+                exam_id: parseInt(select.value),
+                slot: parseInt(select.dataset.slot)
+            });
+        }
+    });
+    
+    fetch('{% url "core:save_exam_mappings" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ mappings: mappings })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('All exam mappings saved successfully!');
+        } else {
+            alert('Error saving exam mappings: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving exam mappings');
+    });
+}
+
+// Placement Rules Functions
+function loadExistingRules() {
+    fetch('{% url "core:get_placement_rules" %}')
+        .then(response => response.json())
+        .then(data => {
+            data.rules.forEach(rule => {
+                const selector = `.level-select[data-grade="${rule.grade}"][data-rank="${rule.rank}"]`;
+                const select = document.querySelector(selector);
+                if (select) {
+                    select.value = rule.curriculum_level_id;
+                }
+            });
+        })
+        .catch(error => console.error('Error loading rules:', error));
+}
+
+function loadExistingMappings() {
+    // This would load existing exam mappings
+    // Implementation depends on your backend API
+}
+
+function savePlacementRules() {
+    if (!isAuthenticated) return;
+    
+    const rules = [];
+    
+    document.querySelectorAll('.level-select').forEach(select => {
+        if (select.value) {
+            rules.push({
+                program: select.dataset.program,
+                grade: parseInt(select.dataset.grade),
+                rank: select.dataset.rank,
+                curriculum_level_id: parseInt(select.value)
+            });
+        }
+    });
+    
+    fetch('{% url "core:save_placement_rules" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ rules: rules })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Placement rules saved successfully!');
+        } else {
+            alert('Error saving placement rules: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving placement rules');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

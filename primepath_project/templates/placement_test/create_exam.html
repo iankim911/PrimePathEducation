@@ -483,6 +483,16 @@ if (typeof pdfjsLib !== 'undefined') {
                     </option>
                 {% endfor %}
             </select>
+            
+            <!-- Debug: Log dropdown status -->
+            <script>
+                console.log('[EXAM_DROPDOWN] Curriculum levels count:', {{ curriculum_levels|length }});
+                {% if not curriculum_levels %}
+                console.error('[EXAM_DROPDOWN] ❌ No curriculum levels available - check server whitelist!');
+                {% else %}
+                console.log('[EXAM_DROPDOWN] ✅ {{ curriculum_levels|length }} levels loaded');
+                {% endif %}
+            </script>
             <div class="help-text">
                 <strong>Note:</strong> Date will be added automatically. Version number (e.g., _v2, _v3) will only be added if uploading multiple exams for the same level on the same day.
             </div>

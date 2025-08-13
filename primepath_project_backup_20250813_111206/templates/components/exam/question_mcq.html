@@ -1,0 +1,20 @@
+{% comment %}
+MCQ Question Component
+{% endcomment %}
+
+<div class="question-mcq">
+    {% for option in question.options_list %}
+    <div class="form-check">
+        <input class="form-check-input" 
+               type="radio" 
+               name="question_{{ question.id }}" 
+               id="q{{ question.id }}_{{ option }}"
+               value="{{ option }}"
+               data-question-id="{{ question.id }}"
+               data-question-type="MCQ">
+        <label class="form-check-label" for="q{{ question.id }}_{{ option }}">
+            {{ option }}
+        </label>
+    </div>
+    {% endfor %}
+</div>

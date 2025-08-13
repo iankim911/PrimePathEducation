@@ -1,0 +1,60 @@
+{% comment %}
+Audio Player Component
+Usage: {% include 'components/audio/player.html' with audio_files=exam.audio_files.all %}
+{% endcomment %}
+
+<div class="audio-player-component" id="audio-container">
+    {% if audio_files %}
+    <div class="audio-controls card">
+        <div class="card-body">
+            <h5 class="card-title">Audio Files</h5>
+            
+            <div class="current-audio mb-3">
+                <audio id="main-audio-player" controls class="w-100">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+            
+            <div class="audio-list">
+                {% for audio in audio_files %}
+                <div class="audio-item mb-2" data-audio-id="{{ audio.id }}">
+                    <button type="button" 
+                            class="btn btn-sm btn-outline-primary play-audio"
+                            data-audio-url="{% url 'serve_audio' audio.id %}"
+                            data-questions="{{ audio.start_question }}-{{ audio.end_question }}">
+                        <i class="fas fa-play"></i>
+                        Questions {{ audio.start_question }}-{{ audio.end_question }}
+                    </button>
+                    <span class="audio-status ms-2"></span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if include_script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const audioPlayer = new PrimePath.modules.AudioPlayer({
+        autoProgress: true
+    });
+    
+    audioPlayer.init('#audio-container');
+    
+    // Handle play button clicks
+    document.querySelectorAll('.play-audio').forEach(button => {
+        button.addEventListener('click', function() {
+            const url = this.dataset.audioUrl;
+            const questions = this.dataset.questions;
+            
+            audioPlayer.loadAudio(url, {
+                questions: questions,
+                id: this.closest('.audio-item').dataset.audioId
+            });
+        });
+    });
+});
+</script>
+{% endif %}

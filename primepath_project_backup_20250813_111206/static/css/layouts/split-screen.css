@@ -1,0 +1,171 @@
+/* Split Screen Layout for Test Pages */
+
+.page-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 0 20px;  /* Reduced from 50px to maximize PDF viewing area */
+    transition: padding var(--transition-slow);
+}
+
+.page-wrapper.wide-view {
+    padding: 0;
+}
+
+.test-container {
+    width: 100%;
+    max-width: var(--container-max-width);  /* Now 1600px for better readability */
+    padding: var(--spacing-lg);  /* Reduced from xl to lg */
+}
+
+.wide-view .test-container {
+    max-width: var(--container-wide-width);
+    padding: var(--spacing-sm);
+}
+
+.test-header {
+    background: var(--bg-light);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Main content area with split layout */
+.question-container {
+    display: flex;
+    gap: var(--spacing-lg);  /* Reduced gap from xl to lg */
+    min-height: calc(100vh - 180px);
+    margin-top: var(--spacing-sm);  /* Reduced from md */
+}
+
+/* Question section on the right - now responsive width */
+.question-section {
+    flex: 0 0 350px;  /* Reduced from 400px to give more space to PDF */
+    background: var(--bg-white);
+    padding: var(--spacing-md);  /* Reduced from lg */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    height: fit-content;
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    position: sticky;
+    top: 20px;
+    box-shadow: var(--shadow-md);
+}
+
+.question-section:hover {
+    box-shadow: var(--shadow-xl) !important;
+    border-color: var(--color-primary) !important;
+}
+
+/* PDF takes remaining space */
+.pdf-section {
+    flex: 1;
+    min-height: calc(100vh - 200px);
+}
+
+/* Question panels - moved to question-panel.css for proper component separation */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Bottom submit button */
+.submit-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: calc(var(--z-index-sticky) + 1);
+}
+
+.submit-test-btn {
+    padding: 12px 24px;
+    background: var(--color-success);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-base);
+}
+
+.submit-test-btn:hover {
+    background: #218838;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Responsive layout - improved breakpoints for PDF readability */
+@media (min-width: 1920px) {
+    /* Ultra-wide screens - use even more space */
+    .test-container {
+        max-width: 1800px;
+    }
+    
+    .question-section {
+        flex: 0 0 380px;  /* Slightly wider on large screens */
+    }
+}
+
+@media (max-width: 1400px) {
+    /* Standard laptops - optimize space usage */
+    .page-wrapper {
+        padding: 0 15px;
+    }
+    
+    .question-section {
+        flex: 0 0 320px;  /* Further reduce on smaller screens */
+    }
+}
+
+@media (max-width: 1024px) {
+    /* Tablets and small laptops - stack layout */
+    .question-container {
+        flex-direction: column;
+    }
+    
+    .question-section {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        flex: none !important;
+        max-height: none !important;
+        margin-top: var(--spacing-lg);
+    }
+    
+    .pdf-section {
+        margin-right: 0;
+        min-height: 600px;  /* Ensure minimum height for PDF */
+    }
+    
+    .submit-container {
+        position: static;
+        margin-top: var(--spacing-xl);
+        text-align: center;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile devices */
+    .page-wrapper {
+        padding: 0 var(--spacing-sm);
+    }
+    
+    .test-container {
+        padding: var(--spacing-sm);
+    }
+    
+    .question-section {
+        padding: var(--spacing-sm);
+    }
+}

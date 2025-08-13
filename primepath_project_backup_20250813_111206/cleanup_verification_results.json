@@ -1,0 +1,13 @@
+{
+  "safe_to_proceed": true,
+  "checks": {
+    "imports": true,
+    "urls": true,
+    "templates": true,
+    "javascript": true,
+    "database": true,
+    "static_media": true
+  },
+  "file_count": 36,
+  "phase": 1
+}

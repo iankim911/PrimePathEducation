@@ -232,7 +232,9 @@
       "Bash(sudo find /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project -name \"*.pyc\" -delete)",
       "mcp__chrome-control__switch_to_tab",
       "mcp__chrome-control__reload_tab",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(awk:*)",
+      "Bash(./cleanup_navigation_fix.sh:*)"
     ],
     "deny": []
   }

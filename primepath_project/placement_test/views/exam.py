@@ -280,27 +280,30 @@ def create_exam(request):
     
     # Define whitelist of allowed placement test curriculum levels
     # Format: (program_name, subprogram_name, level_number)
-    # Note: subprogram names in DB include program prefix (e.g., "CORE PHONICS")
+    # IMPORTANT: SubProgram names must match EXACTLY what's in the database
+    # Database stores: 'Phonics', 'Sigma', 'Elite' (WITHOUT program prefix)
+    # Updated: 2025-08-13 - Fixed to match actual database values
     PLACEMENT_TEST_WHITELIST = [
-        # CORE Program
-        ('CORE', 'CORE PHONICS', 1), ('CORE', 'CORE PHONICS', 2), ('CORE', 'CORE PHONICS', 3),
-        ('CORE', 'CORE SIGMA', 1), ('CORE', 'CORE SIGMA', 2), ('CORE', 'CORE SIGMA', 3),
-        ('CORE', 'CORE ELITE', 1), ('CORE', 'CORE ELITE', 2), ('CORE', 'CORE ELITE', 3),
-        ('CORE', 'CORE PRO', 1), ('CORE', 'CORE PRO', 2), ('CORE', 'CORE PRO', 3),
-        # ASCENT Program
-        ('ASCENT', 'ASCENT NOVA', 1), ('ASCENT', 'ASCENT NOVA', 2), ('ASCENT', 'ASCENT NOVA', 3),
-        ('ASCENT', 'ASCENT DRIVE', 1), ('ASCENT', 'ASCENT DRIVE', 2), ('ASCENT', 'ASCENT DRIVE', 3),
-        ('ASCENT', 'ASCENT PRO', 1), ('ASCENT', 'ASCENT PRO', 2), ('ASCENT', 'ASCENT PRO', 3),
-        # EDGE Program
-        ('EDGE', 'EDGE SPARK', 1), ('EDGE', 'EDGE SPARK', 2), ('EDGE', 'EDGE SPARK', 3),
-        ('EDGE', 'EDGE RISE', 1), ('EDGE', 'EDGE RISE', 2), ('EDGE', 'EDGE RISE', 3),
-        ('EDGE', 'EDGE PURSUIT', 1), ('EDGE', 'EDGE PURSUIT', 2), ('EDGE', 'EDGE PURSUIT', 3),
-        ('EDGE', 'EDGE PRO', 1), ('EDGE', 'EDGE PRO', 2), ('EDGE', 'EDGE PRO', 3),
-        # PINNACLE Program
-        ('PINNACLE', 'PINNACLE VISION', 1), ('PINNACLE', 'PINNACLE VISION', 2),
-        ('PINNACLE', 'PINNACLE ENDEAVOR', 1), ('PINNACLE', 'PINNACLE ENDEAVOR', 2),
-        ('PINNACLE', 'PINNACLE SUCCESS', 1), ('PINNACLE', 'PINNACLE SUCCESS', 2),
-        ('PINNACLE', 'PINNACLE PRO', 1), ('PINNACLE', 'PINNACLE PRO', 2),
+        # CORE Program - SubProgram names WITHOUT 'CORE' prefix
+        ('CORE', 'Phonics', 1), ('CORE', 'Phonics', 2), ('CORE', 'Phonics', 3),
+        ('CORE', 'Sigma', 1), ('CORE', 'Sigma', 2), ('CORE', 'Sigma', 3),
+        ('CORE', 'Elite', 1), ('CORE', 'Elite', 2), ('CORE', 'Elite', 3),
+        ('CORE', 'Pro', 1), ('CORE', 'Pro', 2), ('CORE', 'Pro', 3),
+        # ASCENT Program - SubProgram names WITHOUT 'ASCENT' prefix
+        ('ASCENT', 'Nova', 1), ('ASCENT', 'Nova', 2), ('ASCENT', 'Nova', 3),
+        ('ASCENT', 'Drive', 1), ('ASCENT', 'Drive', 2), ('ASCENT', 'Drive', 3),
+        ('ASCENT', 'Flex', 1), ('ASCENT', 'Flex', 2), ('ASCENT', 'Flex', 3),  # Added Flex
+        ('ASCENT', 'Pro', 1), ('ASCENT', 'Pro', 2), ('ASCENT', 'Pro', 3),
+        # EDGE Program - SubProgram names WITHOUT 'EDGE' prefix
+        ('EDGE', 'Spark', 1), ('EDGE', 'Spark', 2), ('EDGE', 'Spark', 3),
+        ('EDGE', 'Rise', 1), ('EDGE', 'Rise', 2), ('EDGE', 'Rise', 3),
+        ('EDGE', 'Pursuit', 1), ('EDGE', 'Pursuit', 2), ('EDGE', 'Pursuit', 3),
+        ('EDGE', 'Pro', 1), ('EDGE', 'Pro', 2), ('EDGE', 'Pro', 3),
+        # PINNACLE Program - SubProgram names WITHOUT 'PINNACLE' prefix
+        ('PINNACLE', 'Vision', 1), ('PINNACLE', 'Vision', 2),
+        ('PINNACLE', 'Endeavor', 1), ('PINNACLE', 'Endeavor', 2),
+        ('PINNACLE', 'Success', 1), ('PINNACLE', 'Success', 2),
+        ('PINNACLE', 'Pro', 1), ('PINNACLE', 'Pro', 2),
     ]
     
     # Log whitelist configuration
@@ -317,25 +320,68 @@ def create_exam(request):
     all_levels = CurriculumLevel.objects.select_related('subprogram__program').all()
     curriculum_levels = []
     
+    # Enhanced debugging for whitelist filtering
+    debug_samples = []
+    rejected_samples = []
+    
     for level in all_levels:
         # Check if this level is in the whitelist
         program_name = level.subprogram.program.name
         subprogram_name = level.subprogram.name
         level_number = level.level_number
         
-        if (program_name, subprogram_name, level_number) in PLACEMENT_TEST_WHITELIST:
+        # Create tuple for checking
+        level_tuple = (program_name, subprogram_name, level_number)
+        
+        # Log first few samples for debugging
+        if len(debug_samples) < 5:
+            debug_samples.append({
+                "program": program_name,
+                "subprogram": subprogram_name,
+                "level": level_number,
+                "tuple": str(level_tuple)
+            })
+        
+        if level_tuple in PLACEMENT_TEST_WHITELIST:
             curriculum_levels.append(level)
+            # Log successful match
+            logger.debug(f"[WHITELIST_MATCH] ✅ Matched: {level_tuple}")
+        else:
+            # Track rejected items for debugging
+            if len(rejected_samples) < 5 and '[INACTIVE]' not in subprogram_name and 'Test' not in subprogram_name:
+                rejected_samples.append({
+                    "program": program_name,
+                    "subprogram": subprogram_name,
+                    "level": level_number,
+                    "reason": "Not in whitelist"
+                })
+                logger.debug(f"[WHITELIST_REJECT] ❌ Rejected: {level_tuple}")
     
-    # Log filtering results
+    # Comprehensive logging of filtering results
     console_log = {
         "view": "create_exam",
         "action": "levels_filtered",
         "total_levels_in_db": all_levels.count(),
         "levels_after_filter": len(curriculum_levels),
-        "filtered_programs": list(set(level.subprogram.program.name for level in curriculum_levels))
+        "filtered_programs": list(set(level.subprogram.program.name for level in curriculum_levels)),
+        "sample_db_levels": debug_samples,
+        "sample_rejected": rejected_samples,
+        "whitelist_size": len(PLACEMENT_TEST_WHITELIST)
     }
     logger.info(f"[CREATE_EXAM_FILTER] {json.dumps(console_log)}")
     print(f"[CREATE_EXAM_FILTER] {json.dumps(console_log)}")
+    
+    # Additional console warning if no levels passed filter
+    if len(curriculum_levels) == 0:
+        console_error = {
+            "view": "create_exam",
+            "action": "ERROR_NO_LEVELS",
+            "error": "No curriculum levels passed whitelist filter!",
+            "check_whitelist": "Verify PLACEMENT_TEST_WHITELIST matches database values",
+            "sample_from_db": debug_samples[:3] if debug_samples else []
+        }
+        logger.error(f"[CREATE_EXAM_ERROR] {json.dumps(console_error)}")
+        print(f"[CREATE_EXAM_ERROR] {json.dumps(console_error)}")
     
     # Get today's date for checking same-day uploads
     today_str = datetime.now().strftime('%y%m%d')

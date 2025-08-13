@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome - PrimePath Assessment{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 40px 0;">
+    <h2 style="margin-bottom: 30px;">Welcome to PrimePath Assessment Platform</h2>
+    
+    <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;">
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 8px; flex: 1; max-width: 400px;">
+            <h3 style="margin-bottom: 20px;">For Students</h3>
+            <p style="margin-bottom: 20px; color: #666;">Take your placement test to find the right curriculum level for you.</p>
+            <a href="{% url 'placement_test:start_test' %}" class="btn">Start Placement Test</a>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 30px; border-radius: 8px; flex: 1; max-width: 400px;">
+            <h3 style="margin-bottom: 20px;">For Teachers</h3>
+            <p style="margin-bottom: 20px; color: #666;">Manage exams, view results, and configure placement rules.</p>
+            <a href="{% url 'core:teacher_dashboard' %}" class="btn">Teacher Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid #eee;">
+    <h3 style="margin-bottom: 20px;">About PrimePath</h3>
+    <p style="line-height: 1.6; color: #666;">
+        PrimePath is a comprehensive assessment platform designed for K-12 English learners in Korea. 
+        Our system helps academies efficiently place students in the appropriate curriculum level through 
+        automated testing and grading.
+    </p>
+    
+    <div style="margin-top: 30px;">
+        <h4 style="margin-bottom: 15px;">Our Programs:</h4>
+        <ul style="list-style: none; padding: 0;">
+            <li style="padding: 5px 0;"><strong>PRIME CORE</strong> - Grades 1-4</li>
+            <li style="padding: 5px 0;"><strong>PRIME ASCENT</strong> - Grades 5-6</li>
+            <li style="padding: 5px 0;"><strong>PRIME EDGE</strong> - Middle School</li>
+            <li style="padding: 5px 0;"><strong>PRIME PINNACLE</strong> - High School</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

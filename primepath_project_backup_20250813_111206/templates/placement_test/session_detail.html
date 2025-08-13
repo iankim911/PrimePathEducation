@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Session Details - {{ session.student_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Session Details</h2>
+                <a href="{% url 'placement_test:session_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Sessions
+                </a>
+            </div>
+            
+            <!-- Session Information Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user"></i> {{ session.student_name }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Exam:</strong> {{ session.exam.name }}</p>
+                            <p><strong>Grade:</strong> Grade {{ session.grade }}</p>
+                            <p><strong>Academic Rank:</strong> 
+                                {% if session.academic_rank == 'TOP_10' %}Top 10%
+                                {% elif session.academic_rank == 'TOP_20' %}Top 20%
+                                {% elif session.academic_rank == 'TOP_30' %}Top 30%
+                                {% elif session.academic_rank == 'TOP_40' %}Top 40%
+                                {% elif session.academic_rank == 'TOP_50' %}Top 50%
+                                {% elif session.academic_rank == 'BELOW_50' %}Below 50%
+                                {% else %}{{ session.academic_rank }}{% endif %}
+                            </p>
+                            <p><strong>School:</strong> 
+                                {% if session.school %}
+                                    {{ session.school.name }}
+                                {% elif session.school_name_manual %}
+                                    {{ session.school_name_manual }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Started:</strong> {{ session.started_at|date:"M d, Y H:i" }}</p>
+                            {% if session.completed_at %}
+                            <p><strong>Completed:</strong> {{ session.completed_at|date:"M d, Y H:i" }}</p>
+                            {% endif %}
+                            <p><strong>Status:</strong> 
+                                {% if session.is_completed %}
+                                    <span class="badge badge-success">Completed</span>
+                                {% else %}
+                                    <span class="badge badge-warning">In Progress</span>
+                                {% endif %}
+                            </p>
+                            {% if session.time_spent_seconds %}
+                            <p><strong>Duration:</strong> {% widthratio session.time_spent_seconds 60 1 %} minutes</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if session.is_completed %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4 class="text-primary">{{ session.score|default:"0" }}</h4>
+                                <small class="text-muted">Total Score</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4 class="text-success">{{ session.percentage_score|floatformat:1|default:"0" }}%</h4>
+                                <small class="text-muted">Percentage</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h4 class="text-info">{{ answers.count }}</h4>
+                                <small class="text-muted">Questions Answered</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if session.original_curriculum_level %}
+                    <hr>
+                    <p><strong>Recommended Level:</strong> 
+                        <span class="badge badge-info">{{ session.original_curriculum_level.full_name }}</span>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="mb-4">
+                {% if session.is_completed %}
+                <a href="{% url 'placement_test:export_result' session.id %}" class="btn btn-success">
+                    <i class="fas fa-download"></i> Export Results
+                </a>
+                {% endif %}
+                {% if not session.is_completed %}
+                <a href="{% url 'placement_test:take_test' session.id %}" class="btn btn-primary">
+                    <i class="fas fa-play"></i> Continue Test
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Answers Review (if completed) -->
+            {% if session.is_completed and answers %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list"></i> Answer Review
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Question #</th>
+                                    <th>Question Type</th>
+                                    <th>Student Answer</th>
+                                    <th>Correct Answer</th>
+                                    <th>Points</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for answer in answers %}
+                                <tr>
+                                    <td>{{ answer.question.question_number }}</td>
+                                    <td>
+                                        <span class="badge badge-secondary">{{ answer.question.get_question_type_display }}</span>
+                                    </td>
+                                    <td>{{ answer.answer|default:"<em>No answer</em>" }}</td>
+                                    <td>{{ answer.question.correct_answer|default:"<em>Not set</em>" }}</td>
+                                    <td>{{ answer.points_earned|default:"0" }} / {{ answer.question.points|default:"1" }}</td>
+                                    <td>
+                                        {% if answer.is_correct %}
+                                            <span class="badge badge-success">Correct</span>
+                                        {% elif answer.answer %}
+                                            <span class="badge badge-danger">Incorrect</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">No Answer</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% elif answers %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock"></i> Test Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>Questions answered: <strong>{{ answers.count }}</strong> out of <strong>{{ session.exam.total_questions }}</strong></p>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {% widthratio answers.count session.exam.total_questions 100 %}%"
+                             aria-valuenow="{% widthratio answers.count session.exam.total_questions 100 %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {% widthratio answers.count session.exam.total_questions 100 %}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                    <h5>No answers recorded yet</h5>
+                    <p class="text-muted">The student hasn't started answering questions.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
