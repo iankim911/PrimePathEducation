@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Grade Session - {{ session.student_name }} - PrimePath{% endblock %}
+
+{% block header %}Grade Session: {{ session.student_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <h3>Session Information</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Student Name:</strong> {{ session.student_name }}</p>
+                    <p><strong>School:</strong> {{ session.school_name_manual|default:"" }}{% if session.school %}{{ session.school.name }}{% else %}N/A{% endif %}</p>
+                    <p><strong>Grade:</strong> {{ session.grade }}</p>
+                    <p><strong>Academic Rank:</strong> {{ session.get_academic_rank_display }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Exam:</strong> {{ session.exam.name }}</p>
+                    <p><strong>Started:</strong> {{ session.started_at|date:"M d, Y H:i" }}</p>
+                    <p><strong>Completed:</strong> {{ session.completed_at|date:"M d, Y H:i"|default:"In Progress" }}</p>
+                    <p><strong>Score:</strong> {{ session.score|default:0 }} / {{ session.exam.total_questions }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Grading</h3>
+        </div>
+        <div class="card-body">
+            {% if session.is_completed %}
+                <div class="alert alert-info">
+                    <p><strong>Current Score:</strong> {{ session.score|default:0 }} points</p>
+                    <p><strong>Percentage:</strong> {{ session.percentage_score|default:0 }}%</p>
+                    <p><strong>Final Placement:</strong> {{ session.final_curriculum_level.full_name|default:"Not Assigned" }}</p>
+                </div>
+                
+                <form method="post" action="{% url 'primepath_routinetest:grade_session' session_id=session.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="manual_score">Adjust Score (if needed):</label>
+                        <input type="number" 
+                               class="form-control" 
+                               id="manual_score" 
+                               name="manual_score" 
+                               min="0" 
+                               max="{{ session.exam.total_questions }}"
+                               value="{{ session.score|default:0 }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Grading Notes:</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save Grading</button>
+                    <a href="{% url 'primepath_routinetest:session_detail' session_id=session.id %}" class="btn btn-secondary">Back to Session</a>
+                </form>
+            {% else %}
+                <div class="alert alert-warning">
+                    This session is not yet completed. The student must finish the test before grading.
+                </div>
+                <a href="{% url 'primepath_routinetest:session_detail' session_id=session.id %}" class="btn btn-secondary">Back to Session</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h3>Student Answers</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Question #</th>
+                        <th>Type</th>
+                        <th>Student Answer</th>
+                        <th>Correct Answer</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for answer in session.answers.all %}
+                    <tr>
+                        <td>{{ answer.question.question_number }}</td>
+                        <td>{{ answer.question.get_question_type_display }}</td>
+                        <td>{{ answer.answer|default:"No Answer" }}</td>
+                        <td>{{ answer.question.correct_answer|default:"N/A" }}</td>
+                        <td>
+                            {% if answer.is_correct %}
+                                <span class="badge badge-success">{{ answer.points_earned }}</span>
+                            {% else %}
+                                <span class="badge badge-danger">0</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No answers recorded</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate percentage when score changes
+    const scoreInput = document.getElementById('manual_score');
+    if (scoreInput) {
+        scoreInput.addEventListener('input', function() {
+            const score = parseInt(this.value) || 0;
+            const total = {{ session.exam.total_questions }};
+            const percentage = ((score / total) * 100).toFixed(1);
+            console.log(`Score: ${score}/${total} = ${percentage}%`);
+        });
+    }
+});
+</script>
+{% endblock %}

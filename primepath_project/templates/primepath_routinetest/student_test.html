@@ -1,0 +1,2334 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.name }} - Placement Test</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f5f5f5;
+        min-height: 100vh;
+        font-size: 16px; /* Base font size for better readability */
+        line-height: 1.5;
+    }
+    
+    .page-wrapper {
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 0 50px; /* Side margins for normal view */
+        transition: padding 0.3s ease;
+    }
+    
+    .page-wrapper.wide-view {
+        padding: 0; /* No side margins in wide view */
+    }
+    
+    .test-container {
+        width: 100%;
+        max-width: 1200px; /* Max width for normal view */
+        padding: 20px; /* Inner padding */
+    }
+    
+    .wide-view .test-container {
+        max-width: 100vw; /* Full width for wide view */
+        padding: 5px; /* Minimal padding for wide view */
+    }
+    
+    .wide-view .pdf-container {
+        padding: 3px; /* Minimal padding in wide view */
+    }
+    
+    .wide-view .question-container {
+        gap: 3px; /* Minimal gap in wide view */
+    }
+    
+    .test-header {
+        background: #f8f9fa;
+        padding: 8px 10px; /* Reduced padding */
+        border-radius: 8px;
+        margin-bottom: 3px; /* Reduced from 10px (70% reduction) */
+    }
+    
+    .timer-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #dc3545;
+    }
+    
+    .question-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px; /* Reduced from 5px */
+        margin-bottom: 3px; /* Reduced from 10px (70% reduction) */
+        padding: 5px; /* Reduced from 10px (50% reduction) */
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .question-nav-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #dee2e6;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        touch-action: manipulation;
+        min-height: 44px; /* Touch-friendly minimum */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .question-nav-btn.answered {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+        transform: scale(1.05);
+    }
+    
+    .question-nav-btn.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,.25);
+        transform: scale(1.1);
+    }
+    
+    .question-nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .question-nav-btn:active {
+        transform: translateY(0);
+    }
+    
+    .question-nav-btn:hover:not(.active):not(.answered) {
+        background: #e3f2fd;
+        border-color: #007bff;
+        transform: scale(1.05);
+    }
+    
+    .question-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        position: relative !important;
+        display: block !important;
+        min-height: 100vh !important;
+    }
+    
+    .question-section {
+        position: fixed !important;
+        top: 50% !important;
+        right: 10px !important;
+        transform: translateY(-50%) !important;
+        width: 260px !important;
+        background: white !important;
+        padding: 10px !important;
+        padding-bottom: 90px !important; /* Add space for bottom submit button */
+        border: 1px solid #dee2e6 !important;
+        border-radius: 8px !important;
+        height: auto !important;
+        max-height: calc(100vh - 120px) !important; /* Account for bottom submit button */
+        overflow-y: auto !important;
+        z-index: 999 !important; /* Below bottom submit button */
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+    }
+    
+    .test-container .question-container .question-section:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2) !important;
+        /* REMOVED: transform - can interfere with sticky positioning */
+        border-color: #007bff !important;
+    }
+    
+    .pdf-section {
+        width: calc(100% - 280px) !important; /* Expanded width - reduced question section + margins */
+        background: white !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 0 !important;
+        position: relative !important;
+    }
+    
+    /* Unified Color System and Typography */
+    :root {
+        --primary-blue: #0078D4;
+        --secondary-gray: #6c757d;
+        --success-green: #28a745;
+        --neutral-bg: #f8f9fa;
+        --border-color: #dee2e6;
+        --text-primary: #212529;
+        --text-secondary: #6c757d;
+        --border-radius: 6px;
+        --spacing-unit: 8px;
+    }
+    
+    /* Typography Harmonization */
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: calc(var(--spacing-unit) * 2);
+    }
+    
+    .btn {
+        font-weight: 500;
+        border-radius: var(--border-radius);
+        transition: all 0.2s ease;
+        min-height: 44px;
+        font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+        background: var(--primary-blue);
+        border-color: var(--primary-blue);
+    }
+    
+    .btn-secondary {
+        background: var(--secondary-gray);
+        border-color: var(--secondary-gray);
+        color: white;
+    }
+    
+    .btn-success {
+        background: var(--success-green);
+        border-color: var(--success-green);
+    }
+    
+    /* ENHANCED PDF CONTROLS FOR BETTER DISPLAY */
+    .new-pdf-controls {
+        background: var(--neutral-bg);
+        padding: 8px 15px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .pdf-nav-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .pdf-nav-btn {
+        padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-weight: 500;
+        min-height: 44px;
+        min-width: 100px;
+        transition: all 0.2s ease;
+        touch-action: manipulation;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .pdf-nav-btn:hover {
+        background: #106ebe;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    
+    .pdf-nav-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Simplified PDF controls - removed complex display modes */
+    
+    /* PDF Zoom Controls */
+    .pdf-zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .pdf-zoom-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #dee2e6;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-weight: bold;
+        transition: all 0.2s ease;
+    }
+    
+    .pdf-zoom-btn:hover {
+        background: #f8f9fa;
+        border-color: var(--primary-blue);
+    }
+    
+    .pdf-zoom-level {
+        font-size: 0.9rem;
+        font-weight: 500;
+        min-width: 50px;
+        text-align: center;
+    }
+    
+    /* Simplified PDF container - removed complex split view */
+    
+    .pdf-nav-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .pdf-nav-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .page-display {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .page-number-input {
+        width: 50px;
+        padding: 4px 6px;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+    
+    .column-info {
+        margin-left: 10px;
+        font-size: 0.8rem;
+        color: #666;
+        font-weight: normal;
+    }
+    
+    /* Old page-info styles removed to avoid conflicts */
+    
+    .pdf-viewer {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: #525659;
+        height: calc(100vh - 160px);
+    }
+    
+    .pdf-container {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 10px; /* Comfortable padding */
+    }
+    
+    canvas {
+        max-width: 100%;
+        height: auto;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        margin: 0; /* Ensure no margin */
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .question-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .question-number::after {
+        content: '';
+        height: 2px;
+        width: 30px;
+        background: #007bff;
+        display: inline-block;
+    }
+    
+    /* BRAND NEW AUDIO STYLES - NO LEGACY CODE */
+    .question-audio-module {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .audio-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .audio-header-icon {
+        font-size: 18px;
+    }
+    
+    .audio-clips-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .audio-clip-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .audio-play-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        align-self: flex-start;
+    }
+    
+    .audio-play-btn:hover {
+        background: #218838;
+    }
+    
+    .audio-play-btn.playing {
+        background: #dc3545;
+    }
+    
+    .audio-play-btn.playing:hover {
+        background: #c82333;
+    }
+    
+    .audio-info-text {
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
+    
+    .audio-progress-track {
+        height: 4px;
+        background: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+        display: none;
+    }
+    
+    .audio-progress-track.active {
+        display: block;
+    }
+    
+    .audio-progress-fill {
+        height: 100%;
+        background: #28a745;
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+    
+    /* Audio Module Responsive Design */
+    @media (max-width: 768px) {
+        .audio-module {
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .audio-module-header {
+            font-size: 0.95rem;
+        }
+        
+        .audio-control {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            padding: 10px 12px;
+        }
+        
+        .audio-btn {
+            width: 100%;
+            min-width: unset;
+        }
+        
+        .audio-info {
+            width: 100%;
+        }
+    }
+    
+    .answer-options {
+        margin-top: 20px;
+    }
+    
+    /* Multiple Short Answer Styling */
+    .multiple-short-answer {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .short-answer-item {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .short-answer-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+    
+    .short-answer-input {
+        border: 2px solid #dee2e6;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    
+    .short-answer-input:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .option-label {
+        display: block;
+        padding: 15px 20px;
+        margin-bottom: 10px;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .option-label:hover {
+        background: #f0f8ff;
+        border-color: #007bff;
+        transform: translateX(5px);
+    }
+    
+    input[type="radio"]:checked + .option-label {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        font-weight: bold;
+    }
+    
+    /* Enhanced visual feedback for radio button containers */
+    .option-label {
+        position: relative;
+        display: block;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    /* Add checkmark indicator for selected radio options */
+    input[type="radio"]:checked + .option-label::after {
+        content: "✓";
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
+    
+    .btn-nav {
+        padding: 10px 30px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+    
+    .btn-nav:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+    
+    .btn-nav:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .submit-section {
+        margin-top: 40px;
+        text-align: center;
+        padding: 30px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .hidden {
+        display: none !important;
+    }
+    
+    /* Question panel styling */
+    .question-panel {
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Hide the Show Full Page button permanently */
+    #halfPageBtn,
+    button#halfPageBtn,
+    .pdf-controls button#halfPageBtn,
+    button[onclick*="toggleFullPage"],
+    button[onclick*="togglefullpage"],
+    button[onclick*="ToggleFullPage"],
+    #pdf-controls-container button:nth-child(4),
+    .pdf-controls button:contains("Full Page"),
+    .pdf-controls button:contains("full page"),
+    .pdf-controls button:contains("Column View"),
+    button:contains("Show Full Page"),
+    button:contains("Show Column View") {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        pointer-events: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+    
+    /* Enhanced input field styling for better UX */
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 1.1rem;
+        border: 2px solid #ced4da;
+        border-radius: 8px;
+        transition: border-color 0.2s;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0,123,255,.1);
+    }
+    
+    /* Short answer input */
+    input[type="text"].form-control {
+        min-height: 50px;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+    
+    /* Long answer textarea */
+    textarea.form-control {
+        min-height: 250px;
+        resize: vertical;
+        line-height: 1.6;
+        font-size: 1.1rem;
+        font-family: inherit;
+    }
+    
+    /* Checkbox (multiple choice) styling */
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    
+    .wide-view-btn {
+        padding: 4px 10px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-left: 10px;
+    }
+    
+    .wide-view-btn:hover {
+        background: #218838;
+    }
+    
+    .wide-view-btn.active {
+        background: #dc3545;
+    }
+    
+    .wide-view-btn.active:hover {
+        background: #c82333;
+    }
+    
+    /* Bottom submit button styles */
+    .bottom-submit-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #f8f9fa;
+        border-top: 2px solid #dee2e6;
+        padding: 15px 20px;
+        text-align: center;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+    
+    .bottom-submit-btn {
+        padding: 12px 30px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .bottom-submit-btn:hover {
+        background: #218838;
+    }
+    
+    /* Validation popup styles */
+    .validation-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+    }
+    
+    .validation-popup.hidden {
+        display: none !important;
+    }
+    
+    .popup-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .popup-content h3 {
+        color: #dc3545;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+    
+    .popup-content p {
+        margin-bottom: 25px;
+        font-size: 1.1rem;
+        color: #495057;
+    }
+    
+    .popup-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    
+    .popup-btn {
+        padding: 10px 25px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    
+    .popup-btn-cancel {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .popup-btn-cancel:hover {
+        background: #5a6268;
+    }
+    
+    .popup-btn-submit {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .popup-btn-submit:hover {
+        background: #c82333;
+    }
+    
+    /* Add margin to test container to prevent overlap with fixed submit button */
+    .test-container {
+        margin-bottom: 80px;
+    }
+    
+    /* Responsive behavior for floating question section */
+    @media (max-width: 1200px) {
+        .question-section {
+            position: relative !important;
+            top: auto !important;
+            right: auto !important;
+            transform: none !important;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .question-section:hover {
+            transform: none !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .pdf-section {
+            width: 100% !important;
+            margin-bottom: 20px;
+        }
+        
+        .question-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+    
+    /* Responsive Design for 8-18 year olds */
+    
+    /* Tablet optimizations (768px to 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .question-nav {
+            gap: 5px;
+            padding: 10px;
+        }
+        
+        .question-nav-btn {
+            width: 45px;
+            height: 45px;
+            font-size: 1.1rem;
+        }
+        
+        .pdf-nav-btn {
+            min-width: 120px;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+        }
+        
+        .new-pdf-controls {
+            padding: 12px 20px;
+            gap: 20px;
+        }
+        
+        .page-display {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .question-section {
+            padding: 20px;
+        }
+        
+        .question-number {
+            font-size: 1.3rem;
+        }
+        
+        .multiple-choice-option {
+            padding: 12px 15px;
+            min-height: 50px;
+        }
+        
+        .question-input, .question-textarea {
+            font-size: 1rem;
+            padding: 12px;
+            min-height: 48px;
+        }
+    }
+    
+    /* Desktop optimizations (1024px+) */
+    @media (min-width: 1024px) {
+        .question-nav-btn {
+            width: 45px;
+            height: 45px;
+        }
+        
+        .pdf-nav-btn {
+            min-width: 130px;
+            padding: 10px 24px;
+        }
+        
+        .new-pdf-controls {
+            padding: 15px 25px;
+            gap: 25px;
+        }
+        
+        .question-section {
+            padding: 25px;
+        }
+        
+        .question-number {
+            font-size: 1.4rem;
+        }
+    }
+    
+    /* Touch-friendly improvements for all sizes */
+    .multiple-choice-option:hover {
+        background-color: #e3f2fd;
+        transform: translateX(4px);
+        transition: all 0.2s ease;
+    }
+    
+    .wide-view-btn {
+        min-height: 44px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        background: linear-gradient(45deg, #28a745, #218838);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .wide-view-btn:hover {
+        background: linear-gradient(45deg, #218838, #1e7e34);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .wide-view-btn.active {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+    }
+    
+    .wide-view-btn.active:hover {
+        background: linear-gradient(45deg, #c82333, #a71e2a);
+    }
+    
+    @media (min-width: 1201px) {
+        /* Ensure floating behavior only on larger screens */
+        .test-container .question-container .question-section {
+            position: fixed !important;
+            top: 50% !important;
+            right: 20px !important;
+            transform: translateY(-50%) !important;
+        }
+    }
+    
+    /* Nuclear floating answer module styles */
+    #floating-answer-module,
+    .floating-answer-module {
+        position: fixed !important;
+        top: 50% !important;
+        right: 20px !important;
+        transform: translateY(-50%) !important;
+        z-index: 999 !important; /* Reduced from 999999 to be below bottom submit button */
+        width: 280px !important;
+        background: white !important;
+        padding: 10px !important;
+        padding-bottom: 90px !important; /* Add space for bottom submit button */
+        border: 2px solid #28a745 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        max-height: calc(100vh - 120px) !important; /* Account for bottom submit button */
+        overflow-y: auto !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure nothing can override our nuclear solution */
+    body > #floating-answer-module {
+        position: fixed !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+<div class="test-container">
+    <!-- Test Header -->
+    <div class="test-header">
+        <div class="row">
+            <div class="col-md-8">
+                <h2>{{ exam.name }}</h2>
+                <p class="mb-0"><strong>Student:</strong> {{ session.student_name }}</p>
+            </div>
+            <div class="col-md-4 text-right">
+                <div class="timer-display" id="timer">{{ exam.timer_minutes }}:00</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Question Navigation -->
+    <div class="question-nav-wrapper">
+        <div class="question-nav" id="question-nav">
+            <div style="display: flex; align-items: center; gap: 10px; margin-right: 15px;">
+                <span style="font-weight: 600; color: #333; font-size: 0.9rem;">Questions:</span>
+                <span class="progress-indicator" style="font-size: 0.85rem; color: #666;">
+                    <span id="answered-count">0</span> / {{ questions|length }} answered
+                </span>
+            </div>
+            {% for q in questions %}
+            <button type="button" 
+                    class="question-nav-btn {% if forloop.first %}active{% endif %}" 
+                    data-question="{{ q.question_number }}"
+                    onclick="goToQuestion({{ q.question_number }})"
+                    title="Question {{ q.question_number }}">
+                {{ q.question_number }}
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="question-container">
+        <!-- PDF Section (Left Side) -->
+        <div class="pdf-section">
+            {% if exam.pdf_file %}
+            <!-- PDF IMAGE DISPLAY SYSTEM -->
+            <div class="pdf-viewer">
+                <div id="pdfContainer" style="width: 100%; height: 100%; position: relative;">
+                    <!-- Top PDF Navigation Controls -->
+                    <div id="pdf-top-nav-controls" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); border-radius: 25px; padding: 8px 15px; display: flex; align-items: center; gap: 12px; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                        <button id="pdf-top-prev" class="btn btn-sm" style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Previous Page">
+                            ◀ Prev
+                        </button>
+                        <button id="pdf-rotate-left" class="btn btn-sm" style="background: #6c757d; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer;" title="Rotate Left">
+                            ↺
+                        </button>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="color: #333; font-size: 14px; font-weight: 500;">Page</span>
+                            <input id="pdf-page-input" type="number" min="1" max="1" value="1" style="width: 50px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 14px;" title="Go to page">
+                            <span id="pdf-top-page-info" style="color: #666; font-size: 14px;">of 1</span>
+                        </div>
+                        <button id="pdf-rotate-right" class="btn btn-sm" style="background: #6c757d; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer;" title="Rotate Right">
+                            ↻
+                        </button>
+                        <button id="pdf-top-next" class="btn btn-sm" style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Next Page">
+                            Next ▶
+                        </button>
+                        
+                        <!-- Quick Jump -->
+                        <div style="border-left: 1px solid #ddd; padding-left: 12px; display: flex; align-items: center; gap: 6px;">
+                            <input id="pdf-jump-input" type="number" placeholder="Go to" min="1" style="width: 60px; padding: 4px 6px; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 14px;">
+                            <button id="pdf-jump-btn" class="btn btn-sm" style="background: #17a2b8; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 14px; cursor: pointer;" title="Jump to Page">
+                                🔍
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- PDF Image Display -->
+                    <div id="pdf-image-display" style="width: 100%; height: 100%; position: relative;">
+                        <div id="pdf-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">
+                            <p>Loading PDF...</p>
+                        </div>
+                        <img id="pdf-page-image" style="width: 100%; height: 100%; object-fit: contain; background: white;" alt="PDF Page">
+                        
+                        <!-- Navigation Controls -->
+                        <div id="pdf-nav-controls" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); border-radius: 25px; padding: 10px 15px; display: flex; align-items: center; gap: 15px;">
+                            <button id="pdf-prev" class="btn btn-sm" style="background: #fff; border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">‹</button>
+                            <span id="pdf-page-info" style="color: white; font-weight: 500; min-width: 80px; text-align: center;">Page 1 of 1</span>
+                            <button id="pdf-next" class="btn btn-sm" style="background: #fff; border: none; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">›</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Fallback for no PDF -->
+                    <div id="pdf-error" style="display: none; text-align: center; padding: 50px;">
+                        <p>Error loading PDF. Please try again.</p>
+                        {% if exam.pdf_file %}
+                        <a href="{{ exam.pdf_file.url }}" target="_blank" class="btn btn-primary">Download PDF</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="pdf-viewer">
+                <p style="text-align: center; margin-top: 50px;">No PDF available</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Question Section (Right Side) -->
+        <div class="question-section">
+            <form id="test-form" method="post">
+                {% csrf_token %}
+                
+                {% for question in questions %}
+                <div class="question-panel {% if not forloop.first %}hidden{% endif %}" 
+                     id="question-{{ question.question_number }}"
+                     data-question-id="{{ question.id }}">
+                    
+                    <!-- Harmonized Question Header Banner -->
+                    <div class="question-header-banner" style="background: linear-gradient(135deg, #0078D4 0%, #106EBE 100%); color: white; padding: 16px; margin: -15px -15px 20px -15px; border-radius: 6px 6px 0 0;">
+                        <h2 style="margin: 0; font-size: 1.4rem; font-weight: 600; text-align: center; letter-spacing: 0.5px;">
+                            Question {{ question.question_number }}
+                        </h2>
+                    </div>
+                    
+                    
+                    <!-- AUDIO SECTION - TOP OF ANSWER MODULE -->
+                    {% if question.audio_file %}
+                        <div class="question-audio-module" style="margin-top: 15px;">
+                            <div class="audio-header">
+                                <span class="audio-header-icon">🎵</span>
+                                <span class="audio-header-text">{{ question.audio_file.name }}</span>
+                            </div>
+                            <div class="audio-clips-container">
+                                <div class="audio-clip-item">
+                                    <button type="button" 
+                                            class="audio-play-btn" 
+                                            id="audio-play-{{ question.audio_file.id }}"
+                                            onclick="playQuestionAudio({{ question.audio_file.id }})">
+                                        <span id="audio-icon-{{ question.audio_file.id }}">▶</span>
+                                        <span>Play Audio</span>
+                                    </button>
+                                    <div class="audio-info-text">Listen carefully before answering</div>
+                                    <audio id="audio-element-{{ question.audio_file.id }}" 
+                                           preload="none"
+                                           onended="audioFinished({{ question.audio_file.id }})"
+                                           ontimeupdate="updateAudioProgress({{ question.audio_file.id }})">
+                                        <source src="{% url 'primepath_routinetest:get_audio' question.audio_file.id %}" type="audio/mpeg">
+                                    </audio>
+                                    <div class="audio-progress-track" id="progress-track-{{ question.audio_file.id }}">
+                                        <div class="audio-progress-fill" id="progress-fill-{{ question.audio_file.id }}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Points Display - Harmonized with Question Content -->
+                    <div class="points-display" style="margin-bottom: calc(var(--spacing-unit) * 2); padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2); background: #e8f5e8; border-left: 4px solid var(--success-green); border-radius: var(--border-radius);">
+                        <span style="font-size: 0.9rem; color: #155724; font-weight: 500;">
+                            Worth {{ question.points }} point{% if question.points != 1 %}s{% endif %}
+                        </span>
+                    </div>
+                    
+                    <!-- Answer Options -->
+                    <div class="answer-options">
+                        {% if question.question_type == 'MCQ' and ',' not in question.correct_answer %}
+                            <!-- Single Choice (Radio Buttons) -->
+                            {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                            {% for letter in letters %}
+                            <div style="position: relative; margin-bottom: 10px;">
+                                <input type="radio" 
+                                       name="q_{{ question.id }}" 
+                                       id="q{{ question.id }}_{{ letter }}"
+                                       value="{{ letter }}"
+                                       onchange="markAnswered({{ question.question_number }})"
+                                       style="position: absolute; opacity: 0; cursor: pointer;">
+                            <label for="q{{ question.id }}_{{ letter }}" class="option-label">
+                                <strong>{{ letter }}</strong>
+                            </label>
+                            </div>
+                            {% endfor %}
+                            {% endwith %}
+                            
+                        {% elif question.question_type == 'MCQ' and ',' in question.correct_answer or question.question_type == 'CHECKBOX' %}
+                            <!-- Multiple Choice (Checkboxes) - Select All That Apply -->
+                            {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                            {% for letter in letters %}
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; cursor: pointer;">
+                                    <input type="checkbox" 
+                                           name="q_{{ question.id }}_{{ letter }}" 
+                                           value="{{ letter }}"
+                                           onchange="markAnswered({{ question.question_number }})">
+                                    <span class="option-label" style="margin: 0; flex-grow: 1; margin-left: 10px;">
+                                        <strong>{{ letter }}</strong>
+                                    </span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                            {% endwith %}
+                            
+                        {% elif question.question_type == 'SHORT' %}
+                            {% load grade_tags %}
+                            {% if question|has_multiple_answers %}
+                                <!-- Multiple short answer inputs -->
+                                <div class="multiple-short-answer">
+                                    {% with answer_letters=question|get_answer_letters %}
+                                    {% for letter in answer_letters %}
+                                    <div class="short-answer-item">
+                                        <label class="short-answer-label">
+                                            Answer {{ letter }}:
+                                        </label>
+                                        <input type="text" 
+                                               class="short-answer-input" 
+                                               name="q_{{ question.id }}_{{ letter }}"
+                                               placeholder="Type your answer for option {{ letter }}"
+                                               onchange="markAnswered({{ question.question_number }})">
+                                    </div>
+                                    {% endfor %}
+                                    {% endwith %}
+                                </div>
+                            {% else %}
+                                <!-- Single short answer input -->
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       name="q_{{ question.id }}"
+                                       placeholder="Type your answer here"
+                                       onchange="markAnswered({{ question.question_number }})">
+                            {% endif %}
+                                   
+                        {% elif question.question_type == 'LONG' %}
+                            {% load grade_tags %}
+                            {% if question|has_multiple_answers %}
+                                <!-- Multiple long answer textareas -->
+                                <div class="multiple-long-answer">
+                                    {% with answer_letters=question|get_answer_letters %}
+                                    {% for letter in answer_letters %}
+                                    <div class="long-answer-item" style="margin-bottom: 20px;">
+                                        <label class="long-answer-label" style="font-weight: 600; margin-bottom: 8px; display: block;">
+                                            Response {{ letter }}:
+                                        </label>
+                                        <textarea class="form-control" 
+                                                  name="q_{{ question.id }}_{{ letter }}"
+                                                  rows="6"
+                                                  placeholder="Write your response for {{ letter }}"
+                                                  onchange="markAnswered({{ question.question_number }})"></textarea>
+                                    </div>
+                                    {% endfor %}
+                                    {% endwith %}
+                                </div>
+                            {% else %}
+                                <!-- Single long answer textarea -->
+                                <textarea class="form-control" 
+                                          name="q_{{ question.id }}"
+                                          rows="8"
+                                          placeholder="Write your answer here"
+                                          onchange="markAnswered({{ question.question_number }})"></textarea>
+                            {% endif %}
+                                      
+                        {% elif question.question_type == 'MIXED' %}
+                            {% load grade_tags %}
+                            <!-- Mixed type with multiple components -->
+                            {% with components=question|get_mixed_components %}
+                            {% if components %}
+                                <div class="mixed-answer-section">
+                                    {% for component in components %}
+                                        {% if component.type == 'input' %}
+                                            <div class="short-answer-item" style="margin-bottom: 15px;">
+                                                <label class="short-answer-label" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                                    Answer {{ component.letter }}:
+                                                </label>
+                                                <input type="text" 
+                                                       class="form-control" 
+                                                       name="q_{{ question.id }}_{{ component.letter }}"
+                                                       placeholder="Enter answer {{ component.letter }}"
+                                                       onchange="markAnswered({{ question.question_number }})"
+                                                       style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">
+                                            </div>
+                                        {% elif component.type == 'mcq' %}
+                                            <div class="mcq-component" style="margin-bottom: 20px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 5px;">
+                                                <div class="component-label" style="font-weight: bold; margin-bottom: 10px;">
+                                                    Multiple Choice {{ component.letter }}:
+                                                </div>
+                                                {% for option in component.options %}
+                                                <div class="mcq-option" style="margin-left: 20px; margin-bottom: 8px;">
+                                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                                        <input type="checkbox" 
+                                                               name="q_{{ question.id }}_{{ component.index }}_{{ option }}" 
+                                                               value="{{ option }}"
+                                                               onchange="markAnswered({{ question.question_number }})">
+                                                        <span class="option-label" style="margin: 0; flex-grow: 1; margin-left: 10px;">
+                                                            <strong>{{ option }}</strong>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <!-- Fallback for MIXED questions without parsed components -->
+                                {% if question.options_count > 1 %}
+                                    <div class="multiple-short-answer">
+                                        {% with letters="ABCDEFGHIJ"|slice:question.options_count %}
+                                        {% for letter in letters %}
+                                        <div class="short-answer-item" style="margin-bottom: 15px;">
+                                            <label class="short-answer-label" style="display: block; font-weight: bold; margin-bottom: 5px;">
+                                                Answer {{ letter }}:
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   name="q_{{ question.id }}_{{ letter }}"
+                                                   placeholder="Enter answer {{ letter }}"
+                                                   onchange="markAnswered({{ question.question_number }})"
+                                                   style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">
+                                        </div>
+                                        {% endfor %}
+                                        {% endwith %}
+                                    </div>
+                                {% else %}
+                                    <textarea class="form-control" 
+                                              name="q_{{ question.id }}"
+                                              rows="4"
+                                              placeholder="Write your answer here"
+                                              onchange="markAnswered({{ question.question_number }})"></textarea>
+                                {% endif %}
+                            {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Navigation Buttons - Below Answer Choices -->
+                    <div class="nav-buttons-bottom" style="display: flex; gap: 12px; justify-content: center; margin: 24px 0; padding: 16px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                        <button type="button" 
+                                class="btn btn-secondary btn-nav"
+                                style="min-width: 100px; max-width: 140px; min-height: 44px; padding: 8px 16px; border-radius: 6px; font-weight: 500; font-size: 0.95rem;"
+                                onclick="goToQuestion({{ question.question_number|add:"-1" }})"
+                                {% if forloop.first %}disabled{% endif %}>
+                            Previous
+                        </button>
+                        
+                        {% if not forloop.last %}
+                        <button type="button" 
+                                class="btn btn-primary btn-nav"
+                                style="min-width: 100px; max-width: 140px; min-height: 44px; padding: 8px 16px; border-radius: 6px; font-weight: 500; font-size: 0.95rem; background: #0078D4; border-color: #0078D4;"
+                                onclick="goToQuestion({{ question.question_number|add:"1" }})">
+                            Next
+                        </button>
+                        {% else %}
+                        <button type="button" 
+                                class="btn btn-success btn-nav"
+                                style="min-width: 140px; max-width: 180px; min-height: 44px; padding: 8px 20px; border-radius: 6px; font-weight: 500; font-size: 0.95rem; background: #28a745; border-color: #28a745;"
+                                onclick="showSubmitSection()">
+                            Review & Submit
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Jump Navigation - Below Primary Navigation -->
+                    <div class="jump-navigation-section" style="display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 16px; padding: 8px 15px; background: #ffffff; border: 1px solid #dee2e6; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <label style="margin: 0; font-size: 0.9rem; font-weight: 500; color: #6c757d;">Jump to Q:</label>
+                        <input type="number" 
+                               id="quick-nav-{{ question.question_number }}" 
+                               min="1" 
+                               max="{{ questions|length }}" 
+                               style="width: 60px; padding: 4px 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem; text-align: center; font-weight: 500;"
+                               placeholder="#"
+                               onkeypress="if(event.key === 'Enter') goToQuestionFromInput({{ question.question_number }})">
+                        <button type="button" 
+                                class="btn btn-outline-secondary btn-sm" 
+                                style="padding: 4px 12px; border-radius: 4px; font-size: 0.9rem; font-weight: 500; min-height: 36px;"
+                                onclick="goToQuestionFromInput({{ question.question_number }})">
+                            Go
+                        </button>
+                    </div>
+                    
+                    
+                    <!-- Page Navigation Controls -->
+                    {% if forloop.last %}
+                    <div class="page-navigation-controls" style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <strong>Go to Page #</strong>
+                        </div>
+                        <div class="nav-buttons" style="display: flex; gap: 10px; justify-content: center;">
+                            <button type="button" 
+                                    class="btn btn-secondary btn-nav" 
+                                    style="min-width: 90px; max-width: 120px; min-height: 44px; padding: 10px 14px; border-radius: 6px; font-weight: 500;"
+                                    onclick="previousPageFromAnswer()" 
+                                    id="prevPageBtnAnswer">
+                                Previous
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-secondary btn-nav" 
+                                    style="min-width: 90px; max-width: 120px; min-height: 44px; padding: 10px 14px; border-radius: 6px; font-weight: 500;"
+                                    onclick="nextPageFromAnswer()" 
+                                    id="nextPageBtnAnswer">
+                                Next
+                            </button>
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px;">
+                            <label style="margin: 0; font-weight: 500;">Page:</label>
+                            <input type="number" id="pageNumAnswer" min="1" value="1" 
+                                   style="width: 70px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
+                                   onchange="goToPageFromAnswer()">
+                            <span>of <span id="pageCountAnswer">-</span></span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <!-- Submit Section -->
+                <div class="submit-section hidden" id="submit-section">
+                    <h3>Ready to Submit?</h3>
+                    <p>Please review your answers before submitting. You cannot change them after submission.</p>
+                    <button type="button" class="btn btn-success btn-lg" onclick="attemptSubmit()">Submit Test</button>
+                    <button type="button" class="btn btn-secondary btn-lg ml-3" onclick="hideSubmitSection()">
+                        Back to Questions
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Bottom Submit Button -->
+<div class="bottom-submit-container">
+    <button type="button" class="bottom-submit-btn" onclick="attemptSubmit()">
+        Submit Test
+    </button>
+</div>
+
+<!-- Validation Popup -->
+<div class="validation-popup hidden" id="validation-popup">
+    <div class="popup-content">
+        <h3>Unanswered Questions</h3>
+        <p id="validation-message">There are still <span id="unanswered-count">0</span> unanswered questions. Are you sure you want to submit?</p>
+        <div class="popup-buttons">
+            <button type="button" class="popup-btn popup-btn-cancel" id="cancel-btn">
+                Cancel
+            </button>
+            <button type="button" class="popup-btn popup-btn-submit" id="force-submit-btn">
+                Submit Anyway
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PDF.js for image conversion -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+</script>
+
+<script>
+let currentQuestion = 1;
+let timerInterval;
+let timeRemaining = {{ timer_seconds }};
+
+// PDF Image Display System
+let pdfDoc = null;
+let currentPage = 1;
+let totalPages = 0;
+let pageImages = new Map(); // Cache for converted images
+let currentRotation = 0; // Track rotation angle (0, 90, 180, 270)
+
+// Initialize timer
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        document.getElementById('timer').textContent = 
+            `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            submitTest();
+        }
+    }, 1000);
+}
+
+// PDF Image Display Functions
+function initializePdfImageDisplay() {
+    {% if exam.pdf_file %}
+    const pdfUrl = "{{ exam.pdf_file.url }}";
+    {% else %}
+    const pdfUrl = null;
+    {% endif %}
+    
+    if (!pdfUrl) {
+        console.warn('No PDF file available for this exam');
+        document.getElementById('pdf-error').style.display = 'block';
+        document.getElementById('pdf-error').innerHTML = '<p class="text-muted">No PDF file uploaded for this exam</p>';
+        return;
+    }
+    
+    if (typeof pdfjsLib === 'undefined') {
+        console.error('PDF.js not loaded');
+        document.getElementById('pdf-loading').innerHTML = '<p style="color: red;">Error: PDF.js not loaded</p>';
+        return;
+    }
+    
+    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+        pdfDoc = pdf;
+        totalPages = pdf.numPages;
+        currentPage = 1;
+        pageImages.clear();
+        
+        // Update page info
+        updatePageInfo();
+        
+        // Load first page
+        renderPageAsImage(1);
+        
+        console.log('✅ PDF loaded successfully:', totalPages, 'pages');
+        
+    }).catch(function(error) {
+        console.error('Error loading PDF:', error);
+        document.getElementById('pdf-loading').innerHTML = '<p style="color: red;">Error loading PDF. Please try again.</p>';
+        document.getElementById('pdf-error').style.display = 'block';
+    });
+}
+
+function renderPageAsImage(pageNum) {
+    if (!pdfDoc) return;
+    
+    const loading = document.getElementById('pdf-loading');
+    const pageImage = document.getElementById('pdf-page-image');
+    
+    // Clear cache when rotation changes (include rotation in cache key)
+    const cacheKey = `${pageNum}_${currentRotation}`;
+    
+    // Check cache first
+    if (pageImages.has(cacheKey)) {
+        pageImage.src = pageImages.get(cacheKey);
+        loading.style.display = 'none';
+        return;
+    }
+    
+    loading.style.display = 'block';
+    
+    pdfDoc.getPage(pageNum).then(function(page) {
+        // Create canvas for rendering
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Calculate scale for good quality with rotation
+        const viewport = page.getViewport({ scale: 2.0, rotation: currentRotation });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        
+        // Render page to canvas
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+        };
+        
+        page.render(renderContext).promise.then(function() {
+            // Convert canvas to image
+            const imageDataURL = canvas.toDataURL('image/png');
+            
+            // Cache the image with rotation key
+            pageImages.set(cacheKey, imageDataURL);
+            
+            // Display the image
+            pageImage.src = imageDataURL;
+            loading.style.display = 'none';
+            
+            console.log('✅ Page', pageNum, 'rendered as image');
+        });
+    });
+}
+
+function updatePageInfo() {
+    // Update bottom navigation controls (existing)
+    const pageInfo = document.getElementById('pdf-page-info');
+    const prevBtn = document.getElementById('pdf-prev');
+    const nextBtn = document.getElementById('pdf-next');
+    
+    if (pageInfo && prevBtn && nextBtn) {
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+    }
+    
+    // Update top navigation controls (new)
+    const topPageInfo = document.getElementById('pdf-top-page-info');
+    const topPrevBtn = document.getElementById('pdf-top-prev');
+    const topNextBtn = document.getElementById('pdf-top-next');
+    const pageInput = document.getElementById('pdf-page-input');
+    
+    if (topPageInfo && topPrevBtn && topNextBtn && pageInput) {
+        topPageInfo.textContent = `of ${totalPages}`;
+        topPrevBtn.disabled = currentPage === 1;
+        topNextBtn.disabled = currentPage === totalPages;
+        pageInput.value = currentPage;
+        pageInput.max = totalPages;
+        
+        // Update button styles based on disabled state
+        if (currentPage === 1) {
+            topPrevBtn.style.background = '#6c757d';
+            topPrevBtn.style.cursor = 'not-allowed';
+        } else {
+            topPrevBtn.style.background = '#007bff';
+            topPrevBtn.style.cursor = 'pointer';
+        }
+        
+        if (currentPage === totalPages) {
+            topNextBtn.style.background = '#6c757d';
+            topNextBtn.style.cursor = 'not-allowed';
+        } else {
+            topNextBtn.style.background = '#007bff';
+            topNextBtn.style.cursor = 'pointer';
+        }
+    }
+}
+
+// Navigate to question
+function goToQuestion(num) {
+    if (num < 1 || num > {{ questions|length }}) return;
+    
+    // Stop any playing audio when changing questions
+    stopAllQuestionAudio();
+    
+    // Look for questions in floating module first, fallback to original
+    const container = document.getElementById('floating-answer-module') || document;
+    
+    // Hide current question
+    const currentQuestionEl = container.querySelector(`#question-${currentQuestion}`);
+    const currentIndicator = container.querySelector(`[data-question="${currentQuestion}"]`);
+    if (currentQuestionEl) currentQuestionEl.classList.add('hidden');
+    if (currentIndicator) currentIndicator.classList.remove('active');
+    
+    // Show new question
+    const newQuestionEl = container.querySelector(`#question-${num}`);
+    const newIndicator = container.querySelector(`[data-question="${num}"]`);
+    if (newQuestionEl) newQuestionEl.classList.remove('hidden');
+    if (newIndicator) newIndicator.classList.add('active');
+    
+    currentQuestion = num;
+}
+
+// Mark question as answered
+function markAnswered(num) {
+    const btn = document.querySelector(`[data-question="${num}"]`);
+    if (!btn.classList.contains('answered')) {
+        btn.classList.add('answered');
+        updateAnsweredCount();
+    }
+    saveAnswer(num);
+}
+
+// Update answered count
+function updateAnsweredCount() {
+    const answeredCount = document.querySelectorAll('.question-nav-btn.answered').length;
+    document.getElementById('answered-count').textContent = answeredCount;
+}
+
+// Go to question from input field
+function goToQuestionFromInput(currentQuestion) {
+    const input = document.getElementById(`quick-nav-${currentQuestion}`);
+    const questionNum = parseInt(input.value);
+    
+    if (questionNum && questionNum >= 1 && questionNum <= {{ questions|length }}) {
+        goToQuestion(questionNum);
+        input.value = ''; // Clear input after navigation
+    } else if (input.value) {
+        alert(`Please enter a question number between 1 and {{ questions|length }}`);
+        input.value = '';
+    }
+}
+
+// Go to question from answer section navigation
+function goToQuestionFromAnswerSection(currentQuestion) {
+    const input = document.getElementById(`answer-section-nav-${currentQuestion}`);
+    const questionNum = parseInt(input.value);
+    
+    if (questionNum && questionNum >= 1 && questionNum <= {{ questions|length }}) {
+        goToQuestion(questionNum);
+        input.value = ''; // Clear input after navigation
+    } else if (input.value) {
+        alert(`Please enter a question number between 1 and {{ questions|length }}`);
+        input.value = '';
+    }
+}
+
+// Save answer via AJAX
+function saveAnswer(questionNum) {
+    const questionPanel = document.getElementById(`question-${questionNum}`);
+    const questionId = questionPanel.dataset.questionId;
+    
+    let answer = '';
+    
+    // Check for different input types
+    const radioInput = questionPanel.querySelector(`[name="q_${questionId}"]:checked`);
+    const textInput = questionPanel.querySelector(`input[type="text"][name="q_${questionId}"]`);
+    const textareaInput = questionPanel.querySelector(`textarea[name="q_${questionId}"]`);
+    const checkboxInputs = questionPanel.querySelectorAll(`input[type="checkbox"][name^="q_${questionId}_"]:checked`);
+    const mixedTextInput = questionPanel.querySelector(`textarea[name="q_${questionId}_text"]`);
+    const multipleShortInputs = questionPanel.querySelectorAll(`input[type="text"][name^="q_${questionId}_"]`);
+    
+    if (radioInput) {
+        // MCQ
+        answer = radioInput.value;
+    } else if (multipleShortInputs.length > 0) {
+        // Multiple SHORT answers
+        const shortAnswers = {};
+        multipleShortInputs.forEach(input => {
+            const letter = input.name.split('_').pop(); // Get letter from name like "q_123_A"
+            if (input.value.trim()) {
+                shortAnswers[letter] = input.value.trim();
+            }
+        });
+        answer = JSON.stringify(shortAnswers);
+    } else if (textInput) {
+        // Single SHORT answer
+        answer = textInput.value;
+    } else if (textareaInput) {
+        // LONG answer
+        answer = textareaInput.value;
+    } else if (checkboxInputs.length > 0 || mixedTextInput) {
+        // CHECKBOX or MIXED type
+        const checkedValues = Array.from(checkboxInputs).map(cb => cb.value);
+        
+        if (mixedTextInput && mixedTextInput.value.trim()) {
+            // MIXED type with text answer
+            answer = {
+                checkboxes: checkedValues,
+                text: mixedTextInput.value
+            };
+        } else {
+            // CHECKBOX type or MIXED with only checkboxes
+            answer = checkedValues.join(',');
+        }
+    }
+    
+    fetch("{% url 'primepath_routinetest:submit_answer' session.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            question_id: questionId,
+            answer: answer
+        })
+    });
+}
+
+// BRAND NEW AUDIO SYSTEM - NO LEGACY CODE
+let activeAudioId = null;
+
+// Play audio for question
+function playQuestionAudio(audioId) {
+    const audio = document.getElementById(`audio-element-${audioId}`);
+    const btn = document.getElementById(`audio-play-${audioId}`);
+    const icon = document.getElementById(`audio-icon-${audioId}`);
+    const track = document.getElementById(`progress-track-${audioId}`);
+    
+    if (!audio || !btn) return;
+    
+    // Stop any other playing audio
+    if (activeAudioId && activeAudioId !== audioId) {
+        stopQuestionAudio(activeAudioId);
+    }
+    
+    if (audio.paused) {
+        // Start playing
+        audio.play();
+        activeAudioId = audioId;
+        btn.classList.add('playing');
+        icon.textContent = '⏸';
+        track.classList.add('active');
+    } else {
+        // Pause
+        audio.pause();
+        btn.classList.remove('playing');
+        icon.textContent = '▶';
+        track.classList.remove('active');
+        activeAudioId = null;
+    }
+}
+
+// Stop audio
+function stopQuestionAudio(audioId) {
+    const audio = document.getElementById(`audio-element-${audioId}`);
+    const btn = document.getElementById(`audio-play-${audioId}`);
+    const icon = document.getElementById(`audio-icon-${audioId}`);
+    const track = document.getElementById(`progress-track-${audioId}`);
+    const fill = document.getElementById(`progress-fill-${audioId}`);
+    
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+    }
+    
+    if (btn) {
+        btn.classList.remove('playing');
+    }
+    
+    if (icon) {
+        icon.textContent = '▶';
+    }
+    
+    if (track) {
+        track.classList.remove('active');
+    }
+    
+    if (fill) {
+        fill.style.width = '0%';
+    }
+    
+    if (activeAudioId === audioId) {
+        activeAudioId = null;
+    }
+}
+
+// Audio finished playing
+function audioFinished(audioId) {
+    stopQuestionAudio(audioId);
+}
+
+// Update audio progress
+function updateAudioProgress(audioId) {
+    const audio = document.getElementById(`audio-element-${audioId}`);
+    const fill = document.getElementById(`progress-fill-${audioId}`);
+    
+    if (audio && fill && audio.duration) {
+        const progress = (audio.currentTime / audio.duration) * 100;
+        fill.style.width = progress + '%';
+    }
+}
+
+// Stop all audio when changing questions
+function stopAllQuestionAudio() {
+    if (activeAudioId) {
+        stopQuestionAudio(activeAudioId);
+    }
+}
+
+// Show/hide submit section
+function showSubmitSection() {
+    document.querySelectorAll('.question-panel').forEach(panel => {
+        panel.classList.add('hidden');
+    });
+    document.getElementById('submit-section').classList.remove('hidden');
+}
+
+function hideSubmitSection() {
+    document.getElementById('submit-section').classList.add('hidden');
+    goToQuestion(currentQuestion);
+}
+
+// Start timer on load
+document.addEventListener('DOMContentLoaded', () => {
+    startTimer();
+    
+    // Initialize PDF image display
+    {% if exam.pdf_file %}
+    initializePdfImageDisplay();
+    
+    // PDF navigation event listeners
+    document.getElementById('pdf-prev')?.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPageAsImage(currentPage);
+            updatePageInfo();
+        }
+    });
+
+    document.getElementById('pdf-next')?.addEventListener('click', function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderPageAsImage(currentPage);
+            updatePageInfo();
+        }
+    });
+    
+    // Top PDF navigation event listeners (new controls)
+    document.getElementById('pdf-top-prev')?.addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPageAsImage(currentPage);
+            updatePageInfo();
+        }
+    });
+
+    document.getElementById('pdf-top-next')?.addEventListener('click', function() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderPageAsImage(currentPage);
+            updatePageInfo();
+        }
+    });
+    
+    // Rotate left button
+    document.getElementById('pdf-rotate-left')?.addEventListener('click', function() {
+        if (!pdfDoc) return;
+        
+        currentRotation = (currentRotation - 90) % 360;
+        if (currentRotation < 0) currentRotation += 360;
+        
+        console.log('🔥 [STUDENT_TEST] Rotate left clicked, new rotation:', currentRotation);
+        renderPageAsImage(currentPage); // Re-render current page with new rotation
+    });
+    
+    // Rotate right button
+    document.getElementById('pdf-rotate-right')?.addEventListener('click', function() {
+        if (!pdfDoc) return;
+        
+        currentRotation = (currentRotation + 90) % 360;
+        
+        console.log('🔥 [STUDENT_TEST] Rotate right clicked, new rotation:', currentRotation);
+        renderPageAsImage(currentPage); // Re-render current page with new rotation
+    });
+    
+    // Page input navigation (go to specific page)
+    document.getElementById('pdf-page-input')?.addEventListener('change', function() {
+        const targetPage = parseInt(this.value);
+        if (targetPage >= 1 && targetPage <= totalPages && targetPage !== currentPage) {
+            currentPage = targetPage;
+            renderPageAsImage(currentPage);
+            updatePageInfo();
+        } else {
+            // Reset to current page if invalid input
+            this.value = currentPage;
+        }
+    });
+
+    // Also handle Enter key for page input
+    document.getElementById('pdf-page-input')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const targetPage = parseInt(this.value);
+            if (targetPage >= 1 && targetPage <= totalPages && targetPage !== currentPage) {
+                currentPage = targetPage;
+                renderPageAsImage(currentPage);
+                updatePageInfo();
+            } else {
+                // Reset to current page if invalid input
+                this.value = currentPage;
+            }
+        }
+    });
+    
+    // Jump to page functionality
+    document.getElementById('pdf-jump-btn')?.addEventListener('click', function() {
+        const jumpInput = document.getElementById('pdf-jump-input');
+        if (jumpInput) {
+            const targetPage = parseInt(jumpInput.value);
+            if (targetPage >= 1 && targetPage <= totalPages) {
+                currentPage = targetPage;
+                console.log('🔥 [STUDENT_TEST] Jump to page:', currentPage);
+                renderPageAsImage(currentPage);
+                updatePageInfo();
+                jumpInput.value = ''; // Clear after jump
+            } else if (jumpInput.value) {
+                alert(`Please enter a page number between 1 and ${totalPages}`);
+            }
+        }
+    });
+    
+    // Jump input enter key support
+    document.getElementById('pdf-jump-input')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('pdf-jump-btn')?.click();
+        }
+    });
+    {% endif %}
+    
+    // Initialize answered count on page load
+    {% for answer in session.answers.all %}
+        {% if answer.answer %}
+            document.querySelector(`[data-question="{{ answer.question.question_number }}"]`)?.classList.add('answered');
+        {% endif %}
+    {% endfor %}
+    updateAnsweredCount();
+    
+    // Ensure popup is initially hidden
+    document.getElementById('validation-popup').classList.add('hidden');
+    
+    // Setup popup button event listeners
+    document.getElementById('cancel-btn').addEventListener('click', closeValidationPopup);
+    document.getElementById('force-submit-btn').addEventListener('click', forceSubmit);
+    
+    // Prevent default form submission
+    document.getElementById('test-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        attemptSubmit();
+    });
+    
+    // Setup smooth floating answer module - TEMPORARILY DISABLED TO FIX SHORT ANSWER FIELDS
+    // setupFloatingAnswerModule();
+});
+
+function setupFloatingAnswerModule() {
+    console.log('=== SETTING UP SMOOTH FLOATING ANSWER MODULE ===');
+    
+    const questionSection = document.querySelector('.question-section');
+    if (!questionSection) {
+        console.log('❌ ERROR: Question section not found!');
+        return;
+    }
+    
+    // Hide original and create floating version
+    const existingFloating = document.getElementById('floating-answer-module');
+    if (existingFloating) {
+        existingFloating.remove();
+    }
+    
+    // Clone and prepare floating module
+    const floatingModule = questionSection.cloneNode(true);
+    floatingModule.id = 'floating-answer-module';
+    floatingModule.className = 'floating-answer-module';
+    
+    // Hide original
+    questionSection.style.display = 'none';
+    
+    // Add to body
+    document.body.appendChild(floatingModule);
+    
+    // Initial positioning
+    floatingModule.style.cssText = `
+        position: fixed !important;
+        top: 50% !important;
+        right: 20px !important;
+        transform: translateY(-50%) !important;
+        width: 280px !important;
+        max-height: calc(100vh - 120px) !important;
+        background: white !important;
+        padding: 10px !important;
+        padding-bottom: 90px !important;
+        border: 2px solid #007bff !important;
+        border-radius: 8px !important;
+        overflow-y: auto !important;
+        z-index: 999 !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        transition: none !important;
+    `;
+    
+    // Smooth floating effect variables
+    let targetY = window.innerHeight / 2;
+    let currentY = targetY;
+    let velocity = 0;
+    const damping = 0.85; // Controls lag/smoothness (0.8-0.95 works well)
+    const springStrength = 0.05; // Controls responsiveness (0.02-0.1 works well)
+    
+    // Animation frame for smooth movement
+    function animateFloat() {
+        // Calculate the force pulling towards target
+        const force = (targetY - currentY) * springStrength;
+        
+        // Apply force to velocity
+        velocity += force;
+        
+        // Apply damping to velocity
+        velocity *= damping;
+        
+        // Update position
+        currentY += velocity;
+        
+        // Apply the transform
+        floatingModule.style.top = currentY + 'px';
+        floatingModule.style.transform = 'translateY(-50%)';
+        
+        // Continue animation
+        requestAnimationFrame(animateFloat);
+    }
+    
+    // Update target position on scroll
+    function updateTargetPosition() {
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        const viewportHeight = window.innerHeight;
+        
+        // Keep the module centered in viewport but respect bottom boundary
+        const idealY = scrollY + (viewportHeight / 2);
+        const moduleHeight = floatingModule.offsetHeight;
+        const bottomButtonHeight = 80; // Height of bottom submit container
+        const maxY = viewportHeight - moduleHeight / 2 - bottomButtonHeight - 20;
+        
+        targetY = Math.min(idealY, maxY);
+        
+        // Optional: Add some offset based on scroll direction
+        const scrollDirection = scrollY > lastScrollY ? 1 : -1;
+        targetY += scrollDirection * 20; // Slight offset for natural feel
+        
+        lastScrollY = scrollY;
+    }
+    
+    let lastScrollY = 0;
+    
+    // Listen to scroll events
+    window.addEventListener('scroll', updateTargetPosition);
+    document.addEventListener('scroll', updateTargetPosition);
+    
+    // Also check for scrollable containers
+    const pdfContainer = document.querySelector('.pdf-container');
+    if (pdfContainer) {
+        pdfContainer.addEventListener('scroll', function() {
+            const containerScroll = pdfContainer.scrollTop;
+            const containerHeight = pdfContainer.clientHeight;
+            
+            // Adjust target based on container scroll
+            targetY = (containerHeight / 2) + containerScroll;
+        });
+    }
+    
+    // Start the animation
+    animateFloat();
+    
+    // Re-wire form functionality
+    const form = floatingModule.querySelector('form');
+    if (form) {
+        form.id = 'floating-test-form';
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            attemptSubmit();
+        });
+    }
+    
+    // Visual feedback
+    console.log('✅ Smooth floating answer module initialized!');
+    console.log('🎯 Module will smoothly follow scroll with lag effect');
+    
+    // Add floating indicator
+    floatingModule.style.boxShadow = '0 4px 30px rgba(0, 123, 255, 0.2)';
+    
+    setTimeout(() => {
+        floatingModule.style.border = '2px solid #28a745';
+        console.log('✅ Floating module is active and following scroll!');
+    }, 1000);
+}
+
+// Submit validation functions
+function attemptSubmit() {
+    const unansweredQuestions = getUnansweredQuestions();
+    
+    if (unansweredQuestions.length === 0) {
+        // All questions answered, submit directly
+        submitTest();
+    } else {
+        // Show validation popup only if there are actually unanswered questions
+        showValidationPopup(unansweredQuestions.length);
+    }
+}
+
+function getUnansweredQuestions() {
+    const unanswered = [];
+    const totalQuestions = {{ questions|length }};
+    
+    for (let i = 1; i <= totalQuestions; i++) {
+        const questionPanel = document.getElementById(`question-${i}`);
+        if (!questionPanel) continue;
+        
+        const questionId = questionPanel.dataset.questionId;
+        if (!questionId) continue;
+        
+        const input = questionPanel.querySelector(`[name="q_${questionId}"]`);
+        if (!input) continue;
+        
+        let hasAnswer = false;
+        if (input.type === 'radio') {
+            // Check if any radio button is selected
+            hasAnswer = questionPanel.querySelector(`[name="q_${questionId}"]:checked`) !== null;
+        } else if (input.type === 'checkbox') {
+            // Check if any checkbox is selected
+            hasAnswer = questionPanel.querySelector(`[name="q_${questionId}"]:checked`) !== null;
+        } else {
+            // Check if text input has content
+            hasAnswer = input.value.trim() !== '';
+        }
+        
+        if (!hasAnswer) {
+            unanswered.push(i);
+        }
+    }
+    
+    return unanswered;
+}
+
+function showValidationPopup(unansweredCount) {
+    document.getElementById('unanswered-count').textContent = unansweredCount;
+    document.getElementById('validation-popup').classList.remove('hidden');
+}
+
+function closeValidationPopup() {
+    document.getElementById('validation-popup').classList.add('hidden');
+}
+
+function forceSubmit() {
+    closeValidationPopup();
+    submitTest();
+}
+
+function submitTest() {
+    // Submit via AJAX to complete_test endpoint
+    const sessionId = '{{ session.id }}';
+    
+    // Get CSRF token from either form
+    let csrfToken = '{{ csrf_token }}';
+    const floatingForm = document.getElementById('floating-test-form');
+    if (floatingForm) {
+        const csrfInput = floatingForm.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) {
+            csrfToken = csrfInput.value;
+        }
+    }
+    
+    fetch(`/api/routine/session/${sessionId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to results page
+            window.location.href = data.redirect_url;
+        } else {
+            alert('Error submitting test: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error submitting test. Please try again.');
+    });
+}
+
+// REMOVED: Old PDF.js implementation - replaced with new PDF Image Display System above
+
+// Setup floating answer module with smooth scrolling  
+function setupFloatingAnswerModule() {
+    const floatingModule = document.getElementById('floating-answer-module');
+    if (!floatingModule) return;
+    
+    let targetY = window.innerHeight / 2;
+    let currentY = targetY;
+    let velocity = 0;
+    let animationId = null;
+    
+    function updatePosition() {
+        const scrollY = window.scrollY;
+        const viewportHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // Calculate target position (center of viewport)
+        const idealY = scrollY + viewportHeight / 2;
+        
+        // Constrain to document bounds and leave space for bottom submit button
+        const moduleHeight = floatingModule.offsetHeight;
+        const minY = moduleHeight / 2 + 20;
+        const bottomButtonHeight = 80; // Height of bottom submit container
+        const maxY = documentHeight - moduleHeight / 2 - bottomButtonHeight - 20;
+        
+        targetY = Math.max(minY, Math.min(idealY, maxY));
+        
+        // Spring physics for smooth movement
+        const springStrength = 0.08;
+        const damping = 0.85;
+        
+        const force = (targetY - currentY) * springStrength;
+        velocity = (velocity + force) * damping;
+        currentY += velocity;
+        
+        // Apply position
+        floatingModule.style.transform = `translateY(${currentY}px)`;
+        
+        // Continue animation if moving
+        if (Math.abs(velocity) > 0.1 || Math.abs(targetY - currentY) > 1) {
+            animationId = requestAnimationFrame(updatePosition);
+        } else {
+            animationId = null;
+        }
+    }
+    
+    // Trigger animation on scroll
+    window.addEventListener('scroll', function() {
+        if (!animationId) {
+            animationId = requestAnimationFrame(updatePosition);
+        }
+        
+        // Keep animating for a bit after scroll stops
+        clearTimeout(window.scrollEndTimer);
+        window.scrollEndTimer = setTimeout(() => {
+            if (!animationId) {
+                animationId = requestAnimationFrame(updatePosition);
+            }
+        }, 50);
+    });
+    
+    // Initial position
+    floatingModule.style.position = 'fixed';
+    floatingModule.style.right = '20px';
+    floatingModule.style.zIndex = '9999';
+    updatePosition();
+    
+    // Update on resize
+    window.addEventListener('resize', function() {
+        if (!animationId) {
+            animationId = requestAnimationFrame(updatePosition);
+        }
+    });
+}
+
+// Initialize when DOM is ready - TEMPORARILY DISABLED TO FIX SHORT ANSWER FIELDS
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        // setupFloatingAnswerModule();
+    });
+} else {
+    // setupFloatingAnswerModule();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,534 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>{{ exam.name }} - Placement Test</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- Modular CSS with cache busting -->
+    {% load cache %}
+    {% now "U" as current_timestamp %}
+    <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}?v={{ current_timestamp }}">
+    <link rel="stylesheet" href="{% static 'css/components/difficulty-modal.css' %}?v={{ current_timestamp }}">
+    <!-- Mobile Responsive CSS - Only affects mobile viewports -->
+    <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}?v={{ current_timestamp }}">
+    
+    <style>
+        /* Difficulty Adjustment Buttons */
+        .difficulty-adjustment-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn-difficulty-adjust {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn-difficulty-adjust:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-difficulty-adjust:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #6c757d;
+        }
+        
+        .btn-difficulty-adjust[data-direction="down"] {
+            background: linear-gradient(135deg, #667eea 0%, #4facfe 100%);
+        }
+        
+        .btn-difficulty-adjust[data-direction="up"] {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .test-header > div {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .difficulty-adjustment-buttons {
+                margin-top: 10px;
+                width: 100%;
+            }
+            
+            .btn-difficulty-adjust {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="test-container">
+            <!-- Test Header -->
+            <div class="test-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>{{ exam.name }}</h1>
+                    {% include 'components/primepath_routinetest/timer.html' with timer_seconds=timer_seconds %}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <div id="answer-progress" style="color: #6c757d;">
+                        0 / {{ questions|length }} answered
+                    </div>
+                    <!-- Difficulty Adjustment Buttons -->
+                    <div class="difficulty-adjustment-buttons" style="display: flex; gap: 10px;">
+                        <button type="button" 
+                                id="decrease-difficulty-btn"
+                                class="btn-difficulty-adjust"
+                                data-direction="down"
+                                title="Switch to an easier exam">
+                            📉 Easier Exam
+                        </button>
+                        <button type="button" 
+                                id="increase-difficulty-btn"
+                                class="btn-difficulty-adjust"
+                                data-direction="up"
+                                title="Switch to a harder exam">
+                            📈 Harder Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Question Navigation -->
+            {% include 'components/primepath_routinetest/question_nav.html' with questions=questions %}
+            
+            <!-- Main Content Area -->
+            <div class="question-container">
+                <!-- PDF Section -->
+                {% if exam.pdf_file %}
+                    {% include 'components/primepath_routinetest/pdf_viewer.html' with pdf_url=exam.pdf_file.url enable_navigation=True enable_zoom=True %}
+                {% else %}
+                    {% include 'components/primepath_routinetest/pdf_viewer.html' with pdf_url=None enable_navigation=True enable_zoom=True %}
+                {% endif %}
+                
+                <!-- Question Section -->
+                <div class="question-section">
+                    <form id="test-form" method="post">
+                        {% csrf_token %}
+                        {% for question in questions %}
+                            {% include 'components/primepath_routinetest/question_panel.html' with question=question questions=questions %}
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="submit-container">
+                <button type="button" 
+                        id="submit-test-btn"
+                        class="submit-test-btn"
+                        data-action="submit-test">
+                    Submit Test
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include Difficulty Choice Modal -->
+    {% include 'components/primepath_routinetest/difficulty_choice_modal.html' %}
+    
+    <!-- Load PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- Store Django configuration data safely using json_script -->
+    {{ js_config|json_script:"django-js-config" }}
+    
+    <!-- Initialize APP_CONFIG BEFORE loading modules -->
+    <script>
+    // Initialize configuration with error handling - MUST be before modules load
+    (function() {
+        let djangoConfig = {};
+        
+        try {
+            // Safely parse JSON configuration from Django
+            const configElement = document.getElementById('django-js-config');
+            if (configElement && configElement.textContent) {
+                djangoConfig = JSON.parse(configElement.textContent);
+                console.log('Django config loaded successfully');
+            } else {
+                console.error('Django config element not found');
+            }
+        } catch (error) {
+            console.error('Error parsing Django config:', error);
+            djangoConfig = {};
+        }
+        
+        // Build complete configuration object with defensive checks
+        window.APP_CONFIG = {
+            csrf: '{{ csrf_token }}',
+            session: djangoConfig.session || {},
+            exam: djangoConfig.exam || {},
+            urls: {
+                saveAnswer: '{% url "primepath_routinetest:submit_answer" session.id %}',
+                completeTest: '{% url "primepath_routinetest:complete_test" session.id %}',
+                getAudio: '{% url "primepath_routinetest:get_audio" 0 %}'.replace('0', '{id}'),
+                adjustDifficulty: '{% url "primepath_routinetest:manual_adjust_difficulty" session.id %}'
+            },
+            questions: djangoConfig.questions || [],
+            audioFiles: djangoConfig.audioFiles || [],
+            studentAnswers: djangoConfig.studentAnswers || {}
+        };
+        
+        // Validate required data
+        if (!APP_CONFIG.session.id) {
+            console.error('Session ID is missing from configuration');
+        }
+        if (!APP_CONFIG.exam.id) {
+            console.error('Exam ID is missing from configuration');
+        }
+        
+        // Make session ID globally available for backward compatibility
+        window.sessionId = APP_CONFIG.session.id;
+    })();
+    </script>
+    
+    <!-- Load modular JavaScript AFTER APP_CONFIG is set (with cache busting) -->
+    <script src="{% static 'js/config/app-config.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/utils/event-delegation.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/base-module.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/pdf-viewer.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/audio-player.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/timer.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/answer-manager.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/navigation.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Mobile Handler for touch events and responsive behavior -->
+    <script src="{% static 'js/modules/mobile-handler.js' %}?v={{ current_timestamp }}"></script>
+    
+    <script>
+    // Initialize modules after DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize event delegation first
+        if (window.PrimePath && window.PrimePath.utils && window.PrimePath.utils.EventDelegation) {
+            window.PrimePath.utils.EventDelegation.init();
+        } else {
+            console.error('EventDelegation not loaded');
+        }
+        
+        // Initialize PDF viewer with optimized scale for readability
+        const pdfViewer = new PrimePath.modules.PDFViewer({
+            // scale: defaults to 1.8 in module for better readability
+            enableCache: true
+        });
+        
+        // Get PDF URL from multiple sources for robustness
+        const pdfViewerElement = document.querySelector('#pdf-viewer');
+        let pdfUrl = null;
+        
+        // Try to get from data attribute first (most reliable)
+        if (pdfViewerElement && pdfViewerElement.dataset.pdfUrl) {
+            pdfUrl = pdfViewerElement.dataset.pdfUrl;
+        }
+        // Fallback to APP_CONFIG
+        else if (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.pdfUrl) {
+            pdfUrl = APP_CONFIG.exam.pdfUrl;
+        }
+        
+        // The PDF viewer will now handle rotation internally:
+        // - Admin-set default rotation is applied automatically
+        // - Per-page student rotations are saved in sessionStorage
+        // - Rotations persist as students navigate between pages
+        
+        if (pdfUrl) {
+            pdfViewer.init('#pdf-viewer', pdfUrl);
+        } else {
+            console.error('PDF URL not found in either data attribute or APP_CONFIG');
+            // Show error message to user
+            const errorDiv = document.querySelector('.pdf-error');
+            if (errorDiv) {
+                errorDiv.style.display = 'block';
+            }
+        }
+        
+        // Initialize timer
+        const timer = new PrimePath.modules.Timer({
+            warnings: [
+                { time: 300, message: '5 minutes remaining', class: 'warning' },
+                { time: 60, message: '1 minute remaining', class: 'danger' }
+            ],
+            onExpire: function() {
+                if (window.answerManager) {
+                    // Pass true for force, true for isTimerExpiry
+                    window.answerManager.submitTest(true, true);
+                }
+            }
+        });
+        
+        const timerElement = document.querySelector('[data-timer-seconds]');
+        if (timerElement) {
+            const timerSeconds = parseInt(timerElement.dataset.timerSeconds);
+            timer.init(timerSeconds, '#timer');
+            timer.start();
+        }
+        
+        // Initialize audio player
+        const audioPlayer = new PrimePath.modules.AudioPlayer({
+            allowMultiple: false
+        });
+        audioPlayer.init();
+        
+        // Initialize answer manager with enhanced defensive checks and fallbacks
+        let answerManager = null;
+        
+        // Ensure AnswerManager class is available
+        if (!window.PrimePath || !window.PrimePath.modules || !window.PrimePath.modules.AnswerManager) {
+            console.error('AnswerManager module not loaded');
+        } else {
+            // Try to initialize with multiple fallback sources
+            const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
+                              window.sessionId || 
+                              '{{ session.id }}' || 
+                              null;
+            
+            const examId = (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.id) || 
+                           window.examId || 
+                           '{{ exam.id }}' || 
+                           null;
+            
+            if (sessionId && examId) {
+                try {
+                    answerManager = new PrimePath.modules.AnswerManager({
+                        session: APP_CONFIG && APP_CONFIG.session,  // Pass full session object for compatibility
+                        sessionId: sessionId,
+                        examId: examId,
+                        autoSave: true,
+                        autoSaveInterval: 30000,
+                        saveEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.saveAnswer) || 
+                                      '{% url "primepath_routinetest:submit_answer" session.id %}',
+                        submitEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest) || 
+                                        '{% url "primepath_routinetest:complete_test" session.id %}'
+                    });
+                    // Pass sessionId to init method
+                    answerManager.init(sessionId);
+                    
+                    // Only log in debug mode  
+                    if (window.PrimePath && window.PrimePath.config && window.PrimePath.config.isDebugMode && window.PrimePath.config.isDebugMode()) {
+                        console.log('Answer manager initialized successfully with session:', sessionId);
+                    }
+                } catch (error) {
+                    console.error('Error initializing answer manager:', error);
+                    answerManager = null;
+                }
+            } else {
+                console.error('Cannot initialize answer manager: missing session or exam ID');
+                console.log('Session ID:', sessionId, 'Exam ID:', examId);
+                console.log('APP_CONFIG:', APP_CONFIG);
+            }
+        }
+        
+        // Make instances globally available BEFORE navigation init
+        window.pdfViewer = pdfViewer;
+        window.audioPlayer = audioPlayer;
+        window.examTimer = timer;
+        window.answerManager = answerManager;
+        
+        // Initialize navigation module AFTER other modules are available
+        const navigation = new PrimePath.modules.NavigationModule({
+            enableKeyboard: true,
+            enableUrlState: false,  // Disable URL state for exam security
+            autoSaveOnNavigate: true,
+            focusOnNavigate: true,
+            onBeforeNavigate: async function(from, to) {
+                // Optional: Add confirmation for unsaved changes
+                return true;
+            },
+            onAfterNavigate: function(to, from) {
+                // Optional: Track navigation for analytics (only in debug mode)
+                if (window.PrimePath && window.PrimePath.config && window.PrimePath.config.isDebugMode && window.PrimePath.config.isDebugMode()) {
+                    console.log(`Navigated from question ${from} to ${to}`);
+                }
+            }
+        });
+        
+        // Initialize navigation after dependencies are available
+        navigation.init();
+        window.navigation = navigation;
+        
+        // Setup event delegation for proper event handling
+        const delegation = window.PrimePath.utils.EventDelegation;
+        
+        // NOTE: Navigation module handles these events internally
+        // We don't need to set them up here to avoid duplicate handlers
+        // The navigation.init() call already sets up all navigation event handlers
+        
+        // Submit test with enhanced error handling and fallback
+        delegation.onClick('[data-action="submit-test"]', function() {
+            if (!answerManager) {
+                console.error('Answer manager not initialized, attempting fallback submission...');
+                
+                // Try to create a minimal answer manager just for submission
+                const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
+                                  '{{ session.id }}';
+                
+                if (sessionId) {
+                    // Direct submission without answer manager as fallback
+                    if (confirm('There was an issue with the test system. Do you want to submit your test anyway?')) {
+                        const csrfToken = '{{ csrf_token }}';
+                        fetch(`/api/routine/session/${sessionId}/complete/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                alert('Error submitting test. Please contact support.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Submission error:', error);
+                            alert('Unable to submit test. Please contact support.');
+                        });
+                    }
+                } else {
+                    alert('Unable to submit test: Session information is missing. Please refresh the page and try again.');
+                }
+                return;
+            }
+            
+            // Normal submission path with answer manager
+            try {
+                const stats = answerManager.getStats();
+                
+                if (stats.unansweredCount > 0) {
+                    const message = `You have ${stats.unansweredCount} unanswered question(s).\\n\\nAre you sure you want to submit?`;
+                    if (!confirm(message)) return;
+                }
+                
+                answerManager.submitTest();
+            } catch (error) {
+                console.error('Error during submission:', error);
+                if (confirm('There was an error preparing your submission. Do you want to try again?')) {
+                    answerManager.submitTest(true); // Force submission
+                }
+            }
+        });
+        
+        // Handle answer input changes (covers all input types: radio, checkbox, text)
+        delegation.onChange('.answer-input', function(e) {
+            const questionPanel = this.closest('.question-panel');
+            if (questionPanel && answerManager) {
+                const questionNum = parseInt(questionPanel.dataset.questionNumber);
+                answerManager.saveAnswer(questionNum);
+                console.log(`Answer saved for question ${questionNum}`);
+            }
+        });
+        
+        // Listen to answer manager events
+        if (answerManager) {
+            answerManager.on('questionAnswered', function(data) {
+            const navBtn = document.querySelector(`.question-nav-btn[data-question="${data.questionNum}"]`);
+            if (navBtn) {
+                navBtn.classList.add('answered');
+            }
+            
+            // Update progress
+            const stats = answerManager.getStats();
+            const progressEl = document.getElementById('answer-progress');
+            if (progressEl) {
+                progressEl.textContent = `${stats.answeredCount} / ${stats.totalQuestions} answered`;
+            }
+            });
+        }
+        
+        // Navigation module handles initial question display
+        // Note: All instances already made globally available above before navigation init
+        
+        // Difficulty Adjustment Feature
+        const difficultyButtons = document.querySelectorAll('.btn-difficulty-adjust');
+        
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const direction = this.dataset.direction;
+                const isIncreasing = direction === 'up';
+                
+                // Create warning message
+                const warningTitle = isIncreasing ? '⚠️ Increase Test Difficulty?' : '⚠️ Decrease Test Difficulty?';
+                const warningMessage = `
+                    This will:
+                    • Load a ${isIncreasing ? 'more challenging' : 'easier'} exam
+                    • RESET all your current answers
+                    • Restart the timer
+                    • You'll lose all progress on this exam
+                    
+                    Are you sure you want a ${isIncreasing ? 'harder' : 'easier'} test?`;
+                
+                // Show confirmation dialog
+                if (!confirm(warningTitle + warningMessage)) {
+                    return;
+                }
+                
+                // Disable buttons during request
+                difficultyButtons.forEach(btn => btn.disabled = true);
+                
+                // Send request to adjust difficulty
+                fetch(APP_CONFIG.urls.adjustDifficulty, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': APP_CONFIG.csrf
+                    },
+                    body: JSON.stringify({
+                        direction: direction
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alert(`✅ Success!\n\nExam adjusted to: ${data.new_level}\n\nThe page will now reload with your new exam.`);
+                        
+                        // Reload the page to get the new exam
+                        window.location.reload();
+                    } else {
+                        // Handle boundary cases or errors
+                        if (data.at_boundary) {
+                            alert(data.error);
+                        } else {
+                            alert('❌ Error: ' + (data.error || 'Unable to adjust difficulty'));
+                        }
+                        
+                        // Re-enable buttons
+                        difficultyButtons.forEach(btn => btn.disabled = false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adjusting difficulty:', error);
+                    alert('❌ An error occurred while adjusting difficulty. Please try again.');
+                    
+                    // Re-enable buttons
+                    difficultyButtons.forEach(btn => btn.disabled = false);
+                });
+            });
+        });
+    });
+    </script>
+</body>
+</html>

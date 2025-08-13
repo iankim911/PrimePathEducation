@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'placement_test',
+    'primepath_routinetest',  # New separate routine test app
     'core',
     'api',  # API app
     'rest_framework',  # Django REST Framework

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit {{ exam.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Exam: {{ exam.name }}</h2>
+    
+    <div class="alert alert-info">
+        This page is under construction. For now, please use the Preview & Answers page to edit question types and answers.
+    </div>
+    
+    <div class="mt-3">
+        <a href="{% url 'primepath_routinetest:preview_exam' exam.id %}" class="btn btn-primary">Go to Preview & Answers</a>
+        <a href="{% url 'primepath_routinetest:exam_list' %}" class="btn btn-secondary">Back to Exam List</a>
+    </div>
+</div>
+{% endblock %}

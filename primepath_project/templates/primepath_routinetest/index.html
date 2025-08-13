@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PrimePath Routine Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Simple Landing Page -->
+    <div class="jumbotron text-center">
+        <h1 class="display-4">PrimePath Routine Test</h1>
+        <p class="lead">Welcome to the Routine Test Module</p>
+        <hr class="my-4">
+        <p>Choose an action to get started:</p>
+        
+        <div class="mt-4">
+            <a href="{% url 'primepath_routinetest:start_test' %}" class="btn btn-success btn-lg mx-2">
+                <i class="fas fa-play"></i> Start Test
+            </a>
+            <a href="{% url 'primepath_routinetest:exam_list' %}" class="btn btn-primary btn-lg mx-2">
+                <i class="fas fa-list"></i> View Exams
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ active_exams }}</h3>
+                    <p class="text-muted">Active Exams</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ total_sessions }}</h3>
+                    <p class="text-muted">Total Sessions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ recent_sessions|length }}</h3>
+                    <p class="text-muted">Recent Tests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

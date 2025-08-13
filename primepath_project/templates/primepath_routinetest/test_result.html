@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+
+{% block title %}🎉 Test Results - {{ session.student_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    .results-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .celebration-header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .celebration-header h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        animation: bounce 2s infinite;
+    }
+    
+    .celebration-header p {
+        font-size: 1.5rem;
+        margin-bottom: 0;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    .score-card {
+        background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        border: none;
+    }
+    
+    .score-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00b894, #00cec9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        50% {
+            box-shadow: 0 5px 25px rgba(0,184,148,0.5);
+        }
+        100% {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+    }
+    
+    .score-details {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .score-details h3 {
+        color: #2d3436;
+        margin-bottom: 15px;
+        font-size: 1.8rem;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .info-item {
+        background: linear-gradient(135deg, #74b9ff, #0984e3);
+        color: white;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    
+    .info-item .label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 5px;
+    }
+    
+    .info-item .value {
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+    
+    .recommendation-card {
+        background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+        color: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .recommendation-card h3 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+        color: #fdcb6e;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .recommendation-card p {
+        font-size: 1.4rem;
+        margin: 0;
+        background: rgba(255,255,255,0.2);
+        padding: 15px;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .answers-section {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .answers-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    
+    .answers-header h3 {
+        color: #2d3436;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .answers-header p {
+        color: #636e72;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .answer-item {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-left: 6px solid #00b894;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+    
+    .answer-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .answer-item.correct {
+        border-left-color: #00b894;
+        background: linear-gradient(135deg, #d5f4e6, #81ecec);
+    }
+    
+    .answer-item.incorrect {
+        border-left-color: #e17055;
+        background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+    }
+    
+    .answer-item.no-answer {
+        border-left-color: #636e72;
+        background: linear-gradient(135deg, #ddd, #b2bec3);
+    }
+    
+    .question-number {
+        background: #2d3436;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+        font-size: 1.1rem;
+    }
+    
+    .answer-content {
+        display: inline-block;
+        vertical-align: top;
+        width: calc(100% - 60px);
+    }
+    
+    .answer-row {
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+    }
+    
+    .answer-label {
+        font-weight: bold;
+        color: #2d3436;
+        margin-right: 8px;
+    }
+    
+    .answer-value {
+        color: #636e72;
+    }
+    
+    .points-badge {
+        float: right;
+        background: #00b894;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .points-badge.partial {
+        background: #fdcb6e;
+    }
+    
+    .points-badge.zero {
+        background: #e17055;
+    }
+    
+    .action-buttons {
+        text-align: center;
+        margin-top: 30px;
+    }
+    
+    .btn-fun {
+        background: linear-gradient(135deg, #fd79a8, #e84393);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        margin: 0 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-fun:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary-fun {
+        background: linear-gradient(135deg, #74b9ff, #0984e3);
+    }
+    
+    .confetti {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confetti" id="confetti"></div>
+
+<div class="results-container">
+    <!-- Celebration Header -->
+    <div class="celebration-header">
+        <h1>🎉 Awesome Job, {{ session.student_name }}! 🎉</h1>
+        <p>You've completed your placement test!</p>
+    </div>
+    
+    <!-- Score Card -->
+    <div class="score-card">
+        <div class="score-circle">
+            {{ session.percentage_score|floatformat:0 }}%
+        </div>
+        
+        <div class="score-details">
+            <h3>📊 Your Test Score</h3>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="label">Points Earned</div>
+                    <div class="value">{{ session.score }} / {{ session.total_possible_score|default:"?" }}</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="label">Time Spent</div>
+                    <div class="value">{{ session.time_spent_seconds|floatformat:0 }} seconds</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="label">Completed</div>
+                    <div class="value">{{ session.completed_at|date:"M d, Y" }}</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="label">Test Type</div>
+                    <div class="value">Placement Test</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendation Card -->
+    <div class="recommendation-card">
+        <h3>🌟 Your Recommended Level</h3>
+        <p>{{ curriculum_recommendation.full_name }}</p>
+    </div>
+    
+    <!-- Answers Review -->
+    <div class="answers-section">
+        <div class="answers-header">
+            <h3>📝 Answer Review</h3>
+            <p>Let's see how you did on each question!</p>
+        </div>
+        
+        {% for answer in answers %}
+        <div class="answer-item {% if answer.points_earned == answer.question.points %}correct{% elif answer.points_earned > 0 %}partial{% elif answer.answer %}incorrect{% else %}no-answer{% endif %}">
+            <div class="question-number">{{ answer.question.question_number }}</div>
+            
+            <div class="answer-content">
+                <div class="answer-row">
+                    <span class="answer-label">Your Answer:</span>
+                    <span class="answer-value">{{ answer.answer|default:"No answer given" }}</span>
+                </div>
+                
+                {% if answer.question.correct_answer %}
+                <div class="answer-row">
+                    <span class="answer-label">Correct Answer:</span>
+                    <span class="answer-value">{{ answer.question.correct_answer }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="points-badge {% if answer.points_earned == answer.question.points %}full{% elif answer.points_earned > 0 %}partial{% else %}zero{% endif %}">
+                    {{ answer.points_earned }} / {{ answer.question.points }} points
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'primepath_routinetest:start_test' %}" class="btn-fun">
+            🚀 Take Another Test
+        </a>
+        <a href="{% url 'core:teacher_dashboard' %}" class="btn-fun btn-secondary-fun">
+            📚 Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- Difficulty Adjustment Options -->
+    <div class="difficulty-adjustment-section" style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #f5f3ff, #e8f4fd); border-radius: 15px; text-align: center;">
+        <h3 style="color: #5f27cd; margin-bottom: 15px; font-size: 1.5rem;">
+            💭 How was the difficulty?
+        </h3>
+        <p style="color: #636e72; margin-bottom: 20px; font-size: 1.1rem;">
+            If you found this test too easy or too hard, you can try a different difficulty level
+        </p>
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <form method="post" action="{% url 'primepath_routinetest:request_difficulty_change' %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="session_id" value="{{ session.id }}">
+                <input type="hidden" name="adjustment" value="-1">
+                <button type="submit" class="btn-fun" style="background: linear-gradient(135deg, #55efc4, #00b894);">
+                    ⬇️ Try Easier Level
+                </button>
+            </form>
+            <form method="post" action="{% url 'primepath_routinetest:request_difficulty_change' %}" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="session_id" value="{{ session.id }}">
+                <input type="hidden" name="adjustment" value="1">
+                <button type="submit" class="btn-fun" style="background: linear-gradient(135deg, #ff7979, #eb4d4b);">
+                    ⬆️ Try Harder Level
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Add some fun confetti animation
+function createConfetti() {
+    const confetti = document.getElementById('confetti');
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+    
+    for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.style.position = 'absolute';
+        piece.style.width = '10px';
+        piece.style.height = '10px';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.left = Math.random() * window.innerWidth + 'px';
+        piece.style.top = '-10px';
+        piece.style.borderRadius = '50%';
+        piece.style.animation = `fall ${Math.random() * 3 + 2}s linear infinite`;
+        piece.style.animationDelay = Math.random() * 2 + 's';
+        confetti.appendChild(piece);
+    }
+}
+
+// CSS animation for falling confetti
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Start confetti when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    createConfetti();
+    
+    // Remove confetti after 5 seconds
+    setTimeout(() => {
+        document.getElementById('confetti').style.display = 'none';
+    }, 5000);
+});
+</script>
+{% endblock %}
