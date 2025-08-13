@@ -68,7 +68,7 @@
                     console.warn(prefix, message, data || '');
                     break;
                 default:
-                    console.log(prefix, message, data || '');
+// REMOVED:                     console.log(prefix, message, data || '');
             }
         }
 
@@ -127,7 +127,6 @@
 
             this.events[eventName].push(handler);
 
-            // Return unsubscribe function
             return () => {
                 const index = this.events[eventName].indexOf(handler);
                 if (index > -1) {

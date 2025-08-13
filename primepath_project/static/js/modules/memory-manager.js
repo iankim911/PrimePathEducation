@@ -45,7 +45,7 @@
         registerModule(name, module) {
             this.modules.set(name, module);
             if (this.isDebugMode()) {
-                console.log(`MemoryManager: Registered module ${name}`);
+// REMOVED:                 console.log(`MemoryManager: Registered module ${name}`);
             }
         }
 
@@ -82,7 +82,7 @@
          */
         cleanup() {
             if (this.isDebugMode()) {
-                console.log('MemoryManager: Starting cleanup...');
+// REMOVED:                 console.log('MemoryManager: Starting cleanup...');
             }
             
             // Clear all timers
@@ -120,7 +120,7 @@
                 if (module && typeof module.destroy === 'function') {
                     try {
                         module.destroy();
-                        console.log(`MemoryManager: Cleaned up module ${name}`);
+// REMOVED:                         console.log(`MemoryManager: Cleaned up module ${name}`);
                     } catch (error) {
                         console.error(`MemoryManager: Error cleaning up module ${name}:`, error);
                     }
@@ -132,7 +132,7 @@
             this.cleanupLocalStorage();
             
             if (this.isDebugMode()) {
-                console.log('MemoryManager: Cleanup complete');
+// REMOVED:                 console.log('MemoryManager: Cleanup complete');
             }
         }
 
@@ -168,11 +168,11 @@
             // Remove old keys
             keysToRemove.forEach(key => {
                 localStorage.removeItem(key);
-                console.log(`MemoryManager: Removed old localStorage key: ${key}`);
+// REMOVED:                 console.log(`MemoryManager: Removed old localStorage key: ${key}`);
             });
             
             if (keysToRemove.length > 0) {
-                console.log(`MemoryManager: Cleaned up ${keysToRemove.length} old localStorage entries`);
+// REMOVED:                 console.log(`MemoryManager: Cleaned up ${keysToRemove.length} old localStorage entries`);
             }
         }
 
@@ -200,7 +200,7 @@
             // Just clear timers and intervals, keep data
             this.timers.forEach(timerId => clearTimeout(timerId));
             this.intervals.forEach(intervalId => clearInterval(intervalId));
-            console.log('MemoryManager: Partial cleanup on page hide');
+// REMOVED:             console.log('MemoryManager: Partial cleanup on page hide');
         }
 
         /**
@@ -217,7 +217,7 @@
          * Run garbage collection
          */
         runGarbageCollection() {
-            console.log('MemoryManager: Running garbage collection...');
+// REMOVED:             console.log('MemoryManager: Running garbage collection...');
             
             // Clean up old localStorage entries
             this.cleanupLocalStorage();
@@ -229,7 +229,7 @@
                     totalJSHeapSize: (performance.memory.totalJSHeapSize / 1048576).toFixed(2) + ' MB',
                     jsHeapSizeLimit: (performance.memory.jsHeapSizeLimit / 1048576).toFixed(2) + ' MB'
                 };
-                console.log('MemoryManager: Memory usage:', memoryInfo);
+// REMOVED:                 console.log('MemoryManager: Memory usage:', memoryInfo);
                 
                 // If memory usage is high, trigger more aggressive cleanup
                 const usagePercent = (performance.memory.usedJSHeapSize / performance.memory.jsHeapSizeLimit) * 100;
@@ -273,7 +273,7 @@
                 window.gc();
             }
             
-            console.log('MemoryManager: Aggressive cleanup complete');
+// REMOVED:             console.log('MemoryManager: Aggressive cleanup complete');
         }
 
         /**
@@ -326,7 +326,7 @@
             const end = performance.now();
             if (start) {
                 const duration = end - start;
-                console.log(`Performance: ${label} took ${duration.toFixed(2)}ms`);
+// REMOVED:                 console.log(`Performance: ${label} took ${duration.toFixed(2)}ms`);
                 return duration;
             }
             return null;

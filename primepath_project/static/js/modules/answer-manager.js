@@ -491,7 +491,7 @@
                             // Show message before redirecting to new test
                             if (response.message) {
                                 // You could show a brief message here if desired
-                                console.log(response.message);
+// REMOVED:                                 console.log(response.message);
                             }
                         }
                         window.location.href = response.redirect_url;
@@ -834,7 +834,6 @@
     // Create global instance for backward compatibility
     window.answerManager = null;
 
-    // Backward compatibility functions
     window.saveAnswer = function(questionNum) {
         if (!window.answerManager) {
             window.answerManager = new AnswerManager({

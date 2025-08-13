@@ -336,7 +336,6 @@
             // Store reference to this for use in callbacks
             const self = this;
             
-            // Question number buttons - Use regular function for 'this' context
             delegation.onClick('[data-action="navigate-question"]', function(e) {
                 e.preventDefault();
                 const questionNum = parseInt(this.dataset.question);
@@ -345,13 +344,11 @@
                 }
             });
             
-            // Next button - Use regular function for 'this' context
             delegation.onClick('[data-action="next-question"]', function(e) {
                 e.preventDefault();
                 self.nextQuestion();
             });
             
-            // Previous button - Use regular function for 'this' context
             delegation.onClick('[data-action="prev-question"]', function(e) {
                 e.preventDefault();
                 self.previousQuestion();

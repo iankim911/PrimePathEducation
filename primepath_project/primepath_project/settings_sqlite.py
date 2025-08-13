@@ -10,21 +10,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security Configuration - Use environment variables in production
 import os
 from django.core.management.utils import get_random_secret_key
+import warnings
 
+# PHASE 8 SECURITY IMPROVEMENTS
 # Generate a new secret key if not provided
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production')
 if not os.environ.get('SECRET_KEY'):
-    print("WARNING: Using default SECRET_KEY. Set SECRET_KEY environment variable in production!")
+    warnings.warn("WARNING: Using default SECRET_KEY. Set SECRET_KEY environment variable in production!", UserWarning)
 
-# Debug should be False in production
+# Debug should be False in production - PHASE 8 ENHANCED
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 if DEBUG:
-    print("WARNING: DEBUG is True. Set DEBUG=False in production!")
+    warnings.warn("WARNING: DEBUG is True. Set DEBUG=False in production!", UserWarning)
 
-# Properly configure allowed hosts
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,*').split(',')
-if '*' in ALLOWED_HOSTS and not DEBUG:
-    print("WARNING: ALLOWED_HOSTS contains '*' in production mode!")
+# Properly configure allowed hosts - PHASE 8 SECURITY
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Only add wildcard in DEBUG mode for development
+if DEBUG:
+    ALLOWED_HOSTS.append('*')
+elif '*' in ALLOWED_HOSTS:
+    warnings.warn("WARNING: ALLOWED_HOSTS contains '*' in production mode!", UserWarning)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -387,3 +392,65 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*/30'),  # Run every 30 minutes
     },
 }
+
+# ============================================================================
+# PHASE 8 CONFIGURATION IMPROVEMENTS - Added 2025-08-13
+# ============================================================================
+
+# Enhanced Security Settings
+if not DEBUG:
+    # Security middleware settings for production
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False').lower() == 'true'
+    SESSION_COOKIE_SECURE = os.environ.get('SESSION_COOKIE_SECURE', 'True').lower() == 'true'
+    CSRF_COOKIE_SECURE = os.environ.get('CSRF_COOKIE_SECURE', 'True').lower() == 'true'
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# Phase 8 Console Monitoring Configuration
+CONSOLE_MONITORING = {
+    'enabled': True,
+    'log_level': 'DEBUG' if DEBUG else 'INFO',
+    'track_database_queries': DEBUG,
+    'track_template_rendering': DEBUG,
+    'track_static_serving': DEBUG,
+    'preserve_relationships': True,
+    'monitor_endpoints': [
+        '/api/placement/exams/',
+        '/api/placement/sessions/',
+        '/teacher/dashboard/',
+        '/placement-rules/',
+        '/exam-mapping/',
+    ],
+    'log_to_console': True,
+    'log_to_file': True,
+    'max_log_size': 10485760,  # 10MB
+    'backup_count': 5,
+}
+
+# Preserve all model relationships
+PRESERVE_RELATIONSHIPS = True
+
+# Phase 8 Feature Flags
+PHASE8_FEATURES = {
+    'enhanced_monitoring': True,
+    'security_headers': not DEBUG,
+    'relationship_preservation': True,
+    'console_debugging': DEBUG,
+    'performance_tracking': True,
+    'error_tracking': True,
+}
+
+# Environment-based configuration
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development' if DEBUG else 'production')
+
+# Log Phase 8 Configuration Status
+import logging
+logger = logging.getLogger(__name__)
+logger.info(f"[PHASE8] Configuration loaded for environment: {ENVIRONMENT}")
+logger.info(f"[PHASE8] DEBUG={DEBUG}, ALLOWED_HOSTS={ALLOWED_HOSTS}")
+logger.info(f"[PHASE8] Console monitoring: {CONSOLE_MONITORING['enabled']}")
+logger.info(f"[PHASE8] Relationship preservation: {PRESERVE_RELATIONSHIPS}")

@@ -9,7 +9,7 @@
     const modules = ['answerManager', 'pdfViewer', 'timer', 'navigationModule'];
     modules.forEach(mod => {
         if (typeof window[mod] !== 'undefined') {
-            console.log(`✅ ${mod} loaded`);
+// REMOVED:             console.log(`✅ ${mod} loaded`);
         } else {
             console.warn(`⚠️ ${mod} not found (check if needed)`);
         }
@@ -18,15 +18,15 @@
     // Check API endpoints
     fetch('/api/placement/exams/')
         .then(r => {
-            console.log('✅ Exam API accessible');
+// REMOVED:             console.log('✅ Exam API accessible');
             return r.json();
         })
-        .then(data => console.log(`  Found ${data.length || 0} exams`))
+// REMOVED:         .then(data => console.log(`  Found ${data.length || 0} exams`))
         .catch(e => console.error('❌ Exam API error:', e));
     
     // Check authentication
     if (document.querySelector('.nav-tabs')) {
-        console.log('✅ Navigation loaded');
+// REMOVED:         console.log('✅ Navigation loaded');
     }
     
     // Check for any 404s or errors
@@ -35,11 +35,11 @@
         if (errors.length > 0) {
             console.error('❌ Error messages found:', errors);
         } else {
-            console.log('✅ No error messages');
+// REMOVED:             console.log('✅ No error messages');
         }
     };
     
     setTimeout(checkForErrors, 1000);
     
-    console.log('%c===== END QA CHECK =====', 'color: blue; font-weight: bold');
+// REMOVED:     console.log('%c===== END QA CHECK =====', 'color: blue; font-weight: bold');
 })();

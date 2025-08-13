@@ -136,7 +136,6 @@
                 if (touchDuration < 500 && deltaX < 10 && deltaY < 10) {
                     // Check if element has existing click handler
                     if (!element.onclick && !element.hasAttribute('onclick')) {
-                        // For links without onclick, let default behavior handle it
                         if (element.tagName !== 'A') {
                             // Trigger synthetic click for non-links
                             setTimeout(() => {
@@ -278,7 +277,6 @@
             }, { passive: true });
         },
         
-        // Utility: Debounce function
         debounce: function(func, wait) {
             let timeout;
             return function executedFunction(...args) {
@@ -308,7 +306,7 @@
                 logEntry.data = data;
             }
             
-            console.log(`[MOBILE_HANDLER] ${JSON.stringify(logEntry)}`);
+// REMOVED:             console.log(`[MOBILE_HANDLER] ${JSON.stringify(logEntry)}`);
         }
     };
     

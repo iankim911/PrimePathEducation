@@ -128,3 +128,129 @@ media/exams/*
 media/audio/*
 !media/exams/.gitkeep
 !media/audio/.gitkeep.nul
+
+# ============================================================================
+# Phase 8 Configuration Cleanup Additions - 2025-08-13
+# ============================================================================
+
+# Environment files (enhanced)
+.env.*
+!.env.example
+*.env
+env.local
+env.*.local
+
+# Secrets and keys
+*.secret
+*.key
+*.pem
+*.crt
+*.cer
+secrets/
+private/
+
+# Backup files (enhanced)
+*.backup
+*.phase*_backup
+*.bak.*
+*.orig
+archived_configs/
+backups/
+
+# Logs (enhanced)
+logs/
+*.log.*
+error.log
+access.log
+debug.log
+
+# Database files
+*.sqlite
+*.sqlite3-shm
+*.sqlite3-wal
+*.db-journal
+
+# Phase cleanup artifacts
+phase*_report.json
+phase*_monitoring.js
+!phase8_config_monitoring.js
+phase*_console_*.js
+phase*_cleanup.log
+
+# Node modules (if any frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Testing artifacts
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+test-results/
+test-reports/
+
+# IDE specific (enhanced)
+.idea/
+.vscode/
+*.sublime-*
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+*~
+
+# OS specific (enhanced)
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Python specific (enhanced)
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django specific
+local_settings.py
+settings_local.py
+settings_dev.py
+settings_old.py
+*.sqlite3
+staticfiles/
+mediafiles/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+tmp/
+temp/
+cache/
+
+# Documentation build
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Deployment
+.deploy/
+deploy_keys/
+.dockerignore
+docker-compose.override.yml
+
+# Monitoring files (keep the active one)
+!static/js/phase8_config_monitoring.js
+!static/js/feature_verification.js

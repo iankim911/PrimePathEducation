@@ -19,8 +19,8 @@ if (window.location.pathname) {
 
 // Track frontend assets
 console.log('[CLEANUP] Frontend assets check:');
-console.log(`  - CSS loaded: ${document.styleSheets.length} stylesheets`);
-console.log(`  - JS modules: ${Object.keys(window).filter(k => k.includes('Manager') || k.includes('Module')).length} modules`);
+// REMOVED: console.log(`  - CSS loaded: ${document.styleSheets.length} stylesheets`);
+// REMOVED: console.log(`  - JS modules: ${Object.keys(window).filter(k => k.includes('Manager') || k.includes('Module')).length} modules`);
 
 // Track API calls
 if (window.fetch) {

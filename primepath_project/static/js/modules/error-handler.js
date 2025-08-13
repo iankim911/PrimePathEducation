@@ -113,7 +113,7 @@
                 delay = this.options.retryDelay * Math.pow(2, retryInfo.count - 1);
             }
             
-            console.log(`ErrorHandler: Retrying operation (attempt ${retryInfo.count}/${this.options.maxRetries}) after ${delay}ms`);
+// REMOVED:             console.log(`ErrorHandler: Retrying operation (attempt ${retryInfo.count}/${this.options.maxRetries}) after ${delay}ms`);
             
             // Show retry notification
             if (this.options.notifyUser) {
@@ -177,7 +177,7 @@
                     
                     // Success
                     if (attempt > 1) {
-                        console.log(`ErrorHandler: AJAX request succeeded on attempt ${attempt}`);
+// REMOVED:                         console.log(`ErrorHandler: AJAX request succeeded on attempt ${attempt}`);
                     }
                     return response;
                     
@@ -223,7 +223,7 @@
                     if (metaTag) {
                         metaTag.content = data.token;
                     }
-                    console.log('ErrorHandler: CSRF token refreshed');
+// REMOVED:                     console.log('ErrorHandler: CSRF token refreshed');
                 }
             } catch (error) {
                 console.error('ErrorHandler: Failed to refresh CSRF token:', error);

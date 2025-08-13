@@ -23,7 +23,7 @@
             // Log initialization status (only in debug mode)
             if (this.isDebugMode()) {
                 if (this.config && Object.keys(this.config).length > 0) {
-                    console.log('AppConfig initialized with configuration');
+// REMOVED:                     console.log('AppConfig initialized with configuration');
                 } else {
                     console.warn('AppConfig initialized without configuration - APP_CONFIG may not be set yet');
                 }

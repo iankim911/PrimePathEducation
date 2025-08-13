@@ -74,7 +74,6 @@
             const handler = { selector, callback };
             this.handlers.get(eventType).push(handler);
 
-            // Return function to unregister
             return () => {
                 const handlers = this.handlers.get(eventType);
                 const index = handlers.indexOf(handler);
@@ -136,7 +135,6 @@
                     const id = 'click-' + Math.random().toString(36).substr(2, 9);
                     element.setAttribute('data-click-id', id);
                     
-                    // Create handler function
                     const handler = new Function('event', onclickStr);
                     
                     // Register delegated handler

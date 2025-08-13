@@ -436,7 +436,6 @@
     // Create global timer instance for backward compatibility
     window.examTimer = null;
 
-    // Backward compatibility functions
     window.startTimer = function() {
         if (!window.examTimer) {
             // Get time from global variable if set

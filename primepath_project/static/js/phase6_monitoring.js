@@ -189,12 +189,12 @@ cleanupLogs.forEach(log => {
     } else if (log.level === 'warn') {
         console.warn(`${prefix} ${log.message}`);
     } else {
-        console.log(`${prefix} ${log.message}`);
+// REMOVED:         console.log(`${prefix} ${log.message}`);
     }
 });
 
 // Verify critical features still work
-console.log('%c===== FEATURE VERIFICATION =====', 'color: green; font-weight: bold');
+// REMOVED: console.log('%c===== FEATURE VERIFICATION =====', 'color: green; font-weight: bold');
 
 // Check exam dropdown
 fetch('/api/placement/exams/create/')

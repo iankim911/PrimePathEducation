@@ -1,0 +1,58 @@
+{
+  "timestamp": "2025-08-13T13:23:30.837738",
+  "summary": {
+    "passed": 40,
+    "failed": 0,
+    "warnings": 2,
+    "status": "PASS"
+  },
+  "details": {
+    "passed": [
+      "Database: Exams (9)",
+      "Database: Questions (260)",
+      "Database: Student Sessions (3)",
+      "Database: Audio Files (10)",
+      "Database: Teachers (3)",
+      "Database: Curriculum Levels (44)",
+      "Database: SubPrograms (16)",
+      "Database: Programs (4)",
+      "No test subprograms in database",
+      "Exam\u2192CurriculumLevel relationship",
+      "Question\u2192Exam relationship",
+      "ExamLevelMapping relationship",
+      "URL: Teacher Dashboard",
+      "URL: Exam List",
+      "URL: Create Exam",
+      "URL: Start Test",
+      "URL: Placement Rules",
+      "URL: Exam Mapping",
+      "URL: Curriculum Levels",
+      "Create exam page loads",
+      "Curriculum dropdown populated correctly",
+      "Test exam available: [PT]_ASCENT_Nova_Lv1_250813",
+      "Exam has 20 questions",
+      "Exam has 3 audio files",
+      "Admin user exists",
+      "File: Answer Manager JS",
+      "File: PDF Viewer JS",
+      "File: Timer JS",
+      "File: Student Test CSS",
+      "File: Base Template",
+      "File: Student Test Template",
+      "File: PDF Upload Directory",
+      "File: Audio Upload Directory",
+      "API: Exams API",
+      "API: Sessions API",
+      "API: Start Test API",
+      "Template: base.html",
+      "Template: placement_test/student_test_v2.html",
+      "Template: placement_test/create_exam.html",
+      "Template: core/teacher_dashboard.html"
+    ],
+    "failed": [],
+    "warnings": [
+      "Found 2 test sessions",
+      "Authentication test skipped"
+    ]
+  }
+}
