@@ -94,7 +94,7 @@ client = Client()
 
 # 6. Exam Management
 def test_exam_api():
-    response = client.get('/api/placement/exams/')
+    response = client.get('/api/PlacementTest/exams/')
     return response.status_code in [200, 302]
 
 test_feature("Exam list API", test_exam_api)
@@ -105,7 +105,7 @@ def test_question_update():
     if not q:
         return False
     response = client.post(
-        f'/api/placement/questions/{q.id}/update/',
+        f'/api/PlacementTest/questions/{q.id}/update/',
         {'correct_answer': q.correct_answer, 'points': q.points}
     )
     return response.status_code in [200, 302]
@@ -130,7 +130,7 @@ def test_manual_adjust():
     
     if session:
         response = client.post(
-            f'/api/placement/session/{session.id}/manual-adjust/',
+            f'/api/PlacementTest/session/{session.id}/manual-adjust/',
             json.dumps({'direction': 'up'}),
             content_type='application/json'
         )
@@ -147,7 +147,7 @@ print("-" * 50)
 
 # 9. Teacher Dashboard
 def test_dashboard():
-    response = client.get('/teacher/dashboard/')
+    response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
     return response.status_code in [200, 302]
 
 test_feature("Teacher dashboard", test_dashboard)

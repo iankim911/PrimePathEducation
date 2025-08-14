@@ -102,7 +102,7 @@ def test_answer_inputs():
             'school_name': 'Test School'
         }
         
-        response = client.post(reverse('primepath_routinetest:start_test'), test_data)
+        response = client.post(reverse('RoutineTest:start_test'), test_data)
         
         # Check if redirected to test page
         is_redirect = response.status_code == 302
@@ -193,7 +193,7 @@ def test_answer_inputs():
             passed += 1
             
             # Test answer submission endpoint
-            submit_url = reverse('primepath_routinetest:submit_answer', args=[latest_session.id])
+            submit_url = reverse('RoutineTest:submit_answer', args=[latest_session.id])
             
             # Prepare test answer data
             test_question = latest_session.exam.questions.first()

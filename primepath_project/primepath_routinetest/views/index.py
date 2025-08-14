@@ -46,4 +46,4 @@ def redirect_to_start(request):
     Simple redirect to the start test page.
     Used as a convenience redirect.
     """
-    return redirect('primepath_routinetest:start_test')
+    return redirect('RoutineTest:start_test')

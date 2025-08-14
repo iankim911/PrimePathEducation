@@ -75,7 +75,7 @@ def start_test(request):
                 request_meta=request.META
             )
             
-            return redirect('primepath_routinetest:take_test', session_id=session.id)
+            return redirect('RoutineTest:take_test', session_id=session.id)
             
         except Exception as e:
             logger.error(f"Error creating test session: {str(e)}", exc_info=True)
@@ -93,7 +93,7 @@ def take_test(request, session_id):
     session = get_object_or_404(StudentSession, id=session_id)
     
     if session.is_completed:
-        return redirect('primepath_routinetest:test_result', session_id=session_id)
+        return redirect('RoutineTest:test_result', session_id=session_id)
     
     exam = session.exam
     questions = exam.questions.select_related('audio_file').all()
@@ -455,9 +455,9 @@ def complete_test(request, session_id):
         if request.content_type == 'application/json':
             return JsonResponse({
                 'success': True,
-                'redirect_url': reverse('primepath_routinetest:test_result', kwargs={'session_id': session_id})
+                'redirect_url': reverse('RoutineTest:test_result', kwargs={'session_id': session_id})
             })
-        return redirect('primepath_routinetest:test_result', session_id=session_id)
+        return redirect('RoutineTest:test_result', session_id=session_id)
     
     # Check if this was triggered by timer expiry
     timer_expired = False
@@ -507,10 +507,10 @@ def complete_test(request, session_id):
             'success': True,
             'show_difficulty_choice': show_difficulty_choice,
             'session_id': str(session_id),
-            'redirect_url': reverse('primepath_routinetest:test_result', kwargs={'session_id': session_id})
+            'redirect_url': reverse('RoutineTest:test_result', kwargs={'session_id': session_id})
         })
     
-    return redirect('primepath_routinetest:test_result', session_id=session_id)
+    return redirect('RoutineTest:test_result', session_id=session_id)
 
 
 @require_POST
@@ -541,7 +541,7 @@ def post_submit_difficulty_choice(request, session_id):
         return JsonResponse({
             'success': True,
             'action': 'show_results',
-            'redirect_url': reverse('primepath_routinetest:test_result', kwargs={'session_id': session_id})
+            'redirect_url': reverse('RoutineTest:test_result', kwargs={'session_id': session_id})
         })
     
     # Find appropriate difficulty level
@@ -551,7 +551,7 @@ def post_submit_difficulty_choice(request, session_id):
         return JsonResponse({
             'success': False,
             'error': 'No curriculum level assigned',
-            'redirect_url': reverse('primepath_routinetest:test_result', kwargs={'session_id': session_id})
+            'redirect_url': reverse('RoutineTest:test_result', kwargs={'session_id': session_id})
         }, status=400)
     
     # Use PlacementService to find an exam from a different difficulty tier
@@ -564,7 +564,7 @@ def post_submit_difficulty_choice(request, session_id):
             'success': True,
             'action': 'show_results',
             'message': 'No alternative difficulty level available',
-            'redirect_url': reverse('primepath_routinetest:test_result', kwargs={'session_id': session_id})
+            'redirect_url': reverse('RoutineTest:test_result', kwargs={'session_id': session_id})
         })
     
     new_level, new_exam = result
@@ -595,7 +595,7 @@ def post_submit_difficulty_choice(request, session_id):
             'success': True,
             'action': 'start_new_test',
             'message': f'Starting {"easier" if adjustment < 0 else "harder"} test...',
-            'redirect_url': reverse('primepath_routinetest:take_test', kwargs={'session_id': new_session.id})
+            'redirect_url': reverse('RoutineTest:take_test', kwargs={'session_id': new_session.id})
         })
         
     except Exception as e:
@@ -603,7 +603,7 @@ def post_submit_difficulty_choice(request, session_id):
         return JsonResponse({
             'success': False,
             'error': 'Failed to create new test session',
-            'redirect_url': reverse('primepath_routinetest:test_result', kwargs={'session_id': session_id})
+            'redirect_url': reverse('RoutineTest:test_result', kwargs={'session_id': session_id})
         }, status=500)
 
 
@@ -612,7 +612,7 @@ def test_result(request, session_id):
     session = get_object_or_404(StudentSession, id=session_id)
     
     if not session.completed_at:
-        return redirect('primepath_routinetest:take_test', session_id=session_id)
+        return redirect('RoutineTest:take_test', session_id=session_id)
     
     # Get detailed results
     results = GradingService.get_detailed_results(session_id)
@@ -639,14 +639,14 @@ def request_difficulty_change(request):
     
     if not session_id or adjustment not in [-1, 1]:
         messages.error(request, "Invalid difficulty adjustment request")
-        return redirect('primepath_routinetest:start_test')
+        return redirect('RoutineTest:start_test')
     
     # Get the original session
     original_session = get_object_or_404(StudentSession, id=session_id)
     
     if not original_session.completed_at:
         messages.error(request, "Please complete the current test first")
-        return redirect('primepath_routinetest:take_test', session_id=session_id)
+        return redirect('RoutineTest:take_test', session_id=session_id)
     
     # Get the original curriculum level
     original_level = original_session.original_curriculum_level
@@ -655,7 +655,7 @@ def request_difficulty_change(request):
     
     if not original_level:
         messages.error(request, "Unable to determine difficulty level")
-        return redirect('primepath_routinetest:test_result', session_id=session_id)
+        return redirect('RoutineTest:test_result', session_id=session_id)
     
     try:
         # Find an exam from a different difficulty tier
@@ -666,7 +666,7 @@ def request_difficulty_change(request):
                 messages.info(request, "No harder difficulty level available. You're already at an advanced level!")
             else:
                 messages.info(request, "No easier difficulty level available. You're already at a basic level!")
-            return redirect('primepath_routinetest:test_result', session_id=session_id)
+            return redirect('RoutineTest:test_result', session_id=session_id)
         
         new_level, new_exam = result
         
@@ -692,9 +692,9 @@ def request_difficulty_change(request):
         )
         
         messages.success(request, f"Starting {'easier' if adjustment < 0 else 'harder'} difficulty test!")
-        return redirect('primepath_routinetest:take_test', session_id=new_session.id)
+        return redirect('RoutineTest:take_test', session_id=new_session.id)
         
     except Exception as e:
         logger.error(f"Error creating alternate difficulty session: {e}", exc_info=True)
         messages.error(request, "Unable to load alternate difficulty test. Please try again.")
-        return redirect('primepath_routinetest:test_result', session_id=session_id)
+        return redirect('RoutineTest:test_result', session_id=session_id)

@@ -124,11 +124,11 @@ class QATestSuite:
     def test_url_routing(self):
         """Test URL patterns are properly configured"""
         urls_to_test = [
-            ('placement_test:start_test', [], {}),
-            ('placement_test:exam_list', [], {}),
+            ('PlacementTest:start_test', [], {}),
+            ('PlacementTest:exam_list', [], {}),
             # Add session-specific URLs with dummy UUID
-            ('placement_test:take_test', ['00000000-0000-0000-0000-000000000000'], {}),
-            ('placement_test:test_result', ['00000000-0000-0000-0000-000000000000'], {}),
+            ('PlacementTest:take_test', ['00000000-0000-0000-0000-000000000000'], {}),
+            ('PlacementTest:test_result', ['00000000-0000-0000-0000-000000000000'], {}),
         ]
         
         for url_name, args, kwargs in urls_to_test:
@@ -171,10 +171,10 @@ class QATestSuite:
     
     def test_view_accessibility(self):
         """Test views are accessible"""
-        response = self.client.get(reverse('placement_test:start_test'))
+        response = self.client.get(reverse('PlacementTest:start_test'))
         self.test("Start test page accessible", response.status_code == 200)
         
-        response = self.client.get(reverse('placement_test:exam_list'))
+        response = self.client.get(reverse('PlacementTest:exam_list'))
         self.test("Exam list page accessible", response.status_code in [200, 302])
     
     def test_javascript_modules(self):
@@ -239,7 +239,7 @@ class QATestSuite:
             'parent_phone': '555-0000'
         }
         
-        response = self.client.post(reverse('placement_test:start_test'), session_data)
+        response = self.client.post(reverse('PlacementTest:start_test'), session_data)
         self.test("Student session can be created", 
                  response.status_code == 302, critical=True)
         
@@ -249,19 +249,19 @@ class QATestSuite:
                 session_id = response.url.split('/')[-2]
                 
                 # Test take test page
-                response = self.client.get(reverse('placement_test:take_test', args=[session_id]))
+                response = self.client.get(reverse('PlacementTest:take_test', args=[session_id]))
                 self.test("Take test page loads for student", 
                          response.status_code == 200, critical=True)
                 
                 # Test completion (CRITICAL - This is what was broken)
                 response = self.client.post(
-                    reverse('placement_test:complete_test', args=[session_id])
+                    reverse('PlacementTest:complete_test', args=[session_id])
                 )
                 self.test("Test can be submitted (CRITICAL FIX)", 
                          response.status_code in [200, 302], critical=True)
                 
                 # Test results page
-                response = self.client.get(reverse('placement_test:test_result', args=[session_id]))
+                response = self.client.get(reverse('PlacementTest:test_result', args=[session_id]))
                 self.test("Results page displays after submission", 
                          response.status_code == 200)
     
@@ -274,12 +274,12 @@ class QATestSuite:
         # Login as admin
         self.client.login(username='admin', password='password')
         
-        response = self.client.get(reverse('placement_test:exam_list'))
+        response = self.client.get(reverse('PlacementTest:exam_list'))
         self.test("Exam list accessible to admin", response.status_code == 200)
         
         # Test exam creation page if available
         try:
-            response = self.client.get(reverse('placement_test:create_exam'))
+            response = self.client.get(reverse('PlacementTest:create_exam'))
             self.test("Create exam page accessible", response.status_code == 200)
         except:
             print("   ℹ️  Create exam URL not configured")
@@ -289,7 +289,7 @@ class QATestSuite:
     def test_api_endpoints(self):
         """Test API endpoints"""
         # Test start test endpoint
-        response = self.client.get(reverse('placement_test:start_test'))
+        response = self.client.get(reverse('PlacementTest:start_test'))
         self.test("Start test API endpoint works", response.status_code == 200)
         
         # Create a test session for API testing
@@ -298,11 +298,11 @@ class QATestSuite:
             session_id = str(session.id)
             
             # Test submit answer endpoint structure
-            url = reverse('placement_test:submit_answer', args=[session_id])
+            url = reverse('PlacementTest:submit_answer', args=[session_id])
             self.test("Submit answer URL can be generated", bool(url))
             
             # Test complete test endpoint structure
-            url = reverse('placement_test:complete_test', args=[session_id])
+            url = reverse('PlacementTest:complete_test', args=[session_id])
             self.test("Complete test URL can be generated", bool(url))
     
     def test_session_management(self):

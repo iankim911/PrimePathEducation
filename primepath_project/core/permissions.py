@@ -19,26 +19,26 @@ class SmartAPIPermission(permissions.BasePermission):
     
     # Define anonymous-allowed endpoints
     ANONYMOUS_ALLOWED_PATTERNS = [
-        '/api/placement/start/',  # Students can start tests
-        '/api/placement/session/',  # Students can access their sessions
-        '/api/placement/sessions/<uuid:session_id>/',  # Specific session access
-        '/api/v1/placement/start/',  # v1 compatibility
-        '/api/v2/placement/session/',  # v2 compatibility
+        '/api/PlacementTest/start/',  # Students can start tests
+        '/api/PlacementTest/session/',  # Students can access their sessions
+        '/api/PlacementTest/sessions/<uuid:session_id>/',  # Specific session access
+        '/api/v1/PlacementTest/start/',  # v1 compatibility
+        '/api/v2/PlacementTest/session/',  # v2 compatibility
     ]
     
     # Define read-only patterns (GET allowed for all)
     READ_ONLY_PATTERNS = [
-        '/api/placement/exams/',  # Can view exam list
+        '/api/PlacementTest/exams/',  # Can view exam list
         '/api/exams/',  # Legacy exam list
     ]
     
     # Define admin-only patterns
     ADMIN_ONLY_PATTERNS = [
-        '/api/placement/exams/create/',
-        '/api/placement/exams/<uuid:exam_id>/edit/',
-        '/api/placement/exams/<uuid:exam_id>/delete/',
-        '/api/placement/exams/<uuid:exam_id>/update',
-        '/api/placement/questions/',
+        '/api/PlacementTest/exams/create/',
+        '/api/PlacementTest/exams/<uuid:exam_id>/edit/',
+        '/api/PlacementTest/exams/<uuid:exam_id>/delete/',
+        '/api/PlacementTest/exams/<uuid:exam_id>/update',
+        '/api/PlacementTest/questions/',
         '/api/placement-rules/',
     ]
     

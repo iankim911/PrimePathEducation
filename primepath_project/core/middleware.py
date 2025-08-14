@@ -149,10 +149,10 @@ class URLRedirectMiddleware:
     # Define redirect mappings - Old URL -> New URL/View Name
     REDIRECT_MAPPINGS = {
         # Legacy placement test URLs to new API structure
-        '/placement/start-test/': '/api/placement/start/',
-        '/placement/create-exam/': '/api/placement/exams/create/',
-        '/placement/exam-list/': '/api/placement/exams/',
-        '/placement/sessions/': '/api/placement/sessions/',
+        '/PlacementTest/start-test/': '/api/PlacementTest/start/',
+        '/PlacementTest/create-exam/': '/api/PlacementTest/exams/create/',
+        '/PlacementTest/exam-list/': '/api/PlacementTest/exams/',
+        '/PlacementTest/sessions/': '/api/PlacementTest/sessions/',
         
         # Core app redirects
         '/core/': '/',  # Core dashboard is now homepage
@@ -165,9 +165,9 @@ class URLRedirectMiddleware:
     
     # Dynamic redirect patterns (require parameter extraction)
     DYNAMIC_PATTERNS = {
-        '/placement/exam/': '/api/placement/exams/',  # + exam_id
-        '/placement/session/': '/api/placement/session/',  # + session_id
-        '/placement/result/': '/api/placement/session/',  # + session_id + /result/
+        '/PlacementTest/exam/': '/api/PlacementTest/exams/',  # + exam_id
+        # REMOVED: '/PlacementTest/session/' - This was incorrectly redirecting student test pages to API
+        '/PlacementTest/result/': '/api/PlacementTest/session/',  # + session_id + /result/
     }
     
     def __init__(self, get_response):
@@ -195,7 +195,7 @@ class URLRedirectMiddleware:
         path = request.path
         
         # Console logging for debugging
-        if settings.DEBUG and ('/placement/' in path or '/core/' in path):
+        if settings.DEBUG and ('/PlacementTest/' in path or '/core/' in path):
             console_log = {
                 "middleware": "URLRedirectMiddleware",
                 "action": "checking_path",
@@ -260,7 +260,7 @@ class URLRedirectMiddleware:
         response = self.get_response(request)
         
         # Log 404 errors for unhandled legacy URLs
-        if settings.DEBUG and response.status_code == 404 and ('/placement/' in path or '/core/' in path):
+        if settings.DEBUG and response.status_code == 404 and ('/PlacementTest/' in path or '/core/' in path):
             console_log = {
                 "middleware": "URLRedirectMiddleware",
                 "action": "404_not_redirected",

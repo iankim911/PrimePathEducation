@@ -52,7 +52,7 @@ def test_urls():
     print("🔍 Testing URL Configuration...")
     try:
         from django.urls import reverse
-        urls = ['core:teacher_dashboard', 'placement_test:exam_list', 'placement_test:create_exam']
+        urls = ['core:teacher_dashboard', 'PlacementTest:exam_list', 'PlacementTest:create_exam']
         for url in urls:
             reverse(url)
         print("  ✅ All URLs resolved correctly")

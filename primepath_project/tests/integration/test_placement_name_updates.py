@@ -95,7 +95,7 @@ def test_placement_name_updates():
         return False
     
     # Get the create exam page
-    response = client.get('/api/placement/exams/create/')
+    response = client.get('/api/PlacementTest/exams/create/')
     print(f"   Page Status: {response.status_code}")
     
     if response.status_code == 200:

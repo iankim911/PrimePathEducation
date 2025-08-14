@@ -26,8 +26,8 @@ def test_template_url_generation():
     
     # Test pages that contain URL references identified in our analysis
     template_tests = [
-        ('/api/placement/exams/', 'Exam List', ['create_exam', 'teacher_dashboard']),
-        ('/teacher/dashboard/', 'Teacher Dashboard', ['placement_test:exam_list', 'placement_test:create_exam', 'core:placement_rules']),
+        ('/api/PlacementTest/exams/', 'Exam List', ['create_exam', 'teacher_dashboard']),
+        ('/PlacementTest/PlacementTest/teacher/dashboard/', 'Teacher Dashboard', ['PlacementTest:exam_list', 'PlacementTest:create_exam', 'core:placement_rules']),
         ('/placement-rules/', 'Placement Rules', ['placement-rules']),
     ]
     
@@ -71,10 +71,10 @@ def test_reverse_url_lookups():
     # Test URLs that were identified as having template dependencies
     reverse_tests = [
         ('core:teacher_dashboard', {}, 'Teacher Dashboard'),
-        ('placement_test:start_test', {}, 'Start Test'),
-        ('placement_test:exam_list', {}, 'Exam List'),
+        ('PlacementTest:start_test', {}, 'Start Test'),
+        ('PlacementTest:exam_list', {}, 'Exam List'),
         ('core:placement_rules', {}, 'Placement Rules'),
-        ('placement_test:get_audio', {'audio_id': 1}, 'Get Audio'),
+        ('PlacementTest:get_audio', {'audio_id': 1}, 'Get Audio'),
     ]
     
     success_count = 0
@@ -142,10 +142,10 @@ def test_critical_page_loads():
     # Test critical pages
     critical_pages = [
         ('/', 'Home Page'),
-        ('/teacher/dashboard/', 'Teacher Dashboard'),
-        ('/api/placement/exams/', 'Exam List'),
-        ('/api/placement/sessions/', 'Session List'),
-        ('/api/placement/start/', 'Start Test'),
+        ('/PlacementTest/PlacementTest/teacher/dashboard/', 'Teacher Dashboard'),
+        ('/api/PlacementTest/exams/', 'Exam List'),
+        ('/api/PlacementTest/sessions/', 'Session List'),
+        ('/api/PlacementTest/start/', 'Start Test'),
         ('/placement-rules/', 'Placement Rules'),
     ]
     

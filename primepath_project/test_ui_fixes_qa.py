@@ -31,7 +31,7 @@ def test_tab_highlight_fix():
     
     if login_success:
         # Test dashboard page
-        response = client.get('/teacher/dashboard/')
+        response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         print(f"2. Dashboard access: {'✅ Success' if response.status_code == 200 else '❌ Failed'} (Status: {response.status_code})")
         
         if response.status_code == 200:
@@ -62,8 +62,8 @@ def test_tab_highlight_fix():
             # Check that navigation structure is intact
             nav_checks = [
                 ('Dashboard', 'core:teacher_dashboard'),
-                ('Upload Exam', 'placement_test:create_exam'),
-                ('Manage Exams', 'placement_test:exam_list'),
+                ('Upload Exam', 'PlacementTest:create_exam'),
+                ('Manage Exams', 'PlacementTest:exam_list'),
             ]
             
             print("\n5. Navigation Structure:")

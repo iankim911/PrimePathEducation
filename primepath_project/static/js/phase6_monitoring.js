@@ -197,14 +197,14 @@ cleanupLogs.forEach(log => {
 // REMOVED: console.log('%c===== FEATURE VERIFICATION =====', 'color: green; font-weight: bold');
 
 // Check exam dropdown
-fetch('/api/placement/exams/create/')
+fetch('/api/PlacementTest/exams/create/')
     .then(response => {
         console.log('[PHASE6] Exam creation endpoint: ' + (response.ok ? '✅ OK' : '❌ Failed'));
     })
     .catch(err => console.error('[PHASE6] Exam endpoint error:', err));
 
 // Check student sessions
-fetch('/api/placement/sessions/')
+fetch('/api/PlacementTest/sessions/')
     .then(response => {
         console.log('[PHASE6] Sessions endpoint: ' + (response.ok ? '✅ OK' : '❌ Failed'));
     })

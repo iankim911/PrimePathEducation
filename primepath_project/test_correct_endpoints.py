@@ -37,22 +37,22 @@ def test_critical_features():
     print("\n1. EXAM MANAGEMENT FEATURES:")
     
     # 1.1 List exams
-    response = client.get('/api/placement/exams/')
+    response = client.get('/api/PlacementTest/exams/')
     results.append(('List exams', response.status_code == 200))
     print(f"   List exams: {response.status_code}")
     
     # 1.2 Get exam details
-    response = client.get(f'/api/placement/exams/{exam.id}/')
+    response = client.get(f'/api/PlacementTest/exams/{exam.id}/')
     results.append(('Get exam details', response.status_code == 200))
     print(f"   Get exam details: {response.status_code}")
     
     # 1.3 Get exam questions
-    response = client.get(f'/api/placement/exams/{exam.id}/questions/')
+    response = client.get(f'/api/PlacementTest/exams/{exam.id}/questions/')
     results.append(('Get exam questions', response.status_code == 200))
     print(f"   Get exam questions: {response.status_code}")
     
     # 1.4 Save exam answers (teacher interface)
-    response = client.post(f'/api/placement/exams/{exam.id}/save-answers/',
+    response = client.post(f'/api/PlacementTest/exams/{exam.id}/save-answers/',
         json.dumps({'questions': [], 'audio_assignments': {}}),
         content_type='application/json'
     )
@@ -63,7 +63,7 @@ def test_critical_features():
     print("\n2. STUDENT TEST-TAKING FEATURES:")
     
     # 2.1 Start test
-    response = client.post('/api/placement/start/', {
+    response = client.post('/api/PlacementTest/start/', {
         'student_name': 'Test Student Final Check',
         'parent_phone': '5555551234',
         'grade': 10,
@@ -81,7 +81,7 @@ def test_critical_features():
         # 2.2 Submit answer
         if new_session_id and exam.questions.exists():
             question = exam.questions.first()
-            response = client.post(f'/api/placement/session/{new_session_id}/submit/', {
+            response = client.post(f'/api/PlacementTest/session/{new_session_id}/submit/', {
                 'question_id': str(question.id),
                 'answer': 'B'
             })
@@ -92,13 +92,13 @@ def test_critical_features():
     print("\n3. SESSION MANAGEMENT FEATURES:")
     
     # 3.1 List sessions
-    response = client.get('/api/placement/sessions/')
+    response = client.get('/api/PlacementTest/sessions/')
     results.append(('List sessions', response.status_code == 200))
     print(f"   List sessions: {response.status_code}")
     
     # 3.2 Get session details (if session exists)
     if session:
-        response = client.get(f'/api/placement/sessions/{session.id}/')
+        response = client.get(f'/api/PlacementTest/sessions/{session.id}/')
         results.append(('Get session details', response.status_code == 200))
         print(f"   Get session details: {response.status_code}")
     
@@ -108,12 +108,12 @@ def test_critical_features():
     # 4.1 Get audio (if exists)
     audio = AudioFile.objects.filter(exam=exam).first()
     if audio:
-        response = client.get(f'/api/placement/audio/{audio.id}/')
+        response = client.get(f'/api/PlacementTest/audio/{audio.id}/')
         results.append(('Get audio file', response.status_code == 200))
         print(f"   Get audio file: {response.status_code}")
     
     # 4.2 Update audio names
-    response = client.post(f'/api/placement/exams/{exam.id}/update-audio-names/',
+    response = client.post(f'/api/PlacementTest/exams/{exam.id}/update-audio-names/',
         json.dumps({'audio_names': {}}),
         content_type='application/json'
     )

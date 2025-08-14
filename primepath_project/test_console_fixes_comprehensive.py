@@ -54,7 +54,7 @@ def test_console_fixes():
     # Test URLs
     test_urls = [
         f"{base_url}/",  # Home page (admin)
-        f"{base_url}/api/placement/session/{session.id}/",  # Student test page
+        f"{base_url}/api/PlacementTest/session/{session.id}/",  # Student test page
     ]
     
     all_tests_passed = True

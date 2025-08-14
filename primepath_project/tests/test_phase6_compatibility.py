@@ -92,11 +92,11 @@ class TestPhase6Compatibility:
         """Test that URL patterns resolve to correct views."""
         # Test core URLs
         assert reverse('core:index') == '/'
-        assert reverse('core:teacher_dashboard') == '/teacher/dashboard/'
+        assert reverse('core:teacher_dashboard') == '/PlacementTest/PlacementTest/teacher/dashboard/'
         
         # Test placement URLs
-        assert reverse('placement_test:start_test') == '/api/placement/start/'
-        assert reverse('placement_test:exam_list') == '/api/placement/exams/'
+        assert reverse('PlacementTest:start_test') == '/api/PlacementTest/start/'
+        assert reverse('PlacementTest:exam_list') == '/api/PlacementTest/exams/'
         
         print("  - URL patterns unchanged")
     
@@ -107,14 +107,14 @@ class TestPhase6Compatibility:
         assert response.status_code in [200, 302]
         
         # Test dashboard
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         assert response.status_code in [200, 302]
         
         print("  - View responses compatible")
     
     def test_context_variables_preserved(self):
         """Test that template context variables are preserved."""
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         
         if response.status_code == 200 and hasattr(response, 'context'):
             # Check expected context variables
@@ -149,7 +149,7 @@ class TestPhase6Compatibility:
     def test_form_handling_preserved(self):
         """Test that form handling is preserved."""
         # Test POST to start_test
-        response = self.client.post('/api/placement/start/', data={})
+        response = self.client.post('/api/PlacementTest/start/', data={})
         
         # Should handle empty form (validation error)
         assert response.status_code in [200, 400], "Form handling changed"
@@ -200,7 +200,7 @@ class TestPhase6Compatibility:
         assert response.status_code == 404
         
         # Test invalid form data
-        response = self.client.post('/api/placement/start/', {
+        response = self.client.post('/api/PlacementTest/start/', {
             'grade': 'invalid'
         })
         assert response.status_code in [200, 400]
@@ -274,8 +274,8 @@ class TestPhase6Compatibility:
     def test_api_endpoints_stable(self):
         """Test that API endpoints return stable responses."""
         endpoints = [
-            '/api/placement/rules/',
-            '/api/placement/exams/',
+            '/api/PlacementTest/rules/',
+            '/api/PlacementTest/exams/',
         ]
         
         for endpoint in endpoints:
@@ -287,7 +287,7 @@ class TestPhase6Compatibility:
     def test_authentication_flow(self):
         """Test that authentication flow works."""
         # Test login page redirect or access
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         
         # Should either show dashboard or redirect to login
         assert response.status_code in [200, 302]

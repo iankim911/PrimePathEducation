@@ -28,7 +28,7 @@ def comprehensive_test():
         print(f"Testing with session: {session.student_name}")
         
         # Get the test page to extract CSRF token
-        test_url = f'http://127.0.0.1:8000/api/placement/session/{session_id}/'
+        test_url = f'http://127.0.0.1:8000/api/PlacementTest/session/{session_id}/'
         response = requests.get(test_url, timeout=10)
         
         if response.status_code != 200:
@@ -70,7 +70,7 @@ def comprehensive_test():
                 test_answer = 'A'
             
             # Submit answer
-            submit_url = f'http://127.0.0.1:8000/api/placement/session/{session_id}/submit/'
+            submit_url = f'http://127.0.0.1:8000/api/PlacementTest/session/{session_id}/submit/'
             headers = {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': csrf_token,
@@ -114,7 +114,7 @@ def comprehensive_test():
         
         # Test final submission
         print(f"\nTesting complete test submission...")
-        complete_url = f'http://127.0.0.1:8000/api/placement/session/{session_id}/complete/'
+        complete_url = f'http://127.0.0.1:8000/api/PlacementTest/session/{session_id}/complete/'
         
         try:
             complete_response = requests.post(

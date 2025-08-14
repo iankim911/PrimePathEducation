@@ -1006,7 +1006,7 @@
                     <span class="info-value">{{ exam.created_at|date:"M d, Y" }}</span>
                 </div>
             </div>
-            <a href="{% url 'placement_test:exam_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
+            <a href="{% url 'PlacementTest:exam_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
         </div>
         
         <!-- Main Content Grid -->
@@ -1132,7 +1132,7 @@
                         <span class="text-muted" style="font-size: 0.8rem; margin-left: 10px;">(Original: {{ audio.name }})</span>
                     </div>
                     <audio controls class="audio-player">
-                        <source src="{% url 'placement_test:get_audio' audio.id %}" type="audio/mpeg">
+                        <source src="{% url 'PlacementTest:get_audio' audio.id %}" type="audio/mpeg">
                         Your browser does not support the audio element.
                     </audio>
                     <div class="audio-actions">
@@ -2586,7 +2586,7 @@ function initializeAnswerTracking() {
                 formData.append('options_count', newCount);
                 formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
                 
-                fetch(`/api/placement/questions/${questionId}/update/`, {
+                fetch(`/api/PlacementTest/questions/${questionId}/update/`, {
                     method: 'POST',
                     body: formData
                 })
@@ -3214,7 +3214,7 @@ function toggleAudio(questionNum) {
         {
             id: {{ audio.id }},
             name: "{{ audio.name|escapejs }}",
-            url: "{% url 'placement_test:get_audio' audio.id %}",
+            url: "{% url 'PlacementTest:get_audio' audio.id %}",
             filename: "{{ audio.audio_file.name|escapejs }}"
         },
         {% endfor %}
@@ -3415,7 +3415,7 @@ function saveAllAnswers() {
     });
     
     // Debug: Log the URL being called
-    const saveUrl = `/api/placement/exams/{{ exam.id }}/save-answers/`;
+    const saveUrl = `/api/PlacementTest/exams/{{ exam.id }}/save-answers/`;
     console.log('Saving to URL:', saveUrl);
     console.log('Data being sent:', questionsData);
     console.log('Audio assignments being saved:', audioAssignments);
@@ -3677,7 +3677,7 @@ function deleteAudioFile(audioId) {
     }
     
     // Make API call to delete audio
-    fetch(`/api/placement/exams/{{ exam.id }}/audio/${audioId}/delete/`, {
+    fetch(`/api/PlacementTest/exams/{{ exam.id }}/audio/${audioId}/delete/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

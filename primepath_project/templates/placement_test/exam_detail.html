@@ -41,7 +41,7 @@
                             <strong>{{ audio.name|default:"Audio File" }}</strong> 
                             (Questions {{ audio.start_question }}-{{ audio.end_question }})
                             <audio controls class="float-right">
-                                <source src="{% url 'placement_test:get_audio' audio.id %}" type="audio/mpeg">
+                                <source src="{% url 'PlacementTest:get_audio' audio.id %}" type="audio/mpeg">
                                 Your browser does not support the audio element.
                             </audio>
                         </li>
@@ -86,9 +86,9 @@
             </div>
 
             <div class="mt-4">
-                <a href="{% url 'placement_test:preview_exam' exam.id %}" class="btn btn-primary">Preview & Edit Answers</a>
-                <a href="{% url 'placement_test:manage_questions' exam.id %}" class="btn btn-secondary">Manage Questions</a>
-                <a href="{% url 'placement_test:exam_list' %}" class="btn btn-light">Back to Exam List</a>
+                <a href="{% url 'PlacementTest:preview_exam' exam.id %}" class="btn btn-primary">Preview & Edit Answers</a>
+                <a href="{% url 'PlacementTest:manage_questions' exam.id %}" class="btn btn-secondary">Manage Questions</a>
+                <a href="{% url 'PlacementTest:exam_list' %}" class="btn btn-light">Back to Exam List</a>
             </div>
         </div>
     </div>

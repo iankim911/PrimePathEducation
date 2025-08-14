@@ -322,7 +322,7 @@
                 
                 <div class="filter-buttons">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
-                    <a href="{% url 'primepath_routinetest:session_list' %}" class="btn btn-secondary">Clear</a>
+                    <a href="{% url 'RoutineTest:session_list' %}" class="btn btn-secondary">Clear</a>
                 </div>
             </div>
         </form>
@@ -400,11 +400,11 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <a href="{% url 'primepath_routinetest:session_detail' session.id %}" class="btn btn-sm btn-view" title="View Details">
+                            <a href="{% url 'RoutineTest:session_detail' session.id %}" class="btn btn-sm btn-view" title="View Details">
                                 <i class="fas fa-eye"></i> View
                             </a>
                             {% if session.is_completed %}
-                            <a href="{% url 'primepath_routinetest:export_result' session.id %}" class="btn btn-sm btn-export" title="Export Results">
+                            <a href="{% url 'RoutineTest:export_result' session.id %}" class="btn btn-sm btn-export" title="Export Results">
                                 <i class="fas fa-download"></i>
                             </a>
                             {% endif %}

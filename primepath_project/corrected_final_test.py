@@ -54,7 +54,7 @@ def main():
     try:
         if exam:
             # Test critical API with proper headers
-            url = f'/api/placement/exams/{exam.id}/save-answers/'
+            url = f'/api/PlacementTest/exams/{exam.id}/save-answers/'
             data = {'questions': [], 'audio_assignments': {}}
             
             response = client.post(
@@ -95,9 +95,9 @@ def main():
     print("\n4. Testing User Workflows...")
     try:
         workflows = [
-            ('/api/placement/exams/', 'Exam Management'),
-            ('/api/placement/sessions/', 'Session Management'), 
-            ('/api/placement/start/', 'Test Start'),
+            ('/api/PlacementTest/exams/', 'Exam Management'),
+            ('/api/PlacementTest/sessions/', 'Session Management'), 
+            ('/api/PlacementTest/start/', 'Test Start'),
         ]
         
         for url, name in workflows:

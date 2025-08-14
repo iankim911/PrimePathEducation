@@ -1107,7 +1107,7 @@ function generateVersionedName() {
         }
         
         // Check for updates from server
-        fetch(`/api/placement/exams/check-version/?curriculum_level=${selectedOption.value}`)
+        fetch(`/api/PlacementTest/exams/check-version/?curriculum_level=${selectedOption.value}`)
             .then(response => response.json())
             .then(data => {
                 // Update name based on server response

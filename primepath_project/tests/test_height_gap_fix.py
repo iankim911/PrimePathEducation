@@ -30,7 +30,7 @@ def test_height_fixes():
     
     # Test preview page
     print(f"\nTesting exam preview: {exam.name}")
-    response = client.get(f'/api/placement/exams/{exam.id}/preview/')
+    response = client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
     
     if response.status_code != 200:
         print(f"[FAIL] Preview page returned {response.status_code}")

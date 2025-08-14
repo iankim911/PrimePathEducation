@@ -78,12 +78,12 @@ if 'runserver' in sys.argv or 'test' in sys.argv:
         "total_patterns": URL_COUNT,
         "submit_patterns": len(submit_patterns),
         "submit_urls": [
-            "/api/placement/session/{id}/submit/",
-            "/api/placement/session/{id}/submit-answer/",
-            "/api/placement/sessions/{id}/submit/",
-            "/api/placement/sessions/{id}/submit-answer/",
-            "/api/placement/session/{id}/save-answer/",
-            "/api/placement/sessions/{id}/save-answer/"
+            "/api/PlacementTest/session/{id}/submit/",
+            "/api/PlacementTest/session/{id}/submit-answer/",
+            "/api/PlacementTest/sessions/{id}/submit/",
+            "/api/PlacementTest/sessions/{id}/submit-answer/",
+            "/api/PlacementTest/session/{id}/save-answer/",
+            "/api/PlacementTest/sessions/{id}/save-answer/"
         ]
     }
     print(f"[STUDENT_URL_PATTERNS] {json.dumps(console_log, indent=2)}")

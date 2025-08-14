@@ -96,7 +96,7 @@ def test_pdf_file_handling():
     print("\n📋 TEST 2: Access Exam Preview Without PDF")
     print("-" * 40)
     
-    preview_url = f"{base_url}/api/placement/exams/{exam_no_pdf.id}/preview/"
+    preview_url = f"{base_url}/api/PlacementTest/exams/{exam_no_pdf.id}/preview/"
     
     try:
         response = requests.get(preview_url, timeout=10)
@@ -128,7 +128,7 @@ def test_pdf_file_handling():
     print("\n📋 TEST 3: Access Exam List Page")
     print("-" * 40)
     
-    list_url = f"{base_url}/api/placement/exams/"
+    list_url = f"{base_url}/api/PlacementTest/exams/"
     
     try:
         response = requests.get(list_url, timeout=10)
@@ -176,7 +176,7 @@ def test_pdf_file_handling():
         )
     
     # Test preview page for exam with PDF
-    preview_url_with_pdf = f"{base_url}/api/placement/exams/{exam_with_pdf.id}/preview/"
+    preview_url_with_pdf = f"{base_url}/api/PlacementTest/exams/{exam_with_pdf.id}/preview/"
     
     try:
         response = requests.get(preview_url_with_pdf, timeout=10)
@@ -201,7 +201,7 @@ def test_pdf_file_handling():
     print("\n📋 TEST 5: Test API Endpoints")
     print("-" * 40)
     
-    api_url = f"{base_url}/api/placement/exams/{exam_no_pdf.id}/"
+    api_url = f"{base_url}/api/PlacementTest/exams/{exam_no_pdf.id}/"
     
     try:
         response = requests.get(api_url, timeout=5)
@@ -234,7 +234,7 @@ def test_pdf_file_handling():
         started_at=timezone.now()
     )
     
-    student_test_url = f"{base_url}/api/placement/session/{session.id}/"
+    student_test_url = f"{base_url}/api/PlacementTest/session/{session.id}/"
     
     try:
         response = requests.get(student_test_url, timeout=10)

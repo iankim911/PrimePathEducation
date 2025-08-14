@@ -98,8 +98,8 @@ client = Client()
 # Test critical views
 critical_urls = [
     ('/', 'Index page'),
-    ('/teacher/dashboard/', 'Teacher dashboard'),
-    ('/api/placement/exams/', 'Exam list'),
+    ('/PlacementTest/PlacementTest/teacher/dashboard/', 'Teacher dashboard'),
+    ('/api/PlacementTest/exams/', 'Exam list'),
     ('/curriculum/levels/', 'Curriculum levels'),
     ('/placement-rules/', 'Placement rules'),
 ]
@@ -119,7 +119,7 @@ question = Question.objects.first()
 if question:
     try:
         response = client.post(
-            f'/api/placement/questions/{question.id}/update/',
+            f'/api/PlacementTest/questions/{question.id}/update/',
             {
                 'correct_answer': question.correct_answer,
                 'points': question.points,
@@ -135,7 +135,7 @@ exam = Exam.objects.first()
 if exam:
     try:
         response = client.post(
-            f'/api/placement/exams/{exam.id}/save-answers/',
+            f'/api/PlacementTest/exams/{exam.id}/save-answers/',
             json.dumps({'questions': [], 'audio_assignments': {}}),
             content_type='application/json'
         )
@@ -222,7 +222,7 @@ if exam:
     try:
         # Test session creation
         response = client.post(
-            f'/api/placement/exams/{exam.id}/start/',
+            f'/api/PlacementTest/exams/{exam.id}/start/',
             {
                 'student_name': 'Test Student',
                 'student_phone': '1234567890',

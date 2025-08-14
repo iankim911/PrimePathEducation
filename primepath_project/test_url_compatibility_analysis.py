@@ -44,13 +44,13 @@ def test_current_url_structure():
         
         # Test current URLs
         current_urls = [
-            f'/api/placement/session/{session.id}/',
-            f'/api/placement/session/{session.id}/submit/',
-            f'/api/placement/session/{session.id}/complete/',
-            f'/api/placement/session/{session.id}/result/',
-            '/api/placement/start/',
-            '/api/placement/sessions/',
-            '/api/placement/exams/',
+            f'/api/PlacementTest/session/{session.id}/',
+            f'/api/PlacementTest/session/{session.id}/submit/',
+            f'/api/PlacementTest/session/{session.id}/complete/',
+            f'/api/PlacementTest/session/{session.id}/result/',
+            '/api/PlacementTest/start/',
+            '/api/PlacementTest/sessions/',
+            '/api/PlacementTest/exams/',
         ]
         
         print("Testing current URL patterns:")
@@ -70,8 +70,8 @@ def test_current_url_structure():
         # Test legacy URLs (should be 404 currently)
         print(f"\nTesting legacy URL patterns (should be 404):")
         legacy_urls = [
-            f'/placement/test/{session.id}/',
-            f'/placement/session/{session.id}/',
+            f'/PlacementTest/test/{session.id}/',
+            f'/PlacementTest/session/{session.id}/',
         ]
         
         for url in legacy_urls:
@@ -87,12 +87,12 @@ def test_current_url_structure():
     # Test URL name resolution
     print(f"\n2. Testing URL Name Resolution:")
     url_names = [
-        'placement_test:start_test',
-        'placement_test:take_test',
-        'placement_test:submit_answer',
-        'placement_test:complete_test',
-        'placement_test:test_result',
-        'placement_test:post_submit_difficulty_choice',
+        'PlacementTest:start_test',
+        'PlacementTest:take_test',
+        'PlacementTest:submit_answer',
+        'PlacementTest:complete_test',
+        'PlacementTest:test_result',
+        'PlacementTest:post_submit_difficulty_choice',
         'core:teacher_dashboard',
         'core:exam_mapping',
     ]

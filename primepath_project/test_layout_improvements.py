@@ -187,7 +187,7 @@ def test_layout_improvements():
         print(f"✅ Created test session: {session.id}")
         
         # Test student interface
-        student_url = f"{base_url}/api/placement/session/{session.id}/"
+        student_url = f"{base_url}/api/PlacementTest/session/{session.id}/"
         
         response = requests.get(student_url, timeout=10)
         if response.status_code == 200:
@@ -228,7 +228,7 @@ def test_layout_improvements():
     print("\n📋 TEST 5: Exam Preview Interface")
     print("-" * 40)
     
-    preview_url = f"{base_url}/api/placement/exams/{exam.id}/preview/"
+    preview_url = f"{base_url}/api/PlacementTest/exams/{exam.id}/preview/"
     
     try:
         response = requests.get(preview_url, timeout=10)
@@ -285,9 +285,9 @@ def test_existing_features():
     try:
         # Check that navigation URLs still work
         test_urls = [
-            '/api/placement/exams/',
-            '/api/placement/start/',
-            '/api/placement/sessions/'
+            '/api/PlacementTest/exams/',
+            '/api/PlacementTest/start/',
+            '/api/PlacementTest/sessions/'
         ]
         
         base_url = "http://127.0.0.1:8000"

@@ -19,11 +19,11 @@ from .session_urls import urlpatterns as session_patterns
 from .api_urls import urlpatterns as api_patterns
 from .views import index
 
-app_name = 'primepath_routinetest'
+app_name = 'RoutineTest'
 
 # Add index/landing page
 index_patterns = [
-    path('', index.index, name='index'),  # Main landing page at /routine/
+    path('', index.index, name='index'),  # Main landing page at /RoutineTest/
 ]
 
 # Combine all URL patterns from modular files

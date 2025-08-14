@@ -27,13 +27,13 @@ def test_critical_flows():
     
     # 1. Teacher can view dashboard
     print("1. Testing Teacher Dashboard...")
-    response = client.get('/teacher/dashboard/')
+    response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
     assert response.status_code == 200, "Teacher dashboard not loading"
     print("   [PASS] Dashboard loads successfully")
     
     # 2. Teacher can view exam list
     print("\n2. Testing Exam Management...")
-    response = client.get('/api/placement/exams/')
+    response = client.get('/api/PlacementTest/exams/')
     assert response.status_code == 200, "Exam list not loading"
     print("   [PASS] Exam list loads")
     
@@ -44,7 +44,7 @@ def test_critical_flows():
     # 3. Teacher can preview exam
     if exam_count > 0:
         exam = Exam.objects.first()
-        response = client.get(f'/api/placement/exams/{exam.id}/preview/')
+        response = client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
         assert response.status_code == 200, "Exam preview not loading"
         print(f"   [PASS] Can preview exam: {exam.name}")
         
@@ -58,7 +58,7 @@ def test_critical_flows():
     
     # 4. Student can start test
     print("\n3. Testing Student Test Flow...")
-    response = client.get('/api/placement/start/')
+    response = client.get('/api/PlacementTest/start/')
     assert response.status_code == 200, "Start test page not loading"
     print("   [PASS] Start test page loads")
     
@@ -69,13 +69,13 @@ def test_critical_flows():
     # 6. Student can take test
     incomplete_session = StudentSession.objects.filter(completed_at__isnull=True).first()
     if incomplete_session:
-        response = client.get(f'/api/placement/session/{incomplete_session.id}/')
+        response = client.get(f'/api/PlacementTest/session/{incomplete_session.id}/')
         assert response.status_code == 200, "Student test interface not loading"
         print(f"   [PASS] Can load test for student: {incomplete_session.student_name}")
     
     # 7. Teacher can view sessions
     print("\n4. Testing Session Management...")
-    response = client.get('/api/placement/sessions/')
+    response = client.get('/api/PlacementTest/sessions/')
     assert response.status_code == 200, "Session list not loading"
     print("   [PASS] Session list loads")
     

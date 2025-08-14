@@ -16,7 +16,7 @@
     });
     
     // Check API endpoints
-    fetch('/api/placement/exams/')
+    fetch('/api/PlacementTest/exams/')
         .then(r => {
 // REMOVED:             console.log('✅ Exam API accessible');
             return r.json();

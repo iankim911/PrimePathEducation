@@ -8,7 +8,7 @@
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Session Details</h2>
-                <a href="{% url 'primepath_routinetest:session_list' %}" class="btn btn-secondary">
+                <a href="{% url 'RoutineTest:session_list' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Sessions
                 </a>
             </div>
@@ -98,12 +98,12 @@
             <!-- Actions -->
             <div class="mb-4">
                 {% if session.is_completed %}
-                <a href="{% url 'primepath_routinetest:export_result' session.id %}" class="btn btn-success">
+                <a href="{% url 'RoutineTest:export_result' session.id %}" class="btn btn-success">
                     <i class="fas fa-download"></i> Export Results
                 </a>
                 {% endif %}
                 {% if not session.is_completed %}
-                <a href="{% url 'primepath_routinetest:take_test' session.id %}" class="btn btn-primary">
+                <a href="{% url 'RoutineTest:take_test' session.id %}" class="btn btn-primary">
                     <i class="fas fa-play"></i> Continue Test
                 </a>
                 {% endif %}

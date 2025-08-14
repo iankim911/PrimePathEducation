@@ -299,7 +299,7 @@ class TestPhase9Integration:
         assert response.status_code == 200, "Home page failed"
         
         # Test teacher dashboard (uses services)
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         assert response.status_code == 200, "Dashboard failed"
         
         # Test AJAX endpoint
@@ -419,8 +419,8 @@ class TestPhase9Integration:
         # Test key URLs resolve
         urls_to_test = [
             ('core:index', '/'),
-            ('core:teacher_dashboard', '/teacher/dashboard/'),
-            ('placement_test:start_test', '/api/placement/start/'),
+            ('core:teacher_dashboard', '/PlacementTest/PlacementTest/teacher/dashboard/'),
+            ('PlacementTest:start_test', '/api/PlacementTest/start/'),
         ]
         
         for name, expected_url in urls_to_test:

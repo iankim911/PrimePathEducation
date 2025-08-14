@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'primepath_project.url_redirect_middleware.URLRedirectMiddleware',  # NEW: Handle /PlacementTest/ and /RoutineTest/ redirects
     'core.middleware.URLRedirectMiddleware',  # URL redirect handling (early in chain)
     'core.middleware.FeatureFlagMiddleware',  # Add feature flags
     'core.middleware.APIVersionMiddleware',  # Add API versioning
@@ -420,9 +421,9 @@ CONSOLE_MONITORING = {
     'track_static_serving': DEBUG,
     'preserve_relationships': True,
     'monitor_endpoints': [
-        '/api/placement/exams/',
-        '/api/placement/sessions/',
-        '/teacher/dashboard/',
+        '/api/PlacementTest/exams/',
+        '/api/PlacementTest/sessions/',
+        '/PlacementTest/teacher/dashboard/',
         '/placement-rules/',
         '/exam-mapping/',
     ],

@@ -35,7 +35,7 @@ Parameters:
     <audio id="audio-element-{{ audio_file.id }}" 
            preload="none"
            data-audio-element="{{ audio_file.id }}">
-        <source src="{% url 'placement_test:get_audio' audio_file.id %}" type="audio/mpeg">
+        <source src="{% url 'PlacementTest:get_audio' audio_file.id %}" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 </div>

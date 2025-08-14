@@ -42,7 +42,7 @@ def test_pdf_rotation_flow():
     
     # Simulate saving from preview page
     response = client.post(
-        f'/api/placement/exams/{exam.id}/save-answers/',
+        f'/api/PlacementTest/exams/{exam.id}/save-answers/',
         data=json.dumps({
             'questions': [],
             'audio_assignments': {},
@@ -78,7 +78,7 @@ def test_pdf_rotation_flow():
     print("\n📋 TEST 3: Checking preview page")
     print("-" * 40)
     
-    response = client.get(f'/api/placement/exams/{exam.id}/preview/')
+    response = client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
     if response.status_code == 200:
         content = response.content.decode('utf-8')
         
@@ -112,7 +112,7 @@ def test_pdf_rotation_flow():
         started_at=timezone.now()
     )
     
-    response = client.get(f'/placement/test/{session.id}/')
+    response = client.get(f'/PlacementTest/test/{session.id}/')
     if response.status_code == 200:
         content = response.content.decode('utf-8')
         
@@ -143,7 +143,7 @@ def test_pdf_rotation_flow():
     
     for rotation in valid_rotations:
         response = client.post(
-            f'/api/placement/exams/{exam.id}/save-answers/',
+            f'/api/PlacementTest/exams/{exam.id}/save-answers/',
             data=json.dumps({
                 'questions': [],
                 'audio_assignments': {},

@@ -37,7 +37,7 @@ def test_js_error_fix():
     print(f"✅ Using session: {session.id}")
     
     # Request the page
-    url = reverse('placement_test:take_test', args=[session.id])
+    url = reverse('PlacementTest:take_test', args=[session.id])
     response = client.get(url, follow=True)
     
     if response.status_code != 200:

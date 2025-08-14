@@ -212,12 +212,12 @@
     <nav class="nav-tabs">
         <ul style="display: flex; justify-content: space-between;">
             <div style="display: flex;">
-                <li><a href="/teacher/dashboard/" class="">Dashboard</a></li>
-                <li><a href="/api/placement/exams/create/" class="">Upload Exam</a></li>
-                <li><a href="/api/placement/exams/" class="">Manage Exams</a></li>
+                <li><a href="/PlacementTest/PlacementTest/teacher/dashboard/" class="">Dashboard</a></li>
+                <li><a href="/api/PlacementTest/exams/create/" class="">Upload Exam</a></li>
+                <li><a href="/api/PlacementTest/exams/" class="">Manage Exams</a></li>
                 <li><a href="/exam-mapping/" class="active">Exam-to-Level Mapping</a></li>
                 <li><a href="/placement-rules/" class="">Placement Rules</a></li>
-                <li><a href="/api/placement/sessions/" class="">Student Sessions</a></li>
+                <li><a href="/api/PlacementTest/sessions/" class="">Student Sessions</a></li>
             </div>
             <div style="display: flex; margin-left: auto; align-items: stretch;">
                 
@@ -703,7 +703,7 @@
             <input type="text" id="adminId" placeholder="Admin ID" required>
             <input type="password" id="adminPassword" placeholder="Password" required>
             <button type="submit">Login</button>
-            <button type="button" onclick="window.location.href='/teacher/dashboard/'" style="background-color: #6c757d;">
+            <button type="button" onclick="window.location.href='/PlacementTest/PlacementTest/teacher/dashboard/'" style="background-color: #6c757d;">
                 Exit
             </button>
             <div id="loginError" class="error-message" style="display: none;"></div>
@@ -6461,14 +6461,14 @@ function safeCall(funcName, ...args) {
                     link: this.href,
                     text: this.textContent.trim(),
                     authenticated: authState.authenticated,
-                    willRedirect: !authState.authenticated && !this.href.includes('/placement/test/'),
+                    willRedirect: !authState.authenticated && !this.href.includes('/PlacementTest/test/'),
                     timestamp: new Date().toISOString()
                 };
                 
                 console.log('[NAV_CLICK]', clickData);
                 
                 // Log warning if clicking protected link while unauthenticated
-                if (!authState.authenticated && !this.href.includes('/placement/test/')) {
+                if (!authState.authenticated && !this.href.includes('/PlacementTest/test/')) {
                     console.warn('[AUTH_REDIRECT] User will be redirected to login page');
                 }
             });

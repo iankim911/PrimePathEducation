@@ -14,7 +14,7 @@ def browser_test():
     # Start a session to maintain cookies
     with requests.Session() as s:
         # First get the page (like browser loading)
-        test_url = f'http://127.0.0.1:8000/api/placement/session/{session_id}/'
+        test_url = f'http://127.0.0.1:8000/api/PlacementTest/session/{session_id}/'
         response = s.get(test_url)
         
         print(f"Page load: {response.status_code}")

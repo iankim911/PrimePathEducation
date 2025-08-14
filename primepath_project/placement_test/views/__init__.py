@@ -14,6 +14,11 @@ All views are re-exported here to maintain compatibility.
 """
 
 # Import all views from the modular files
+from .index import (
+    index,
+    redirect_to_start
+)
+
 from .student import (
     start_test,
     take_test,
@@ -55,6 +60,10 @@ from .ajax import (
 
 # Export all views for backward compatibility
 __all__ = [
+    # Index views
+    'index',
+    'redirect_to_start',
+    
     # Student views
     'start_test',
     'take_test',

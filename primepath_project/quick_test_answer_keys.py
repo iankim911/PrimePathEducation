@@ -33,7 +33,7 @@ def quick_test():
     
     # Test the preview page
     try:
-        url = reverse('placement_test:preview_exam', kwargs={'exam_id': exam.id})
+        url = reverse('PlacementTest:preview_exam', kwargs={'exam_id': exam.id})
         print(f"Testing URL: {url}")
         
         response = client.get(url)

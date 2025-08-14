@@ -90,7 +90,7 @@ def test_audio_urls():
         print(f"\nTesting audio ID: {audio.id}")
         
         # Test URL generation
-        url = reverse('placement_test:get_audio', args=[audio.id])
+        url = reverse('PlacementTest:get_audio', args=[audio.id])
         print(f"Generated URL: {url}")
         
         # Test accessing the URL
@@ -142,7 +142,7 @@ def test_audio_template_rendering():
             (f'id="audio-play-{audio_file.id}"', 'Play button'),
             (f'data-audio-play="{audio_file.id}"', 'Audio play data attribute'),
             ('audio-icon', 'Audio icon'),
-            ('/api/placement/audio/', 'Audio URL'),
+            ('/api/PlacementTest/audio/', 'Audio URL'),
         ]
         
         all_passed = True
@@ -182,7 +182,7 @@ def test_student_interface_audio():
         print(f"Exam: {session.exam.name}")
         
         # Get the student test page
-        url = reverse('placement_test:take_test', args=[session.id])
+        url = reverse('PlacementTest:take_test', args=[session.id])
         response = client.get(url)
         
         if response.status_code == 200:

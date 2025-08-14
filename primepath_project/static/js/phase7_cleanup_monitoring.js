@@ -24,8 +24,8 @@ console.log('%c===== FUNCTIONALITY VERIFICATION =====', 'color: green; font-weig
 
 // Test API endpoints
 const testEndpoints = [
-    '/api/placement/exams/',
-    '/api/placement/sessions/',
+    '/api/PlacementTest/exams/',
+    '/api/PlacementTest/sessions/',
     '/api/core/curriculum-levels/'
 ];
 

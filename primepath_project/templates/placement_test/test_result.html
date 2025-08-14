@@ -385,7 +385,7 @@
     
     <!-- Action Buttons -->
     <div class="action-buttons">
-        <a href="{% url 'placement_test:start_test' %}" class="btn-fun">
+        <a href="{% url 'PlacementTest:start_test' %}" class="btn-fun">
             🚀 Take Another Test
         </a>
         <a href="{% url 'core:teacher_dashboard' %}" class="btn-fun btn-secondary-fun">
@@ -402,7 +402,7 @@
             If you found this test too easy or too hard, you can try a different difficulty level
         </p>
         <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-            <form method="post" action="{% url 'placement_test:request_difficulty_change' %}" style="display: inline;">
+            <form method="post" action="{% url 'PlacementTest:request_difficulty_change' %}" style="display: inline;">
                 {% csrf_token %}
                 <input type="hidden" name="session_id" value="{{ session.id }}">
                 <input type="hidden" name="adjustment" value="-1">
@@ -410,7 +410,7 @@
                     ⬇️ Try Easier Level
                 </button>
             </form>
-            <form method="post" action="{% url 'placement_test:request_difficulty_change' %}" style="display: inline;">
+            <form method="post" action="{% url 'PlacementTest:request_difficulty_change' %}" style="display: inline;">
                 {% csrf_token %}
                 <input type="hidden" name="session_id" value="{{ session.id }}">
                 <input type="hidden" name="adjustment" value="1">

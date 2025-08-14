@@ -118,7 +118,7 @@ def test_pdf_upload_fix():
     # Submit the form
     print("   Submitting exam upload form...")
     response = client.post(
-        '/api/placement/exams/create/',
+        '/api/PlacementTest/exams/create/',
         data=form_data,
         follow=True
     )

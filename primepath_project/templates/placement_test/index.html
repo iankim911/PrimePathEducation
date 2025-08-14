@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PrimePath Placement Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Simple Landing Page -->
+    <div class="jumbotron text-center">
+        <h1 class="display-4">PrimePath Placement Test</h1>
+        <p class="lead">Welcome to the Placement Test Module</p>
+        <hr class="my-4">
+        <p>Assess student levels and place them in the appropriate curriculum</p>
+        
+        <div class="mt-4">
+            <a href="{% url 'PlacementTest:start_test' %}" class="btn btn-success btn-lg mx-2">
+                <i class="fas fa-play"></i> Start Placement Test
+            </a>
+            <a href="{% url 'PlacementTest:exam_list' %}" class="btn btn-primary btn-lg mx-2">
+                <i class="fas fa-list"></i> View Exams
+            </a>
+            {% if is_teacher %}
+            <a href="{% url 'PlacementTest:session_list' %}" class="btn btn-info btn-lg mx-2">
+                <i class="fas fa-tasks"></i> Manage Sessions
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ active_exams }}</h3>
+                    <p class="text-muted">Active Exams</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ total_sessions }}</h3>
+                    <p class="text-muted">Total Sessions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3>{{ recent_sessions|length }}</h3>
+                    <p class="text-muted">Recent Tests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_teacher and pending_sessions > 0 %}
+    <div class="alert alert-warning mt-4" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> 
+        You have <strong>{{ pending_sessions }}</strong> test sessions awaiting grading.
+        <a href="{% url 'PlacementTest:session_list' %}">View Sessions</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

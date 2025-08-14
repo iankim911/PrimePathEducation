@@ -1157,7 +1157,7 @@
                                            preload="none"
                                            onended="audioFinished({{ question.audio_file.id }})"
                                            ontimeupdate="updateAudioProgress({{ question.audio_file.id }})">
-                                        <source src="{% url 'placement_test:get_audio' question.audio_file.id %}" type="audio/mpeg">
+                                        <source src="{% url 'PlacementTest:get_audio' question.audio_file.id %}" type="audio/mpeg">
                                     </audio>
                                     <div class="audio-progress-track" id="progress-track-{{ question.audio_file.id }}">
                                         <div class="audio-progress-fill" id="progress-fill-{{ question.audio_file.id }}"></div>
@@ -1752,7 +1752,7 @@ function saveAnswer(questionNum) {
         }
     }
     
-    fetch("{% url 'placement_test:submit_answer' session.id %}", {
+    fetch("{% url 'PlacementTest:submit_answer' session.id %}", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -2223,7 +2223,7 @@ function submitTest() {
         }
     }
     
-    fetch(`/api/placement/session/${sessionId}/complete/`, {
+    fetch(`/api/PlacementTest/session/${sessionId}/complete/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

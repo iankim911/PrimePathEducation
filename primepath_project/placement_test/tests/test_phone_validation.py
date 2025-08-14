@@ -43,7 +43,7 @@ def test_phone_validation():
         try:
             # Submit form
             response = client.post(
-                reverse('placement_test:start_test'),
+                reverse('PlacementTest:start_test'),
                 data=form_data,
                 follow=True
             )
@@ -100,7 +100,7 @@ def test_form_rendering():
     
     print("\n=== TESTING FORM RENDERING ===\n")
     
-    response = client.get(reverse('placement_test:start_test'))
+    response = client.get(reverse('PlacementTest:start_test'))
     
     if response.status_code == 200:
         content = response.content.decode('utf-8')

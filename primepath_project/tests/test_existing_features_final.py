@@ -48,22 +48,22 @@ class TestExistingFeatures:
     
     def test_teacher_dashboard_loads(self):
         """Test teacher dashboard loads."""
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         assert response.status_code == 200, f"Dashboard returned {response.status_code}"
     
     def test_start_test_page_loads(self):
         """Test placement test start page loads."""
-        response = self.client.get('/api/placement/start/')
+        response = self.client.get('/api/PlacementTest/start/')
         assert response.status_code == 200, f"Start test page returned {response.status_code}"
     
     def test_exam_list_loads(self):
         """Test exam list page loads."""
-        response = self.client.get('/api/placement/exams/')
+        response = self.client.get('/api/PlacementTest/exams/')
         assert response.status_code == 200, f"Exam list returned {response.status_code}"
     
     def test_create_exam_page_loads(self):
         """Test create exam page loads."""
-        response = self.client.get('/api/placement/exams/create/')
+        response = self.client.get('/api/PlacementTest/exams/create/')
         assert response.status_code == 200, f"Create exam page returned {response.status_code}"
     
     # ========== PLACEMENT TEST FEATURES ==========
@@ -77,13 +77,13 @@ class TestExistingFeatures:
             'parent_phone': '555-1234',
             'school_name': 'Test School'
         }
-        response = self.client.post('/api/placement/start/', data)
+        response = self.client.post('/api/PlacementTest/start/', data)
         # Should redirect to take test
         assert response.status_code in [302, 200], f"Start test returned {response.status_code}"
     
     def test_session_list_loads(self):
         """Test session list page loads."""
-        response = self.client.get('/api/placement/sessions/')
+        response = self.client.get('/api/PlacementTest/sessions/')
         assert response.status_code == 200, f"Session list returned {response.status_code}"
     
     # ========== EXAM MANAGEMENT FEATURES ==========
@@ -93,7 +93,7 @@ class TestExistingFeatures:
         from placement_test.models import Exam
         exam = Exam.objects.first()
         if exam:
-            response = self.client.get(f'/api/placement/exams/{exam.id}/')
+            response = self.client.get(f'/api/PlacementTest/exams/{exam.id}/')
             assert response.status_code == 200, f"Exam detail returned {response.status_code}"
     
     def test_preview_exam_page(self):
@@ -101,7 +101,7 @@ class TestExistingFeatures:
         from placement_test.models import Exam
         exam = Exam.objects.first()
         if exam:
-            response = self.client.get(f'/api/placement/exams/{exam.id}/preview/')
+            response = self.client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
             assert response.status_code == 200, f"Preview exam returned {response.status_code}"
     
     # ========== AJAX ENDPOINTS ==========
@@ -203,7 +203,7 @@ class TestExistingFeatures:
         
         session = StudentSession.objects.filter(completed_at__isnull=True).first()
         if session:
-            response = self.client.get(f'/api/placement/session/{session.id}/')
+            response = self.client.get(f'/api/PlacementTest/session/{session.id}/')
             assert response.status_code == 200, f"Student test returned {response.status_code}"
     
     # ========== MIDDLEWARE & SETTINGS ==========

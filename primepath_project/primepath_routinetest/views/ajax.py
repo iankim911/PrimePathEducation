@@ -287,7 +287,7 @@ def update_audio_names(request, exam_id):
         # Return redirect response for non-AJAX requests
         if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             messages.success(request, f'Updated {updated_count} audio file names')
-            return redirect('primepath_routinetest:preview_exam', exam_id=exam_id)
+            return redirect('RoutineTest:preview_exam', exam_id=exam_id)
         
         return JsonResponse({
             'success': True,
@@ -298,7 +298,7 @@ def update_audio_names(request, exam_id):
         logger.error(f"Error updating audio names: {e}")
         if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             messages.error(request, f'Error updating audio names: {str(e)}')
-            return redirect('primepath_routinetest:preview_exam', exam_id=exam_id)
+            return redirect('RoutineTest:preview_exam', exam_id=exam_id)
         return JsonResponse({
             'success': False,
             'error': str(e)

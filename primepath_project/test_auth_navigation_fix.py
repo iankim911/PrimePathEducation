@@ -79,10 +79,10 @@ def test_auth_navigation():
     # Test 3: Test unauthenticated access to protected views
     print("\n3. Testing unauthenticated access redirects to login...")
     protected_urls = [
-        ('/teacher/dashboard/', 'Dashboard'),
-        ('/api/placement/exams/create/', 'Create Exam'),
-        ('/api/placement/exams/', 'Exam List'),
-        ('/api/placement/sessions/', 'Session List'),
+        ('/PlacementTest/PlacementTest/teacher/dashboard/', 'Dashboard'),
+        ('/api/PlacementTest/exams/create/', 'Create Exam'),
+        ('/api/PlacementTest/exams/', 'Exam List'),
+        ('/api/PlacementTest/sessions/', 'Session List'),
         ('/exam-mapping/', 'Exam Mapping'),
         ('/placement-rules/', 'Placement Rules')
     ]
@@ -111,7 +111,7 @@ def test_auth_navigation():
     # Test 4: Test student pages remain accessible without auth
     print("\n4. Testing student pages accessible without authentication...")
     student_urls = [
-        ('/api/placement/start/', 'Start Test'),
+        ('/api/PlacementTest/start/', 'Start Test'),
         ('/', 'Home Page')
     ]
     
@@ -142,7 +142,7 @@ def test_auth_navigation():
         print("   ✅ Successfully logged in as teacher1 (Taehyun Kim)")
         
         # Test accessing dashboard
-        response = client.get('/teacher/dashboard/')
+        response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         test_result = {
             "test": "Authenticated dashboard access",
             "status_code": response.status_code,

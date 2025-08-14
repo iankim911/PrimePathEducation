@@ -106,7 +106,7 @@ def test_submit_answer_fix():
     print("\n📋 TEST 1: Submit First Answer (Create)")
     print("-" * 40)
     
-    submit_url = f"{base_url}/api/placement/session/{session.id}/submit/"
+    submit_url = f"{base_url}/api/PlacementTest/session/{session.id}/submit/"
     
     # Submit answer for question 1
     answer_data = {

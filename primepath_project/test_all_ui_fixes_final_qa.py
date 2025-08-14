@@ -39,7 +39,7 @@ def test_comprehensive_ui_fixes():
         
     # Test Issue #1: Dashboard Tab Highlight 
     print(f"\n2. Issue #1 - Dashboard Tab Highlight Coverage:")
-    response = client.get('/teacher/dashboard/')
+    response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
     print(f"   Dashboard Access: {'✅ Success' if response.status_code == 200 else '❌ Failed'} (Status: {response.status_code})")
     
     if response.status_code == 200:

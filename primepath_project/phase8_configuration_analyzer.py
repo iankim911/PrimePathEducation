@@ -543,9 +543,9 @@ console.table(securityStatus);
 console.log('%c===== TESTING CRITICAL ENDPOINTS =====', 'color: green; font-weight: bold');
 
 const criticalEndpoints = [
-    '/api/placement/exams/',
-    '/api/placement/sessions/',
-    '/teacher/dashboard/',
+    '/api/PlacementTest/exams/',
+    '/api/PlacementTest/sessions/',
+    '/PlacementTest/PlacementTest/teacher/dashboard/',
     '/placement-rules/',
     '/exam-mapping/'
 ];

@@ -40,7 +40,7 @@ def test_critical_workflows():
     # Test 2: Exam management interface
     print("\n2. Testing Exam Management...")
     try:
-        response = requests.get(f"{base_url}/api/placement/exams/", timeout=5)
+        response = requests.get(f"{base_url}/api/PlacementTest/exams/", timeout=5)
         if response.status_code == 200:
             print("✅ Exam management interface loads")
         else:
@@ -51,7 +51,7 @@ def test_critical_workflows():
     # Test 3: Session management interface
     print("\n3. Testing Session Management...")
     try:
-        response = requests.get(f"{base_url}/api/placement/sessions/", timeout=5)
+        response = requests.get(f"{base_url}/api/PlacementTest/sessions/", timeout=5)
         if response.status_code == 200:
             print("✅ Session management interface loads")
         else:
@@ -64,7 +64,7 @@ def test_critical_workflows():
     try:
         exam = Exam.objects.first()
         if exam:
-            api_url = f"{base_url}/api/placement/exams/{exam.id}/save-answers/"
+            api_url = f"{base_url}/api/PlacementTest/exams/{exam.id}/save-answers/"
             test_data = {
                 'questions': [],
                 'audio_assignments': {}

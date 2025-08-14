@@ -29,7 +29,7 @@ def test_server_running():
 def test_create_exam_page():
     """Test if create exam page loads"""
     try:
-        response = requests.get(f"{BASE_URL}/api/placement/exams/create/")
+        response = requests.get(f"{BASE_URL}/api/PlacementTest/exams/create/")
         if response.status_code == 200:
             content = response.text
             
@@ -60,9 +60,9 @@ def test_other_pages():
     """Test if other pages still work"""
     pages = [
         ("/", "Home page"),
-        ("/api/placement/start/", "Start test page"),
-        ("/api/placement/exams/", "Exam list page"),
-        ("/teacher/", "Teacher dashboard"),
+        ("/api/PlacementTest/start/", "Start test page"),
+        ("/api/PlacementTest/exams/", "Exam list page"),
+        ("/PlacementTest/teacher/", "Teacher dashboard"),
     ]
     
     all_good = True
@@ -83,7 +83,7 @@ def test_other_pages():
 def test_javascript_errors():
     """Check for common JavaScript errors in the page"""
     try:
-        response = requests.get(f"{BASE_URL}/api/placement/exams/create/")
+        response = requests.get(f"{BASE_URL}/api/PlacementTest/exams/create/")
         content = response.text
         
         # Check for problematic patterns

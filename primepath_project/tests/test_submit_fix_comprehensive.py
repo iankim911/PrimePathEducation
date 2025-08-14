@@ -44,7 +44,7 @@ def test_student_workflow():
     try:
         # 1. Test Start Test Page
         print("\n1. Testing start test page...")
-        response = client.get(reverse('placement_test:start_test'))
+        response = client.get(reverse('PlacementTest:start_test'))
         if response.status_code == 200:
             print("   ✅ Start test page loads correctly")
             results['passed'].append("Start test page loads")
@@ -109,7 +109,7 @@ def test_student_workflow():
             'parent_phone': '555-1234'
         }
         
-        response = client.post(reverse('placement_test:start_test'), session_data)
+        response = client.post(reverse('PlacementTest:start_test'), session_data)
         if response.status_code == 302:  # Redirect expected
             print("   ✅ Session created successfully")
             results['passed'].append("Session creation")
@@ -130,7 +130,7 @@ def test_student_workflow():
         
         # 3. Test Take Test Page (where the fix was applied)
         print("\n3. Testing take test page with enhanced session handling...")
-        response = client.get(reverse('placement_test:take_test', args=[session_id]))
+        response = client.get(reverse('PlacementTest:take_test', args=[session_id]))
         
         if response.status_code == 200:
             print("   ✅ Take test page loads correctly")
@@ -194,7 +194,7 @@ def test_student_workflow():
         }
         
         response = client.post(
-            reverse('placement_test:submit_answer', args=[session_id]),
+            reverse('PlacementTest:submit_answer', args=[session_id]),
             json.dumps(answer_data),
             content_type='application/json'
         )
@@ -215,7 +215,7 @@ def test_student_workflow():
         print("\n5. Testing test completion (CRITICAL - where error occurred)...")
         
         response = client.post(
-            reverse('placement_test:complete_test', args=[session_id])
+            reverse('PlacementTest:complete_test', args=[session_id])
         )
         
         if response.status_code in [200, 302]:  # Could be redirect to results
@@ -236,7 +236,7 @@ def test_student_workflow():
         
         # 6. Test Results Page
         print("\n6. Testing results page...")
-        response = client.get(reverse('placement_test:test_result', args=[session_id]))
+        response = client.get(reverse('PlacementTest:test_result', args=[session_id]))
         
         if response.status_code == 200:
             print("   ✅ Results page displays correctly")
@@ -273,7 +273,7 @@ def test_other_features():
             User.objects.create_superuser('admin', 'admin@test.com', 'password')
         
         # Try to access exam list (requires login)
-        response = client.get(reverse('placement_test:exam_list'))
+        response = client.get(reverse('PlacementTest:exam_list'))
         if response.status_code in [200, 302]:  # 302 if login required
             print("   ✅ Exam list endpoint works")
             results['passed'].append("Exam list")
@@ -332,7 +332,7 @@ def test_other_features():
         
         # Test placement API endpoints
         endpoints = [
-            ('placement_test:start_test', 'GET'),
+            ('PlacementTest:start_test', 'GET'),
             # Add more endpoints as needed
         ]
         

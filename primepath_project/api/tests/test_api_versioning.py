@@ -98,8 +98,8 @@ def test_api_versioning():
     # Test 4: Check placement API endpoints
     print("\n4. Testing placement API endpoints...")
     placement_endpoints = [
-        '/api/v1/placement/start/',
-        '/api/placement/start/',  # Legacy
+        '/api/v1/PlacementTest/start/',
+        '/api/PlacementTest/start/',  # Legacy
     ]
     
     for endpoint in placement_endpoints:

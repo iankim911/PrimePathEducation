@@ -237,7 +237,7 @@ def create_exam(request):
             print(f"[CREATE_EXAM_SUCCESS] {json.dumps(console_log)}")
             
             messages.success(request, f'Exam "{exam.name}" uploaded successfully!')
-            return redirect('placement_test:create_exam')
+            return redirect('PlacementTest:create_exam')
             
         except ValueError as e:
             console_log = {
@@ -539,7 +539,7 @@ def manage_questions(request, exam_id):
             question.save()
         
         messages.success(request, 'Questions updated successfully!')
-        return redirect('placement_test:manage_questions', exam_id=exam_id)
+        return redirect('PlacementTest:manage_questions', exam_id=exam_id)
     
     return render(request, 'placement_test/manage_questions.html', {
         'exam': exam,
@@ -573,4 +573,4 @@ def delete_exam(request, exam_id):
         logger.error(f"Error deleting exam: {str(e)}")
         messages.error(request, f'Error deleting exam: {str(e)}')
     
-    return redirect('placement_test:exam_list')
+    return redirect('PlacementTest:exam_list')

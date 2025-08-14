@@ -82,8 +82,21 @@
             this.totalTime = seconds;
             this.timeRemaining = seconds;
             
-            // Initial display
-            this.updateDisplay();
+            // Check if timer is already expired on init
+            if (this.timeRemaining <= 0) {
+                this.log('warn', 'Timer initialized with 0 seconds - already expired');
+                this.timeRemaining = 0;
+                
+                // Display 00:00
+                this.updateDisplay();
+                
+                // Don't immediately call onExpire - give user a moment to see what's happening
+                // The expire will be called when start() is called
+                this.isExpired = true;
+            } else {
+                // Initial display
+                this.updateDisplay();
+            }
             
             super.init();
         }
@@ -99,6 +112,23 @@
             
             if (this.isPaused) {
                 this.resume();
+                return;
+            }
+            
+            // Check if timer was already expired on init
+            if (this.isExpired || this.timeRemaining <= 0) {
+                this.log('warn', 'Timer is already expired, showing expiry message');
+                
+                // Show a message to the user before auto-submitting
+                if (this.displayElement) {
+                    this.displayElement.innerHTML = '<span style="color: red; font-weight: bold;">Time Expired - Submitting...</span>';
+                }
+                
+                // Give user 2 seconds to see the message before triggering expiry
+                setTimeout(() => {
+                    this.expire();
+                }, 2000);
+                
                 return;
             }
             

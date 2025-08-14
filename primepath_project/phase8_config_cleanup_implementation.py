@@ -295,9 +295,9 @@ CONSOLE_MONITORING = {
     'track_static_serving': DEBUG,
     'preserve_relationships': True,
     'monitor_endpoints': [
-        '/api/placement/exams/',
-        '/api/placement/sessions/',
-        '/teacher/dashboard/',
+        '/api/PlacementTest/exams/',
+        '/api/PlacementTest/sessions/',
+        '/PlacementTest/PlacementTest/teacher/dashboard/',
     ]
 }
 
@@ -546,9 +546,9 @@ fetch('/api/config/check/')
 console.log('%c===== TESTING CRITICAL FUNCTIONALITY =====', 'color: green; font-weight: bold');
 
 const criticalTests = [
-    {{ url: '/api/placement/exams/', name: 'Exams API' }},
-    {{ url: '/api/placement/sessions/', name: 'Sessions API' }},
-    {{ url: '/teacher/dashboard/', name: 'Teacher Dashboard' }},
+    {{ url: '/api/PlacementTest/exams/', name: 'Exams API' }},
+    {{ url: '/api/PlacementTest/sessions/', name: 'Sessions API' }},
+    {{ url: '/PlacementTest/PlacementTest/teacher/dashboard/', name: 'Teacher Dashboard' }},
     {{ url: '/static/js/modules/answer-manager.js', name: 'Static Files' }},
     {{ url: '/media/', name: 'Media Files' }}
 ];

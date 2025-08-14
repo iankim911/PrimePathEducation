@@ -70,7 +70,7 @@ def test_live_server():
     # Test live submission to running server
     print(f"\n🧪 Testing live answer submission...")
     
-    url = f"{base_url}/api/placement/session/{session.id}/submit/"
+    url = f"{base_url}/api/PlacementTest/session/{session.id}/submit/"
     data = {
         'question_id': str(question.id),
         'answer': 'Live server test answer'

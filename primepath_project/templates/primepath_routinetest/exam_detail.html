@@ -41,7 +41,7 @@
                             <strong>{{ audio.name|default:"Audio File" }}</strong> 
                             (Questions {{ audio.start_question }}-{{ audio.end_question }})
                             <audio controls class="float-right">
-                                <source src="{% url 'primepath_routinetest:get_audio' audio.id %}" type="audio/mpeg">
+                                <source src="{% url 'RoutineTest:get_audio' audio.id %}" type="audio/mpeg">
                                 Your browser does not support the audio element.
                             </audio>
                         </li>
@@ -86,9 +86,9 @@
             </div>
 
             <div class="mt-4">
-                <a href="{% url 'primepath_routinetest:preview_exam' exam.id %}" class="btn btn-primary">Preview & Edit Answers</a>
-                <a href="{% url 'primepath_routinetest:manage_questions' exam.id %}" class="btn btn-secondary">Manage Questions</a>
-                <a href="{% url 'primepath_routinetest:exam_list' %}" class="btn btn-light">Back to Exam List</a>
+                <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-primary">Preview & Edit Answers</a>
+                <a href="{% url 'RoutineTest:manage_questions' exam.id %}" class="btn btn-secondary">Manage Questions</a>
+                <a href="{% url 'RoutineTest:exam_list' %}" class="btn btn-light">Back to Exam List</a>
             </div>
         </div>
     </div>

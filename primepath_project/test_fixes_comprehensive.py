@@ -42,10 +42,10 @@ class ComprehensiveFixesTestCase:
         
         # Test legacy URLs that should redirect
         legacy_urls = [
-            ('/placement/', '/', 'Placement home redirect'),
-            ('/placement/start-test/', '/api/placement/start/', 'Start test redirect'),
-            ('/placement/create-exam/', None, 'Create exam (should work directly)'),
-            ('/placement/sessions/', '/api/placement/sessions/', 'Sessions redirect'),
+            ('/PlacementTest/', '/', 'Placement home redirect'),
+            ('/PlacementTest/start-test/', '/api/PlacementTest/start/', 'Start test redirect'),
+            ('/PlacementTest/create-exam/', None, 'Create exam (should work directly)'),
+            ('/PlacementTest/sessions/', '/api/PlacementTest/sessions/', 'Sessions redirect'),
             ('/core/', '/', 'Core dashboard redirect'),
             ('/core/dashboard/', '/', 'Dashboard redirect'),
         ]
@@ -98,8 +98,8 @@ class ComprehensiveFixesTestCase:
         
         # Test anonymous access to student endpoints
         anonymous_allowed = [
-            '/api/placement/start/',
-            '/api/placement/sessions/',
+            '/api/PlacementTest/start/',
+            '/api/PlacementTest/sessions/',
         ]
         
         print("\n📍 Testing Anonymous Access (should be allowed):")
@@ -123,7 +123,7 @@ class ComprehensiveFixesTestCase:
         
         # Test protected endpoints
         protected_endpoints = [
-            '/api/placement/exams/create/',
+            '/api/PlacementTest/exams/create/',
             '/api/placement-rules/',
         ]
         
@@ -159,7 +159,7 @@ class ComprehensiveFixesTestCase:
             self.client.login(username='test_teacher', password='test123')
             
             # Test access to protected endpoints
-            response = self.client.get('/api/placement/exams/create/')
+            response = self.client.get('/api/PlacementTest/exams/create/')
             if response.status_code == 200:
                 print(f"✅ Authenticated user can access protected endpoints")
                 self.results['summary']['passed'] += 1
@@ -249,7 +249,7 @@ class ComprehensiveFixesTestCase:
         # Get a test session
         session = StudentSession.objects.filter(completed_at__isnull=True).first()
         if session:
-            response = self.client.get(f'/placement/test/{session.id}/')
+            response = self.client.get(f'/PlacementTest/test/{session.id}/')
             
             if response.status_code == 200:
                 content = response.content.decode('utf-8')

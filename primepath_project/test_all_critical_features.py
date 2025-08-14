@@ -24,8 +24,8 @@ def test_urls_exist():
     # Critical URLs that must exist
     urls_to_test = [
         ('/', 'Home page'),
-        ('/api/placement/exams/', 'Exam list API'),
-        ('/api/placement/sessions/', 'Session list API'),
+        ('/api/PlacementTest/exams/', 'Exam list API'),
+        ('/api/PlacementTest/sessions/', 'Session list API'),
         ('/api/v1/exams/', 'DRF Exams'),
         ('/api/v1/sessions/', 'DRF Sessions'),
         ('/api/v1/schools/', 'DRF Schools'),
@@ -58,13 +58,13 @@ def test_exam_crud():
         return False
     
     # Test READ
-    response = client.get(f'/api/placement/exams/{exam.id}/')
+    response = client.get(f'/api/PlacementTest/exams/{exam.id}/')
     results.append(('Read exam', response.status_code == 200))
     print(f"  [{'OK' if response.status_code == 200 else 'FAIL'}] Read exam: {response.status_code}")
     
     # Test UPDATE (via save-answers endpoint)
     response = client.post(
-        f'/api/placement/exams/{exam.id}/save-answers/',
+        f'/api/PlacementTest/exams/{exam.id}/save-answers/',
         json.dumps({'questions': [], 'audio_assignments': {}}),
         content_type='application/json'
     )
@@ -72,7 +72,7 @@ def test_exam_crud():
     print(f"  [{'OK' if response.status_code == 200 else 'FAIL'}] Update exam: {response.status_code}")
     
     # Test LIST
-    response = client.get('/api/placement/exams/')
+    response = client.get('/api/PlacementTest/exams/')
     results.append(('List exams', response.status_code == 200))
     print(f"  [{'OK' if response.status_code == 200 else 'FAIL'}] List exams: {response.status_code}")
     
@@ -90,7 +90,7 @@ def test_student_flow():
         return False
     
     # Step 1: Start test (might fail due to placement rules)
-    response = client.post('/api/placement/start/', {
+    response = client.post('/api/PlacementTest/start/', {
         'student_name': 'Feature Test Student',
         'parent_phone': '5551234567',
         'grade': 10,
@@ -113,7 +113,7 @@ def test_student_flow():
         # Step 2: Submit an answer
         question = exam.questions.first()
         if question:
-            response = client.post(f'/api/placement/session/{session.id}/submit/', {
+            response = client.post(f'/api/PlacementTest/session/{session.id}/submit/', {
                 'question_id': str(question.id),
                 'answer': 'A'
             })
@@ -122,7 +122,7 @@ def test_student_flow():
             print(f"  [{'OK' if success else 'FAIL'}] Submit answer: {response.status_code}")
         
         # Step 3: Get session status
-        response = client.get(f'/api/placement/sessions/{session.id}/')
+        response = client.get(f'/api/PlacementTest/sessions/{session.id}/')
         results.append(('Get session', response.status_code == 200))
         print(f"  [{'OK' if response.status_code == 200 else 'FAIL'}] Get session: {response.status_code}")
     
@@ -140,13 +140,13 @@ def test_ajax_endpoints():
         return False
     
     # Test question retrieval
-    response = client.get(f'/api/placement/exams/{exam.id}/questions/')
+    response = client.get(f'/api/PlacementTest/exams/{exam.id}/questions/')
     results.append(('Get questions AJAX', response.status_code == 200))
     print(f"  [{'OK' if response.status_code == 200 else 'FAIL'}] Get questions: {response.status_code}")
     
     # Test save answers AJAX
     response = client.post(
-        f'/api/placement/exams/{exam.id}/save-answers/',
+        f'/api/PlacementTest/exams/{exam.id}/save-answers/',
         json.dumps({'questions': [], 'audio_assignments': {}}),
         content_type='application/json'
     )
@@ -155,7 +155,7 @@ def test_ajax_endpoints():
     
     # Test audio name update
     response = client.post(
-        f'/api/placement/exams/{exam.id}/update-audio-names/',
+        f'/api/PlacementTest/exams/{exam.id}/update-audio-names/',
         json.dumps({'audio_names': {}}),
         content_type='application/json'
     )
@@ -182,7 +182,7 @@ def test_file_handling():
     
     audio = AudioFile.objects.first()
     if audio:
-        response = client.get(f'/api/placement/audio/{audio.id}/')
+        response = client.get(f'/api/PlacementTest/audio/{audio.id}/')
         results.append(('Audio access', response.status_code == 200))
         print(f"  [{'OK' if response.status_code == 200 else 'FAIL'}] Audio access: {response.status_code}")
     else:

@@ -157,7 +157,7 @@ def test_view_endpoint():
     
     # Create a mock request
     factory = RequestFactory()
-    request = factory.get(f'/api/placement/exams/check-version/?curriculum_level={level.id}')
+    request = factory.get(f'/api/PlacementTest/exams/check-version/?curriculum_level={level.id}')
     
     # Call the view
     response = check_exam_version(request)

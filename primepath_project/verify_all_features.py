@@ -135,9 +135,9 @@ class FeatureVerifier:
         
         critical_urls = [
             ('core:teacher_dashboard', 'Teacher Dashboard'),
-            ('placement_test:exam_list', 'Exam List'),
-            ('placement_test:create_exam', 'Create Exam'),
-            ('placement_test:start_test', 'Start Test'),
+            ('PlacementTest:exam_list', 'Exam List'),
+            ('PlacementTest:create_exam', 'Create Exam'),
+            ('PlacementTest:start_test', 'Start Test'),
             ('core:placement_rules', 'Placement Rules'),
             ('core:exam_mapping', 'Exam Mapping'),
             ('core:curriculum_levels', 'Curriculum Levels'),
@@ -165,7 +165,7 @@ class FeatureVerifier:
             from core.models import CurriculumLevel
             
             # Test exam creation view loads
-            request = self.factory.get('/api/placement/exams/create/')
+            request = self.factory.get('/api/PlacementTest/exams/create/')
             request.user = self.user
             
             response = create_exam(request)
@@ -308,9 +308,9 @@ class FeatureVerifier:
         print("="*60)
         
         endpoints = [
-            ('/api/placement/exams/', 'Exams API'),
-            ('/api/placement/sessions/', 'Sessions API'),
-            ('/api/placement/start/', 'Start Test API'),
+            ('/api/PlacementTest/exams/', 'Exams API'),
+            ('/api/PlacementTest/sessions/', 'Sessions API'),
+            ('/api/PlacementTest/start/', 'Start Test API'),
         ]
         
         for endpoint, description in endpoints:
@@ -430,7 +430,7 @@ console.table(verificationResults);
 console.log('%c===== BROWSER FEATURE TESTS =====', 'color: green; font-weight: bold');
 
 // Check if exam dropdown populates
-fetch('/api/placement/exams/create/')
+fetch('/api/PlacementTest/exams/create/')
     .then(response => {{
         if (response.ok) {{
             console.log('✅ [VERIFY] Exam creation endpoint works');

@@ -103,7 +103,7 @@ def test_pdf_navigation_functionality():
     print("\n📋 TEST VERIFICATION STEPS")
     print("-" * 40)
     print("1. Visit the test page:")
-    print(f"   http://127.0.0.1:8000/placement/test/{session.id}/")
+    print(f"   http://127.0.0.1:8000/PlacementTest/test/{session.id}/")
     print("\n2. Check PDF navigation area:")
     print("   ✓ Should show 'Page 1 of [actual number]'")
     print("   ✗ NOT 'Page 1 of 0'")

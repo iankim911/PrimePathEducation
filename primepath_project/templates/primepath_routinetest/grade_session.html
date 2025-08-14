@@ -40,7 +40,7 @@
                     <p><strong>Final Placement:</strong> {{ session.final_curriculum_level.full_name|default:"Not Assigned" }}</p>
                 </div>
                 
-                <form method="post" action="{% url 'primepath_routinetest:grade_session' session_id=session.id %}">
+                <form method="post" action="{% url 'RoutineTest:grade_session' session_id=session.id %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="manual_score">Adjust Score (if needed):</label>
@@ -59,13 +59,13 @@
                     </div>
                     
                     <button type="submit" class="btn btn-primary">Save Grading</button>
-                    <a href="{% url 'primepath_routinetest:session_detail' session_id=session.id %}" class="btn btn-secondary">Back to Session</a>
+                    <a href="{% url 'RoutineTest:session_detail' session_id=session.id %}" class="btn btn-secondary">Back to Session</a>
                 </form>
             {% else %}
                 <div class="alert alert-warning">
                     This session is not yet completed. The student must finish the test before grading.
                 </div>
-                <a href="{% url 'primepath_routinetest:session_detail' session_id=session.id %}" class="btn btn-secondary">Back to Session</a>
+                <a href="{% url 'RoutineTest:session_detail' session_id=session.id %}" class="btn btn-secondary">Back to Session</a>
             {% endif %}
         </div>
     </div>

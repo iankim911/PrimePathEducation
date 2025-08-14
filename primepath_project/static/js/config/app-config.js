@@ -7,8 +7,18 @@
 (function(window) {
     'use strict';
 
-    // Create namespace if it doesn't exist
-    window.PrimePath = window.PrimePath || {};
+    console.log('[AppConfig] Initializing configuration module');
+    
+    // Defensive namespace creation with logging
+    if (!window.PrimePath) {
+        console.error('[AppConfig] PrimePath namespace not found, creating it');
+        window.PrimePath = {};
+    }
+    
+    if (!window.PrimePath.config) {
+        window.PrimePath.config = {};
+        console.log('[AppConfig] Created PrimePath.config namespace');
+    }
 
     /**
      * Configuration manager for the application
@@ -23,7 +33,7 @@
             // Log initialization status (only in debug mode)
             if (this.isDebugMode()) {
                 if (this.config && Object.keys(this.config).length > 0) {
-// REMOVED:                     console.log('AppConfig initialized with configuration');
+                    // AppConfig initialized with configuration
                 } else {
                     console.warn('AppConfig initialized without configuration - APP_CONFIG may not be set yet');
                 }
@@ -165,11 +175,35 @@
         }
     }
 
-    // Create singleton instance
-    window.PrimePath.config = new AppConfig();
-    
-    // Also export the class for creating new instances
-    window.PrimePath.config.AppConfig = AppConfig;
+    // Create singleton instance with error handling
+    try {
+        const configInstance = new AppConfig();
+        window.PrimePath.config = configInstance;
+        
+        // Also export the class for creating new instances
+        window.PrimePath.config.AppConfig = AppConfig;
+        
+        console.log('[AppConfig] ✓ Configuration module initialized successfully');
+        
+        // Track initialization if bootstrap is available
+        if (window.PrimePath.trackInit) {
+            window.PrimePath.trackInit('AppConfig', true);
+        }
+    } catch (error) {
+        console.error('[AppConfig] Failed to initialize:', error);
+        
+        // Create fallback
+        window.PrimePath.config = {
+            getCsrfToken: () => '',
+            get: () => undefined,
+            has: () => false,
+            isDebugMode: () => true
+        };
+        
+        if (window.PrimePath.trackInit) {
+            window.PrimePath.trackInit('AppConfig', false, error.message);
+        }
+    }
 
     // Also export for module systems
     if (typeof module !== 'undefined' && module.exports) {

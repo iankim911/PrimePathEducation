@@ -52,11 +52,11 @@ def test_logout_fix():
     if login_success:
         # Test 2: Check authenticated state
         print("\n2. Testing authenticated state...")
-        response = client.get('/teacher/dashboard/')
+        response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         
         test_result = {
             "test": "Authenticated access",
-            "endpoint": "/teacher/dashboard/",
+            "endpoint": "/PlacementTest/PlacementTest/teacher/dashboard/",
             "status_code": response.status_code,
             "passed": response.status_code == 200
         }
@@ -94,11 +94,11 @@ def test_logout_fix():
         
         # Test 4: Verify actually logged out
         print("\n4. Verifying logout completed...")
-        response = client.get('/teacher/dashboard/', follow=False)
+        response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/', follow=False)
         
         test_result = {
             "test": "Verify logged out",
-            "endpoint": "/teacher/dashboard/",
+            "endpoint": "/PlacementTest/PlacementTest/teacher/dashboard/",
             "status_code": response.status_code,
             "redirects_to_login": response.status_code == 302 and '/login/' in response.get('Location', ''),
             "passed": response.status_code == 302

@@ -8,6 +8,7 @@ from django.views.generic import RedirectView
 from django.shortcuts import redirect
 from .views import student as student_views
 from .views import exam as exam_views
+from .views.index import index
 import json
 import logging
 
@@ -39,33 +40,50 @@ legacy_patterns = [
     # Direct view mappings (these work without redirect)
     path('test/<uuid:session_id>/', student_views.take_test, name='take_test_legacy'),
     
-    # Redirect-based mappings for expected URLs
-    # These handle the URLs that QA tests expect
-    path('', LoggingRedirectView.as_view(url='/'), name='placement_home_redirect'),
-    path('start-test/', LoggingRedirectView.as_view(pattern_name='placement_test:start_test'), name='start_test_redirect'),
+    # Index page (changed from redirect to actual page)
+    path('', index, name='index'),
+    path('start-test/', LoggingRedirectView.as_view(pattern_name='PlacementTest:start_test'), name='start_test_redirect'),
     path('create-exam/', exam_views.create_exam, name='create_exam_legacy'),  # Direct mapping
-    path('exam-list/', LoggingRedirectView.as_view(pattern_name='placement_test:exam_list'), name='exam_list_redirect'),
+    path('exam-list/', LoggingRedirectView.as_view(pattern_name='PlacementTest:exam_list'), name='exam_list_redirect'),
     
     # Session management redirects
-    path('sessions/', LoggingRedirectView.as_view(url='/api/placement/sessions/'), name='sessions_redirect'),
-    path('session/<uuid:session_id>/', LoggingRedirectView.as_view(url='/api/placement/session/%(session_id)s/'), name='session_detail_redirect'),
-    path('session/<uuid:session_id>/submit/', LoggingRedirectView.as_view(url='/api/placement/session/%(session_id)s/submit/'), name='session_submit_redirect'),
+    path('sessions/', LoggingRedirectView.as_view(url='/api/PlacementTest/sessions/'), name='sessions_redirect'),
+    path('session/<uuid:session_id>/', LoggingRedirectView.as_view(url='/api/PlacementTest/session/%(session_id)s/'), name='session_detail_redirect'),
+    path('session/<uuid:session_id>/submit/', LoggingRedirectView.as_view(url='/api/PlacementTest/session/%(session_id)s/submit/'), name='session_submit_redirect'),
     path('session/<uuid:session_id>/result/', student_views.test_result, name='test_result_legacy'),
     
     # Exam management redirects
-    path('exams/', LoggingRedirectView.as_view(url='/api/placement/exams/'), name='exams_redirect'),
-    path('exam/<uuid:exam_id>/', LoggingRedirectView.as_view(url='/api/placement/exams/%(exam_id)s/'), name='exam_detail_redirect'),
-    path('exam/<uuid:exam_id>/edit/', LoggingRedirectView.as_view(url='/api/placement/exams/%(exam_id)s/edit/'), name='exam_edit_redirect'),
+    path('exams/', LoggingRedirectView.as_view(url='/api/PlacementTest/exams/'), name='exams_redirect'),
+    path('exam/<uuid:exam_id>/', LoggingRedirectView.as_view(url='/api/PlacementTest/exams/%(exam_id)s/'), name='exam_detail_redirect'),
+    path('exam/<uuid:exam_id>/edit/', LoggingRedirectView.as_view(url='/api/PlacementTest/exams/%(exam_id)s/edit/'), name='exam_edit_redirect'),
 ]
 
 # Export for inclusion in main URL config
 urlpatterns = legacy_patterns
 
-# Log initialization
+# Enhanced initialization logging
 console_log = {
     "module": "legacy_urls",
     "action": "initialized",
     "patterns_count": len(urlpatterns),
-    "patterns": [p.name for p in urlpatterns if hasattr(p, 'name')]
+    "index_page": "enabled",
+    "patterns": [],
+    "critical_patterns": {
+        "index": "path('', index)",
+        "test_legacy": "path('test/<uuid>/', take_test)",
+        "create_exam_legacy": "path('create-exam/', create_exam)"
+    }
 }
+
+# Log each pattern with details
+for pattern in urlpatterns:
+    if hasattr(pattern, 'name'):
+        pattern_info = {
+            "name": pattern.name,
+            "pattern": str(pattern.pattern),
+            "is_redirect": "RedirectView" in str(type(pattern.callback)) if hasattr(pattern, 'callback') else False
+        }
+        console_log["patterns"].append(pattern_info)
+
 print(f"[LEGACY_URLS_INIT] {json.dumps(console_log, indent=2)}")
+logger.info(f"Legacy URLs initialized with {len(urlpatterns)} patterns including index page")

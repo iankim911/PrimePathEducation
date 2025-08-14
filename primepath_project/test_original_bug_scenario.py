@@ -84,7 +84,7 @@ def test_original_bug_scenario():
         print(f"Submitting answer for question {question.question_number}...")
         
         response = client.post(
-            f'/api/placement/session/{session.id}/submit/',
+            f'/api/PlacementTest/session/{session.id}/submit/',
             data=json.dumps({
                 'question_id': str(question.id),
                 'answer': f'Test answer {i+1} for Q{question.question_number}'
@@ -109,7 +109,7 @@ def test_original_bug_scenario():
     print(f"\n🧪 Testing final test submission...")
     
     final_response = client.post(
-        f'/api/placement/session/{session.id}/complete/',
+        f'/api/PlacementTest/session/{session.id}/complete/',
         data=json.dumps({'timer_expired': False, 'unsaved_count': 0}),
         content_type='application/json'
     )

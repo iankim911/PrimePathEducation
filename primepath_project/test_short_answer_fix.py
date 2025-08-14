@@ -183,7 +183,7 @@ def test_short_answer_save():
     }
     
     # Make API call to save answers
-    save_url = f"{base_url}/api/placement/exams/{exam.id}/save-answers/"
+    save_url = f"{base_url}/api/PlacementTest/exams/{exam.id}/save-answers/"
     
     try:
         response = requests.post(
@@ -267,7 +267,7 @@ def test_short_answer_save():
     print("\n📋 TEST 4: Preview Page Rendering")
     print("-" * 40)
     
-    preview_url = f"{base_url}/api/placement/exams/{exam.id}/preview/"
+    preview_url = f"{base_url}/api/PlacementTest/exams/{exam.id}/preview/"
     
     try:
         response = requests.get(preview_url, timeout=10)

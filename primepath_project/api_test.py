@@ -31,7 +31,7 @@ def test_api_functionality():
         print(f"\nTesting with exam: {exam.name}")
         
         # Test save-answers endpoint (most complex operation)
-        api_url = f'/api/placement/exams/{exam.id}/save-answers/'
+        api_url = f'/api/PlacementTest/exams/{exam.id}/save-answers/'
         test_data = {
             'questions': [
                 {
@@ -69,7 +69,7 @@ def test_api_functionality():
         
         # Test update-name endpoint
         print("\n2. Testing update-name API...")
-        api_url = f'/api/placement/exams/{exam.id}/update-name/'
+        api_url = f'/api/PlacementTest/exams/{exam.id}/update-name/'
         test_data = {'name': exam.name}  # Keep same name to avoid side effects
         
         try:
@@ -95,7 +95,7 @@ def test_api_functionality():
             print(f"\n3. Testing audio API with audio ID {audio.id}...")
             
             # Test get-audio endpoint
-            api_url = f'/api/placement/audio/{audio.id}/'
+            api_url = f'/api/PlacementTest/audio/{audio.id}/'
             try:
                 response = client.get(api_url)
                 print(f"   Get audio status: {response.status_code}")

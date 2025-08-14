@@ -45,7 +45,7 @@ class AnswerKeysRestorationTest:
         """Test 1: Verify preview page loads successfully"""
         test_name = "Preview Page Loading"
         try:
-            url = reverse('placement_test:preview_exam', kwargs={'exam_id': self.exam.id})
+            url = reverse('PlacementTest:preview_exam', kwargs={'exam_id': self.exam.id})
             response = self.client.get(url)
             
             if response.status_code == 200:
@@ -62,7 +62,7 @@ class AnswerKeysRestorationTest:
         """Test 2: Verify Answer Keys section is present in HTML"""
         test_name = "Answer Keys Section Presence"
         try:
-            url = reverse('placement_test:preview_exam', kwargs={'exam_id': self.exam.id})
+            url = reverse('PlacementTest:preview_exam', kwargs={'exam_id': self.exam.id})
             response = self.client.get(url)
             
             if response.status_code != 200:
@@ -91,7 +91,7 @@ class AnswerKeysRestorationTest:
         """Test 3: Verify PDF Preview section still works"""
         test_name = "PDF Preview Section"
         try:
-            url = reverse('placement_test:preview_exam', kwargs={'exam_id': self.exam.id})
+            url = reverse('PlacementTest:preview_exam', kwargs={'exam_id': self.exam.id})
             response = self.client.get(url)
             
             if response.status_code != 200:
@@ -120,7 +120,7 @@ class AnswerKeysRestorationTest:
         """Test 4: Verify Audio Files section still works"""
         test_name = "Audio Files Section"
         try:
-            url = reverse('placement_test:preview_exam', kwargs={'exam_id': self.exam.id})
+            url = reverse('PlacementTest:preview_exam', kwargs={'exam_id': self.exam.id})
             response = self.client.get(url)
             
             if response.status_code != 200:
@@ -146,7 +146,7 @@ class AnswerKeysRestorationTest:
         """Test 5: Verify critical JavaScript functions are present"""
         test_name = "JavaScript Functions"
         try:
-            url = reverse('placement_test:preview_exam', kwargs={'exam_id': self.exam.id})
+            url = reverse('PlacementTest:preview_exam', kwargs={'exam_id': self.exam.id})
             response = self.client.get(url)
             
             if response.status_code != 200:
@@ -184,7 +184,7 @@ class AnswerKeysRestorationTest:
         test_name = "AJAX Endpoints"
         try:
             # Test save answers endpoint (with empty data just to check accessibility)
-            save_url = reverse('placement_test:save_exam_answers', kwargs={'exam_id': self.exam.id})
+            save_url = reverse('PlacementTest:save_exam_answers', kwargs={'exam_id': self.exam.id})
             
             # Just check if URL resolves (don't actually POST to avoid changing data)
             if save_url:
@@ -246,7 +246,7 @@ class AnswerKeysRestorationTest:
         test_name = "Exam List Link"
         try:
             # Get exam list page
-            list_url = reverse('placement_test:exam_list')
+            list_url = reverse('PlacementTest:exam_list')
             response = self.client.get(list_url)
             
             if response.status_code != 200:

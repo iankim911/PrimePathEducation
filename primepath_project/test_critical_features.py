@@ -132,7 +132,7 @@ def test_critical_features():
     try:
         exam = Exam.objects.first()
         if exam:
-            response = client.get(f'/api/placement/exams/{exam.id}/preview/')
+            response = client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
             assert response.status_code == 200
             
             content = response.content.decode('utf-8')
@@ -160,7 +160,7 @@ def test_critical_features():
         if exam:
             # Test saving via API
             response = client.post(
-                f'/api/placement/exams/{exam.id}/save-answers/',
+                f'/api/PlacementTest/exams/{exam.id}/save-answers/',
                 data=json.dumps({
                     'questions': [],
                     'audio_assignments': {},

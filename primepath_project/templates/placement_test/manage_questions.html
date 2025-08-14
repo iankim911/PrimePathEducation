@@ -243,7 +243,7 @@
     
     <!-- Action Buttons -->
     <div class="action-buttons">
-        <a href="{% url 'placement_test:exam_list' %}" class="btn btn-secondary">Back to Exam List</a>
+        <a href="{% url 'PlacementTest:exam_list' %}" class="btn btn-secondary">Back to Exam List</a>
         {% if questions.count < exam.total_questions %}
             <button class="btn btn-primary" onclick="createMissingQuestions()">Create Missing Questions</button>
         {% endif %}
@@ -308,7 +308,7 @@ document.querySelectorAll('.options-count-selector').forEach(selector => {
         formData.append('correct_answer', answerInput ? answerInput.value : '');
         formData.append('points', form.querySelector('[name=points]').value);
         
-        fetch(`/api/placement/questions/${questionId}/update/`, {
+        fetch(`/api/PlacementTest/questions/${questionId}/update/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -427,7 +427,7 @@ document.querySelectorAll('.answer-form').forEach(form => {
         saveBtn.disabled = true;
         saveBtn.textContent = 'Saving...';
         
-        fetch(`/api/placement/questions/${questionId}/update/`, {
+        fetch(`/api/PlacementTest/questions/${questionId}/update/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -478,7 +478,7 @@ function createMissingQuestions() {
 
 // Make request to create questions
 function createQuestionsRequest() {
-    fetch(`/api/placement/exams/{{ exam.id }}/create-questions/`, {
+    fetch(`/api/PlacementTest/exams/{{ exam.id }}/create-questions/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,

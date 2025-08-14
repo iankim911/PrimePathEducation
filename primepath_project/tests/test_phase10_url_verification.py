@@ -25,14 +25,14 @@ def test_url_resolution():
     # Test critical URLs that were identified in analysis
     test_urls = [
         # Placement test URLs  
-        ('placement_test:exam_list', {}, '/api/placement/exams/'),
-        ('placement_test:create_exam', {}, '/api/placement/exams/create/'),
-        ('placement_test:session_list', {}, '/api/placement/sessions/'),
-        ('placement_test:start_test', {}, '/api/placement/start/'),
+        ('PlacementTest:exam_list', {}, '/api/PlacementTest/exams/'),
+        ('PlacementTest:create_exam', {}, '/api/PlacementTest/exams/create/'),
+        ('PlacementTest:session_list', {}, '/api/PlacementTest/sessions/'),
+        ('PlacementTest:start_test', {}, '/api/PlacementTest/start/'),
         
         # Core URLs
         ('core:index', {}, '/'),
-        ('core:teacher_dashboard', {}, '/teacher/dashboard/'),
+        ('core:teacher_dashboard', {}, '/PlacementTest/PlacementTest/teacher/dashboard/'),
         ('core:placement_rules', {}, '/placement-rules/'),
         ('core:curriculum_levels', {}, '/curriculum/levels/'),
         
@@ -69,11 +69,11 @@ def test_url_accessibility():
     
     client = Client()
     test_urls = [
-        ('/api/placement/exams/', 'Exam List'),
-        ('/api/placement/sessions/', 'Session List'),
-        ('/api/placement/start/', 'Start Test'),
+        ('/api/PlacementTest/exams/', 'Exam List'),
+        ('/api/PlacementTest/sessions/', 'Session List'),
+        ('/api/PlacementTest/start/', 'Start Test'),
         ('/', 'Home Page'),
-        ('/teacher/dashboard/', 'Teacher Dashboard'),
+        ('/PlacementTest/PlacementTest/teacher/dashboard/', 'Teacher Dashboard'),
         ('/placement-rules/', 'Placement Rules'),
     ]
     

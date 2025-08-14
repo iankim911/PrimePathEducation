@@ -129,7 +129,7 @@ def test_student_interface():
     print(f"{'✅' if questions.count() > 0 else '⚠️ '} Questions: {questions.count()}")
     
     print("\n✨ Student interface should work correctly!")
-    print("\nTest URL: http://127.0.0.1:8000/api/placement/session/{}/".format(session.id))
+    print("\nTest URL: http://127.0.0.1:8000/api/PlacementTest/session/{}/".format(session.id))
     
     return True
 

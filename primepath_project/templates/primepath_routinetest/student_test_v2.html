@@ -182,10 +182,10 @@
             session: djangoConfig.session || {},
             exam: djangoConfig.exam || {},
             urls: {
-                saveAnswer: '{% url "primepath_routinetest:submit_answer" session.id %}',
-                completeTest: '{% url "primepath_routinetest:complete_test" session.id %}',
-                getAudio: '{% url "primepath_routinetest:get_audio" 0 %}'.replace('0', '{id}'),
-                adjustDifficulty: '{% url "primepath_routinetest:manual_adjust_difficulty" session.id %}'
+                saveAnswer: '{% url "RoutineTest:submit_answer" session.id %}',
+                completeTest: '{% url "RoutineTest:complete_test" session.id %}',
+                getAudio: '{% url "RoutineTest:get_audio" 0 %}'.replace('0', '{id}'),
+                adjustDifficulty: '{% url "RoutineTest:manual_adjust_difficulty" session.id %}'
             },
             questions: djangoConfig.questions || [],
             audioFiles: djangoConfig.audioFiles || [],
@@ -317,9 +317,9 @@
                         autoSave: true,
                         autoSaveInterval: 30000,
                         saveEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.saveAnswer) || 
-                                      '{% url "primepath_routinetest:submit_answer" session.id %}',
+                                      '{% url "RoutineTest:submit_answer" session.id %}',
                         submitEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest) || 
-                                        '{% url "primepath_routinetest:complete_test" session.id %}'
+                                        '{% url "RoutineTest:complete_test" session.id %}'
                     });
                     // Pass sessionId to init method
                     answerManager.init(sessionId);
@@ -387,7 +387,7 @@
                     // Direct submission without answer manager as fallback
                     if (confirm('There was an issue with the test system. Do you want to submit your test anyway?')) {
                         const csrfToken = '{{ csrf_token }}';
-                        fetch(`/api/routine/session/${sessionId}/complete/`, {
+                        fetch(`/api/RoutineTest/session/${sessionId}/complete/`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

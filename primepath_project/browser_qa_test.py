@@ -34,9 +34,9 @@ class BrowserQATest:
     def test_api_endpoints(self):
         """Test API endpoints"""
         endpoints = [
-            ("/api/placement/exams/", "Exams API"),
-            ("/api/placement/sessions/", "Sessions API"),
-            ("/api/placement/exams/check-version/", "Version Check API"),
+            ("/api/PlacementTest/exams/", "Exams API"),
+            ("/api/PlacementTest/sessions/", "Sessions API"),
+            ("/api/PlacementTest/exams/check-version/", "Version Check API"),
         ]
         
         for url, name in endpoints:
@@ -52,7 +52,7 @@ class BrowserQATest:
     def test_exam_creation_page(self):
         """Test exam creation page"""
         try:
-            response = self.session.get(f"{self.base_url}/api/placement/exams/create/")
+            response = self.session.get(f"{self.base_url}/api/PlacementTest/exams/create/")
             if response.status_code == 200:
                 self.results.append({"test": "Exam Creation Page", "status": "PASS", "details": "Page loads"})
                 
@@ -68,14 +68,14 @@ class BrowserQATest:
         """Test student test interface"""
         try:
             # First get a session ID from the database
-            response = self.session.get(f"{self.base_url}/api/placement/sessions/")
+            response = self.session.get(f"{self.base_url}/api/PlacementTest/sessions/")
             if response.status_code == 200:
                 data = response.json()
                 if data and len(data) > 0:
                     session_id = data[0].get('id')
                     if session_id:
                         # Try to access student test page
-                        test_url = f"{self.base_url}/placement/test/{session_id}/"
+                        test_url = f"{self.base_url}/PlacementTest/test/{session_id}/"
                         response = self.session.get(test_url)
                         if response.status_code == 200:
                             self.results.append({"test": "Student Test Interface", "status": "PASS", "details": "Test page loads"})

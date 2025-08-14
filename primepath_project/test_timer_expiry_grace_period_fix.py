@@ -74,7 +74,7 @@ def test_timer_expiry_grace_period_fix():
     
     # Submit answer before timer expiry
     response = client.post(
-        f'/api/placement/session/{session.id}/submit/',
+        f'/api/PlacementTest/session/{session.id}/submit/',
         data=json.dumps({
             'question_id': str(question.id),
             'answer': 'Test answer before expiry'
@@ -104,7 +104,7 @@ def test_timer_expiry_grace_period_fix():
     
     # Submit answer - this should mark session complete but allow the save
     response = client.post(
-        f'/api/placement/session/{expired_session.id}/submit/',
+        f'/api/PlacementTest/session/{expired_session.id}/submit/',
         data=json.dumps({
             'question_id': str(question.id),
             'answer': 'Test answer at timer expiry'
@@ -127,7 +127,7 @@ def test_timer_expiry_grace_period_fix():
     
     # Submit another answer during grace period
     response = client.post(
-        f'/api/placement/session/{expired_session.id}/submit/',
+        f'/api/PlacementTest/session/{expired_session.id}/submit/',
         data=json.dumps({
             'question_id': str(question2.id),
             'answer': 'Second answer during grace period'
@@ -160,7 +160,7 @@ def test_timer_expiry_grace_period_fix():
     
     # Submit answer - this should fail
     response = client.post(
-        f'/api/placement/session/{old_completed_session.id}/submit/',
+        f'/api/PlacementTest/session/{old_completed_session.id}/submit/',
         data=json.dumps({
             'question_id': str(question.id),
             'answer': 'Answer after grace period'
@@ -193,7 +193,7 @@ def test_timer_expiry_grace_period_fix():
     
     for i, q in enumerate(questions_to_test):
         response = client.post(
-            f'/api/placement/session/{failing_session.id}/submit/',
+            f'/api/PlacementTest/session/{failing_session.id}/submit/',
             data=json.dumps({
                 'question_id': str(q.id),
                 'answer': f'Rapid submission {i+1}'

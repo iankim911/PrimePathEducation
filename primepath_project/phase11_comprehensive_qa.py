@@ -233,7 +233,7 @@ class Phase11QATests:
             'parent_phone': '555-9999'
         }
         
-        response = self.client.post(reverse('placement_test:start_test'), session_data)
+        response = self.client.post(reverse('PlacementTest:start_test'), session_data)
         if response.status_code == 302:
             print("   ✅ Student session created")
             self.results['tests']['passed'].append("Student session creation")
@@ -243,7 +243,7 @@ class Phase11QATests:
                 session_id = response.url.split('/')[-2]
                 
                 # Test take test page
-                response = self.client.get(reverse('placement_test:take_test', args=[session_id]))
+                response = self.client.get(reverse('PlacementTest:take_test', args=[session_id]))
                 if response.status_code == 200:
                     print("   ✅ Take test page loads")
                     self.results['tests']['passed'].append("Take test page")
@@ -253,7 +253,7 @@ class Phase11QATests:
                 
                 # Test completion
                 response = self.client.post(
-                    reverse('placement_test:complete_test', args=[session_id])
+                    reverse('PlacementTest:complete_test', args=[session_id])
                 )
                 if response.status_code in [200, 302]:
                     print("   ✅ Test can be completed")
@@ -277,7 +277,7 @@ class Phase11QATests:
         self.client.login(username='admin', password='password')
         
         # Test exam list
-        response = self.client.get(reverse('placement_test:exam_list'))
+        response = self.client.get(reverse('PlacementTest:exam_list'))
         if response.status_code == 200:
             print("   ✅ Exam list accessible")
             self.results['tests']['passed'].append("Teacher exam list")
@@ -287,7 +287,7 @@ class Phase11QATests:
         
         # Test exam creation page
         try:
-            response = self.client.get(reverse('placement_test:create_exam'))
+            response = self.client.get(reverse('PlacementTest:create_exam'))
             if response.status_code == 200:
                 print("   ✅ Create exam page accessible")
                 self.results['tests']['passed'].append("Create exam page")
@@ -354,8 +354,8 @@ class Phase11QATests:
         print("\n9. Testing URL Routing...")
         
         critical_urls = [
-            ('placement_test:start_test', []),
-            ('placement_test:exam_list', []),
+            ('PlacementTest:start_test', []),
+            ('PlacementTest:exam_list', []),
             ('api:health', []),  # Should work with new API structure
         ]
         

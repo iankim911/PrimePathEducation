@@ -58,7 +58,7 @@ def test_audio_fix_live():
         return
         
     # Test the URL
-    url = f"http://127.0.0.1:8000/api/placement/session/{session.id}/"
+    url = f"http://127.0.0.1:8000/api/PlacementTest/session/{session.id}/"
     print(f"🌐 Testing URL: {url}")
     
     try:

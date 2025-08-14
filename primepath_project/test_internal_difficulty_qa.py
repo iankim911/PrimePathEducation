@@ -170,7 +170,7 @@ class InternalDifficultyQATest:
         
         try:
             response = self.client.get(
-                reverse('placement_test:test_result', kwargs={'session_id': session.id})
+                reverse('PlacementTest:test_result', kwargs={'session_id': session.id})
             )
             
             self.log_result("Test result page loads", response.status_code == 200,
@@ -196,7 +196,7 @@ class InternalDifficultyQATest:
         
         # Check if the URL pattern exists
         try:
-            url = reverse('placement_test:request_difficulty_change')
+            url = reverse('PlacementTest:request_difficulty_change')
             self.log_result("request_difficulty_change URL exists", True, url)
         except Exception as e:
             self.log_result("request_difficulty_change URL", False, str(e))
@@ -231,21 +231,21 @@ class InternalDifficultyQATest:
         
         # Test exam list
         try:
-            response = self.client.get(reverse('placement_test:exam_list'))
+            response = self.client.get(reverse('PlacementTest:exam_list'))
             self.log_result("Exam list still works", response.status_code == 200)
         except Exception as e:
             self.log_result("Exam list", False, str(e))
         
         # Test create exam view
         try:
-            response = self.client.get(reverse('placement_test:create_exam'))
+            response = self.client.get(reverse('PlacementTest:create_exam'))
             self.log_result("Create exam still works", response.status_code == 200)
         except Exception as e:
             self.log_result("Create exam", False, str(e))
         
         # Test start test
         try:
-            response = self.client.get(reverse('placement_test:start_test'))
+            response = self.client.get(reverse('PlacementTest:start_test'))
             self.log_result("Start test still works", response.status_code == 200)
         except Exception as e:
             self.log_result("Start test", False, str(e))

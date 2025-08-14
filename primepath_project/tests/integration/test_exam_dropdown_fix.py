@@ -110,7 +110,7 @@ def test_view_rendering():
     
     # Create mock request
     factory = RequestFactory()
-    request = factory.get('/api/placement/exams/create/')
+    request = factory.get('/api/PlacementTest/exams/create/')
     
     # Add user to request
     User = get_user_model()

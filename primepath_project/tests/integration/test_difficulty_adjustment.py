@@ -103,7 +103,7 @@ if session:
     # Test increasing difficulty
     try:
         response = client.post(
-            f'/api/placement/session/{session.id}/manual-adjust/',
+            f'/api/PlacementTest/session/{session.id}/manual-adjust/',
             json.dumps({'direction': 'up'}),
             content_type='application/json'
         )
@@ -124,7 +124,7 @@ if session:
     # Test decreasing difficulty
     try:
         response = client.post(
-            f'/api/placement/session/{session.id}/manual-adjust/',
+            f'/api/PlacementTest/session/{session.id}/manual-adjust/',
             json.dumps({'direction': 'down'}),
             content_type='application/json'
         )
@@ -145,7 +145,7 @@ if session:
     # Test invalid direction
     try:
         response = client.post(
-            f'/api/placement/session/{session.id}/manual-adjust/',
+            f'/api/PlacementTest/session/{session.id}/manual-adjust/',
             json.dumps({'direction': 'invalid'}),
             content_type='application/json'
         )
@@ -219,7 +219,7 @@ print("-" * 50)
 # Test that the student test page loads with difficulty buttons
 if session:
     try:
-        response = client.get(f'/api/placement/session/{session.id}/')
+        response = client.get(f'/api/PlacementTest/session/{session.id}/')
         if response.status_code == 200:
             content = str(response.content)
             

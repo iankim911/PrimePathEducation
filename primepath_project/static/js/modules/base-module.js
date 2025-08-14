@@ -311,8 +311,25 @@
         }
     }
 
-    // Export to PrimePath namespace
-    window.PrimePath.modules.BaseModule = BaseModule;
+    // Export to PrimePath namespace with safety check
+    try {
+        if (window.PrimePath && window.PrimePath.modules) {
+            window.PrimePath.modules.BaseModule = BaseModule;
+            console.log('[BaseModule] ✓ Class exported to PrimePath.modules.BaseModule');
+            
+            // Track initialization if bootstrap is available
+            if (window.PrimePath.trackInit) {
+                window.PrimePath.trackInit('BaseModule', true);
+            }
+        } else {
+            console.error('[BaseModule] Cannot export - namespace not available');
+        }
+    } catch (error) {
+        console.error('[BaseModule] Export failed:', error);
+        if (window.PrimePath && window.PrimePath.trackInit) {
+            window.PrimePath.trackInit('BaseModule', false, error.message);
+        }
+    }
 
     // Also export for module systems
     if (typeof module !== 'undefined' && module.exports) {

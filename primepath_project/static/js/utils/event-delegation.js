@@ -6,9 +6,19 @@
 
 (function(window) {
     'use strict';
-
-    window.PrimePath = window.PrimePath || {};
-    window.PrimePath.utils = window.PrimePath.utils || {};
+    
+    console.log('[EventDelegation] Initializing event delegation module');
+    
+    // Defensive namespace creation with comprehensive checks
+    if (typeof window.PrimePath === 'undefined') {
+        console.warn('[EventDelegation] PrimePath namespace not found, creating it');
+        window.PrimePath = {};
+    }
+    
+    if (typeof window.PrimePath.utils === 'undefined') {
+        console.log('[EventDelegation] Creating PrimePath.utils namespace');
+        window.PrimePath.utils = {};
+    }
 
     /**
      * Event delegation manager
@@ -166,11 +176,40 @@
         }
     }
 
-    // Create singleton instance
-    const eventDelegation = new EventDelegation();
+    // Create singleton instance with error handling
+    let eventDelegation;
+    
+    try {
+        eventDelegation = new EventDelegation();
+        console.log('[EventDelegation] ✓ Instance created successfully');
+    } catch (error) {
+        console.error('[EventDelegation] Failed to create instance:', error);
+        // Create minimal fallback
+        eventDelegation = {
+            init: function() { console.warn('[EventDelegation] Using fallback'); },
+            on: function() { return function() {}; },
+            onClick: function(sel, cb) { 
+                document.addEventListener('click', function(e) {
+                    const el = e.target.closest(sel);
+                    if (el) cb.call(el, e);
+                });
+            },
+            onChange: function(sel, cb) {
+                document.addEventListener('change', function(e) {
+                    const el = e.target.closest(sel);
+                    if (el) cb.call(el, e);
+                });
+            }
+        };
+    }
 
-    // Export to PrimePath namespace
-    window.PrimePath.utils.EventDelegation = eventDelegation;
+    // Export to PrimePath namespace with safety check
+    if (window.PrimePath && window.PrimePath.utils) {
+        window.PrimePath.utils.EventDelegation = eventDelegation;
+        console.log('[EventDelegation] ✓ Module exported to PrimePath.utils.EventDelegation');
+    } else {
+        console.error('[EventDelegation] Cannot export - namespace not available');
+    }
 
     // Convenience methods
     window.PrimePath.on = eventDelegation.on.bind(eventDelegation);
@@ -179,13 +218,28 @@
     window.PrimePath.onInput = eventDelegation.onInput.bind(eventDelegation);
     window.PrimePath.onSubmit = eventDelegation.onSubmit.bind(eventDelegation);
 
-    // Auto-initialize on DOMContentLoaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+    // Auto-initialize on DOMContentLoaded with error handling
+    const autoInit = function() {
+        try {
             eventDelegation.init();
-        });
+            console.log('[EventDelegation] ✓ Auto-initialization complete');
+            
+            // Track initialization if bootstrap is available
+            if (window.PrimePath && window.PrimePath.trackInit) {
+                window.PrimePath.trackInit('EventDelegation', true);
+            }
+        } catch (error) {
+            console.error('[EventDelegation] Auto-initialization failed:', error);
+            if (window.PrimePath && window.PrimePath.trackInit) {
+                window.PrimePath.trackInit('EventDelegation', false, error.message);
+            }
+        }
+    };
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', autoInit);
     } else {
-        eventDelegation.init();
+        autoInit();
     }
 
     // Also export for module systems

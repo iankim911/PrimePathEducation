@@ -49,7 +49,7 @@ def run_tests():
     # Test 2: Teacher Dashboard
     print("\n2. Testing Teacher Dashboard...")
     try:
-        response = client.get('/teacher/dashboard/')
+        response = client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         results['tests'].append({'name': 'Teacher Dashboard', 'status': 'PASS'})
         results['passed'] += 1
@@ -62,7 +62,7 @@ def run_tests():
     # Test 3: Exam List
     print("\n3. Testing Exam List...")
     try:
-        response = client.get('/api/placement/exams/')
+        response = client.get('/api/PlacementTest/exams/')
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         content = response.content.decode('utf-8')
         assert '[FIRE] TEMPLATE UPDATED' not in content, "Debug badge still present"
@@ -79,7 +79,7 @@ def run_tests():
     # Test 4: Create Exam Page
     print("\n4. Testing Create Exam Page...")
     try:
-        response = client.get('/api/placement/exams/create/')
+        response = client.get('/api/PlacementTest/exams/create/')
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         results['tests'].append({'name': 'Create Exam Page', 'status': 'PASS'})
         results['passed'] += 1
@@ -94,7 +94,7 @@ def run_tests():
     try:
         exam = Exam.objects.first()
         if exam:
-            response = client.get(f'/api/placement/exams/{exam.id}/preview/')
+            response = client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
             assert response.status_code == 200, f"Expected 200, got {response.status_code}"
             
             content = response.content.decode('utf-8')
@@ -135,7 +135,7 @@ def run_tests():
     # Test 6: Student Sessions
     print("\n6. Testing Student Sessions...")
     try:
-        response = client.get('/api/placement/sessions/')
+        response = client.get('/api/PlacementTest/sessions/')
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         results['tests'].append({'name': 'Student Sessions', 'status': 'PASS'})
         results['passed'] += 1
@@ -176,7 +176,7 @@ def run_tests():
     try:
         exam = Exam.objects.first()
         if exam:
-            response = client.get(f'/api/placement/exams/{exam.id}/preview/')
+            response = client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
             content = response.content.decode('utf-8')
             
             # Check critical JS functions are present
@@ -235,7 +235,7 @@ def run_tests():
     try:
         if AudioFile.objects.exists():
             audio = AudioFile.objects.first()
-            response = client.get(f'/api/placement/audio/{audio.id}/')
+            response = client.get(f'/api/PlacementTest/audio/{audio.id}/')
             assert response.status_code == 200, f"Audio file retrieval failed: {response.status_code}"
             results['tests'].append({'name': 'Audio File Management', 'status': 'PASS'})
             results['passed'] += 1

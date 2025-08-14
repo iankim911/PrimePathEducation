@@ -89,7 +89,7 @@ def test_complete_rotation_workflow():
     print("-" * 40)
     
     # Test preview page
-    response = client.get(f'/api/placement/exams/{exam.id}/preview/')
+    response = client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
     
     if response.status_code == 200:
         content = response.content.decode('utf-8')
@@ -114,7 +114,7 @@ def test_complete_rotation_workflow():
     # Test updating rotation (simulating save from Manage Exams)
     new_rotation = 90
     response = client.post(
-        f'/api/placement/exams/{exam.id}/save-answers/',
+        f'/api/PlacementTest/exams/{exam.id}/save-answers/',
         data=json.dumps({
             'questions': [],
             'audio_assignments': {},
@@ -151,7 +151,7 @@ def test_complete_rotation_workflow():
     )
     
     # Test student view
-    response = client.get(f'/placement/test/{session.id}/')
+    response = client.get(f'/PlacementTest/test/{session.id}/')
     
     if response.status_code == 200:
         content = response.content.decode('utf-8')

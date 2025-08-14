@@ -317,7 +317,7 @@ def run_quick_test():
         # Test critical endpoints
         tests = [
             ('/', 'Index'),
-            ('/api/placement/exams/', 'Exams'),
+            ('/api/PlacementTest/exams/', 'Exams'),
             ('/placement-rules/', 'Rules'),
         ]
         

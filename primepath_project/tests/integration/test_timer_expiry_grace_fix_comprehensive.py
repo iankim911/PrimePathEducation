@@ -94,7 +94,7 @@ def test_timer_scenarios():
     }
     
     request = factory.post(
-        f'/api/placement/session/{session.id}/submit-answer/',
+        f'/api/PlacementTest/session/{session.id}/submit-answer/',
         data=json.dumps(request_data),
         content_type='application/json'
     )
@@ -128,7 +128,7 @@ def test_timer_scenarios():
     }
     
     request = factory.post(
-        f'/api/placement/session/{session.id}/submit-answer/',
+        f'/api/PlacementTest/session/{session.id}/submit-answer/',
         data=json.dumps(request_data),
         content_type='application/json'
     )
@@ -163,7 +163,7 @@ def test_timer_scenarios():
     }
     
     request = factory.post(
-        f'/api/placement/session/{session.id}/submit-answer/',
+        f'/api/PlacementTest/session/{session.id}/submit-answer/',
         data=json.dumps(request_data),
         content_type='application/json'
     )
@@ -199,7 +199,7 @@ def test_timer_scenarios():
     }
     
     request = factory.post(
-        f'/api/placement/session/{session.id}/submit-answer/',
+        f'/api/PlacementTest/session/{session.id}/submit-answer/',
         data=json.dumps(request_data),
         content_type='application/json'
     )
@@ -255,7 +255,7 @@ def test_timer_scenarios():
     }
     
     request = factory.post(
-        f'/api/placement/session/{nt_session.id}/submit-answer/',
+        f'/api/PlacementTest/session/{nt_session.id}/submit-answer/',
         data=json.dumps(request_data),
         content_type='application/json'
     )
@@ -318,7 +318,7 @@ def test_race_condition_simulation():
         }
         
         request = factory.post(
-            f'/api/placement/session/{session.id}/submit-answer/',
+            f'/api/PlacementTest/session/{session.id}/submit-answer/',
             data=json.dumps(request_data),
             content_type='application/json'
         )

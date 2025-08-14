@@ -62,7 +62,7 @@ class ComprehensiveFeatureTest:
         
     def test_teacher_dashboard(self):
         """Test teacher dashboard loads and shows stats."""
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         assert response.status_code == 200
         content = response.content.decode('utf-8')
         # Check for dashboard elements
@@ -72,7 +72,7 @@ class ComprehensiveFeatureTest:
     
     def test_start_test_page(self):
         """Test placement test start page with form."""
-        response = self.client.get('/api/placement/start/')
+        response = self.client.get('/api/PlacementTest/start/')
         assert response.status_code == 200
         content = response.content.decode('utf-8')
         # Check for form fields
@@ -106,12 +106,12 @@ class ComprehensiveFeatureTest:
                 'parent_phone': '555-1234',
                 'school_name': 'Test School'
             }
-            response = self.client.post('/api/placement/start/', data)
+            response = self.client.post('/api/PlacementTest/start/', data)
             # Should redirect (302) or show error page (200/400)
             assert response.status_code in [200, 302, 400]
             if response.status_code == 302:
                 # Check redirect is to take test
-                assert '/api/placement/session/' in response.url
+                assert '/api/PlacementTest/session/' in response.url
         else:
             return "WARNING"  # No rules configured
     
@@ -122,7 +122,7 @@ class ComprehensiveFeatureTest:
         # Find an incomplete session
         session = StudentSession.objects.filter(completed_at__isnull=True).first()
         if session:
-            response = self.client.get(f'/api/placement/session/{session.id}/')
+            response = self.client.get(f'/api/PlacementTest/session/{session.id}/')
             assert response.status_code == 200
             content = response.content.decode('utf-8')
             # Check for test interface elements
@@ -139,14 +139,14 @@ class ComprehensiveFeatureTest:
                     exam=exam,
                     school_name_manual='Test School'
                 )
-                response = self.client.get(f'/api/placement/session/{session.id}/')
+                response = self.client.get(f'/api/PlacementTest/session/{session.id}/')
                 assert response.status_code == 200
     
     # ========== 3. EXAM MANAGEMENT ==========
     
     def test_exam_list_page(self):
         """Test exam list page shows exams."""
-        response = self.client.get('/api/placement/exams/')
+        response = self.client.get('/api/PlacementTest/exams/')
         assert response.status_code == 200
         content = response.content.decode('utf-8')
         
@@ -158,7 +158,7 @@ class ComprehensiveFeatureTest:
     
     def test_create_exam_page(self):
         """Test create exam page with form."""
-        response = self.client.get('/api/placement/exams/create/')
+        response = self.client.get('/api/PlacementTest/exams/create/')
         assert response.status_code == 200
         content = response.content.decode('utf-8')
         # Check for form elements
@@ -171,7 +171,7 @@ class ComprehensiveFeatureTest:
         
         exam = Exam.objects.first()
         if exam:
-            response = self.client.get(f'/api/placement/exams/{exam.id}/')
+            response = self.client.get(f'/api/PlacementTest/exams/{exam.id}/')
             assert response.status_code == 200
             content = response.content.decode('utf-8')
             assert exam.name in content
@@ -182,7 +182,7 @@ class ComprehensiveFeatureTest:
         
         exam = Exam.objects.first()
         if exam:
-            response = self.client.get(f'/api/placement/exams/{exam.id}/preview/')
+            response = self.client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
             assert response.status_code == 200
             content = response.content.decode('utf-8')
             # Should have question elements
@@ -199,7 +199,7 @@ class ComprehensiveFeatureTest:
             # Ensure exam has questions
             if not exam.questions.exists():
                 # Trigger question creation
-                response = self.client.get(f'/api/placement/exams/{exam.id}/preview/')
+                response = self.client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
                 
             # Check questions exist now
             questions = exam.questions.all()
@@ -230,7 +230,7 @@ class ComprehensiveFeatureTest:
             }
             
             response = self.client.post(
-                f'/api/placement/exams/{exam.id}/save-answers/',
+                f'/api/PlacementTest/exams/{exam.id}/save-answers/',
                 data=json.dumps(data),
                 content_type='application/json'
             )
@@ -271,7 +271,7 @@ class ComprehensiveFeatureTest:
     
     def test_session_list_page(self):
         """Test session list page."""
-        response = self.client.get('/api/placement/sessions/')
+        response = self.client.get('/api/PlacementTest/sessions/')
         assert response.status_code == 200
         content = response.content.decode('utf-8')
         
@@ -286,7 +286,7 @@ class ComprehensiveFeatureTest:
         
         session = StudentSession.objects.first()
         if session:
-            response = self.client.get(f'/api/placement/sessions/{session.id}/')
+            response = self.client.get(f'/api/PlacementTest/sessions/{session.id}/')
             assert response.status_code == 200
             content = response.content.decode('utf-8')
             assert session.student_name in content
@@ -319,7 +319,7 @@ class ComprehensiveFeatureTest:
             }
             
             response = self.client.post(
-                f'/api/placement/session/{session.id}/submit/',
+                f'/api/PlacementTest/session/{session.id}/submit/',
                 data=json.dumps(data),
                 content_type='application/json'
             )
@@ -437,7 +437,7 @@ class ComprehensiveFeatureTest:
         from placement_test.models import StudentSession
         session = StudentSession.objects.filter(completed_at__isnull=True).first()
         if session:
-            response = self.client.get(f'/api/placement/session/{session.id}/')
+            response = self.client.get(f'/api/PlacementTest/session/{session.id}/')
             assert response.status_code == 200
             # V2 template should be used
             assert 'student_test_v2' in str(response.templates) or response.status_code == 200

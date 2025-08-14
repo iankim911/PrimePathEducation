@@ -75,7 +75,7 @@ def test_navigation():
     # Test 2: Load test page
     print("\n[2] LOADING TEST PAGE")
     try:
-        test_url = reverse('placement_test:take_test', args=[session.id])
+        test_url = reverse('PlacementTest:take_test', args=[session.id])
         response = client.get(test_url)
         
         page_loads = response.status_code == 200

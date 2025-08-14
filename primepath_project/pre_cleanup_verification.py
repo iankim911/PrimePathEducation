@@ -254,7 +254,7 @@ def add_console_logging():
     }
     
     // Check API endpoints
-    fetch('/api/placement/exams/')
+    fetch('/api/PlacementTest/exams/')
         .then(r => console.log('[CLEANUP_VERIFY] ✅ API accessible'))
         .catch(e => console.error('[CLEANUP_VERIFY] ❌ API error:', e));
     '''

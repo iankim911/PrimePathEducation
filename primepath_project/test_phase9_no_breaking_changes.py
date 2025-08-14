@@ -124,10 +124,10 @@ class Phase9NoBreakingChangesTest:
         
         critical_urls = [
             ('/', 200),
-            ('/teacher/login/', 200),
+            ('/PlacementTest/teacher/login/', 200),
             ('/placement-rules/', 302),  # Redirect if not logged in
             ('/exam-mapping/', 302),
-            ('/api/placement/exams/', 200),
+            ('/api/PlacementTest/exams/', 200),
         ]
         
         for url, expected_status in critical_urls:
@@ -259,7 +259,7 @@ class Phase9NoBreakingChangesTest:
         print("\n🔍 TESTING API ENDPOINTS...")
         
         api_endpoints = [
-            '/api/placement/exams/',
+            '/api/PlacementTest/exams/',
             '/api/core/curriculum-levels/',
             '/api/health/'
         ]

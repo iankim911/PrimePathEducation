@@ -22,7 +22,7 @@ if session:
         
         # Test 1: POST with form data (traditional)
         print("\nTest 1: Form data POST")
-        response = client.post(f'/api/placement/session/{session.id}/submit/', {
+        response = client.post(f'/api/PlacementTest/session/{session.id}/submit/', {
             'question_id': str(question.id),
             'answer': 'A'
         })
@@ -33,7 +33,7 @@ if session:
         # Test 2: POST with JSON data
         print("\nTest 2: JSON POST")
         response = client.post(
-            f'/api/placement/session/{session.id}/submit/',
+            f'/api/PlacementTest/session/{session.id}/submit/',
             json.dumps({
                 'question_id': str(question.id),
                 'answer': 'B'

@@ -20,6 +20,9 @@
         constructor(options = {}) {
             super('AnswerManager', options);
             
+            console.log("[URL_UPDATE] AnswerManager using new URL structure");
+            console.log("[URL_UPDATE] PlacementTest API: /api/PlacementTest/");
+            
             // Answer storage
             this.answers = new Map();
             this.answeredQuestions = new Set();
@@ -40,7 +43,7 @@
             this.allowEmptySubmit = options.allowEmptySubmit || false;
             
             // API endpoints
-            this.saveEndpoint = options.saveEndpoint || '/api/placement/save-answer/';
+            this.saveEndpoint = options.saveEndpoint || '/api/PlacementTest/save-answer/';
             this.submitEndpoint = options.submitEndpoint || null;
             
             // UI elements
@@ -55,6 +58,9 @@
          */
         init(sessionId, options = {}) {
             if (this.initialized) return;
+            
+            console.log('[ANSWER_MANAGER_INIT] Initializing with sessionId:', sessionId);
+            console.log('[ANSWER_MANAGER_INIT] Options:', options);
             
             this.sessionId = sessionId || this.sessionId;
             Object.assign(this, options);
@@ -73,6 +79,7 @@
             // Initialize UI
             this.updateUI();
             
+            console.log('[ANSWER_MANAGER_INIT] Initialization complete');
             super.init();
         }
 
@@ -404,6 +411,12 @@
          * @param {string} defaultRedirectUrl - Default URL to redirect to if modal is closed
          */
         showDifficultyChoiceModal(sessionId, defaultRedirectUrl) {
+            // CRITICAL DEBUG: Log when modal is being shown
+            console.error('[MODAL_DEBUG] showDifficultyChoiceModal called!');
+            console.trace('[MODAL_DEBUG] Call stack:');
+            console.log('[MODAL_DEBUG] sessionId:', sessionId);
+            console.log('[MODAL_DEBUG] defaultRedirectUrl:', defaultRedirectUrl);
+            
             const modal = document.getElementById('difficulty-choice-modal');
             if (!modal) {
                 this.log('warn', 'Difficulty choice modal not found, redirecting to results');
@@ -412,6 +425,7 @@
             }
             
             // Show the modal
+            console.error('[MODAL_DEBUG] About to show modal with display: flex');
             modal.style.display = 'flex';
             
             // Store session data for later use
@@ -473,7 +487,7 @@
             buttons.forEach(btn => btn.disabled = true);
             
             try {
-                const endpoint = `/api/placement/session/${sessionId}/post-submit-difficulty/`;
+                const endpoint = `/api/PlacementTest/session/${sessionId}/post-submit-difficulty/`;
                 const response = await this.ajax(endpoint, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -545,8 +559,14 @@
          * @param {boolean} isTimerExpiry Whether this is triggered by timer expiry
          */
         async submitTest(force = false, isTimerExpiry = false) {
+            console.error('[SUBMIT_TEST_CALLED] submitTest function called!');
+            console.trace('[SUBMIT_TEST_CALLED] Call stack:');
+            console.log('[SUBMIT_TEST_CALLED] force:', force, 'isTimerExpiry:', isTimerExpiry);
+            
             // Defensive check for sessionId with multiple fallbacks
             const sessionId = this.getSessionId();
+            console.log('[SUBMIT_TEST_CALLED] sessionId:', sessionId);
+            
             if (!sessionId) {
                 this.log('error', 'Cannot submit test: session ID not available');
                 alert('Unable to submit test. Session information is missing. Please refresh the page and try again.');
@@ -586,7 +606,7 @@
             // Submit to server
             try {
                 const endpoint = this.submitEndpoint || 
-                    `/api/placement/session/${sessionId}/complete/`;
+                    `/api/PlacementTest/session/${sessionId}/complete/`;
                 
                 const response = await this.ajax(endpoint, {
                     method: 'POST',
@@ -599,13 +619,16 @@
                 });
                 
                 if (response.success) {
+                    console.log('[SUBMIT_TEST] Response received:', response);
                     this.emit('testSubmitted', response);
                     
                     // Clear auto-save
                     this.stopAutoSave();
                     
                     // Check if we should show difficulty choice modal
+                    console.log('[SUBMIT_TEST] show_difficulty_choice flag:', response.show_difficulty_choice);
                     if (response.show_difficulty_choice) {
+                        console.error('[SUBMIT_TEST] Showing difficulty modal from submit response');
                         this.showDifficultyChoiceModal(sessionId, response.redirect_url);
                         return true;
                     }
@@ -627,7 +650,7 @@
                 // For timer expiry, still try to redirect even if submission failed
                 if (isTimerExpiry) {
                     this.log('warn', 'Timer expired but submission failed. Redirecting to results.');
-                    window.location.href = `/api/placement/session/${sessionId}/result/`;
+                    window.location.href = `/api/PlacementTest/session/${sessionId}/result/`;
                 }
                 
                 return false;
@@ -828,8 +851,25 @@
         }
     }
 
-    // Export to PrimePath namespace
-    window.PrimePath.modules.AnswerManager = AnswerManager;
+    // Export to PrimePath namespace with safety check
+    try {
+        if (window.PrimePath && window.PrimePath.modules) {
+            window.PrimePath.modules.AnswerManager = AnswerManager;
+            console.log('[AnswerManager] ✓ Module exported to PrimePath.modules.AnswerManager');
+            
+            // Track initialization if bootstrap is available
+            if (window.PrimePath.trackInit) {
+                window.PrimePath.trackInit('AnswerManager', true);
+            }
+        } else {
+            console.error('[AnswerManager] Cannot export - namespace not available');
+        }
+    } catch (error) {
+        console.error('[AnswerManager] Export failed:', error);
+        if (window.PrimePath && window.PrimePath.trackInit) {
+            window.PrimePath.trackInit('AnswerManager', false, error.message);
+        }
+    }
 
     // Create global instance for backward compatibility
     window.answerManager = null;

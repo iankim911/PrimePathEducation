@@ -17,7 +17,7 @@ console.table(verificationResults);
 console.log('%c===== BROWSER FEATURE TESTS =====', 'color: green; font-weight: bold');
 
 // Check if exam dropdown populates
-fetch('/api/placement/exams/create/')
+fetch('/api/PlacementTest/exams/create/')
     .then(response => {
         if (response.ok) {
             console.log('✅ [VERIFY] Exam creation endpoint works');

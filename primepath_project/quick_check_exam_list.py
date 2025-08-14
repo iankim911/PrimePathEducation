@@ -15,7 +15,7 @@ from django.urls import reverse
 
 # Test exam list
 client = Client()
-response = client.get(reverse('placement_test:exam_list'))
+response = client.get(reverse('PlacementTest:exam_list'))
 
 print(f"Status: {response.status_code}")
 

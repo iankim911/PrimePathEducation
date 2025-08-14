@@ -69,8 +69,8 @@ def test_url_configuration():
         
         urls_to_test = [
             'core:teacher_dashboard',
-            'placement_test:exam_list',
-            'placement_test:create_exam',
+            'PlacementTest:exam_list',
+            'PlacementTest:create_exam',
             'core:placement_rules',
             'core:exam_mapping'
         ]
@@ -228,7 +228,7 @@ def generate_console_script():
     });
     
     // Check API endpoints
-    fetch('/api/placement/exams/')
+    fetch('/api/PlacementTest/exams/')
         .then(r => {
             console.log('✅ Exam API accessible');
             return r.json();

@@ -64,7 +64,7 @@ class DualDifficultyAdjustmentTest:
         if session:
             try:
                 # Access the test interface
-                response = self.client.get(f'/api/placement/session/{session.id}/')
+                response = self.client.get(f'/api/PlacementTest/session/{session.id}/')
                 
                 self.log_result("Test interface loads", response.status_code == 200,
                               f"Status: {response.status_code}")
@@ -80,7 +80,7 @@ class DualDifficultyAdjustmentTest:
                     
                     # Test the manual adjust endpoint exists
                     try:
-                        url = reverse('placement_test:manual_adjust_difficulty', 
+                        url = reverse('PlacementTest:manual_adjust_difficulty', 
                                     kwargs={'session_id': session.id})
                         self.log_result("Manual adjust difficulty URL exists", True, url)
                     except:
@@ -113,7 +113,7 @@ class DualDifficultyAdjustmentTest:
         
         try:
             # Complete the test via AJAX (simulating JavaScript)
-            complete_url = reverse('placement_test:complete_test', 
+            complete_url = reverse('PlacementTest:complete_test', 
                                  kwargs={'session_id': session.id})
             
             response = self.client.post(
@@ -144,7 +144,7 @@ class DualDifficultyAdjustmentTest:
                     
                     # Test the post-submit difficulty endpoint
                     try:
-                        post_submit_url = reverse('placement_test:post_submit_difficulty_choice',
+                        post_submit_url = reverse('PlacementTest:post_submit_difficulty_choice',
                                                 kwargs={'session_id': session.id})
                         
                         # Test choosing "Just Right" (0)
@@ -201,7 +201,7 @@ class DualDifficultyAdjustmentTest:
             try:
                 # Access results page
                 response = self.client.get(
-                    reverse('placement_test:test_result', 
+                    reverse('PlacementTest:test_result', 
                           kwargs={'session_id': session.id})
                 )
                 
@@ -223,7 +223,7 @@ class DualDifficultyAdjustmentTest:
                     
                     # Test the request_difficulty_change endpoint
                     try:
-                        url = reverse('placement_test:request_difficulty_change')
+                        url = reverse('PlacementTest:request_difficulty_change')
                         self.log_result("Request difficulty change URL exists", True, url)
                     except:
                         self.log_result("Request difficulty change URL exists", False)

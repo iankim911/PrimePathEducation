@@ -83,7 +83,7 @@ def test_answer_mapping_status():
     client.force_login(user)
     
     # Test exam list view
-    response = client.get('/placement/exams/')
+    response = client.get('/PlacementTest/exams/')
     if response.status_code == 200:
         print("  ✅ Exam list view loads successfully")
         
@@ -181,7 +181,7 @@ def test_ui_elements():
     
     client.force_login(user)
     
-    response = client.get('/placement/exams/')
+    response = client.get('/PlacementTest/exams/')
     
     if response.status_code == 200:
         content = response.content.decode('utf-8')
@@ -254,7 +254,7 @@ def main():
         
         print("\n💡 To see the feature in action:")
         print("  1. Start the server")
-        print("  2. Navigate to /placement/exams/")
+        print("  2. Navigate to /PlacementTest/exams/")
         print("  3. Look for the colored indicators on each exam card")
         print("  4. Check browser console for detailed logging")
         

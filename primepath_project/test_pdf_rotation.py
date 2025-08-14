@@ -70,7 +70,7 @@ def test_pdf_rotation_feature():
             }
             
             response = client.post(
-                f'/api/placement/exams/{exam.id}/save-answers/',
+                f'/api/PlacementTest/exams/{exam.id}/save-answers/',
                 data=json.dumps(test_data),
                 content_type='application/json'
             )

@@ -89,11 +89,11 @@ class TestPhase8Compatibility:
         assert response.status_code == 200, f"Home page failed: {response.status_code}"
         
         # Test teacher dashboard
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         assert response.status_code == 200, f"Dashboard failed: {response.status_code}"
         
         # Test placement test start page
-        response = self.client.get('/placement/start/')
+        response = self.client.get('/PlacementTest/start/')
         assert response.status_code == 200, f"Start test failed: {response.status_code}"
         
         print("  - Existing views still functional")
@@ -258,7 +258,7 @@ class TestPhase8Compatibility:
     def test_template_compatibility(self):
         """Test that templates still work with API."""
         # Test that traditional template views still render
-        response = self.client.get('/placement/exams/')
+        response = self.client.get('/PlacementTest/exams/')
         
         # Should return HTML for traditional views
         if response.status_code == 200:
@@ -271,7 +271,7 @@ class TestPhase8Compatibility:
         """Test that JavaScript AJAX calls would still work."""
         # Test endpoints that JavaScript uses
         endpoints = [
-            '/api/placement/start/',
+            '/api/PlacementTest/start/',
             '/curriculum/levels/',
         ]
         

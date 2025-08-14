@@ -72,7 +72,7 @@ def test_submission_workflow():
         }
         
         response = requests.post(
-            f"{base_url}/api/placement/session/{session.id}/submit/",
+            f"{base_url}/api/PlacementTest/session/{session.id}/submit/",
             json=answer_data,
             headers={'Content-Type': 'application/json'}
         )
@@ -85,7 +85,7 @@ def test_submission_workflow():
     
     # Complete the test normally
     response = requests.post(
-        f"{base_url}/api/placement/session/{session.id}/complete/",
+        f"{base_url}/api/PlacementTest/session/{session.id}/complete/",
         json={'session_id': str(session.id)}
     )
     
@@ -114,7 +114,7 @@ def test_submission_workflow():
     }
     
     response = requests.post(
-        f"{base_url}/api/placement/session/{session.id}/submit/",
+        f"{base_url}/api/PlacementTest/session/{session.id}/submit/",
         json=answer_data,
         headers={'Content-Type': 'application/json'}
     )
@@ -143,7 +143,7 @@ def test_submission_workflow():
     
     # Simulate timer expiry with unsaved answers
     response = requests.post(
-        f"{base_url}/api/placement/session/{session2.id}/complete/",
+        f"{base_url}/api/PlacementTest/session/{session2.id}/complete/",
         json={
             'session_id': str(session2.id),
             'timer_expired': True,
@@ -182,7 +182,7 @@ def test_submission_workflow():
     }
     
     response = requests.post(
-        f"{base_url}/api/placement/session/{session3.id}/submit/",
+        f"{base_url}/api/PlacementTest/session/{session3.id}/submit/",
         json=answer_data,
         headers={'Content-Type': 'application/json'}
     )

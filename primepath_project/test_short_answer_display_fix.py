@@ -144,7 +144,7 @@ def test_short_answer_display():
             'options_count': 4 if case['type'] == 'MCQ' else None
         })
     
-    save_url = f"{base_url}/api/placement/exams/{exam.id}/save-answers/"
+    save_url = f"{base_url}/api/PlacementTest/exams/{exam.id}/save-answers/"
     
     try:
         response = requests.post(
@@ -168,7 +168,7 @@ def test_short_answer_display():
     print("\n📋 TEST 2: Check Preview Page Display")
     print("-" * 40)
     
-    preview_url = f"{base_url}/api/placement/exams/{exam.id}/preview/"
+    preview_url = f"{base_url}/api/PlacementTest/exams/{exam.id}/preview/"
     
     try:
         response = requests.get(preview_url, timeout=10)

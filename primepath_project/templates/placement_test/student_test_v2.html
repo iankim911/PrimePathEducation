@@ -150,6 +150,34 @@
     <!-- Include Difficulty Choice Modal -->
     {% include 'components/placement_test/difficulty_choice_modal.html' %}
     
+    <!-- Debug modal state immediately after include -->
+    <script>
+        (function() {
+            const modal = document.getElementById('difficulty-choice-modal');
+            if (modal) {
+                console.error('[MODAL_STATE_AFTER_INCLUDE] Modal display style:', modal.style.display);
+                console.error('[MODAL_STATE_AFTER_INCLUDE] Modal computed style:', window.getComputedStyle(modal).display);
+                
+                // Add MutationObserver to track when modal display changes
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            console.error('[MODAL_MUTATION] Display changed to:', modal.style.display);
+                            console.trace('[MODAL_MUTATION] Stack trace:');
+                        }
+                    });
+                });
+                
+                observer.observe(modal, {
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
+            } else {
+                console.error('[MODAL_STATE_AFTER_INCLUDE] Modal not found!');
+            }
+        })();
+    </script>
+    
     <!-- Load PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
@@ -182,10 +210,10 @@
             session: djangoConfig.session || {},
             exam: djangoConfig.exam || {},
             urls: {
-                saveAnswer: '{% url "placement_test:submit_answer" session.id %}',
-                completeTest: '{% url "placement_test:complete_test" session.id %}',
-                getAudio: '{% url "placement_test:get_audio" 0 %}'.replace('0', '{id}'),
-                adjustDifficulty: '{% url "placement_test:manual_adjust_difficulty" session.id %}'
+                saveAnswer: '{% url "PlacementTest:submit_answer" session.id %}',
+                completeTest: '{% url "PlacementTest:complete_test" session.id %}',
+                getAudio: '{% url "PlacementTest:get_audio" 0 %}'.replace('0', '{id}'),
+                adjustDifficulty: '{% url "PlacementTest:manual_adjust_difficulty" session.id %}'
             },
             questions: djangoConfig.questions || [],
             audioFiles: djangoConfig.audioFiles || [],
@@ -205,10 +233,17 @@
     })();
     </script>
     
-    <!-- Load modular JavaScript AFTER APP_CONFIG is set (with cache busting) -->
+    <!-- CRITICAL: Load bootstrap FIRST to ensure namespaces exist -->
+    <script src="{% static 'js/bootstrap.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Load core utilities and config -->
     <script src="{% static 'js/config/app-config.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/utils/module-loader.js' %}?v={{ current_timestamp }}"></script>
     <script src="{% static 'js/utils/event-delegation.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Base module and helper -->
     <script src="{% static 'js/modules/base-module.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/module-init-helper.js' %}?v={{ current_timestamp }}"></script>
     <script src="{% static 'js/modules/pdf-viewer.js' %}?v={{ current_timestamp }}"></script>
     <script src="{% static 'js/modules/audio-player.js' %}?v={{ current_timestamp }}"></script>
     <script src="{% static 'js/modules/timer.js' %}?v={{ current_timestamp }}"></script>
@@ -219,163 +254,274 @@
     <script src="{% static 'js/modules/mobile-handler.js' %}?v={{ current_timestamp }}"></script>
     
     <script>
-    // Initialize modules after DOM is ready
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize event delegation first
-        if (window.PrimePath && window.PrimePath.utils && window.PrimePath.utils.EventDelegation) {
-            window.PrimePath.utils.EventDelegation.init();
+    // Enhanced module initialization with comprehensive error handling
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('===== PRIMEPATH INITIALIZATION STARTING =====');
+        console.log('[INIT] Page loaded at:', new Date().toISOString());
+        console.log('[INIT] Current URL:', window.location.href);
+        console.log('[INIT] User Agent:', navigator.userAgent);
+        
+        // Step 1: Verify bootstrap loaded correctly
+        console.group('[INIT] Step 1: Verifying bootstrap initialization');
+        
+        if (window.PrimePath && window.PrimePath.state && window.PrimePath.state.bootstrapComplete) {
+            console.log('  ✅ Bootstrap loaded successfully');
+            const health = window.PrimePath.healthCheck();
+            console.log(`  ✅ Health Score: ${health.score}%`);
+            console.log(`  ✅ Status: ${health.status}`);
         } else {
-            console.error('EventDelegation not loaded');
+            console.error('  ❌ Bootstrap not loaded properly!');
+            console.log('  Creating emergency namespaces...');
+            // Emergency namespace creation
+            window.PrimePath = window.PrimePath || {};
+            window.PrimePath.utils = window.PrimePath.utils || {};
+            window.PrimePath.modules = window.PrimePath.modules || {};
+            window.PrimePath.state = window.PrimePath.state || {};
         }
         
-        // Initialize PDF viewer with optimized scale for readability
-        const pdfViewer = new PrimePath.modules.PDFViewer({
-            // scale: defaults to 1.8 in module for better readability
-            enableCache: true
+        const namespaceChecks = [
+            { path: 'window.PrimePath', exists: !!window.PrimePath },
+            { path: 'window.PrimePath.utils', exists: !!(window.PrimePath && window.PrimePath.utils) },
+            { path: 'window.PrimePath.modules', exists: !!(window.PrimePath && window.PrimePath.modules) },
+            { path: 'window.APP_CONFIG', exists: !!window.APP_CONFIG }
+        ];
+        
+        namespaceChecks.forEach(check => {
+            console.log(`  ${check.exists ? '✅' : '❌'} ${check.path}`);
         });
+        console.groupEnd();
         
-        // Get PDF URL from multiple sources for robustness
-        const pdfViewerElement = document.querySelector('#pdf-viewer');
-        let pdfUrl = null;
-        
-        // Try to get from data attribute first (most reliable)
-        if (pdfViewerElement && pdfViewerElement.dataset.pdfUrl) {
-            pdfUrl = pdfViewerElement.dataset.pdfUrl;
-        }
-        // Fallback to APP_CONFIG
-        else if (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.pdfUrl) {
-            pdfUrl = APP_CONFIG.exam.pdfUrl;
-        }
-        
-        // The PDF viewer will now handle rotation internally:
-        // - Admin-set default rotation is applied automatically
-        // - Per-page student rotations are saved in sessionStorage
-        // - Rotations persist as students navigate between pages
-        
-        if (pdfUrl) {
-            pdfViewer.init('#pdf-viewer', pdfUrl);
-        } else {
-            console.error('PDF URL not found in either data attribute or APP_CONFIG');
-            // Show error message to user
-            const errorDiv = document.querySelector('.pdf-error');
-            if (errorDiv) {
-                errorDiv.style.display = 'block';
-            }
-        }
-        
-        // Initialize timer
-        const timer = new PrimePath.modules.Timer({
-            warnings: [
-                { time: 300, message: '5 minutes remaining', class: 'warning' },
-                { time: 60, message: '1 minute remaining', class: 'danger' }
-            ],
-            onExpire: function() {
-                if (window.answerManager) {
-                    // Pass true for force, true for isTimerExpiry
-                    window.answerManager.submitTest(true, true);
-                }
-            }
-        });
-        
-        const timerElement = document.querySelector('[data-timer-seconds]');
-        if (timerElement) {
-            const timerSeconds = parseInt(timerElement.dataset.timerSeconds);
-            timer.init(timerSeconds, '#timer');
-            timer.start();
-        }
-        
-        // Initialize audio player
-        const audioPlayer = new PrimePath.modules.AudioPlayer({
-            allowMultiple: false
-        });
-        audioPlayer.init();
-        
-        // Initialize answer manager with enhanced defensive checks and fallbacks
-        let answerManager = null;
-        
-        // Ensure AnswerManager class is available
-        if (!window.PrimePath || !window.PrimePath.modules || !window.PrimePath.modules.AnswerManager) {
-            console.error('AnswerManager module not loaded');
-        } else {
-            // Try to initialize with multiple fallback sources
-            const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
-                              window.sessionId || 
-                              '{{ session.id }}' || 
-                              null;
-            
-            const examId = (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.id) || 
-                           window.examId || 
-                           '{{ exam.id }}' || 
-                           null;
-            
-            if (sessionId && examId) {
-                try {
-                    answerManager = new PrimePath.modules.AnswerManager({
-                        session: APP_CONFIG && APP_CONFIG.session,  // Pass full session object for compatibility
-                        sessionId: sessionId,
-                        examId: examId,
-                        autoSave: true,
-                        autoSaveInterval: 30000,
-                        saveEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.saveAnswer) || 
-                                      '{% url "placement_test:submit_answer" session.id %}',
-                        submitEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest) || 
-                                        '{% url "placement_test:complete_test" session.id %}'
-                    });
-                    // Pass sessionId to init method
-                    answerManager.init(sessionId);
-                    
-                    // Only log in debug mode  
-                    if (window.PrimePath && window.PrimePath.config && window.PrimePath.config.isDebugMode && window.PrimePath.config.isDebugMode()) {
-                        console.log('Answer manager initialized successfully with session:', sessionId);
+        // Step 2: Initialize Event Delegation
+        console.group('[INIT] Step 2: Initializing Event Delegation');
+        try {
+            if (window.PrimePath.utils.EventDelegation) {
+                window.PrimePath.utils.EventDelegation.init();
+                console.log('  ✅ EventDelegation initialized successfully');
+            } else {
+                console.error('  ❌ EventDelegation not found, creating fallback');
+                // Create a minimal fallback
+                window.PrimePath.utils.EventDelegation = {
+                    init: function() { console.warn('Using EventDelegation fallback'); },
+                    onClick: function(selector, handler) {
+                        document.addEventListener('click', function(e) {
+                            const el = e.target.closest(selector);
+                            if (el) handler.call(el, e);
+                        });
+                    },
+                    onChange: function(selector, handler) {
+                        document.addEventListener('change', function(e) {
+                            const el = e.target.closest(selector);
+                            if (el) handler.call(el, e);
+                        });
                     }
-                } catch (error) {
-                    console.error('Error initializing answer manager:', error);
-                    answerManager = null;
+                };
+                window.PrimePath.utils.EventDelegation.init();
+            }
+        } catch (error) {
+            console.error('  ❌ EventDelegation initialization failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 3: Initialize PDF viewer with error handling
+        console.group('[INIT] Step 3: Initializing PDF Viewer');
+        let pdfViewer = null;
+        try {
+            if (window.PrimePath.modules.PDFViewer) {
+                pdfViewer = new PrimePath.modules.PDFViewer({
+                    enableCache: true
+                });
+                
+                // Get PDF URL from multiple sources
+                const pdfViewerElement = document.querySelector('#pdf-viewer');
+                let pdfUrl = null;
+                
+                if (pdfViewerElement && pdfViewerElement.dataset.pdfUrl) {
+                    pdfUrl = pdfViewerElement.dataset.pdfUrl;
+                } else if (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.pdfUrl) {
+                    pdfUrl = APP_CONFIG.exam.pdfUrl;
+                }
+                
+                if (pdfUrl) {
+                    pdfViewer.init('#pdf-viewer', pdfUrl);
+                    console.log('  ✅ PDF Viewer initialized with URL:', pdfUrl);
+                } else {
+                    console.warn('  ⚠️ PDF URL not found, viewer inactive');
                 }
             } else {
-                console.error('Cannot initialize answer manager: missing session or exam ID');
-                console.log('Session ID:', sessionId, 'Exam ID:', examId);
-                console.log('APP_CONFIG:', APP_CONFIG);
+                console.error('  ❌ PDFViewer module not found');
             }
+        } catch (error) {
+            console.error('  ❌ PDF Viewer initialization failed:', error);
         }
+        console.groupEnd();
         
-        // Make instances globally available BEFORE navigation init
+        // Step 4: Initialize Timer with error handling
+        console.group('[INIT] Step 4: Initializing Timer');
+        let timer = null;
+        try {
+            if (window.PrimePath.modules.Timer) {
+                timer = new PrimePath.modules.Timer({
+                    warnings: [
+                        { time: 300, message: '5 minutes remaining', class: 'warning' },
+                        { time: 60, message: '1 minute remaining', class: 'danger' }
+                    ],
+                    onExpire: function() {
+                        console.warn('[Timer] Timer expired, attempting to submit test');
+                        if (window.answerManager) {
+                            window.answerManager.submitTest(true, true);
+                        } else {
+                            console.error('[Timer] Cannot submit - answerManager not available');
+                        }
+                    }
+                });
+                
+                const timerElement = document.querySelector('[data-timer-seconds]');
+                if (timerElement) {
+                    const timerSeconds = parseInt(timerElement.dataset.timerSeconds);
+                    if (timerSeconds && timerSeconds > 0) {
+                        timer.init(timerSeconds, '#timer');
+                        timer.start();
+                        console.log('  ✅ Timer initialized with', timerSeconds, 'seconds');
+                    } else {
+                        console.log('  ℹ️ No timer needed for this exam');
+                    }
+                } else {
+                    console.log('  ℹ️ Timer element not found');
+                }
+            } else {
+                console.error('  ❌ Timer module not found');
+            }
+        } catch (error) {
+            console.error('  ❌ Timer initialization failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 5: Initialize Audio Player
+        console.group('[INIT] Step 5: Initializing Audio Player');
+        let audioPlayer = null;
+        try {
+            if (window.PrimePath.modules.AudioPlayer) {
+                audioPlayer = new PrimePath.modules.AudioPlayer({
+                    allowMultiple: false
+                });
+                audioPlayer.init();
+                console.log('  ✅ Audio Player initialized');
+            } else {
+                console.error('  ❌ AudioPlayer module not found');
+            }
+        } catch (error) {
+            console.error('  ❌ Audio Player initialization failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 6: Initialize Answer Manager (CRITICAL MODULE)
+        console.group('[INIT] Step 6: Initializing Answer Manager');
+        let answerManager = null;
+        
+        try {
+            // Check module availability
+            if (!window.PrimePath.modules.AnswerManager) {
+                console.error('  ❌ AnswerManager module not found');
+                console.log('  Available modules:', Object.keys(window.PrimePath.modules || {}));
+            } else {
+                // Extract session and exam IDs with multiple fallbacks
+                const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
+                                  window.sessionId || 
+                                  '{{ session.id }}' || 
+                                  null;
+                
+                const examId = (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.id) || 
+                               window.examId || 
+                               '{{ exam.id }}' || 
+                               null;
+                
+                console.log('  Session ID:', sessionId);
+                console.log('  Exam ID:', examId);
+                
+                if (sessionId && examId) {
+                    try {
+                        answerManager = new PrimePath.modules.AnswerManager({
+                            session: APP_CONFIG && APP_CONFIG.session,
+                            sessionId: sessionId,
+                            examId: examId,
+                            autoSave: true,
+                            autoSaveInterval: 30000,
+                            saveEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.saveAnswer) || 
+                                          '{% url "PlacementTest:submit_answer" session.id %}',
+                            submitEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest) || 
+                                            '{% url "PlacementTest:complete_test" session.id %}'
+                        });
+                        
+                        answerManager.init(sessionId);
+                        console.log('  ✅ Answer Manager initialized successfully');
+                        
+                    } catch (error) {
+                        console.error('  ❌ Answer Manager initialization error:', error);
+                        answerManager = null;
+                    }
+                } else {
+                    console.error('  ❌ Cannot initialize: Missing session or exam ID');
+                    console.log('  APP_CONFIG:', APP_CONFIG);
+                }
+            }
+        } catch (error) {
+            console.error('  ❌ Answer Manager setup failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 7: Make instances globally available
+        console.group('[INIT] Step 7: Registering global instances');
         window.pdfViewer = pdfViewer;
         window.audioPlayer = audioPlayer;
         window.examTimer = timer;
         window.answerManager = answerManager;
+        console.log('  Global instances registered:');
+        console.log('    pdfViewer:', !!window.pdfViewer);
+        console.log('    audioPlayer:', !!window.audioPlayer);
+        console.log('    examTimer:', !!window.examTimer);
+        console.log('    answerManager:', !!window.answerManager);
+        console.groupEnd();
         
-        // Initialize navigation module AFTER other modules are available
-        const navigation = new PrimePath.modules.NavigationModule({
-            enableKeyboard: true,
-            enableUrlState: false,  // Disable URL state for exam security
-            autoSaveOnNavigate: true,
-            focusOnNavigate: true,
-            onBeforeNavigate: async function(from, to) {
-                // Optional: Add confirmation for unsaved changes
-                return true;
-            },
-            onAfterNavigate: function(to, from) {
-                // Optional: Track navigation for analytics (only in debug mode)
-                if (window.PrimePath && window.PrimePath.config && window.PrimePath.config.isDebugMode && window.PrimePath.config.isDebugMode()) {
-                    console.log(`Navigated from question ${from} to ${to}`);
-                }
+        // Step 8: Initialize Navigation Module
+        console.group('[INIT] Step 8: Initializing Navigation');
+        let navigation = null;
+        try {
+            if (window.PrimePath.modules.NavigationModule) {
+                navigation = new PrimePath.modules.NavigationModule({
+                    enableKeyboard: true,
+                    enableUrlState: false,
+                    autoSaveOnNavigate: true,
+                    focusOnNavigate: true,
+                    onBeforeNavigate: async function(from, to) {
+                        return true;
+                    },
+                    onAfterNavigate: function(to, from) {
+                        console.log(`[Navigation] Question ${from} → ${to}`);
+                    }
+                });
+                
+                navigation.init();
+                window.navigation = navigation;
+                console.log('  ✅ Navigation module initialized');
+            } else {
+                console.error('  ❌ NavigationModule not found');
             }
-        });
+        } catch (error) {
+            console.error('  ❌ Navigation initialization failed:', error);
+        }
+        console.groupEnd();
         
-        // Initialize navigation after dependencies are available
-        navigation.init();
-        window.navigation = navigation;
-        
-        // Setup event delegation for proper event handling
+        // Step 9: Setup Event Handlers
+        console.group('[INIT] Step 9: Setting up event handlers');
         const delegation = window.PrimePath.utils.EventDelegation;
         
-        // NOTE: Navigation module handles these events internally
-        // We don't need to set them up here to avoid duplicate handlers
-        // The navigation.init() call already sets up all navigation event handlers
-        
-        // Submit test with enhanced error handling and fallback
-        delegation.onClick('[data-action="submit-test"]', function() {
+        if (!delegation) {
+            console.error('  ❌ EventDelegation not available');
+        } else {
+            console.log('  Setting up submit handler...');
+            
+            // Submit test with enhanced error handling and fallback
+            delegation.onClick('[data-action="submit-test"]', function() {
             if (!answerManager) {
                 console.error('Answer manager not initialized, attempting fallback submission...');
                 
@@ -387,7 +533,7 @@
                     // Direct submission without answer manager as fallback
                     if (confirm('There was an issue with the test system. Do you want to submit your test anyway?')) {
                         const csrfToken = '{{ csrf_token }}';
-                        fetch(`/api/placement/session/${sessionId}/complete/`, {
+                        fetch(`/api/PlacementTest/session/${sessionId}/complete/`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -429,34 +575,40 @@
                     answerManager.submitTest(true); // Force submission
                 }
             }
-        });
-        
-        // Handle answer input changes (covers all input types: radio, checkbox, text)
-        delegation.onChange('.answer-input', function(e) {
-            const questionPanel = this.closest('.question-panel');
-            if (questionPanel && answerManager) {
-                const questionNum = parseInt(questionPanel.dataset.questionNumber);
-                answerManager.saveAnswer(questionNum);
-                console.log(`Answer saved for question ${questionNum}`);
-            }
-        });
-        
-        // Listen to answer manager events
-        if (answerManager) {
-            answerManager.on('questionAnswered', function(data) {
-            const navBtn = document.querySelector(`.question-nav-btn[data-question="${data.questionNum}"]`);
-            if (navBtn) {
-                navBtn.classList.add('answered');
+            });
+            
+            // Handle answer input changes
+            console.log('  Setting up answer change handler...');
+            delegation.onChange('.answer-input', function(e) {
+                const questionPanel = this.closest('.question-panel');
+                if (questionPanel && answerManager) {
+                    const questionNum = parseInt(questionPanel.dataset.questionNumber);
+                    answerManager.saveAnswer(questionNum);
+                    console.log(`[AnswerManager] Answer saved for question ${questionNum}`);
+                }
+            });
+            
+            // Listen to answer manager events
+            if (answerManager) {
+                console.log('  Setting up answer manager event listeners...');
+                answerManager.on('questionAnswered', function(data) {
+                    const navBtn = document.querySelector(`.question-nav-btn[data-question="${data.questionNum}"]`);
+                    if (navBtn) {
+                        navBtn.classList.add('answered');
+                    }
+                    
+                    // Update progress
+                    const stats = answerManager.getStats();
+                    const progressEl = document.getElementById('answer-progress');
+                    if (progressEl) {
+                        progressEl.textContent = `${stats.answeredCount} / ${stats.totalQuestions} answered`;
+                    }
+                });
             }
             
-            // Update progress
-            const stats = answerManager.getStats();
-            const progressEl = document.getElementById('answer-progress');
-            if (progressEl) {
-                progressEl.textContent = `${stats.answeredCount} / ${stats.totalQuestions} answered`;
-            }
-            });
+            console.log('  ✅ Event handlers configured');
         }
+        console.groupEnd();
         
         // Navigation module handles initial question display
         // Note: All instances already made globally available above before navigation init
@@ -528,6 +680,59 @@
                 });
             });
         });
+        
+        // Step 10: Final Initialization Summary
+        console.group('[INIT] Step 10: Initialization Summary');
+        const initStatus = {
+            core: {
+                'APP_CONFIG': !!window.APP_CONFIG,
+                'PrimePath namespace': !!window.PrimePath,
+                'EventDelegation': !!window.PrimePath.utils.EventDelegation
+            },
+            modules: {
+                'PDFViewer': !!pdfViewer,
+                'Timer': !!timer,
+                'AudioPlayer': !!audioPlayer,
+                'AnswerManager': !!answerManager,
+                'Navigation': !!navigation
+            },
+            critical: {
+                'Session ID': !!(APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id),
+                'Exam ID': !!(APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.id),
+                'Submit URL': !!(APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest)
+            }
+        };
+        
+        // Check overall health
+        let successCount = 0;
+        let totalCount = 0;
+        
+        Object.keys(initStatus).forEach(category => {
+            console.group(`  ${category}:`);
+            Object.keys(initStatus[category]).forEach(item => {
+                const status = initStatus[category][item];
+                console.log(`    ${status ? '✅' : '❌'} ${item}`);
+                totalCount++;
+                if (status) successCount++;
+            });
+            console.groupEnd();
+        });
+        
+        const successRate = Math.round((successCount / totalCount) * 100);
+        console.log(`\n  Overall Success Rate: ${successRate}% (${successCount}/${totalCount})`);
+        
+        if (successRate < 50) {
+            console.error('  ⚠️ CRITICAL: Less than 50% of modules initialized successfully');
+            console.error('  The test interface may not function properly');
+        } else if (successRate < 80) {
+            console.warn('  ⚠️ WARNING: Some modules failed to initialize');
+            console.warn('  Some features may not be available');
+        } else {
+            console.log('  ✅ Initialization completed successfully');
+        }
+        
+        console.groupEnd();
+        console.log('===== PRIMEPATH INITIALIZATION COMPLETE =====\n\n');
     });
     </script>
 </body>

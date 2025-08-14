@@ -118,7 +118,7 @@ def test_production_race_condition():
         }
         
         request = factory.post(
-            f'/api/placement/session/{session.id}/submit-answer/',
+            f'/api/PlacementTest/session/{session.id}/submit-answer/',
             data=json.dumps(request_data),
             content_type='application/json'
         )
@@ -192,7 +192,7 @@ def test_production_race_condition():
         }
         
         request = factory.post(
-            f'/api/placement/session/{session.id}/submit-answer/',
+            f'/api/PlacementTest/session/{session.id}/submit-answer/',
             data=json.dumps(request_data),
             content_type='application/json'
         )

@@ -35,10 +35,10 @@ class TemplateConsolidationTest:
         """Test that all views render without errors"""
         test_name = "All Views Render"
         views_to_test = [
-            ('placement_test:start_test', {}, 'GET'),
-            ('placement_test:exam_list', {}, 'GET'),
-            ('placement_test:create_exam', {}, 'GET'),
-            ('placement_test:session_list', {}, 'GET'),
+            ('PlacementTest:start_test', {}, 'GET'),
+            ('PlacementTest:exam_list', {}, 'GET'),
+            ('PlacementTest:create_exam', {}, 'GET'),
+            ('PlacementTest:session_list', {}, 'GET'),
         ]
         
         failed_views = []
@@ -102,7 +102,7 @@ class TemplateConsolidationTest:
             return False
             
         try:
-            url = reverse('placement_test:preview_exam', kwargs={'exam_id': exam.id})
+            url = reverse('PlacementTest:preview_exam', kwargs={'exam_id': exam.id})
             response = self.client.get(url)
             
             if response.status_code != 200:
@@ -150,7 +150,7 @@ class TemplateConsolidationTest:
         )
         
         try:
-            url = reverse('placement_test:take_test', kwargs={'session_id': session.id})
+            url = reverse('PlacementTest:take_test', kwargs={'session_id': session.id})
             response = self.client.get(url)
             
             if response.status_code != 200:
@@ -316,7 +316,7 @@ class TemplateConsolidationTest:
         )
         
         try:
-            url = reverse('placement_test:grade_session', kwargs={'session_id': session.id})
+            url = reverse('PlacementTest:grade_session', kwargs={'session_id': session.id})
             response = self.client.get(url)
             
             if response.status_code == 200:

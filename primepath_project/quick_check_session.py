@@ -25,7 +25,7 @@ print(f"Student: {session.student_name}")
 
 # Test session detail
 client = Client()
-response = client.get(reverse('placement_test:session_detail', kwargs={'session_id': session.id}))
+response = client.get(reverse('PlacementTest:session_detail', kwargs={'session_id': session.id}))
 
 print(f"Status: {response.status_code}")
 

@@ -29,11 +29,11 @@ urlpatterns = [
     path('health/', HealthCheckAPIView.as_view(), name='health'),
     
     # Core placement endpoints
-    path('placement/start/', StudentSessionViewSet.as_view({'post': 'create'}), name='start_test'),
-    path('placement/session/<uuid:pk>/submit/', 
+    path('PlacementTest/start/', StudentSessionViewSet.as_view({'post': 'create'}), name='start_test'),
+    path('PlacementTest/session/<uuid:pk>/submit/', 
          StudentSessionViewSet.as_view({'post': 'submit_answer'}), 
          name='submit_answer'),
-    path('placement/session/<uuid:pk>/complete/', 
+    path('PlacementTest/session/<uuid:pk>/complete/', 
          StudentSessionViewSet.as_view({'post': 'complete'}), 
          name='complete_test'),
 ]

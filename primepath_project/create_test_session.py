@@ -60,7 +60,7 @@ def create_test_session():
     print(f"Created test session: {session.id}")
     
     # Try to access the test page
-    test_url = f'http://127.0.0.1:8000/api/placement/session/{session.id}/'
+    test_url = f'http://127.0.0.1:8000/api/PlacementTest/session/{session.id}/'
     print(f"Test URL: {test_url}")
     
     try:

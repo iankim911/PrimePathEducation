@@ -53,7 +53,7 @@ def run_qa_tests():
     # Test 2: Check exam list page
     print("\n[2] TESTING EXAM LIST")
     try:
-        response = client.get(reverse('placement_test:exam_list'))
+        response = client.get(reverse('PlacementTest:exam_list'))
         test_passed = print_test(
             "Exam list page loads",
             response.status_code == 200,
@@ -78,7 +78,7 @@ def run_qa_tests():
     # Test 3: Check create exam page
     print("\n[3] TESTING CREATE EXAM PAGE")
     try:
-        response = client.get(reverse('placement_test:create_exam'))
+        response = client.get(reverse('PlacementTest:create_exam'))
         test_passed = print_test(
             "Create exam page loads",
             response.status_code == 200,
@@ -103,7 +103,7 @@ def run_qa_tests():
     # Test 4: Check start test page
     print("\n[4] TESTING START TEST PAGE")
     try:
-        response = client.get(reverse('placement_test:start_test'))
+        response = client.get(reverse('PlacementTest:start_test'))
         test_passed = print_test(
             "Start test page loads",
             response.status_code == 200,
@@ -148,7 +148,7 @@ def run_qa_tests():
     try:
         exam = Exam.objects.filter(pdf_file__isnull=False).first()
         if exam:
-            response = client.get(reverse('placement_test:preview_exam', args=[exam.id]))
+            response = client.get(reverse('PlacementTest:preview_exam', args=[exam.id]))
             test_passed = print_test(
                 "Preview exam page loads",
                 response.status_code == 200,
@@ -176,7 +176,7 @@ def run_qa_tests():
     # Test 7: Check session list
     print("\n[7] TESTING SESSION LIST")
     try:
-        response = client.get(reverse('placement_test:session_list'))
+        response = client.get(reverse('PlacementTest:session_list'))
         test_passed = print_test(
             "Session list page loads",
             response.status_code == 200,

@@ -90,8 +90,8 @@ client = Client()
 # Test all critical views
 views_to_test = [
     ('/', 'Index'),
-    ('/teacher/dashboard/', 'Teacher Dashboard'),
-    ('/api/placement/exams/', 'Exam List'),
+    ('/PlacementTest/PlacementTest/teacher/dashboard/', 'Teacher Dashboard'),
+    ('/api/PlacementTest/exams/', 'Exam List'),
     ('/placement-rules/', 'Placement Rules'),
     ('/exam-mapping/', 'Exam Mapping'),
 ]
@@ -107,9 +107,9 @@ for url, name in views_to_test:
 exam = Exam.objects.first()
 if exam:
     exam_views = [
-        (f'/api/placement/exams/{exam.id}/', 'Exam Detail'),
-        (f'/api/placement/exams/{exam.id}/preview/', 'Exam Preview'),
-        (f'/api/placement/exams/{exam.id}/questions/', 'Manage Questions'),
+        (f'/api/PlacementTest/exams/{exam.id}/', 'Exam Detail'),
+        (f'/api/PlacementTest/exams/{exam.id}/preview/', 'Exam Preview'),
+        (f'/api/PlacementTest/exams/{exam.id}/questions/', 'Manage Questions'),
     ]
     
     for url, name in exam_views:
@@ -127,7 +127,7 @@ question = Question.objects.first()
 if question:
     try:
         response = client.post(
-            f'/api/placement/questions/{question.id}/update/',
+            f'/api/PlacementTest/questions/{question.id}/update/',
             {
                 'correct_answer': question.correct_answer,
                 'points': question.points,
@@ -141,7 +141,7 @@ if question:
 if exam:
     try:
         response = client.post(
-            f'/api/placement/exams/{exam.id}/save-answers/',
+            f'/api/PlacementTest/exams/{exam.id}/save-answers/',
             json.dumps({'questions': [], 'audio_assignments': {}}),
             content_type='application/json'
         )

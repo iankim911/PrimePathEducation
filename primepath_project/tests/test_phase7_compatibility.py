@@ -339,7 +339,7 @@ class TestPhase7Compatibility:
         assert response.status_code == 200
         
         # Test teacher dashboard
-        response = self.client.get('/teacher/dashboard/')
+        response = self.client.get('/PlacementTest/PlacementTest/teacher/dashboard/')
         assert response.status_code == 200
         
         print("  - Existing views still functional")

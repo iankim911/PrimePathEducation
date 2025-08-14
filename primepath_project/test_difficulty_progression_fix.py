@@ -301,7 +301,7 @@ def test_student_interface():
         print(f"Current level: {session.original_curriculum_level}")
         
         # Test difficulty adjustment endpoint
-        url = f'/api/placement/sessions/{session.id}/adjust-difficulty/'
+        url = f'/api/PlacementTest/sessions/{session.id}/adjust-difficulty/'
         
         # Try going harder
         response = client.post(url, 
