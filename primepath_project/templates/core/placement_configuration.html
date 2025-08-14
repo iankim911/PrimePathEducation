@@ -445,7 +445,13 @@
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="updateStats()">
                                         <option value="">Select Exam</option>
                                         {% for exam in level.available_exams %}
-                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% if exam.is_mapped_elsewhere %}
+                                                <option value="{{ exam.id }}" disabled style="color: #999;">{{ exam.name }} (Already mapped to {{ exam.mapped_to_level }})</option>
+                                            {% elif exam.is_mapped_here %}
+                                                <option value="{{ exam.id }}" selected>{{ exam.name }}</option>
+                                            {% else %}
+                                                <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% endif %}
                                         {% endfor %}
                                     </select>
                                     <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
@@ -494,7 +500,13 @@
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="updateStats()">
                                         <option value="">Select Exam</option>
                                         {% for exam in level.available_exams %}
-                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% if exam.is_mapped_elsewhere %}
+                                                <option value="{{ exam.id }}" disabled style="color: #999;">{{ exam.name }} (Already mapped to {{ exam.mapped_to_level }})</option>
+                                            {% elif exam.is_mapped_here %}
+                                                <option value="{{ exam.id }}" selected>{{ exam.name }}</option>
+                                            {% else %}
+                                                <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% endif %}
                                         {% endfor %}
                                     </select>
                                     <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
@@ -543,7 +555,13 @@
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="updateStats()">
                                         <option value="">Select Exam</option>
                                         {% for exam in level.available_exams %}
-                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% if exam.is_mapped_elsewhere %}
+                                                <option value="{{ exam.id }}" disabled style="color: #999;">{{ exam.name }} (Already mapped to {{ exam.mapped_to_level }})</option>
+                                            {% elif exam.is_mapped_here %}
+                                                <option value="{{ exam.id }}" selected>{{ exam.name }}</option>
+                                            {% else %}
+                                                <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% endif %}
                                         {% endfor %}
                                     </select>
                                     <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
@@ -592,7 +610,13 @@
                                     <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="updateStats()">
                                         <option value="">Select Exam</option>
                                         {% for exam in level.available_exams %}
-                                        <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% if exam.is_mapped_elsewhere %}
+                                                <option value="{{ exam.id }}" disabled style="color: #999;">{{ exam.name }} (Already mapped to {{ exam.mapped_to_level }})</option>
+                                            {% elif exam.is_mapped_here %}
+                                                <option value="{{ exam.id }}" selected>{{ exam.name }}</option>
+                                            {% else %}
+                                                <option value="{{ exam.id }}">{{ exam.name }}</option>
+                                            {% endif %}
                                         {% endfor %}
                                     </select>
                                     <button class="remove-exam-btn" onclick="clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>

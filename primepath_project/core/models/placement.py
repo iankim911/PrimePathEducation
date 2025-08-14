@@ -40,11 +40,36 @@ class ExamLevelMapping(models.Model):
     slot = models.IntegerField(default=1, help_text="Slot position (1-5)")
     created_at = models.DateTimeField(auto_now_add=True)
     
+    def clean(self):
+        """Validate that exam is not already mapped to another level"""
+        from django.core.exceptions import ValidationError
+        
+        # Check if this exam is already mapped to another curriculum level
+        existing = ExamLevelMapping.objects.filter(exam=self.exam).exclude(pk=self.pk).first()
+        if existing:
+            raise ValidationError(
+                f'This exam "{self.exam.name}" is already mapped to '
+                f'"{existing.curriculum_level.full_name}". '
+                f'Each exam can only be mapped to one curriculum level.'
+            )
+    
+    def save(self, *args, **kwargs):
+        """Override save to validate before saving"""
+        self.clean()
+        super().save(*args, **kwargs)
+    
     class Meta:
         ordering = ['curriculum_level', 'slot']
         unique_together = [
             ('curriculum_level', 'exam'),  # Same exam can't be mapped twice to same level
             ('curriculum_level', 'slot'),  # Each slot can only have one exam
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['exam'],
+                name='unique_exam_per_mapping',
+                condition=None
+            )
         ]
     
     def __str__(self):

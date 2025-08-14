@@ -201,9 +201,11 @@ class GradingService:
         """
         import json
         
-        logger.debug(f"[MIXED_GRADING] Starting evaluation")
-        logger.debug(f"[MIXED_GRADING] Student answer: {student_answer[:100]}...")
-        logger.debug(f"[MIXED_GRADING] Correct answer: {correct_answer[:100]}...")
+        logger.info(f"[MIXED_GRADING] ENHANCED: Starting evaluation")
+        logger.info(f"[MIXED_GRADING] Student answer length: {len(student_answer)} chars")
+        logger.info(f"[MIXED_GRADING] Student answer preview: {student_answer[:150]}...")
+        logger.info(f"[MIXED_GRADING] Correct answer length: {len(correct_answer)} chars")  
+        logger.info(f"[MIXED_GRADING] Correct answer preview: {correct_answer[:150]}...")
         
         if not correct_answer or not student_answer:
             logger.debug("[MIXED_GRADING] Missing answer data")

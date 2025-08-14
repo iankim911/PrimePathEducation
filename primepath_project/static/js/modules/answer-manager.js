@@ -116,10 +116,17 @@
                 answerType = 'radio';
             }
             
-            // Special handling for MIXED questions with MCQ components
+            // ENHANCED: Comprehensive MIXED question handling
             if (questionType === 'MIXED') {
-                // Check for MIXED MCQ components (format: q_{id}_{index}_{option})
+                console.group(`[AnswerManager] MIXED question comprehensive collection - Q${questionNum}`);
+                
+                // Initialize combined answer array for all components
+                const allComponents = [];
+                let hasAnyAnswer = false;
+                
+                // 1. Check for MIXED MCQ components (format: q_{id}_{index}_{option})
                 const mixedCheckboxes = questionPanel.querySelectorAll(`input[type="checkbox"][name^="q_${questionId}_"]:checked`);
+                console.log(`[MIXED] Found ${mixedCheckboxes.length} checked MCQ components`);
                 
                 if (mixedCheckboxes.length > 0) {
                     // Group checkboxes by component index
@@ -145,70 +152,74 @@
                         }
                     });
                     
-                    // Format answer based on component structure
+                    // Convert to component array format
                     if (Object.keys(componentAnswers).length > 0) {
                         // Check if we have numeric indices (new MCQ format)
                         const hasNumericIndices = Object.keys(componentAnswers).some(key => !isNaN(parseInt(key)));
                         
                         if (hasNumericIndices) {
-                            // CRITICAL FIX: Format MIXED questions for backend compatibility
-                            // Backend expects: [{"type":"Multiple Choice","value":"B,C"},...]
-                            const formattedAnswers = [];
-                            
+                            // New format: Add MCQ components to combined array
                             Object.keys(componentAnswers).sort().forEach((index) => {
-                                formattedAnswers.push({
+                                allComponents.push({
                                     "type": "Multiple Choice",
                                     "value": componentAnswers[index].join(',')
                                 });
                             });
-                            
-                            answer = JSON.stringify(formattedAnswers);
-                            answerType = 'mixed-mcq';
-                            
-                            // Debug logging
-                            console.log('[AnswerManager] MIXED answer format conversion:', {
-                                questionId: questionId,
-                                componentAnswers: componentAnswers,
-                                formattedAnswer: formattedAnswers,
-                                stringified: answer,
-                                type: 'mixed-mcq'
-                            });
-                        } else {
-                            // Old format or text inputs
-                            answer = JSON.stringify(componentAnswers);
-                            answerType = 'mixed';
+                            hasAnyAnswer = true;
+                            console.log(`[MIXED] Added ${Object.keys(componentAnswers).length} MCQ components`);
                         }
                     }
                 }
                 
-                // Also check for text inputs and textareas in MIXED questions
+                // 2. CRITICAL FIX: ALWAYS check for text inputs and textareas (remove && !answer condition)
                 const mixedTextInputs = questionPanel.querySelectorAll(`input[type="text"][name^="q_${questionId}_"]`);
                 const mixedTextareas = questionPanel.querySelectorAll(`textarea[name^="q_${questionId}_"]`);
+                console.log(`[MIXED] Found ${mixedTextInputs.length} text inputs, ${mixedTextareas.length} textareas`);
                 
-                if ((mixedTextInputs.length > 0 || mixedTextareas.length > 0) && !answer) {
-                    const textAnswers = {};
-                    
+                if (mixedTextInputs.length > 0 || mixedTextareas.length > 0) {
                     // Collect text input answers
                     mixedTextInputs.forEach(input => {
                         const letter = input.name.split('_').pop();
-                        if (input.value) {
-                            textAnswers[letter] = input.value;
+                        if (input.value.trim()) {
+                            allComponents.push({
+                                "type": "Short Answer",
+                                "value": input.value.trim()
+                            });
+                            hasAnyAnswer = true;
+                            console.log(`[MIXED] Added Short Answer component (${letter}): "${input.value.trim()}"`);
                         }
                     });
                     
                     // Collect textarea answers
                     mixedTextareas.forEach(textarea => {
                         const letter = textarea.name.split('_').pop();
-                        if (textarea.value) {
-                            textAnswers[letter] = textarea.value;
+                        if (textarea.value.trim()) {
+                            allComponents.push({
+                                "type": "Long Answer", 
+                                "value": textarea.value.trim()
+                            });
+                            hasAnyAnswer = true;
+                            console.log(`[MIXED] Added Long Answer component (${letter}): "${textarea.value.trim().substring(0, 50)}..."`);
                         }
                     });
-                    
-                    if (Object.keys(textAnswers).length > 0) {
-                        answer = JSON.stringify(textAnswers);
-                        answerType = 'mixed-text';
-                    }
                 }
+                
+                // 3. Build final answer if we have any components
+                if (hasAnyAnswer && allComponents.length > 0) {
+                    answer = JSON.stringify(allComponents);
+                    answerType = 'mixed-complete';
+                    
+                    console.log(`[MIXED] Final combined answer with ${allComponents.length} components:`, {
+                        questionId: questionId,
+                        components: allComponents,
+                        answerLength: answer.length,
+                        type: answerType
+                    });
+                } else {
+                    console.warn(`[MIXED] No components found for question ${questionNum}`);
+                }
+                
+                console.groupEnd();
             } else {
                 // Regular checkbox handling for non-MIXED questions
                 const checkboxInputs = questionPanel.querySelectorAll(`input[type="checkbox"][name^="q_${questionId}_"]:checked`);
@@ -305,6 +316,27 @@
             if (!answerData || !answerData.answer) {
                 this.log('info', `No answer for question ${questionNum}`);
                 return false;
+            }
+            
+            // ENHANCED: Validation for MIXED questions
+            if (answerData.answerType === 'mixed-complete') {
+                try {
+                    const components = JSON.parse(answerData.answer);
+                    console.log(`[AnswerManager] MIXED question validation Q${questionNum}:`, {
+                        totalComponents: components.length,
+                        mcqComponents: components.filter(c => c.type === 'Multiple Choice').length,
+                        shortComponents: components.filter(c => c.type === 'Short Answer').length,
+                        longComponents: components.filter(c => c.type === 'Long Answer').length,
+                        dataSize: answerData.answer.length
+                    });
+                    
+                    // Warn if suspiciously few components
+                    if (components.length < 2) {
+                        console.warn(`[AnswerManager] MIXED question Q${questionNum} has only ${components.length} components - may be incomplete`);
+                    }
+                } catch (e) {
+                    console.error(`[AnswerManager] Failed to parse MIXED answer for Q${questionNum}:`, e);
+                }
             }
             
             // Store locally

@@ -359,7 +359,7 @@ class PlacementService:
         adjustment: int
     ) -> Optional[Tuple[CurriculumLevel, Exam]]:
         """
-        Adjust difficulty level up or down.
+        Adjust difficulty level up or down using internal_difficulty field.
         
         Args:
             current_level: Current curriculum level
@@ -373,36 +373,27 @@ class PlacementService:
                 "Invalid adjustment value. Must be -1 or 1",
                 code="INVALID_ADJUSTMENT"
             )
-            
-        # Get all curriculum levels in order
-        all_levels = CurriculumLevel.objects.order_by(
-            'subprogram__program__order',
-            'subprogram__order',
-            'level_number'
-        )
         
-        level_list = list(all_levels)
-        try:
-            current_index = level_list.index(current_level)
-        except ValueError:
-            logger.error(f"Current level {current_level.id} not found in level list")
-            return None
-            
-        new_index = current_index + adjustment
+        # Use the enhanced find_alternate_difficulty_exam method which handles internal_difficulty properly
+        result = PlacementService.find_alternate_difficulty_exam(current_level, adjustment)
         
-        # Check bounds
-        if not 0 <= new_index < len(level_list):
+        if result:
             logger.info(
-                f"Cannot adjust difficulty: new_index={new_index} out of bounds"
+                f"Successfully adjusted difficulty from {current_level} to {result[0]} "
+                f"(internal_difficulty: {current_level.internal_difficulty} -> {result[0].internal_difficulty})"
             )
-            return None
-            
-        new_level = level_list[new_index]
+            return result
         
-        # Try to find exam for new level
-        try:
-            new_exam = PlacementService.find_exam_for_level(new_level)
-            return new_level, new_exam
-        except ExamNotFoundException:
-            logger.warning(f"No exam available for adjusted level {new_level.id}")
-            return None
+        # If no alternate found, log detailed reason
+        current_difficulty = current_level.internal_difficulty if hasattr(current_level, 'internal_difficulty') else None
+        if current_difficulty:
+            if adjustment > 0 and current_difficulty >= 44:
+                logger.info(f"Cannot go harder: already at maximum difficulty (44)")
+            elif adjustment < 0 and current_difficulty <= 1:
+                logger.info(f"Cannot go easier: already at minimum difficulty (1)")
+            else:
+                logger.warning(f"No exam available for difficulty adjustment from level {current_difficulty}")
+        else:
+            logger.warning(f"Current level {current_level.id} has no internal_difficulty set")
+        
+        return None
