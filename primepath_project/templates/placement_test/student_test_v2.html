@@ -161,30 +161,38 @@
     <!-- Include Difficulty Choice Modal -->
     {% include 'components/placement_test/difficulty_choice_modal.html' %}
     
-    <!-- Debug modal state immediately after include -->
+    <!-- Modal State Monitoring (Debug Mode Only) -->
     <script>
         (function() {
-            const modal = document.getElementById('difficulty-choice-modal');
-            if (modal) {
-                console.error('[MODAL_STATE_AFTER_INCLUDE] Modal display style:', modal.style.display);
-                console.error('[MODAL_STATE_AFTER_INCLUDE] Modal computed style:', window.getComputedStyle(modal).display);
-                
-                // Add MutationObserver to track when modal display changes
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                            console.error('[MODAL_MUTATION] Display changed to:', modal.style.display);
-                            console.trace('[MODAL_MUTATION] Stack trace:');
-                        }
-                    });
-                });
-                
-                observer.observe(modal, {
-                    attributes: true,
-                    attributeFilter: ['style']
-                });
-            } else {
-                console.error('[MODAL_STATE_AFTER_INCLUDE] Modal not found!');
+            // Only run modal debugging if debug is enabled for modals
+            if (window.PrimePathDebug && window.PrimePathDebug.shouldLog('modal', 3)) {
+                const modal = document.getElementById('difficulty-choice-modal');
+                if (modal) {
+                    const logger = window.PrimePathDebug.createLogger('ModalState');
+                    logger.debug('Modal found, initial display:', modal.style.display || 'none');
+                    
+                    // Only add observer in TRACE mode
+                    if (window.PrimePathDebug.shouldLog('modal', 4)) {
+                        const observer = new MutationObserver(function(mutations) {
+                            mutations.forEach(function(mutation) {
+                                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                    // Log only the display change, not the entire element
+                                    logger.trace('Modal display changed to:', modal.style.display);
+                                }
+                            });
+                        });
+                        
+                        observer.observe(modal, {
+                            attributes: true,
+                            attributeFilter: ['style']
+                        });
+                        
+                        logger.trace('MutationObserver attached to modal');
+                    }
+                } else if (window.PrimePathDebug.shouldLog('modal', 1)) {
+                    const logger = window.PrimePathDebug.createLogger('ModalState');
+                    logger.warn('Difficulty choice modal element not found in DOM');
+                }
             }
         })();
     </script>
@@ -242,10 +250,49 @@
         // Make session ID globally available for backward compatibility
         window.sessionId = APP_CONFIG.session.id;
     })();
+    
+    // CRITICAL FIX: Clear stale timer states from localStorage to prevent session conflicts
+    (function() {
+        try {
+            console.log('[TIMER_CLEANUP] Clearing stale timer states from localStorage...');
+            
+            const currentSessionId = APP_CONFIG.session.id;
+            const currentPersistKey = `exam-timer-session-${currentSessionId}`;
+            
+            // Get all localStorage keys
+            const localStorageKeys = Object.keys(localStorage);
+            console.log('[TIMER_CLEANUP] Found localStorage keys:', localStorageKeys);
+            
+            let clearedCount = 0;
+            for (const key of localStorageKeys) {
+                // Remove old global timer state (legacy format)
+                if (key === 'exam-timer') {
+                    console.log('[TIMER_CLEANUP] Removing legacy global timer state');
+                    localStorage.removeItem(key);
+                    clearedCount++;
+                }
+                // Remove timer states from other sessions (but keep current session if valid)
+                else if (key.startsWith('exam-timer-session-') && key !== currentPersistKey) {
+                    console.log('[TIMER_CLEANUP] Removing timer state from different session:', key);
+                    localStorage.removeItem(key);
+                    clearedCount++;
+                }
+            }
+            
+            console.log(`[TIMER_CLEANUP] Cleared ${clearedCount} stale timer states`);
+            console.log(`[TIMER_CLEANUP] Current session will use persistence key: ${currentPersistKey}`);
+            
+        } catch (error) {
+            console.warn('[TIMER_CLEANUP] Error during timer cleanup:', error);
+        }
+    })();
     </script>
     
     <!-- CRITICAL: Load bootstrap FIRST to ensure namespaces exist -->
     <script src="{% static 'js/bootstrap.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Load debug configuration BEFORE other modules -->
+    <script src="{% static 'js/config/debug-config.js' %}?v={{ current_timestamp }}"></script>
     
     <!-- Load core utilities and config -->
     <script src="{% static 'js/config/app-config.js' %}?v={{ current_timestamp }}"></script>
@@ -371,19 +418,121 @@
         let timer = null;
         try {
             if (window.PrimePath.modules.Timer) {
+                // CRITICAL FIX: Use session-specific persistence key to prevent timer state conflicts
+                const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || '{{ session.id }}' || 'unknown';
+                const sessionSpecificPersistKey = `exam-timer-session-${sessionId}`;
+                
+                console.log('[Timer] Creating timer with session-specific persistence key:', sessionSpecificPersistKey);
+                
                 timer = new PrimePath.modules.Timer({
                     warnings: [
                         { time: 300, message: '5 minutes remaining', class: 'warning' },
                         { time: 60, message: '1 minute remaining', class: 'danger' }
                     ],
                     onExpire: function() {
-                        console.warn('[Timer] Timer expired, attempting to submit test');
+                        console.warn('[Timer] Timer expired - beginning comprehensive cleanup and submission');
+                        console.log('[Timer] Session ID:', sessionId);
+                        console.log('[Timer] Current timestamp:', new Date().toISOString());
+                        
+                        // CRITICAL ENHANCEMENT: Check for open difficulty modal and handle cleanup
+                        const difficultyModal = document.getElementById('difficulty-choice-modal');
+                        if (difficultyModal && difficultyModal.style.display !== 'none') {
+                            console.warn('[Timer] Difficulty choice modal is open during timer expiry - initiating modal cleanup');
+                            
+                            // Clear any timer monitoring interval on the modal
+                            const intervalId = difficultyModal.dataset.timerCheckInterval;
+                            if (intervalId) {
+                                console.log('[Timer] Clearing modal timer monitoring interval:', intervalId);
+                                clearInterval(parseInt(intervalId));
+                                delete difficultyModal.dataset.timerCheckInterval;
+                            }
+                            
+                            // Hide modal immediately
+                            difficultyModal.style.display = 'none';
+                            console.log('[Timer] Difficulty modal closed due to timer expiry');
+                            
+                            // Show user-friendly message about timer expiry
+                            setTimeout(() => {
+                                alert('Test time has expired. Your test will be submitted automatically.');
+                            }, 100); // Small delay to ensure modal is hidden first
+                        } else {
+                            console.log('[Timer] No open modals detected during timer expiry');
+                        }
+                        
+                        // Enhanced debugging for timer state
+                        console.group('[Timer] Timer State Cleanup');
+                        console.log('Timer persistence key:', sessionSpecificPersistKey);
+                        console.log('Timer clearState available:', !!(timer && timer.clearState));
+                        console.log('Answer manager available:', !!window.answerManager);
+                        
+                        // Clear this session's timer state when expired
+                        if (timer && timer.clearState) {
+                            timer.clearState();
+                            console.log('[Timer] Session-specific timer state cleared');
+                        } else {
+                            console.warn('[Timer] Could not clear timer state - clearState method not available');
+                        }
+                        console.groupEnd();
+                        
+                        // Enhanced debugging for test submission
+                        console.group('[Timer] Initiating Test Submission');
                         if (window.answerManager) {
+                            console.log('[Timer] Calling answerManager.submitTest(true, true) - force=true, isTimerExpiry=true');
+                            
+                            // Add additional debugging for submission process
+                            const originalLog = window.answerManager.log;
+                            window.answerManager.log = function(level, message, data) {
+                                console.log(`[Timer-Submission-${level.toUpperCase()}]`, message, data || '');
+                                if (originalLog) {
+                                    originalLog.call(this, level, message, data);
+                                }
+                            };
+                            
                             window.answerManager.submitTest(true, true);
                         } else {
-                            console.error('[Timer] Cannot submit - answerManager not available');
+                            console.error('[Timer] CRITICAL ERROR: answerManager not available for test submission');
+                            console.log('[Timer] Available window objects:', Object.keys(window).filter(key => key.includes('answer') || key.includes('test') || key.includes('manager')));
+                            
+                            // Fallback submission mechanism
+                            console.warn('[Timer] Attempting fallback submission mechanism');
+                            try {
+                                const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || '{{ session.id }}';
+                                const csrfToken = '{{ csrf_token }}';
+                                
+                                fetch(`/PlacementTest/session/${sessionId}/complete/`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': csrfToken
+                                    },
+                                    body: JSON.stringify({
+                                        timer_expired: true,
+                                        unsaved_count: 0,
+                                        fallback_submission: true
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    console.log('[Timer] Fallback submission successful:', data);
+                                    if (data.success && data.redirect_url) {
+                                        window.location.href = data.redirect_url;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('[Timer] Fallback submission failed:', error);
+                                    alert('Test time expired but there was an issue submitting. Please contact support.');
+                                });
+                            } catch (error) {
+                                console.error('[Timer] Fallback mechanism failed:', error);
+                            }
                         }
-                    }
+                        console.groupEnd();
+                        
+                        console.log('[Timer] onExpire function completed');
+                    },
+                    // CRITICAL: Use session-specific persistence key
+                    persistKey: sessionSpecificPersistKey,
+                    enablePersistence: true
                 });
                 
                 // COMPREHENSIVE TIMER INITIALIZATION WITH NULL SAFETY
@@ -406,9 +555,44 @@
                         
                         if (!isNaN(timerSeconds) && timerSeconds > 0) {
                             console.log('[TIMER_INIT] Valid timer value, initializing timer...');
+                            
+                            // COMPREHENSIVE TIMER STATE LOGGING
+                            console.group('[TIMER_STATE] Pre-initialization logging');
+                            console.log('Backend calculated timer_seconds:', {{ timer_seconds|default:"null" }});
+                            console.log('Template timer_seconds variable:', '{{ timer_seconds }}');
+                            console.log('DOM data-timer-seconds value:', timerSecondsRaw);
+                            console.log('Parsed timer seconds:', timerSeconds);
+                            console.log('Session ID:', sessionId);
+                            console.log('Persistence key:', sessionSpecificPersistKey);
+                            
+                            // Check for any existing timer state that might interfere
+                            try {
+                                const existingState = localStorage.getItem(sessionSpecificPersistKey);
+                                if (existingState) {
+                                    console.log('Existing localStorage state:', existingState);
+                                } else {
+                                    console.log('No existing localStorage state found');
+                                }
+                                
+                                // Also check for old global timer state that should be cleared
+                                const oldGlobalState = localStorage.getItem('exam-timer');
+                                if (oldGlobalState) {
+                                    console.warn('Found old global timer state, clearing it:', oldGlobalState);
+                                    localStorage.removeItem('exam-timer');
+                                }
+                            } catch (e) {
+                                console.warn('Error checking localStorage:', e);
+                            }
+                            console.groupEnd();
+                            
                             timer.init(timerSeconds, '#timer');
                             timer.start();
                             console.log('  ✅ Timer initialized with', timerSeconds, 'seconds');
+                            
+                            // Verify timer state after initialization
+                            const stats = timer.getStats();
+                            console.log('[TIMER_VERIFICATION] Post-init timer stats:', stats);
+                            
                         } else if (timerSeconds === 0) {
                             console.log('  ℹ️ Timer set to 0 - no countdown needed');
                             // Still initialize timer but don't start it

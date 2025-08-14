@@ -95,12 +95,24 @@
                 console.warn('[Timer.init] No display element provided');
             }
             
-            // Restore from storage if available
+            // Restore from storage if available with comprehensive validation
             if (this.enablePersistence) {
+                console.log('[Timer.init] Attempting to restore state from persistence...');
                 const saved = this.restoreState();
                 if (saved) {
-                    seconds = saved.timeRemaining;
-                    this.log('info', `Restored timer with ${seconds} seconds remaining`);
+                    // CRITICAL FIX: Additional validation before using restored state
+                    if (saved.timeRemaining > 0 && saved.timeRemaining <= saved.totalTime) {
+                        const originalSeconds = seconds;
+                        seconds = saved.timeRemaining;
+                        console.log(`[Timer.init] State restored successfully: ${originalSeconds}s -> ${seconds}s remaining`);
+                        this.log('info', `Restored timer with ${seconds} seconds remaining (was ${originalSeconds})`);
+                    } else {
+                        console.warn('[Timer.init] Restored state invalid, using original timer value');
+                        console.warn(`[Timer.init] Restored timeRemaining: ${saved.timeRemaining}, totalTime: ${saved.totalTime}`);
+                        this.clearState(); // Clear invalid state
+                    }
+                } else {
+                    console.log('[Timer.init] No valid state to restore, using fresh timer');
                 }
             }
             
@@ -132,47 +144,71 @@
          * Start the timer
          */
         start() {
-            console.log('[Timer.start] Called, initialized:', this.initialized, 'isRunning:', this.isRunning);
+            console.group('[Timer.start] Starting timer');
+            console.log('[Timer.start] Initial state:', {
+                initialized: this.initialized,
+                isRunning: this.isRunning,
+                isPaused: this.isPaused,
+                timeRemaining: this.timeRemaining,
+                persistKey: this.persistKey
+            });
             
             // NULL SAFETY: Check if timer was properly initialized
             if (!this.initialized) {
                 console.warn('[Timer.start] Timer not initialized, cannot start');
                 this.log('warn', 'Attempted to start uninitialized timer');
+                console.groupEnd();
                 return false;
             }
             
             if (this.isRunning && !this.isPaused) {
+                console.log('[Timer.start] Timer already running, no action needed');
                 this.log('warn', 'Timer already running');
+                console.groupEnd();
                 return true;
             }
             
             if (this.isPaused) {
+                console.log('[Timer.start] Timer paused, resuming instead');
                 this.resume();
+                console.groupEnd();
                 return true;
             }
             
             // Check if timer was already expired on init
             if (this.isExpired || this.timeRemaining <= 0) {
+                console.warn('[Timer.start] CRITICAL: Timer already expired at start');
+                console.log('[Timer.start] Expired timer details:', {
+                    isExpired: this.isExpired,
+                    timeRemaining: this.timeRemaining,
+                    totalTime: this.totalTime
+                });
+                
                 this.log('warn', 'Timer is already expired, showing expiry message');
                 
                 // Show a message to the user before auto-submitting
                 if (this.displayElement) {
                     this.displayElement.innerHTML = '<span style="color: red; font-weight: bold;">Time Expired - Submitting...</span>';
+                    console.log('[Timer.start] Updated display element to show expiry message');
                 }
                 
                 // Give user 2 seconds to see the message before triggering expiry
+                console.log('[Timer.start] Scheduling expiry in 2 seconds');
                 setTimeout(() => {
                     this.expire();
                 }, 2000);
                 
+                console.groupEnd();
                 return;
             }
             
+            console.log('[Timer.start] Starting timer normally');
             this.isRunning = true;
             this.isPaused = false;
             
             // Save start time for persistence
             if (this.enablePersistence) {
+                console.log('[Timer.start] Saving initial state to persistence');
                 this.saveState();
             }
             
@@ -180,12 +216,16 @@
                 this.tick();
             }, this.updateInterval);
             
+            console.log('[Timer.start] Timer interval created, ID:', this.interval);
+            
             this.emit('start', {
                 timeRemaining: this.timeRemaining,
                 totalTime: this.totalTime
             });
             
             this.log('info', `Timer started with ${this.timeRemaining} seconds`);
+            console.log('[Timer.start] Timer start completed successfully');
+            console.groupEnd();
         }
 
         /**
@@ -303,19 +343,67 @@
          * Handle timer expiration
          */
         expire() {
+            console.group('[Timer.expire] Timer expiration handling');
+            console.log('[Timer.expire] Timer state at expiry:', {
+                timeRemaining: this.timeRemaining,
+                totalTime: this.totalTime,
+                isRunning: this.isRunning,
+                isPaused: this.isPaused,
+                persistKey: this.persistKey
+            });
+            
+            // Check for open modals before expiry
+            const difficultyModal = document.getElementById('difficulty-choice-modal');
+            if (difficultyModal) {
+                const modalVisible = difficultyModal.style.display !== 'none';
+                console.log('[Timer.expire] Difficulty modal state:', {
+                    exists: true,
+                    visible: modalVisible,
+                    display: difficultyModal.style.display
+                });
+                
+                if (modalVisible) {
+                    console.warn('[Timer.expire] CRITICAL: Modal is open during timer expiry - race condition detected');
+                    
+                    // Clear timer monitoring interval if exists
+                    const intervalId = difficultyModal.dataset.timerCheckInterval;
+                    if (intervalId) {
+                        console.log('[Timer.expire] Clearing modal timer monitoring interval:', intervalId);
+                        clearInterval(parseInt(intervalId));
+                        delete difficultyModal.dataset.timerCheckInterval;
+                    }
+                    
+                    // Hide modal
+                    difficultyModal.style.display = 'none';
+                    console.log('[Timer.expire] Modal hidden due to timer expiry');
+                }
+            } else {
+                console.log('[Timer.expire] No difficulty modal found - normal expiry');
+            }
+            
             this.stop();
             
+            console.log('[Timer.expire] Emitting expire event');
             this.emit('expire', {
                 totalTime: this.totalTime,
                 timeElapsed: this.totalTime
             });
             
-            // Call expiration callback
+            // Call expiration callback with detailed logging
             if (this.onExpire) {
-                this.onExpire();
+                console.log('[Timer.expire] Calling onExpire callback');
+                try {
+                    this.onExpire();
+                    console.log('[Timer.expire] onExpire callback completed successfully');
+                } catch (error) {
+                    console.error('[Timer.expire] Error in onExpire callback:', error);
+                }
+            } else {
+                console.warn('[Timer.expire] No onExpire callback defined');
             }
             
             this.log('warn', 'Timer expired!');
+            console.groupEnd();
         }
 
         /**
@@ -411,15 +499,29 @@
          * @returns {Object} Timer stats
          */
         getStats() {
-            return {
+            const stats = {
                 timeRemaining: this.timeRemaining,
                 timeElapsed: this.totalTime - this.timeRemaining,
                 totalTime: this.totalTime,
                 progress: ((this.totalTime - this.timeRemaining) / this.totalTime) * 100,
                 isRunning: this.isRunning,
                 isPaused: this.isPaused,
-                formattedTime: this.formatTime(this.timeRemaining)
+                isExpired: this.timeRemaining <= 0,
+                formattedTime: this.formatTime(this.timeRemaining),
+                persistKey: this.persistKey
             };
+            
+            // Enhanced debugging for race condition detection
+            if (stats.isExpired) {
+                console.log('[Timer.getStats] EXPIRED TIMER DETECTED:', {
+                    timeRemaining: stats.timeRemaining,
+                    isRunning: stats.isRunning,
+                    persistKey: stats.persistKey,
+                    caller: (new Error()).stack.split('\n')[2].trim() // Show who called getStats
+                });
+            }
+            
+            return stats;
         }
 
         /**
@@ -444,7 +546,7 @@
         }
 
         /**
-         * Restore timer state from localStorage
+         * Restore timer state from localStorage with comprehensive validation
          * @returns {Object|null} Saved state or null
          */
         restoreState() {
@@ -452,20 +554,68 @@
             
             try {
                 const saved = localStorage.getItem(this.persistKey);
-                if (!saved) return null;
-                
-                const state = JSON.parse(saved);
-                
-                // Calculate time elapsed since save
-                if (state.isRunning && !state.isPaused) {
-                    const elapsed = Math.floor((Date.now() - state.timestamp) / 1000);
-                    state.timeRemaining = Math.max(0, state.timeRemaining - elapsed);
+                if (!saved) {
+                    console.log('[Timer.restoreState] No saved state found for key:', this.persistKey);
+                    return null;
                 }
                 
+                const state = JSON.parse(saved);
+                console.log('[Timer.restoreState] Raw saved state:', state);
+                
+                // CRITICAL FIX: Validate saved state structure
+                if (!state || typeof state !== 'object') {
+                    console.warn('[Timer.restoreState] Invalid state structure, clearing saved state');
+                    this.clearState();
+                    return null;
+                }
+                
+                // Validate required fields
+                const requiredFields = ['timeRemaining', 'totalTime', 'timestamp'];
+                for (const field of requiredFields) {
+                    if (state[field] === undefined || state[field] === null) {
+                        console.warn(`[Timer.restoreState] Missing required field: ${field}, clearing saved state`);
+                        this.clearState();
+                        return null;
+                    }
+                }
+                
+                // Validate timestamp is reasonable (not too old)
+                const now = Date.now();
+                const timeSinceSave = now - state.timestamp;
+                const maxAgeHours = 24; // Don't restore state older than 24 hours
+                const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
+                
+                if (timeSinceSave > maxAgeMs) {
+                    console.warn(`[Timer.restoreState] Saved state too old (${Math.round(timeSinceSave / 1000 / 60)} minutes), clearing`);
+                    this.clearState();
+                    return null;
+                }
+                
+                // Calculate time elapsed since save with validation
+                if (state.isRunning && !state.isPaused) {
+                    const elapsed = Math.floor(timeSinceSave / 1000);
+                    console.log(`[Timer.restoreState] Time elapsed since save: ${elapsed} seconds`);
+                    
+                    // Apply elapsed time but ensure it doesn't go negative
+                    state.timeRemaining = Math.max(0, state.timeRemaining - elapsed);
+                    
+                    console.log(`[Timer.restoreState] Adjusted time remaining: ${state.timeRemaining} seconds`);
+                }
+                
+                // ADDITIONAL VALIDATION: Check if the restored timer would be expired
+                if (state.timeRemaining <= 0) {
+                    console.warn('[Timer.restoreState] Restored timer would be expired, clearing saved state');
+                    this.clearState();
+                    return null;
+                }
+                
+                console.log('[Timer.restoreState] Successfully restored valid state:', state);
                 return state;
                 
             } catch (e) {
+                console.error('[Timer.restoreState] Error restoring state:', e);
                 this.log('error', 'Failed to restore timer state', e);
+                this.clearState(); // Clear corrupted state
                 return null;
             }
         }
@@ -476,11 +626,26 @@
         clearState() {
             if (!this.enablePersistence) return;
             
+            console.group('[Timer.clearState] Clearing timer state');
+            console.log('[Timer.clearState] Clearing state for key:', this.persistKey);
+            
             try {
+                // Check if state exists before clearing
+                const existingState = localStorage.getItem(this.persistKey);
+                if (existingState) {
+                    console.log('[Timer.clearState] Existing state found, clearing:', JSON.parse(existingState));
+                } else {
+                    console.log('[Timer.clearState] No existing state to clear');
+                }
+                
                 localStorage.removeItem(this.persistKey);
+                console.log('[Timer.clearState] State cleared successfully');
             } catch (e) {
+                console.error('[Timer.clearState] Error clearing state:', e);
                 this.log('error', 'Failed to clear timer state', e);
             }
+            
+            console.groupEnd();
         }
 
         /**

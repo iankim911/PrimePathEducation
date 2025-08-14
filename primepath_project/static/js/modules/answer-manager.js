@@ -20,8 +20,10 @@
         constructor(options = {}) {
             super('AnswerManager', options);
             
-            console.log("[URL_UPDATE] AnswerManager using new URL structure");
-            console.log("[URL_UPDATE] PlacementTest API: /api/PlacementTest/");
+            // Only log URL structure in debug mode
+            if (this.isDebugMode()) {
+                this.log('debug', 'Using new URL structure: /api/PlacementTest/');
+            }
             
             // Answer storage
             this.answers = new Map();
@@ -59,8 +61,13 @@
         init(sessionId, options = {}) {
             if (this.initialized) return;
             
-            console.log('[ANSWER_MANAGER_INIT] Initializing with sessionId:', sessionId);
-            console.log('[ANSWER_MANAGER_INIT] Options:', options);
+            // Only log in debug mode
+            if (this.isDebugMode()) {
+                this.log('debug', `Initializing with sessionId: ${sessionId}`);
+                if (Object.keys(options).length > 0) {
+                    this.log('debug', 'Additional options provided', options);
+                }
+            }
             
             this.sessionId = sessionId || this.sessionId;
             Object.assign(this, options);
@@ -79,7 +86,9 @@
             // Initialize UI
             this.updateUI();
             
-            console.log('[ANSWER_MANAGER_INIT] Initialization complete');
+            if (this.isDebugMode()) {
+                this.log('debug', 'Initialization complete');
+            }
             super.init();
         }
 
@@ -142,17 +151,28 @@
                         const hasNumericIndices = Object.keys(componentAnswers).some(key => !isNaN(parseInt(key)));
                         
                         if (hasNumericIndices) {
-                            // New format: organize by component with letters A, B, C
-                            const letters = ['A', 'B', 'C', 'D', 'E'];
-                            const formattedAnswers = {};
+                            // CRITICAL FIX: Format MIXED questions for backend compatibility
+                            // Backend expects: [{"type":"Multiple Choice","value":"B,C"},...]
+                            const formattedAnswers = [];
                             
-                            Object.keys(componentAnswers).sort().forEach((index, i) => {
-                                const componentLetter = letters[i] || `Component${index}`;
-                                formattedAnswers[componentLetter] = componentAnswers[index].join(',');
+                            Object.keys(componentAnswers).sort().forEach((index) => {
+                                formattedAnswers.push({
+                                    "type": "Multiple Choice",
+                                    "value": componentAnswers[index].join(',')
+                                });
                             });
                             
                             answer = JSON.stringify(formattedAnswers);
                             answerType = 'mixed-mcq';
+                            
+                            // Debug logging
+                            console.log('[AnswerManager] MIXED answer format conversion:', {
+                                questionId: questionId,
+                                componentAnswers: componentAnswers,
+                                formattedAnswer: formattedAnswers,
+                                stringified: answer,
+                                type: 'mixed-mcq'
+                            });
                         } else {
                             // Old format or text inputs
                             answer = JSON.stringify(componentAnswers);
@@ -217,16 +237,31 @@
                 const shortAnswerInputs = questionPanel.querySelectorAll(`input[type="text"][name^="q_${questionId}_"]`);
                 if (shortAnswerInputs.length > 0) {
                     const answers = {};
-                    shortAnswerInputs.forEach(input => {
-                        const letter = input.name.split('_').pop();
-                        if (input.value) {
+                    const answerArray = [];
+                    
+                    // Collect answers preserving order
+                    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                    letters.forEach(letter => {
+                        const input = questionPanel.querySelector(`input[name="q_${questionId}_${letter}"]`);
+                        if (input && input.value) {
                             answers[letter] = input.value;
+                            answerArray.push(input.value);
                         }
                     });
                     
-                    if (Object.keys(answers).length > 0) {
-                        answer = JSON.stringify(answers);
+                    if (answerArray.length > 0) {
+                        // CRITICAL FIX: Use pipe format for SHORT questions
+                        // Backend expects "A|A" not {"A": "A", "B": "A"}
+                        answer = answerArray.join('|');
                         answerType = 'multiple-short';
+                        
+                        // Debug logging
+                        console.log('[AnswerManager] SHORT answer format conversion:', {
+                            questionId: questionId,
+                            originalFormat: JSON.stringify(answers),
+                            convertedFormat: answer,
+                            type: 'multiple-short'
+                        });
                     }
                 }
             }
@@ -411,22 +446,60 @@
          * @param {string} defaultRedirectUrl - Default URL to redirect to if modal is closed
          */
         showDifficultyChoiceModal(sessionId, defaultRedirectUrl) {
-            // CRITICAL DEBUG: Log when modal is being shown
-            console.error('[MODAL_DEBUG] showDifficultyChoiceModal called!');
-            console.trace('[MODAL_DEBUG] Call stack:');
-            console.log('[MODAL_DEBUG] sessionId:', sessionId);
-            console.log('[MODAL_DEBUG] defaultRedirectUrl:', defaultRedirectUrl);
+            // Use debug logger if available
+            const logger = (window.PrimePathDebug && window.PrimePathDebug.createLogger) ?
+                          window.PrimePathDebug.createLogger('DifficultyModal') :
+                          { 
+                              debug: (msg, data) => console.log('[DifficultyModal]', msg, data || ''),
+                              warn: (msg) => console.warn('[DifficultyModal]', msg),
+                              trace: () => { /* no-op */ }
+                          };
+            
+            logger.debug('showDifficultyChoiceModal called', {
+                sessionId: sessionId,
+                defaultRedirectUrl: defaultRedirectUrl
+            });
+            
+            // Only show stack trace in TRACE mode
+            if (window.PrimePathDebug && window.PrimePathDebug.shouldLog('modal', 4)) {
+                logger.trace('Call stack for modal display');
+            }
             
             const modal = document.getElementById('difficulty-choice-modal');
             if (!modal) {
+                console.error('[AnswerManager] CRITICAL ERROR: Difficulty choice modal not found in DOM');
+                console.log('[AnswerManager] Available modal elements:', document.querySelectorAll('[id*="modal"]'));
                 this.log('warn', 'Difficulty choice modal not found, redirecting to results');
                 window.location.href = defaultRedirectUrl;
                 return;
             }
             
+            // Enhanced modal state debugging
+            console.group('[AnswerManager] Modal Display Process');
+            console.log('Modal element found:', modal);
+            console.log('Modal current display:', modal.style.display);
+            console.log('Modal current visibility:', getComputedStyle(modal).visibility);
+            console.log('Modal current opacity:', getComputedStyle(modal).opacity);
+            console.log('Session data to store:', { sessionId, defaultRedirectUrl });
+            
+            // Check if timer is still valid before showing modal
+            if (window.examTimer && window.examTimer.getStats) {
+                const timerStats = window.examTimer.getStats();
+                console.log('Timer validation before modal display:', timerStats);
+                
+                if (timerStats.isExpired) {
+                    console.error('[AnswerManager] CRITICAL: Timer expired during modal display setup - aborting modal');
+                    console.groupEnd();
+                    window.location.href = defaultRedirectUrl;
+                    return;
+                }
+            }
+            
             // Show the modal
-            console.error('[MODAL_DEBUG] About to show modal with display: flex');
+            logger.debug('Showing difficulty choice modal');
             modal.style.display = 'flex';
+            console.log('[AnswerManager] Modal display set to flex');
+            console.groupEnd();
             
             // Store session data for later use
             modal.dataset.sessionId = sessionId;
@@ -437,6 +510,70 @@
                 this.setupDifficultyModalListeners(modal);
                 modal.dataset.listenersAdded = 'true';
             }
+            
+            // CRITICAL FIX: Set up timer expiry monitoring for modal
+            const self = this;
+            console.log('[AnswerManager] Setting up timer monitoring for modal');
+            console.log('[AnswerManager] Timer available for monitoring:', !!(window.examTimer && window.examTimer.getStats));
+            
+            const checkTimerInterval = setInterval(() => {
+                if (window.examTimer && window.examTimer.getStats) {
+                    const timerStats = window.examTimer.getStats();
+                    
+                    // Only log in debug mode to avoid console spam
+                    if (window.PrimePathDebug && window.PrimePathDebug.shouldLog('modal', 4)) {
+                        console.log('[AnswerManager] Timer monitoring check:', {
+                            isExpired: timerStats.isExpired,
+                            timeRemaining: timerStats.timeRemaining,
+                            modalVisible: modal.style.display !== 'none'
+                        });
+                    }
+                    
+                    if (timerStats.isExpired) {
+                        console.warn('[AnswerManager] TIMER EXPIRY DETECTED DURING MODAL DISPLAY');
+                        console.group('[AnswerManager] Modal Auto-Close Process');
+                        console.log('Timer stats at expiry:', timerStats);
+                        console.log('Modal state before close:', {
+                            display: modal.style.display,
+                            sessionId: modal.dataset.sessionId,
+                            redirectUrl: modal.dataset.defaultRedirectUrl
+                        });
+                        
+                        self.log('warn', 'Timer expired while modal was open - auto-closing');
+                        
+                        // Clear interval
+                        clearInterval(checkTimerInterval);
+                        console.log('[AnswerManager] Timer monitoring interval cleared');
+                        
+                        // Hide modal
+                        modal.style.display = 'none';
+                        console.log('[AnswerManager] Modal hidden');
+                        
+                        // Clear timer state
+                        if (window.examTimer.clearState) {
+                            window.examTimer.clearState();
+                            console.log('[AnswerManager] Timer state cleared');
+                        } else {
+                            console.warn('[AnswerManager] Timer clearState not available');
+                        }
+                        
+                        console.log('[AnswerManager] Showing expiry alert and redirecting');
+                        console.groupEnd();
+                        
+                        // Show message and redirect
+                        alert('Test time has expired. Redirecting to your results...');
+                        window.location.href = defaultRedirectUrl;
+                    }
+                } else {
+                    // Timer not available - this could indicate a problem
+                    console.warn('[AnswerManager] Timer not available during monitoring check');
+                }
+            }, 1000); // Check every second
+            
+            console.log('[AnswerManager] Timer monitoring interval started, ID:', checkTimerInterval);
+            
+            // Store interval ID so we can clean it up
+            modal.dataset.timerCheckInterval = checkTimerInterval;
         }
         
         /**
@@ -446,6 +583,15 @@
         setupDifficultyModalListeners(modal) {
             const self = this;
             const sessionId = modal.dataset.sessionId;
+            
+            // Helper function to clean up timer monitoring
+            function cleanupTimerMonitoring() {
+                const intervalId = modal.dataset.timerCheckInterval;
+                if (intervalId) {
+                    clearInterval(parseInt(intervalId));
+                    delete modal.dataset.timerCheckInterval;
+                }
+            }
             
             // Handle difficulty choice buttons
             modal.querySelectorAll('[data-action="difficulty-choice"]').forEach(button => {
@@ -459,6 +605,7 @@
             const skipBtn = modal.querySelector('[data-action="skip-difficulty-choice"]');
             if (skipBtn) {
                 skipBtn.addEventListener('click', function() {
+                    cleanupTimerMonitoring();
                     modal.style.display = 'none';
                     window.location.href = modal.dataset.defaultRedirectUrl;
                 });
@@ -468,6 +615,7 @@
             const overlay = modal.querySelector('.modal-overlay');
             if (overlay) {
                 overlay.addEventListener('click', function() {
+                    cleanupTimerMonitoring();
                     modal.style.display = 'none';
                     window.location.href = modal.dataset.defaultRedirectUrl;
                 });
@@ -480,14 +628,77 @@
          * @param {number} adjustment - Difficulty adjustment (-1, 0, 1)
          */
         async handleDifficultyChoice(sessionId, adjustment) {
+            console.group('[AnswerManager] Difficulty Choice Processing');
+            console.log('Processing difficulty choice:', {
+                sessionId: sessionId,
+                adjustment: adjustment,
+                timestamp: new Date().toISOString()
+            });
+            
             const modal = document.getElementById('difficulty-choice-modal');
+            
+            // CRITICAL FIX: Validate timer state before processing choice
+            console.log('[AnswerManager] Validating timer state before processing choice...');
+            if (window.examTimer && window.examTimer.getStats) {
+                const timerStats = window.examTimer.getStats();
+                console.log('[AnswerManager] Timer stats during choice processing:', timerStats);
+                
+                if (timerStats.isExpired) {
+                    console.error('[AnswerManager] CRITICAL: Timer expired during difficulty choice - canceling operation');
+                    console.log('[AnswerManager] Choice details at cancellation:', {
+                        sessionId: sessionId,
+                        adjustment: adjustment,
+                        timerExpired: timerStats.isExpired,
+                        timeRemaining: timerStats.timeRemaining,
+                        action: 'cancel_and_redirect'
+                    });
+                    
+                    this.log('warn', 'Timer expired - canceling difficulty choice');
+                    
+                    // Clear timer state
+                    if (window.examTimer.clearState) {
+                        window.examTimer.clearState();
+                        console.log('[AnswerManager] Timer state cleared due to expiry during choice');
+                    }
+                    
+                    // Hide modal and redirect to results
+                    modal.style.display = 'none';
+                    console.log('[AnswerManager] Modal hidden, showing expiry alert');
+                    console.groupEnd();
+                    
+                    alert('Test time has expired. Showing your results...');
+                    window.location.href = modal.dataset.defaultRedirectUrl;
+                    return;
+                } else {
+                    console.log('[AnswerManager] Timer validation passed, proceeding with choice processing');
+                }
+            } else {
+                console.warn('[AnswerManager] Timer not available for validation during choice processing');
+            }
             
             // Show loading state
             const buttons = modal.querySelectorAll('button');
             buttons.forEach(btn => btn.disabled = true);
             
+            // Clear timer monitoring
+            console.log('[AnswerManager] Clearing timer monitoring interval...');
+            const intervalId = modal.dataset.timerCheckInterval;
+            if (intervalId) {
+                clearInterval(parseInt(intervalId));
+                delete modal.dataset.timerCheckInterval;
+                console.log('[AnswerManager] Timer monitoring interval cleared:', intervalId);
+            } else {
+                console.log('[AnswerManager] No timer monitoring interval to clear');
+            }
+            
             try {
-                const endpoint = `/api/PlacementTest/session/${sessionId}/post-submit-difficulty/`;
+                const endpoint = `/PlacementTest/session/${sessionId}/post-submit-difficulty/`;
+                console.log('[AnswerManager] Sending difficulty choice request:', {
+                    endpoint: endpoint,
+                    adjustment: adjustment,
+                    sessionId: sessionId
+                });
+                
                 const response = await this.ajax(endpoint, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -495,9 +706,27 @@
                     })
                 });
                 
+                console.log('[AnswerManager] Difficulty choice response received:', response);
+                
                 if (response.success) {
+                    console.log('[AnswerManager] Difficulty choice successful, processing response...');
+                    console.log('[AnswerManager] Response details:', {
+                        action: response.action,
+                        redirect_url: response.redirect_url,
+                        message: response.message
+                    });
+                    
                     // Hide modal
                     modal.style.display = 'none';
+                    console.log('[AnswerManager] Modal hidden after successful choice');
+                    
+                    // Clear timer state since we're done
+                    if (window.examTimer && window.examTimer.clearState) {
+                        window.examTimer.clearState();
+                        console.log('[AnswerManager] Timer state cleared after successful choice');
+                    } else {
+                        console.warn('[AnswerManager] Timer clearState not available after choice');
+                    }
                     
                     // Redirect based on action
                     if (response.redirect_url) {
@@ -559,13 +788,21 @@
          * @param {boolean} isTimerExpiry Whether this is triggered by timer expiry
          */
         async submitTest(force = false, isTimerExpiry = false) {
-            console.error('[SUBMIT_TEST_CALLED] submitTest function called!');
-            console.trace('[SUBMIT_TEST_CALLED] Call stack:');
-            console.log('[SUBMIT_TEST_CALLED] force:', force, 'isTimerExpiry:', isTimerExpiry);
+            // Only log in debug mode
+            if (this.isDebugMode()) {
+                this.log('info', 'submitTest called', { force, isTimerExpiry });
+                // Only show stack trace in TRACE mode
+                if (window.PrimePathDebug && window.PrimePathDebug.shouldLog('answerManager', 4)) {
+                    console.trace('[AnswerManager] Submit test call stack');
+                }
+            }
             
             // Defensive check for sessionId with multiple fallbacks
             const sessionId = this.getSessionId();
-            console.log('[SUBMIT_TEST_CALLED] sessionId:', sessionId);
+            
+            if (this.isDebugMode()) {
+                this.log('debug', `Session ID for submission: ${sessionId}`);
+            }
             
             if (!sessionId) {
                 this.log('error', 'Cannot submit test: session ID not available');
@@ -619,16 +856,69 @@
                 });
                 
                 if (response.success) {
-                    console.log('[SUBMIT_TEST] Response received:', response);
+                    if (this.isDebugMode()) {
+                        this.log('debug', 'Test submission successful', {
+                            show_difficulty_choice: response.show_difficulty_choice,
+                            redirect_url: response.redirect_url
+                        });
+                    }
                     this.emit('testSubmitted', response);
                     
                     // Clear auto-save
                     this.stopAutoSave();
                     
                     // Check if we should show difficulty choice modal
-                    console.log('[SUBMIT_TEST] show_difficulty_choice flag:', response.show_difficulty_choice);
+                    if (this.isDebugMode()) {
+                        this.log('info', `Difficulty choice flag: ${response.show_difficulty_choice}`);
+                    }
                     if (response.show_difficulty_choice) {
-                        console.error('[SUBMIT_TEST] Showing difficulty modal from submit response');
+                        // CRITICAL FIX: Check if timer has expired since test was submitted
+                        console.group('[AnswerManager] Difficulty Choice Modal Decision');
+                        console.log('Backend requests modal display:', response.show_difficulty_choice);
+                        console.log('Timer available:', !!(window.examTimer && window.examTimer.getStats));
+                        
+                        if (window.examTimer && window.examTimer.getStats) {
+                            const timerStats = window.examTimer.getStats();
+                            console.log('Timer stats:', {
+                                isExpired: timerStats.isExpired,
+                                timeRemaining: timerStats.timeRemaining,
+                                totalTime: timerStats.totalTime,
+                                isRunning: timerStats.isRunning
+                            });
+                            
+                            // If timer is expired, don't show modal regardless of backend response
+                            if (timerStats.isExpired) {
+                                console.warn('[AnswerManager] RACE CONDITION DETECTED: Timer expired after submission - skipping difficulty choice modal');
+                                console.log('Submission details:', {
+                                    timer_expired: isTimerExpiry,
+                                    backend_says_show_modal: response.show_difficulty_choice,
+                                    actual_timer_expired: timerStats.isExpired,
+                                    action: 'skip_modal_and_redirect'
+                                });
+                                
+                                this.log('warn', 'Timer expired after submission - skipping difficulty choice modal');
+                                
+                                // Clear any timer state and redirect directly
+                                if (window.examTimer.clearState) {
+                                    window.examTimer.clearState();
+                                    console.log('[AnswerManager] Timer state cleared due to race condition');
+                                }
+                                
+                                if (response.redirect_url) {
+                                    console.log('[AnswerManager] Redirecting to results:', response.redirect_url);
+                                    window.location.href = response.redirect_url;
+                                }
+                                console.groupEnd();
+                                return true;
+                            } else {
+                                console.log('[AnswerManager] Timer is still active, proceeding with modal display');
+                            }
+                        } else {
+                            console.warn('[AnswerManager] Timer not available for validation - proceeding with modal display');
+                        }
+                        console.groupEnd();
+                        
+                        this.log('info', 'Showing difficulty modal after test submission');
                         this.showDifficultyChoiceModal(sessionId, response.redirect_url);
                         return true;
                     }
@@ -855,17 +1145,25 @@
     try {
         if (window.PrimePath && window.PrimePath.modules) {
             window.PrimePath.modules.AnswerManager = AnswerManager;
-            console.log('[AnswerManager] ✓ Module exported to PrimePath.modules.AnswerManager');
+            
+            // Only log in debug mode
+            if (window.PrimePathDebug && window.PrimePathDebug.shouldLog('answerManager', 3)) {
+                console.log('[AnswerManager] Module exported to PrimePath.modules.AnswerManager');
+            }
             
             // Track initialization if bootstrap is available
             if (window.PrimePath.trackInit) {
                 window.PrimePath.trackInit('AnswerManager', true);
             }
         } else {
-            console.error('[AnswerManager] Cannot export - namespace not available');
+            if (window.PrimePathDebug && window.PrimePathDebug.shouldLog('answerManager', 0)) {
+                console.error('[AnswerManager] Cannot export - namespace not available');
+            }
         }
     } catch (error) {
-        console.error('[AnswerManager] Export failed:', error);
+        if (window.PrimePathDebug && window.PrimePathDebug.shouldLog('answerManager', 0)) {
+            console.error('[AnswerManager] Export failed:', error);
+        }
         if (window.PrimePath && window.PrimePath.trackInit) {
             window.PrimePath.trackInit('AnswerManager', false, error.message);
         }

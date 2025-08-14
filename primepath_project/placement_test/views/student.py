@@ -150,16 +150,20 @@ def take_test(request, session_id):
     audio_files = exam.audio_files.all()
     student_answers = {sa.question_id: sa for sa in session.answers.all()}
     
-    # COMPREHENSIVE TIMER CALCULATION WITH NULL SAFETY
-    # Log initial timer state
+    # COMPREHENSIVE TIMER CALCULATION WITH DEBUGGING AND NULL SAFETY
+    # Log initial timer state and session information
     console_log_timer_init = {
         "event": "TIMER_INIT_CHECK",
         "session_id": str(session_id),
+        "session_started_at": str(session.started_at),
+        "current_time": str(timezone.now()),
         "exam_timer_minutes": exam.timer_minutes,
         "timer_minutes_type": type(exam.timer_minutes).__name__ if exam.timer_minutes is not None else "NoneType",
         "is_none": exam.timer_minutes is None,
         "is_zero": exam.timer_minutes == 0 if exam.timer_minutes is not None else False,
-        "is_positive": exam.timer_minutes > 0 if exam.timer_minutes is not None else False
+        "is_positive": exam.timer_minutes > 0 if exam.timer_minutes is not None else False,
+        "session_is_completed": session.is_completed,
+        "session_completed_at": str(session.completed_at) if session.completed_at else None
     }
     print(f"[TIMER_INIT] {json.dumps(console_log_timer_init, indent=2)}")
     
@@ -175,18 +179,46 @@ def take_test(request, session_id):
         time_elapsed = (timezone.now() - session.started_at).total_seconds()
         timer_seconds_remaining = max(0, timer_seconds_total - time_elapsed)
         
-        # Log timer calculation
+        # CRITICAL: Check for session state issues that could cause immediate expiry
+        session_age_minutes = time_elapsed / 60
+        is_session_fresh = session_age_minutes < 1  # Session less than 1 minute old
+        is_timer_expired_backend = timer_seconds_remaining <= 0
+        
+        # Log comprehensive timer calculation
         console_log_timer = {
             "event": "TIMER_CALCULATION",
             "session_id": str(session_id),
             "timer_minutes": exam.timer_minutes,
             "timer_seconds_total": timer_seconds_total,
             "time_elapsed_seconds": time_elapsed,
+            "time_elapsed_minutes": session_age_minutes,
             "timer_seconds_remaining": timer_seconds_remaining,
-            "is_expired": timer_seconds_remaining <= 0,
-            "is_in_grace_period": session.is_in_grace_period() if hasattr(session, 'is_in_grace_period') else False
+            "is_expired_backend": is_timer_expired_backend,
+            "is_session_fresh": is_session_fresh,
+            "is_in_grace_period": session.is_in_grace_period() if hasattr(session, 'is_in_grace_period') else False,
+            "potential_issue": is_timer_expired_backend and is_session_fresh,
+            "session_started_at_iso": session.started_at.isoformat(),
+            "current_time_iso": timezone.now().isoformat()
         }
         print(f"[TIMER_CALC] {json.dumps(console_log_timer, indent=2)}")
+        
+        # CRITICAL WARNING: Check for potential timing issues
+        if is_timer_expired_backend and is_session_fresh:
+            console_log_warning = {
+                "event": "TIMER_CALCULATION_WARNING",
+                "session_id": str(session_id),
+                "issue": "Timer shows as expired but session is fresh",
+                "possible_causes": [
+                    "Session started_at timestamp issue",
+                    "System clock discrepancy",
+                    "Database transaction delay",
+                    "Cached session data"
+                ],
+                "session_age_seconds": time_elapsed,
+                "timer_remaining": timer_seconds_remaining,
+                "recommendation": "Check session creation timing"
+            }
+            print(f"[TIMER_WARNING] {json.dumps(console_log_warning, indent=2)}")
         
         # Use remaining time for timer display
         timer_seconds = int(timer_seconds_remaining)
@@ -588,8 +620,36 @@ def complete_test(request, session_id):
         except json.JSONDecodeError:
             pass
     
-    # Use GradingService to calculate final score
+    # Use ENHANCED GradingService with LONG exclusion
+    logger.info(f"[complete_test] Grading session {session_id} with new policy (LONG excluded)")
+    
+    # CRITICAL DEBUG: Log all answers before grading
+    logger.info(f"[complete_test] DEBUG: Pre-grading answer analysis")
+    answers = session.answers.select_related('question').all()
+    for answer in answers:
+        logger.debug(
+            f"[complete_test] Q{answer.question.question_number} ({answer.question.question_type}): "
+            f"Student='{answer.answer[:50] if answer.answer else 'None'}...' "
+            f"Correct='{answer.question.correct_answer[:50] if answer.question.correct_answer else 'None'}...'"
+        )
+    
     results = GradingService.grade_session(session)
+    
+    # Log grading results for verification
+    logger.info(
+        f"[complete_test] Grading complete: {results['total_score']}/{results['total_possible']} "
+        f"= {results['percentage_score']:.2f}% "
+        f"({len(results.get('excluded_questions', []))} LONG questions excluded)"
+    )
+    
+    # CRITICAL DEBUG: Log post-grading results
+    logger.info(f"[complete_test] DEBUG: Post-grading verification")
+    for answer in answers:
+        if answer.question.question_type != 'LONG':
+            logger.debug(
+                f"[complete_test] Q{answer.question.question_number}: "
+                f"is_correct={answer.is_correct}, points={answer.points_earned}/{answer.question.points}"
+            )
     
     # Mark session as complete
     session.completed_at = timezone.now()
@@ -720,7 +780,14 @@ def post_submit_difficulty_choice(request, session_id):
 
 
 def test_result(request, session_id):
-    """Displays test results to the student"""
+    """
+    ENHANCED: Displays test results with CORRECT scoring (LONG excluded).
+    
+    CRITICAL CHANGES:
+    - LONG questions are excluded from total_possible_score
+    - Shows actual gradable points only
+    - Comprehensive logging for score verification
+    """
     session = get_object_or_404(StudentSession, id=session_id)
     
     if not session.completed_at:
@@ -729,11 +796,71 @@ def test_result(request, session_id):
     # Get detailed results
     results = GradingService.get_detailed_results(session_id)
     
+    # CRITICAL: Calculate total possible excluding LONG questions
+    answers = session.answers.select_related('question').all()
+    total_possible_score = 0
+    total_possible_including_long = 0
+    excluded_count = 0
+    
+    for answer in answers:
+        if answer.question.question_type == 'LONG':
+            # LONG questions don't count toward total_possible
+            total_possible_including_long += answer.question.points
+            excluded_count += 1
+            logger.info(
+                f"[test_result] Excluding LONG Q{answer.question.question_number} "
+                f"({answer.question.points} points) from total"
+            )
+        else:
+            # All other question types count
+            total_possible_score += answer.question.points
+            total_possible_including_long += answer.question.points
+    
+    # Add total_possible_score to session for template compatibility
+    session.total_possible_score = total_possible_score
+    
+    # Get curriculum recommendation
+    curriculum_recommendation = session.final_curriculum_level or session.original_curriculum_level
+    
+    # Enhanced logging for debugging
+    logger.info(f"[test_result] " + "=" * 50)
+    logger.info(
+        f"[test_result] Session {session_id} RESULTS:"
+    )
+    logger.info(
+        f"[test_result] Score: {session.score}/{total_possible_score} = {session.percentage_score:.2f}% "
+        f"(LONG excluded)"
+    )
+    logger.info(
+        f"[test_result] Would be: {session.score}/{total_possible_including_long} = "
+        f"{(session.score/total_possible_including_long*100) if total_possible_including_long > 0 else 0:.2f}% "
+        f"(if LONG included)"
+    )
+    logger.info(
+        f"[test_result] Excluded {excluded_count} LONG questions from scoring"
+    )
+    logger.info(f"[test_result] " + "=" * 50)
+    
+    # Verify score consistency with new policy
+    if total_possible_score > 0:
+        calculated_percentage = (session.score / total_possible_score) * 100
+        if abs(float(session.percentage_score) - calculated_percentage) > 0.01:
+            logger.warning(
+                f"[test_result] Score inconsistency detected for session {session_id}: "
+                f"stored {session.percentage_score}% vs calculated {calculated_percentage:.2f}% "
+                f"(may need re-grading with new policy)"
+            )
+    
     return render(request, 'placement_test/test_result.html', {
         'session': session,
         'results': results,
         'exam': session.exam,
-        'final_level': session.final_curriculum_level
+        'final_level': session.final_curriculum_level,
+        'curriculum_recommendation': curriculum_recommendation,
+        'answers': answers,
+        'total_possible_score': total_possible_score,  # Excludes LONG
+        'total_possible_including_long': total_possible_including_long,  # For comparison
+        'excluded_count': excluded_count  # Number of LONG questions
     })
 
 

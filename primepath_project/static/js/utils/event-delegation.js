@@ -7,16 +7,27 @@
 (function(window) {
     'use strict';
     
-    console.log('[EventDelegation] Initializing event delegation module');
+    // Use debug config if available, otherwise use simple check
+    const logger = (window.PrimePathDebug && window.PrimePathDebug.createLogger) ? 
+                   window.PrimePathDebug.createLogger('EventDelegation') :
+                   {
+                       info: (msg) => console.log('[EventDelegation] ' + msg),
+                       warn: (msg) => console.warn('[EventDelegation] ' + msg),
+                       error: (msg) => console.error('[EventDelegation] ' + msg),
+                       debug: (msg) => { /* no-op */ },
+                       trace: (msg) => { /* no-op */ }
+                   };
+    
+    logger.debug('Initializing event delegation module');
     
     // Defensive namespace creation with comprehensive checks
     if (typeof window.PrimePath === 'undefined') {
-        console.warn('[EventDelegation] PrimePath namespace not found, creating it');
+        logger.info('PrimePath namespace not found, creating it');
         window.PrimePath = {};
     }
     
     if (typeof window.PrimePath.utils === 'undefined') {
-        console.log('[EventDelegation] Creating PrimePath.utils namespace');
+        logger.debug('Creating PrimePath.utils namespace');
         window.PrimePath.utils = {};
     }
 
@@ -181,12 +192,12 @@
     
     try {
         eventDelegation = new EventDelegation();
-        console.log('[EventDelegation] ✓ Instance created successfully');
+        logger.debug('Instance created successfully');
     } catch (error) {
-        console.error('[EventDelegation] Failed to create instance:', error);
+        logger.error('Failed to create instance:', error);
         // Create minimal fallback
         eventDelegation = {
-            init: function() { console.warn('[EventDelegation] Using fallback'); },
+            init: function() { logger.warn('Using fallback implementation'); },
             on: function() { return function() {}; },
             onClick: function(sel, cb) { 
                 document.addEventListener('click', function(e) {
@@ -206,9 +217,9 @@
     // Export to PrimePath namespace with safety check
     if (window.PrimePath && window.PrimePath.utils) {
         window.PrimePath.utils.EventDelegation = eventDelegation;
-        console.log('[EventDelegation] ✓ Module exported to PrimePath.utils.EventDelegation');
+        logger.debug('Module exported to PrimePath.utils.EventDelegation');
     } else {
-        console.error('[EventDelegation] Cannot export - namespace not available');
+        logger.error('Cannot export - namespace not available');
     }
 
     // Convenience methods
@@ -222,14 +233,14 @@
     const autoInit = function() {
         try {
             eventDelegation.init();
-            console.log('[EventDelegation] ✓ Auto-initialization complete');
+            logger.debug('Auto-initialization complete');
             
             // Track initialization if bootstrap is available
             if (window.PrimePath && window.PrimePath.trackInit) {
                 window.PrimePath.trackInit('EventDelegation', true);
             }
         } catch (error) {
-            console.error('[EventDelegation] Auto-initialization failed:', error);
+            logger.error('Auto-initialization failed:', error);
             if (window.PrimePath && window.PrimePath.trackInit) {
                 window.PrimePath.trackInit('EventDelegation', false, error.message);
             }

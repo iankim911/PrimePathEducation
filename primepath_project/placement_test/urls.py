@@ -20,6 +20,7 @@ from .student_urls import urlpatterns as student_patterns
 from .exam_urls import urlpatterns as exam_patterns
 from .session_urls import urlpatterns as session_patterns
 from .api_urls import urlpatterns as api_patterns
+from .teacher_urls import urlpatterns as teacher_patterns
 from .legacy_urls import urlpatterns as legacy_patterns
 from .url_integration import integrate_url_patterns, URLIntegrationLogger
 
@@ -38,6 +39,7 @@ console_log = {
         "exam_urls",
         "session_urls",
         "api_urls",
+        "teacher_urls",
         "legacy_urls"
     ],
     "timestamp": str(__import__('datetime').datetime.now())
@@ -50,6 +52,7 @@ pattern_counts = {
     "exam": len(exam_patterns),
     "session": len(session_patterns),
     "api": len(api_patterns),
+    "teacher": len(teacher_patterns),
     "legacy": len(legacy_patterns)
 }
 
@@ -68,6 +71,7 @@ try:
         "exam": exam_patterns,
         "session": session_patterns,
         "api": api_patterns,
+        "teacher": teacher_patterns,
         "legacy": legacy_patterns  # Includes index page
     }
     
@@ -101,4 +105,5 @@ except Exception as e:
     urlpatterns.extend(exam_patterns)
     urlpatterns.extend(session_patterns)
     urlpatterns.extend(api_patterns)
+    urlpatterns.extend(teacher_patterns)
     urlpatterns.extend(legacy_patterns)  # Still include legacy for index page
