@@ -27,11 +27,11 @@
             this.pageRendering = false;
             this.pageNumPending = null;
             
-            // Display settings - optimized for readability
-            this.scale = options.scale || 1.8;  // Increased from 1.5 for better readability
+            // Display settings
+            this.scale = options.scale || 1.5;  // Restored to original scale
             this.rotation = 0;
             this.minScale = options.minScale || 0.5;
-            this.maxScale = options.maxScale || 4.0;  // Increased max zoom capability
+            this.maxScale = options.maxScale || 3.0;  // Restored to original max scale
             
             // Per-page rotation tracking
             this.pageRotations = new Map();
