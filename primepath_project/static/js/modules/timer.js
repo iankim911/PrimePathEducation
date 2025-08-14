@@ -58,16 +58,41 @@
          * @param {string|HTMLElement} displayElement Element to show time
          */
         init(seconds, displayElement) {
-            if (this.initialized && this.isRunning) {
-                this.log('warn', 'Timer already running');
-                return;
+            console.log('[Timer.init] Called with seconds:', seconds, 'displayElement:', displayElement);
+            
+            // NULL SAFETY: Validate input parameters
+            if (seconds === undefined || seconds === null) {
+                console.warn('[Timer.init] No seconds provided, timer will not be initialized');
+                this.log('warn', 'Timer init called without seconds value');
+                return false;
             }
             
-            // Set display element
-            if (typeof displayElement === 'string') {
-                this.displayElement = document.querySelector(displayElement);
+            // Convert to number and validate
+            seconds = Number(seconds);
+            if (isNaN(seconds)) {
+                console.error('[Timer.init] Invalid seconds value:', seconds);
+                this.log('error', 'Invalid timer seconds value');
+                return false;
+            }
+            
+            // Check if already initialized
+            if (this.initialized && this.isRunning) {
+                this.log('warn', 'Timer already running');
+                return true;
+            }
+            
+            // Set display element with null safety
+            if (displayElement) {
+                if (typeof displayElement === 'string') {
+                    this.displayElement = document.querySelector(displayElement);
+                    if (!this.displayElement) {
+                        console.warn('[Timer.init] Display element not found:', displayElement);
+                    }
+                } else {
+                    this.displayElement = displayElement;
+                }
             } else {
-                this.displayElement = displayElement;
+                console.warn('[Timer.init] No display element provided');
             }
             
             // Restore from storage if available
@@ -99,20 +124,31 @@
             }
             
             super.init();
+            console.log('[Timer.init] Timer initialization complete');
+            return true;
         }
 
         /**
          * Start the timer
          */
         start() {
+            console.log('[Timer.start] Called, initialized:', this.initialized, 'isRunning:', this.isRunning);
+            
+            // NULL SAFETY: Check if timer was properly initialized
+            if (!this.initialized) {
+                console.warn('[Timer.start] Timer not initialized, cannot start');
+                this.log('warn', 'Attempted to start uninitialized timer');
+                return false;
+            }
+            
             if (this.isRunning && !this.isPaused) {
                 this.log('warn', 'Timer already running');
-                return;
+                return true;
             }
             
             if (this.isPaused) {
                 this.resume();
-                return;
+                return true;
             }
             
             // Check if timer was already expired on init

@@ -86,7 +86,18 @@
             <div class="test-header">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <h1>{{ exam.name }}</h1>
-                    {% include 'components/placement_test/timer.html' with timer_seconds=timer_seconds %}
+                    {% comment %}
+                    TIMER COMPONENT: Only render if timer_seconds exists and is not None
+                    This prevents null/empty data-timer-seconds attributes
+                    {% endcomment %}
+                    {% if timer_seconds is not None and timer_seconds >= 0 %}
+                        {% include 'components/placement_test/timer.html' with timer_seconds=timer_seconds %}
+                    {% else %}
+                        <!-- No timer for this exam -->
+                        <div class="timer-placeholder" style="color: #6c757d; font-size: 14px;">
+                            <span>⏱️ Untimed Exam</span>
+                        </div>
+                    {% endif %}
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <div id="answer-progress" style="color: #6c757d;">
@@ -375,18 +386,46 @@
                     }
                 });
                 
+                // COMPREHENSIVE TIMER INITIALIZATION WITH NULL SAFETY
+                console.log('[TIMER_INIT] Looking for timer element...');
                 const timerElement = document.querySelector('[data-timer-seconds]');
+                
                 if (timerElement) {
-                    const timerSeconds = parseInt(timerElement.dataset.timerSeconds);
-                    if (timerSeconds && timerSeconds > 0) {
-                        timer.init(timerSeconds, '#timer');
-                        timer.start();
-                        console.log('  ✅ Timer initialized with', timerSeconds, 'seconds');
+                    console.log('[TIMER_INIT] Timer element found, checking data attributes...');
+                    
+                    // Safely get timer seconds with multiple checks
+                    const timerSecondsRaw = timerElement.dataset.timerSeconds;
+                    console.log('[TIMER_INIT] Raw timer seconds value:', timerSecondsRaw);
+                    console.log('[TIMER_INIT] Timer seconds type:', typeof timerSecondsRaw);
+                    console.log('[TIMER_INIT] Timer seconds truthy:', !!timerSecondsRaw);
+                    
+                    // Check if the value exists and is not empty
+                    if (timerSecondsRaw !== undefined && timerSecondsRaw !== null && timerSecondsRaw !== '') {
+                        const timerSeconds = parseInt(timerSecondsRaw);
+                        console.log('[TIMER_INIT] Parsed timer seconds:', timerSeconds);
+                        
+                        if (!isNaN(timerSeconds) && timerSeconds > 0) {
+                            console.log('[TIMER_INIT] Valid timer value, initializing timer...');
+                            timer.init(timerSeconds, '#timer');
+                            timer.start();
+                            console.log('  ✅ Timer initialized with', timerSeconds, 'seconds');
+                        } else if (timerSeconds === 0) {
+                            console.log('  ℹ️ Timer set to 0 - no countdown needed');
+                            // Still initialize timer but don't start it
+                            timer.init(0, '#timer');
+                            console.log('[TIMER_INIT] Timer initialized but not started (0 seconds)');
+                        } else {
+                            console.log('  ⚠️ Invalid timer value after parsing:', timerSeconds);
+                            console.log('[TIMER_INIT] This exam appears to have no timer');
+                        }
                     } else {
-                        console.log('  ℹ️ No timer needed for this exam');
+                        console.log('  ℹ️ Timer attribute is empty or undefined - no timer for this exam');
+                        console.log('[TIMER_INIT] Timer element exists but has no valid timer value');
+                        console.log('[TIMER_INIT] This is normal for untimed exams');
                     }
                 } else {
-                    console.log('  ℹ️ Timer element not found');
+                    console.log('  ℹ️ Timer element not found in DOM');
+                    console.log('[TIMER_INIT] This may indicate the timer component was not rendered');
                 }
             } else {
                 console.error('  ❌ Timer module not found');

@@ -150,29 +150,67 @@ def take_test(request, session_id):
     audio_files = exam.audio_files.all()
     student_answers = {sa.question_id: sa for sa in session.answers.all()}
     
-    # Calculate actual remaining time for timer
-    timer_seconds = exam.timer_minutes * 60 if exam.timer_minutes else None
+    # COMPREHENSIVE TIMER CALCULATION WITH NULL SAFETY
+    # Log initial timer state
+    console_log_timer_init = {
+        "event": "TIMER_INIT_CHECK",
+        "session_id": str(session_id),
+        "exam_timer_minutes": exam.timer_minutes,
+        "timer_minutes_type": type(exam.timer_minutes).__name__ if exam.timer_minutes is not None else "NoneType",
+        "is_none": exam.timer_minutes is None,
+        "is_zero": exam.timer_minutes == 0 if exam.timer_minutes is not None else False,
+        "is_positive": exam.timer_minutes > 0 if exam.timer_minutes is not None else False
+    }
+    print(f"[TIMER_INIT] {json.dumps(console_log_timer_init, indent=2)}")
     
-    if timer_seconds:
+    # Calculate actual remaining time for timer with defensive checks
+    timer_seconds = None  # Default value for no timer
+    
+    # Check if exam has a valid timer
+    if exam.timer_minutes is not None and exam.timer_minutes > 0:
+        # Valid timer exists
+        timer_seconds_total = exam.timer_minutes * 60
+        
         # Calculate how much time has elapsed
         time_elapsed = (timezone.now() - session.started_at).total_seconds()
-        timer_seconds_remaining = max(0, timer_seconds - time_elapsed)
+        timer_seconds_remaining = max(0, timer_seconds_total - time_elapsed)
         
         # Log timer calculation
         console_log_timer = {
             "event": "TIMER_CALCULATION",
             "session_id": str(session_id),
             "timer_minutes": exam.timer_minutes,
+            "timer_seconds_total": timer_seconds_total,
             "time_elapsed_seconds": time_elapsed,
             "timer_seconds_remaining": timer_seconds_remaining,
-            "is_expired": timer_seconds_remaining <= 0
+            "is_expired": timer_seconds_remaining <= 0,
+            "is_in_grace_period": session.is_in_grace_period() if hasattr(session, 'is_in_grace_period') else False
         }
         print(f"[TIMER_CALC] {json.dumps(console_log_timer, indent=2)}")
         
         # Use remaining time for timer display
         timer_seconds = int(timer_seconds_remaining)
-    else:
+        
+    elif exam.timer_minutes == 0:
+        # Timer explicitly set to 0 - untimed exam
         timer_seconds = None
+        console_log_no_timer = {
+            "event": "NO_TIMER_ZERO",
+            "session_id": str(session_id),
+            "message": "Exam has timer_minutes set to 0 (untimed exam)"
+        }
+        print(f"[TIMER_CALC] {json.dumps(console_log_no_timer, indent=2)}")
+        
+    else:
+        # Timer is None or invalid
+        timer_seconds = None
+        console_log_no_timer = {
+            "event": "NO_TIMER_NULL",
+            "session_id": str(session_id),
+            "timer_minutes_value": exam.timer_minutes,
+            "message": "Exam has no timer (null value)"
+        }
+        print(f"[TIMER_CALC] {json.dumps(console_log_no_timer, indent=2)}")
     
     # Prepare JavaScript configuration data (properly serialized)
     # json is already imported at the top of the file
