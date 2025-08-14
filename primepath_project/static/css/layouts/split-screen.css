@@ -39,12 +39,11 @@
     margin-top: var(--spacing-sm);  /* Reduced from md */
 }
 
-/* ENHANCED: Question section with integrated submit button */
+/* Question section on the right - now responsive width */
 .question-section {
     flex: 0 0 350px;  /* Reduced from 400px to give more space to PDF */
     background: var(--bg-white);
     padding: var(--spacing-md);  /* Reduced from lg */
-    padding-bottom: 0; /* Remove bottom padding since submit container has its own */
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     height: fit-content;
@@ -53,15 +52,6 @@
     position: sticky;
     top: 20px;
     box-shadow: var(--shadow-md);
-    display: flex;
-    flex-direction: column;
-}
-
-/* Ensure form takes available space but allows submit to stick */
-.question-section form {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: var(--spacing-md);
 }
 
 .question-section:hover {
@@ -90,9 +80,7 @@
 
 /* ENHANCED: Submit button positioning - Prevents overlap with navigation buttons */
 .submit-container {
-    /* Desktop: Sticky footer within question section */
-    position: sticky;
-    bottom: 0;
+    /* Inside question section to prevent overlap */
     background: linear-gradient(to top, 
         var(--bg-white) 0%, 
         var(--bg-white) 80%, 
@@ -101,7 +89,8 @@
     padding: var(--spacing-lg) var(--spacing-md) var(--spacing-md);
     margin-top: var(--spacing-xl);
     border-top: 1px solid var(--border-color);
-    z-index: calc(var(--z-index-sticky) - 1); /* Below navigation but above content */
+    position: relative;
+    z-index: 10; /* Above content but below modals */
 }
 
 /* Alternative fixed positioning for wide screens only */
