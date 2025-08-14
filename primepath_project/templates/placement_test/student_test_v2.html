@@ -135,7 +135,7 @@
                     {% include 'components/placement_test/pdf_viewer.html' with pdf_url=None enable_navigation=True enable_zoom=True %}
                 {% endif %}
                 
-                <!-- Question Section -->
+                <!-- Question Section with Integrated Submit Button -->
                 <div class="question-section">
                     <form id="test-form" method="post">
                         {% csrf_token %}
@@ -143,17 +143,19 @@
                             {% include 'components/placement_test/question_panel.html' with question=question questions=questions %}
                         {% endfor %}
                     </form>
+                    
+                    <!-- Submit Button - Now inside question section to prevent overlap -->
+                    <div class="submit-container" id="submit-container">
+                        <button type="button" 
+                                id="submit-test-btn"
+                                class="submit-test-btn"
+                                data-action="submit-test"
+                                aria-label="Submit Test">
+                            <span class="btn-text">Submit Test</span>
+                            <span class="btn-icon" style="display: none;">✓</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Submit Button -->
-            <div class="submit-container">
-                <button type="button" 
-                        id="submit-test-btn"
-                        class="submit-test-btn"
-                        data-action="submit-test">
-                    Submit Test
-                </button>
             </div>
         </div>
     </div>
@@ -743,8 +745,115 @@
         } else {
             console.log('  Setting up submit handler...');
             
-            // Submit test with enhanced error handling and fallback
-            delegation.onClick('[data-action="submit-test"]', function() {
+            // ENHANCED: Submit button positioning manager to prevent overlap
+            const submitButtonManager = {
+                container: null,
+                button: null,
+                initialized: false,
+                
+                init() {
+                    console.log('[SubmitButtonManager] Initializing...');
+                    this.container = document.getElementById('submit-container');
+                    this.button = document.getElementById('submit-test-btn');
+                    
+                    if (!this.container || !this.button) {
+                        console.warn('[SubmitButtonManager] Submit container or button not found');
+                        return false;
+                    }
+                    
+                    this.setupResponsivePositioning();
+                    this.addDebugLogging();
+                    this.initialized = true;
+                    console.log('[SubmitButtonManager] Initialization complete');
+                    return true;
+                },
+                
+                setupResponsivePositioning() {
+                    // Check viewport width and adjust positioning
+                    const checkViewport = () => {
+                        const width = window.innerWidth;
+                        console.log(`[SubmitButtonManager] Viewport width: ${width}px`);
+                        
+                        // Ultra-wide screens (1600px+) can use fixed positioning if no overlap detected
+                        if (width >= 1600 && !this.detectPotentialOverlap()) {
+                            this.container.classList.add('use-fixed-position');
+                            console.log('[SubmitButtonManager] Using fixed positioning (ultra-wide screen)');
+                        } else {
+                            this.container.classList.remove('use-fixed-position');
+                            console.log('[SubmitButtonManager] Using sticky footer positioning');
+                        }
+                    };
+                    
+                    // Initial check
+                    checkViewport();
+                    
+                    // Re-check on resize with debounce
+                    let resizeTimer;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(checkViewport, 250);
+                    });
+                },
+                
+                detectPotentialOverlap() {
+                    // Check if there are navigation buttons that might overlap
+                    const navButtons = document.querySelector('.question-nav-buttons');
+                    if (!navButtons) return false;
+                    
+                    const navRect = navButtons.getBoundingClientRect();
+                    const submitRect = this.button.getBoundingClientRect();
+                    
+                    // Check for vertical overlap
+                    const verticalOverlap = !(navRect.bottom < submitRect.top || submitRect.bottom < navRect.top);
+                    // Check for horizontal overlap
+                    const horizontalOverlap = !(navRect.right < submitRect.left || submitRect.right < navRect.left);
+                    
+                    const hasOverlap = verticalOverlap && horizontalOverlap;
+                    
+                    if (hasOverlap) {
+                        console.warn('[SubmitButtonManager] Potential overlap detected with navigation buttons');
+                    }
+                    
+                    return hasOverlap;
+                },
+                
+                addDebugLogging() {
+                    // Log button interactions
+                    this.button.addEventListener('mouseenter', () => {
+                        console.log('[SubmitButtonManager] Mouse entered submit button');
+                    });
+                    
+                    this.button.addEventListener('focus', () => {
+                        console.log('[SubmitButtonManager] Submit button focused');
+                    });
+                    
+                    // Monitor visibility changes
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                console.log('[SubmitButtonManager] Submit button is visible (visibility: ' + Math.round(entry.intersectionRatio * 100) + '%)');
+                            } else {
+                                console.log('[SubmitButtonManager] Submit button is not visible');
+                            }
+                        });
+                    }, { threshold: [0, 0.5, 1.0] });
+                    
+                    observer.observe(this.button);
+                }
+            };
+            
+            // Initialize submit button manager
+            submitButtonManager.init();
+            window.PrimePath.submitButtonManager = submitButtonManager; // Make it globally accessible for debugging
+            
+            // Submit test with enhanced error handling and debugging
+            delegation.onClick('[data-action="submit-test"]', function(event) {
+                console.log('[Submit] Submit button clicked');
+                console.log('[Submit] Event target:', event.target);
+                console.log('[Submit] Current button state:', {
+                    disabled: event.target.disabled,
+                    classList: event.target.classList.toString()
+                });
             if (!answerManager) {
                 console.error('Answer manager not initialized, attempting fallback submission...');
                 

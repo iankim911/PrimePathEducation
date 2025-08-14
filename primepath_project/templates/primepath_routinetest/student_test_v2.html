@@ -124,7 +124,7 @@
                     {% include 'components/primepath_routinetest/pdf_viewer.html' with pdf_url=None enable_navigation=True enable_zoom=True %}
                 {% endif %}
                 
-                <!-- Question Section -->
+                <!-- Question Section with Integrated Submit Button -->
                 <div class="question-section">
                     <form id="test-form" method="post">
                         {% csrf_token %}
@@ -132,17 +132,19 @@
                             {% include 'components/primepath_routinetest/question_panel.html' with question=question questions=questions %}
                         {% endfor %}
                     </form>
+                    
+                    <!-- Submit Button - Now inside question section to prevent overlap -->
+                    <div class="submit-container" id="submit-container">
+                        <button type="button" 
+                                id="submit-test-btn"
+                                class="submit-test-btn"
+                                data-action="submit-test"
+                                aria-label="Submit Test">
+                            <span class="btn-text">Submit Test</span>
+                            <span class="btn-icon" style="display: none;">✓</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Submit Button -->
-            <div class="submit-container">
-                <button type="button" 
-                        id="submit-test-btn"
-                        class="submit-test-btn"
-                        data-action="submit-test">
-                    Submit Test
-                </button>
             </div>
         </div>
     </div>
