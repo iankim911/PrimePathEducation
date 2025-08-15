@@ -1,10 +1,11 @@
 // ========================================
-// CASCADING CURRICULUM SELECTION & AUTO-NAME GENERATION SYSTEM (v3.0)
+// CASCADING CURRICULUM SELECTION & AUTO-NAME GENERATION SYSTEM (v3.1)
 // ========================================
 console.log('[CASCADE_SYSTEM] ========================================');
-console.log('[CASCADE_SYSTEM] Initializing Cascading Curriculum System v3.0');
+console.log('[CASCADE_SYSTEM] Initializing Cascading Curriculum System v3.1');
 console.log('[CASCADE_SYSTEM] Features: Program → SubProgram → Level cascade');
-console.log('[CASCADE_SYSTEM] Auto-name format: [RT/QTR] - [Time Period] - [Program] [SubProgram] Level [X]');
+console.log('[CASCADE_SYSTEM] Auto-name format: [RT/QTR] - [Mon Year] - [Program] [SubProgram] Lv[X]');
+console.log('[CASCADE_SYSTEM] Updated: Using "Lv" abbreviation and 3-letter months');
 console.log('[CASCADE_SYSTEM] ========================================');
 
 // Store curriculum hierarchy data
@@ -15,7 +16,15 @@ let finalExamName = '';
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('[CASCADE_SYSTEM] DOM loaded, initializing cascading system...');
+    console.log('[CASCADE_SYSTEM] ========================================');
+    console.log('[CASCADE_SYSTEM] DOM CONTENT LOADED - v3.1');
+    console.log('[CASCADE_SYSTEM] Workflow Order:');
+    console.log('[CASCADE_SYSTEM] 1. Exam Type & Time Period');
+    console.log('[CASCADE_SYSTEM] 2. Class Selection');
+    console.log('[CASCADE_SYSTEM] 3. Program → SubProgram → Level');
+    console.log('[CASCADE_SYSTEM] 4. Additional Notes (Optional)');
+    console.log('[CASCADE_SYSTEM] 5. Auto-Generated Name (at bottom)');
+    console.log('[CASCADE_SYSTEM] ========================================');
     initializeCascadingSystem();
 });
 
@@ -124,9 +133,9 @@ function initializeCascadingSystem() {
                 levels.forEach(level => {
                     const option = document.createElement('option');
                     option.value = level.id;
-                    option.textContent = level.display_name;
+                    option.textContent = `Lv${level.level_number}`; // Use Lv abbreviation
                     option.setAttribute('data-level-number', level.level_number);
-                    option.setAttribute('data-full-name', level.full_name);
+                    option.setAttribute('data-full-name', `${program} ${this.value} Lv${level.level_number}`);
                     levelSelect.appendChild(option);
                 });
                 
@@ -153,9 +162,10 @@ function initializeCascadingSystem() {
             curriculumLevelHidden.value = this.value;
             selectedLevelNumberHidden.value = levelNumber;
             
-            // Show curriculum status
+            // Show curriculum status with Lv abbreviation
             curriculumStatus.style.display = 'block';
-            curriculumStatusText.textContent = fullName;
+            const displayName = `${selectedProgramHidden.value} ${selectedSubprogramHidden.value} Lv${levelNumber}`;
+            curriculumStatusText.textContent = displayName;
             
             console.log('[CASCADE_SYSTEM] Complete selection:', {
                 curriculum_level_id: this.value,
@@ -242,8 +252,8 @@ function populateProgramDropdown() {
 // Function to generate the exam name based on selections
 function generateExamName() {
     console.log('[CASCADE_SYSTEM] ========================================');
-    console.log('[CASCADE_SYSTEM] Starting name generation (Cascading version)');
-    console.log('[CASCADE_SYSTEM] Name format: [RT/QTR] - [Time Period] - [Program] [SubProgram] Level [X]');
+    console.log('[CASCADE_SYSTEM] Starting name generation (v3.1 with abbreviations)');
+    console.log('[CASCADE_SYSTEM] Name format: [RT/QTR] - [Mon Year] - [Program] [SubProgram] Lv[X]');
     
     // Get current selections
     const examType = document.getElementById('exam_type')?.value;
@@ -274,30 +284,32 @@ function generateExamName() {
         console.log('[CASCADE_SYSTEM] Added prefix:', prefix);
     }
     
-    // Add time period (actual period, not placeholder)
+    // Add time period with abbreviated months (3 letters)
     if (examType === 'REVIEW' && timePeriodMonth) {
-        const monthNames = {
-            'JAN': 'January', 'FEB': 'February', 'MAR': 'March', 'APR': 'April',
-            'MAY': 'May', 'JUN': 'June', 'JUL': 'July', 'AUG': 'August',
-            'SEP': 'September', 'OCT': 'October', 'NOV': 'November', 'DEC': 'December'
+        // Month codes are already 3 letters (JAN, FEB, MAR, etc.)
+        // Just use them directly with the year
+        const monthAbbrev = {
+            'JAN': 'Jan', 'FEB': 'Feb', 'MAR': 'Mar', 'APR': 'Apr',
+            'MAY': 'May', 'JUN': 'Jun', 'JUL': 'Jul', 'AUG': 'Aug',
+            'SEP': 'Sep', 'OCT': 'Oct', 'NOV': 'Nov', 'DEC': 'Dec'
         };
-        const monthName = monthNames[timePeriodMonth] || timePeriodMonth;
+        const monthName = monthAbbrev[timePeriodMonth] || timePeriodMonth;
         const periodStr = academicYear ? `${monthName} ${academicYear}` : monthName;
         nameParts.push(periodStr);
-        console.log('[CASCADE_SYSTEM] Added month period:', periodStr);
+        console.log('[CASCADE_SYSTEM] Added abbreviated month period:', periodStr);
     } else if (examType === 'QUARTERLY' && timePeriodQuarter) {
         const periodStr = academicYear ? `${timePeriodQuarter} ${academicYear}` : timePeriodQuarter;
         nameParts.push(periodStr);
         console.log('[CASCADE_SYSTEM] Added quarter period:', periodStr);
     }
     
-    // Add curriculum level from cascading selections
+    // Add curriculum level from cascading selections with Lv abbreviation
     if (program && subprogram && levelId && levelSelect) {
         const levelOption = levelSelect.options[levelSelect.selectedIndex];
         const levelNumber = levelOption.getAttribute('data-level-number');
-        const curriculumStr = `${program} ${subprogram} Level ${levelNumber}`;
+        const curriculumStr = `${program} ${subprogram} Lv${levelNumber}`; // Use Lv instead of Level
         nameParts.push(curriculumStr);
-        console.log('[CASCADE_SYSTEM] Added curriculum:', curriculumStr);
+        console.log('[CASCADE_SYSTEM] Added curriculum with Lv abbreviation:', curriculumStr);
     }
     
     // Generate base name
@@ -375,6 +387,7 @@ window.generateExamName = generateExamName;
 window.updateFinalName = updateFinalName;
 
 console.log('[CASCADE_SYSTEM] ========================================');
-console.log('[CASCADE_SYSTEM] Cascading Curriculum System v3.0 loaded');
+console.log('[CASCADE_SYSTEM] Cascading Curriculum System v3.1 loaded');
+console.log('[CASCADE_SYSTEM] Format: [RT/QTR] - [Mon Year] - [Program] [SubProgram] Lv[X]');
 console.log('[CASCADE_SYSTEM] Ready for initialization on DOM load');
 console.log('[CASCADE_SYSTEM] ========================================');

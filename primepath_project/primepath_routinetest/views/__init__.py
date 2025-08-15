@@ -50,7 +50,8 @@ from .ajax import (
     update_exam_name,
     get_audio,
     update_audio_names,
-    delete_audio_from_exam
+    delete_audio_from_exam,
+    get_curriculum_hierarchy
 )
 
 # Phase 5: Import roster management views
@@ -99,6 +100,7 @@ __all__ = [
     'get_audio',
     'update_audio_names',
     'delete_audio_from_exam',
+    'get_curriculum_hierarchy',
     
     # Phase 5: Roster management views
     'manage_roster',

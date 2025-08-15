@@ -405,8 +405,8 @@ def get_curriculum_hierarchy(request):
                     hierarchy['levels'][subprogram_key].append({
                         'id': level.id,
                         'level_number': level.level_number,
-                        'display_name': f"Level {level.level_number}",
-                        'full_name': f"{program.name} {subprogram.name} Level {level.level_number}"
+                        'display_name': f"Lv{level.level_number}",  # Changed to Lv abbreviation
+                        'full_name': f"{program.name} {subprogram.name} Lv{level.level_number}"  # Changed to Lv
                     })
         
         # Log the hierarchy structure

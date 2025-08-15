@@ -673,24 +673,16 @@ if (typeof pdfjsLib !== 'undefined') {
         </div>
         
         
-        <!-- Auto-generated Name Section with User Comments -->
+        <!-- Curriculum and Exam Configuration Section -->
         <div class="form-section" style="background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); border: 2px solid #66BB6A; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
             <h4 class="section-title" style="color: #2E7D32; border-bottom: 2px solid #66BB6A; padding-bottom: 10px; margin-bottom: 20px;">
-                <i class="fas fa-magic"></i> Exam Name Configuration
+                <i class="fas fa-graduation-cap"></i> Curriculum Selection & Exam Details
             </h4>
             
-            <!-- Auto-generated Name Display -->
-            <div class="form-group">
-                <label style="font-weight: 600; color: #1B5E20; font-size: 1.05rem;">
-                    Auto-Generated Exam Name
-                </label>
-                <div id="generated_exam_name_display" 
-                     style="font-size: 1.15rem; padding: 15px; background: white; border-radius: 6px; border: 2px solid #81C784; margin: 10px 0; font-weight: 500; color: #1B5E20; min-height: 50px; display: flex; align-items: center;">
-                    <span id="generated_name_text" style="color: #757575;">Please make selections above to generate name...</span>
-                </div>
-                <div class="help-text" style="color: #558B2F; font-size: 0.9rem;">
-                    <i class="fas fa-info-circle"></i> Name automatically builds from: Exam Type + Time Period + Curriculum Level
-                </div>
+            <!-- Info Message -->
+            <div class="alert" style="background-color: #E3F2FD; border-left: 4px solid #2196F3; padding: 12px; margin-bottom: 20px;">
+                <i class="fas fa-info-circle" style="color: #1976D2;"></i>
+                <span style="color: #0D47A1; font-weight: 500;">The exam name will be automatically generated based on all your selections below.</span>
             </div>
             
             <!-- CASCADING CURRICULUM SELECTION (v3.0) -->
@@ -741,7 +733,7 @@ if (typeof pdfjsLib !== 'undefined') {
             </div>
             
             <!-- User Comment Field (Optional) -->
-            <div class="form-group" style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 6px; border: 1px solid #FFC107;">
+            <div class="form-group" style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 6px; border: 1px solid #FFC107; margin-top: 20px;">
                 <label for="user_comment" style="font-weight: 600; color: #F57C00;">
                     <i class="fas fa-comment-alt"></i> Additional Notes (Optional)
                 </label>
@@ -754,19 +746,46 @@ if (typeof pdfjsLib !== 'undefined') {
                        style="border: 1px solid #FFB300;">
                 <div class="help-text" style="color: #E65100; font-size: 0.85rem;">
                     <strong>Optional:</strong> Add version or distinguishing notes (max 50 chars)<br>
-                    • Will be appended after underscore: [Generated]_[Your Note]<br>
+                    • Will be appended after underscore: [Auto-Generated Name]_[Your Note]<br>
                     • Examples: "v2", "revised", "audio_fixes", "morning_group"
                 </div>
             </div>
+        </div>
+        
+        <!-- Auto-Generated Exam Name Section (NOW AT THE BOTTOM) -->
+        <div class="form-section" style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border: 2px solid #FF9800; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h4 class="section-title" style="color: #E65100; border-bottom: 2px solid #FF9800; padding-bottom: 10px; margin-bottom: 20px;">
+                <i class="fas fa-magic"></i> Auto-Generated Exam Name
+            </h4>
             
-            <!-- Final Name Preview -->
-            <div class="form-group" style="background: linear-gradient(135deg, #FFF9C4 0%, #FFF8E1 100%); padding: 15px; border-radius: 6px;">
+            <!-- Explanation -->
+            <div class="alert" style="background-color: #FFF8E1; border-left: 4px solid #FFC107; padding: 12px; margin-bottom: 20px;">
+                <i class="fas fa-lightbulb" style="color: #F57C00;"></i>
+                <span style="color: #E65100; font-weight: 500;">Your exam name has been automatically generated based on all your selections above:</span>
+            </div>
+            
+            <!-- Generated Name Display -->
+            <div class="form-group">
+                <label style="font-weight: 600; color: #E65100; font-size: 1.1rem;">
+                    Generated Exam Name:
+                </label>
+                <div id="generated_exam_name_display" 
+                     style="font-size: 1.3rem; padding: 20px; background: white; border-radius: 8px; border: 3px solid #FF9800; margin: 10px 0; font-weight: 600; color: #E65100; min-height: 60px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <span id="generated_name_text" style="color: #9E9E9E;">Complete the form above to see your auto-generated exam name...</span>
+                </div>
+                <div class="help-text" style="color: #F57C00; font-size: 0.9rem; margin-top: 10px;">
+                    <i class="fas fa-info-circle"></i> <strong>Format:</strong> [RT/QTR] - [Month Year] - [Program] [SubProgram] Lv[Number]_[Optional Notes]
+                </div>
+            </div>
+            
+            <!-- Final Name Preview with Notes -->
+            <div class="form-group" style="background: linear-gradient(135deg, #FFF9C4 0%, #FFF8E1 100%); padding: 15px; border-radius: 6px; margin-top: 15px;">
                 <label style="font-weight: 600; color: #F57C00; font-size: 0.95rem;">
-                    <i class="fas fa-eye"></i> Final Name Preview
+                    <i class="fas fa-check-circle"></i> Final Exam Name (With Your Notes):
                 </label>
                 <div id="final_name_preview" 
-                     style="font-family: 'Courier New', monospace; font-size: 1.1rem; padding: 12px; background: white; border-radius: 4px; border: 1px solid #FFB300; color: #424242; word-break: break-all; min-height: 45px;">
-                    <span style="color: #9E9E9E;">Waiting for selections...</span>
+                     style="font-family: 'Courier New', monospace; font-size: 1.2rem; padding: 15px; background: white; border-radius: 4px; border: 2px solid #FFB300; color: #424242; word-break: break-all; min-height: 50px; font-weight: bold;">
+                    <span style="color: #9E9E9E;">Waiting for all selections...</span>
                 </div>
             </div>
             
