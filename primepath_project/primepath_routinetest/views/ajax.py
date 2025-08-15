@@ -8,6 +8,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils import timezone
 from ..models import Exam, AudioFile, Question
 from core.exceptions import ValidationException, AudioFileException
 from core.decorators import handle_errors, teacher_required
@@ -322,6 +323,111 @@ def delete_audio_from_exam(request, exam_id, audio_id):
         
     except Exception as e:
         logger.error(f"Error deleting audio file: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+@handle_errors(ajax_only=True)
+def get_curriculum_hierarchy(request):
+    """
+    Get hierarchical curriculum data for cascading dropdowns.
+    Returns programs, subprograms, and levels in a structured format.
+    """
+    from core.models import Program, SubProgram, CurriculumLevel
+    from ..constants import ROUTINETEST_CURRICULUM_WHITELIST
+    
+    try:
+        # Log the request
+        logger.info("[CASCADE_API] Fetching curriculum hierarchy for RoutineTest")
+        print("[CASCADE_API] Fetching curriculum hierarchy for RoutineTest")
+        
+        # Build whitelist lookup for filtering
+        whitelist_set = set(ROUTINETEST_CURRICULUM_WHITELIST)
+        
+        # Get all programs available in RoutineTest
+        program_names = list(set(item[0] for item in ROUTINETEST_CURRICULUM_WHITELIST))
+        programs = Program.objects.filter(name__in=program_names).order_by('order')
+        
+        hierarchy = {
+            'programs': [],
+            'subprograms': {},
+            'levels': {}
+        }
+        
+        for program in programs:
+            # Add program to list
+            hierarchy['programs'].append({
+                'id': program.id,
+                'name': program.name,
+                'display_name': program.get_name_display()
+            })
+            
+            # Get subprograms for this program that are in whitelist
+            subprogram_names = list(set(
+                item[1] for item in ROUTINETEST_CURRICULUM_WHITELIST 
+                if item[0] == program.name
+            ))
+            
+            subprograms = SubProgram.objects.filter(
+                program=program,
+                name__in=subprogram_names
+            ).order_by('order')
+            
+            hierarchy['subprograms'][program.name] = []
+            
+            for subprogram in subprograms:
+                # Add subprogram to program's list
+                hierarchy['subprograms'][program.name].append({
+                    'id': subprogram.id,
+                    'name': subprogram.name,
+                    'display_name': subprogram.name  # Just the subprogram name
+                })
+                
+                # Get levels for this subprogram that are in whitelist
+                level_numbers = [
+                    item[2] for item in ROUTINETEST_CURRICULUM_WHITELIST
+                    if item[0] == program.name and item[1] == subprogram.name
+                ]
+                
+                levels = CurriculumLevel.objects.filter(
+                    subprogram=subprogram,
+                    level_number__in=level_numbers
+                ).order_by('level_number')
+                
+                # Create key for subprogram levels
+                subprogram_key = f"{program.name}_{subprogram.name}"
+                hierarchy['levels'][subprogram_key] = []
+                
+                for level in levels:
+                    hierarchy['levels'][subprogram_key].append({
+                        'id': level.id,
+                        'level_number': level.level_number,
+                        'display_name': f"Level {level.level_number}",
+                        'full_name': f"{program.name} {subprogram.name} Level {level.level_number}"
+                    })
+        
+        # Log the hierarchy structure
+        console_log = {
+            "action": "curriculum_hierarchy_fetched",
+            "programs_count": len(hierarchy['programs']),
+            "subprograms_count": sum(len(v) for v in hierarchy['subprograms'].values()),
+            "levels_count": sum(len(v) for v in hierarchy['levels'].values()),
+            "timestamp": str(timezone.now())
+        }
+        logger.info(f"[CASCADE_API] {json.dumps(console_log)}")
+        print(f"[CASCADE_API] {json.dumps(console_log)}")
+        
+        return JsonResponse({
+            'success': True,
+            'data': hierarchy
+        })
+        
+    except Exception as e:
+        logger.error(f"[CASCADE_API_ERROR] Error fetching curriculum hierarchy: {str(e)}")
+        print(f"[CASCADE_API_ERROR] Error fetching curriculum hierarchy: {str(e)}")
         return JsonResponse({
             'success': False,
             'error': str(e)

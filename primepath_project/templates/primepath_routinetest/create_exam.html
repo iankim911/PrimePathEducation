@@ -425,6 +425,9 @@
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- Cascading Curriculum Selection System -->
+{% load static %}
+<script src="{% static 'js/routinetest-cascading-curriculum.js' %}"></script>
 <script>
 if (typeof pdfjsLib !== 'undefined') {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -690,25 +693,51 @@ if (typeof pdfjsLib !== 'undefined') {
                 </div>
             </div>
             
-            <!-- Curriculum Level Selection -->
-            <div class="form-group">
-                <label for="curriculum_level_select">Select Curriculum Level *</label>
-                <select class="form-control" id="curriculum_level_select" name="curriculum_level_select" required 
-                        style="border: 1px solid #66BB6A;">
-                    <option value="">-- Select curriculum level --</option>
-                    {% for level in curriculum_levels %}
-                        <option value="{{ level.id }}" 
-                                data-display-name="{{ level.display_name }}"
-                                data-base-name="{{ level.exam_base_name }}"
-                                data-next-version="{{ level.next_version|default:'' }}"
-                                data-date-str="{{ level.date_str }}">
-                            {{ level.display_name }}
-                            {% if level.existing_count > 0 %}
-                                ({{ level.existing_count }} existing)
-                            {% endif %}
-                        </option>
-                    {% endfor %}
-                </select>
+            <!-- CASCADING CURRICULUM SELECTION (v3.0) -->
+            <div class="cascading-curriculum-section" style="background: linear-gradient(135deg, #F1F8E9 0%, #E8F5E9 100%); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #81C784;">
+                <h4 style="color: #2E7D32; margin-bottom: 20px;">📚 Select Curriculum (Step-by-Step)</h4>
+                
+                <!-- Step 1: Program Selection -->
+                <div class="form-group cascade-step" data-step="1">
+                    <label for="program_select" style="font-weight: 600; color: #1B5E20;">
+                        Step 1: Select Program *
+                    </label>
+                    <select class="form-control cascade-select" id="program_select" name="program_select" required 
+                            style="border: 2px solid #66BB6A; font-size: 1.05rem; padding: 10px;">
+                        <option value="">-- Select Program --</option>
+                    </select>
+                    <div class="help-text" style="color: #558B2F;">Choose from: CORE, ASCENT, EDGE, or PINNACLE</div>
+                </div>
+                
+                <!-- Step 2: SubProgram Selection -->
+                <div class="form-group cascade-step" data-step="2" style="display: none;">
+                    <label for="subprogram_select" style="font-weight: 600; color: #1B5E20;">
+                        Step 2: Select SubProgram *
+                    </label>
+                    <select class="form-control cascade-select" id="subprogram_select" name="subprogram_select" required 
+                            style="border: 2px solid #66BB6A; font-size: 1.05rem; padding: 10px;" disabled>
+                        <option value="">-- First select a Program --</option>
+                    </select>
+                    <div class="help-text" style="color: #558B2F;">SubPrograms will appear based on your Program selection</div>
+                </div>
+                
+                <!-- Step 3: Level Selection -->
+                <div class="form-group cascade-step" data-step="3" style="display: none;">
+                    <label for="level_select" style="font-weight: 600; color: #1B5E20;">
+                        Step 3: Select Level *
+                    </label>
+                    <select class="form-control cascade-select" id="level_select" name="level_select" required 
+                            style="border: 2px solid #66BB6A; font-size: 1.05rem; padding: 10px;" disabled>
+                        <option value="">-- First select a SubProgram --</option>
+                    </select>
+                    <div class="help-text" style="color: #558B2F;">Levels will appear based on your SubProgram selection</div>
+                </div>
+                
+                <!-- Curriculum Selection Status -->
+                <div id="curriculum_status" style="margin-top: 15px; padding: 10px; background: white; border-radius: 6px; display: none;">
+                    <strong style="color: #2E7D32;">✓ Selected:</strong>
+                    <span id="curriculum_status_text" style="color: #424242;"></span>
+                </div>
             </div>
             
             <!-- User Comment Field (Optional) -->
@@ -755,6 +784,10 @@ if (typeof pdfjsLib !== 'undefined') {
         <input type="hidden" id="curriculum_level" name="curriculum_level" value="">
         <input type="hidden" id="final_exam_name" name="name" value="">
         <input type="hidden" id="generated_base_name" name="generated_base_name" value="">
+        <!-- Store selected program and subprogram for backend reference -->
+        <input type="hidden" id="selected_program" name="selected_program" value="">
+        <input type="hidden" id="selected_subprogram" name="selected_subprogram" value="">
+        <input type="hidden" id="selected_level_number" name="selected_level_number" value="">
         
         <div class="form-group">
             <label for="timer_minutes">Test Duration (minutes) *</label>
@@ -896,8 +929,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const quarterSelect = document.getElementById('time_period_quarter');
     const yearSelect = document.getElementById('academic_year');
     
-    // [RT]/[QTR] naming: Add event listener for timeslot selection
-    const timeslotSelect = document.getElementById('timeslot');
+    // REMOVED: Timeslot functionality has been completely removed from the system
+    console.log('[TIMESLOT_REMOVAL] Timeslot feature has been removed from RoutineTest module');
     
     if (monthSelect) {
         monthSelect.addEventListener('change', function(e) {
@@ -928,20 +961,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // [RT]/[QTR] naming: Timeslot selection event listener
-    if (timeslotSelect) {
-        timeslotSelect.addEventListener('change', function(e) {
-            console.log('[RT_QTR_NAMING] Timeslot selected:', {
-                value: e.target.value,
-                display: e.target.options[e.target.selectedIndex].text,
-                has_timeslot: !!e.target.value,
-                timestamp: new Date().toISOString(),
-                naming_impact: e.target.value ? 
-                    `Will include [${e.target.options[e.target.selectedIndex].text.split(' (')[0]}] in exam name` : 
-                    'Timeslot will not be included in exam name'
-            });
-        });
-    }
+    // REMOVED: Timeslot event listener removed
+    console.log('[TIMESLOT_REMOVAL] Timeslot event listeners removed - feature deprecated');
     
     const successAlert = document.querySelector('.alert-success');
     if (successAlert && successAlert.textContent.includes('uploaded successfully')) {
@@ -1394,28 +1415,26 @@ function removeAudioFile(index) {
 }
 
 // ========================================
-// AUTO-NAME GENERATION SYSTEM
+// OLD AUTO-NAME GENERATION REMOVED - NOW USING CASCADING SYSTEM
 // ========================================
-console.log('[AUTO_NAME_GEN] Initializing new auto-generation system');
+console.log('[MIGRATION] Old auto-name generation system removed');
+console.log('[MIGRATION] Now using cascading curriculum selection (v3.0)');
+console.log('[MIGRATION] See routinetest-cascading-curriculum.js for implementation');
 
-// Get new UI elements
-const curriculumLevelSelect = document.getElementById('curriculum_level_select');
-const userCommentInput = document.getElementById('user_comment');
-const generatedNameText = document.getElementById('generated_name_text');
-const finalNamePreview = document.getElementById('final_name_preview');
-const curriculumLevelHidden = document.getElementById('curriculum_level');
-const finalExamNameHidden = document.getElementById('final_exam_name');
-const generatedBaseNameHidden = document.getElementById('generated_base_name');
+// OLD generateExamName function removed - now in cascading system
+// This stub prevents errors from old event listeners
+if (typeof window.generateExamName === 'undefined') {
+    window.generateExamName = function() {
+        console.log('[MIGRATION] generateExamName called but cascading system not yet loaded');
+    };
+}
 
-// Store name components
-let generatedBaseName = '';
-let userComment = '';
-let finalExamName = '';
-
-// Function to generate the exam name based on selections
-function generateExamName() {
+// Original function removed
+function OLD_generateExamName_REMOVED() {
     console.log('[AUTO_NAME_GEN] ========================================');
-    console.log('[AUTO_NAME_GEN] Starting name generation');
+    console.log('[AUTO_NAME_GEN] Starting name generation (Timeslot-free version)');
+    console.log('[AUTO_NAME_GEN] Name format: [RT/QTR] - [Time Period] - [Curriculum Level]');
+    console.log('[AUTO_NAME_GEN] NOTE: Timeslot feature has been permanently removed');
     
     // Get current selections
     const examType = document.getElementById('exam_type').value;
@@ -1429,7 +1448,8 @@ function generateExamName() {
         timePeriodMonth: timePeriodMonth,
         timePeriodQuarter: timePeriodQuarter,
         academicYear: academicYear,
-        curriculumLevelId: curriculumLevelId
+        curriculumLevelId: curriculumLevelId,
+        timeslot: 'REMOVED - Feature deprecated'
     });
     
     // Check if minimum requirements are met
@@ -1496,6 +1516,13 @@ function generateExamName() {
     generatedBaseNameHidden.value = generatedBaseName;
     
     console.log('[AUTO_NAME_GEN] Name generation complete');
+    console.log('[AUTO_NAME_GEN] Final components used:', {
+        prefix: prefix,
+        timePeriod: nameParts[1] || 'Not specified',
+        curriculum: nameParts[nameParts.length - 1],
+        timeslot: 'NOT INCLUDED - Feature removed',
+        finalBaseName: generatedBaseName
+    });
     console.log('[AUTO_NAME_GEN] ========================================');
 }
 
@@ -1536,16 +1563,9 @@ function updateFinalNamePreview() {
     }
 }
 
-// Event listeners for real-time updates
-document.getElementById('exam_type').addEventListener('change', generateExamName);
-document.getElementById('time_period_month').addEventListener('change', generateExamName);
-document.getElementById('time_period_quarter').addEventListener('change', generateExamName);
-document.getElementById('academic_year').addEventListener('change', generateExamName);
-curriculumLevelSelect.addEventListener('change', generateExamName);
-userCommentInput.addEventListener('input', updateFinalNamePreview);
-
-// Initial generation
-generateExamName();
+// OLD EVENT LISTENERS REMOVED - Now handled by cascading system
+// These are now set up in routinetest-cascading-curriculum.js
+console.log('[MIGRATION] Old event listeners removed - cascading system handles all events');
 
 console.log('[AUTO_NAME_GEN] System initialized and ready');
 
@@ -1561,8 +1581,8 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
     const timePeriodQuarter = document.getElementById('time_period_quarter').value;
     const academicYear = document.getElementById('academic_year').value;
     
-    // [RT]/[QTR] naming: Get timeslot data
-    const timeslot = document.getElementById('timeslot').value;
+    // REMOVED: Timeslot data collection removed
+    console.log('[TIMESLOT_REMOVAL] Timeslot data collection removed from form submission');
     
     // Phase 3: Get selected class codes
     const classCodesSelect = document.getElementById('class_codes');
@@ -1584,8 +1604,7 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
         time_period_month: timePeriodMonth || null,
         time_period_quarter: timePeriodQuarter || null,
         academic_year: academicYear,
-        timeslot: timeslot || null,
-        timeslot_display: timeslot ? document.getElementById('timeslot').options[document.getElementById('timeslot').selectedIndex].text : null,
+        // REMOVED: timeslot fields removed from submission data
         class_codes: selectedClasses,
         class_codes_count: selectedClasses.length,
         scheduled_date: scheduledDate || null,
@@ -1646,11 +1665,12 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
         return;
     }
     
-    // Validate curriculum level is selected
-    if (!curriculumLevelHidden.value) {
+    // Validate curriculum level is selected (from cascading dropdowns)
+    const curriculumLevelHidden = document.getElementById('curriculum_level');
+    if (!curriculumLevelHidden || !curriculumLevelHidden.value) {
         e.preventDefault();
-        alert('Please select a curriculum level.');
-        console.error('[AUTO_NAME_GEN] Curriculum level not selected');
+        alert('Please complete all curriculum selections (Program, SubProgram, and Level).');
+        console.error('[CASCADE_SYSTEM] Curriculum level not selected through cascading dropdowns');
         return;
     }
     
@@ -1661,6 +1681,8 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
     console.log('[AUTO_NAME_GEN] Base name:', generatedBaseName);
     console.log('[AUTO_NAME_GEN] User comment:', userComment || '(none)');
     console.log('[AUTO_NAME_GEN] Curriculum level:', curriculumLevelHidden.value);
+    console.log('[AUTO_NAME_GEN] Timeslot:', 'NOT SENT - Feature removed');
+    console.log('[AUTO_NAME_GEN] Form data does not include timeslot field');
     console.log('[AUTO_NAME_GEN] ========================================');
     
     // The name is already in the hidden field 'final_exam_name', no need to create another
@@ -1803,8 +1825,13 @@ document.addEventListener('DOMContentLoaded', function() {
         levels_available: availableLevels,
         has_rt_qtr_prefix: availableLevels.length > 0 ? availableLevels[0].display_name.includes('[RT/QTR]') : false,
         naming_system: 'RoutineTest [RT]/[QTR]',
+        timeslot_feature: 'REMOVED - Not part of v2.0',
         timestamp: new Date().toISOString()
     });
+    
+    // Confirm timeslot removal
+    console.log('%c[TIMESLOT_REMOVAL_COMPLETE]', 'color: red; font-weight: bold;', 
+        'Timeslot feature has been completely removed from RoutineTest module');
     
     // Log if RoutineTest whitelist filtering is working
     if (availableLevels.length >= 30) {

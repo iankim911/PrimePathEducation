@@ -14,4 +14,6 @@ urlpatterns = [
     path('exams/<uuid:exam_id>/update-audio-names/', views.update_audio_names, name='update_audio_names'),
     path('exams/<uuid:exam_id>/audio/<int:audio_id>/delete/', views.delete_audio_from_exam, name='delete_audio_from_exam'),
     path('exams/<uuid:exam_id>/update-name/', views.update_exam_name, name='update_exam_name'),
+    # Cascading curriculum hierarchy endpoint
+    path('api/curriculum-hierarchy/', views.get_curriculum_hierarchy, name='get_curriculum_hierarchy'),
 ]
