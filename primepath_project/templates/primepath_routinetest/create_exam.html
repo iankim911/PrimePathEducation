@@ -1595,7 +1595,7 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
         instructions_length: instructions.length,
         allow_late_submission: allowLateSubmission,
         late_submission_penalty: lateSubmissionPenalty,
-        naming_choice: presetNameRadio.checked ? 'preset' : 'custom',
+        naming_choice: 'auto_generated',
         timestamp: new Date().toISOString()
     });
     
@@ -1782,10 +1782,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initInstructionsTracking();
     
     const availableLevels = [];
-    const presetOptions = presetSelect.options;
+    const curriculumOptions = curriculumLevelSelect.options;
     
-    for (let i = 1; i < presetOptions.length; i++) {
-        const option = presetOptions[i];
+    for (let i = 1; i < curriculumOptions.length; i++) {
+        const option = curriculumOptions[i];
         if (option.value) {
             availableLevels.push({
                 id: option.value,
