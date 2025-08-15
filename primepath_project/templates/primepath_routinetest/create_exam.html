@@ -669,69 +669,92 @@ if (typeof pdfjsLib !== 'undefined') {
             </div>
         </div>
         
-        <div class="form-group">
-            <label>Exam Name Selection *</label>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="naming_choice" id="preset_name" value="preset" checked>
-                <label class="form-check-label" for="preset_name">
-                    Choose from pre-designed names
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="naming_choice" id="custom_name" value="custom">
-                <label class="form-check-label" for="custom_name">
-                    Enter custom name
-                </label>
-            </div>
-        </div>
         
-        <div class="form-group" id="preset_name_group">
-            <label for="preset_exam_name">Select Pre-designed Name *</label>
-            <select class="form-control" id="preset_exam_name" name="preset_exam_name" required>
-                <option value="">Select exam name</option>
-                {% for level in curriculum_levels %}
-                    <option value="{{ level.id }}" 
-                            data-display-name="{{ level.display_name }}"
-                            data-base-name="{{ level.exam_base_name }}"
-                            data-next-version="{{ level.next_version|default:'' }}"
-                            data-date-str="{{ level.date_str }}">
-                        {{ level.display_name }}
-                        {% if level.existing_count > 0 %}
-                            ({{ level.existing_count }} existing)
-                        {% endif %}
-                    </option>
-                {% endfor %}
-            </select>
+        <!-- Auto-generated Name Section with User Comments -->
+        <div class="form-section" style="background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%); border: 2px solid #66BB6A; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <h4 class="section-title" style="color: #2E7D32; border-bottom: 2px solid #66BB6A; padding-bottom: 10px; margin-bottom: 20px;">
+                <i class="fas fa-magic"></i> Exam Name Configuration
+            </h4>
             
-            <!-- Debug: Log dropdown status -->
+            <!-- Auto-generated Name Display -->
+            <div class="form-group">
+                <label style="font-weight: 600; color: #1B5E20; font-size: 1.05rem;">
+                    Auto-Generated Exam Name
+                </label>
+                <div id="generated_exam_name_display" 
+                     style="font-size: 1.15rem; padding: 15px; background: white; border-radius: 6px; border: 2px solid #81C784; margin: 10px 0; font-weight: 500; color: #1B5E20; min-height: 50px; display: flex; align-items: center;">
+                    <span id="generated_name_text" style="color: #757575;">Please make selections above to generate name...</span>
+                </div>
+                <div class="help-text" style="color: #558B2F; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Name automatically builds from: Exam Type + Time Period + Curriculum Level
+                </div>
+            </div>
+            
+            <!-- Curriculum Level Selection -->
+            <div class="form-group">
+                <label for="curriculum_level_select">Select Curriculum Level *</label>
+                <select class="form-control" id="curriculum_level_select" name="curriculum_level_select" required 
+                        style="border: 1px solid #66BB6A;">
+                    <option value="">-- Select curriculum level --</option>
+                    {% for level in curriculum_levels %}
+                        <option value="{{ level.id }}" 
+                                data-display-name="{{ level.display_name }}"
+                                data-base-name="{{ level.exam_base_name }}"
+                                data-next-version="{{ level.next_version|default:'' }}"
+                                data-date-str="{{ level.date_str }}">
+                            {{ level.display_name }}
+                            {% if level.existing_count > 0 %}
+                                ({{ level.existing_count }} existing)
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- User Comment Field (Optional) -->
+            <div class="form-group" style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 6px; border: 1px solid #FFC107;">
+                <label for="user_comment" style="font-weight: 600; color: #F57C00;">
+                    <i class="fas fa-comment-alt"></i> Additional Notes (Optional)
+                </label>
+                <input type="text" 
+                       class="form-control" 
+                       id="user_comment" 
+                       name="user_comment" 
+                       placeholder="e.g., v2, revised, with audio, morning class"
+                       maxlength="50"
+                       style="border: 1px solid #FFB300;">
+                <div class="help-text" style="color: #E65100; font-size: 0.85rem;">
+                    <strong>Optional:</strong> Add version or distinguishing notes (max 50 chars)<br>
+                    • Will be appended after underscore: [Generated]_[Your Note]<br>
+                    • Examples: "v2", "revised", "audio_fixes", "morning_group"
+                </div>
+            </div>
+            
+            <!-- Final Name Preview -->
+            <div class="form-group" style="background: linear-gradient(135deg, #FFF9C4 0%, #FFF8E1 100%); padding: 15px; border-radius: 6px;">
+                <label style="font-weight: 600; color: #F57C00; font-size: 0.95rem;">
+                    <i class="fas fa-eye"></i> Final Name Preview
+                </label>
+                <div id="final_name_preview" 
+                     style="font-family: 'Courier New', monospace; font-size: 1.1rem; padding: 12px; background: white; border-radius: 4px; border: 1px solid #FFB300; color: #424242; word-break: break-all; min-height: 45px;">
+                    <span style="color: #9E9E9E;">Waiting for selections...</span>
+                </div>
+            </div>
+            
+            <!-- Debug Console Logging -->
             <script>
-                console.log('[EXAM_DROPDOWN] Curriculum levels count:', {{ curriculum_levels|length }});
-                {% if not curriculum_levels %}
-                console.error('[EXAM_DROPDOWN] ❌ No curriculum levels available - check server whitelist!');
-                {% else %}
-                console.log('[EXAM_DROPDOWN] ✅ {{ curriculum_levels|length }} levels loaded');
-                {% endif %}
+                console.log('[EXAM_NAME_AUTO_GEN] ========================================');
+                console.log('[EXAM_NAME_AUTO_GEN] Initializing Auto-Name Generation System');
+                console.log('[EXAM_NAME_AUTO_GEN] Curriculum levels available:', {{ curriculum_levels|length }});
+                console.log('[EXAM_NAME_AUTO_GEN] System ready for real-time name generation');
+                console.log('[EXAM_NAME_AUTO_GEN] ========================================');
             </script>
-            <div class="help-text">
-                <strong>Note:</strong> Date will be added automatically. Version number (e.g., _v2, _v3) will only be added if uploading multiple exams for the same level on the same day.
-            </div>
         </div>
         
-        <div class="form-group" id="custom_name_group" style="display: none;">
-            <label for="custom_exam_name">Custom Exam Name *</label>
-            <input type="text" class="form-control" id="custom_exam_name" name="custom_exam_name" 
-                   placeholder="Enter your custom exam name">
-            <div class="help-text">
-                <strong>RoutineTest Naming Guidelines:</strong><br>
-                • Format: [RT/QTR] - [Time Period] - [Timeslot] - PROGRAM SUBPROGRAM Level #<br>
-                • Review exams use [RT] prefix, Quarterly exams use [QTR] prefix<br>
-                • Time period and timeslot are included automatically based on your selections<br>
-                • Example: "[RT] - [January 2025] - [Morning] - CORE Phonics Level 1"
-            </div>
-        </div>
-        
-        <!-- Hidden field to store the curriculum level ID -->
-        <input type="hidden" id="curriculum_level" name="curriculum_level">
+        <!-- Hidden fields for form submission -->
+        <input type="hidden" id="curriculum_level" name="curriculum_level" value="">
+        <input type="hidden" id="final_exam_name" name="name" value="">
+        <input type="hidden" id="generated_base_name" name="generated_base_name" value="">
         
         <div class="form-group">
             <label for="timer_minutes">Test Duration (minutes) *</label>
@@ -1370,179 +1393,162 @@ function removeAudioFile(index) {
     updateAudioDisplay();
 }
 
-// Handle naming choice
-const presetNameRadio = document.getElementById('preset_name');
-const customNameRadio = document.getElementById('custom_name');
-const presetNameGroup = document.getElementById('preset_name_group');
-const customNameGroup = document.getElementById('custom_name_group');
-const presetSelect = document.getElementById('preset_exam_name');
-const customNameInput = document.getElementById('custom_exam_name');
-const curriculumLevelHidden = document.getElementById('curriculum_level');
+// ========================================
+// AUTO-NAME GENERATION SYSTEM
+// ========================================
+console.log('[AUTO_NAME_GEN] Initializing new auto-generation system');
 
-// Store the final exam name with version
+// Get new UI elements
+const curriculumLevelSelect = document.getElementById('curriculum_level_select');
+const userCommentInput = document.getElementById('user_comment');
+const generatedNameText = document.getElementById('generated_name_text');
+const finalNamePreview = document.getElementById('final_name_preview');
+const curriculumLevelHidden = document.getElementById('curriculum_level');
+const finalExamNameHidden = document.getElementById('final_exam_name');
+const generatedBaseNameHidden = document.getElementById('generated_base_name');
+
+// Store name components
+let generatedBaseName = '';
+let userComment = '';
 let finalExamName = '';
 
-function updateNameFields() {
-    if (presetNameRadio.checked) {
-        presetNameGroup.style.display = 'block';
-        customNameGroup.style.display = 'none';
-        presetSelect.required = true;
-        customNameInput.required = false;
-        if (presetSelect.value) {
-            generateVersionedName();
+// Function to generate the exam name based on selections
+function generateExamName() {
+    console.log('[AUTO_NAME_GEN] ========================================');
+    console.log('[AUTO_NAME_GEN] Starting name generation');
+    
+    // Get current selections
+    const examType = document.getElementById('exam_type').value;
+    const timePeriodMonth = document.getElementById('time_period_month').value;
+    const timePeriodQuarter = document.getElementById('time_period_quarter').value;
+    const academicYear = document.getElementById('academic_year').value;
+    const curriculumLevelId = curriculumLevelSelect.value;
+    
+    console.log('[AUTO_NAME_GEN] Current selections:', {
+        examType: examType,
+        timePeriodMonth: timePeriodMonth,
+        timePeriodQuarter: timePeriodQuarter,
+        academicYear: academicYear,
+        curriculumLevelId: curriculumLevelId
+    });
+    
+    // Check if minimum requirements are met
+    if (!examType || !curriculumLevelId) {
+        console.log('[AUTO_NAME_GEN] Missing required selections');
+        generatedNameText.textContent = 'Please select exam type and curriculum level...';
+        generatedNameText.style.color = '#757575';
+        finalNamePreview.innerHTML = '<span style="color: #9E9E9E;">Waiting for selections...</span>';
+        return;
+    }
+    
+    // Build name parts
+    const nameParts = [];
+    
+    // 1. Add prefix based on exam type
+    const prefix = examType === 'QUARTERLY' ? 'QTR' : 'RT';
+    nameParts.push(`[${prefix}]`);
+    
+    // 2. Add time period
+    if (examType === 'REVIEW' && timePeriodMonth) {
+        const monthNames = {
+            'JAN': 'January', 'FEB': 'February', 'MAR': 'March', 'APR': 'April',
+            'MAY': 'May', 'JUN': 'June', 'JUL': 'July', 'AUG': 'August',
+            'SEP': 'September', 'OCT': 'October', 'NOV': 'November', 'DEC': 'December'
+        };
+        const monthDisplay = monthNames[timePeriodMonth] || timePeriodMonth;
+        if (academicYear) {
+            nameParts.push(`[${monthDisplay} ${academicYear}]`);
+        } else {
+            nameParts.push(`[${monthDisplay}]`);
         }
+    } else if (examType === 'QUARTERLY' && timePeriodQuarter) {
+        const quarterDisplay = timePeriodQuarter; // Keep it simple: Q1, Q2, etc.
+        if (academicYear) {
+            nameParts.push(`[${quarterDisplay} ${academicYear}]`);
+        } else {
+            nameParts.push(`[${quarterDisplay}]`);
+        }
+    }
+    
+    // 3. Add curriculum level
+    const selectedOption = curriculumLevelSelect.options[curriculumLevelSelect.selectedIndex];
+    if (selectedOption && selectedOption.value) {
+        const displayName = selectedOption.getAttribute('data-display-name') || selectedOption.text;
+        // Clean up the display name (remove any existing count indicators)
+        const cleanName = displayName.replace(/\s*\(\d+\s+existing\)\s*$/, '').trim();
+        nameParts.push(cleanName);
+    }
+    
+    // Build the base name
+    generatedBaseName = nameParts.join(' - ');
+    
+    console.log('[AUTO_NAME_GEN] Generated base name:', generatedBaseName);
+    
+    // Update the generated name display
+    generatedNameText.textContent = generatedBaseName;
+    generatedNameText.style.color = '#1B5E20';
+    
+    // Update the final name preview with user comment if any
+    updateFinalNamePreview();
+    
+    // Update hidden fields
+    curriculumLevelHidden.value = curriculumLevelId;
+    generatedBaseNameHidden.value = generatedBaseName;
+    
+    console.log('[AUTO_NAME_GEN] Name generation complete');
+    console.log('[AUTO_NAME_GEN] ========================================');
+}
+
+// Function to update the final name preview
+function updateFinalNamePreview() {
+    userComment = userCommentInput.value.trim();
+    
+    if (generatedBaseName) {
+        if (userComment) {
+            // Replace spaces with underscores in comment for better file naming
+            const cleanComment = userComment.replace(/\s+/g, '_');
+            finalExamName = `${generatedBaseName}_${cleanComment}`;
+        } else {
+            finalExamName = generatedBaseName;
+        }
+        
+        // Update preview
+        if (userComment) {
+            finalNamePreview.innerHTML = `
+                <span style="color: #1B5E20;">${generatedBaseName}</span>
+                <span style="color: #F57C00;">_${userComment}</span>
+            `;
+        } else {
+            finalNamePreview.innerHTML = `<span style="color: #1B5E20;">${generatedBaseName}</span>`;
+        }
+        
+        // Update hidden field
+        finalExamNameHidden.value = finalExamName;
+        
+        console.log('[AUTO_NAME_GEN] Final name updated:', {
+            baseName: generatedBaseName,
+            userComment: userComment,
+            finalName: finalExamName
+        });
     } else {
-        presetNameGroup.style.display = 'none';
-        customNameGroup.style.display = 'block';
-        presetSelect.required = false;
-        customNameInput.required = true;
-        curriculumLevelHidden.value = ''; // Clear curriculum level for custom names
+        finalNamePreview.innerHTML = '<span style="color: #9E9E9E;">Waiting for selections...</span>';
+        finalExamNameHidden.value = '';
     }
 }
 
-presetNameRadio.addEventListener('change', updateNameFields);
-customNameRadio.addEventListener('change', updateNameFields);
+// Event listeners for real-time updates
+document.getElementById('exam_type').addEventListener('change', generateExamName);
+document.getElementById('time_period_month').addEventListener('change', generateExamName);
+document.getElementById('time_period_quarter').addEventListener('change', generateExamName);
+document.getElementById('academic_year').addEventListener('change', generateExamName);
+curriculumLevelSelect.addEventListener('change', generateExamName);
+userCommentInput.addEventListener('input', updateFinalNamePreview);
 
-// When preset selection changes, update the name with version
-presetSelect.addEventListener('change', function() {
-    if (this.value) {
-        curriculumLevelHidden.value = this.value;
-        console.log('[EXAM_NAME_SELECTION]', {
-            action: 'preset_changed',
-            level_id: this.value,
-            level_text: this.options[this.selectedIndex].text,
-            timestamp: new Date().toISOString()
-        });
-        generateVersionedName();
-    } else {
-        curriculumLevelHidden.value = '';
-        console.log('[EXAM_NAME_SELECTION]', {
-            action: 'preset_cleared',
-            timestamp: new Date().toISOString()
-        });
-    }
-});
+// Initial generation
+generateExamName();
 
-// Function to generate versioned name with new convention
-function generateVersionedName() {
-    const selectedOption = presetSelect.options[presetSelect.selectedIndex];
-    if (selectedOption.value) {
-        // Get the base name and date from the option
-        const baseName = selectedOption.getAttribute('data-base-name');
-        const dateStr = selectedOption.getAttribute('data-date-str');
-        const existingVersion = selectedOption.getAttribute('data-next-version');
-        const displayName = selectedOption.text;
-        
-        // Log selection for debugging
-        console.log('[EXAM_NAME_GENERATION]', {
-            action: 'generating_name',
-            selected_level_id: selectedOption.value,
-            display_name: displayName,
-            base_name: baseName,
-            date_str: dateStr,
-            existing_version: existingVersion,
-            timestamp: new Date().toISOString()
-        });
-        
-        // Generate RoutineTest name using [RT]/[QTR] pattern
-        const examType = document.getElementById('exam_type').value;
-        const timePeriodMonth = document.getElementById('time_period_month').value;
-        const timePeriodQuarter = document.getElementById('time_period_quarter').value;
-        const academicYear = document.getElementById('academic_year').value;
-        const timeslot = document.getElementById('timeslot').value;
-        
-        // Determine prefix based on exam type
-        const prefix = examType === 'QUARTERLY' ? 'QTR' : 'RT';
-        
-        // Build name parts for [RT]/[QTR] format
-        let nameParts = [`[${prefix}]`];
-        
-        // Add time period
-        if (examType === 'REVIEW' && timePeriodMonth) {
-            const monthNames = {
-                'JAN': 'January', 'FEB': 'February', 'MAR': 'March', 'APR': 'April',
-                'MAY': 'May', 'JUN': 'June', 'JUL': 'July', 'AUG': 'August',
-                'SEP': 'September', 'OCT': 'October', 'NOV': 'November', 'DEC': 'December'
-            };
-            const monthDisplay = monthNames[timePeriodMonth] || timePeriodMonth;
-            if (academicYear) {
-                nameParts.push(`[${monthDisplay} ${academicYear}]`);
-            } else {
-                nameParts.push(`[${monthDisplay}]`);
-            }
-        } else if (examType === 'QUARTERLY' && timePeriodQuarter) {
-            const quarterNames = {
-                'Q1': 'Q1 (Jan-Mar)', 'Q2': 'Q2 (Apr-Jun)', 
-                'Q3': 'Q3 (Jul-Sep)', 'Q4': 'Q4 (Oct-Dec)'
-            };
-            const quarterDisplay = quarterNames[timePeriodQuarter] || timePeriodQuarter;
-            if (academicYear) {
-                nameParts.push(`[${quarterDisplay} ${academicYear}]`);
-            } else {
-                nameParts.push(`[${quarterDisplay}]`);
-            }
-        }
-        
-        // Add timeslot if selected
-        if (timeslot) {
-            const timeslotNames = {
-                'MORNING': 'Morning', 'AFTERNOON': 'Afternoon', 'EVENING': 'Evening',
-                'FULL_DAY': 'Full Day', 'FLEXIBLE': 'Flexible'
-            };
-            const timeslotDisplay = timeslotNames[timeslot] || timeslot;
-            nameParts.push(`[${timeslotDisplay}]`);
-        }
-        
-        // Add curriculum level display name (from the dropdown option)
-        const selectedOption = presetSelect.options[presetSelect.selectedIndex];
-        const curriculumDisplay = selectedOption.getAttribute('data-display-name') || displayName;
-        // Extract just the curriculum part (remove [RT/QTR] preview part)
-        const curriculumPart = curriculumDisplay.replace(/^\[RT\/QTR\] - \[Time Period\] - /, '');
-        nameParts.push(curriculumPart);
-        
-        // Join all parts for display name
-        finalExamName = nameParts.join(' - ');
-        
-        // Set version-based name if needed (for backend storage)
-        if (existingVersion && existingVersion !== '') {
-            finalExamName += ` (v${existingVersion})`;
-        }
-        
-        // Check for updates from server
-        fetch(`/RoutineTest/exams/check-version/?curriculum_level=${selectedOption.value}`)
-            .then(response => response.json())
-            .then(data => {
-                // For RoutineTest, we don't need to modify the name based on server response
-                // The name is already built with [RT]/[QTR] format above
-                
-                // Log final name generation
-                console.log('[RT_QTR_NAME_GENERATION]', {
-                    action: 'routinetest_name_finalized',
-                    final_exam_name: finalExamName,
-                    exam_type: examType,
-                    prefix: prefix,
-                    time_period_month: timePeriodMonth,
-                    time_period_quarter: timePeriodQuarter,
-                    academic_year: academicYear,
-                    timeslot: timeslot,
-                    curriculum_part: curriculumPart,
-                    timestamp: new Date().toISOString()
-                });
-                
-                // Update the help text to show what name will be used
-                const helpText = presetNameGroup.querySelector('.help-text');
-                helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
-                    '<strong>Note:</strong> RoutineTest naming includes exam type, time period, timeslot, and curriculum level automatically.';
-            })
-            .catch(error => {
-                console.error('[RT_QTR_NAME_GENERATION] Error with server communication:', error);
-                // Keep the name we already set
-                const helpText = presetNameGroup.querySelector('.help-text');
-                helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
-                    '<strong>Note:</strong> RoutineTest naming completed using form selections.';
-            });
-    }
-}
+console.log('[AUTO_NAME_GEN] System initialized and ready');
+
 
 // Override form submission to set the correct name
 document.getElementById('examForm')?.addEventListener('submit', function(e) {
@@ -1632,37 +1638,32 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
         return;
     }
     
-    // Validate exam name
-    if (presetNameRadio.checked && !finalExamName) {
+    // Validate that exam name has been generated
+    if (!finalExamName) {
         e.preventDefault();
-        alert('Please select a pre-designed exam name.');
-        console.error('[ROUTINETEST VALIDATION] Preset exam name required');
+        alert('Please complete all required selections to generate the exam name.');
+        console.error('[AUTO_NAME_GEN] Final exam name not generated');
         return;
     }
     
-    if (customNameRadio.checked && !customNameInput.value.trim()) {
+    // Validate curriculum level is selected
+    if (!curriculumLevelHidden.value) {
         e.preventDefault();
-        alert('Please enter a custom exam name.');
-        console.error('[ROUTINETEST VALIDATION] Custom exam name required');
+        alert('Please select a curriculum level.');
+        console.error('[AUTO_NAME_GEN] Curriculum level not selected');
         return;
     }
     
-    // Set the final exam name based on choice
-    if (presetNameRadio.checked) {
-        // Create a hidden input with the final name
-        let nameInput = document.createElement('input');
-        nameInput.type = 'hidden';
-        nameInput.name = 'name';
-        nameInput.value = finalExamName;
-        this.appendChild(nameInput);
-    } else {
-        // Use custom name
-        let nameInput = document.createElement('input');
-        nameInput.type = 'hidden';
-        nameInput.name = 'name';
-        nameInput.value = customNameInput.value;
-        this.appendChild(nameInput);
-    }
+    // Log the final submission data
+    console.log('[AUTO_NAME_GEN] ========================================');
+    console.log('[AUTO_NAME_GEN] FORM SUBMISSION');
+    console.log('[AUTO_NAME_GEN] Final name:', finalExamName);
+    console.log('[AUTO_NAME_GEN] Base name:', generatedBaseName);
+    console.log('[AUTO_NAME_GEN] User comment:', userComment || '(none)');
+    console.log('[AUTO_NAME_GEN] Curriculum level:', curriculumLevelHidden.value);
+    console.log('[AUTO_NAME_GEN] ========================================');
+    
+    // The name is already in the hidden field 'final_exam_name', no need to create another
 });
 
 // Phase 3: Class Code Selection JavaScript Functions

@@ -8,6 +8,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.utils import timezone
 from ..models import Exam, AudioFile, Question
 from core.models import CurriculumLevel
 from core.exceptions import ValidationException, ExamConfigurationException
@@ -186,6 +187,23 @@ def create_exam(request):
             exam_name = request.POST.get('name')
             if not exam_name:
                 raise ValidationException("Exam name is required", code="MISSING_NAME")
+            
+            # Get auto-generation components (for logging)
+            generated_base_name = request.POST.get('generated_base_name', '')
+            user_comment = request.POST.get('user_comment', '')
+            
+            # Log the auto-generated name components
+            console_log = {
+                "view": "create_exam",
+                "action": "auto_name_received",
+                "full_name": exam_name,
+                "base_name": generated_base_name,
+                "user_comment": user_comment,
+                "has_comment": bool(user_comment),
+                "timestamp": timezone.now().isoformat()
+            }
+            logger.info(f"[AUTO_NAME_GEN_BACKEND] {json.dumps(console_log)}")
+            print(f"[AUTO_NAME_GEN_BACKEND] {json.dumps(console_log)}")
             
             total_questions = request.POST.get('total_questions')
             if not total_questions:
