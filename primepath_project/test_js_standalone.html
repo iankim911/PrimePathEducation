@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Points Editing JavaScript Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .status-box {
+            background: #ffeb3b;
+            color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .status-box.success {
+            background: #4caf50;
+            color: white;
+        }
+        .status-box.error {
+            background: #f44336;
+            color: white;
+        }
+        .test-questions {
+            margin: 20px 0;
+        }
+        .question-entry {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .question-number {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        .question-points-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 32px;
+        }
+        .question-points-display {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .question-points-edit {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 2px solid #007bff;
+        }
+        .points-input {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        .edit-points-btn, .save-points-btn, .cancel-points-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            margin-left: 4px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .edit-points-btn {
+            opacity: 1;
+            background: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        .edit-points-btn:hover {
+            opacity: 1;
+            background: #ffc107;
+            color: #fff;
+            transform: scale(1.05);
+        }
+        .save-points-btn {
+            color: #fff;
+            background: #28a745;
+            border-color: #28a745;
+        }
+        .save-points-btn:hover {
+            background: #218838;
+            border-color: #1e7e34;
+            transform: scale(1.05);
+        }
+        .cancel-points-btn {
+            color: #fff;
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        .cancel-points-btn:hover {
+            background: #c82333;
+            border-color: #bd2130;
+            transform: scale(1.05);
+        }
+        .console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .console-line {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Points Editing JavaScript Test Page</h1>
+    
+    <div id="main-status" class="status-box">
+        ⏳ Initializing test page...
+    </div>
+    
+    <h2>Test Questions</h2>
+    <div class="test-questions">
+        <!-- Test Question 1 -->
+        <div class="question-entry" data-question-number="1" data-question-id="test-1">
+            <div class="question-header">
+                <span class="question-number">Question 1</span>
+                <div class="question-points-container">
+                    <span class="question-points-display">1 point</span>
+                    <div class="question-points-edit" style="display: none;">
+                        <input type="number" 
+                               class="points-input" 
+                               min="1" max="10" 
+                               value="1"
+                               data-question-id="test-1"
+                               data-original-value="1">
+                        <button class="save-points-btn" data-question-id="test-1">✓</button>
+                        <button class="cancel-points-btn" data-question-id="test-1">✗</button>
+                    </div>
+                    <button class="edit-points-btn" data-question-id="test-1" title="Edit points">✏️</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Question 2 -->
+        <div class="question-entry" data-question-number="2" data-question-id="test-2">
+            <div class="question-header">
+                <span class="question-number">Question 2</span>
+                <div class="question-points-container">
+                    <span class="question-points-display">3 points</span>
+                    <div class="question-points-edit" style="display: none;">
+                        <input type="number" 
+                               class="points-input" 
+                               min="1" max="10" 
+                               value="3"
+                               data-question-id="test-2"
+                               data-original-value="3">
+                        <button class="save-points-btn" data-question-id="test-2">✓</button>
+                        <button class="cancel-points-btn" data-question-id="test-2">✗</button>
+                    </div>
+                    <button class="edit-points-btn" data-question-id="test-2" title="Edit points">✏️</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Test Question 3 -->
+        <div class="question-entry" data-question-number="3" data-question-id="test-3">
+            <div class="question-header">
+                <span class="question-number">Question 3</span>
+                <div class="question-points-container">
+                    <span class="question-points-display">5 points</span>
+                    <div class="question-points-edit" style="display: none;">
+                        <input type="number" 
+                               class="points-input" 
+                               min="1" max="10" 
+                               value="5"
+                               data-question-id="test-3"
+                               data-original-value="5">
+                        <button class="save-points-btn" data-question-id="test-3">✓</button>
+                        <button class="cancel-points-btn" data-question-id="test-3">✗</button>
+                    </div>
+                    <button class="edit-points-btn" data-question-id="test-3" title="Edit points">✏️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <h2>Console Output</h2>
+    <div id="console-output" class="console-output">
+        <div class="console-line">Console messages will appear here...</div>
+    </div>
+    
+    <script>
+        // Override console.log to display in our console output
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog(...args);
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            line.textContent = args.join(' ');
+            consoleOutput.appendChild(line);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        // Test JavaScript from the actual template
+        console.log('🔴 [TEST PAGE] JavaScript is loading! Timestamp:', new Date().toISOString());
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[TEST PAGE] 🚀 DOM Content Loaded');
+            
+            const mainStatus = document.getElementById('main-status');
+            
+            // Function to set up edit button event handlers
+            function setupEditButtonHandlers() {
+                const editButtons = document.querySelectorAll('.edit-points-btn');
+                console.log(`[TEST PAGE] 🎯 Setting up handlers for ${editButtons.length} edit buttons`);
+                
+                editButtons.forEach((btn, index) => {
+                    console.log(`[TEST PAGE] 🔧 Attaching handlers to button ${index + 1}`);
+                    
+                    // Click handler
+                    btn.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        
+                        const questionId = this.dataset.questionId;
+                        const container = this.parentElement;
+                        const display = container.querySelector('.question-points-display');
+                        const editDiv = container.querySelector('.question-points-edit');
+                        const input = editDiv ? editDiv.querySelector('.points-input') : null;
+                        
+                        console.log(`[TEST PAGE] 🖱️ CLICK: Edit button clicked for ${questionId}`);
+                        
+                        if (!container || !display || !editDiv || !input) {
+                            console.log(`[TEST PAGE] ❌ Missing required elements`);
+                            alert('Missing required elements!');
+                            return;
+                        }
+                        
+                        // Hide display, show edit
+                        display.style.display = 'none';
+                        editDiv.style.display = 'flex';
+                        this.style.display = 'none';
+                        
+                        console.log(`[TEST PAGE] ✅ Edit interface opened`);
+                        
+                        input.focus();
+                        input.select();
+                    });
+                    
+                    console.log(`[TEST PAGE] ✅ Button ${index + 1} configured`);
+                });
+                
+                console.log(`[TEST PAGE] 🎉 All ${editButtons.length} buttons configured!`);
+                
+                // Update status
+                mainStatus.className = 'status-box success';
+                mainStatus.innerHTML = `✅ JavaScript Working! ${editButtons.length} edit buttons configured. Try clicking the ✏️ buttons!`;
+            }
+            
+            // Set up save buttons
+            document.querySelectorAll('.save-points-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const questionId = this.dataset.questionId;
+                    const container = this.parentElement.parentElement;
+                    const input = this.parentElement.querySelector('.points-input');
+                    const newValue = input.value;
+                    
+                    console.log(`[TEST PAGE] 💾 Save clicked for ${questionId}, new value: ${newValue}`);
+                    
+                    // Update display
+                    const display = container.querySelector('.question-points-display');
+                    const editDiv = container.querySelector('.question-points-edit');
+                    const editBtn = container.querySelector('.edit-points-btn');
+                    
+                    display.textContent = `${newValue} point${newValue !== '1' ? 's' : ''}`;
+                    input.dataset.originalValue = newValue;
+                    
+                    // Show display, hide edit
+                    display.style.display = 'inline';
+                    editDiv.style.display = 'none';
+                    editBtn.style.display = 'inline';
+                    
+                    console.log(`[TEST PAGE] ✅ Points updated to ${newValue}`);
+                });
+            });
+            
+            // Set up cancel buttons
+            document.querySelectorAll('.cancel-points-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const questionId = this.dataset.questionId;
+                    const container = this.parentElement.parentElement;
+                    const input = this.parentElement.querySelector('.points-input');
+                    const originalValue = input.dataset.originalValue;
+                    
+                    console.log(`[TEST PAGE] ❌ Cancel clicked for ${questionId}`);
+                    
+                    // Reset input
+                    input.value = originalValue;
+                    
+                    // Show display, hide edit
+                    const display = container.querySelector('.question-points-display');
+                    const editDiv = container.querySelector('.question-points-edit');
+                    const editBtn = container.querySelector('.edit-points-btn');
+                    
+                    display.style.display = 'inline';
+                    editDiv.style.display = 'none';
+                    editBtn.style.display = 'inline';
+                    
+                    console.log(`[TEST PAGE] ✅ Edit cancelled`);
+                });
+            });
+            
+            // Initialize
+            setupEditButtonHandlers();
+        });
+    </script>
+</body>
+</html>

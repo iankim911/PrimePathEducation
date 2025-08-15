@@ -541,9 +541,21 @@ def manage_questions(request, exam_id):
         messages.success(request, 'Questions updated successfully!')
         return redirect('PlacementTest:manage_questions', exam_id=exam_id)
     
+    # Calculate total points and breakdown by question type
+    total_points = sum(q.points for q in questions)
+    points_breakdown = {}
+    for question in questions:
+        q_type = question.get_question_type_display()
+        if q_type not in points_breakdown:
+            points_breakdown[q_type] = {'count': 0, 'points': 0}
+        points_breakdown[q_type]['count'] += 1
+        points_breakdown[q_type]['points'] += question.points
+    
     return render(request, 'placement_test/manage_questions.html', {
         'exam': exam,
         'questions': questions,
+        'total_points': total_points,
+        'points_breakdown': points_breakdown,
     })
 
 

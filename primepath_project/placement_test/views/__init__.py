@@ -55,7 +55,9 @@ from .ajax import (
     update_exam_name,
     get_audio,
     update_audio_names,
-    delete_audio_from_exam
+    delete_audio_from_exam,
+    get_points_analytics,
+    get_points_impact_preview
 )
 
 # Export all views for backward compatibility
@@ -97,7 +99,9 @@ __all__ = [
     'update_exam_name',
     'get_audio',
     'update_audio_names',
-    'delete_audio_from_exam'
+    'delete_audio_from_exam',
+    'get_points_analytics',
+    'get_points_impact_preview'
 ]
 
 # This ensures that the following imports continue to work:

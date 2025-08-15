@@ -407,13 +407,169 @@
         font-size: 1.1rem;
     }
     
-    .question-points {
+    /* Points container moved to comprehensive fix section below */
+    
+    .question-points-display {
         background: #e3f2fd;
         color: #1976d2;
         padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.85rem;
         font-weight: 500;
+    }
+    
+    .question-points-edit {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 8px;
+        border: 2px solid #007bff;
+    }
+    
+    .points-input {
+        width: 60px;
+        padding: 4px 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        text-align: center;
+        font-weight: 600;
+    }
+    
+    /* ENHANCED: More visible button styles */
+    .edit-points-btn, .save-points-btn, .cancel-points-btn {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        margin-left: 4px;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    
+    .edit-points-btn {
+        opacity: 1;
+        background: #fff3cd;
+        border-color: #ffc107;
+        color: #856404;
+    }
+    
+    .edit-points-btn:hover {
+        opacity: 1;
+        background: #ffc107;
+        color: #fff;
+        transform: scale(1.05);
+    }
+    
+    /* ENHANCED: Points editing loading and feedback states */
+    .question-points-edit.loading {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+    
+    .points-input:disabled {
+        background: #f5f5f5;
+        cursor: not-allowed;
+    }
+    
+    .save-points-btn:disabled,
+    .cancel-points-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* NEW: Impact preview tooltip */
+    .points-impact-preview {
+        position: absolute;
+        z-index: 1000;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-size: 0.85rem;
+        max-width: 300px;
+        display: none;
+        margin-top: 8px;
+        margin-left: -150px;
+    }
+    
+    .points-impact-preview.show {
+        display: block;
+    }
+    
+    .impact-preview-header {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 6px;
+    }
+    
+    .impact-preview-stats {
+        color: #666;
+        line-height: 1.4;
+    }
+    
+    .impact-sessions-count {
+        color: #f39c12;
+        font-weight: 500;
+    }
+    
+    .impact-no-sessions {
+        color: #27ae60;
+        font-style: italic;
+    }
+    
+    .impact-preview-loading {
+        color: #999;
+        font-style: italic;
+    }
+    
+    /* ENHANCED: Save and cancel button styles */
+    .save-points-btn {
+        color: #fff;
+        background: #28a745;
+        border-color: #28a745;
+    }
+    
+    .save-points-btn:hover {
+        background: #218838;
+        border-color: #1e7e34;
+        transform: scale(1.05);
+    }
+    
+    .cancel-points-btn {
+        color: #fff;
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .cancel-points-btn:hover {
+        background: #c82333;
+        border-color: #bd2130;
+        transform: scale(1.05);
+    }
+    
+    /* CRITICAL FIX: Ensure points editing buttons are visible */
+    .question-points-container .edit-points-btn {
+        display: inline-block !important;
+        visibility: visible !important;
+    }
+    
+    .question-points-container .question-points-edit {
+        align-items: center;
+    }
+    
+    /* Ensure proper layout in container */
+    .question-points-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 32px;
     }
     
     .question-controls {
@@ -962,10 +1118,134 @@
             transform: translateX(-50%) scale(1.02);
         }
     }
+    
+    /* NOTIFICATION SYSTEM STYLES */
+    .notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 100000;
+        pointer-events: none;
+        max-width: 400px;
+        width: calc(100% - 40px);
+    }
+    
+    .notification-item {
+        pointer-events: auto;
+        margin-bottom: 10px;
+        padding: 12px 20px;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        animation: slideInRight 0.3s ease-out;
+        position: relative;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .notification-item.success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+    
+    .notification-item.error {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .notification-item.info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+    }
+    
+    .notification-item.warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .notification-message {
+        flex: 1;
+        margin-right: 10px;
+        font-weight: 500;
+    }
+    
+    .notification-close {
+        background: none;
+        border: none;
+        color: inherit;
+        opacity: 0.7;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.2s;
+    }
+    
+    .notification-close:hover {
+        opacity: 1;
+    }
+    
+    .notification-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        background: rgba(0, 0, 0, 0.2);
+        animation: progress 5s linear forwards;
+        transform-origin: left;
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes progress {
+        from {
+            transform: scaleX(1);
+        }
+        to {
+            transform: scaleX(0);
+        }
+    }
+    
+    .notification-item.removing {
+        animation: slideOutRight 0.3s ease-out forwards;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <!-- Success Notification Container -->
 <div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 400px;">
     <div class="alert alert-success" style="margin: 0; padding: 12px 20px; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 4px solid #28a745; position: relative;">
@@ -1174,7 +1454,20 @@
                 <div class="question-entry" data-question-number="{{ question.question_number }}" data-question-id="{{ question.id }}">
                     <div class="question-header">
                         <span class="question-number">Question {{ question.question_number }}</span>
-                        <span class="question-points">{{ question.points }} point{% if question.points != 1 %}s{% endif %}</span>
+                        <div class="question-points-container">
+                            <span class="question-points-display">{{ question.points }} point{% if question.points != 1 %}s{% endif %}</span>
+                            <div class="question-points-edit" style="display: none;">
+                                <input type="number" 
+                                       class="points-input" 
+                                       min="1" max="10" 
+                                       value="{{ question.points }}"
+                                       data-question-id="{{ question.id }}"
+                                       data-original-value="{{ question.points }}">
+                                <button class="save-points-btn" data-question-id="{{ question.id }}">✓</button>
+                                <button class="cancel-points-btn" data-question-id="{{ question.id }}">✗</button>
+                            </div>
+                            <button class="edit-points-btn" data-question-id="{{ question.id }}" title="Edit points">✏️</button>
+                        </div>
                     </div>
                     
                     <div class="question-controls">
@@ -2584,7 +2877,12 @@ function initializeAnswerTracking() {
             if (questionId) {
                 const formData = new FormData();
                 formData.append('options_count', newCount);
-                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                const csrf = getCSRFToken();
+                if (csrf) {
+                    formData.append('csrfmiddlewaretoken', csrf);
+                } else {
+                    console.warn('[OPTIONS] No CSRF token available');
+                }
                 
                 fetch(`/api/PlacementTest/questions/${questionId}/update/`, {
                     method: 'POST',
@@ -3399,12 +3697,52 @@ function saveAllAnswers() {
             correctAnswer = JSON.stringify(mixedData);
         }
         
+        // CRITICAL FIX: Collect current points value for Save All
+        let currentPoints = null;
+        
+        // Try to get points from the points input (if in edit mode)
+        const pointsInput = entry.querySelector('.points-input');
+        if (pointsInput) {
+            currentPoints = parseInt(pointsInput.value);
+            console.log(`[SaveAll] Found points input for Q${questionNum}: ${currentPoints} points`);
+        }
+        
+        // If not in edit mode, get from display
+        if (currentPoints === null) {
+            const pointsDisplay = entry.querySelector('.question-points-display');
+            if (pointsDisplay) {
+                // Extract number from text like "5 points" or "1 point"
+                const pointsText = pointsDisplay.textContent.trim();
+                const match = pointsText.match(/^(\d+)\s+point/);
+                if (match) {
+                    currentPoints = parseInt(match[1]);
+                    console.log(`[SaveAll] Found points display for Q${questionNum}: ${currentPoints} points`);
+                } else {
+                    console.warn(`[SaveAll] Could not parse points from display text: "${pointsText}"`);
+                }
+            }
+        }
+        
+        // Validate points value
+        if (currentPoints !== null && (currentPoints < 1 || currentPoints > 10)) {
+            console.warn(`[SaveAll] Invalid points value for Q${questionNum}: ${currentPoints}, using default of 1`);
+            currentPoints = 1;
+        }
+        
         const data = {
             id: questionId,
             question_number: questionNum,
             question_type: typeSelect.value,
             correct_answer: correctAnswer
         };
+        
+        // CRITICAL: Include points in the data sent to backend
+        if (currentPoints !== null) {
+            data.points = currentPoints;
+            console.log(`[SaveAll] Including points for Q${questionNum}: ${currentPoints}`);
+        } else {
+            console.warn(`[SaveAll] No points value found for Q${questionNum}, backend will use existing value`);
+        }
         
         // Add options count for MCQ, CHECKBOX, and SHORT question types
         if ((typeSelect.value === 'MCQ' || typeSelect.value === 'CHECKBOX' || typeSelect.value === 'SHORT') && optionsCount) {
@@ -3414,11 +3752,23 @@ function saveAllAnswers() {
         questionsData.push(data);
     });
     
-    // Debug: Log the URL being called
+    // Enhanced debugging for Save All
     const saveUrl = `/api/PlacementTest/exams/{{ exam.id }}/save-answers/`;
-    console.log('Saving to URL:', saveUrl);
-    console.log('Data being sent:', questionsData);
-    console.log('Audio assignments being saved:', audioAssignments);
+    console.log('[SaveAll] ============ SAVE ALL DEBUG ============');
+    console.log('[SaveAll] Saving to URL:', saveUrl);
+    console.log('[SaveAll] Total questions:', questionsData.length);
+    
+    // Log points summary
+    const pointsSummary = questionsData.map(q => ({
+        num: q.question_number,
+        points: q.points || 'not set',
+        type: q.question_type
+    }));
+    console.table(pointsSummary);
+    
+    console.log('[SaveAll] Full data being sent:', questionsData);
+    console.log('[SaveAll] Audio assignments being saved:', audioAssignments);
+    console.log('[SaveAll] =========================================');
     
     // Make API call to save all answers and types INCLUDING audio assignments and PDF rotation
     fetch(saveUrl, {
@@ -3439,7 +3789,18 @@ function saveAllAnswers() {
         return response.json();
     })
     .then(data => {
+        console.log('[SaveAll] ============ SAVE RESPONSE ============');
+        console.log('[SaveAll] Response data:', data);
+        
         if (data.success) {
+            // Log points update summary
+            if (data.points_updated !== undefined) {
+                console.log(`[SaveAll] ✅ Points updated for ${data.points_updated} questions`);
+                if (data.debug_info && data.debug_info.points_provided) {
+                    console.log('[SaveAll] Questions with points updated:', data.debug_info.points_provided);
+                }
+            }
+            
             unsavedChanges = false;
             document.getElementById('unsaved-changes').style.display = 'none';
             
@@ -3448,11 +3809,20 @@ function saveAllAnswers() {
             const alertDiv = notification.querySelector('.alert');
             notification.style.display = 'block';
             
+            // Enhance success message with points info
+            if (data.points_updated > 0) {
+                const successText = alertDiv.querySelector('h4') || alertDiv;
+                const originalText = successText.innerHTML;
+                successText.innerHTML = `${originalText} (${data.points_updated} question points updated)`;
+            }
+            
             // Apply animations
             alertDiv.style.animation = 'slideDown 0.5s ease-out, pulse 2s ease-in-out';
             
             // Scroll to top to ensure notification is visible
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            console.log('[SaveAll] =========================================');
             
             // Force page refresh after brief success display to clear any browser cache
             setTimeout(() => {
@@ -3681,7 +4051,7 @@ function deleteAudioFile(audioId) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': getCSRFToken()
         }
     })
     .then(response => {
@@ -3831,6 +4201,659 @@ function updateAudioButtonNames() {
 }
 
 
+
+// IMMEDIATE DEBUG - This should appear in console as soon as JavaScript loads
+console.log('🔴 [CRITICAL DEBUG] JavaScript is loading! Timestamp:', new Date().toISOString());
+console.log('🔴 [CRITICAL DEBUG] Current URL:', window.location.href);
+console.log('🔴 [CRITICAL DEBUG] Page ready state:', document.readyState);
+
+// CRITICAL FIX: Get CSRF token safely
+function getCSRFToken() {
+    // Try multiple methods to get CSRF token
+    let token = null;
+    
+    // Method 1: From input field
+    const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (tokenInput) {
+        token = tokenInput.value;
+        console.log('✅ [CSRF] Token found in input field');
+    }
+    
+    // Method 2: From cookie
+    if (!token) {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+        if (cookieValue) {
+            token = cookieValue;
+            console.log('✅ [CSRF] Token found in cookie');
+        }
+    }
+    
+    // Method 3: From meta tag (if exists)
+    if (!token) {
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken) {
+            token = metaToken.getAttribute('content');
+            console.log('✅ [CSRF] Token found in meta tag');
+        }
+    }
+    
+    if (!token) {
+        console.warn('⚠️ [CSRF] No CSRF token found, API calls may fail');
+    }
+    
+    return token || '';
+}
+
+console.log('🔍 [CSRF] Checking for CSRF token...');
+const csrfToken = getCSRFToken();
+if (csrfToken) {
+    console.log('✅ [CSRF] Token available for API calls');
+} else {
+    console.error('❌ [CSRF] No token available - API calls will likely fail');
+}
+
+// NOTIFICATION SYSTEM - Comprehensive user feedback mechanism
+let notificationContainer = null;
+let notificationCount = 0;
+const activeNotifications = new Map();
+
+/**
+ * Show a notification message to the user
+ * @param {string} message - The message to display
+ * @param {string} type - Type of notification: 'success', 'error', 'info', 'warning'
+ * @param {number} duration - How long to show the notification (ms), 0 for permanent
+ */
+function showNotification(message, type = 'info', duration = 5000) {
+    console.log(`[NOTIFICATION] 📢 Showing ${type} notification: ${message}`);
+    
+    // Ensure notification container exists
+    if (!notificationContainer) {
+        notificationContainer = document.getElementById('notification-container');
+        if (!notificationContainer) {
+            // Create container if it doesn't exist
+            notificationContainer = document.createElement('div');
+            notificationContainer.id = 'notification-container';
+            notificationContainer.className = 'notification-container';
+            document.body.appendChild(notificationContainer);
+            console.log('[NOTIFICATION] ✅ Created notification container');
+        }
+    }
+    
+    // Create notification element
+    const notificationId = `notification-${++notificationCount}`;
+    const notification = document.createElement('div');
+    notification.id = notificationId;
+    notification.className = `notification-item ${type}`;
+    
+    // Build notification HTML
+    notification.innerHTML = `
+        <span class="notification-message">${message}</span>
+        <button class="notification-close" onclick="dismissNotification('${notificationId}')">&times;</button>
+        ${duration > 0 ? '<div class="notification-progress"></div>' : ''}
+    `;
+    
+    // Add to container
+    notificationContainer.appendChild(notification);
+    activeNotifications.set(notificationId, notification);
+    
+    console.log(`[NOTIFICATION] ✅ Added notification ${notificationId} to DOM`);
+    
+    // Auto-dismiss if duration is set
+    if (duration > 0) {
+        // Update progress bar animation duration
+        const progressBar = notification.querySelector('.notification-progress');
+        if (progressBar) {
+            progressBar.style.animationDuration = `${duration}ms`;
+        }
+        
+        // Set timeout for removal
+        setTimeout(() => {
+            dismissNotification(notificationId);
+        }, duration);
+        
+        console.log(`[NOTIFICATION] ⏱️ Auto-dismiss scheduled for ${notificationId} in ${duration}ms`);
+    }
+    
+    // Log notification stats
+    console.log(`[NOTIFICATION] 📊 Active notifications: ${activeNotifications.size}`);
+    
+    return notificationId;
+}
+
+/**
+ * Dismiss a specific notification
+ * @param {string} notificationId - ID of the notification to dismiss
+ */
+function dismissNotification(notificationId) {
+    console.log(`[NOTIFICATION] 🗑️ Dismissing notification ${notificationId}`);
+    
+    const notification = activeNotifications.get(notificationId);
+    if (notification) {
+        // Add removing animation
+        notification.classList.add('removing');
+        
+        // Remove after animation completes
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+            activeNotifications.delete(notificationId);
+            console.log(`[NOTIFICATION] ✅ Removed notification ${notificationId}`);
+            console.log(`[NOTIFICATION] 📊 Active notifications: ${activeNotifications.size}`);
+        }, 300); // Match animation duration
+    } else {
+        console.warn(`[NOTIFICATION] ⚠️ Notification ${notificationId} not found`);
+    }
+}
+
+/**
+ * Clear all notifications
+ */
+function clearAllNotifications() {
+    console.log(`[NOTIFICATION] 🧹 Clearing all ${activeNotifications.size} notifications`);
+    
+    activeNotifications.forEach((notification, id) => {
+        dismissNotification(id);
+    });
+}
+
+// Test notification system on load (only in debug mode)
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[NOTIFICATION] 🔧 Notification system ready');
+    
+    // Show a test notification if in debug mode (can be removed in production)
+    if (window.location.href.includes('debug=true')) {
+        showNotification('✅ Notification system initialized', 'success', 3000);
+    }
+});
+
+console.log('[NOTIFICATION] ✅ Notification system loaded and ready');
+
+// VISUAL INDICATOR - Add a JavaScript status message to the page
+(function() {
+    const statusDiv = document.createElement('div');
+    statusDiv.id = 'js-status-indicator';
+    statusDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; background: #ffeb3b; color: #333; padding: 10px 15px; border-radius: 5px; font-weight: bold; z-index: 10000; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
+    statusDiv.innerHTML = '⚠️ JavaScript Loading...';
+    document.body.appendChild(statusDiv);
+    console.log('🟡 [STATUS] JavaScript status indicator added to page');
+})();
+
+// Points editing functionality
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[PointsEditor] 🚀 INITIALIZING POINTS EDITING SYSTEM');
+    console.log('[PointsEditor] Timestamp:', new Date().toISOString());
+    console.log('[PointsEditor] DOM fully loaded and parsed');
+    console.log('[PointsEditor] Document ready state:', document.readyState);
+    console.log('[PointsEditor] Body element exists:', !!document.body);
+    console.log('[PointsEditor] CSRF Token available:', !!getCSRFToken());
+    
+    // Function to set up edit button event handlers
+    function setupEditButtonHandlers() {
+        const editButtons = document.querySelectorAll('.edit-points-btn');
+        console.log(`[PointsEditor] 🎯 Setting up handlers for ${editButtons.length} edit buttons`);
+        
+        // CRITICAL: Set up event handlers for EACH edit button
+        editButtons.forEach((btn, index) => {
+            console.log(`[PointsEditor] 🔧 Attaching handlers to button ${index + 1} for question ${btn.dataset.questionId}`);
+            
+            // CLICK HANDLER - Opens the edit interface
+            btn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const questionId = this.dataset.questionId;
+                const container = this.parentElement;
+                const display = container.querySelector('.question-points-display');
+                const editDiv = container.querySelector('.question-points-edit');
+                const input = editDiv ? editDiv.querySelector('.points-input') : null;
+                
+                console.log(`[PointsEditor] 🖱️ CLICK: Edit button clicked for question ${questionId}`);
+                console.log(`[PointsEditor] 📊 Current points display:`, display ? display.textContent : 'NOT FOUND');
+                console.log(`[PointsEditor] 🔍 DOM elements found:`, {
+                    container: !!container,
+                    display: !!display,
+                    editDiv: !!editDiv,
+                    input: !!input
+                });
+                
+                // Validate all required elements exist
+                if (!container || !display || !editDiv || !input) {
+                    console.error(`[PointsEditor] ❌ Missing required elements for question ${questionId}`);
+                    alert('Error: Required elements not found. Please refresh the page.');
+                    return;
+                }
+                
+                // Get current points value
+                const currentPoints = input.value;
+                console.log(`[PointsEditor] 📝 Current input value: ${currentPoints}`);
+                
+                // Hide display, show edit interface
+                display.style.display = 'none';
+                editDiv.style.display = 'flex';
+                this.style.display = 'none';
+                
+                console.log(`[PointsEditor] 👁️ UI State Changed: display hidden, edit visible`);
+                
+                // Focus and select input
+                try {
+                    input.focus();
+                    input.select();
+                    console.log(`[PointsEditor] 📍 Input focused and selected`);
+                } catch (focusError) {
+                    console.error(`[PointsEditor] ❌ Failed to focus input:`, focusError);
+                }
+            });
+            
+            // HOVER HANDLERS - Show impact preview tooltip
+            let impactPreviewTimeout;
+            let impactPreview = null;
+            
+            // MOUSEENTER - Show impact preview after delay
+            btn.addEventListener('mouseenter', function() {
+                const questionId = this.dataset.questionId;
+                console.log(`[PointsEditor] 🎯 HOVER: Mouse entered button for question ${questionId}`);
+                
+                // Clear any existing timeout
+                if (impactPreviewTimeout) {
+                    clearTimeout(impactPreviewTimeout);
+                }
+                
+                // Show impact preview after 800ms delay
+                impactPreviewTimeout = setTimeout(async () => {
+                    console.log(`[ImpactPreview] 🔍 Loading impact preview for question ${questionId}`);
+                    
+                    try {
+                        // Create preview element if it doesn't exist
+                        if (!impactPreview) {
+                            impactPreview = document.createElement('div');
+                            impactPreview.className = 'points-impact-preview';
+                            document.body.appendChild(impactPreview);
+                            console.log('[ImpactPreview] 📝 Created preview element');
+                        }
+                        
+                        // Position the preview
+                        const rect = btn.getBoundingClientRect();
+                        const leftPos = (rect.left + rect.width / 2);
+                        const topPos = (rect.bottom + window.scrollY);
+                        
+                        impactPreview.style.left = leftPos + 'px';
+                        impactPreview.style.top = topPos + 'px';
+                        
+                        // Show loading state
+                        impactPreview.innerHTML = `
+                            <div class="impact-preview-header">Impact Preview</div>
+                            <div class="impact-preview-loading">Loading...</div>
+                        `;
+                        impactPreview.classList.add('show');
+                        
+                        // Fetch impact data
+                        const apiUrl = `/api/PlacementTest/questions/${questionId}/points/impact-preview/`;
+                        console.log(`[ImpactPreview] 🌐 Fetching: ${apiUrl}`);
+                        
+                        const response = await fetch(apiUrl, {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('[ImpactPreview] ✅ Data received');
+                        
+                        // Display impact data
+                        if (data.success && data.impact_analysis) {
+                            const impact = data.impact_analysis;
+                            let content = `<div class="impact-preview-header">Impact Preview</div>`;
+                            content += `<div class="impact-preview-stats">`;
+                            
+                            if (impact.impact_summary.total_affected_sessions === 0) {
+                                content += `<div class="impact-no-sessions">✅ No sessions affected</div>`;
+                            } else {
+                                const summary = impact.impact_summary;
+                                content += `<div class="impact-sessions-count">📊 ${summary.total_affected_sessions} sessions</div>`;
+                                content += `<div>✅ ${summary.sessions_with_correct_answers} correct</div>`;
+                                content += `<div>❌ ${summary.sessions_with_incorrect_answers} incorrect</div>`;
+                            }
+                            
+                            content += `</div>`;
+                            impactPreview.innerHTML = content;
+                        }
+                        
+                    } catch (error) {
+                        console.error('[ImpactPreview] ❌ Error:', error);
+                        if (impactPreview) {
+                            impactPreview.innerHTML = `
+                                <div class="impact-preview-header">Impact Preview</div>
+                                <div class="impact-preview-stats">❌ Error loading</div>
+                            `;
+                        }
+                    }
+                }, 800);
+            });
+            
+            // MOUSELEAVE - Hide impact preview
+            btn.addEventListener('mouseleave', function() {
+                console.log(`[PointsEditor] 👋 HOVER: Mouse left button`);
+                
+                if (impactPreviewTimeout) {
+                    clearTimeout(impactPreviewTimeout);
+                }
+                if (impactPreview) {
+                    impactPreview.classList.remove('show');
+                }
+            });
+            
+            console.log(`[PointsEditor] ✅ Button ${index + 1} configured with all handlers`);
+        });
+        
+        console.log(`[PointsEditor] 🎉 All ${editButtons.length} edit buttons configured`);
+        
+        // Update visual status indicator
+        const statusDiv = document.getElementById('js-status-indicator');
+        if (statusDiv) {
+            statusDiv.style.background = '#4caf50';
+            statusDiv.style.color = '#fff';
+            statusDiv.innerHTML = `✅ Points Editor Ready (${editButtons.length} buttons)`;
+            console.log('🟢 [STATUS] Visual indicator updated - Points editor ready');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                statusDiv.style.opacity = '0';
+                setTimeout(() => statusDiv.remove(), 500);
+            }, 5000);
+        }
+    }
+    
+    // Check if points editing elements exist
+    console.log('[PointsEditor] 🔍 Checking for required DOM elements...');
+    
+    const allEditButtons = document.querySelectorAll('.edit-points-btn');
+    const allPointsContainers = document.querySelectorAll('.question-points-container');
+    const allPointsDisplays = document.querySelectorAll('.question-points-display');
+    const allPointsEdits = document.querySelectorAll('.question-points-edit');
+    
+    console.log('[PointsEditor] 📊 Initial element counts:');
+    console.log(`  • Edit buttons: ${allEditButtons.length}`);
+    console.log(`  • Containers: ${allPointsContainers.length}`);
+    console.log(`  • Displays: ${allPointsDisplays.length}`);
+    console.log(`  • Edit divs: ${allPointsEdits.length}`);
+    
+    if (allEditButtons.length === 0) {
+        console.error('[PointsEditor] ❌ No edit buttons found! Attempting fallback...');
+        
+        // Update status indicator to show error
+        const statusDiv = document.getElementById('js-status-indicator');
+        if (statusDiv) {
+            statusDiv.style.background = '#f44336';
+            statusDiv.style.color = '#fff';
+            statusDiv.innerHTML = '❌ No edit buttons found - checking for fallback...';
+        }
+        
+        const questionEntries = document.querySelectorAll('.question-entry');
+        console.log(`[PointsEditor] Question entries found: ${questionEntries.length}`);
+        
+        if (questionEntries.length > 0) {
+            console.log('[PointsEditor] 🔧 FALLBACK: Adding missing edit buttons...');
+            let buttonsAdded = 0;
+            
+            questionEntries.forEach(entry => {
+                const container = entry.querySelector('.question-points-container');
+                const questionId = entry.dataset.questionId;
+                
+                if (container && !container.querySelector('.edit-points-btn')) {
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'edit-points-btn';
+                    editBtn.dataset.questionId = questionId;
+                    editBtn.title = 'Edit points';
+                    editBtn.innerHTML = '✏️';
+                    editBtn.style.display = 'inline-block';
+                    editBtn.style.visibility = 'visible';
+                    
+                    container.appendChild(editBtn);
+                    buttonsAdded++;
+                    console.log(`[PointsEditor] ✅ Added button for Q${questionId}`);
+                }
+            });
+            
+            if (buttonsAdded > 0) {
+                console.log(`[PointsEditor] ✅ Added ${buttonsAdded} buttons via fallback`);
+                setupEditButtonHandlers();
+            }
+        }
+    } else {
+        console.log('[PointsEditor] ✅ Edit buttons found. Setting up handlers...');
+        setupEditButtonHandlers();
+    }
+    
+    // ENHANCED: Save points buttons with comprehensive API integration
+    document.querySelectorAll('.save-points-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const questionId = this.dataset.questionId;
+            const container = this.parentElement.parentElement;
+            const input = this.parentElement.querySelector('.points-input');
+            const newPoints = parseInt(input.value);
+            const originalPoints = parseInt(input.dataset.originalValue);
+            
+            // Enhanced validation with user feedback
+            if (isNaN(newPoints)) {
+                showNotification('Please enter a valid number for points', 'error');
+                input.focus();
+                return;
+            }
+            
+            if (newPoints < 1 || newPoints > 10) {
+                showNotification('Points must be between 1 and 10', 'error');
+                input.focus();
+                return;
+            }
+            
+            if (newPoints === originalPoints) {
+                showNotification('No change needed - points are already set to ' + newPoints, 'info');
+                // Cancel the edit
+                document.querySelector(`.cancel-points-btn[data-question-id="${questionId}"]`).click();
+                return;
+            }
+            
+            // Show loading state
+            const saveBtn = this;
+            const cancelBtn = this.nextElementSibling;
+            const originalSaveText = saveBtn.innerHTML;
+            const originalCancelText = cancelBtn.innerHTML;
+            
+            saveBtn.innerHTML = '⏳';
+            saveBtn.disabled = true;
+            cancelBtn.disabled = true;
+            input.disabled = true;
+            
+            console.log(`[PointsEditor] Updating Q${questionId}: ${originalPoints} -> ${newPoints} points`);
+            
+            try {
+                // Use the enhanced API endpoint
+                // Get CSRF token safely
+                const csrf = getCSRFToken();
+                if (!csrf) {
+                    console.error('[PointsEditor] ❌ No CSRF token available');
+                    showNotification('❌ Security token missing. Please refresh the page.', 'error');
+                    // Re-enable buttons
+                    saveBtn.disabled = false;
+                    cancelBtn.disabled = false;
+                    input.disabled = false;
+                    return;
+                }
+                
+                const response = await fetch(`/api/PlacementTest/questions/${questionId}/update/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrf,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `points=${newPoints}`
+                });
+                
+                console.log(`[PointsEditor] 📡 Response status: ${response.status}`);
+                console.log(`[PointsEditor] 📡 Response OK: ${response.ok}`);
+                
+                if (!response.ok) {
+                    console.error(`[PointsEditor] ❌ HTTP error! status: ${response.status}`);
+                    showNotification(`❌ Server error (${response.status}). Please try again.`, 'error');
+                    // Re-enable buttons
+                    saveBtn.disabled = false;
+                    cancelBtn.disabled = false;
+                    input.disabled = false;
+                    return;
+                }
+                
+                const data = await response.json();
+                console.log('[PointsEditor] 📦 Response data:', data);
+                
+                if (data.success) {
+                    // Enhanced success handling with comprehensive feedback
+                    console.log('[PointsEditor] ✅ Points update successful:', data);
+                    
+                    // Get the actual values from the server response
+                    const actualOldPoints = data.updates_applied?.points?.old_value || originalPoints;
+                    const actualNewPoints = data.updates_applied?.points?.new_value || newPoints;
+                    
+                    console.log(`[PointsEditor] 📊 Server confirmed: ${actualOldPoints} → ${actualNewPoints} points`);
+                    
+                    // Update display elements
+                    const display = container.querySelector('.question-points-display');
+                    const editDiv = container.querySelector('.question-points-edit');
+                    const editBtn = container.querySelector('.edit-points-btn');
+                    
+                    // Use the server-confirmed value
+                    display.textContent = `${actualNewPoints} point${actualNewPoints !== 1 ? 's' : ''}`;
+                    input.dataset.originalValue = actualNewPoints;
+                    
+                    // Show display, hide edit
+                    display.style.display = 'inline';
+                    editDiv.style.display = 'none';
+                    editBtn.style.display = 'inline';
+                    
+                    // Create comprehensive success message using actual values
+                    // Add defensive check for question_number
+                    const questionNumber = data.question_number || data.question?.number || 'Unknown';
+                    console.log('[PointsEditor] 🔍 Question number resolution:', {
+                        'data.question_number': data.question_number,
+                        'data.question?.number': data.question?.number,
+                        'resolved': questionNumber
+                    });
+                    
+                    let successMsg = `✅ Question ${questionNumber} updated: ${actualOldPoints} → ${actualNewPoints} points`;
+                    
+                    // Add session recalculation info if available
+                    if (data.updates_applied && data.updates_applied.sessions_recalculated > 0) {
+                        successMsg += ` (${data.updates_applied.sessions_recalculated} student sessions recalculated)`;
+                        console.log('[PointsEditor] 📊 Affected sessions:', data.debug_info?.affected_sessions);
+                    }
+                    
+                    // Add performance info in debug mode
+                    if (data.debug_info?.performance) {
+                        const perf = data.debug_info.performance;
+                        console.log(`[PointsEditor] ⚡ Performance: ${perf.total_time_seconds}s total${perf.recalculation_time_seconds ? `, ${perf.recalculation_time_seconds}s for recalculation` : ''}`);
+                    }
+                    
+                    showNotification(successMsg, 'success');
+                    
+                } else {
+                    // Enhanced error handling with comprehensive debugging
+                    console.error('[PointsEditor] ❌ Points update failed:', data);
+                    
+                    // Enhanced debugging for response structure
+                    console.log('[PointsEditor] 🐛 Debug - Error response structure:', {
+                        'has_question_number': 'question_number' in data,
+                        'has_question_id': 'question_id' in data,
+                        'has_question': 'question' in data,
+                        'has_error': 'error' in data,
+                        'has_field': 'field' in data,
+                        'response_keys': Object.keys(data),
+                        'question_number_value': data.question_number,
+                        'question_id_value': data.question_id
+                    });
+                    
+                    let errorMsg = 'Failed to update points';
+                    
+                    if (data.error) {
+                        errorMsg = data.error;
+                        
+                        // Handle specific error types
+                        if (data.field === 'points') {
+                            errorMsg = `Points validation error: ${data.error}`;
+                            if (data.validated_points) {
+                                input.value = data.validated_points;
+                                errorMsg += ` (Reset to ${data.validated_points})`;
+                            }
+                        }
+                    }
+                    
+                    // Show detailed error in console for debugging
+                    if (data.debug_info) {
+                        console.error('[PointsEditor] Debug info:', data.debug_info);
+                    }
+                    
+                    showNotification(`❌ ${errorMsg}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('[PointsEditor] Network/parsing error:', error);
+                showNotification(`❌ Network error updating points: ${error.message}`, 'error');
+            } finally {
+                // Reset button states
+                saveBtn.innerHTML = originalSaveText;
+                cancelBtn.innerHTML = originalCancelText;
+                saveBtn.disabled = false;
+                cancelBtn.disabled = false;
+                input.disabled = false;
+            }
+        });
+    });
+    
+    // Cancel points buttons
+    document.querySelectorAll('.cancel-points-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const questionId = this.dataset.questionId;
+            const container = this.parentElement.parentElement;
+            const input = this.parentElement.querySelector('.points-input');
+            const originalValue = input.dataset.originalValue;
+            
+            // Reset input
+            input.value = originalValue;
+            
+            // Show display, hide edit
+            const display = container.querySelector('.question-points-display');
+            const editDiv = container.querySelector('.question-points-edit');
+            const editBtn = container.querySelector('.edit-points-btn');
+            
+            display.style.display = 'inline';
+            editDiv.style.display = 'none';
+            editBtn.style.display = 'inline';
+        });
+    });
+    
+    // Allow Enter to save, Escape to cancel
+    document.querySelectorAll('.points-input').forEach(input => {
+        input.addEventListener('keydown', function(e) {
+            const questionId = this.dataset.questionId;
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.querySelector(`.save-points-btn[data-question-id="${questionId}"]`).click();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                document.querySelector(`.cancel-points-btn[data-question-id="${questionId}"]`).click();
+            }
+        });
+    });
+});
 
 // Warn before leaving with unsaved changes
 window.addEventListener('beforeunload', function(e) {

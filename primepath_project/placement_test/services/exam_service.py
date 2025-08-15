@@ -173,6 +173,36 @@ class ExamService:
                     question.question_type = q_data.get('question_type', 'MCQ')
                     question.correct_answer = q_data.get('correct_answer', '')
                     
+                    # CRITICAL FIX: Handle points update from Save All
+                    if 'points' in q_data:
+                        new_points = q_data['points']
+                        # Validate points range
+                        if isinstance(new_points, (int, str)):
+                            try:
+                                points_value = int(new_points)
+                                if 1 <= points_value <= 10:
+                                    old_points = question.points
+                                    question.points = points_value
+                                    logger.info(
+                                        f"[ExamService] Updated points for Q{question.question_number}: "
+                                        f"{old_points} -> {points_value}"
+                                    )
+                                else:
+                                    logger.warning(
+                                        f"[ExamService] Invalid points value for Q{question.question_number}: "
+                                        f"{points_value} (must be 1-10)"
+                                    )
+                            except (ValueError, TypeError) as e:
+                                logger.error(
+                                    f"[ExamService] Error parsing points for Q{question.question_number}: "
+                                    f"{new_points} - {e}"
+                                )
+                    else:
+                        logger.debug(
+                            f"[ExamService] No points update for Q{question.question_number}, "
+                            f"keeping existing value: {question.points}"
+                        )
+                    
                     # Calculate correct options_count based on answer data
                     if question.question_type in ['SHORT', 'LONG', 'MIXED']:
                         # For SHORT/LONG/MIXED, calculate from actual answer data

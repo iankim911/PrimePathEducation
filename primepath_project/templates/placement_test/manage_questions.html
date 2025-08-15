@@ -143,6 +143,22 @@
                     <span style="color: #dc3545;">Incomplete ({{ exam.total_questions|add:"-"|add:questions.count }} missing)</span>
                 {% endif %}
             </div>
+            <div class="summary-item" id="total-points-summary">
+                <strong>Total Points:</strong> 
+                <span id="total-points-value" style="color: #007bff; font-weight: 600; font-size: 1.1em;">
+                    <span class="points-display">{{ total_points }} point{{ total_points|pluralize }}</span>
+                </span>
+            </div>
+            <div class="summary-item" id="points-breakdown">
+                <strong>Point Distribution:</strong>
+                <div id="points-by-type" style="font-size: 0.9rem; margin-top: 5px; color: #6c757d;">
+                    <div class="points-type-summary">
+                        {% for type_name, breakdown in points_breakdown.items %}
+                            <div>{{ type_name }}: {{ breakdown.count }} question{{ breakdown.count|pluralize }} ({{ breakdown.points }} point{{ breakdown.points|pluralize }})</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -219,10 +235,21 @@
                                       placeholder="Enter grading guidelines or key points">{{ question.correct_answer }}</textarea>
                         {% endif %}
                         
-                        <div style="margin-top: 10px;">
-                            <label>Points:</label>
-                            <input type="number" class="form-control" name="points" 
-                                   value="{{ question.points }}" min="1" max="10" style="width: 100px;">
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; border-left: 3px solid #007bff;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div>
+                                    <label style="font-weight: 600; margin-bottom: 5px; color: #495057;">Points:</label>
+                                    <input type="number" class="form-control points-input" name="points" 
+                                           value="{{ question.points }}" min="1" max="10" style="width: 80px; text-align: center; font-weight: 600;"
+                                           data-original-value="{{ question.points }}">
+                                </div>
+                                <div>
+                                    <small class="text-muted" style="line-height: 1.4;">
+                                        <strong>Weight:</strong> This question is worth {{ question.points }} point{{ question.points|pluralize }} in the final score.<br>
+                                        <strong>Range:</strong> 1-10 points allowed.
+                                    </small>
+                                </div>
+                            </div>
                         </div>
                         
                         <button type="submit" class="btn btn-primary btn-save">Save Answer</button>

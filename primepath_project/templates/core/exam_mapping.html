@@ -1165,22 +1165,47 @@ window.ExamMapping.addExamSlot = function(levelId, program) {
     // Remove the specific slot
     rows[slot - 1].remove();
     
-    // Renumber remaining slots
+    // Renumber remaining slots with defensive programming
     const remainingRows = container.querySelectorAll('.exam-row');
-    remainingRows.forEach((row, index) => {
-        row.querySelector('.exam-number').textContent = `${index + 1}.`;
-        row.querySelector('.exam-select').dataset.slot = index + 1;
-        
-        // Update remove button
-        const removeBtn = row.querySelector('.remove-exam-btn');
-        if (index === 0 && remainingRows.length === 1) {
-            removeBtn.textContent = 'Clear';
-            removeBtn.onclick = () => window.ExamMapping.clearExamSlot(levelId, 1);
-        } else {
-            removeBtn.textContent = 'Remove';
-            removeBtn.onclick = () => window.ExamMapping.removeExamSlot(levelId, index + 1);
-        }
-    });
+    
+    try {
+        remainingRows.forEach((row, index) => {
+            try {
+                // DEFENSIVE: Validate row exists and is element
+                if (!row || typeof row.querySelector !== 'function') {
+                    console.warn(`[RENUMBER_SLOTS] Invalid row at index ${index}:`, row);
+                    return;
+                }
+                
+                const examNumber = row.querySelector('.exam-number');
+                const examSelect = row.querySelector('.exam-select');
+                const removeBtn = row.querySelector('.remove-exam-btn');
+                
+                if (examNumber) {
+                    examNumber.textContent = `${index + 1}.`;
+                }
+                
+                if (examSelect) {
+                    examSelect.dataset.slot = index + 1;
+                }
+                
+                if (removeBtn) {
+                    if (index === 0 && remainingRows.length === 1) {
+                        removeBtn.textContent = 'Clear';
+                        removeBtn.onclick = () => window.ExamMapping.clearExamSlot(levelId, 1);
+                    } else {
+                        removeBtn.textContent = 'Remove';
+                        removeBtn.onclick = () => window.ExamMapping.removeExamSlot(levelId, index + 1);
+                    }
+                }
+            } catch (rowError) {
+                console.error(`[RENUMBER_SLOTS] Error processing row ${index}:`, rowError);
+                // Continue with other rows
+            }
+        });
+    } catch (forEachError) {
+        console.error('[RENUMBER_SLOTS] Error in remainingRows forEach:', forEachError);
+    }
     
     // Enable add button
     document.getElementById(`add-btn-${levelId}`).disabled = false;
@@ -1216,11 +1241,26 @@ window.ExamMapping.addExamSlot = function(levelId, program) {
         const levelId = container.id.replace('mapping-', '');
         const rows = container.querySelectorAll('.exam-row');
         
-        rows.forEach((row, index) => {
-            if (rows.length === 1) {
-                window.ExamMapping.updateClearButton(levelId, index + 1);
-            }
-        });
+        // DEFENSIVE: Process rows with error handling
+        try {
+            rows.forEach((row, index) => {
+                try {
+                    if (!row) {
+                        console.warn(`[STATS_UPDATE] Invalid row at index ${index}`);
+                        return;
+                    }
+                    
+                    if (rows.length === 1) {
+                        window.ExamMapping.updateClearButton(levelId, index + 1);
+                    }
+                } catch (rowError) {
+                    console.error(`[STATS_UPDATE] Error processing row ${index}:`, rowError);
+                    // Continue with other rows
+                }
+            });
+        } catch (forEachError) {
+            console.error('[STATS_UPDATE] Error in rows forEach:', forEachError);
+        }
     });
 }
 
@@ -1283,60 +1323,142 @@ window.ExamMapping.addExamSlot = function(levelId, program) {
 }
 
     window.ExamMapping.saveLevelMappings = function(levelId) {
-    const mappings = [];
-    const container = document.getElementById(`mapping-${levelId}`);
-    
-    if (!container) {
-        console.error('Container not found for level:', levelId);
-        alert('Error: Cannot find mapping container');
-        return;
-    }
-    
-    container.querySelectorAll('.exam-select').forEach(select => {
-        if (select.value) {
-            mappings.push({
-                curriculum_level_id: parseInt(levelId),
-                exam_id: select.value,  // Keep as string - it's a UUID
-                slot: parseInt(select.dataset.slot)
+        // ========================================
+        // ROBUST SAVE LEVEL MAPPINGS - ERROR-PROOF VERSION
+        // ========================================
+        
+        console.group('[SAVE_LEVEL] Starting save for level:', levelId);
+        
+        try {
+            const mappings = [];
+            const container = document.getElementById(`mapping-${levelId}`);
+            
+            if (!container) {
+                console.error('[SAVE_LEVEL] ❌ Container not found for level:', levelId);
+                console.groupEnd();
+                alert('Error: Cannot find mapping container for this level. Please refresh the page and try again.');
+                return;
+            }
+            
+            console.log('[SAVE_LEVEL] ✅ Container found:', container);
+            
+            // DEFENSIVE: Get all exam selects with validation
+            const examSelects = container.querySelectorAll('.exam-select');
+            console.log('[SAVE_LEVEL] Found exam selects:', examSelects.length);
+            
+            if (examSelects.length === 0) {
+                console.warn('[SAVE_LEVEL] ⚠️ No exam selects found in container');
+                console.groupEnd();
+                alert('No exam selections found for this level.');
+                return;
+            }
+            
+            // Process each select with robust error handling
+            examSelects.forEach((select, index) => {
+                try {
+                    console.log(`[SAVE_LEVEL] Processing select ${index + 1}:`, {
+                        value: select.value,
+                        levelId: select.dataset.levelId,
+                        slot: select.dataset.slot
+                    });
+                    
+                    if (select.value && select.value.trim()) {
+                        const mapping = {
+                            curriculum_level_id: parseInt(levelId),
+                            exam_id: select.value.trim(),  // Keep as string UUID
+                            slot: parseInt(select.dataset.slot)
+                        };
+                        
+                        // Validate mapping data
+                        if (isNaN(mapping.curriculum_level_id)) {
+                            console.error('[SAVE_LEVEL] Invalid level ID:', levelId);
+                            return;
+                        }
+                        
+                        if (isNaN(mapping.slot)) {
+                            console.error('[SAVE_LEVEL] Invalid slot:', select.dataset.slot);
+                            return;
+                        }
+                        
+                        mappings.push(mapping);
+                        console.log(`[SAVE_LEVEL] ✅ Added mapping:`, mapping);
+                    }
+                } catch (selectError) {
+                    console.error(`[SAVE_LEVEL] Error processing select ${index + 1}:`, selectError);
+                    // Continue with other selects
+                }
             });
-        }
-    });
+            
+            console.log('[SAVE_LEVEL] Final mappings to save:', mappings);
     
-    const csrfToken = window.ExamMapping.getCookie('csrftoken');
-    if (!csrfToken) {
-        console.error('CSRF token not found');
-        alert('Error: Security token not found. Please refresh the page and try again.');
-        return;
-    }
-    
-    fetch('{% url "core:save_exam_mappings" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
-        },
-        body: JSON.stringify({ 
-            mappings: mappings,
-            level_id: levelId 
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            if (mappings.length === 0) {
+                console.warn('[SAVE_LEVEL] No mappings to save');
+                console.groupEnd();
+                alert('No exam mappings selected for this level.');
+                return;
+            }
+            
+            // Get CSRF token with validation
+            const csrfToken = window.ExamMapping.getCookie('csrftoken');
+            if (!csrfToken) {
+                console.error('[SAVE_LEVEL] ❌ CSRF token not found');
+                console.groupEnd();
+                alert('Error: Security token not found. Please refresh the page and try again.');
+                return;
+            }
+            
+            console.log('[SAVE_LEVEL] Sending request to save mappings...');
+            
+            // Send save request with comprehensive error handling
+            fetch('{% url "core:save_exam_mappings" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ 
+                    mappings: mappings,
+                    level_id: levelId,
+                    debug_info: {
+                        timestamp: new Date().toISOString(),
+                        user_agent: navigator.userAgent,
+                        mappings_count: mappings.length
+                    }
+                })
+            })
+            .then(response => {
+                console.log('[SAVE_LEVEL] Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('[SAVE_LEVEL] Response data:', data);
+                
+                if (data.success) {
+                    console.log('[SAVE_LEVEL] ✅ Save successful');
+                    console.groupEnd();
+                    alert(`Mappings saved successfully for this level! (${mappings.length} mappings)`);
+                } else {
+                    console.error('[SAVE_LEVEL] ❌ Save failed:', data.error);
+                    console.groupEnd();
+                    alert('Error saving mappings: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('[SAVE_LEVEL] ❌ Network/fetch error:', error);
+                console.groupEnd();
+                alert('An error occurred while saving mappings: ' + error.message);
+            });
+            
+        } catch (error) {
+            console.error('[SAVE_LEVEL] ❌ Unexpected error in saveLevelMappings:', error);
+            console.groupEnd();
+            alert('An unexpected error occurred. Please try again or refresh the page.');
         }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert('Mappings saved successfully for this level!');
-        } else {
-            alert('Error saving mappings: ' + (data.error || 'Unknown error'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while saving mappings: ' + error.message);
-    });
+    };
 }
 
     window.ExamMapping.saveAllMappings = function() {
@@ -1404,114 +1526,336 @@ window.ExamMapping.addExamSlot = function(levelId, program) {
     }
 
     window.ExamMapping.saveAllMappingsWithFeedback = function() {
-        console.group('[LEVEL_EXAMS] Saving Level Exams Configuration');
-        console.log('📝 Initiating save for Level Exams mappings');
+        // ========================================
+        // ROBUST SAVE ALL MAPPINGS - ERROR-PROOF VERSION
+        // ========================================
         
-        const globalBtn = document.getElementById('globalSaveBtn');
-        const topBtn = document.querySelector('.save-button-top');
-        const btnText = document.getElementById('saveButtonText');
+        console.group('[SAVE_ALL] Starting Save All Mappings');
+        console.log('📝 Initiating comprehensive save for all Level Exams mappings');
         
-        // Disable buttons and show loading state
-        globalBtn.disabled = true;
-        globalBtn.classList.add('saving');
-        if (topBtn) {
-            topBtn.disabled = true;
-            topBtn.textContent = 'Saving...';
-        }
-        btnText.textContent = 'Saving...';
-        
-        const mappings = [];
-        const difficultyUpdates = [];
-        
-        // Collect exam mappings
-        document.querySelectorAll('.exam-select').forEach(select => {
-            if (select.value) {
-                mappings.push({
-                    curriculum_level_id: parseInt(select.dataset.levelId),
-                    exam_id: select.value,  // Keep as string - it's a UUID
-                    slot: parseInt(select.dataset.slot)
-                });
-            }
-        });
-        
-        // Collect difficulty levels
-        document.querySelectorAll('.difficulty-input').forEach(input => {
-            const levelId = parseInt(input.dataset.levelId);
-            const difficulty = input.value ? parseInt(input.value) : null;
-            difficultyUpdates.push({
-                level_id: levelId,
-                difficulty: difficulty
-            });
-        });
-        
-        // Save mappings first
-        fetch('{% url "core:save_exam_mappings" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
-            },
-            body: JSON.stringify({ mappings: mappings })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Now save difficulty levels
-                return fetch('{% url "core:save_difficulty_levels" %}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({ difficulty_updates: difficultyUpdates })
-                });
-            } else {
-                throw new Error('Failed to save mappings');
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Re-enable buttons
-            globalBtn.disabled = false;
-            globalBtn.classList.remove('saving');
-            if (topBtn) {
-                topBtn.disabled = false;
-                topBtn.textContent = 'Save All Mappings';
-            }
-            btnText.textContent = 'Save All Mappings';
+        try {
+            // Get UI elements with validation
+            const globalBtn = document.getElementById('globalSaveBtn');
+            const topBtn = document.querySelector('.save-button-top');
+            const btnText = document.getElementById('saveButtonText');
             
-            if (data.success) {
-                console.log('✅ [LEVEL_EXAMS] Successfully saved all Level Exams mappings');
-                console.log('Mappings saved:', mappings.length, 'mappings');
-                console.groupEnd();
-                window.ExamMapping.showMessage('All exam mappings saved successfully!', 'success');
-                
-                // Flash the button green
-                globalBtn.style.backgroundColor = '#28a745';
-                setTimeout(() => {
-                    globalBtn.style.backgroundColor = '';
-                }, 1000);
-            } else {
-                console.error('❌ [LEVEL_EXAMS] Error saving Level Exams mappings:', data.error);
-                console.groupEnd();
-                window.ExamMapping.showMessage('Error saving exam mappings: ' + data.error, 'error');
+            if (!globalBtn) {
+                console.error('[SAVE_ALL] ❌ Global save button not found');
+                alert('Error: Save button not found. Please refresh the page.');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('❌ [LEVEL_EXAMS] Network error saving Level Exams:', error);
+            
+            // Disable buttons and show loading state
+            globalBtn.disabled = true;
+            globalBtn.classList.add('saving');
+            if (topBtn) {
+                topBtn.disabled = true;
+                topBtn.textContent = 'Saving...';
+            }
+            if (btnText) {
+                btnText.textContent = 'Saving...';
+            }
+            
+            console.log('[SAVE_ALL] UI buttons disabled, starting data collection...');
+            
+            const mappings = [];
+            const difficultyUpdates = [];
+            const errors = [];
+            
+            // DEFENSIVE: Collect exam mappings with robust error handling
+            try {
+                const examSelects = document.querySelectorAll('.exam-select');
+                console.log(`[SAVE_ALL] Found ${examSelects.length} exam selects`);
+                
+                examSelects.forEach((select, index) => {
+                    try {
+                        if (select.value && select.value.trim()) {
+                            const levelId = select.dataset.levelId;
+                            const slot = select.dataset.slot;
+                            
+                            if (!levelId || !slot) {
+                                console.warn(`[SAVE_ALL] ⚠️ Select ${index + 1} missing data attributes:`, {
+                                    levelId: levelId,
+                                    slot: slot
+                                });
+                                return;
+                            }
+                            
+                            const mapping = {
+                                curriculum_level_id: parseInt(levelId),
+                                exam_id: select.value.trim(),
+                                slot: parseInt(slot)
+                            };
+                            
+                            // Validate mapping
+                            if (isNaN(mapping.curriculum_level_id) || isNaN(mapping.slot)) {
+                                console.error(`[SAVE_ALL] Invalid mapping data at select ${index + 1}:`, mapping);
+                                errors.push(`Invalid data for exam select ${index + 1}`);
+                                return;
+                            }
+                            
+                            mappings.push(mapping);
+                        }
+                    } catch (selectError) {
+                        console.error(`[SAVE_ALL] Error processing select ${index + 1}:`, selectError);
+                        errors.push(`Error processing exam select ${index + 1}: ${selectError.message}`);
+                    }
+                });
+                
+                console.log(`[SAVE_ALL] Collected ${mappings.length} valid mappings`);
+                
+            } catch (mappingError) {
+                console.error('[SAVE_ALL] Error collecting mappings:', mappingError);
+                errors.push('Error collecting exam mappings');
+            }
+            
+            // DEFENSIVE: Collect difficulty levels with robust error handling
+            try {
+                const difficultyInputs = document.querySelectorAll('.difficulty-input');
+                console.log(`[SAVE_ALL] Found ${difficultyInputs.length} difficulty inputs`);
+                
+                difficultyInputs.forEach((input, index) => {
+                    try {
+                        const levelId = input.dataset.levelId;
+                        if (levelId) {
+                            const difficulty = input.value ? parseInt(input.value) : null;
+                            const update = {
+                                level_id: parseInt(levelId),
+                                difficulty: difficulty
+                            };
+                            
+                            if (isNaN(update.level_id)) {
+                                console.warn(`[SAVE_ALL] Invalid level ID at difficulty input ${index + 1}:`, levelId);
+                                return;
+                            }
+                            
+                            difficultyUpdates.push(update);
+                        }
+                    } catch (difficultyError) {
+                        console.error(`[SAVE_ALL] Error processing difficulty input ${index + 1}:`, difficultyError);
+                        errors.push(`Error processing difficulty input ${index + 1}`);
+                    }
+                });
+                
+                console.log(`[SAVE_ALL] Collected ${difficultyUpdates.length} difficulty updates`);
+                
+            } catch (difficultyCollectionError) {
+                console.error('[SAVE_ALL] Error collecting difficulty updates:', difficultyCollectionError);
+                errors.push('Error collecting difficulty levels');
+            }
+            
+            // Check for collection errors
+            if (errors.length > 0) {
+                console.error('[SAVE_ALL] Collection errors:', errors);
+                // Re-enable buttons
+                globalBtn.disabled = false;
+                globalBtn.classList.remove('saving');
+                if (topBtn) {
+                    topBtn.disabled = false;
+                    topBtn.textContent = 'Save All Mappings';
+                }
+                if (btnText) {
+                    btnText.textContent = 'Save All Mappings';
+                }
+                alert('Errors occurred while collecting data:\n' + errors.join('\n') + '\n\nPlease check the console and try again.');
+                console.groupEnd();
+                return;
+            }
+        
+            // Validate we have something to save
+            if (mappings.length === 0 && difficultyUpdates.length === 0) {
+                console.warn('[SAVE_ALL] No data to save');
+                // Re-enable buttons
+                globalBtn.disabled = false;
+                globalBtn.classList.remove('saving');
+                if (topBtn) {
+                    topBtn.disabled = false;
+                    topBtn.textContent = 'Save All Mappings';
+                }
+                if (btnText) {
+                    btnText.textContent = 'Save All Mappings';
+                }
+                alert('No changes found to save.');
+                console.groupEnd();
+                return;
+            }
+            
+            console.log('[SAVE_ALL] Summary of data to save:', {
+                mappings: mappings.length,
+                difficultyUpdates: difficultyUpdates.length
+            });
+            
+            // Get CSRF token
+            const csrfToken = window.ExamMapping.getCookie('csrftoken');
+            if (!csrfToken) {
+                console.error('[SAVE_ALL] ❌ CSRF token not found');
+                // Re-enable buttons
+                globalBtn.disabled = false;
+                globalBtn.classList.remove('saving');
+                if (topBtn) {
+                    topBtn.disabled = false;
+                    topBtn.textContent = 'Save All Mappings';
+                }
+                if (btnText) {
+                    btnText.textContent = 'Save All Mappings';
+                }
+                alert('Error: Security token not found. Please refresh the page and try again.');
+                console.groupEnd();
+                return;
+            }
+            
+            console.log('[SAVE_ALL] Starting save process...');
+            
+            // Save mappings first with enhanced error handling
+            fetch('{% url "core:save_exam_mappings" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ 
+                    mappings: mappings,
+                    debug_info: {
+                        source: 'save_all',
+                        timestamp: new Date().toISOString(),
+                        mappings_count: mappings.length,
+                        user_agent: navigator.userAgent
+                    }
+                })
+            })
+            .then(response => {
+                console.log('[SAVE_ALL] Mappings response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('[SAVE_ALL] Mappings response data:', data);
+                
+                if (data.success) {
+                    console.log('[SAVE_ALL] ✅ Mappings saved successfully');
+                    
+                    // Now save difficulty levels if we have any
+                    if (difficultyUpdates.length > 0) {
+                        console.log('[SAVE_ALL] Saving difficulty levels...');
+                        return fetch('{% url "core:save_difficulty_levels" %}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({ 
+                                difficulty_updates: difficultyUpdates,
+                                debug_info: {
+                                    source: 'save_all',
+                                    timestamp: new Date().toISOString(),
+                                    updates_count: difficultyUpdates.length
+                                }
+                            })
+                        });
+                    } else {
+                        console.log('[SAVE_ALL] No difficulty updates to save');
+                        return { success: true, message: 'No difficulty updates' };
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to save mappings');
+                }
+            })
+            .then(response => {
+                if (difficultyUpdates.length > 0) {
+                    console.log('[SAVE_ALL] Difficulty response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error on difficulty save! status: ${response.status}`);
+                    }
+                    return response.json();
+                } else {
+                    // Return the response as-is if it's just a success object
+                    return response;
+                }
+            })
+            .then(data => {
+                console.log('[SAVE_ALL] Final response data:', data);
+                
+                // Re-enable buttons
+                globalBtn.disabled = false;
+                globalBtn.classList.remove('saving');
+                if (topBtn) {
+                    topBtn.disabled = false;
+                    topBtn.textContent = 'Save All Mappings';
+                }
+                if (btnText) {
+                    btnText.textContent = 'Save All Mappings';
+                }
+                
+                if (data.success) {
+                    console.log('[SAVE_ALL] ✅ All operations completed successfully');
+                    console.log('[SAVE_ALL] Summary:', {
+                        mappings_saved: mappings.length,
+                        difficulties_saved: difficultyUpdates.length
+                    });
+                    console.groupEnd();
+                    
+                    const successMsg = `All changes saved successfully! (${mappings.length} mappings, ${difficultyUpdates.length} difficulty updates)`;
+                    window.ExamMapping.showMessage(successMsg, 'success');
+                    
+                    // Flash the button green
+                    try {
+                        globalBtn.style.backgroundColor = '#28a745';
+                        setTimeout(() => {
+                            globalBtn.style.backgroundColor = '';
+                        }, 1000);
+                    } catch (styleError) {
+                        console.warn('[SAVE_ALL] Could not flash button color:', styleError);
+                        // Non-critical error, continue
+                    }
+                } else {
+                    console.error('[SAVE_ALL] ❌ Save operation failed:', data.error);
+                    console.groupEnd();
+                    window.ExamMapping.showMessage('Error saving changes: ' + (data.error || 'Unknown error'), 'error');
+                }
+            })
+            .catch(error => {
+                console.error('[SAVE_ALL] ❌ Save operation error:', error);
+                console.groupEnd();
+                
+                // Re-enable buttons
+                globalBtn.disabled = false;
+                globalBtn.classList.remove('saving');
+                if (topBtn) {
+                    topBtn.disabled = false;
+                    topBtn.textContent = 'Save All Mappings';
+                }
+                if (btnText) {
+                    btnText.textContent = 'Save All Mappings';
+                }
+                
+                const errorMsg = `Network error while saving: ${error.message}. Please check your connection and try again.`;
+                window.ExamMapping.showMessage(errorMsg, 'error');
+                alert('Save failed: ' + error.message);
+            });
+            
+        } catch (outerError) {
+            console.error('[SAVE_ALL] ❌ Unexpected error in saveAllMappingsWithFeedback:', outerError);
             console.groupEnd();
             
-            // Re-enable buttons
-            globalBtn.disabled = false;
-            globalBtn.classList.remove('saving');
-            if (topBtn) {
-                topBtn.disabled = false;
-                topBtn.textContent = 'Save All Mappings';
+            // Try to re-enable buttons even if we can't find them
+            try {
+                const btn = document.getElementById('globalSaveBtn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('saving');
+                }
+                const text = document.getElementById('saveButtonText');
+                if (text) {
+                    text.textContent = 'Save All Mappings';
+                }
+            } catch (btnError) {
+                console.error('[SAVE_ALL] Could not re-enable buttons:', btnError);
             }
-            btnText.textContent = 'Save All Mappings';
             
-            window.ExamMapping.showMessage('An error occurred while saving exam mappings', 'error');
-        });
+            alert('An unexpected error occurred. Please refresh the page and try again.');
+        }
     }
 
 // Initialize on page load
@@ -1524,8 +1868,46 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('User:', '{{ user.username }}');
     console.groupEnd();
     
-    // Remove automatic login modal display - make it optional
-    // document.getElementById('loginModal').style.display = 'block';
+    // Enhanced DOM monitoring
+    try {
+        // Count exam selects and difficulty inputs for validation
+        const examSelects = document.querySelectorAll('.exam-select');
+        const difficultyInputs = document.querySelectorAll('.difficulty-input');
+        const examRows = document.querySelectorAll('.exam-row');
+        
+        console.group('[DOM_STATS] Page Element Statistics');
+        console.log('DOM element counts:', {
+            exam_selects: examSelects.length,
+            difficulty_inputs: difficultyInputs.length,
+            exam_rows: examRows.length,
+            containers: document.querySelectorAll('[id^="mapping-"]').length
+        });
+        console.groupEnd();
+        
+        // Validate ExamMapping namespace
+        console.group('[NAMESPACE_VALIDATION] ExamMapping Functions Check');
+        const requiredFunctions = [
+            'saveLevelMappings',
+            'saveAllMappingsWithFeedback', 
+            'addExamSlot',
+            'removeExamSlot',
+            'updateStats',
+            'getCookie',
+            'showMessage'
+        ];
+        
+        requiredFunctions.forEach(funcName => {
+            if (window.ExamMapping && typeof window.ExamMapping[funcName] === 'function') {
+                console.log(`✅ ${funcName}: Available`);
+            } else {
+                console.error(`❌ ${funcName}: Missing or not a function`);
+            }
+        });
+        console.groupEnd();
+        
+    } catch (statsError) {
+        console.error('[DOM_STATS] Error collecting DOM statistics:', statsError);
+    }
     
     // Remove automatic disabling of inputs
     // window.ExamMapping.disableAllInputs();
@@ -1533,9 +1915,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mark as authenticated by default for now
     isAuthenticated = true;
     
-    // Update stats based on existing mappings
+    // Update stats based on existing mappings with error handling
     console.log('[LEVEL_EXAMS] Updating statistics for existing mappings...');
-    window.ExamMapping.updateStats();
+    try {
+        if (window.ExamMapping && typeof window.ExamMapping.updateStats === 'function') {
+            window.ExamMapping.updateStats();
+            console.log('[LEVEL_EXAMS] ✅ Stats updated successfully');
+        } else {
+            console.error('[LEVEL_EXAMS] updateStats function not available');
+        }
+    } catch (statsError) {
+        console.error('[LEVEL_EXAMS] Error calling updateStats:', statsError);
+    }
     
     // Update button states for existing mappings
     document.querySelectorAll('.exam-mapping-container').forEach(container => {
@@ -1548,15 +1939,30 @@ document.addEventListener('DOMContentLoaded', function() {
             addBtn.disabled = true;
         }
         
-        // Update clear/remove button states
-        rows.forEach((row, index) => {
-            const select = row.querySelector('.exam-select');
-            const removeBtn = row.querySelector('.remove-exam-btn');
-            
-            if (select && select.value && removeBtn) {
-                removeBtn.disabled = false;
-            }
-        });
+        // Update clear/remove button states with defensive programming
+        try {
+            rows.forEach((row, index) => {
+                try {
+                    // DEFENSIVE: Validate row exists and is element
+                    if (!row || typeof row.querySelector !== 'function') {
+                        console.warn(`[DOM_UPDATE] Invalid row at index ${index}:`, row);
+                        return;
+                    }
+                    
+                    const select = row.querySelector('.exam-select');
+                    const removeBtn = row.querySelector('.remove-exam-btn');
+                    
+                    if (select && select.value && removeBtn) {
+                        removeBtn.disabled = false;
+                    }
+                } catch (rowError) {
+                    console.error(`[DOM_UPDATE] Error processing row ${index}:`, rowError);
+                    // Continue with other rows
+                }
+            });
+        } catch (forEachError) {
+            console.error('[DOM_UPDATE] Error in rows forEach:', forEachError);
+        }
     });
 });
 
