@@ -47,15 +47,15 @@ legacy_patterns = [
     path('exam-list/', LoggingRedirectView.as_view(pattern_name='RoutineTest:exam_list'), name='exam_list_redirect'),
     
     # Session management redirects
-    path('sessions/', LoggingRedirectView.as_view(url='/api/PlacementTest/sessions/'), name='sessions_redirect'),
-    path('session/<uuid:session_id>/', LoggingRedirectView.as_view(url='/api/PlacementTest/session/%(session_id)s/'), name='session_detail_redirect'),
-    path('session/<uuid:session_id>/submit/', LoggingRedirectView.as_view(url='/api/PlacementTest/session/%(session_id)s/submit/'), name='session_submit_redirect'),
+    path('sessions/', LoggingRedirectView.as_view(url='/api/RoutineTest/sessions/'), name='sessions_redirect'),
+    path('session/<uuid:session_id>/', LoggingRedirectView.as_view(url='/api/RoutineTest/session/%(session_id)s/'), name='session_detail_redirect'),
+    path('session/<uuid:session_id>/submit/', LoggingRedirectView.as_view(url='/api/RoutineTest/session/%(session_id)s/submit/'), name='session_submit_redirect'),
     path('session/<uuid:session_id>/result/', student_views.test_result, name='test_result_legacy'),
     
     # Exam management redirects
-    path('exams/', LoggingRedirectView.as_view(url='/api/PlacementTest/exams/'), name='exams_redirect'),
-    path('exam/<uuid:exam_id>/', LoggingRedirectView.as_view(url='/api/PlacementTest/exams/%(exam_id)s/'), name='exam_detail_redirect'),
-    path('exam/<uuid:exam_id>/edit/', LoggingRedirectView.as_view(url='/api/PlacementTest/exams/%(exam_id)s/edit/'), name='exam_edit_redirect'),
+    path('exams/', LoggingRedirectView.as_view(url='/api/RoutineTest/exams/'), name='exams_redirect'),
+    path('exam/<uuid:exam_id>/', LoggingRedirectView.as_view(url='/api/RoutineTest/exams/%(exam_id)s/'), name='exam_detail_redirect'),
+    path('exam/<uuid:exam_id>/edit/', LoggingRedirectView.as_view(url='/api/RoutineTest/exams/%(exam_id)s/edit/'), name='exam_edit_redirect'),
 ]
 
 # Export for inclusion in main URL config

@@ -53,6 +53,16 @@ from .ajax import (
     delete_audio_from_exam
 )
 
+# Phase 5: Import roster management views
+from .roster import (
+    manage_roster,
+    import_roster_csv,
+    roster_report,
+    update_roster_status,
+    remove_roster_entry,
+    export_roster
+)
+
 # Export all views for backward compatibility
 __all__ = [
     # Student views
@@ -88,7 +98,15 @@ __all__ = [
     'update_exam_name',
     'get_audio',
     'update_audio_names',
-    'delete_audio_from_exam'
+    'delete_audio_from_exam',
+    
+    # Phase 5: Roster management views
+    'manage_roster',
+    'import_roster_csv',
+    'roster_report',
+    'update_roster_status',
+    'remove_roster_entry',
+    'export_roster'
 ]
 
 # This ensures that the following imports continue to work:

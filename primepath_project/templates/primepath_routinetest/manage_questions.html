@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "routinetest_base.html" %}
 
 {% block title %}Manage Questions - {{ exam.name }} - PrimePath{% endblock %}
 
@@ -308,7 +308,7 @@ document.querySelectorAll('.options-count-selector').forEach(selector => {
         formData.append('correct_answer', answerInput ? answerInput.value : '');
         formData.append('points', form.querySelector('[name=points]').value);
         
-        fetch(`/api/RoutineTest/questions/${questionId}/update/`, {
+        fetch(`/RoutineTest/questions/${questionId}/update/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -427,7 +427,7 @@ document.querySelectorAll('.answer-form').forEach(form => {
         saveBtn.disabled = true;
         saveBtn.textContent = 'Saving...';
         
-        fetch(`/api/RoutineTest/questions/${questionId}/update/`, {
+        fetch(`/RoutineTest/questions/${questionId}/update/`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -478,7 +478,7 @@ function createMissingQuestions() {
 
 // Make request to create questions
 function createQuestionsRequest() {
-    fetch(`/api/RoutineTest/exams/{{ exam.id }}/create-questions/`, {
+    fetch(`/RoutineTest/exams/{{ exam.id }}/create-questions/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,

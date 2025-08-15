@@ -57,7 +57,7 @@ class SessionService:
         )
         
         # Create answer placeholders for all questions
-        questions = exam.questions.all()
+        questions = exam.routine_questions.all()
         answer_objects = [
             StudentAnswer(
                 session=session,
@@ -280,7 +280,7 @@ class SessionService:
                 question=question,
                 answer=''
             )
-            for question in new_exam.questions.all()
+            for question in new_exam.routine_questions.all()
         ]
         StudentAnswer.objects.bulk_create(answer_objects)
         

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "routinetest_base.html" %}
 
 {% block title %}Preview & Answer Keys - {{ exam.name }} - PrimePath{% endblock %}
 
@@ -2586,7 +2586,7 @@ function initializeAnswerTracking() {
                 formData.append('options_count', newCount);
                 formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
                 
-                fetch(`/api/RoutineTest/questions/${questionId}/update/`, {
+                fetch(`/RoutineTest/questions/${questionId}/update/`, {
                     method: 'POST',
                     body: formData
                 })
@@ -3415,7 +3415,7 @@ function saveAllAnswers() {
     });
     
     // Debug: Log the URL being called
-    const saveUrl = `/api/RoutineTest/exams/{{ exam.id }}/save-answers/`;
+    const saveUrl = `/RoutineTest/exams/{{ exam.id }}/save-answers/`;
     console.log('Saving to URL:', saveUrl);
     console.log('Data being sent:', questionsData);
     console.log('Audio assignments being saved:', audioAssignments);
@@ -3677,7 +3677,7 @@ function deleteAudioFile(audioId) {
     }
     
     // Make API call to delete audio
-    fetch(`/api/RoutineTest/exams/{{ exam.id }}/audio/${audioId}/delete/`, {
+    fetch(`/RoutineTest/exams/{{ exam.id }}/audio/${audioId}/delete/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

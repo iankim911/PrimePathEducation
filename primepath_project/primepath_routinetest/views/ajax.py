@@ -138,7 +138,7 @@ def create_questions(request, exam_id):
     
     try:
         # Get existing question numbers
-        existing_numbers = set(exam.questions.values_list('question_number', flat=True))
+        existing_numbers = set(exam.routine_questions.values_list('question_number', flat=True))
         
         # Create missing questions
         questions_created = 0

@@ -10,14 +10,17 @@ All existing imports will continue to work:
 """
 
 # Import all models from their respective modules
-from .exam import Exam, AudioFile
+from .exam import Exam, AudioFile, StudentRoster
 from .question import Question
 from .session import StudentSession, StudentAnswer, DifficultyAdjustment
+from .class_schedule import ClassExamSchedule  # Class-specific scheduling
 
 # Re-export all models for backward compatibility
 __all__ = [
     'Exam',
     'AudioFile',
+    'StudentRoster',  # Phase 5: Student Roster & Assignment
+    'ClassExamSchedule',  # Class-specific scheduling
     'Question',
     'StudentSession',
     'StudentAnswer',

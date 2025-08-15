@@ -1,53 +1,153 @@
-{% extends "base.html" %}
+{% extends "routinetest_base.html" %}
 {% load static %}
 
-{% block title %}PrimePath Routine Test{% endblock %}
+{% block title %}Dashboard - RoutineTest{% endblock %}
+
+{% block header %}Dashboard - Continuous Assessment{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <!-- Simple Landing Page -->
-    <div class="jumbotron text-center">
-        <h1 class="display-4">PrimePath Routine Test</h1>
-        <p class="lead">Welcome to the Routine Test Module</p>
-        <hr class="my-4">
-        <p>Choose an action to get started:</p>
-        
-        <div class="mt-4">
-            <a href="{% url 'RoutineTest:start_test' %}" class="btn btn-success btn-lg mx-2">
-                <i class="fas fa-play"></i> Start Test
-            </a>
-            <a href="{% url 'RoutineTest:exam_list' %}" class="btn btn-primary btn-lg mx-2">
-                <i class="fas fa-list"></i> View Exams
-            </a>
-        </div>
-    </div>
+<script>
+    console.log('%c[RoutineTest Dashboard] Page loaded', 'color: #00A65E; font-weight: bold;');
+    console.log('[RoutineTest Dashboard] Stats:', {
+        activeExams: {{ active_exams }},
+        totalSessions: {{ total_sessions }},
+        recentSessions: {{ recent_sessions|length }}
+    });
+</script>
 
-    <!-- Quick Stats -->
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3>{{ active_exams }}</h3>
-                    <p class="text-muted">Active Exams</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3>{{ total_sessions }}</h3>
-                    <p class="text-muted">Total Sessions</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3>{{ recent_sessions|length }}</h3>
-                    <p class="text-muted">Recent Tests</p>
-                </div>
-            </div>
-        </div>
+<!-- Welcome Section -->
+<div style="background: linear-gradient(135deg, #F1F8E9 0%, #E0E7DA 100%); border-left: 4px solid #2E7D32; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+    <h2 style="color: #1B5E20; margin-bottom: 10px;">Welcome to RoutineTest Dashboard</h2>
+    <p style="color: #263238; font-size: 1.1rem;">Manage continuous assessments and track student progress</p>
+</div>
+
+<!-- Quick Actions -->
+<div style="margin-bottom: 30px;">
+    <h3 style="color: #263238; margin-bottom: 15px;">Quick Actions</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <a href="{% url 'RoutineTest:create_exam' %}" class="btn" onclick="console.log('[RoutineTest] Quick action: Upload Exam')">
+            <i class="fas fa-upload"></i> Upload New Exam
+        </a>
+        <a href="{% url 'RoutineTest:exam_list' %}" class="btn btn-secondary" onclick="console.log('[RoutineTest] Quick action: Manage Exams')">
+            <i class="fas fa-edit"></i> Manage Exams
+        </a>
+        <a href="{% url 'RoutineTest:start_test' %}" class="btn" style="background-color: #66BB6A;" onclick="console.log('[RoutineTest] Quick action: Start Test')">
+            <i class="fas fa-play"></i> Start Test Session
+        </a>
     </div>
 </div>
+
+<!-- Statistics Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <!-- Active Exams Card -->
+    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
+         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
+         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="console.log('[RoutineTest] Stat card clicked: Active Exams')">
+        <h3 style="color: #388E3C; font-size: 3rem; margin: 0;">{{ active_exams }}</h3>
+        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Active Exams</p>
+        <div style="width: 50px; height: 3px; background: #388E3C; margin: 10px auto 0;"></div>
+    </div>
+    
+    <!-- Total Sessions Card -->
+    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
+         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
+         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="console.log('[RoutineTest] Stat card clicked: Total Sessions')">
+        <h3 style="color: #2E7D32; font-size: 3rem; margin: 0;">{{ total_sessions }}</h3>
+        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Total Sessions</p>
+        <div style="width: 50px; height: 3px; background: #2E7D32; margin: 10px auto 0;"></div>
+    </div>
+    
+    <!-- Recent Tests Card -->
+    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
+         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
+         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="console.log('[RoutineTest] Stat card clicked: Recent Tests')">
+        <h3 style="color: #66BB6A; font-size: 3rem; margin: 0;">{{ recent_sessions|length }}</h3>
+        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Recent Tests</p>
+        <div style="width: 50px; height: 3px; background: #66BB6A; margin: 10px auto 0;"></div>
+    </div>
+    
+    <!-- Pending Grading Card (if teacher) -->
+    {% if is_teacher %}
+    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
+         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
+         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
+         onclick="console.log('[RoutineTest] Stat card clicked: Pending Grading')">
+        <h3 style="color: #FF9800; font-size: 3rem; margin: 0;">{{ pending_sessions|default:0 }}</h3>
+        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Pending Grading</p>
+        <div style="width: 50px; height: 3px; background: #FF9800; margin: 10px auto 0;"></div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Recent Activity Section -->
+{% if recent_sessions %}
+<div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%); color: white; padding: 15px 20px;">
+        <h3 style="margin: 0;">Recent Test Sessions</h3>
+    </div>
+    <div style="padding: 0;">
+        {% for session in recent_sessions %}
+        <div style="padding: 15px 20px; border-bottom: 1px solid #E8F5E9; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease;"
+             onmouseover="this.style.background='#F5FAF7'"
+             onmouseout="this.style.background='white'"
+             onclick="console.log('[RoutineTest] Session clicked:', '{{ session.id }}')">
+            <div>
+                <strong style="color: #2E7D32;">{{ session.student_name }}</strong>
+                <span style="color: #6c757d; margin-left: 10px;">{{ session.exam.name }}</span>
+            </div>
+            <div style="text-align: right;">
+                {% if session.score %}
+                <span style="color: #388E3C; font-weight: bold;">{{ session.score }}%</span>
+                {% else %}
+                <span style="color: #FF9800;">In Progress</span>
+                {% endif %}
+                <div style="color: #999; font-size: 0.9rem;">{{ session.completed_at|date:"M d, H:i" }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div style="padding: 15px 20px; background: #F5FAF7; text-align: center;">
+        <a href="{% url 'RoutineTest:session_list' %}" style="color: #388E3C; text-decoration: none; font-weight: 500;"
+           onclick="console.log('[RoutineTest] View all sessions clicked')">
+            View All Sessions →
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Info Section -->
+<div style="margin-top: 30px; padding: 20px; background: #F5FAF7; border-radius: 8px; border: 1px solid #C3E6CB;">
+    <h4 style="color: #2E7D32; margin-bottom: 15px;">📚 About RoutineTest Module</h4>
+    <p style="color: #1B5E20; line-height: 1.6;">
+        The RoutineTest module enables continuous assessment through Review Tests (monthly) and Quarterly Exams. 
+        Track student progress, manage test schedules, and analyze performance trends throughout the academic year.
+    </p>
+    <ul style="color: #1B5E20; line-height: 1.8; margin-top: 10px;">
+        <li><strong>Review Tests:</strong> Monthly assessments for continuous evaluation</li>
+        <li><strong>Quarterly Exams:</strong> Comprehensive quarter-end assessments</li>
+        <li><strong>Test Pools:</strong> Random exam assignment from pools to prevent cheating</li>
+        <li><strong>Progress Tracking:</strong> Monitor individual and class performance trends</li>
+    </ul>
+</div>
+
+<script>
+    // Console logging for dashboard interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        console.group('%c[RoutineTest Dashboard] Interaction Tracking Active', 'color: #00A65E;');
+        console.log('Quick Actions: 3 buttons available');
+        console.log('Statistics Cards: 4 cards displayed');
+        console.log('Recent Sessions: {{ recent_sessions|length }} displayed');
+        console.groupEnd();
+        
+        // Track time on dashboard
+        const startTime = Date.now();
+        window.addEventListener('beforeunload', function() {
+            const timeSpent = (Date.now() - startTime) / 1000;
+            console.log(`[RoutineTest Dashboard] Time spent: ${timeSpent.toFixed(1)}s`);
+        });
+    });
+</script>
 {% endblock %}

@@ -35,9 +35,46 @@ class ExamService:
         Returns:
             Created Exam instance
         """
+        import json
+        
+        # Helper function to serialize dates/times
+        def serialize_datetime(obj):
+            if hasattr(obj, 'isoformat'):
+                return obj.isoformat()
+            elif hasattr(obj, 'strftime'):
+                return obj.strftime('%H:%M:%S')
+            return str(obj) if obj else None
+        
+        # Log exam creation attempt
+        console_log = {
+            "service": "ExamService",
+            "action": "create_exam_start",
+            "exam_name": exam_data.get('name'),
+            "exam_type": exam_data.get('exam_type', 'REVIEW'),
+            "time_period_month": exam_data.get('time_period_month'),  # Phase 2
+            "time_period_quarter": exam_data.get('time_period_quarter'),  # Phase 2
+            "academic_year": exam_data.get('academic_year'),  # Phase 2
+            "class_codes": exam_data.get('class_codes', []),  # Phase 3
+            "class_codes_count": len(exam_data.get('class_codes', [])),  # Phase 3
+            "has_instructions": bool(exam_data.get('instructions')),  # General instructions (kept at exam level)
+            "curriculum_level_id": exam_data.get('curriculum_level_id'),
+            "has_pdf": pdf_file is not None,
+            "pdf_name": pdf_file.name if pdf_file else None,
+            "audio_count": len(audio_files) if audio_files else 0,
+            "note": "Scheduling now managed per class via ClassExamSchedule"
+        }
+        logger.info(f"[EXAM_SERVICE_CREATE] {json.dumps(console_log)}")
+        print(f"[EXAM_SERVICE_CREATE] {json.dumps(console_log)}")
+        
         # Create the exam
         exam = Exam.objects.create(
             name=exam_data['name'],
+            exam_type=exam_data.get('exam_type', 'REVIEW'),  # Add exam type with default
+            time_period_month=exam_data.get('time_period_month'),  # Phase 2: Add month
+            time_period_quarter=exam_data.get('time_period_quarter'),  # Phase 2: Add quarter
+            academic_year=exam_data.get('academic_year'),  # Phase 2: Add academic year
+            class_codes=exam_data.get('class_codes', []),  # Phase 3: Add class codes
+            instructions=exam_data.get('instructions', ''),  # General instructions (kept at exam level)
             curriculum_level_id=exam_data.get('curriculum_level_id'),
             pdf_file=pdf_file,
             timer_minutes=exam_data.get('timer_minutes', 60),
@@ -48,6 +85,17 @@ class ExamService:
             created_by=exam_data.get('created_by'),
             is_active=exam_data.get('is_active', True)
         )
+        
+        # Log successful exam object creation
+        console_log = {
+            "service": "ExamService",
+            "action": "exam_object_created",
+            "exam_id": str(exam.id),
+            "exam_name": exam.name,
+            "pdf_file_path": exam.pdf_file.name if exam.pdf_file else None
+        }
+        logger.info(f"[EXAM_SERVICE_CREATED] {json.dumps(console_log)}")
+        print(f"[EXAM_SERVICE_CREATED] {json.dumps(console_log)}")
         
         # Create placeholder questions
         ExamService.create_questions_for_exam(exam)
@@ -60,6 +108,18 @@ class ExamService:
             f"Created exam {exam.id}: {exam.name}",
             extra={'exam_id': str(exam.id), 'total_questions': exam.total_questions}
         )
+        
+        # Final success log
+        console_log = {
+            "service": "ExamService",
+            "action": "create_exam_complete",
+            "exam_id": str(exam.id),
+            "exam_name": exam.name,
+            "questions_created": exam.total_questions,
+            "audio_files_attached": len(audio_files) if audio_files else 0
+        }
+        logger.info(f"[EXAM_SERVICE_COMPLETE] {json.dumps(console_log)}")
+        print(f"[EXAM_SERVICE_COMPLETE] {json.dumps(console_log)}")
         
         return exam
     
@@ -75,7 +135,7 @@ class ExamService:
             List of created Question instances
         """
         existing_numbers = set(
-            exam.questions.values_list('question_number', flat=True)
+            exam.routine_questions.values_list('question_number', flat=True)
         )
         
         questions_to_create = []
@@ -294,7 +354,7 @@ class ExamService:
         """
         existing_exams = Exam.objects.filter(
             curriculum_level_id=curriculum_level_id,
-            name__regex=r'^\[PlacementTest\].*_v_[a-z]$'
+            name__regex=r'^\[RoutineTest\].*_v_[a-z]$'
         ).values_list('name', flat=True)
         
         used_versions = set()
@@ -465,6 +525,287 @@ class ExamService:
         return 1
     
     @staticmethod
+    @transaction.atomic
+    def manage_student_roster(
+        exam: Exam,
+        roster_data: List[Dict[str, Any]],
+        teacher = None
+    ) -> Dict[str, Any]:
+        """
+        Phase 5: Manage student roster assignments for an exam.
+        
+        Args:
+            exam: Exam instance
+            roster_data: List of student data dictionaries
+            teacher: Teacher instance (for tracking who assigned)
+            
+        Returns:
+            Summary of roster operations
+        """
+        from ..models import StudentRoster
+        import json
+        
+        created_count = 0
+        updated_count = 0
+        errors = []
+        
+        # Log roster management start
+        console_log = {
+            "service": "ExamService",
+            "action": "manage_roster_start",
+            "exam_id": str(exam.id),
+            "exam_name": exam.name,
+            "roster_count": len(roster_data),
+            "teacher": teacher.name if teacher else None
+        }
+        logger.info(f"[PHASE5_ROSTER_MANAGE] {json.dumps(console_log)}")
+        print(f"[PHASE5_ROSTER_MANAGE] {json.dumps(console_log)}")
+        
+        for student_data in roster_data:
+            try:
+                # Check if roster entry already exists
+                roster_entry, created = StudentRoster.objects.update_or_create(
+                    exam=exam,
+                    student_name=student_data['student_name'],
+                    student_id=student_data.get('student_id', ''),
+                    defaults={
+                        'class_code': student_data['class_code'],
+                        'assigned_by': teacher,
+                        'notes': student_data.get('notes', '')
+                    }
+                )
+                
+                if created:
+                    created_count += 1
+                    console_log = {
+                        "action": "roster_entry_created",
+                        "student": student_data['student_name'],
+                        "class": student_data['class_code']
+                    }
+                    logger.info(f"[PHASE5_ROSTER_CREATED] {json.dumps(console_log)}")
+                else:
+                    updated_count += 1
+                    console_log = {
+                        "action": "roster_entry_updated",
+                        "student": student_data['student_name'],
+                        "class": student_data['class_code']
+                    }
+                    logger.info(f"[PHASE5_ROSTER_UPDATED] {json.dumps(console_log)}")
+                    
+            except Exception as e:
+                error_msg = f"Error processing {student_data.get('student_name', 'unknown')}: {str(e)}"
+                errors.append(error_msg)
+                logger.error(f"[PHASE5_ROSTER_ERROR] {error_msg}")
+        
+        # Log completion
+        console_log = {
+            "service": "ExamService",
+            "action": "manage_roster_complete",
+            "exam_id": str(exam.id),
+            "created": created_count,
+            "updated": updated_count,
+            "errors": len(errors)
+        }
+        logger.info(f"[PHASE5_ROSTER_COMPLETE] {json.dumps(console_log)}")
+        print(f"[PHASE5_ROSTER_COMPLETE] {json.dumps(console_log)}")
+        
+        return {
+            'created': created_count,
+            'updated': updated_count,
+            'errors': errors,
+            'total': len(roster_data)
+        }
+    
+    @staticmethod
+    def bulk_import_roster(
+        exam: Exam,
+        csv_content: str,
+        teacher = None
+    ) -> Dict[str, Any]:
+        """
+        Phase 5: Bulk import student roster from CSV.
+        
+        Expected CSV format:
+        student_name,student_id,class_code,notes
+        
+        Args:
+            exam: Exam instance
+            csv_content: CSV content as string
+            teacher: Teacher instance
+            
+        Returns:
+            Import results
+        """
+        import csv
+        import io
+        
+        roster_data = []
+        errors = []
+        
+        try:
+            csv_reader = csv.DictReader(io.StringIO(csv_content))
+            
+            for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 (header is line 1)
+                try:
+                    if not row.get('student_name'):
+                        errors.append(f"Row {row_num}: Missing student name")
+                        continue
+                    
+                    if not row.get('class_code'):
+                        errors.append(f"Row {row_num}: Missing class code")
+                        continue
+                    
+                    roster_data.append({
+                        'student_name': row['student_name'].strip(),
+                        'student_id': row.get('student_id', '').strip(),
+                        'class_code': row['class_code'].strip(),
+                        'notes': row.get('notes', '').strip()
+                    })
+                    
+                except Exception as e:
+                    errors.append(f"Row {row_num}: {str(e)}")
+            
+            if roster_data:
+                results = ExamService.manage_student_roster(exam, roster_data, teacher)
+                results['csv_errors'] = errors
+                return results
+            else:
+                return {
+                    'created': 0,
+                    'updated': 0,
+                    'errors': errors,
+                    'total': 0
+                }
+                
+        except Exception as e:
+            logger.error(f"[PHASE5_ROSTER_IMPORT_ERROR] CSV parsing error: {str(e)}")
+            return {
+                'created': 0,
+                'updated': 0,
+                'errors': [f"CSV parsing error: {str(e)}"],
+                'total': 0
+            }
+    
+    @staticmethod
+    def update_roster_completion(
+        roster_entry_id: str,
+        session = None
+    ) -> bool:
+        """
+        Phase 5: Update roster entry when student starts or completes exam.
+        
+        Args:
+            roster_entry_id: StudentRoster entry ID
+            session: StudentSession instance (optional)
+            
+        Returns:
+            Success status
+        """
+        from ..models import StudentRoster
+        
+        try:
+            roster_entry = StudentRoster.objects.get(id=roster_entry_id)
+            
+            if session:
+                roster_entry.session = session
+                roster_entry.update_completion_status()
+                roster_entry.save()
+                
+                console_log = {
+                    "action": "roster_completion_updated",
+                    "roster_id": str(roster_entry_id),
+                    "student": roster_entry.student_name,
+                    "status": roster_entry.completion_status,
+                    "session_id": str(session.id) if session else None
+                }
+                logger.info(f"[PHASE5_ROSTER_STATUS] {json.dumps(console_log)}")
+                print(f"[PHASE5_ROSTER_STATUS] {json.dumps(console_log)}")
+                
+                return True
+                
+        except StudentRoster.DoesNotExist:
+            logger.error(f"[PHASE5_ROSTER_ERROR] Roster entry {roster_entry_id} not found")
+            
+        return False
+    
+    @staticmethod
+    def get_roster_report(exam: Exam) -> Dict[str, Any]:
+        """
+        Phase 5: Generate comprehensive roster report for an exam.
+        
+        Args:
+            exam: Exam instance
+            
+        Returns:
+            Detailed roster report
+        """
+        from ..models import StudentRoster
+        import json
+        
+        roster_entries = StudentRoster.objects.filter(exam=exam).select_related('session')
+        
+        report = {
+            'exam_id': str(exam.id),
+            'exam_name': exam.name,
+            'total_assigned': roster_entries.count(),
+            'by_status': {},
+            'by_class': {},
+            'completion_rate': 0,
+            'students': []
+        }
+        
+        # Count by status
+        for status_code, status_label in StudentRoster.COMPLETION_STATUS:
+            count = roster_entries.filter(completion_status=status_code).count()
+            report['by_status'][status_label] = count
+        
+        # Count by class
+        for entry in roster_entries:
+            class_code = entry.class_code
+            if class_code not in report['by_class']:
+                report['by_class'][class_code] = {
+                    'total': 0,
+                    'completed': 0,
+                    'in_progress': 0,
+                    'not_started': 0
+                }
+            
+            report['by_class'][class_code]['total'] += 1
+            
+            if entry.completion_status == 'COMPLETED':
+                report['by_class'][class_code]['completed'] += 1
+            elif entry.completion_status == 'IN_PROGRESS':
+                report['by_class'][class_code]['in_progress'] += 1
+            elif entry.completion_status == 'NOT_STARTED':
+                report['by_class'][class_code]['not_started'] += 1
+            
+            # Add student details
+            report['students'].append({
+                'name': entry.student_name,
+                'id': entry.student_id,
+                'class': entry.class_code,
+                'status': entry.get_completion_status_display(),
+                'assigned_at': entry.assigned_at.isoformat() if entry.assigned_at else None,
+                'completed_at': entry.completed_at.isoformat() if entry.completed_at else None
+            })
+        
+        # Calculate overall completion rate
+        if report['total_assigned'] > 0:
+            completed = report['by_status'].get('Completed', 0)
+            report['completion_rate'] = round(completed / report['total_assigned'] * 100, 1)
+        
+        console_log = {
+            "action": "roster_report_generated",
+            "exam_id": str(exam.id),
+            "total_students": report['total_assigned'],
+            "completion_rate": report['completion_rate']
+        }
+        logger.info(f"[PHASE5_ROSTER_REPORT] {json.dumps(console_log)}")
+        print(f"[PHASE5_ROSTER_REPORT] {json.dumps(console_log)}")
+        
+        return report
+    
+    @staticmethod
     def get_all_exams_with_stats() -> List[Dict[str, Any]]:
         """
         Get all exams with statistics.
@@ -517,3 +858,443 @@ class ExamService:
         except Exception as e:
             logger.error(f"Error getting exam stats: {e}")
             return []
+    
+    # ==================== CLASS-SPECIFIC SCHEDULING METHODS ====================
+    
+    @staticmethod
+    @transaction.atomic
+    def create_class_schedule(
+        exam: Exam,
+        class_code: str,
+        schedule_data: Dict[str, Any],
+        teacher = None
+    ) -> 'ClassExamSchedule':
+        """
+        Create or update a class-specific schedule for an exam.
+        
+        Args:
+            exam: Exam instance
+            class_code: Class code (e.g., 'CLASS_7A')
+            schedule_data: Dictionary containing schedule information
+            teacher: Teacher creating the schedule
+            
+        Returns:
+            Created or updated ClassExamSchedule instance
+        """
+        from ..models import ClassExamSchedule
+        import json
+        
+        # Log schedule creation attempt
+        console_log = {
+            "service": "ExamService",
+            "action": "create_class_schedule_start",
+            "exam_id": str(exam.id),
+            "exam_name": exam.name,
+            "class_code": class_code,
+            "scheduled_date": str(schedule_data.get('scheduled_date')) if schedule_data.get('scheduled_date') else None,
+            "scheduled_start_time": str(schedule_data.get('scheduled_start_time')) if schedule_data.get('scheduled_start_time') else None,
+            "scheduled_end_time": str(schedule_data.get('scheduled_end_time')) if schedule_data.get('scheduled_end_time') else None,
+            "location": schedule_data.get('location'),
+            "allow_late_submission": schedule_data.get('allow_late_submission', False)
+        }
+        logger.info(f"[CLASS_SCHEDULE_CREATE] {json.dumps(console_log)}")
+        print(f"[CLASS_SCHEDULE_CREATE] {json.dumps(console_log)}")
+        
+        # Create or update the class schedule
+        schedule, created = ClassExamSchedule.objects.update_or_create(
+            exam=exam,
+            class_code=class_code,
+            defaults={
+                'scheduled_date': schedule_data.get('scheduled_date'),
+                'scheduled_start_time': schedule_data.get('scheduled_start_time'),
+                'scheduled_end_time': schedule_data.get('scheduled_end_time'),
+                'location': schedule_data.get('location', ''),
+                'additional_instructions': schedule_data.get('additional_instructions', ''),
+                'allow_late_submission': schedule_data.get('allow_late_submission', False),
+                'late_submission_penalty': schedule_data.get('late_submission_penalty', 0),
+                'created_by': teacher,
+                'is_active': True
+            }
+        )
+        
+        action_type = "created" if created else "updated"
+        console_log = {
+            "service": "ExamService",
+            "action": f"class_schedule_{action_type}",
+            "schedule_id": str(schedule.id),
+            "exam_id": str(exam.id),
+            "class_code": class_code,
+            "is_scheduled": schedule.is_scheduled()
+        }
+        logger.info(f"[CLASS_SCHEDULE_{action_type.upper()}] {json.dumps(console_log)}")
+        print(f"[CLASS_SCHEDULE_{action_type.upper()}] {json.dumps(console_log)}")
+        
+        return schedule
+    
+    @staticmethod
+    def bulk_create_class_schedules(
+        exam: Exam,
+        schedules_data: List[Dict[str, Any]],
+        teacher = None
+    ) -> Dict[str, Any]:
+        """
+        Create multiple class schedules for an exam at once.
+        
+        Args:
+            exam: Exam instance
+            schedules_data: List of schedule dictionaries
+            teacher: Teacher creating the schedules
+            
+        Returns:
+            Summary of created/updated schedules
+        """
+        created_count = 0
+        updated_count = 0
+        errors = []
+        
+        for schedule_data in schedules_data:
+            try:
+                class_code = schedule_data.get('class_code')
+                if not class_code:
+                    errors.append("Missing class_code in schedule data")
+                    continue
+                
+                schedule = ExamService.create_class_schedule(
+                    exam=exam,
+                    class_code=class_code,
+                    schedule_data=schedule_data,
+                    teacher=teacher
+                )
+                
+                if schedule._state.adding:
+                    created_count += 1
+                else:
+                    updated_count += 1
+                    
+            except Exception as e:
+                error_msg = f"Error creating schedule for {class_code}: {str(e)}"
+                errors.append(error_msg)
+                logger.error(f"[CLASS_SCHEDULE_ERROR] {error_msg}")
+        
+        return {
+            'created': created_count,
+            'updated': updated_count,
+            'errors': errors,
+            'total': len(schedules_data)
+        }
+    
+    @staticmethod
+    def get_class_schedules_for_exam(exam: Exam) -> List[Dict[str, Any]]:
+        """
+        Get all class schedules for an exam.
+        
+        Args:
+            exam: Exam instance
+            
+        Returns:
+            List of schedule dictionaries
+        """
+        from ..models import ClassExamSchedule
+        
+        schedules = ClassExamSchedule.objects.filter(
+            exam=exam,
+            is_active=True
+        ).order_by('scheduled_date', 'scheduled_start_time', 'class_code')
+        
+        schedule_list = []
+        for schedule in schedules:
+            schedule_list.append({
+                'id': str(schedule.id),
+                'class_code': schedule.class_code,
+                'class_display': schedule.get_class_display(),
+                'scheduled_date': schedule.scheduled_date.isoformat() if schedule.scheduled_date else None,
+                'scheduled_start_time': schedule.scheduled_start_time.strftime('%H:%M') if schedule.scheduled_start_time else None,
+                'scheduled_end_time': schedule.scheduled_end_time.strftime('%H:%M') if schedule.scheduled_end_time else None,
+                'location': schedule.location,
+                'additional_instructions': schedule.additional_instructions,
+                'allow_late_submission': schedule.allow_late_submission,
+                'late_submission_penalty': schedule.late_submission_penalty,
+                'schedule_display': schedule.get_schedule_display(),
+                'is_scheduled': schedule.is_scheduled()
+            })
+        
+        return schedule_list
+    
+    @staticmethod
+    def delete_class_schedule(schedule_id: str) -> bool:
+        """
+        Delete a class schedule.
+        
+        Args:
+            schedule_id: ClassExamSchedule ID
+            
+        Returns:
+            Success status
+        """
+        from ..models import ClassExamSchedule
+        import json
+        
+        try:
+            schedule = ClassExamSchedule.objects.get(id=schedule_id)
+            
+            console_log = {
+                "service": "ExamService",
+                "action": "delete_class_schedule",
+                "schedule_id": str(schedule_id),
+                "exam_id": str(schedule.exam_id),
+                "class_code": schedule.class_code
+            }
+            logger.info(f"[CLASS_SCHEDULE_DELETE] {json.dumps(console_log)}")
+            print(f"[CLASS_SCHEDULE_DELETE] {json.dumps(console_log)}")
+            
+            schedule.delete()
+            return True
+            
+        except ClassExamSchedule.DoesNotExist:
+            logger.error(f"[CLASS_SCHEDULE_ERROR] Schedule {schedule_id} not found")
+            return False
+    
+    @staticmethod
+    def check_class_access(exam: Exam, class_code: str, current_time=None) -> Dict[str, Any]:
+        """
+        Check if a class can access an exam based on its schedule.
+        
+        Args:
+            exam: Exam instance
+            class_code: Class code to check
+            current_time: Optional datetime to check against
+            
+        Returns:
+            Dictionary with access status and message
+        """
+        from ..models import ClassExamSchedule
+        
+        try:
+            schedule = ClassExamSchedule.objects.get(
+                exam=exam,
+                class_code=class_code,
+                is_active=True
+            )
+            
+            can_access, message = schedule.can_student_access(current_time)
+            
+            return {
+                'can_access': can_access,
+                'message': message,
+                'schedule': schedule.get_schedule_display() if schedule.is_scheduled() else None,
+                'late_policy': schedule.get_late_policy_display()
+            }
+            
+        except ClassExamSchedule.DoesNotExist:
+            # No schedule for this class means they can access anytime
+            return {
+                'can_access': True,
+                'message': 'Exam available',
+                'schedule': None,
+                'late_policy': 'No schedule set'
+            }
+    
+    # ==================== ROUTINETEST [RT]/[QTR] NAMING METHODS ====================
+    
+    @staticmethod
+    def get_routinetest_curriculum_levels():
+        """
+        Get curriculum levels available for RoutineTest with [RT]/[QTR] naming.
+        Filters curriculum levels based on RoutineTest whitelist.
+        
+        Returns:
+            List of dictionaries with curriculum level data and display names
+        """
+        from ..constants import ROUTINETEST_CURRICULUM_WHITELIST
+        from core.models import CurriculumLevel
+        import json
+        
+        logger.info("[ROUTINETEST_CURRICULUM] Getting curriculum levels for RoutineTest")
+        print("[ROUTINETEST_CURRICULUM] Getting curriculum levels for RoutineTest")
+        
+        curriculum_levels = []
+        
+        # Loop through whitelist and find matching curriculum levels
+        for program_name, subprogram_name, level_number in ROUTINETEST_CURRICULUM_WHITELIST:
+            try:
+                # Find the curriculum level in database
+                curriculum_level = CurriculumLevel.objects.select_related(
+                    'subprogram__program'
+                ).get(
+                    subprogram__program__name=program_name,
+                    subprogram__name__icontains=subprogram_name,  # Use icontains for flexible matching
+                    level_number=level_number
+                )
+                
+                # Get existing exam count for this level
+                existing_count = Exam.objects.filter(
+                    curriculum_level=curriculum_level,
+                    is_active=True
+                ).count()
+                
+                # Generate display data
+                level_data = {
+                    'id': curriculum_level.id,
+                    'program_name': program_name,
+                    'subprogram_name': subprogram_name,
+                    'level_number': level_number,
+                    'full_name': curriculum_level.full_name,
+                    'existing_count': existing_count,
+                    # Format for RoutineTest dropdown
+                    'routinetest_display_preview': f"[RT/QTR] - [Time Period] - {program_name} {subprogram_name} Level {level_number}",
+                    'curriculum_level': curriculum_level
+                }
+                
+                curriculum_levels.append(level_data)
+                
+            except CurriculumLevel.DoesNotExist:
+                # Log missing curriculum level
+                console_log = {
+                    "service": "ExamService", 
+                    "action": "curriculum_level_not_found",
+                    "program": program_name,
+                    "subprogram": subprogram_name,
+                    "level": level_number
+                }
+                logger.warning(f"[ROUTINETEST_CURRICULUM_MISSING] {json.dumps(console_log)}")
+                print(f"[ROUTINETEST_CURRICULUM_MISSING] {json.dumps(console_log)}")
+                continue
+        
+        # Log results
+        console_log = {
+            "service": "ExamService",
+            "action": "get_routinetest_curriculum_levels",
+            "total_whitelist": len(ROUTINETEST_CURRICULUM_WHITELIST),
+            "found_levels": len(curriculum_levels),
+            "missing_levels": len(ROUTINETEST_CURRICULUM_WHITELIST) - len(curriculum_levels)
+        }
+        logger.info(f"[ROUTINETEST_CURRICULUM_RESULT] {json.dumps(console_log)}")
+        print(f"[ROUTINETEST_CURRICULUM_RESULT] {json.dumps(console_log)}")
+        
+        return curriculum_levels
+    
+    @staticmethod
+    def generate_routinetest_exam_name(
+        exam_type: str,
+        time_period_month: str = None,
+        time_period_quarter: str = None,
+        academic_year: str = None,
+        curriculum_level_id: int = None,
+        include_version: bool = True
+    ) -> Dict[str, str]:
+        """
+        Generate RoutineTest exam name with [RT]/[QTR] pattern.
+        
+        Args:
+            exam_type: 'REVIEW' or 'QUARTERLY'
+            time_period_month: Month code (e.g., 'JAN', 'FEB')
+            time_period_quarter: Quarter code (e.g., 'Q1', 'Q2')
+            academic_year: Year (e.g., '2025')
+            curriculum_level_id: CurriculumLevel ID
+            include_version: Whether to include version/date in name
+            
+        Returns:
+            Dictionary with display_name and base_name
+        """
+        from core.models import CurriculumLevel
+        from datetime import datetime
+        import json
+        
+        console_log = {
+            "service": "ExamService",
+            "action": "generate_routinetest_exam_name",
+            "exam_type": exam_type,
+            "time_period_month": time_period_month,
+            "time_period_quarter": time_period_quarter,
+            "academic_year": academic_year,
+            "curriculum_level_id": curriculum_level_id
+        }
+        logger.info(f"[ROUTINETEST_NAME_GEN] {json.dumps(console_log)}")
+        print(f"[ROUTINETEST_NAME_GEN] {json.dumps(console_log)}")
+        
+        # Determine prefix
+        prefix = 'RT' if exam_type == 'REVIEW' else 'QTR'
+        
+        # Build display name parts
+        display_parts = [f"[{prefix}]"]
+        base_parts = [prefix]
+        
+        # Add time period
+        if exam_type == 'REVIEW' and time_period_month:
+            # Convert month code to display name
+            month_choices = dict(Exam.MONTH_CHOICES)
+            month_display = month_choices.get(time_period_month, time_period_month)
+            if academic_year:
+                display_parts.append(f"[{month_display} {academic_year}]")
+                base_parts.append(f"{time_period_month}{academic_year}")
+            else:
+                display_parts.append(f"[{month_display}]")
+                base_parts.append(time_period_month)
+                
+        elif exam_type == 'QUARTERLY' and time_period_quarter:
+            quarter_choices = dict(Exam.QUARTER_CHOICES)
+            quarter_display = quarter_choices.get(time_period_quarter, time_period_quarter)
+            if academic_year:
+                display_parts.append(f"[{quarter_display} {academic_year}]")
+                base_parts.append(f"{time_period_quarter}{academic_year}")
+            else:
+                display_parts.append(f"[{quarter_display}]")
+                base_parts.append(time_period_quarter)
+        
+        
+        # Add curriculum level
+        if curriculum_level_id:
+            try:
+                curriculum_level = CurriculumLevel.objects.select_related(
+                    'subprogram__program'
+                ).get(id=curriculum_level_id)
+                
+                program_name = curriculum_level.subprogram.program.name
+                subprogram_name = curriculum_level.subprogram.name
+                level_number = curriculum_level.level_number
+                
+                # Clean subprogram name (remove program prefix if exists)
+                clean_subprogram = subprogram_name
+                if subprogram_name.startswith(program_name + ' '):
+                    clean_subprogram = subprogram_name[len(program_name) + 1:]
+                
+                # Add to display name
+                curriculum_display = f"{program_name} {clean_subprogram} Level {level_number}"
+                display_parts.append(curriculum_display)
+                
+                # Add to base name (file-friendly)
+                curriculum_base = f"{program_name}_{clean_subprogram}_Lv{level_number}".replace(" ", "_")
+                base_parts.append(curriculum_base)
+                
+            except CurriculumLevel.DoesNotExist:
+                logger.warning(f"[ROUTINETEST_NAME_GEN] Curriculum level {curriculum_level_id} not found")
+        
+        # Build final names
+        display_name = " - ".join(display_parts)
+        base_name = "_".join(base_parts)
+        
+        # Add version/date if requested
+        final_name = base_name
+        if include_version:
+            date_str = datetime.now().strftime('%y%m%d')
+            final_name = f"{base_name}_{date_str}"
+        
+        result = {
+            'display_name': display_name,
+            'base_name': base_name,
+            'final_name': final_name,
+            'prefix': prefix
+        }
+        
+        # Log result
+        console_log = {
+            "service": "ExamService",
+            "action": "routinetest_name_generated",
+            "display_name": display_name,
+            "base_name": base_name,
+            "final_name": final_name
+        }
+        logger.info(f"[ROUTINETEST_NAME_RESULT] {json.dumps(console_log)}")
+        print(f"[ROUTINETEST_NAME_RESULT] {json.dumps(console_log)}")
+        
+        return result

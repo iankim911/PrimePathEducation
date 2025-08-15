@@ -17,6 +17,7 @@ from .student_urls import urlpatterns as student_patterns
 from .exam_urls import urlpatterns as exam_patterns
 from .session_urls import urlpatterns as session_patterns
 from .api_urls import urlpatterns as api_patterns
+from .roster_urls import urlpatterns as roster_patterns  # Phase 5: Roster management
 from .views import index
 
 app_name = 'RoutineTest'
@@ -33,3 +34,4 @@ urlpatterns.extend(student_patterns)
 urlpatterns.extend(exam_patterns)
 urlpatterns.extend(session_patterns)
 urlpatterns.extend(api_patterns)
+urlpatterns.extend(roster_patterns)  # Phase 5: Roster management URLs

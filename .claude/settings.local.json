@@ -237,7 +237,16 @@
       "Bash(./cleanup_navigation_fix.sh:*)",
       "Bash(do rm -f \"$file\")",
       "Bash(journalctl:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+      "Bash(do if [ \"$file\" != \"index.html\" ])",
+      "Bash(then sed -i '' 's/{% extends \"\"base.html\"\" %}/{% extends \"\"routinetest_base.html\"\" %}/' \"$file\")",
+      "Bash(fi)",
+      "Bash(do sed -i '' 's/{% extends \"\"base.html\"\" %}/{% extends \"\"routinetest_base.html\"\" %}/' \"$file\")",
+      "Bash(do sed -i '' \"s/{% extends ''base.html'' %}/{% extends \"\"routinetest_base.html\"\" %}/\" \"$file\")",
+      "Bash(brew tap:*)",
+      "Bash(brew install:*)",
+      "Bash(ln:*)",
+      "Bash(~/.local/bin/heroku:*)"
     ],
     "deny": []
   }

@@ -15,7 +15,7 @@ session = StudentSession.objects.first()
 
 if session:
     print(f'Testing with session: {session.id}')
-    question = session.exam.questions.first()
+    question = session.exam.routine_questions.first()
     
     if question:
         print(f'Testing with question: {question.id}')

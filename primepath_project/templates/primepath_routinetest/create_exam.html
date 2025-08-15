@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "routinetest_base.html" %}
 
 {% block title %}Upload New Exam - PrimePath{% endblock %}
 
@@ -6,10 +6,10 @@
 
 {% block extra_css %}
 <style>
-    /* Enhanced success message for exam upload */
+    /* Enhanced success message for exam upload - Green theme */
     .alert-success {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-        border-left: 5px solid #28a745;
+        background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+        border-left: 5px solid #4CAF50;
         margin: 20px 0 30px 0;
     }
     
@@ -54,7 +54,7 @@
         font-weight: 600;
         margin-bottom: 25px;
         color: #2c3e50;
-        border-bottom: 2px solid #3498db;
+        border-bottom: 2px solid #558B2F;  /* Muted olive green underline */
         padding-bottom: 10px;
         display: flex;
         align-items: center;
@@ -64,7 +64,7 @@
         content: "";
         width: 4px;
         height: 24px;
-        background: linear-gradient(45deg, #3498db, #2980b9);
+        background: linear-gradient(45deg, #2E7D32, #1B5E20);  /* Dark muted green gradient */
         margin-right: 12px;
         border-radius: 2px;
     }
@@ -83,7 +83,7 @@
     .file-input-label {
         display: inline-block;
         padding: 12px 24px;
-        background: linear-gradient(45deg, #3498db, #2980b9);
+        background: linear-gradient(45deg, #2E7D32, #1B5E20);  /* Dark muted green button */
         color: white;
         border-radius: 8px;
         cursor: pointer;
@@ -98,7 +98,7 @@
     }
     
     .file-input-label:hover {
-        background: linear-gradient(45deg, #2980b9, #1f618d);
+        background: linear-gradient(45deg, #1B5E20, #0D4F1F);  /* Very dark green on hover */
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
@@ -197,8 +197,8 @@
     .form-switch .form-check-input:checked {
         background-position: right center;
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
-        background-color: #3498db;
-        border-color: #3498db;
+        background-color: #2E7D32;  /* Dark green for checked state */
+        border-color: #2E7D32;
     }
     
     #pdf-preview-container {
@@ -328,8 +328,8 @@
     }
     
     .form-control:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+        border-color: #2E7D32;  /* Dark green focus */
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.20);
     }
     
     /* Enhanced checkbox styling for better visibility */
@@ -344,15 +344,81 @@
     }
     
     .form-check-input:checked {
-        background-color: #3498db;
-        border-color: #3498db;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+        background-color: #2E7D32;  /* Dark green for checked */
+        border-color: #2E7D32;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.20);
     }
     
     .form-check-label {
         cursor: pointer;
         user-select: none;
         margin-left: 0.5rem;
+    }
+    
+    /* Green theme overrides for radio buttons and checkboxes */
+    input[type="radio"]:checked {
+        accent-color: #2E7D32 !important;  /* Dark green for radio buttons */
+    }
+    
+    input[type="checkbox"]:checked {
+        accent-color: #2E7D32 !important;  /* Dark green for checkboxes */
+    }
+    
+    /* Custom radio button styling for better browser support */
+    input[type="radio"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 2px solid #90A4AE;  /* Muted gray-green */
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        cursor: pointer;
+        position: relative;
+        background-color: white;
+        transition: all 0.2s ease;
+    }
+    
+    input[type="radio"]:checked {
+        border-color: #2E7D32;
+        background-color: #2E7D32;
+    }
+    
+    input[type="radio"]:checked::after {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+    input[type="radio"]:hover {
+        border-color: #1B5E20;
+    }
+    
+    /* Override any remaining blue elements */
+    .btn-primary {
+        background-color: #2E7D32 !important;
+        border-color: #2E7D32 !important;
+    }
+    
+    .btn-primary:hover {
+        background-color: #1B5E20 !important;
+        border-color: #1B5E20 !important;
+    }
+    
+    .btn-info {
+        background-color: #558B57 !important;
+        border-color: #558B57 !important;
+    }
+    
+    .btn-info:hover {
+        background-color: #3D6F3F !important;
+        border-color: #3D6F3F !important;
     }
 </style>
 {% endblock %}
@@ -450,6 +516,159 @@ if (typeof pdfjsLib !== 'undefined') {
     <div class="form-section">
         <h3 class="section-title">Exam Information</h3>
         
+        <!-- Exam Type Selection (RoutineTest Specific) -->
+        <div class="form-group">
+            <label for="exam_type">Exam Type *</label>
+            <select class="form-control" id="exam_type" name="exam_type" required 
+                    style="background: linear-gradient(to right, #F5FAF7 0%, white 100%); border: 2px solid #2E7D32;">
+                <option value="REVIEW">Review / Monthly Exam</option>
+                <option value="QUARTERLY">Quarterly Exam</option>
+            </select>
+            <div class="help-text">
+                <strong>Review / Monthly Exam:</strong> Monthly assessments for continuous evaluation<br>
+                <strong>Quarterly Exam:</strong> Comprehensive quarter-end assessments
+            </div>
+        </div>
+        
+        <!-- Phase 2: Time Period Selection -->
+        <div id="time_period_section" style="background: linear-gradient(to right, #F0F8F4, white); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #2E7D32;">
+            <h5 style="color: #2E7D32; margin-bottom: 15px;">📅 Time Period Selection</h5>
+            
+            <!-- Month Selection (for Review) -->
+            <div class="form-group" id="month_selection" style="display: none;">
+                <label for="time_period_month">Select Month *</label>
+                <select class="form-control" id="time_period_month" name="time_period_month"
+                        style="background: white; border: 1px solid #4CAF50;">
+                    <option value="">-- Select Month --</option>
+                    <option value="JAN">January</option>
+                    <option value="FEB">February</option>
+                    <option value="MAR">March</option>
+                    <option value="APR">April</option>
+                    <option value="MAY">May</option>
+                    <option value="JUN">June</option>
+                    <option value="JUL">July</option>
+                    <option value="AUG">August</option>
+                    <option value="SEP">September</option>
+                    <option value="OCT">October</option>
+                    <option value="NOV">November</option>
+                    <option value="DEC">December</option>
+                </select>
+                <div class="help-text">Select the month for this Review / Monthly Exam</div>
+            </div>
+            
+            <!-- Quarter Selection (for Quarterly) -->
+            <div class="form-group" id="quarter_selection" style="display: none;">
+                <label for="time_period_quarter">Select Quarter *</label>
+                <select class="form-control" id="time_period_quarter" name="time_period_quarter"
+                        style="background: white; border: 1px solid #4CAF50;">
+                    <option value="">-- Select Quarter --</option>
+                    <option value="Q1">Q1 (January - March)</option>
+                    <option value="Q2">Q2 (April - June)</option>
+                    <option value="Q3">Q3 (July - September)</option>
+                    <option value="Q4">Q4 (October - December)</option>
+                </select>
+                <div class="help-text">Select the quarter for this Quarterly Exam</div>
+            </div>
+            
+            <!-- Academic Year Selection (for both) -->
+            <div class="form-group" id="year_selection">
+                <label for="academic_year">Academic Year *</label>
+                <select class="form-control" id="academic_year" name="academic_year" required
+                        style="background: white; border: 1px solid #4CAF50;">
+                    <option value="">-- Select Academic Year --</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select>
+                <div class="help-text">Select the academic year for this exam</div>
+            </div>
+        </div>
+        
+        <!-- Phase 3: Class Code Selection -->
+        <div id="class_code_section" style="background: linear-gradient(to right, #E8F5E9, white); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #66BB6A;">
+            <h5 style="color: #2E7D32; margin-bottom: 15px;">🎓 Class Selection</h5>
+            
+            <div class="form-group">
+                <label for="class_codes">Select Classes *</label>
+                <div class="help-text" style="margin-bottom: 10px;">
+                    Select which classes this exam applies to (hold Ctrl/Cmd to select multiple)
+                </div>
+                
+                <select class="form-control" id="class_codes" name="class_codes[]" multiple 
+                        style="background: white; border: 1px solid #4CAF50; min-height: 200px;"
+                        size="12">
+                    <optgroup label="Class 7">
+                        <option value="CLASS_7A">Class 7A</option>
+                        <option value="CLASS_7B">Class 7B</option>
+                        <option value="CLASS_7C">Class 7C</option>
+                    </optgroup>
+                    <optgroup label="Class 8">
+                        <option value="CLASS_8A">Class 8A</option>
+                        <option value="CLASS_8B">Class 8B</option>
+                        <option value="CLASS_8C">Class 8C</option>
+                    </optgroup>
+                    <optgroup label="Class 9">
+                        <option value="CLASS_9A">Class 9A</option>
+                        <option value="CLASS_9B">Class 9B</option>
+                        <option value="CLASS_9C">Class 9C</option>
+                    </optgroup>
+                    <optgroup label="Class 10">
+                        <option value="CLASS_10A">Class 10A</option>
+                        <option value="CLASS_10B">Class 10B</option>
+                        <option value="CLASS_10C">Class 10C</option>
+                    </optgroup>
+                </select>
+                
+                <div class="help-text" style="margin-top: 10px;">
+                    <strong>Tip:</strong> You can select multiple classes. Use Ctrl+Click (Windows/Linux) or Cmd+Click (Mac) to select multiple individual classes, or Shift+Click to select a range.
+                </div>
+                
+                <!-- Selected classes display -->
+                <div id="selected_classes_display" style="margin-top: 15px; padding: 10px; background: #F1F8E9; border-radius: 4px; display: none;">
+                    <strong style="color: #558B2F;">Selected Classes:</strong>
+                    <span id="selected_classes_list" style="color: #33691E;"></span>
+                </div>
+            </div>
+            
+            <!-- Quick select buttons -->
+            <div style="margin-top: 15px;">
+                <label style="margin-bottom: 8px; display: block;">Quick Select:</label>
+                <button type="button" class="btn btn-sm" onclick="selectAllClasses()" 
+                        style="background: #81C784; color: white; margin-right: 5px;">Select All</button>
+                <button type="button" class="btn btn-sm" onclick="clearAllClasses()" 
+                        style="background: #A5D6A7; color: #2E7D32; margin-right: 5px;">Clear All</button>
+                <button type="button" class="btn btn-sm" onclick="selectGrade(7)" 
+                        style="background: #C8E6C9; color: #1B5E20; margin-right: 5px;">All Class 7</button>
+                <button type="button" class="btn btn-sm" onclick="selectGrade(8)" 
+                        style="background: #C8E6C9; color: #1B5E20; margin-right: 5px;">All Class 8</button>
+                <button type="button" class="btn btn-sm" onclick="selectGrade(9)" 
+                        style="background: #C8E6C9; color: #1B5E20; margin-right: 5px;">All Class 9</button>
+                <button type="button" class="btn btn-sm" onclick="selectGrade(10)" 
+                        style="background: #C8E6C9; color: #1B5E20;">All Class 10</button>
+            </div>
+        </div>
+        
+        <!-- Exam Instructions (Kept at exam level) -->
+        <div id="instructions_section" style="background: linear-gradient(to right, #FFF3E0, white); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #FF9800;">
+            <h5 style="color: #E65100; margin-bottom: 15px;">📝 General Exam Instructions</h5>
+            
+            <!-- Instructions -->
+            <div class="form-group">
+                <label for="instructions">Special Instructions (Optional)</label>
+                <textarea class="form-control" id="instructions" name="instructions" rows="4"
+                          placeholder="Enter any general instructions for students taking this exam..."
+                          style="background: white; border: 1px solid #FFA726; resize: vertical;"></textarea>
+                <div class="help-text">
+                    General instructions will be displayed to all students before they start the exam. 
+                    Include information about materials allowed, exam rules, or special requirements.
+                    <br><small style="color: #F57C00;">Note: Class-specific scheduling will be set separately for each class after exam creation.</small>
+                </div>
+            </div>
+        </div>
+        
         <div class="form-group">
             <label>Exam Name Selection *</label>
             <div class="form-check">
@@ -503,11 +722,11 @@ if (typeof pdfjsLib !== 'undefined') {
             <input type="text" class="form-control" id="custom_exam_name" name="custom_exam_name" 
                    placeholder="Enter your custom exam name">
             <div class="help-text">
-                <strong>Naming Guidelines:</strong><br>
-                • Format: [PT]_Subject_Lv#_Modifier_YYMMDD<br>
-                • Use abbreviations: Math, Eng, Sci for subjects<br>
-                • Version (_v2, _v3) added automatically for same-day uploads<br>
-                • Example: "[PT]_Math_Lv5_Advanced_250810"
+                <strong>RoutineTest Naming Guidelines:</strong><br>
+                • Format: [RT/QTR] - [Time Period] - [Timeslot] - PROGRAM SUBPROGRAM Level #<br>
+                • Review exams use [RT] prefix, Quarterly exams use [QTR] prefix<br>
+                • Time period and timeslot are included automatically based on your selections<br>
+                • Example: "[RT] - [January 2025] - [Morning] - CORE Phonics Level 1"
             </div>
         </div>
         
@@ -573,6 +792,134 @@ let currentRotation = 0; // Track rotation angle (0, 90, 180, 270)
 
 // Check if there's a success message and clear form
 document.addEventListener('DOMContentLoaded', function() {
+    // Console log for RoutineTest exam type feature
+    console.log('%c[ROUTINETEST EXAM TYPE] Feature Initialized', 'color: #2E7D32; font-weight: bold;');
+    console.log('[ROUTINETEST] Exam types available:', {
+        'REVIEW': 'Review / Monthly Exam',
+        'QUARTERLY': 'Quarterly Exam'
+    });
+    
+    // Phase 2: Time Period Selection Logic
+    function updateTimePeriodFields(examType) {
+        const monthSelection = document.getElementById('month_selection');
+        const quarterSelection = document.getElementById('quarter_selection');
+        const monthField = document.getElementById('time_period_month');
+        const quarterField = document.getElementById('time_period_quarter');
+        
+        console.log('[PHASE 2 TIME PERIOD] Updating fields for exam type:', examType);
+        
+        if (examType === 'REVIEW') {
+            // Show month selection, hide quarter
+            monthSelection.style.display = 'block';
+            quarterSelection.style.display = 'none';
+            
+            // Make month required, quarter not required
+            monthField.setAttribute('required', 'required');
+            quarterField.removeAttribute('required');
+            quarterField.value = ''; // Clear quarter value
+            
+            console.log('[PHASE 2 TIME PERIOD] Showing month selector for Review exam');
+        } else if (examType === 'QUARTERLY') {
+            // Show quarter selection, hide month
+            monthSelection.style.display = 'none';
+            quarterSelection.style.display = 'block';
+            
+            // Make quarter required, month not required
+            quarterField.setAttribute('required', 'required');
+            monthField.removeAttribute('required');
+            monthField.value = ''; // Clear month value
+            
+            console.log('[PHASE 2 TIME PERIOD] Showing quarter selector for Quarterly exam');
+        }
+    }
+    
+    // Add event listener for exam type changes
+    const examTypeSelect = document.getElementById('exam_type');
+    if (examTypeSelect) {
+        examTypeSelect.addEventListener('change', function(e) {
+            const selectedType = e.target.value;
+            const selectedText = e.target.options[e.target.selectedIndex].text;
+            console.log('[ROUTINETEST EXAM TYPE] Changed:', {
+                value: selectedType,
+                display: selectedText,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Visual feedback for exam type selection
+            if (selectedType === 'QUARTERLY') {
+                e.target.style.borderColor = '#1B5E20';
+                e.target.style.boxShadow = '0 0 5px rgba(27, 94, 32, 0.3)';
+            } else {
+                e.target.style.borderColor = '#2E7D32';
+                e.target.style.boxShadow = '0 0 5px rgba(46, 125, 50, 0.2)';
+            }
+            
+            // Phase 2: Update time period fields
+            updateTimePeriodFields(selectedType);
+        });
+        
+        // Initialize on page load
+        updateTimePeriodFields(examTypeSelect.value);
+        
+        // Log initial selection
+        console.log('[ROUTINETEST EXAM TYPE] Initial selection:', {
+            value: examTypeSelect.value,
+            display: examTypeSelect.options[examTypeSelect.selectedIndex].text
+        });
+    }
+    
+    // Phase 2: Add event listeners for time period selections
+    const monthSelect = document.getElementById('time_period_month');
+    const quarterSelect = document.getElementById('time_period_quarter');
+    const yearSelect = document.getElementById('academic_year');
+    
+    // [RT]/[QTR] naming: Add event listener for timeslot selection
+    const timeslotSelect = document.getElementById('timeslot');
+    
+    if (monthSelect) {
+        monthSelect.addEventListener('change', function(e) {
+            console.log('[PHASE 2 TIME PERIOD] Month selected:', {
+                value: e.target.value,
+                display: e.target.options[e.target.selectedIndex].text,
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+    
+    if (quarterSelect) {
+        quarterSelect.addEventListener('change', function(e) {
+            console.log('[PHASE 2 TIME PERIOD] Quarter selected:', {
+                value: e.target.value,
+                display: e.target.options[e.target.selectedIndex].text,
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+    
+    if (yearSelect) {
+        yearSelect.addEventListener('change', function(e) {
+            console.log('[PHASE 2 TIME PERIOD] Academic year selected:', {
+                value: e.target.value,
+                timestamp: new Date().toISOString()
+            });
+        });
+    }
+    
+    // [RT]/[QTR] naming: Timeslot selection event listener
+    if (timeslotSelect) {
+        timeslotSelect.addEventListener('change', function(e) {
+            console.log('[RT_QTR_NAMING] Timeslot selected:', {
+                value: e.target.value,
+                display: e.target.options[e.target.selectedIndex].text,
+                has_timeslot: !!e.target.value,
+                timestamp: new Date().toISOString(),
+                naming_impact: e.target.value ? 
+                    `Will include [${e.target.options[e.target.selectedIndex].text.split(' (')[0]}] in exam name` : 
+                    'Timeslot will not be included in exam name'
+            });
+        });
+    }
+    
     const successAlert = document.querySelector('.alert-success');
     if (successAlert && successAlert.textContent.includes('uploaded successfully')) {
         // Add pulse animation to success message
@@ -1097,57 +1444,191 @@ function generateVersionedName() {
             timestamp: new Date().toISOString()
         });
         
-        // Set initial name with date
+        // Generate RoutineTest name using [RT]/[QTR] pattern
+        const examType = document.getElementById('exam_type').value;
+        const timePeriodMonth = document.getElementById('time_period_month').value;
+        const timePeriodQuarter = document.getElementById('time_period_quarter').value;
+        const academicYear = document.getElementById('academic_year').value;
+        const timeslot = document.getElementById('timeslot').value;
+        
+        // Determine prefix based on exam type
+        const prefix = examType === 'QUARTERLY' ? 'QTR' : 'RT';
+        
+        // Build name parts for [RT]/[QTR] format
+        let nameParts = [`[${prefix}]`];
+        
+        // Add time period
+        if (examType === 'REVIEW' && timePeriodMonth) {
+            const monthNames = {
+                'JAN': 'January', 'FEB': 'February', 'MAR': 'March', 'APR': 'April',
+                'MAY': 'May', 'JUN': 'June', 'JUL': 'July', 'AUG': 'August',
+                'SEP': 'September', 'OCT': 'October', 'NOV': 'November', 'DEC': 'December'
+            };
+            const monthDisplay = monthNames[timePeriodMonth] || timePeriodMonth;
+            if (academicYear) {
+                nameParts.push(`[${monthDisplay} ${academicYear}]`);
+            } else {
+                nameParts.push(`[${monthDisplay}]`);
+            }
+        } else if (examType === 'QUARTERLY' && timePeriodQuarter) {
+            const quarterNames = {
+                'Q1': 'Q1 (Jan-Mar)', 'Q2': 'Q2 (Apr-Jun)', 
+                'Q3': 'Q3 (Jul-Sep)', 'Q4': 'Q4 (Oct-Dec)'
+            };
+            const quarterDisplay = quarterNames[timePeriodQuarter] || timePeriodQuarter;
+            if (academicYear) {
+                nameParts.push(`[${quarterDisplay} ${academicYear}]`);
+            } else {
+                nameParts.push(`[${quarterDisplay}]`);
+            }
+        }
+        
+        // Add timeslot if selected
+        if (timeslot) {
+            const timeslotNames = {
+                'MORNING': 'Morning', 'AFTERNOON': 'Afternoon', 'EVENING': 'Evening',
+                'FULL_DAY': 'Full Day', 'FLEXIBLE': 'Flexible'
+            };
+            const timeslotDisplay = timeslotNames[timeslot] || timeslot;
+            nameParts.push(`[${timeslotDisplay}]`);
+        }
+        
+        // Add curriculum level display name (from the dropdown option)
+        const selectedOption = presetSelect.options[presetSelect.selectedIndex];
+        const curriculumDisplay = selectedOption.getAttribute('data-display-name') || displayName;
+        // Extract just the curriculum part (remove [RT/QTR] preview part)
+        const curriculumPart = curriculumDisplay.replace(/^\[RT\/QTR\] - \[Time Period\] - /, '');
+        nameParts.push(curriculumPart);
+        
+        // Join all parts for display name
+        finalExamName = nameParts.join(' - ');
+        
+        // Set version-based name if needed (for backend storage)
         if (existingVersion && existingVersion !== '') {
-            // Multiple uploads today for this level
-            finalExamName = `[PT]_${baseName}_${dateStr}_v${existingVersion}`;
-        } else {
-            // First upload today for this level
-            finalExamName = `[PT]_${baseName}_${dateStr}`;
+            finalExamName += ` (v${existingVersion})`;
         }
         
         // Check for updates from server
-        fetch(`/api/RoutineTest/exams/check-version/?curriculum_level=${selectedOption.value}`)
+        fetch(`/RoutineTest/exams/check-version/?curriculum_level=${selectedOption.value}`)
             .then(response => response.json())
             .then(data => {
-                // Update name based on server response
-                if (data.next_version) {
-                    finalExamName = `[PT]_${baseName}_${data.date_str}_v${data.next_version}`;
-                } else {
-                    finalExamName = `[PT]_${baseName}_${data.date_str}`;
-                }
+                // For RoutineTest, we don't need to modify the name based on server response
+                // The name is already built with [RT]/[QTR] format above
                 
                 // Log final name generation
-                console.log('[EXAM_NAME_GENERATION]', {
-                    action: 'name_finalized',
+                console.log('[RT_QTR_NAME_GENERATION]', {
+                    action: 'routinetest_name_finalized',
                     final_exam_name: finalExamName,
-                    has_version: !!data.next_version,
-                    version_number: data.next_version || 'none',
+                    exam_type: examType,
+                    prefix: prefix,
+                    time_period_month: timePeriodMonth,
+                    time_period_quarter: timePeriodQuarter,
+                    academic_year: academicYear,
+                    timeslot: timeslot,
+                    curriculum_part: curriculumPart,
                     timestamp: new Date().toISOString()
                 });
                 
                 // Update the help text to show what name will be used
                 const helpText = presetNameGroup.querySelector('.help-text');
                 helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
-                    '<strong>Note:</strong> Date is added automatically. Version number only added for multiple same-day uploads.';
+                    '<strong>Note:</strong> RoutineTest naming includes exam type, time period, timeslot, and curriculum level automatically.';
             })
             .catch(error => {
-                console.error('[EXAM_NAME_GENERATION] Error fetching version:', error);
+                console.error('[RT_QTR_NAME_GENERATION] Error with server communication:', error);
                 // Keep the name we already set
                 const helpText = presetNameGroup.querySelector('.help-text');
                 helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
-                    '<strong>Note:</strong> Using local version information.';
+                    '<strong>Note:</strong> RoutineTest naming completed using form selections.';
             });
     }
 }
 
 // Override form submission to set the correct name
 document.getElementById('examForm')?.addEventListener('submit', function(e) {
+    // Get exam type for logging
+    const examType = document.getElementById('exam_type').value;
+    const examTypeText = document.getElementById('exam_type').options[document.getElementById('exam_type').selectedIndex].text;
+    
+    // Phase 2: Get time period data
+    const timePeriodMonth = document.getElementById('time_period_month').value;
+    const timePeriodQuarter = document.getElementById('time_period_quarter').value;
+    const academicYear = document.getElementById('academic_year').value;
+    
+    // [RT]/[QTR] naming: Get timeslot data
+    const timeslot = document.getElementById('timeslot').value;
+    
+    // Phase 3: Get selected class codes
+    const classCodesSelect = document.getElementById('class_codes');
+    const selectedClasses = Array.from(classCodesSelect.selectedOptions).map(opt => opt.value);
+    
+    // Phase 4: Get scheduling and instruction data
+    const scheduledDate = document.getElementById('scheduled_date').value;
+    const scheduledStartTime = document.getElementById('scheduled_start_time').value;
+    const scheduledEndTime = document.getElementById('scheduled_end_time').value;
+    const instructions = document.getElementById('instructions').value.trim();
+    const allowLateSubmission = document.getElementById('allow_late_submission').checked;
+    const lateSubmissionPenalty = allowLateSubmission ? 
+        parseInt(document.getElementById('late_submission_penalty').value) : 0;
+    
+    // Log form submission with exam type, time period, timeslot, class codes, and scheduling
+    console.log('%c[ROUTINETEST FORM SUBMISSION]', 'color: #1B5E20; font-weight: bold;', {
+        exam_type: examType,
+        exam_type_display: examTypeText,
+        time_period_month: timePeriodMonth || null,
+        time_period_quarter: timePeriodQuarter || null,
+        academic_year: academicYear,
+        timeslot: timeslot || null,
+        timeslot_display: timeslot ? document.getElementById('timeslot').options[document.getElementById('timeslot').selectedIndex].text : null,
+        class_codes: selectedClasses,
+        class_codes_count: selectedClasses.length,
+        scheduled_date: scheduledDate || null,
+        scheduled_start_time: scheduledStartTime || null,
+        scheduled_end_time: scheduledEndTime || null,
+        has_instructions: !!instructions,
+        instructions_length: instructions.length,
+        allow_late_submission: allowLateSubmission,
+        late_submission_penalty: lateSubmissionPenalty,
+        naming_choice: presetNameRadio.checked ? 'preset' : 'custom',
+        timestamp: new Date().toISOString()
+    });
+    
+    // Phase 2: Validate time period fields
+    if (examType === 'REVIEW' && !timePeriodMonth) {
+        e.preventDefault();
+        alert('Please select a month for the Review / Monthly Exam.');
+        console.error('[PHASE 2 VALIDATION] Month required for Review exam');
+        return;
+    }
+    
+    if (examType === 'QUARTERLY' && !timePeriodQuarter) {
+        e.preventDefault();
+        alert('Please select a quarter for the Quarterly Exam.');
+        console.error('[PHASE 2 VALIDATION] Quarter required for Quarterly exam');
+        return;
+    }
+    
+    if (!academicYear) {
+        e.preventDefault();
+        alert('Please select an academic year.');
+        console.error('[PHASE 2 VALIDATION] Academic year required');
+        return;
+    }
+    
+    // Phase 3: Validate class codes
+    if (selectedClasses.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one class for this exam.');
+        console.error('[PHASE 3 VALIDATION] At least one class must be selected');
+        return;
+    }
+    
     // Validate PDF file
     const pdfFile = document.getElementById('pdf_file').files[0];
     if (!pdfFile) {
         e.preventDefault();
         alert('Please select a PDF file before uploading.');
+        console.error('[ROUTINETEST VALIDATION] PDF file required');
         return;
     }
     
@@ -1155,12 +1636,14 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
     if (presetNameRadio.checked && !finalExamName) {
         e.preventDefault();
         alert('Please select a pre-designed exam name.');
+        console.error('[ROUTINETEST VALIDATION] Preset exam name required');
         return;
     }
     
     if (customNameRadio.checked && !customNameInput.value.trim()) {
         e.preventDefault();
         alert('Please enter a custom exam name.');
+        console.error('[ROUTINETEST VALIDATION] Custom exam name required');
         return;
     }
     
@@ -1182,8 +1665,121 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
     }
 });
 
+// Phase 3: Class Code Selection JavaScript Functions
+function selectAllClasses() {
+    const classSelect = document.getElementById('class_codes');
+    console.log('[PHASE 3 CLASS CODES] Selecting all classes');
+    
+    for (let i = 0; i < classSelect.options.length; i++) {
+        classSelect.options[i].selected = true;
+    }
+    
+    updateSelectedClassesDisplay();
+}
+
+function clearAllClasses() {
+    const classSelect = document.getElementById('class_codes');
+    console.log('[PHASE 3 CLASS CODES] Clearing all classes');
+    
+    for (let i = 0; i < classSelect.options.length; i++) {
+        classSelect.options[i].selected = false;
+    }
+    
+    updateSelectedClassesDisplay();
+}
+
+function selectGrade(gradeNumber) {
+    const classSelect = document.getElementById('class_codes');
+    const gradePrefix = `CLASS_${gradeNumber}`;
+    console.log('[PHASE 3 CLASS CODES] Selecting all classes for grade:', gradeNumber);
+    
+    for (let i = 0; i < classSelect.options.length; i++) {
+        const option = classSelect.options[i];
+        if (option.value.startsWith(gradePrefix)) {
+            option.selected = true;
+        }
+    }
+    
+    updateSelectedClassesDisplay();
+}
+
+function updateSelectedClassesDisplay() {
+    const classSelect = document.getElementById('class_codes');
+    const selectedDisplay = document.getElementById('selected_classes_display');
+    const selectedList = document.getElementById('selected_classes_list');
+    
+    const selectedOptions = Array.from(classSelect.selectedOptions);
+    const selectedCount = selectedOptions.length;
+    
+    console.log('[PHASE 3 CLASS CODES] Selected classes updated:', {
+        count: selectedCount,
+        classes: selectedOptions.map(opt => opt.value),
+        timestamp: new Date().toISOString()
+    });
+    
+    if (selectedCount > 0) {
+        selectedDisplay.style.display = 'block';
+        
+        const displayNames = selectedOptions.map(opt => opt.text);
+        if (selectedCount <= 4) {
+            selectedList.textContent = displayNames.join(', ');
+        } else {
+            selectedList.textContent = `${displayNames.slice(0, 3).join(', ')}... (+${selectedCount - 3} more)`;
+        }
+    } else {
+        selectedDisplay.style.display = 'none';
+        selectedList.textContent = '';
+    }
+}
+
+// Instructions tracking (kept at exam level)
+function initInstructionsTracking() {
+    const instructions = document.getElementById('instructions');
+    
+    console.log('[INSTRUCTIONS] Initialized instructions UI', {
+        element_found: !!instructions,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Log instructions when they change
+    if (instructions) {
+        instructions.addEventListener('blur', function(e) {
+            const value = e.target.value.trim();
+            if (value) {
+                console.log('[INSTRUCTIONS] General instructions updated:', {
+                    length: value.length,
+                    has_content: true,
+                    timestamp: new Date().toISOString(),
+                    note: 'Class-specific scheduling will be set separately'
+                });
+            }
+        });
+    }
+}
+
 // Log initialization of exam creation page
 document.addEventListener('DOMContentLoaded', function() {
+    // Phase 3: Add change event listener for class selection
+    const classCodesSelect = document.getElementById('class_codes');
+    if (classCodesSelect) {
+        classCodesSelect.addEventListener('change', function(e) {
+            updateSelectedClassesDisplay();
+        });
+        
+        // Log initial class code options
+        console.log('[PHASE 3 CLASS CODES] Initialized with options:', {
+            total_classes: classCodesSelect.options.length,
+            grade_7_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_7')).length,
+            grade_8_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_8')).length,
+            grade_9_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_9')).length,
+            grade_10_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_10')).length,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    // Initialize instructions tracking
+    initInstructionsTracking();
+    
     const availableLevels = [];
     const presetOptions = presetSelect.options;
     
@@ -1200,21 +1796,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    console.log('[EXAM_CREATE_PAGE_INIT]', {
+    console.log('[ROUTINETEST_CREATE_PAGE_INIT]', {
         action: 'page_loaded',
         total_curriculum_levels: availableLevels.length,
         levels_available: availableLevels,
-        has_pt_prefix: availableLevels.length > 0 ? availableLevels[0].display_name.startsWith('[PT]') : false,
+        has_rt_qtr_prefix: availableLevels.length > 0 ? availableLevels[0].display_name.includes('[RT/QTR]') : false,
+        naming_system: 'RoutineTest [RT]/[QTR]',
         timestamp: new Date().toISOString()
     });
     
-    // Log if whitelist filtering is working
-    if (availableLevels.length === 40) {
-        console.log('[EXAM_CREATE_PAGE_INIT] ✅ Whitelist applied correctly: 40 placement test levels available');
-    } else if (availableLevels.length < 40) {
-        console.warn('[EXAM_CREATE_PAGE_INIT] ⚠️ Fewer than expected levels:', availableLevels.length, 'of 40 expected');
+    // Log if RoutineTest whitelist filtering is working
+    if (availableLevels.length >= 30) {
+        console.log('[ROUTINETEST_CREATE_PAGE_INIT] ✅ RoutineTest whitelist applied correctly:', availableLevels.length, 'curriculum levels available');
+    } else if (availableLevels.length > 0) {
+        console.warn('[ROUTINETEST_CREATE_PAGE_INIT] ⚠️ Some RoutineTest levels available:', availableLevels.length, 'levels found');
     } else {
-        console.warn('[EXAM_CREATE_PAGE_INIT] ⚠️ More levels than expected:', availableLevels.length, 'vs 40 expected');
+        console.error('[ROUTINETEST_CREATE_PAGE_INIT] ❌ No RoutineTest curriculum levels found - check whitelist configuration');
     }
 });
 

@@ -47,7 +47,7 @@ def test_answer_inputs():
             return passed, failed
             
         # Check questions
-        questions = exam.questions.all()
+        questions = exam.routine_questions.all()
         question_count = questions.count()
         print_test("Exam has questions", question_count > 0, f"Found {question_count} questions")
         if question_count > 0:
@@ -196,7 +196,7 @@ def test_answer_inputs():
             submit_url = reverse('RoutineTest:submit_answer', args=[latest_session.id])
             
             # Prepare test answer data
-            test_question = latest_session.exam.questions.first()
+            test_question = latest_session.exam.routine_questions.first()
             if test_question:
                 answer_data = {
                     'question_id': str(test_question.id),

@@ -54,7 +54,7 @@ def test_exam_creation():
         print(f"✓ Exam created successfully: {exam.name} (ID: {exam.id})")
         
         # Verify questions were created
-        questions = exam.questions.count()
+        questions = exam.routine_questions.count()
         print(f"✓ Questions created: {questions}/{exam.total_questions}")
         
         # Clean up test data

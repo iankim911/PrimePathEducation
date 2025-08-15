@@ -1,0 +1,505 @@
+/**
+ * RoutineTest Module - BCG Green Theme
+ * 
+ * This theme file applies BCG (Boston Consulting Group) green color scheme
+ * to differentiate the RoutineTest module from PlacementTest.
+ * 
+ * BCG Green represents growth, progress, and continuous improvement -
+ * perfect for routine testing and student progress tracking.
+ * 
+ * Created: August 15, 2025
+ * Version: 1.0.0
+ */
+
+/* ============================================
+   DEBUG LOGGING - Theme Load Verification
+   ============================================ */
+@media all {
+    body.routinetest-theme::before {
+        content: "RoutineTest BCG Green Theme Active";
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        display: none;
+    }
+}
+
+/* ============================================
+   COLOR VARIABLES - Dark Muted Green Palette
+   ============================================ */
+:root.routinetest-theme {
+    /* Primary Dark Muted Colors - Professional & Easy on Eyes */
+    --color-primary: #2E7D32;          /* Dark forest green */
+    --color-primary-hover: #1B5E20;    /* Deeper forest green for hover */
+    --color-primary-light: #F1F8E9;    /* Very light sage background */
+    --color-primary-shadow: rgba(46, 125, 50, 0.20);
+    
+    /* Secondary Muted Shades */
+    --color-secondary: #558B57;        /* Muted sage green */
+    --color-secondary-dark: #263238;   /* Dark gray-green for text */
+    --color-accent: #689F38;           /* Muted olive green accent */
+    
+    /* Updated Status Colors (muted green-aligned) */
+    --color-success: #558B2F;          /* Olive green for success */
+    --color-info: #00695C;             /* Dark teal for info */
+    
+    /* Background Colors with Green Tint */
+    --bg-body: #F1F8F4;                /* Very light green tint */
+    --bg-light: #F5FAF7;               /* Subtle green background */
+    --bg-card: #FFFFFF;                /* Keep cards white for contrast */
+    
+    /* Border Colors */
+    --border-color: #C3E6CB;           /* Light green border */
+    --border-color-dark: #00A65E;      /* BCG green border */
+    
+    /* Green-based Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 166, 94, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 166, 94, 0.15);
+    --shadow-lg: 0 4px 20px rgba(0, 166, 94, 0.15);
+    --shadow-xl: 0 8px 30px rgba(0, 166, 94, 0.2);
+}
+
+/* ============================================
+   BODY & GLOBAL STYLES
+   ============================================ */
+body.routinetest-theme {
+    background-color: var(--bg-body) !important;
+    transition: background-color 0.3s ease;
+}
+
+/* Console logging for theme application */
+body.routinetest-theme::after {
+    content: "";
+    display: none;
+    /* This triggers console log via JavaScript */
+}
+
+/* ============================================
+   HEADER & NAVIGATION
+   ============================================ */
+.routinetest-theme .header {
+    background-color: #1B5E20 !important;  /* Dark forest green header */
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(27, 94, 32, 0.2);
+}
+
+.routinetest-theme .nav-tabs {
+    background-color: #0D4F1F !important;  /* Very dark muted green */
+}
+
+.routinetest-theme .nav-tabs a {
+    color: #E8F5E9 !important;
+    transition: all 0.3s ease;
+}
+
+.routinetest-theme .nav-tabs a:hover {
+    background-color: #1B5E20 !important;  /* Dark forest green hover */
+    color: white !important;
+}
+
+.routinetest-theme .nav-tabs a.active {
+    background-color: #2E7D32 !important;  /* Dark green active */
+    color: white !important;
+    box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ============================================
+   BUTTONS - BCG Green Theme
+   ============================================ */
+.routinetest-theme .btn,
+.routinetest-theme .btn-primary {
+    background-color: #2E7D32 !important;  /* Dark muted green button */
+    border-color: #2E7D32 !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.routinetest-theme .btn:hover,
+.routinetest-theme .btn-primary:hover {
+    background-color: #1B5E20 !important;  /* Deeper green hover */
+    border-color: #1B5E20 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+}
+
+.routinetest-theme .btn-secondary {
+    background-color: #558B57 !important;  /* Muted sage green */
+    border-color: #558B57 !important;
+}
+
+.routinetest-theme .btn-secondary:hover {
+    background-color: #3D6F3F !important;  /* Darker sage green */
+    border-color: #3D6F3F !important;
+}
+
+.routinetest-theme .btn-success {
+    background-color: #81C784 !important;  /* Muted accent green */
+    border-color: #81C784 !important;
+}
+
+.routinetest-theme .btn-success:hover {
+    background-color: #66BB6A !important;
+    border-color: #66BB6A !important;
+}
+
+/* ============================================
+   CARDS & PANELS
+   ============================================ */
+.routinetest-theme .card {
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.routinetest-theme .card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: #00A65E !important;
+}
+
+.routinetest-theme .card-header {
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%) !important;
+    border-bottom: 2px solid #4CAF50 !important;  /* Softer green border */
+    color: #1B5E20 !important;  /* Dark soft green text */
+}
+
+.routinetest-theme .jumbotron {
+    background: linear-gradient(135deg, #F5FAF7 0%, #E8F5E9 100%) !important;
+    border-left: 4px solid #388E3C;  /* Soft green accent */
+}
+
+/* ============================================
+   FORMS & INPUTS
+   ============================================ */
+.routinetest-theme .form-control:focus {
+    border-color: #4CAF50 !important;  /* Soft green focus */
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25) !important;
+}
+
+.routinetest-theme .form-control.is-valid {
+    border-color: #00A65E !important;
+}
+
+.routinetest-theme .custom-select:focus {
+    border-color: #00A65E !important;
+}
+
+.routinetest-theme input[type="radio"]:checked,
+.routinetest-theme input[type="checkbox"]:checked {
+    background-color: #00A65E !important;
+    border-color: #00A65E !important;
+}
+
+/* ============================================
+   PROGRESS BARS & INDICATORS
+   ============================================ */
+.routinetest-theme .progress-bar {
+    background-color: #00A65E !important;
+}
+
+.routinetest-theme .badge-primary {
+    background-color: #00A65E !important;
+}
+
+.routinetest-theme .badge-success {
+    background-color: #1DE9B6 !important;
+}
+
+/* ============================================
+   ALERTS & NOTIFICATIONS
+   ============================================ */
+.routinetest-theme .alert-success {
+    background-color: #E8F5E9 !important;
+    border-color: #00A65E !important;
+    color: #2E4C2F !important;
+}
+
+.routinetest-theme .alert-info {
+    background-color: #E0F2F1 !important;
+    border-color: #00ACC1 !important;
+    color: #004D40 !important;
+}
+
+/* ============================================
+   QUESTION NAVIGATION (Student Test)
+   ============================================ */
+.routinetest-theme .question-nav-btn {
+    background-color: #F5FAF7 !important;
+    border: 2px solid #C3E6CB !important;
+    color: #2E4C2F !important;
+}
+
+.routinetest-theme .question-nav-btn:hover {
+    background-color: #E8F5E9 !important;
+    border-color: #00A65E !important;
+}
+
+.routinetest-theme .question-nav-btn.active {
+    background-color: #00A65E !important;
+    border-color: #00A65E !important;
+    color: white !important;
+}
+
+.routinetest-theme .question-nav-btn.answered {
+    background-color: #C3E6CB !important;
+    border-color: #00A65E !important;
+}
+
+/* ============================================
+   TIMER COMPONENT
+   ============================================ */
+.routinetest-theme .timer-container {
+    background: linear-gradient(135deg, #00A65E 0%, #007C3F 100%) !important;
+    color: white !important;
+}
+
+.routinetest-theme .timer-warning {
+    background-color: #FF6B35 !important; /* Keep warning orange for visibility */
+}
+
+/* ============================================
+   PDF VIEWER CONTROLS
+   ============================================ */
+.routinetest-theme .pdf-controls {
+    background-color: #F5FAF7 !important;
+    border: 1px solid #C3E6CB !important;
+}
+
+.routinetest-theme .pdf-controls button {
+    background-color: #00A65E !important;
+    color: white !important;
+}
+
+.routinetest-theme .pdf-controls button:hover {
+    background-color: #007C3F !important;
+}
+
+/* ============================================
+   EXAM LIST & MANAGEMENT
+   ============================================ */
+.routinetest-theme .exam-card {
+    border-left: 4px solid #00A65E !important;
+}
+
+.routinetest-theme .exam-status-active {
+    color: #00A65E !important;
+    font-weight: bold;
+}
+
+.routinetest-theme .exam-status-completed {
+    color: #1DE9B6 !important;
+}
+
+/* ============================================
+   STATISTICS & CHARTS
+   ============================================ */
+.routinetest-theme .stat-card {
+    background: linear-gradient(135deg, white 0%, #F5FAF7 100%) !important;
+    border-top: 3px solid #00A65E !important;
+}
+
+.routinetest-theme .stat-number {
+    color: #00A65E !important;
+    font-weight: bold;
+}
+
+/* ============================================
+   LINKS & ANCHORS
+   ============================================ */
+.routinetest-theme a {
+    color: #00A65E !important;
+}
+
+.routinetest-theme a:hover {
+    color: #007C3F !important;
+    text-decoration: underline;
+}
+
+/* ============================================
+   TABLE STYLING
+   ============================================ */
+.routinetest-theme .table thead th {
+    background-color: #E8F5E9 !important;
+    color: #2E4C2F !important;
+    border-bottom: 2px solid #00A65E !important;
+}
+
+.routinetest-theme .table-hover tbody tr:hover {
+    background-color: #F5FAF7 !important;
+}
+
+.routinetest-theme .table-success {
+    background-color: #E8F5E9 !important;
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
+.routinetest-theme .modal-header {
+    background: linear-gradient(135deg, #00A65E 0%, #007C3F 100%) !important;
+    color: white !important;
+}
+
+.routinetest-theme .modal-footer {
+    background-color: #F5FAF7 !important;
+}
+
+/* ============================================
+   AUDIO PLAYER
+   ============================================ */
+.routinetest-theme .audio-player-container {
+    background-color: #F5FAF7 !important;
+    border: 2px solid #00A65E !important;
+}
+
+.routinetest-theme .audio-play-btn {
+    background-color: #00A65E !important;
+    color: white !important;
+}
+
+.routinetest-theme .audio-play-btn:hover {
+    background-color: #007C3F !important;
+}
+
+/* ============================================
+   LOADING INDICATORS
+   ============================================ */
+.routinetest-theme .spinner-border {
+    color: #00A65E !important;
+}
+
+.routinetest-theme .loading-overlay {
+    background-color: rgba(0, 166, 94, 0.1) !important;
+}
+
+/* ============================================
+   BREADCRUMBS
+   ============================================ */
+.routinetest-theme .breadcrumb {
+    background-color: #F5FAF7 !important;
+}
+
+.routinetest-theme .breadcrumb-item.active {
+    color: #00A65E !important;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+.routinetest-theme .page-link {
+    color: #00A65E !important;
+}
+
+.routinetest-theme .page-item.active .page-link {
+    background-color: #00A65E !important;
+    border-color: #00A65E !important;
+}
+
+/* ============================================
+   TOOLTIPS & POPOVERS
+   ============================================ */
+.routinetest-theme .tooltip-inner {
+    background-color: #007C3F !important;
+}
+
+.routinetest-theme .popover-header {
+    background-color: #E8F5E9 !important;
+    color: #2E4C2F !important;
+}
+
+/* ============================================
+   SCROLLBAR STYLING (Webkit browsers)
+   ============================================ */
+.routinetest-theme::-webkit-scrollbar-track {
+    background-color: #F5FAF7;
+}
+
+.routinetest-theme::-webkit-scrollbar-thumb {
+    background-color: #00A65E;
+}
+
+.routinetest-theme::-webkit-scrollbar-thumb:hover {
+    background-color: #007C3F;
+}
+
+/* ============================================
+   CONSOLE DEBUGGING STYLES
+   ============================================ */
+.routinetest-theme[data-theme-loaded="true"] {
+    /* This attribute will be added by JavaScript to confirm theme is loaded */
+    position: relative;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+    .routinetest-theme .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .routinetest-theme .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+    .routinetest-theme {
+        background-color: white !important;
+    }
+    
+    .routinetest-theme .header,
+    .routinetest-theme .nav-tabs {
+        background-color: #00A65E !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* ============================================
+   ANIMATION CLASSES
+   ============================================ */
+.routinetest-theme .fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.routinetest-theme .slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { 
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   DEBUG MODE INDICATOR
+   ============================================ */
+.routinetest-theme[data-debug="true"]::after {
+    content: "BCG Green Theme Active";
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: #00A65E;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 9999;
+    pointer-events: none;
+}

@@ -1,0 +1,482 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PrimePath RoutineTest - Continuous Assessment Platform{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- Mobile Responsive CSS -->
+    <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}">
+    
+    <!-- Console Debugging for RoutineTest -->
+    <script>
+        console.log('%c[RoutineTest] Page Loading...', 'color: #00A65E; font-weight: bold;');
+        console.log('[RoutineTest] Navigation: Tab-based horizontal layout');
+        console.log('[RoutineTest] Theme: BCG Green (#00A65E)');
+        console.log('[RoutineTest] Module: Continuous Assessment Platform');
+        window.ROUTINETEST_DEBUG = true;
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header Section - Darker Muted Green Theme (Matching PlacementTest weight) */
+        .header {
+            background-color: #1B5E20;  /* Darker, more muted green */
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        /* Navigation Tabs - Darker Muted Green Theme (Matching PlacementTest style) */
+        .nav-tabs {
+            background-color: #0D4F1F;  /* Very dark, muted green */
+            padding: 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-tabs * {
+            box-sizing: border-box;
+        }
+        
+        .nav-tabs ul {
+            list-style: none;
+            display: flex;
+            margin: 0 auto;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+        
+        .nav-tabs li {
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        
+        .nav-tabs a {
+            display: block;
+            padding: 15px 25px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            font-weight: 500;
+            position: relative;
+            height: 100%;
+            white-space: nowrap;
+        }
+        
+        .nav-tabs a:hover {
+            background-color: #1B5E20;  /* Darker muted green on hover */
+        }
+        
+        .nav-tabs a.active {
+            background-color: #2E7D32 !important;  /* Darker green for active */
+            color: white;
+            font-weight: 600;
+            box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Profile Link Styling */
+        .nav-tabs .profile-link {
+            display: flex !important;
+            align-items: center;
+            white-space: nowrap !important;
+            min-width: fit-content;
+        }
+        
+        .nav-tabs .profile-link span {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Logout Button - Red */
+        #logout-link {
+            background-color: #e74c3c !important;
+            color: white !important;
+        }
+        
+        #logout-link:hover {
+            background-color: #c0392b !important;
+        }
+        
+        /* Container - Matching PlacementTest */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Content Area */
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+        
+        /* Messages/Alerts - BCG Green Theme */
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .alert-success {
+            background-color: #F1F8E9;
+            border: 1px solid #689F38;  /* Muted olive green border */
+            color: #33691E;  /* Dark olive green text */
+        }
+        
+        .alert-info {
+            background-color: #E0F2F1;
+            border: 1px solid #00ACC1;
+            color: #004D40;
+        }
+        
+        .alert-warning {
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            color: #E65100;
+        }
+        
+        .alert-danger {
+            background-color: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #B71C1C;
+        }
+        
+        .close-alert {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: inherit;
+            margin-left: 20px;
+        }
+        
+        /* Buttons - Darker Muted Green Theme */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2E7D32;  /* Darker muted green */
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: #1B5E20;  /* Even darker on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: #558B57;  /* Muted sage green */
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3D6F3F;  /* Darker sage green */
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        /* Form Controls - Softer Green Theme */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #90A4AE;  /* Muted gray-green border */
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #2E7D32;  /* Darker green on focus */
+            box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.20);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #263238;  /* Dark gray for better readability */
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Debug Console Logger -->
+    <script>
+        console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #00A65E; color: white; padding: 5px; border-radius: 3px;');
+        console.log('Theme: BCG Green (#00A65E)');
+        console.log('Navigation: Horizontal Tab Layout');
+        console.log('Module: RoutineTest - Continuous Assessment');
+        console.log('User: {% if user.is_authenticated %}{{ user.username }}{% else %}Anonymous{% endif %}');
+        console.groupEnd();
+    </script>
+    
+    <!-- Header Section -->
+    <div class="header">
+        <div class="container">
+            <h1>{% block header %}RoutineTest - Continuous Assessment{% endblock %}</h1>
+        </div>
+    </div>
+    
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+        <ul style="display: flex; justify-content: space-between;">
+            <div style="display: flex;">
+                <!-- Dashboard -->
+                <li><a href="{% url 'RoutineTest:index' %}" 
+                       class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}"
+                       data-nav="dashboard">Dashboard</a></li>
+                
+                <!-- Upload Exam -->
+                <li><a href="{% url 'RoutineTest:create_exam' %}" 
+                       class="{% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}"
+                       data-nav="upload-exam">Upload Exam</a></li>
+                
+                <!-- Manage Exams -->
+                <li><a href="{% url 'RoutineTest:exam_list' %}" 
+                       class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}"
+                       data-nav="manage-exams">Manage Exams</a></li>
+                
+                <!-- Class Management (Placeholder for now) -->
+                <li><a href="#" 
+                       class="{% if request.resolver_match.url_name == 'class_management' %}active{% endif %}"
+                       data-nav="class-management"
+                       onclick="console.log('[RoutineTest] Class Management - Coming Soon'); alert('Class Management - Coming in Phase 2.2'); return false;">Class Management</a></li>
+                
+                <!-- Test Schedules (Placeholder for now) -->
+                <li><a href="#" 
+                       class="{% if request.resolver_match.url_name == 'test_schedules' %}active{% endif %}"
+                       data-nav="test-schedules"
+                       onclick="console.log('[RoutineTest] Test Schedules - Coming Soon'); alert('Test Schedules - Coming in Phase 2.3'); return false;">Test Schedules</a></li>
+                
+                <!-- Results & Analytics -->
+                <li><a href="{% url 'RoutineTest:session_list' %}" 
+                       class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}"
+                       data-nav="results">Results & Analytics</a></li>
+            </div>
+            
+            <!-- Right side: Profile and Logout -->
+            <div style="display: flex; margin-left: auto; align-items: stretch;">
+                {% if user.is_authenticated %}
+                    <!-- Profile Link -->
+                    <li style="display: flex;">
+                        <a href="#" 
+                           class="profile-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" 
+                           title="My Profile" 
+                           style="white-space: nowrap; padding-right: 30px;"
+                           onclick="console.log('[RoutineTest] Profile clicked'); return false;">
+                            <span style="display: inline-block; margin-right: 5px;">👤</span>
+                            <span style="display: inline-block;">{{ user.get_full_name|default:user.username }}</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Logout Button -->
+                    <li style="display: flex;">
+                        <a href="{% url 'core:logout' %}" 
+                           id="logout-link" 
+                           style="background-color: #e74c3c; white-space: nowrap;">Logout</a>
+                    </li>
+                {% else %}
+                    <!-- Login Link -->
+                    <li style="display: flex;">
+                        <a href="{% url 'PlacementTest:teacher_login' %}" 
+                           style="background-color: #00A65E;">Login</a>
+                    </li>
+                {% endif %}
+            </div>
+        </ul>
+    </nav>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Messages/Alerts -->
+        {% if messages %}
+            <div class="messages" id="message-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'">&times;</button>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            <script>
+                // Auto-scroll to top when there's a message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Auto-hide success messages after 10 seconds
+                setTimeout(function() {
+                    const successAlerts = document.querySelectorAll('.alert-success');
+                    successAlerts.forEach(function(alert) {
+                        alert.style.transition = 'opacity 0.5s ease-out';
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.style.display = 'none';
+                        }, 500);
+                    });
+                }, 10000);
+                
+                console.log('[RoutineTest] Messages displayed:', document.querySelectorAll('.alert').length);
+            </script>
+        {% endif %}
+        
+        <!-- Page Content -->
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- Load RoutineTest Theme CSS -->
+    <link rel="stylesheet" href="{% static 'css/routinetest-theme.css' %}">
+    
+    <!-- Load RoutineTest Theme JS -->
+    <script src="{% static 'js/routinetest-theme.js' %}"></script>
+    
+    <!-- Navigation JavaScript with Console Debugging -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.group('%c[RoutineTest Navigation] Initialization', 'color: #00A65E; font-weight: bold;');
+            
+            // Log navigation state
+            const navTabs = document.querySelectorAll('.nav-tabs a');
+            console.log(`Found ${navTabs.length} navigation tabs`);
+            
+            // Log active tab
+            const activeTab = document.querySelector('.nav-tabs a.active');
+            if (activeTab) {
+                console.log('Active Tab:', activeTab.getAttribute('data-nav') || activeTab.textContent.trim());
+                console.log('Active URL:', activeTab.href);
+            }
+            
+            // Add click tracking to all nav items
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    const navName = this.getAttribute('data-nav') || this.textContent.trim();
+                    console.log(`%c[RoutineTest Nav Click] ${navName}`, 'color: #00A65E;');
+                    console.log('Target URL:', this.href);
+                    console.log('Timestamp:', new Date().toISOString());
+                    
+                    // Track navigation in sessionStorage
+                    const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+                    navHistory.push({
+                        tab: navName,
+                        url: this.href,
+                        timestamp: new Date().toISOString()
+                    });
+                    sessionStorage.setItem('routinetest_nav_history', JSON.stringify(navHistory.slice(-10))); // Keep last 10
+                });
+            });
+            
+            // Log authentication state
+            const authState = {
+                authenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
+                username: {% if user.is_authenticated %}'{{ user.username }}'{% else %}null{% endif %},
+                fullName: {% if user.is_authenticated %}'{{ user.get_full_name }}'{% else %}null{% endif %},
+                is_staff: {% if user.is_authenticated %}{{ user.is_staff|lower }}{% else %}false{% endif %},
+                page: '{{ request.resolver_match.url_name }}',
+                path: '{{ request.path }}',
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('[RoutineTest Auth State]', authState);
+            
+            // Log theme confirmation
+            console.log('[RoutineTest Theme Check]', {
+                primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--color-primary') || '#00A65E',
+                headerBg: getComputedStyle(document.querySelector('.header')).background,
+                navBg: getComputedStyle(document.querySelector('.nav-tabs')).backgroundColor
+            });
+            
+            // Performance metrics
+            if (window.performance) {
+                const perfData = window.performance.timing;
+                const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                console.log(`[RoutineTest Performance] Page load time: ${pageLoadTime}ms`);
+            }
+            
+            console.groupEnd();
+            
+            // Navigation history display
+            const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+            if (navHistory.length > 0) {
+                console.group('%c[RoutineTest Navigation History]', 'color: #007C3F;');
+                console.table(navHistory);
+                console.groupEnd();
+            }
+        });
+        
+        // Logout confirmation
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                console.log('[RoutineTest] Logout initiated');
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                    console.log('[RoutineTest] Logout cancelled');
+                }
+            });
+        }
+        
+        // Global error handler for debugging
+        window.addEventListener('error', function(e) {
+            console.error('[RoutineTest Error]', {
+                message: e.message,
+                filename: e.filename,
+                line: e.lineno,
+                column: e.colno,
+                error: e.error
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

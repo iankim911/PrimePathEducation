@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "routinetest_base.html" %}
 
 {% block title %}Manage Exams - PrimePath{% endblock %}
 
@@ -284,6 +284,20 @@
         background-color: #0056b3;
     }
     
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+    }
+    
     .exam-name-input {
         display: none;
         padding: 6px 10px;
@@ -355,8 +369,8 @@
             </div>
             
             <div class="name-edit-container">
-                <div class="exam-title">{{ exam.name }}</div>
-                <input type="text" class="exam-name-input" value="{{ exam.name }}" data-exam-id="{{ exam.id }}">
+                <div class="exam-title">{{ exam.get_routinetest_display_name }}</div>
+                <input type="text" class="exam-name-input" value="{{ exam.get_routinetest_display_name }}" data-exam-id="{{ exam.id }}">
                 <button class="btn btn-small btn-primary save-name-btn" onclick="saveExamName('{{ exam.id }}')">Save</button>
                 <button class="btn btn-small btn-secondary cancel-name-btn" onclick="cancelNameEdit('{{ exam.id }}')">Cancel</button>
             </div>
@@ -402,6 +416,69 @@
                 {% endif %}
             </div>
             
+            <!-- Exam Type Badge (RoutineTest Specific) -->
+            <div class="exam-info" style="margin-bottom: 8px;">
+                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;
+                            {% if exam.exam_type == 'QUARTERLY' %}
+                                background: linear-gradient(135deg, #1B5E20 0%, #0D4F1F 100%); color: white;
+                            {% else %}
+                                background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%); color: white;
+                            {% endif %}">
+                    {% if exam.exam_type == 'REVIEW' %}
+                        📝 Review / Monthly Exam
+                    {% elif exam.exam_type == 'QUARTERLY' %}
+                        📊 Quarterly Exam
+                    {% else %}
+                        {{ exam.get_exam_type_display }}
+                    {% endif %}
+                </span>
+                
+                <!-- Phase 2: Time Period Display -->
+                {% if exam.get_time_period_display %}
+                <span style="display: inline-block; margin-left: 8px; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;
+                            background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%); color: #1B5E20;">
+                    📅 {{ exam.get_time_period_display }}
+                </span>
+                {% endif %}
+            </div>
+            
+            <!-- Phase 3: Class Codes Display -->
+            {% if exam.get_class_codes_display %}
+            <div class="exam-info" style="margin-bottom: 8px;">
+                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;
+                            background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%); color: #2E7D32;">
+                    🎓 Classes: {{ exam.get_class_codes_display }}
+                </span>
+            </div>
+            {% endif %}
+            
+            <!-- Class-Specific Schedule Indicator -->
+            {% if exam.has_class_schedules %}
+            <div class="exam-info" style="margin-bottom: 8px;">
+                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;
+                            background: linear-gradient(135deg, #FFE0B2 0%, #FFCC80 100%); color: #E65100;">
+                    📆 {{ exam.class_schedules.count }} class schedule{{ exam.class_schedules.count|pluralize }}
+                </span>
+            </div>
+            {% else %}
+            <div class="exam-info" style="margin-bottom: 8px;">
+                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;
+                            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); color: #F57C00;">
+                    ⏰ No schedules set
+                </span>
+            </div>
+            {% endif %}
+            
+            <!-- Phase 4: Instructions Indicator -->
+            {% if exam.instructions %}
+            <div class="exam-info" style="margin-bottom: 8px;">
+                <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 500;
+                            background: linear-gradient(135deg, #FFF8E1 0%, #FFF3E0 100%); color: #FF9800;">
+                    📋 Has special instructions
+                </span>
+            </div>
+            {% endif %}
+            
             <div class="exam-info">Questions: {{ exam.total_questions }}</div>
             <div class="exam-info">Duration: {{ exam.timer_minutes }} minutes</div>
             <div class="exam-info">Audio Files: {{ exam.audio_files.count }}</div>
@@ -414,6 +491,14 @@
             
             <div class="exam-actions">
                 <a href="{% url 'RoutineTest:preview_exam' exam_id=exam.id %}" class="btn btn-small btn-primary">Manage</a>
+                <a href="{% url 'RoutineTest:manage_roster' exam_id=exam.id %}" class="btn btn-small btn-success" title="Manage Student Roster">
+                    <span style="margin-right: 3px;">👥</span> Roster
+                    {% if exam.roster_stats.total_assigned > 0 %}
+                    <span class="badge" style="background: #28a745; color: white; padding: 2px 5px; border-radius: 10px; margin-left: 3px;">
+                        {{ exam.roster_stats.total_assigned }}
+                    </span>
+                    {% endif %}
+                </a>
                 <button class="btn btn-small btn-secondary" onclick="enableNameEdit('{{ exam.id }}')">Update Name</button>
                 <form method="post" action="{% url 'RoutineTest:delete_exam' exam_id=exam.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this exam? This action cannot be undone.');">
                     {% csrf_token %}
@@ -432,16 +517,17 @@
 {% endif %}
 
 <script>
-// Comprehensive console logging for Answer Mapping Status debugging
+// Comprehensive console logging for RoutineTest [RT]/[QTR] naming and Answer Mapping Status
 (function() {
     'use strict';
     
-    console.group('%c[ANSWER_MAPPING_UI] Page Initialization', 'color: #2196F3; font-weight: bold');
+    console.group('%c[ROUTINETEST_EXAM_LIST] Page Initialization', 'color: #2196F3; font-weight: bold');
     
     // Log page load information
-    console.log('[ANSWER_MAPPING_UI] Exam List page loaded');
-    console.log('[ANSWER_MAPPING_UI] Timestamp:', new Date().toISOString());
-    console.log('[ANSWER_MAPPING_UI] URL:', window.location.href);
+    console.log('[ROUTINETEST_EXAM_LIST] RoutineTest Exam List page loaded with [RT]/[QTR] naming system');
+    console.log('[ROUTINETEST_EXAM_LIST] Timestamp:', new Date().toISOString());
+    console.log('[ROUTINETEST_EXAM_LIST] URL:', window.location.href);
+    console.log('[ROUTINETEST_EXAM_LIST] Naming system: [RT] for Review exams, [QTR] for Quarterly exams');
     
     // Log summary statistics if available
     const summaryElement = document.querySelector('.mapping-summary');
@@ -465,8 +551,10 @@
         const mappingPercentage = card.dataset.mappingPercentage;
         const examName = card.querySelector('.exam-title')?.textContent || 'Unknown';
         
-        console.group(`[ANSWER_MAPPING_UI] Exam ${index + 1}: ${examName}`);
+        console.group(`[ROUTINETEST_EXAM_LIST] Exam ${index + 1}: ${examName}`);
         console.log('Exam ID:', examId);
+        console.log('RoutineTest Display Name:', examName);
+        console.log('Naming System: [RT]/[QTR] format');
         console.log('Mapping Status:', mappingStatus);
         console.log('Mapping Percentage:', mappingPercentage + '%');
         
@@ -600,7 +688,7 @@ function saveExamName(examId) {
     // Send update request
     console.log(`[ANSWER_MAPPING_UI] Sending name update request to API...`);
     
-    fetch(`/api/RoutineTest/exams/${examId}/update-name/`, {
+    fetch(`/RoutineTest/exams/${examId}/update-name/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

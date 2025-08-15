@@ -574,7 +574,7 @@
                     // Direct submission without answer manager as fallback
                     if (confirm('There was an issue with the test system. Do you want to submit your test anyway?')) {
                         const csrfToken = '{{ csrf_token }}';
-                        fetch(`/api/RoutineTest/session/${sessionId}/complete/`, {
+                        fetch(`/RoutineTest/session/${sessionId}/complete/`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

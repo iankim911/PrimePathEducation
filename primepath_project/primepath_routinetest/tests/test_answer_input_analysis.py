@@ -39,7 +39,7 @@ def analyze_answer_input_interface():
     
     for exam in exams:
         print(f"\n📚 Exam: {exam.name}")
-        questions = exam.questions.all()
+        questions = exam.routine_questions.all()
         print(f"   Total questions: {questions.count()}")
         
         for question in questions[:5]:  # Check first 5 questions

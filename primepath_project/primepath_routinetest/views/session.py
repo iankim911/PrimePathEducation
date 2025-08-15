@@ -101,7 +101,7 @@ def export_result(request, session_id):
     
     # For now, return a simple CSV response
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f'attachment; filename="placement_test_result_{session_id}.csv"'
+    response['Content-Disposition'] = f'attachment; filename="routine_test_result_{session_id}.csv"'
     
     writer = csv.writer(response)
     writer.writerow(['Student Name', 'Grade', 'School', 'Test Date', 'Score', 'Assigned Level'])

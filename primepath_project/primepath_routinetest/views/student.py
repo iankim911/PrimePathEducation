@@ -96,7 +96,7 @@ def take_test(request, session_id):
         return redirect('RoutineTest:test_result', session_id=session_id)
     
     exam = session.exam
-    questions = exam.questions.select_related('audio_file').all()
+    questions = exam.routine_questions.select_related('audio_file').all()
     audio_files = exam.audio_files.all()
     student_answers = {sa.question_id: sa for sa in session.answers.all()}
     

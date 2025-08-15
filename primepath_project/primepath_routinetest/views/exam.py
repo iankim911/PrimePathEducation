@@ -36,14 +36,18 @@ def exam_list(request):
         'curriculum_level__subprogram__program'
     ).prefetch_related(
         'questions',  # Prefetch questions to avoid N+1 queries
-        'audio_files'  # Also prefetch audio files for display
+        'audio_files',  # Also prefetch audio files for display
+        'student_roster'  # Phase 5: Prefetch roster for stats
     ).all()
     
-    # Add answer mapping status to each exam
+    # Add answer mapping status and roster stats to each exam
     exams_with_status = []
     for exam in exams:
         # Get answer mapping status
         mapping_status = exam.get_answer_mapping_status()
+        
+        # Phase 5: Get roster statistics
+        roster_stats = exam.get_roster_stats()
         
         # Log the mapping status for each exam
         console_log = {
@@ -55,12 +59,15 @@ def exam_list(request):
             "mapped_questions": mapping_status['mapped_questions'],
             "unmapped_questions": mapping_status['unmapped_questions'],
             "percentage_complete": mapping_status['percentage_complete'],
-            "status": mapping_status['status_label']
+            "status": mapping_status['status_label'],
+            "roster_total": roster_stats['total_assigned'],  # Phase 5
+            "roster_completed": roster_stats['completed']  # Phase 5
         }
         logger.info(f"[EXAM_LIST_MAPPING] {json.dumps(console_log)}")
         
         # Add the status to the exam object for template access
         exam.answer_mapping_status = mapping_status
+        exam.roster_stats = roster_stats  # Phase 5: Add roster stats
         exams_with_status.append(exam)
     
     # Log summary of answer mapping statuses
@@ -184,14 +191,43 @@ def create_exam(request):
             if not total_questions:
                 raise ValidationException("Total number of questions is required", code="MISSING_QUESTIONS")
             
-            # Log exam creation attempt
+            # Get exam type from form
+            exam_type = request.POST.get('exam_type', 'REVIEW')
+            
+            # Phase 2: Get time period fields based on exam type
+            time_period_month = None
+            time_period_quarter = None
+            academic_year = request.POST.get('academic_year', '').strip() or None
+            
+            if exam_type == 'REVIEW':
+                time_period_month = request.POST.get('time_period_month', '').strip() or None
+            elif exam_type == 'QUARTERLY':
+                time_period_quarter = request.POST.get('time_period_quarter', '').strip() or None
+            
+            
+            # Phase 3: Get selected class codes
+            class_codes = request.POST.getlist('class_codes[]')  # Get array of selected class codes
+            
+            # Get general instructions (kept at exam level)
+            instructions = request.POST.get('instructions', '').strip()
+            # Note: Scheduling is now handled per-class via ClassExamSchedule
+            
+            # Log exam creation attempt with all phases data
             console_log = {
                 "view": "create_exam",
                 "action": "exam_creation_attempt",
                 "exam_name": exam_name,
+                "exam_type": exam_type,
+                "time_period_month": time_period_month,
+                "time_period_quarter": time_period_quarter,
+                "academic_year": academic_year,
+                "class_codes": class_codes,  # Phase 3: Log selected classes
+                "class_codes_count": len(class_codes),
+                "has_instructions": bool(instructions),
                 "total_questions": total_questions,
                 "created_by_teacher_id": teacher_profile.id if teacher_profile else None,
-                "created_by_teacher_name": teacher_profile.name if teacher_profile else None
+                "created_by_teacher_name": teacher_profile.name if teacher_profile else None,
+                "note": "Class-specific scheduling will be set separately after exam creation"
             }
             logger.info(f"[CREATE_EXAM_ATTEMPT] {json.dumps(console_log)}")
             print(f"[CREATE_EXAM_ATTEMPT] {json.dumps(console_log)}")
@@ -199,6 +235,12 @@ def create_exam(request):
             # Prepare exam data with validation
             exam_data = {
                 'name': exam_name,
+                'exam_type': exam_type,  # Add exam type to data
+                'time_period_month': time_period_month,  # Phase 2: Add month
+                'time_period_quarter': time_period_quarter,  # Phase 2: Add quarter
+                'academic_year': academic_year,  # Phase 2: Add academic year
+                'class_codes': class_codes,  # Phase 3: Add selected class codes
+                'instructions': instructions,  # General instructions (kept at exam level)
                 'curriculum_level_id': request.POST.get('curriculum_level', '').strip() or None,
                 'timer_minutes': int(request.POST.get('timer_minutes', 60)),
                 'total_questions': int(total_questions),
@@ -214,6 +256,19 @@ def create_exam(request):
             if not pdf_file:
                 raise ValidationException("PDF file is required", code="MISSING_PDF")
             
+            # Log the file upload details
+            console_log = {
+                "view": "create_exam",
+                "action": "file_upload_details",
+                "pdf_file_name": pdf_file.name if pdf_file else None,
+                "pdf_file_size": pdf_file.size if pdf_file else 0,
+                "pdf_file_content_type": pdf_file.content_type if pdf_file else None,
+                "audio_files_count": len(request.FILES.getlist('audio_files')),
+                "audio_names_count": len(request.POST.getlist('audio_names[]'))
+            }
+            logger.info(f"[CREATE_EXAM_FILES] {json.dumps(console_log)}")
+            print(f"[CREATE_EXAM_FILES] {json.dumps(console_log)}")
+            
             # Use ExamService to create exam with files
             exam = ExamService.create_exam(
                 exam_data=exam_data,
@@ -228,6 +283,7 @@ def create_exam(request):
                 "action": "exam_created_successfully",
                 "exam_id": str(exam.id),
                 "exam_name": exam.name,
+                "exam_type": exam.exam_type,
                 "created_by_teacher_id": exam.created_by.id if exam.created_by else None,
                 "created_by_teacher_name": exam.created_by.name if exam.created_by else None,
                 "total_questions": exam.total_questions,
@@ -275,165 +331,80 @@ def create_exam(request):
             messages.error(request, f"An unexpected error occurred: {str(e)}")
             # Fall through to render the form again with error message
     
-    # Get curriculum levels with version info
+    # Get RoutineTest curriculum levels using ExamService
+    # This uses the ROUTINETEST_CURRICULUM_WHITELIST from constants.py
     from datetime import datetime
     
-    # Define whitelist of allowed placement test curriculum levels
-    # Format: (program_name, subprogram_name, level_number)
-    # IMPORTANT: SubProgram names must match EXACTLY what's in the database
-    # Database stores: 'Phonics', 'Sigma', 'Elite' (WITHOUT program prefix)
-    # Updated: 2025-08-13 - Fixed to match actual database values
-    PLACEMENT_TEST_WHITELIST = [
-        # CORE Program - SubProgram names WITHOUT 'CORE' prefix
-        ('CORE', 'Phonics', 1), ('CORE', 'Phonics', 2), ('CORE', 'Phonics', 3),
-        ('CORE', 'Sigma', 1), ('CORE', 'Sigma', 2), ('CORE', 'Sigma', 3),
-        ('CORE', 'Elite', 1), ('CORE', 'Elite', 2), ('CORE', 'Elite', 3),
-        ('CORE', 'Pro', 1), ('CORE', 'Pro', 2), ('CORE', 'Pro', 3),
-        # ASCENT Program - SubProgram names WITHOUT 'ASCENT' prefix
-        ('ASCENT', 'Nova', 1), ('ASCENT', 'Nova', 2), ('ASCENT', 'Nova', 3),
-        ('ASCENT', 'Drive', 1), ('ASCENT', 'Drive', 2), ('ASCENT', 'Drive', 3),
-        ('ASCENT', 'Flex', 1), ('ASCENT', 'Flex', 2), ('ASCENT', 'Flex', 3),  # Added Flex
-        ('ASCENT', 'Pro', 1), ('ASCENT', 'Pro', 2), ('ASCENT', 'Pro', 3),
-        # EDGE Program - SubProgram names WITHOUT 'EDGE' prefix
-        ('EDGE', 'Spark', 1), ('EDGE', 'Spark', 2), ('EDGE', 'Spark', 3),
-        ('EDGE', 'Rise', 1), ('EDGE', 'Rise', 2), ('EDGE', 'Rise', 3),
-        ('EDGE', 'Pursuit', 1), ('EDGE', 'Pursuit', 2), ('EDGE', 'Pursuit', 3),
-        ('EDGE', 'Pro', 1), ('EDGE', 'Pro', 2), ('EDGE', 'Pro', 3),
-        # PINNACLE Program - SubProgram names WITHOUT 'PINNACLE' prefix
-        ('PINNACLE', 'Vision', 1), ('PINNACLE', 'Vision', 2),
-        ('PINNACLE', 'Endeavor', 1), ('PINNACLE', 'Endeavor', 2),
-        ('PINNACLE', 'Success', 1), ('PINNACLE', 'Success', 2),
-        ('PINNACLE', 'Pro', 1), ('PINNACLE', 'Pro', 2),
-    ]
-    
-    # Log whitelist configuration
+    # Log curriculum levels retrieval start
     console_log = {
         "view": "create_exam",
-        "action": "whitelist_configured",
-        "total_allowed_levels": len(PLACEMENT_TEST_WHITELIST),
-        "programs": list(set(item[0] for item in PLACEMENT_TEST_WHITELIST))
+        "action": "getting_routinetest_curriculum_levels",
+        "message": "Using ExamService to get filtered RoutineTest curriculum levels"
     }
-    logger.info(f"[CREATE_EXAM_WHITELIST] {json.dumps(console_log)}")
-    print(f"[CREATE_EXAM_WHITELIST] {json.dumps(console_log)}")
+    logger.info(f"[CREATE_EXAM_CURRICULUM] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_CURRICULUM] {json.dumps(console_log)}")
     
-    # Get all curriculum levels but filter to whitelist
-    all_levels = CurriculumLevel.objects.select_related('subprogram__program').all()
-    curriculum_levels = []
+    # Get RoutineTest curriculum levels from ExamService
+    curriculum_levels_data = ExamService.get_routinetest_curriculum_levels()
     
-    # Enhanced debugging for whitelist filtering
-    debug_samples = []
-    rejected_samples = []
-    
-    for level in all_levels:
-        # Check if this level is in the whitelist
-        program_name = level.subprogram.program.name
-        subprogram_name = level.subprogram.name
-        level_number = level.level_number
-        
-        # Create tuple for checking
-        level_tuple = (program_name, subprogram_name, level_number)
-        
-        # Log first few samples for debugging
-        if len(debug_samples) < 5:
-            debug_samples.append({
-                "program": program_name,
-                "subprogram": subprogram_name,
-                "level": level_number,
-                "tuple": str(level_tuple)
-            })
-        
-        if level_tuple in PLACEMENT_TEST_WHITELIST:
-            curriculum_levels.append(level)
-            # Log successful match
-            logger.debug(f"[WHITELIST_MATCH] ✅ Matched: {level_tuple}")
-        else:
-            # Track rejected items for debugging
-            if len(rejected_samples) < 5 and '[INACTIVE]' not in subprogram_name and 'Test' not in subprogram_name:
-                rejected_samples.append({
-                    "program": program_name,
-                    "subprogram": subprogram_name,
-                    "level": level_number,
-                    "reason": "Not in whitelist"
-                })
-                logger.debug(f"[WHITELIST_REJECT] ❌ Rejected: {level_tuple}")
-    
-    # Comprehensive logging of filtering results
-    console_log = {
-        "view": "create_exam",
-        "action": "levels_filtered",
-        "total_levels_in_db": all_levels.count(),
-        "levels_after_filter": len(curriculum_levels),
-        "filtered_programs": list(set(level.subprogram.program.name for level in curriculum_levels)),
-        "sample_db_levels": debug_samples,
-        "sample_rejected": rejected_samples,
-        "whitelist_size": len(PLACEMENT_TEST_WHITELIST)
-    }
-    logger.info(f"[CREATE_EXAM_FILTER] {json.dumps(console_log)}")
-    print(f"[CREATE_EXAM_FILTER] {json.dumps(console_log)}")
-    
-    # Additional console warning if no levels passed filter
-    if len(curriculum_levels) == 0:
-        console_error = {
-            "view": "create_exam",
-            "action": "ERROR_NO_LEVELS",
-            "error": "No curriculum levels passed whitelist filter!",
-            "check_whitelist": "Verify PLACEMENT_TEST_WHITELIST matches database values",
-            "sample_from_db": debug_samples[:3] if debug_samples else []
-        }
-        logger.error(f"[CREATE_EXAM_ERROR] {json.dumps(console_error)}")
-        print(f"[CREATE_EXAM_ERROR] {json.dumps(console_error)}")
-    
-    # Get today's date for checking same-day uploads
+    # Get today's date for version checking
     today_str = datetime.now().strftime('%y%m%d')
     
-    # Add version info to each level using new naming convention
+    # Add version info to each level for RoutineTest naming
     levels_with_versions = []
-    for level in curriculum_levels:
+    for level_data in curriculum_levels_data:
+        curriculum_level = level_data['curriculum_level']
+        
         # Check if there are existing uploads today for this level
-        next_version = ExamService.get_next_version_number(level.id, today_str)
+        next_version = ExamService.get_next_version_number(curriculum_level.id, today_str)
         
         # Get count of existing exams for this level (for info display)
-        existing_count = Exam.objects.filter(curriculum_level=level).count()
+        existing_count = Exam.objects.filter(curriculum_level=curriculum_level).count()
         
-        # Create placement test specific display name
-        # Format: "[PT] PROGRAM, SUBPROGRAM, Level X"
-        program_name = level.subprogram.program.name
-        subprogram_name = level.subprogram.name
-        level_number = level.level_number
-        
-        # Remove program prefix from subprogram name if it exists
-        # e.g., "CORE PHONICS" -> "Phonics"
-        clean_subprogram = subprogram_name
-        if subprogram_name.startswith(program_name + ' '):
-            clean_subprogram = subprogram_name[len(program_name) + 1:]
-        
-        # Clean display name for placement tests (no "SubProgram" text)
-        pt_display_name = f"[PT] {program_name}, {clean_subprogram}, Level {level_number}"
+        # Create RoutineTest specific display name using [RT]/[QTR] format
+        # Format: "[RT/QTR] - [Time Period] - PROGRAM SUBPROGRAM Level X"
+        rt_display_name = level_data['routinetest_display_preview']
         
         # Clean base name for file generation (used in exam name)
         # Format: "PROGRAM_SUBPROGRAM_LvX"
-        pt_base_name = f"{program_name}_{clean_subprogram}_Lv{level_number}".replace(" ", "_")
+        program_name = level_data['program_name']
+        subprogram_name = level_data['subprogram_name']
+        level_number = level_data['level_number']
+        rt_base_name = f"{program_name}_{subprogram_name}_Lv{level_number}".replace(" ", "_")
         
         levels_with_versions.append({
-            'id': level.id,
-            'display_name': pt_display_name,  # Use PT-specific display name
-            'exam_base_name': pt_base_name,  # Use PT-specific base name
+            'id': curriculum_level.id,
+            'display_name': rt_display_name,  # Use RT-specific display name
+            'exam_base_name': rt_base_name,  # Use RT-specific base name
             'next_version': next_version,
             'existing_count': existing_count,
-            'date_str': today_str
+            'date_str': today_str,
+            'program_name': program_name,
+            'subprogram_name': subprogram_name,
+            'level_number': level_number
         })
         
         # Log each level being added
         console_log = {
             "view": "create_exam",
-            "action": "level_added",
-            "level_id": level.id,
-            "pt_display_name": pt_display_name,
-            "pt_base_name": pt_base_name,
+            "action": "routinetest_level_added",
+            "level_id": curriculum_level.id,
+            "rt_display_name": rt_display_name,
+            "rt_base_name": rt_base_name,
             "existing_count": existing_count
         }
-        logger.debug(f"[CREATE_EXAM_LEVEL] {json.dumps(console_log)}")
-        print(f"[CREATE_EXAM_LEVEL] {json.dumps(console_log)}")
+        logger.debug(f"[CREATE_EXAM_RT_LEVEL] {json.dumps(console_log)}")
+        print(f"[CREATE_EXAM_RT_LEVEL] {json.dumps(console_log)}")
+    
+    # Log final results
+    console_log = {
+        "view": "create_exam",
+        "action": "routinetest_curriculum_levels_loaded",
+        "total_levels": len(levels_with_versions),
+        "programs": list(set(level['program_name'] for level in levels_with_versions))
+    }
+    logger.info(f"[CREATE_EXAM_RT_FINAL] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_RT_FINAL] {json.dumps(console_log)}")
     
     return render(request, 'primepath_routinetest/create_exam.html', {
         'curriculum_levels': levels_with_versions
@@ -443,7 +414,7 @@ def create_exam(request):
 @login_required
 def exam_detail(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
-    questions = exam.questions.all()
+    questions = exam.routine_questions.all()
     audio_files = exam.audio_files.all()
     
     context = {
@@ -465,7 +436,7 @@ def preview_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     
     # Get or create questions for the exam with audio files prefetched
-    questions = exam.questions.select_related('audio_file').all().order_by('question_number')
+    questions = exam.routine_questions.select_related('audio_file').all().order_by('question_number')
     
     # If no questions exist, create them based on total_questions
     if not questions.exists():
@@ -478,7 +449,7 @@ def preview_exam(request, exam_id):
                 points=1,
                 options_count=exam.default_options_count
             )
-        questions = exam.questions.all().order_by('question_number')
+        questions = exam.routine_questions.all().order_by('question_number')
     
     # Process questions to add response lists for short and long answers
     for question in questions:
@@ -523,7 +494,7 @@ def preview_exam(request, exam_id):
 @login_required
 def manage_questions(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
-    questions = exam.questions.all().order_by('question_number')
+    questions = exam.routine_questions.all().order_by('question_number')
     
     if request.method == 'POST':
         # Process question updates
