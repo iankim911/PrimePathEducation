@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-08-18T17:48:57.632006",
+  "tests_run": 1,
+  "passed": 0,
+  "failed": 1,
+  "errors": [
+    {
+      "test": "Admin user creation",
+      "error": "UNIQUE constraint failed: auth_user.username"
+    }
+  ]
+}

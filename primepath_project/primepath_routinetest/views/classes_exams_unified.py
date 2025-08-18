@@ -267,7 +267,13 @@ def classes_exams_unified_view(request):
         
         for class_code in my_class_codes[:20]:  # Limit to 20 classes for performance
             try:
-                matrix_data[class_code] = {}
+                # Add curriculum mapping for this class
+                from primepath_routinetest.views.schedule_matrix_optimized import get_class_curriculum_mapping_cached
+                curriculum_mapping = get_class_curriculum_mapping_cached(class_code, current_year)
+                
+                matrix_data[class_code] = {
+                    'curriculum_mapping': curriculum_mapping
+                }
                 
                 for timeslot in timeslots:
                     try:

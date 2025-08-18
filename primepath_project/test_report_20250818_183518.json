@@ -1,0 +1,11 @@
+{
+  "passed": 2,
+  "failed": 8,
+  "errors": [
+    "Exam creation: UNIQUE constraint failed: routinetest_exam.name, routinetest_exam.academic_year, routinetest_exam.quarter",
+    "Exam assignment: ExamAssignment() got unexpected keyword arguments: 'max_attempts', 'passing_score', 'is_active'",
+    "Student exam attempt: NOT NULL constraint failed: routinetest_exam_attempt.assignment_id",
+    "Auto-save functionality: NOT NULL constraint failed: routinetest_exam_attempt.assignment_id",
+    "Teacher creation: UNIQUE constraint failed: core_teacher.email"
+  ]
+}

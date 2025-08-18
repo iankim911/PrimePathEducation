@@ -1,0 +1,419 @@
+{% extends 'routinetest_base.html' %}
+{% load static %}
+
+{% block title %}{{ exam.name }} - Take Exam{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exam-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .exam-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .exam-timer {
+        background: rgba(255,255,255,0.2);
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+    
+    .exam-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+    }
+    
+    .pdf-section {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+    
+    .pdf-viewer {
+        width: 100%;
+        height: 700px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .answer-section {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        max-height: 700px;
+        overflow-y: auto;
+    }
+    
+    .question-input {
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .question-input:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .question-input label {
+        display: block;
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+    
+    .answer-field {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #dee2e6;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+    
+    .answer-field:focus {
+        border-color: #667eea;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .answer-field.saved {
+        border-color: #28a745;
+        background: #f0fff4;
+    }
+    
+    .exam-actions {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 20px;
+        border-top: 2px solid #dee2e6;
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .auto-save-indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #28a745;
+        color: white;
+        border-radius: 5px;
+        display: none;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    .warning-banner {
+        background: #ffc107;
+        color: #000;
+        padding: 10px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .exam-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .pdf-section {
+            order: 2;
+        }
+        
+        .answer-section {
+            order: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="warning-banner" id="warningBanner">
+    ⚠️ Warning: Tab switching detected! Your activity is being monitored.
+</div>
+
+<div class="auto-save-indicator" id="autoSaveIndicator">
+    ✓ Progress saved
+</div>
+
+<div class="exam-container">
+    <div class="exam-header">
+        <div>
+            <h1>{{ exam.name }}</h1>
+            <p>{{ exam.exam_type|title }} | {{ exam.curriculum_level }}</p>
+        </div>
+        <div class="exam-timer">
+            <i class="fas fa-clock"></i> Time Remaining: <span id="timeDisplay">--:--</span>
+        </div>
+    </div>
+    
+    <form id="examForm" method="post" action="{% url 'RoutineTest:submit_exam' exam.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+        
+        <div class="exam-content">
+            <div class="pdf-section">
+                <h3>Exam Questions</h3>
+                <div class="pdf-viewer">
+                    {% if exam.pdf_file %}
+                        <iframe src="{{ exam.pdf_file.url }}" width="100%" height="100%"></iframe>
+                    {% else %}
+                        <div style="padding: 50px; text-align: center; color: #6c757d;">
+                            <i class="fas fa-file-pdf" style="font-size: 48px;"></i>
+                            <p>No PDF available for this exam</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="answer-section">
+                <h3>Your Answers</h3>
+                <div class="questions-list">
+                    {% for i in question_range %}
+                    <div class="question-input">
+                        <label for="answer_{{ i }}">Question {{ i }}</label>
+                        <input 
+                            type="text" 
+                            name="answer_{{ i }}" 
+                            id="answer_{{ i }}" 
+                            class="answer-field"
+                            placeholder="Enter your answer"
+                            value="{{ saved_answers|default_if_none:''|get_item:i }}"
+                            autocomplete="off"
+                        >
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="exam-actions">
+                    <button type="button" id="saveProgress" class="btn btn-secondary">
+                        <i class="fas fa-save"></i> Save Progress
+                    </button>
+                    <button type="submit" id="submitExam" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Exam
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Timer functionality
+let deadline = new Date("{{ assignment.deadline|date:'c' }}");
+let timerInterval;
+
+function updateTimer() {
+    const now = new Date();
+    const timeLeft = deadline - now;
+    
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timeDisplay').textContent = "Time's up!";
+        document.getElementById('examForm').submit();
+        return;
+    }
+    
+    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+    
+    document.getElementById('timeDisplay').textContent = 
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Start timer
+timerInterval = setInterval(updateTimer, 1000);
+updateTimer();
+
+// Auto-save functionality
+function autoSave() {
+    const formData = new FormData(document.getElementById('examForm'));
+    const answers = {};
+    
+    formData.forEach((value, key) => {
+        if (key.startsWith('answer_')) {
+            const qNum = key.replace('answer_', '');
+            if (value.trim()) {
+                answers[qNum] = value;
+            }
+        }
+    });
+    
+    fetch("{% url 'RoutineTest:auto_save_progress' exam.id %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            attempt_id: '{{ attempt.id }}',
+            answers: answers
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show save indicator
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 3000);
+            
+            // Mark saved fields
+            document.querySelectorAll('.answer-field').forEach(field => {
+                if (field.value.trim()) {
+                    field.classList.add('saved');
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Auto-save error:', error));
+}
+
+// Auto-save every 60 seconds
+setInterval(autoSave, 60000);
+
+// Manual save button
+document.getElementById('saveProgress').addEventListener('click', function() {
+    autoSave();
+});
+
+// Anti-cheat measures
+// Disable copy/paste
+document.addEventListener('copy', function(e) {
+    e.preventDefault();
+    alert('Copying is not allowed during the exam');
+    return false;
+});
+
+document.addEventListener('paste', function(e) {
+    e.preventDefault();
+    alert('Pasting is not allowed during the exam');
+    return false;
+});
+
+// Detect tab switching
+let violationCount = 0;
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        violationCount++;
+        document.getElementById('warningBanner').style.display = 'block';
+        
+        // Log violation
+        fetch("{% url 'RoutineTest:flag_violation' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                attempt_id: '{{ attempt.id }}',
+                violation_type: 'tab_switch',
+                count: violationCount
+            })
+        });
+        
+        if (violationCount >= 3) {
+            alert('Too many violations detected. Your exam will be submitted.');
+            document.getElementById('examForm').submit();
+        }
+    }
+});
+
+// Confirm before submitting
+document.getElementById('examForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const unanswered = document.querySelectorAll('.answer-field').length - 
+                      document.querySelectorAll('.answer-field.saved').length;
+    
+    let confirmMessage = 'Are you sure you want to submit your exam?';
+    if (unanswered > 0) {
+        confirmMessage = `You have ${unanswered} unanswered questions. Are you sure you want to submit?`;
+    }
+    
+    if (confirm(confirmMessage)) {
+        this.submit();
+    }
+});
+
+// Track answer changes
+document.querySelectorAll('.answer-field').forEach(field => {
+    field.addEventListener('change', function() {
+        this.classList.add('saved');
+    });
+});
+
+// Prevent accidental navigation
+window.addEventListener('beforeunload', function(e) {
+    e.preventDefault();
+    e.returnValue = 'Your exam progress will be lost. Are you sure you want to leave?';
+});
+</script>
+{% endblock %}

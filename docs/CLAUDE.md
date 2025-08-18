@@ -1,5 +1,43 @@
 # PrimePath Project - Critical Knowledge Base
 
+## 🤖 AUTONOMOUS AGENT SYSTEM - ACTIVE
+
+### CRITICAL: Process ALL User Requests Through Agents
+**EVERY command from the user MUST be analyzed by the autonomous agent system FIRST**
+
+### How to Process User Commands:
+```bash
+# For ANY user request about fixing, adding, changing, or reviewing:
+# ALWAYS RUN THIS FIRST:
+python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/PROCESS_REQUEST.py "exact user command"
+
+# Then follow the agent recommendations that are displayed
+```
+
+### Agent Activation Keywords (Auto-triggers):
+- **UI/UX Issues**: wide, narrow, layout, design, color, spacing, responsive
+- **Implementation**: fix, add, change, update, implement, bug, error
+- **Testing**: test, verify, check, ensure, quality
+- **Performance**: slow, fast, optimize, performance, loading
+- **Security**: auth, permission, vulnerability, security
+- **Documentation**: document, explain, readme, guide
+
+### Integration Check:
+1. **BEFORE doing any work**, run: `python agent_system/check_agents.py`
+2. **Agents will automatically**:
+   - Analyze the request
+   - Self-organize by expertise
+   - Collaborate on solution
+   - Provide consolidated results
+
+### Example Usage:
+```bash
+# User says: "The curriculum column is too wide"
+python -c "from agent_system.integration import process_with_agents; process_with_agents('The curriculum column is too wide')"
+```
+
+**IMPORTANT**: Do NOT manually implement fixes without running through agents first!
+
 ## 🔧 Chrome Control MCP - Working Setup
 
 ### Quick Setup (One Command!)

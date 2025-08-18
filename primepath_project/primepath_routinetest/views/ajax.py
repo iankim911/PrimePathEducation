@@ -207,9 +207,17 @@ def save_exam_answers(request, exam_id):
         raise ValidationException("Invalid JSON data", code="INVALID_JSON")
 
 
+# UPDATE NAME REMOVED: Names are systematically generated from exam type and curriculum
+# This function has been commented out as exam names are now automatically generated
+"""
 @require_http_methods(["POST"])
 def update_exam_name(request, exam_id):
-    """Update exam name."""
+    # REMOVED - Update exam name.
+    # Names are now systematically generated from:
+    # - Exam type (REVIEW/QUARTERLY)
+    # - Time period (Month or Quarter)
+    # - Curriculum level
+    # Example: "[REVIEW | January] - CORE Phonics Level 1"
     try:
         exam = get_object_or_404(Exam, id=exam_id)
         data = json.loads(request.body)
@@ -233,6 +241,7 @@ def update_exam_name(request, exam_id):
             'success': False,
             'error': str(e)
         }, status=500)
+"""
 
 
 @require_http_methods(["POST"])

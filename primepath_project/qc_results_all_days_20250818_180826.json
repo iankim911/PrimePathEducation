@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-08-18T18:08:26.519305",
+  "days_tested": [],
+  "total_tests": 1,
+  "passed": 0,
+  "failed": 1,
+  "errors": [
+    "Day 10: UNIQUE constraint failed: core_teacher.email"
+  ]
+}

@@ -5,7 +5,7 @@
 {% block title %}Classes & Exams - RoutineTest{% endblock %}
 
 {% block extra_css %}
-<!-- Unified Classes & Exams Styles with Cache Busting -->
+<!-- Unified Classes & Exams Styles with Cache Busting v2.1 -->
 <style>
     /* Main Container */
     .unified-container {
@@ -50,6 +50,7 @@
         padding: 20px;
         transition: all 0.3s ease;
         background: #fafafa;
+        cursor: pointer;
     }
     
     .class-card:hover {
@@ -139,13 +140,125 @@
         font-weight: bold;
     }
     
-    .matrix-cell {
-        position: relative;
-        min-height: 40px;
+    .matrix-table th:nth-child(2) {
+        min-width: 120px;
+        max-width: 140px;
+        width: 140px;
+        background: #266B2A;
     }
     
+    /* Quarter columns (Q1-Q4) - make them wider */
+    .matrix-table th:nth-child(3),
+    .matrix-table th:nth-child(4),
+    .matrix-table th:nth-child(5),
+    .matrix-table th:nth-child(6) {
+        min-width: 100px;
+        width: 100px;
+    }
+    
+    .matrix-table td:nth-child(3),
+    .matrix-table td:nth-child(4),
+    .matrix-table td:nth-child(5),
+    .matrix-table td:nth-child(6) {
+        min-width: 100px;
+        width: 100px;
+    }
+    
+    .matrix-cell {
+        position: relative;
+        min-height: 50px;
+        padding: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+    
+    /* Color coding for different states */
+    .matrix-cell.empty {
+        background: #FFEBEE;  /* Light red for empty */
+        border-color: #FFCDD2;
+    }
+    
+    .matrix-cell.has-single-exam {
+        background: #E8F5E9;  /* Light green for single exam */
+        border-color: #C8E6C9;
+    }
+    
+    .matrix-cell.has-multiple-exams {
+        background: #E3F2FD;  /* Light blue for multiple exams */
+        border-color: #90CAF9;
+    }
+    
+    .matrix-cell:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+    
+    /* Exam count display */
+    .exam-count {
+        display: block;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+    
+    .exam-count.count-0 {
+        color: #D32F2F;  /* Red for 0 */
+    }
+    
+    .exam-count.count-1 {
+        color: #388E3C;  /* Green for 1 */
+    }
+    
+    .exam-count.count-multiple {
+        color: #1976D2;  /* Blue for 2+ */
+    }
+    
+    /* Legacy support */
     .has-exam {
         background: #E8F5E9;
+    }
+    
+    /* Curriculum Mapping Column */
+    .curriculum-mapping {
+        padding: 6px;
+        background: #F8F9FA;
+        font-size: 11px;
+        max-width: 140px;
+        width: 140px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .curriculum-badge {
+        display: inline-block;
+        padding: 3px 6px;
+        background: #E3F2FD;
+        color: #1565C0;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 500;
+        white-space: nowrap;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .curriculum-badge.not-assigned {
+        background: #FFF3E0;
+        color: #E65100;
+        font-style: italic;
+    }
+    
+    /* Exam indicators container */
+    .exam-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        margin-top: 4px;
     }
     
     .exam-indicator {
@@ -153,7 +266,17 @@
         padding: 2px 6px;
         border-radius: 3px;
         font-size: 10px;
+        font-weight: bold;
+        color: white;
         margin: 2px;
+    }
+    
+    .exam-indicator.exam-review {
+        background: #4CAF50;
+    }
+    
+    .exam-indicator.exam-quarterly {
+        background: #FF9800;
     }
     
     .exam-review {
@@ -282,6 +405,98 @@
     .matrix-content.loading {
         opacity: 0.5;
         pointer-events: none;
+    }
+    
+    /* Admin Section Styles */
+    .admin-section {
+        background: #FFF3E0;
+        border: 2px solid #FF9800;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 40px;
+        box-shadow: 0 5px 15px rgba(255, 152, 0, 0.1);
+    }
+    
+    .admin-section .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #FF9800;
+    }
+    
+    .admin-section .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #E65100;
+    }
+    
+    .admin-section .section-subtitle {
+        color: #F57C00;
+        font-size: 14px;
+    }
+    
+    .admin-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .admin-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .admin-table thead {
+        background: #FF9800;
+        color: white;
+    }
+    
+    .admin-table th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    .admin-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #F0F0F0;
+    }
+    
+    .admin-table tbody tr:hover {
+        background: #FFF9F0;
+    }
+    
+    .curriculum-select {
+        padding: 4px 8px;
+        border: 1px solid #DDD;
+        border-radius: 4px;
+        font-size: 12px;
+    }
+    
+    .btn-edit {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-right: 5px;
+    }
+    
+    .btn-delete {
+        background: #F44336;
+        color: white;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
     }
     
     /* Hide cells based on active filter */
@@ -539,7 +754,7 @@ console.groupEnd();
         
         <div class="class-grid">
             {% for class in classes_info %}
-            <div class="class-card">
+            <div class="class-card" onclick="openExamModal('{{ class.class_code }}', 'overview', '{{ class.access_level }}')" style="cursor: pointer;">
                 <div class="class-header">
                     <div class="class-name">{{ class.class_name }}</div>
                     <div class="class-badge badge-{{ class.access_level|lower }}">
@@ -631,6 +846,7 @@ console.groupEnd();
                 <thead>
                     <tr>
                         <th>Class</th>
+                        <th>Curriculum</th>
                         {% for timeslot in timeslots %}
                         <th data-timeslot="{{ timeslot }}" 
                             data-column-type="{% if 'Q' in timeslot %}quarterly{% else %}monthly{% endif %}"
@@ -644,18 +860,39 @@ console.groupEnd();
                     {% for class_code, slots in matrix_data.items %}
                     <tr>
                         <td><strong>{{ class_code }}</strong></td>
+                        <td class="curriculum-mapping">
+                            {% if slots.curriculum_mapping.combined != 'Not Assigned' %}
+                            <span class="curriculum-badge">{{ slots.curriculum_mapping.combined }}</span>
+                            {% else %}
+                            <span class="curriculum-badge not-assigned">Not Assigned</span>
+                            {% endif %}
+                        </td>
                         {% for timeslot in timeslots %}
                             {% with cell=slots|dict_get:timeslot %}
-                            <td class="matrix-cell {% if cell.has_exam %}has-exam{% endif %} {% if 'Q' in timeslot %}quarterly-column{% else %}monthly-column{% endif %}"
+                            {% with exam_count=cell|count_exams %}
+                            <td class="matrix-cell {{ exam_count|exam_count_class }} {% if 'Q' in timeslot %}quarterly-column{% else %}monthly-column{% endif %}"
                                 data-timeslot="{{ timeslot }}"
-                                data-column-type="{% if 'Q' in timeslot %}quarterly{% else %}monthly{% endif %}">
-                                {% if cell.review %}
-                                    <span class="exam-indicator exam-review" title="{{ cell.review.name }}">R</span>
-                                {% endif %}
-                                {% if cell.quarterly %}
-                                    <span class="exam-indicator exam-quarterly" title="{{ cell.quarterly.name }}">Q</span>
-                                {% endif %}
+                                data-column-type="{% if 'Q' in timeslot %}quarterly{% else %}monthly{% endif %}"
+                                data-exam-count="{{ exam_count }}"
+                                onclick="openExamModal('{{ class_code }}', '{{ timeslot }}', 'FULL')"
+                                style="cursor: pointer;">
+                                
+                                <!-- Exam count display -->
+                                <span class="exam-count {{ exam_count|exam_count_label_class }}">
+                                    {{ exam_count }}
+                                </span>
+                                
+                                <!-- Exam indicators -->
+                                <div class="exam-indicators">
+                                    {% if cell.review %}
+                                        <span class="exam-indicator exam-review" title="{{ cell.review.name }}">R</span>
+                                    {% endif %}
+                                    {% if cell.quarterly %}
+                                        <span class="exam-indicator exam-quarterly" title="{{ cell.quarterly.name }}">Q</span>
+                                    {% endif %}
+                                </div>
                             </td>
+                            {% endwith %}
                             {% endwith %}
                         {% endfor %}
                     </tr>
@@ -664,13 +901,140 @@ console.groupEnd();
             </table>
         </div>
         
-        <div style="margin-top: 15px; display: flex; gap: 20px; font-size: 12px;">
-            <span><span class="exam-indicator exam-review">R</span> = Review Exam</span>
-            <span><span class="exam-indicator exam-quarterly">Q</span> = Quarterly Exam</span>
+        <!-- Legend for color coding and exam types -->
+        <div style="margin-top: 20px; padding: 15px; background: #F5F5F5; border-radius: 8px;">
+            <div style="margin-bottom: 10px; font-weight: bold; color: #333;">Legend:</div>
+            <div style="display: flex; gap: 30px; flex-wrap: wrap; font-size: 13px; align-items: center;">
+                <!-- Color coding legend -->
+                <div style="display: flex; gap: 15px;">
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="display: inline-block; width: 20px; height: 20px; background: #FFEBEE; border: 2px solid #FFCDD2; border-radius: 4px;"></span>
+                        Empty (0 exams)
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="display: inline-block; width: 20px; height: 20px; background: #E8F5E9; border: 2px solid #C8E6C9; border-radius: 4px;"></span>
+                        Single Exam (1)
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="display: inline-block; width: 20px; height: 20px; background: #E3F2FD; border: 2px solid #90CAF9; border-radius: 4px;"></span>
+                        Multiple Exams (2+)
+                    </span>
+                </div>
+                
+                <!-- Separator -->
+                <div style="width: 1px; height: 20px; background: #CCC;"></div>
+                
+                <!-- Exam type legend with better styling -->
+                <div style="display: flex; gap: 20px;">
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="display: inline-block; padding: 2px 6px; background: #4CAF50; color: white; border-radius: 3px; font-weight: bold; font-size: 11px;">R</span>
+                        = Review Exam
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 5px;">
+                        <span style="display: inline-block; padding: 2px 6px; background: #FF9800; color: white; border-radius: 3px; font-weight: bold; font-size: 11px;">Q</span>
+                        = Quarterly Exam
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
     
     {% endif %}
+    
+    <!-- Admin-Only Curriculum Management Section -->
+    {% if user.is_superuser or user.is_staff %}
+    <div class="admin-section">
+        <div class="section-header">
+            <div class="section-title">🔐 Admin: Curriculum Management</div>
+            <div class="section-subtitle">Manage class-curriculum mappings and class configurations</div>
+        </div>
+        
+        <div class="admin-controls">
+            <button class="btn btn-primary" onclick="showCreateClassDialog()">
+                <i class="fas fa-plus"></i> Create New Class
+            </button>
+            <button class="btn btn-secondary" onclick="refreshClassList()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+        
+        <div class="admin-classes-table">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Class Code</th>
+                        <th>Class Name</th>
+                        <th>Current Curriculum</th>
+                        <th>Program</th>
+                        <th>Sub-Program</th>
+                        <th>Level</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminClassTableBody">
+                    <!-- Dynamically populated -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    
+</div>
+
+<!-- Create/Edit Class Modal -->
+<div id="classManagementModal" class="modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="classModalTitle">Create New Class</h4>
+                <button type="button" class="close-modal" onclick="closeClassModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="classForm">
+                    <div class="form-group">
+                        <label>Class Code:</label>
+                        <input type="text" id="classCode" class="form-control" placeholder="e.g., CLASS_1A" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Class Name:</label>
+                        <input type="text" id="className" class="form-control" placeholder="e.g., Grade 1 Section A" required>
+                    </div>
+                    
+                    <hr>
+                    <h5>Curriculum Mapping</h5>
+                    
+                    <div class="form-group">
+                        <label>Program:</label>
+                        <select id="programSelect" class="form-control" onchange="loadSubPrograms()">
+                            <option value="">-- Select Program --</option>
+                            <option value="CORE">PRIME CORE</option>
+                            <option value="ASCENT">PRIME ASCENT</option>
+                            <option value="EDGE">PRIME EDGE</option>
+                            <option value="PINNACLE">PRIME PINNACLE</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Sub-Program:</label>
+                        <select id="subProgramSelect" class="form-control" onchange="loadLevels()" disabled>
+                            <option value="">-- Select Sub-Program --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Level:</label>
+                        <select id="levelSelect" class="form-control" disabled>
+                            <option value="">-- Select Level --</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeClassModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveClass()">Save Class</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Dynamic Updates Script -->
@@ -991,4 +1355,16 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('[UNIFIED_VIEW] Initialization complete');
 });
 </script>
+
+<!-- Include Exam Management Modal -->
+{% include 'primepath_routinetest/includes/exam_management_modal.html' %}
+
+<!-- Exam Management Script -->
+<script src="{% static 'js/routinetest/exam-management.js' %}"></script>
+
+<!-- Curriculum Management Script (Admin Only) -->
+{% if user.is_superuser or user.is_staff %}
+<script src="{% static 'js/routinetest/curriculum-management.js' %}"></script>
+{% endif %}
+
 {% endblock %}

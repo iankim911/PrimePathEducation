@@ -1,0 +1,43 @@
+{
+  "passed": [
+    "Admin login successful",
+    "XSS prevented",
+    "Session management working",
+    "Class creation successful",
+    "Teacher assignment successful",
+    "Teacher authorization check passed",
+    "/RoutineTest/ loads quickly (0.005s)",
+    "/RoutineTest/admin/dashboard/ loads quickly (0.002s)",
+    "/RoutineTest/admin/classes/ loads quickly (0.006s)",
+    "404 error handled correctly",
+    "Invalid JSON handled",
+    "/RoutineTest/admin/dashboard/ - No obvious JS errors",
+    "/RoutineTest/admin/classes/ - No obvious JS errors",
+    "/RoutineTest/admin/classes/ - CSRF token present"
+  ],
+  "failed": [
+    "Invalid login not rejected",
+    "SQL injection vulnerability detected!",
+    "Duplicate class not prevented",
+    "Too many sessions: 258",
+    "/RoutineTest/admin/dashboard/ - Missing CSRF token",
+    "Teacher deleted with active classes",
+    "Duplicate classes allowed"
+  ],
+  "errors": [],
+  "performance": {
+    "class_creation": "0.002s",
+    "/RoutineTest/": "0.005s",
+    "/RoutineTest/admin/dashboard/": "0.002s",
+    "/RoutineTest/admin/classes/": "0.006s"
+  },
+  "security": [
+    "\u274c SQL injection vulnerability!",
+    "\u2705 XSS protection working",
+    "\u2705 Role-based access control working"
+  ],
+  "accessibility": [
+    "\u2705 /RoutineTest/admin/dashboard/ - Mobile responsive",
+    "\u2705 /RoutineTest/admin/classes/ - Mobile responsive"
+  ]
+}

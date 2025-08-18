@@ -1,0 +1,156 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* BUILDER: Simple login styles for Day 1 MVP */
+    .login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .login-header h1 {
+        color: #2E7D32;
+        font-size: 28px;
+    }
+    
+    .login-header p {
+        color: #666;
+        margin-top: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #2E7D32;
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .remember-me input {
+        margin-right: 8px;
+    }
+    
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        background: #2E7D32;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    
+    .btn-login:hover {
+        background: #1B5E20;
+    }
+    
+    .role-info {
+        margin-top: 30px;
+        padding: 15px;
+        background: #F5F5F5;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    
+    .role-info h3 {
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .role-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .role-list li {
+        padding: 5px 0;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-header">
+        <h1>🎓 RoutineTest Login</h1>
+        <p>Sign in to access your dashboard</p>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" style="padding: 10px; margin-bottom: 20px; border-radius: 5px; 
+                {% if message.tags == 'error' %}background: #FFEBEE; color: #C62828;{% else %}background: #E8F5E9; color: #2E7D32;{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post" action="{% url 'RoutineTest:login' %}">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autofocus>
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        
+        <div class="remember-me">
+            <input type="checkbox" id="remember_me" name="remember_me">
+            <label for="remember_me">Remember me for 2 weeks</label>
+        </div>
+        
+        <button type="submit" class="btn-login">Login</button>
+    </form>
+    
+    <!-- BUILDER: Role information for Day 1 testing -->
+    <div class="role-info">
+        <h3>Test Accounts (Day 1)</h3>
+        <ul class="role-list">
+            <li><strong>Admin:</strong> Superuser account</li>
+            <li><strong>Teacher:</strong> User with Teacher profile</li>
+            <li><strong>Student:</strong> Regular user account</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

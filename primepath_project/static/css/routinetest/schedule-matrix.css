@@ -177,8 +177,27 @@
 }
 
 .matrix-table th:nth-child(2) {
-    min-width: 180px;
+    min-width: 120px;
+    max-width: 140px;
+    width: 140px;
     background: #266B2A;
+}
+
+/* Quarter columns (Q1-Q4) - make them wider */
+.matrix-table th:nth-child(3),
+.matrix-table th:nth-child(4),
+.matrix-table th:nth-child(5),
+.matrix-table th:nth-child(6) {
+    min-width: 100px;
+    width: 100px;
+}
+
+.matrix-table td:nth-child(3),
+.matrix-table td:nth-child(4),
+.matrix-table td:nth-child(5),
+.matrix-table td:nth-child(6) {
+    min-width: 100px;
+    width: 100px;
 }
 
 .matrix-table tbody tr {
@@ -449,21 +468,26 @@
    ============================================ */
 
 .curriculum-mapping {
-    padding: 8px;
+    padding: 6px;
     background: #F8F9FA;
-    font-size: 12px;
+    font-size: 11px;
+    max-width: 140px;
+    width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .curriculum-badge {
     display: inline-block;
-    padding: 4px 8px;
+    padding: 3px 6px;
     background: #E3F2FD;
     color: #1565C0;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
     white-space: nowrap;
-    max-width: 160px;
+    max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -826,6 +850,33 @@
     
     .matrix-table {
         min-width: 800px;
+    }
+    
+    /* Responsive curriculum column */
+    .matrix-table th:nth-child(2),
+    .curriculum-mapping {
+        min-width: 100px;
+        max-width: 100px;
+        width: 100px;
+    }
+    
+    /* Responsive quarter columns */
+    .matrix-table th:nth-child(3),
+    .matrix-table th:nth-child(4),
+    .matrix-table th:nth-child(5),
+    .matrix-table th:nth-child(6),
+    .matrix-table td:nth-child(3),
+    .matrix-table td:nth-child(4),
+    .matrix-table td:nth-child(5),
+    .matrix-table td:nth-child(6) {
+        min-width: 80px;
+        width: 80px;
+    }
+    
+    .curriculum-badge {
+        max-width: 90px;
+        font-size: 9px;
+        padding: 2px 4px;
     }
     
     .modal-content {

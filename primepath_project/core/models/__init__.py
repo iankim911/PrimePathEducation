@@ -10,7 +10,7 @@ All existing imports will continue to work:
 """
 
 # Import all models from their respective modules
-from .user import School, Teacher
+from .user import School, Teacher, Student
 from .curriculum import Program, SubProgram, CurriculumLevel
 from .placement import PlacementRule, ExamLevelMapping
 
@@ -18,6 +18,7 @@ from .placement import PlacementRule, ExamLevelMapping
 __all__ = [
     'School',
     'Teacher',
+    'Student',
     'Program',
     'SubProgram',
     'CurriculumLevel',

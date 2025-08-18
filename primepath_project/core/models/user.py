@@ -1,5 +1,5 @@
 """
-User-related models: Teacher, School
+User-related models: Teacher, School, Student
 Part of Phase 9: Model Modularization
 Enhanced with Django User integration for authentication
 """
@@ -9,6 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 import logging
 import json
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -140,3 +141,65 @@ def create_or_update_teacher_profile(sender, instance, created, **kwargs):
             except Teacher.DoesNotExist:
                 # No teacher profile exists, which is fine for non-staff users
                 pass
+
+
+class Student(models.Model):
+    """Student model for enrollment and tracking"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Link to Django User for authentication
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='student_profile',
+        null=True,
+        blank=True,
+        help_text="Django user account for authentication"
+    )
+    
+    # Student information
+    name = models.CharField(max_length=100)
+    current_grade_level = models.CharField(max_length=50)
+    date_of_birth = models.DateField(null=True, blank=True)
+    
+    # Parent/Guardian information
+    parent_phone = models.CharField(max_length=20, blank=True)
+    parent_email = models.EmailField(blank=True)
+    
+    # Additional information
+    notes = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['current_grade_level']),
+            models.Index(fields=['is_active']),
+        ]
+    
+    def __str__(self):
+        return f"{self.name} ({self.current_grade_level})"
+    
+    def get_age(self):
+        """Calculate student's age from date of birth"""
+        if self.date_of_birth:
+            from datetime import date
+            today = date.today()
+            age = today.year - self.date_of_birth.year
+            if (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day):
+                age -= 1
+            return age
+        return None
+    
+    @property
+    def enrolled_classes(self):
+        """Get all classes this student is enrolled in"""
+        from primepath_routinetest.models import Class
+        return Class.objects.filter(
+            enrollments__student=self,
+            enrollments__status='active'
+        )

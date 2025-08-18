@@ -16,7 +16,7 @@ from datetime import datetime
 
 from primepath_routinetest.models import (
     Exam, ExamScheduleMatrix, TeacherClassAssignment,
-    ClassExamSchedule
+    ClassExamSchedule, ClassCurriculumMapping
 )
 from core.models import Teacher
 from django.db.models import Q, Prefetch
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 def get_class_curriculum_mapping(class_code, academic_year):
     """
     Get the curriculum (Program × SubProgram × Level) mapping for a class.
-    Returns the most recent exam's curriculum for both Monthly and Quarterly types.
+    First checks ClassCurriculumMapping table, then falls back to recent exam data.
     """
     curriculum_info = {
         'review': None,
@@ -35,65 +35,80 @@ def get_class_curriculum_mapping(class_code, academic_year):
         'combined': None
     }
     
-    # Get most recent Review exam for this class
-    # For SQLite compatibility, we need to filter in Python
-    review_exams = Exam.objects.filter(
-        exam_type='REVIEW',
-        academic_year=academic_year,
-        curriculum_level__isnull=False
-    ).select_related(
-        'curriculum_level__subprogram__program'
-    ).order_by('-created_at')
+    # First check if there's a direct curriculum mapping for this class
+    primary_mapping = ClassCurriculumMapping.get_primary_curriculum(class_code, academic_year)
     
-    # Find the exam that includes this class
-    review_exam = None
-    for exam in review_exams:
-        if exam.class_codes and class_code in exam.class_codes:
-            review_exam = exam
-            break
-    
-    if review_exam and review_exam.curriculum_level:
-        level = review_exam.curriculum_level
+    if primary_mapping:
+        # Use the mapped curriculum
+        level = primary_mapping
+        formatted_display = f"{level.subprogram.program.name} × {level.subprogram.name} × Level {level.level_number}"
         curriculum_info['review'] = {
-            'program': level.subprogram.program.name if level.subprogram else '',
-            'subprogram': level.subprogram.name if level.subprogram else '',
+            'program': level.subprogram.program.name,
+            'subprogram': level.subprogram.name,
             'level': level.level_number,
-            'display': f"{level.subprogram.program.name} {level.subprogram.name} L{level.level_number}" if level.subprogram else ''
+            'display': formatted_display
         }
-    
-    # Get most recent Quarterly exam for this class
-    # For SQLite compatibility, we need to filter in Python
-    quarterly_exams = Exam.objects.filter(
-        exam_type='QUARTERLY',
-        academic_year=academic_year,
-        curriculum_level__isnull=False
-    ).select_related(
-        'curriculum_level__subprogram__program'
-    ).order_by('-created_at')
-    
-    # Find the exam that includes this class
-    quarterly_exam = None
-    for exam in quarterly_exams:
-        if exam.class_codes and class_code in exam.class_codes:
-            quarterly_exam = exam
-            break
-    
-    if quarterly_exam and quarterly_exam.curriculum_level:
-        level = quarterly_exam.curriculum_level
-        curriculum_info['quarterly'] = {
-            'program': level.subprogram.program.name if level.subprogram else '',
-            'subprogram': level.subprogram.name if level.subprogram else '',
-            'level': level.level_number,
-            'display': f"{level.subprogram.program.name} {level.subprogram.name} L{level.level_number}" if level.subprogram else ''
-        }
-    
-    # Combined display (prefer Review if available, otherwise Quarterly)
-    if curriculum_info['review']:
-        curriculum_info['combined'] = curriculum_info['review']['display']
-    elif curriculum_info['quarterly']:
-        curriculum_info['combined'] = curriculum_info['quarterly']['display']
+        curriculum_info['quarterly'] = curriculum_info['review']
+        curriculum_info['combined'] = formatted_display
     else:
-        curriculum_info['combined'] = 'Not Assigned'
+        # Fall back to checking recent exams for curriculum info
+        # Get most recent Review exam for this class
+        review_exams = Exam.objects.filter(
+            exam_type='REVIEW',
+            academic_year=academic_year,
+            curriculum_level__isnull=False
+        ).select_related(
+            'curriculum_level__subprogram__program'
+        ).order_by('-created_at')
+        
+        # Find the exam that includes this class
+        review_exam = None
+        for exam in review_exams:
+            if exam.class_codes and class_code in exam.class_codes:
+                review_exam = exam
+                break
+        
+        if review_exam and review_exam.curriculum_level:
+            level = review_exam.curriculum_level
+            curriculum_info['review'] = {
+                'program': level.subprogram.program.name if level.subprogram else '',
+                'subprogram': level.subprogram.name if level.subprogram else '',
+                'level': level.level_number,
+                'display': f"{level.subprogram.program.name} × {level.subprogram.name} × Level {level.level_number}" if level.subprogram else ''
+            }
+        
+        # Get most recent Quarterly exam for this class
+        quarterly_exams = Exam.objects.filter(
+            exam_type='QUARTERLY',
+            academic_year=academic_year,
+            curriculum_level__isnull=False
+        ).select_related(
+            'curriculum_level__subprogram__program'
+        ).order_by('-created_at')
+        
+        # Find the exam that includes this class
+        quarterly_exam = None
+        for exam in quarterly_exams:
+            if exam.class_codes and class_code in exam.class_codes:
+                quarterly_exam = exam
+                break
+        
+        if quarterly_exam and quarterly_exam.curriculum_level:
+            level = quarterly_exam.curriculum_level
+            curriculum_info['quarterly'] = {
+                'program': level.subprogram.program.name if level.subprogram else '',
+                'subprogram': level.subprogram.name if level.subprogram else '',
+                'level': level.level_number,
+                'display': f"{level.subprogram.program.name} × {level.subprogram.name} × Level {level.level_number}" if level.subprogram else ''
+            }
+        
+        # Combined display (prefer Review if available, otherwise Quarterly)
+        if curriculum_info['review']:
+            curriculum_info['combined'] = curriculum_info['review']['display']
+        elif curriculum_info['quarterly']:
+            curriculum_info['combined'] = curriculum_info['quarterly']['display']
+        else:
+            curriculum_info['combined'] = 'Unassigned'
     
     return curriculum_info
 
@@ -148,6 +163,11 @@ def schedule_matrix_view(request):
         class_code = assignment.class_code
         # Get curriculum mappings for this class
         curriculum_info = get_class_curriculum_mapping(class_code, current_year)
+        
+        # DEBUG: Log curriculum data being passed to template
+        print(f"\n[CURRICULUM_DEBUG] Monthly Matrix - Class: {class_code}")
+        print(f"[CURRICULUM_DEBUG] Curriculum Info: {curriculum_info}")
+        print(f"[CURRICULUM_DEBUG] Combined: {curriculum_info.get('combined', 'None')}")
         
         monthly_matrix[class_code] = {
             'display_name': assignment.get_class_code_display(),
@@ -229,6 +249,13 @@ def schedule_matrix_view(request):
         'Q3': 'Q3 (Jul-Sep)',
         'Q4': 'Q4 (Oct-Dec)'
     }
+    
+    # DEBUG: Log monthly matrix data being passed to template
+    print(f"\n[TEMPLATE_DEBUG] Final monthly_matrix keys: {list(monthly_matrix.keys())}")
+    for class_code, class_data in monthly_matrix.items():
+        curriculum = class_data.get('curriculum_mapping', {})
+        print(f"[TEMPLATE_DEBUG] {class_code}: curriculum_mapping = {curriculum}")
+        print(f"[TEMPLATE_DEBUG] {class_code}: combined = {curriculum.get('combined', 'NOT_SET')}")
     
     context = {
         'teacher': teacher,

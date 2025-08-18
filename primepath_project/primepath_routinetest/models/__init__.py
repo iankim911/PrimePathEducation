@@ -18,6 +18,8 @@ from .class_schedule import ClassExamSchedule  # Class-specific scheduling
 from .class_access import TeacherClassAssignment, ClassAccessRequest, AccessAuditLog  # Teacher class access management
 from .exam_schedule_matrix import ExamScheduleMatrix  # Class × Timeslot Matrix
 from .curriculum_mapping import ClassCurriculumMapping  # Admin curriculum mapping
+from .class_model import Class, StudentEnrollment  # BUILDER: Day 2 - Class management
+from .exam_management import RoutineExam, ExamAssignment, StudentExamAssignment, ExamAttempt  # BUILDER: Day 4 - Exam management
 
 # Re-export all models for backward compatibility
 __all__ = [
@@ -34,4 +36,10 @@ __all__ = [
     'AccessAuditLog',  # Access audit logging
     'ExamScheduleMatrix',  # Class × Timeslot Matrix
     'ClassCurriculumMapping',  # Admin curriculum mapping
+    'Class',  # BUILDER: Day 2
+    'StudentEnrollment',  # BUILDER: Day 2
+    'RoutineExam',  # BUILDER: Day 4
+    'ExamAssignment',  # BUILDER: Day 4
+    'StudentExamAssignment',  # BUILDER: Day 4
+    'ExamAttempt',  # BUILDER: Day 4
 ]
