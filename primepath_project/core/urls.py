@@ -12,7 +12,7 @@ The URLs have been organized into logical modules:
 
 All URL patterns are imported here to maintain compatibility.
 """
-from django.urls import path
+from django.urls import path, include
 from .dashboard_urls import urlpatterns as dashboard_patterns
 from .admin_urls import urlpatterns as admin_patterns
 from .api_urls import urlpatterns as api_patterns
@@ -26,3 +26,8 @@ urlpatterns.extend(dashboard_patterns)
 urlpatterns.extend(admin_patterns)
 urlpatterns.extend(api_patterns)
 urlpatterns.extend(auth_patterns)
+
+# Add registration URLs
+urlpatterns += [
+    path('', include('core.urls_registration')),
+]

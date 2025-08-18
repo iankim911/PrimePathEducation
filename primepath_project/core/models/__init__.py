@@ -13,6 +13,10 @@ All existing imports will continue to work:
 from .user import School, Teacher, Student
 from .curriculum import Program, SubProgram, CurriculumLevel
 from .placement import PlacementRule, ExamLevelMapping
+from .user_profile import (
+    UserProfile, SocialAuthToken, EmailVerification,
+    PhoneVerification, LoginHistory
+)
 
 # Re-export all models for backward compatibility
 __all__ = [
@@ -24,4 +28,9 @@ __all__ = [
     'CurriculumLevel',
     'PlacementRule',
     'ExamLevelMapping',
+    'UserProfile',
+    'SocialAuthToken',
+    'EmailVerification',
+    'PhoneVerification',
+    'LoginHistory',
 ]
