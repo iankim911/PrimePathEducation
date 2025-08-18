@@ -1,0 +1,294 @@
+/**
+ * CRITICAL DESKTOP LAYOUT PROTECTION for PrimePath
+ * VERSION: 2.0 - Bulletproof Implementation
+ * 
+ * Ensures proper layout on desktop viewports (≥ 768px)
+ * Specifically fixes flexbox layouts and overrides mobile CSS conflicts
+ * 
+ * ISSUE FIXED: Universal max-width: 100vw rule breaking desktop layouts
+ * ROOT CAUSE: mobile-responsive.css universal selector override
+ * SOLUTION: Multi-layer protection with high specificity
+ * 
+ * Created: August 16, 2025
+ * Updated: August 16, 2025 (Comprehensive fix)
+ */
+
+/* ============================================
+   GLOBAL DESKTOP PROTECTION
+   ============================================ */
+@media only screen and (min-width: 768px) {
+    /* Reset any problematic mobile rules */
+    html *, 
+    body *, 
+    .access-container,
+    .access-container *,
+    .left-panel,
+    .right-panel {
+        max-width: none !important;
+    }
+    
+    /* Ensure proper box-sizing inheritance */
+    html {
+        box-sizing: border-box;
+    }
+    
+    *, *:before, *:after {
+        box-sizing: inherit;
+    }
+}
+
+/* ============================================
+   DESKTOP-ONLY STYLES (> 1024px)
+   ============================================ */
+@media only screen and (min-width: 1025px) {
+    /* Reset any mobile max-width constraints */
+    * {
+        max-width: none !important;
+    }
+    
+    /* Ensure proper box-sizing */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+    
+    /* Container width management */
+    .container-fluid {
+        width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+    
+    /* BULLETPROOF CLASS ACCESS CONTAINER */
+    .access-container {
+        /* Force flexbox layout with maximum specificity */
+        display: -webkit-box !important;
+        display: -webkit-flex !important;
+        display: -ms-flexbox !important;
+        display: flex !important;
+        
+        /* Force row direction */
+        -webkit-box-orient: horizontal !important;
+        -webkit-box-direction: normal !important;
+        -webkit-flex-direction: row !important;
+        -ms-flex-direction: row !important;
+        flex-direction: row !important;
+        
+        /* Layout properties */
+        gap: 35px !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        position: relative !important;
+        
+        /* Alignment */
+        -webkit-box-align: start !important;
+        -webkit-align-items: flex-start !important;
+        -ms-flex-align: start !important;
+        align-items: flex-start !important;
+        
+        -webkit-box-pack: justify !important;
+        -webkit-justify-content: space-between !important;
+        -ms-flex-pack: justify !important;
+        justify-content: space-between !important;
+        
+        /* Reset any problematic styles */
+        float: none !important;
+        clear: both !important;
+        overflow: visible !important;
+        z-index: auto !important;
+    }
+    
+    /* BULLETPROOF LEFT PANEL */
+    .access-container .left-panel {
+        /* Flex properties with all prefixes */
+        -webkit-box-flex: 0 !important;
+        -webkit-flex: 0 0 60% !important;
+        -ms-flex: 0 0 60% !important;
+        flex: 0 0 60% !important;
+        
+        /* Width constraints */
+        width: 60% !important;
+        max-width: 60% !important;
+        min-width: 0 !important;
+        
+        /* Layout properties */
+        position: relative !important;
+        display: block !important;
+        float: none !important;
+        clear: none !important;
+        overflow: visible !important;
+        
+        /* Box model */
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+    
+    /* BULLETPROOF RIGHT PANEL */
+    .access-container .right-panel {
+        /* Flex properties with all prefixes */
+        -webkit-box-flex: 0 !important;
+        -webkit-flex: 0 0 38% !important;
+        -ms-flex: 0 0 38% !important;
+        flex: 0 0 38% !important;
+        
+        /* Width constraints */
+        width: 38% !important;
+        max-width: 38% !important;
+        min-width: 0 !important;
+        
+        /* Layout properties */
+        position: relative !important;
+        display: block !important;
+        float: none !important;
+        clear: none !important;
+        overflow: visible !important;
+        
+        /* Box model */
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+    
+    /* Ensure panels don't overflow */
+    .left-panel, .right-panel {
+        overflow: visible !important;
+        float: none !important;
+        position: relative !important;
+    }
+    
+    /* Fix any Bootstrap column conflicts */
+    .access-container > [class*="col-"] {
+        position: relative !important;
+        width: auto !important;
+        max-width: none !important;
+        flex: inherit !important;
+    }
+    
+    /* Ensure proper display for flex children */
+    .access-container > * {
+        flex-shrink: 0 !important;
+    }
+    
+    /* Debug helper - remove in production */
+    .access-container[data-debug="true"] {
+        border: 2px dashed red;
+    }
+    
+    .access-container[data-debug="true"] .left-panel {
+        border: 2px dashed blue;
+    }
+    
+    .access-container[data-debug="true"] .right-panel {
+        border: 2px dashed green;
+    }
+}
+
+/* ============================================
+   MEDIUM DESKTOP (1025px - 1440px)
+   ============================================ */
+@media only screen and (min-width: 1025px) and (max-width: 1440px) {
+    .container-fluid {
+        max-width: 1400px;
+    }
+}
+
+/* ============================================
+   LARGE DESKTOP (> 1440px)
+   ============================================ */
+@media only screen and (min-width: 1441px) {
+    .container-fluid {
+        max-width: 1600px;
+    }
+    
+    /* Slightly adjust panel ratios for larger screens */
+    .access-container .left-panel {
+        flex: 0 0 62% !important;
+        max-width: 62% !important;
+    }
+    
+    .access-container .right-panel {
+        flex: 0 0 36% !important;
+        max-width: 36% !important;
+    }
+}
+
+/* ============================================
+   ULTRA-WIDE DISPLAYS (> 1920px)
+   ============================================ */
+@media only screen and (min-width: 1921px) {
+    .container-fluid {
+        max-width: 1800px;
+    }
+}
+
+/* ============================================
+   FLEXBOX LAYOUT INSURANCE
+   ============================================ */
+@supports (display: flex) {
+    @media only screen and (min-width: 1025px) {
+        /* Double-ensure flexbox works */
+        .access-container {
+            display: -webkit-box !important;
+            display: -ms-flexbox !important;
+            display: flex !important;
+            -webkit-box-orient: horizontal !important;
+            -webkit-box-direction: normal !important;
+            -ms-flex-direction: row !important;
+            flex-direction: row !important;
+        }
+        
+        .access-container .left-panel {
+            -webkit-box-flex: 0 !important;
+            -ms-flex: 0 0 60% !important;
+            flex: 0 0 60% !important;
+        }
+        
+        .access-container .right-panel {
+            -webkit-box-flex: 0 !important;
+            -ms-flex: 0 0 38% !important;
+            flex: 0 0 38% !important;
+        }
+    }
+}
+
+/* ============================================
+   FALLBACK LAYOUT (if flexbox fails)
+   ============================================ */
+@media only screen and (min-width: 1025px) {
+    @supports not (display: flex) {
+        .access-container {
+            display: table !important;
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+        
+        .access-container .left-panel,
+        .access-container .right-panel {
+            display: table-cell !important;
+            vertical-align: top !important;
+        }
+        
+        .access-container .left-panel {
+            width: 60% !important;
+            padding-right: 35px !important;
+        }
+        
+        .access-container .right-panel {
+            width: 38% !important;
+        }
+    }
+}
+
+/* ============================================
+   CONSOLE DEBUGGING STYLES
+   ============================================ */
+@media only screen and (min-width: 1025px) {
+    body[data-desktop-fix-loaded="true"]::before {
+        content: "Desktop Layout Fix Active";
+        position: fixed;
+        top: -9999px;
+        left: -9999px;
+        display: none;
+    }
+}

@@ -265,31 +265,37 @@ class Exam(models.Model):
     # ==================== ROUTINETEST [RT]/[QTR] NAMING SYSTEM ====================
     
     def get_routinetest_prefix(self):
-        """Get [RT] or [QTR] prefix based on exam type"""
+        """Get [REVIEW] or [QUARTERLY] prefix based on exam type per PRD"""
         if self.exam_type == 'REVIEW':
-            return 'RT'
+            return 'REVIEW'
         elif self.exam_type == 'QUARTERLY':
-            return 'QTR'
-        return 'RT'  # Default fallback
+            return 'QUARTERLY'
+        return 'REVIEW'  # Default fallback
     
     
     def get_routinetest_display_name(self):
         """
-        Get RoutineTest display name in format:
-        [RT] - [January] - CORE Phonics Level 1
-        [QTR] - [Q1] - CORE Phonics Level 1
+        Get RoutineTest display name in format per PRD:
+        [REVIEW | January] - CORE Phonics Level 1
+        [QUARTERLY | Q1] - CORE Phonics Level 1
         """
         import logging
         logger = logging.getLogger(__name__)
         
-        # Start with prefix
+        # Build prefix with time period per PRD format
         prefix = self.get_routinetest_prefix()
-        parts = [f"[{prefix}]"]
         
-        # Add time period
-        time_period = self.get_time_period_display()
-        if time_period:
-            parts.append(f"[{time_period}]")
+        # Get just the month/quarter without year
+        if self.exam_type == 'REVIEW' and self.time_period_month:
+            month_display = dict(self.MONTH_CHOICES).get(self.time_period_month, self.time_period_month)
+            prefix_with_period = f"[{prefix} | {month_display}]"
+        elif self.exam_type == 'QUARTERLY' and self.time_period_quarter:
+            quarter_display = self.time_period_quarter  # Just Q1, Q2, etc
+            prefix_with_period = f"[{prefix} | {quarter_display}]"
+        else:
+            prefix_with_period = f"[{prefix}]"
+        
+        parts = [prefix_with_period]
         
         
         # Add curriculum level
@@ -316,7 +322,7 @@ class Exam(models.Model):
             "exam_id": str(self.id),
             "exam_type": self.exam_type,
             "prefix": prefix,
-            "time_period": time_period,
+            "time_period": self.get_time_period_display(),
             "curriculum": self.curriculum_level.full_name if self.curriculum_level else None,
             "generated_name": display_name
         }

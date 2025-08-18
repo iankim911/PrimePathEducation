@@ -126,12 +126,13 @@ console.groupEnd();
                                 {% for month in months %}
                                 {% with cell=class_data.cells|get_item:month %}
                                 <td>
-                                    <div class="matrix-cell {% if cell.exam_count > 0 %}has-exams{% else %}empty{% endif %} {{ cell.status|lower }}"
+                                    <div class="matrix-cell {% if cell.exam_count > 2 %}multiple-exams{% elif cell.exam_count > 0 %}has-exams{% else %}empty{% endif %} {{ cell.status|lower }}"
                                          data-cell-id="{{ cell.id }}"
                                          data-class="{{ class_code }}"
                                          data-period="{{ month }}"
                                          data-type="monthly"
-                                         title="Click to manage exams"
+                                         data-exam-count="{{ cell.exam_count }}"
+                                         title="📱 Click to view {{ cell.exam_count }} exam{{ cell.exam_count|pluralize }} • {{ cell_info.class_display }} - {{ month_names|get_item:month }}"
                                          style="cursor: pointer;">
                                         {% if cell.exam_count > 0 %}
                                             {% if cell.exams %}
@@ -144,13 +145,15 @@ console.groupEnd();
                                                     </div>
                                                 {% endfor %}
                                             {% else %}
-                                                <div class="cell-count">{{ cell.exam_count }} exam{{ cell.exam_count|pluralize }}</div>
+                                                <div class="cell-count">{{ cell.exam_count }}</div>
+                                                <div style="font-size: 10px; color: #666;">exam{{ cell.exam_count|pluralize }}</div>
                                             {% endif %}
                                         {% else %}
-                                            <div class="cell-empty" style="color: #999; font-size: 20px;">➖</div>
+                                            <div class="cell-empty" style="color: #999; font-size: 20px;">➕</div>
+                                            <div style="font-size: 9px; color: #999; margin-top: 2px;">Add Exam</div>
                                         {% endif %}
                                         {% if cell.scheduled_date %}
-                                        <div class="cell-date" style="font-size: 9px; color: #888; margin-top: 2px;">{{ cell.scheduled_date|date:"M d" }}</div>
+                                        <div class="cell-date" style="font-size: 9px; color: #888; margin-top: 2px;">📅 {{ cell.scheduled_date|date:"M d" }}</div>
                                         {% endif %}
                                     </div>
                                 </td>
@@ -201,12 +204,13 @@ console.groupEnd();
                                 {% for quarter in quarters %}
                                 {% with cell=class_data.cells|get_item:quarter %}
                                 <td>
-                                    <div class="matrix-cell {% if cell.exam_count > 0 %}has-exams{% else %}empty{% endif %} {{ cell.status|lower }}"
+                                    <div class="matrix-cell {% if cell.exam_count > 2 %}multiple-exams{% elif cell.exam_count > 0 %}has-exams{% else %}empty{% endif %} {{ cell.status|lower }}"
                                          data-cell-id="{{ cell.id }}"
                                          data-class="{{ class_code }}"
                                          data-period="{{ quarter }}"
                                          data-type="quarterly"
-                                         title="Click to manage exams"
+                                         data-exam-count="{{ cell.exam_count }}"
+                                         title="📱 Click to view {{ cell.exam_count }} exam{{ cell.exam_count|pluralize }} • {{ class_data.display_name }} - {{ quarter_names|get_item:quarter }}"
                                          style="cursor: pointer;">
                                         {% if cell.exam_count > 0 %}
                                             {% if cell.exams %}
@@ -219,13 +223,15 @@ console.groupEnd();
                                                     </div>
                                                 {% endfor %}
                                             {% else %}
-                                                <div class="cell-count">{{ cell.exam_count }} exam{{ cell.exam_count|pluralize }}</div>
+                                                <div class="cell-count">{{ cell.exam_count }}</div>
+                                                <div style="font-size: 10px; color: #666;">exam{{ cell.exam_count|pluralize }}</div>
                                             {% endif %}
                                         {% else %}
-                                            <div class="cell-empty" style="color: #999; font-size: 20px;">➖</div>
+                                            <div class="cell-empty" style="color: #999; font-size: 20px;">➕</div>
+                                            <div style="font-size: 9px; color: #999; margin-top: 2px;">Add Exam</div>
                                         {% endif %}
                                         {% if cell.scheduled_date %}
-                                        <div class="cell-date" style="font-size: 9px; color: #888; margin-top: 2px;">{{ cell.scheduled_date|date:"M d" }}</div>
+                                        <div class="cell-date" style="font-size: 9px; color: #888; margin-top: 2px;">📅 {{ cell.scheduled_date|date:"M d" }}</div>
                                         {% endif %}
                                     </div>
                                 </td>
@@ -245,23 +251,39 @@ console.groupEnd();
             </div>
         </div>
 
-        <!-- Legend -->
+        <!-- Enhanced Legend -->
         <div class="matrix-legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: #FFEBEE; border-color: #FFCDD2;"></div>
-                <span class="legend-label">No Exams</span>
+            <div class="legend-title">📊 Assignment Status Legend</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%); border-color: #EF5350;"></div>
+                    <span class="legend-label">❌ No Exams</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); border-color: #66BB6A;"></div>
+                    <span class="legend-label">✅ Has Exams</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%); border-color: #4CAF50; position: relative;">
+                        <div style="position: absolute; top: 1px; right: 1px; width: 8px; height: 8px; background: #2E7D32; border-radius: 50%;"></div>
+                    </div>
+                    <span class="legend-label">🔢 Multiple Exams</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%); border-color: #42A5F5;"></div>
+                    <span class="legend-label">📅 Scheduled</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); border-color: #AB47BC;"></div>
+                    <span class="legend-label">✔️ Completed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border-color: #FFA726;"></div>
+                    <span class="legend-label">📝 Draft</span>
+                </div>
             </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #E8F5E9; border-color: #A5D6A7;"></div>
-                <span class="legend-label">Has Exams</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #E3F2FD; border-color: #90CAF9;"></div>
-                <span class="legend-label">Scheduled</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #F3E5F5; border-color: #CE93D8;"></div>
-                <span class="legend-label">Completed</span>
+            <div class="legend-help">
+                💡 <strong>Tip:</strong> Click any cell to view and manage exam assignments
             </div>
         </div>
 

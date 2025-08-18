@@ -1,0 +1,579 @@
+<!-- Matrix Cell Detail Content (loaded via AJAX) -->
+<div class="cell-detail-container">
+    <!-- Cell Information -->
+    <div class="cell-info-section">
+        <h3>📍 {{ matrix_cell.get_class_display }} - {{ matrix_cell.get_time_period_display }}</h3>
+        <p class="cell-meta">
+            Academic Year: <strong>{{ matrix_cell.academic_year }}</strong> | 
+            Status: <span class="status-badge {{ matrix_cell.status|lower }}">{{ matrix_cell.get_status_icon }} {{ matrix_cell.get_status_display }}</span>
+        </p>
+    </div>
+
+    <!-- Schedule Information -->
+    <div class="schedule-section">
+        <h4>📅 Schedule Details</h4>
+        <form id="schedule-form" class="schedule-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_schedule">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="scheduled_date">Date:</label>
+                    <input type="date" 
+                           id="scheduled_date" 
+                           name="scheduled_date" 
+                           value="{{ matrix_cell.scheduled_date|date:'Y-m-d' }}"
+                           {% if not can_edit %}disabled{% endif %}>
+                </div>
+                
+                <div class="form-group">
+                    <label for="scheduled_start_time">Start Time:</label>
+                    <input type="time" 
+                           id="scheduled_start_time" 
+                           name="scheduled_start_time" 
+                           value="{{ matrix_cell.scheduled_start_time|time:'H:i' }}"
+                           {% if not can_edit %}disabled{% endif %}>
+                </div>
+                
+                <div class="form-group">
+                    <label for="scheduled_end_time">End Time:</label>
+                    <input type="time" 
+                           id="scheduled_end_time" 
+                           name="scheduled_end_time" 
+                           value="{{ matrix_cell.scheduled_end_time|time:'H:i' }}"
+                           {% if not can_edit %}disabled{% endif %}>
+                </div>
+            </div>
+            
+            {% if can_edit %}
+            <button type="submit" class="btn btn-small btn-primary">💾 Save Schedule</button>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Assigned Exams -->
+    <div class="exams-section">
+        <h4>📚 Assigned Exams ({{ assigned_exams|length }})</h4>
+        
+        {% if assigned_exams %}
+        <div class="assigned-exam-list">
+            {% for exam in assigned_exams %}
+            <div class="exam-card" data-exam-id="{{ exam.id }}">
+                <div class="exam-card-header">
+                    <span class="exam-name">{{ exam.name }}</span>
+                    <span class="exam-type-badge">{{ exam.type }}</span>
+                </div>
+                <div class="exam-card-body">
+                    <p class="exam-curriculum">📖 {{ exam.curriculum|default:"No curriculum" }}</p>
+                    <p class="exam-stats">
+                        Questions: {{ exam.questions }} | 
+                        Timer: {{ exam.timer }} mins
+                    </p>
+                    <div class="exam-status">
+                        {% with status=exam.status %}
+                        <span class="answer-status {{ status.status_color }}">
+                            {{ status.status_label }} ({{ status.percentage_complete }}%)
+                        </span>
+                        {% endwith %}
+                    </div>
+                </div>
+                <div class="exam-card-actions">
+                    <a href="{% url 'RoutineTest:preview_exam' exam.id %}" 
+                       target="_blank" 
+                       class="btn btn-small btn-secondary">👁️ Preview</a>
+                    {% if can_edit %}
+                    <button onclick="removeExam('{{ exam.id }}')" 
+                            class="btn btn-small btn-danger">🗑️ Remove</button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="no-exams">No exams assigned to this timeslot yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Add Exams -->
+    {% if can_edit %}
+    <div class="add-exams-section">
+        <h4>➕ Add Exams</h4>
+        
+        {% if available_exams %}
+        <div class="available-exam-list">
+            {% for exam in available_exams %}
+            <div class="available-exam-item" data-exam-id="{{ exam.id }}">
+                <div class="exam-checkbox">
+                    <input type="checkbox" 
+                           id="exam-{{ exam.id }}" 
+                           name="exam_ids" 
+                           value="{{ exam.id }}">
+                </div>
+                <label for="exam-{{ exam.id }}" class="exam-label">
+                    <div class="exam-title">{{ exam.name }}</div>
+                    <div class="exam-meta">
+                        {{ exam.get_exam_type_display_short }} | 
+                        {{ exam.total_questions }} questions | 
+                        {{ exam.timer_minutes }} mins
+                    </div>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button onclick="addSelectedExams()" class="btn btn-primary">
+            ➕ Add Selected Exams
+        </button>
+        {% else %}
+        <p class="no-available">No available exams for this time period type.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Completion Statistics -->
+    <div class="stats-section">
+        <h4>📊 Completion Statistics</h4>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">{{ completion_stats.total_students }}</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ completion_stats.completed }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ completion_stats.in_progress }}</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ completion_stats.completion_rate }}%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sharing Options -->
+    {% if can_edit and other_classes %}
+    <div class="sharing-section">
+        <h4>🔄 Share with Other Classes</h4>
+        <div class="sharing-options">
+            <select id="target-class" class="form-control">
+                <option value="">Select a class...</option>
+                {% for assignment in other_classes %}
+                <option value="{{ assignment.class_code }}">
+                    {{ assignment.get_class_code_display }}
+                </option>
+                {% endfor %}
+            </select>
+            <button onclick="shareWithClass()" class="btn btn-secondary">
+                📤 Share Schedule
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Cell Detail Styles */
+.cell-detail-container {
+    padding: 20px;
+}
+
+.cell-info-section {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+.cell-meta {
+    color: #666;
+    margin-top: 8px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.status-badge.empty { background: #F5F5F5; color: #999; }
+.status-badge.scheduled { background: #E3F2FD; color: #1976D2; }
+.status-badge.in_progress { background: #FFF3E0; color: #F57C00; }
+.status-badge.completed { background: #E8F5E9; color: #388E3C; }
+.status-badge.draft { background: #F3E5F5; color: #7B1FA2; }
+
+/* Schedule Form */
+.schedule-form {
+    background: #F5F5F5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+}
+
+/* Exam Cards */
+.assigned-exam-list {
+    display: grid;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.exam-card {
+    background: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.3s ease;
+}
+
+.exam-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.exam-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.exam-name {
+    font-weight: 600;
+    color: #263238;
+    font-size: 16px;
+}
+
+.exam-type-badge {
+    background: #2E7D32;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.exam-card-body {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.exam-card-body p {
+    margin: 5px 0;
+}
+
+.answer-status {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.answer-status.success { background: #E8F5E9; color: #2E7D32; }
+.answer-status.warning { background: #FFF3E0; color: #F57C00; }
+.answer-status.danger { background: #FFEBEE; color: #C62828; }
+
+.exam-card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Available Exams */
+.available-exam-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 15px 0;
+}
+
+.available-exam-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.available-exam-item:hover {
+    background: #F5F5F5;
+}
+
+.exam-checkbox {
+    margin-right: 12px;
+}
+
+.exam-label {
+    flex: 1;
+    cursor: pointer;
+}
+
+.exam-title {
+    font-weight: 500;
+    color: #263238;
+    margin-bottom: 4px;
+}
+
+.exam-meta {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Statistics */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.stat-item {
+    background: #F5F5F5;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2E7D32;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Sharing Section */
+.sharing-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #E0E0E0;
+}
+
+.sharing-options {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.sharing-options select {
+    flex: 1;
+    max-width: 300px;
+}
+
+/* Buttons */
+.btn-small {
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #2E7D32;
+    color: white;
+}
+
+.btn-secondary {
+    background: #558B57;
+    color: white;
+}
+
+.btn-danger {
+    background: #DC3545;
+    color: white;
+}
+
+/* Messages */
+.no-exams,
+.no-available {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    background: #F5F5F5;
+    border-radius: 8px;
+}
+</style>
+
+<script>
+// Console debugging for cell detail
+console.log('[MATRIX CELL] Detail loaded for cell:', '{{ matrix_cell.id }}');
+console.log('[MATRIX CELL] Class:', '{{ matrix_cell.class_code }}');
+console.log('[MATRIX CELL] Period:', '{{ matrix_cell.time_period_value }}');
+console.log('[MATRIX CELL] Exams:', {{ assigned_exams|length }});
+
+// Handle schedule form submission
+document.getElementById('schedule-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    console.log('[MATRIX CELL] Updating schedule');
+    
+    const formData = new FormData(this);
+    
+    fetch(`/RoutineTest/schedule-matrix/cell/{{ matrix_cell.id }}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[MATRIX CELL] Schedule update response:', data);
+        if (data.success) {
+            alert('Schedule updated successfully!');
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[MATRIX CELL ERROR]', error);
+        alert('Error updating schedule');
+    });
+});
+
+// Remove exam from cell
+function removeExam(examId) {
+    console.log('[MATRIX CELL] Removing exam:', examId);
+    
+    if (!confirm('Are you sure you want to remove this exam?')) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'remove_exam');
+    formData.append('exam_id', examId);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch(`/RoutineTest/schedule-matrix/cell/{{ matrix_cell.id }}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[MATRIX CELL] Remove exam response:', data);
+        if (data.success) {
+            // Remove exam card from UI
+            document.querySelector(`[data-exam-id="${examId}"]`).remove();
+            alert(data.message);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[MATRIX CELL ERROR]', error);
+        alert('Error removing exam');
+    });
+}
+
+// Add selected exams to cell
+function addSelectedExams() {
+    console.log('[MATRIX CELL] Adding selected exams');
+    
+    const checkboxes = document.querySelectorAll('input[name="exam_ids"]:checked');
+    if (checkboxes.length === 0) {
+        alert('Please select at least one exam');
+        return;
+    }
+    
+    const examIds = Array.from(checkboxes).map(cb => cb.value);
+    console.log('[MATRIX CELL] Selected exam IDs:', examIds);
+    
+    examIds.forEach(examId => {
+        const formData = new FormData();
+        formData.append('action', 'add_exam');
+        formData.append('exam_id', examId);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        fetch(`/RoutineTest/schedule-matrix/cell/{{ matrix_cell.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('[MATRIX CELL] Add exam response:', data);
+            if (data.success) {
+                // Reload cell content
+                openCellDetail('{{ matrix_cell.id }}');
+            }
+        })
+        .catch(error => {
+            console.error('[MATRIX CELL ERROR]', error);
+        });
+    });
+}
+
+// Share with another class
+function shareWithClass() {
+    console.log('[MATRIX CELL] Sharing with class');
+    
+    const targetClass = document.getElementById('target-class').value;
+    if (!targetClass) {
+        alert('Please select a class');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'share_with_class');
+    formData.append('target_class', targetClass);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch(`/RoutineTest/schedule-matrix/cell/{{ matrix_cell.id }}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[MATRIX CELL] Share response:', data);
+        if (data.success) {
+            alert(data.message);
+            document.getElementById('target-class').value = '';
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[MATRIX CELL ERROR]', error);
+        alert('Error sharing schedule');
+    });
+}
+</script>

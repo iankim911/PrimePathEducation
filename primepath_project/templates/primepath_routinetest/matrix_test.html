@@ -1,0 +1,115 @@
+{% extends 'routinetest_base.html' %}
+{% load static %}
+{% load matrix_filters %}
+
+{% block title %}Matrix Test - RoutineTest{% endblock %}
+
+{% block extra_css %}
+<style>
+.test-container {
+    padding: 20px;
+    background: white;
+    margin: 20px;
+    border-radius: 8px;
+}
+
+.test-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.test-table th,
+.test-table td {
+    border: 2px solid #333;
+    padding: 10px;
+    text-align: center;
+}
+
+.test-table th {
+    background: #2E7D32;
+    color: white;
+    font-weight: bold;
+}
+
+.test-cell {
+    min-height: 60px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.test-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="test-container">
+    <h1>🧪 Matrix Rendering Test</h1>
+    
+    <h2>Basic Table Test</h2>
+    <table class="test-table">
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>January</th>
+                <th>February</th>
+                <th>March</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Class 7A</td>
+                <td>
+                    <div class="test-cell">
+                        <div class="test-icon">📅</div>
+                        <div>1 exam</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="test-cell">
+                        <div class="test-icon">⬜</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="test-cell">
+                        <div class="test-icon">⬜</div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h2>Matrix Data Test</h2>
+    <p>Monthly matrix keys: {{ monthly_matrix.keys|length }}</p>
+    <p>Month names: {{ month_names|length }}</p>
+    
+    {% if monthly_matrix %}
+        <h3>Matrix Data Structure:</h3>
+        {% for class_code, class_data in monthly_matrix.items %}
+            <p><strong>{{ class_code }}</strong>: {{ class_data.display_name }} ({{ class_data.cells.keys|length }} cells)</p>
+        {% endfor %}
+    {% endif %}
+    
+    <h2>Template Filter Test</h2>
+    {% if monthly_matrix %}
+        {% for class_code, class_data in monthly_matrix.items %}
+            <p>Testing get_item filter for {{ class_code }}:</p>
+            <ul>
+            {% for month in months %}
+                {% with cell=class_data.cells|get_item:month %}
+                <li>{{ month }}: {% if cell %}{{ cell.icon }} ({{ cell.status }}){% else %}No data{% endif %}</li>
+                {% endwith %}
+            {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

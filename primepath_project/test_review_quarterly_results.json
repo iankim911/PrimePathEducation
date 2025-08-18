@@ -1,0 +1,14 @@
+{
+  "total_tests": 6,
+  "passed": 5,
+  "failed": 1,
+  "errors": 0,
+  "details": [
+    "\u274c Test data creation: UNIQUE constraint failed: core_teacher.email",
+    "\u2705 Backend filtering",
+    "\u2705 Exam counts",
+    "\u2705 Exam type field validity",
+    "\u2705 Filter accuracy",
+    "\u2705 No breaking changes detected"
+  ]
+}

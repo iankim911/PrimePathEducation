@@ -106,7 +106,7 @@ body.routinetest-theme::after {
 /* ============================================
    BUTTONS - BCG Green Theme
    ============================================ */
-.routinetest-theme .btn,
+.routinetest-theme .btn:not(.btn-danger):not(.btn-warning),
 .routinetest-theme .btn-primary {
     background-color: #2E7D32 !important;  /* Dark muted green button */
     border-color: #2E7D32 !important;
@@ -114,7 +114,7 @@ body.routinetest-theme::after {
     transition: all 0.3s ease;
 }
 
-.routinetest-theme .btn:hover,
+.routinetest-theme .btn:not(.btn-danger):not(.btn-warning):hover,
 .routinetest-theme .btn-primary:hover {
     background-color: #1B5E20 !important;  /* Deeper green hover */
     border-color: #1B5E20 !important;
@@ -140,6 +140,31 @@ body.routinetest-theme::after {
 .routinetest-theme .btn-success:hover {
     background-color: #66BB6A !important;
     border-color: #66BB6A !important;
+}
+
+/* DANGER & WARNING BUTTONS - Must stay their original colors for UX consistency */
+.routinetest-theme .btn-danger {
+    background-color: #dc3545 !important;  /* Standard Bootstrap danger red */
+    border-color: #dc3545 !important;
+    color: white !important;
+}
+
+.routinetest-theme .btn-danger:hover {
+    background-color: #c82333 !important;  /* Darker red on hover */
+    border-color: #bd2130 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.routinetest-theme .btn-warning {
+    background-color: #ffc107 !important;  /* Standard Bootstrap warning yellow */
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.routinetest-theme .btn-warning:hover {
+    background-color: #e0a800 !important;  /* Darker yellow on hover */
+    border-color: #d39e00 !important;
 }
 
 /* ============================================

@@ -1,0 +1,288 @@
+<!-- RoutineTest Navigation - VERSION 8.0 UNIFIED COMPLETE -->
+<!-- Cache Bust: {% now "U" %} -->
+<!-- NO OLD TABS - UNIFIED CLASSES & EXAMS ONLY -->
+<nav class="nav-tabs" id="routinetest-nav-v8-{{ request.user.id|default:'anon' }}" data-version="8.0" data-timestamp="{% now 'c' %}">
+    <ul style="display: flex; justify-content: space-between; width: 100%;">
+        <div style="display: flex; flex: 1;">
+            <!-- Dashboard -->
+            <li>
+                <a href="{% url 'RoutineTest:index' %}" 
+                   data-nav="dashboard"
+                   class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                   Dashboard
+                </a>
+            </li>
+            
+            <!-- Upload Exam -->
+            <li>
+                <a href="{% url 'RoutineTest:create_exam' %}" 
+                   data-nav="upload"
+                   class="{% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}">
+                   Upload Exam
+                </a>
+            </li>
+            
+            <!-- Answer Keys -->
+            <li>
+                <a href="{% url 'RoutineTest:exam_list' %}" 
+                   data-nav="keys"
+                   class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}">
+                   Answer Keys
+                </a>
+            </li>
+            
+            <!-- UNIFIED CLASSES & EXAMS TAB (VERSION 8) -->
+            <li id="unified-tab-v8">
+                <a href="{% url 'RoutineTest:classes_exams_unified' %}" 
+                   data-nav="classes-exams"
+                   class="{% if request.resolver_match.url_name == 'classes_exams_unified' or request.resolver_match.url_name == 'schedule_matrix' or request.resolver_match.url_name == 'curriculum_mapping' %}active{% endif %}">
+                   Classes & Exams
+                </a>
+            </li>
+            
+            <!-- Results & Analytics -->
+            <li>
+                <a href="{% url 'RoutineTest:session_list' %}" 
+                   data-nav="results"
+                   class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}">
+                   Results & Analytics
+                </a>
+            </li>
+            
+            <!-- Admin Only: Curriculum Mapping - Only show in Admin mode -->
+            {% if request.session.view_mode == 'Admin' and user.is_staff %}
+            <li id="curriculum-mapping-tab">
+                <a href="{% url 'RoutineTest:curriculum_mapping' %}" 
+                   data-nav="curriculum"
+                   style="background: linear-gradient(135deg, #FF6B00 0%, #FF9800 100%); position: relative;"
+                   class="{% if request.resolver_match.url_name == 'curriculum_mapping' %}active{% endif %}">
+                   🎯 Curriculum Mapping
+                   <span style="position: absolute; top: 2px; right: 5px; background: #FFD700; color: #1B5E20; font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: bold;">ADMIN</span>
+                </a>
+            </li>
+            
+            <!-- Admin Only: Teacher Assessment - Only show in Admin mode -->
+            <li id="teacher-assessment-tab">
+                <a href="{% url 'RoutineTest:teacher_assessment' %}" 
+                   data-nav="assessment"
+                   style="background: linear-gradient(135deg, #FF6B00 0%, #FF9800 100%); position: relative;"
+                   class="{% if request.resolver_match.url_name == 'teacher_assessment' %}active{% endif %}">
+                   👥 Teacher Assessment
+                   <span style="position: absolute; top: 2px; right: 5px; background: #FFD700; color: #1B5E20; font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: bold;">ADMIN</span>
+                </a>
+            </li>
+            {% endif %}
+        </div>
+        
+        <!-- User Section -->
+        <div style="display: flex; margin-left: auto;">
+            {% if user.is_authenticated %}
+                <li><a href="#" class="profile-link">👤 {{ user.username }}</a></li>
+                <li><a href="/logout/" style="background: #e74c3c;">Logout</a></li>
+            {% else %}
+                <li><a href="/PlacementTest/teacher/login/">Login</a></li>
+            {% endif %}
+        </div>
+    </ul>
+</nav>
+
+<!-- Aggressive Cache Busting and Verification Script -->
+<script>
+(function() {
+    const navVersion = 8.0;
+    const timestamp = new Date().getTime();
+    const userId = '{{ request.user.id|default:"anon" }}';
+    
+    console.group('%c[NAV_V8_UNIFIED] RoutineTest Navigation Version 8.0', 
+        'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 5px; font-weight: bold;');
+    
+    console.log('📌 Version:', navVersion);
+    console.log('⏱️ Timestamp:', new Date(timestamp).toISOString());
+    console.log('👤 User:', userId);
+    console.log('🔄 Cache Bust ID:', timestamp);
+    
+    // Log URL resolution from Django templates
+    console.group('🔗 URL Resolution from Django:');
+    console.log('Dashboard URL: {% url "RoutineTest:index" %}');
+    console.log('Create Exam URL: {% url "RoutineTest:create_exam" %}');
+    console.log('Exam List URL: {% url "RoutineTest:exam_list" %}');
+    console.log('Classes & Exams URL: {% url "RoutineTest:classes_exams_unified" %}');
+    console.log('Session List URL: {% url "RoutineTest:session_list" %}');
+    {% if is_head_teacher %}
+    console.log('Curriculum Mapping URL: {% url "RoutineTest:curriculum_mapping" %}');
+    {% endif %}
+    console.groupEnd();
+    
+    // Verify navigation structure
+    const nav = document.getElementById('routinetest-nav-v8-' + userId);
+    if (nav) {
+        console.log('✅ Navigation V8 element found');
+        
+        // Count and log all tabs
+        const allTabs = nav.querySelectorAll('a[data-nav]');
+        console.log('📊 Total navigation tabs:', allTabs.length);
+        
+        const tabStructure = [];
+        allTabs.forEach((tab, index) => {
+            const text = tab.textContent.trim();
+            const dataNav = tab.getAttribute('data-nav');
+            const href = tab.getAttribute('href');
+            
+            tabStructure.push({
+                index: index + 1,
+                text: text,
+                dataNav: dataNav,
+                href: href
+            });
+            
+            // Log each tab
+            const isUnified = dataNav === 'classes-exams';
+            const marker = isUnified ? '🎯' : '  ';
+            console.log(`${marker} Tab ${index + 1}: "${text}" [${dataNav}] → ${href}`);
+        });
+        
+        // Check for unified tab
+        const unifiedTab = nav.querySelector('a[data-nav="classes-exams"]');
+        if (unifiedTab) {
+            console.log('✅ UNIFIED TAB FOUND:', unifiedTab.textContent.trim());
+            
+            // Force visibility
+            const unifiedLi = document.getElementById('unified-tab-v8');
+            if (unifiedLi) {
+                unifiedLi.style.display = 'flex';
+                unifiedLi.style.visibility = 'visible';
+                unifiedLi.style.opacity = '1';
+                console.log('✅ Unified tab visibility enforced (consistent styling applied)');
+            }
+        } else {
+            console.error('❌ UNIFIED TAB NOT FOUND!');
+        }
+        
+        // Check for OLD tabs (should not exist)
+        const oldTabsCheck = Array.from(allTabs).filter(tab => {
+            const text = tab.textContent;
+            const dataNav = tab.getAttribute('data-nav');
+            return (text.includes('My Classes') && text.includes('Access')) || 
+                   text.includes('Exam Assignments') ||
+                   dataNav === 'my-classes' ||
+                   dataNav === 'exam-assignments';
+        });
+        
+        if (oldTabsCheck.length > 0) {
+            console.error('❌ OLD TABS DETECTED:', oldTabsCheck.map(t => t.textContent.trim()));
+            console.error('These tabs should be removed!');
+            
+            // Remove old tabs dynamically
+            oldTabsCheck.forEach(tab => {
+                const li = tab.closest('li');
+                if (li) {
+                    li.style.display = 'none';
+                    console.log('🗑️ Hiding old tab:', tab.textContent.trim());
+                }
+            });
+        } else {
+            console.log('✅ No old tabs found - navigation is clean');
+        }
+        
+        // Store navigation state
+        window.ROUTINETEST_NAV_V8 = {
+            version: navVersion,
+            timestamp: timestamp,
+            tabs: tabStructure,
+            unified: unifiedTab ? true : false
+        };
+        
+    } else {
+        console.error('❌ Navigation V8 element not found!');
+    }
+    
+    console.groupEnd();
+    
+    // Track any URL modifications
+    const originalUrls = {};
+    document.querySelectorAll('.nav-tabs a').forEach(link => {
+        const dataNav = link.getAttribute('data-nav');
+        if (dataNav) {
+            originalUrls[dataNav] = link.href;
+        }
+    });
+    
+    // Periodic check to ensure navigation stays correct and URLs aren't modified
+    let checkCount = 0;
+    const checkInterval = setInterval(function() {
+        checkCount++;
+        
+        const tabs = document.querySelectorAll('.nav-tabs a[data-nav]');
+        
+        // Check for URL modifications
+        tabs.forEach(tab => {
+            const dataNav = tab.getAttribute('data-nav');
+            if (dataNav && originalUrls[dataNav] && tab.href !== originalUrls[dataNav]) {
+                console.error(`[URL_MODIFIED] ${dataNav}: ${originalUrls[dataNav]} → ${tab.href}`);
+            }
+        });
+        
+        const hasOldTabs = Array.from(tabs).some(tab => 
+            tab.getAttribute('data-nav') === 'my-classes' || 
+            tab.getAttribute('data-nav') === 'exam-assignments'
+        );
+        
+        if (hasOldTabs) {
+            console.warn(`[NAV_V8_CHECK_${checkCount}] Old tabs detected at ${new Date().toISOString()}`);
+            // Hide them
+            tabs.forEach(tab => {
+                if (tab.getAttribute('data-nav') === 'my-classes' || 
+                    tab.getAttribute('data-nav') === 'exam-assignments') {
+                    tab.closest('li').style.display = 'none';
+                }
+            });
+        }
+        
+        if (checkCount >= 5) {
+            clearInterval(checkInterval);
+            console.log('[NAV_V8_MONITORING] Completed 5 checks, navigation stable');
+        }
+    }, 1000);
+})();
+
+// Simple navigation debouncing to prevent rapid clicking
+(function() {
+    let lastClickTime = 0;
+    const clickDelay = 300; // 300ms debounce
+    
+    document.addEventListener('click', function(e) {
+        const navLink = e.target.closest('.nav-tabs a');
+        if (navLink) {
+            const now = Date.now();
+            if (now - lastClickTime < clickDelay) {
+                e.preventDefault();
+                return false;
+            }
+            lastClickTime = now;
+        }
+    });
+})();
+</script>
+
+<style>
+/* Navigation V8 Specific Styles */
+#routinetest-nav-v8-{{ request.user.id|default:'anon' }} {
+    position: relative;
+    z-index: 1000;
+}
+
+#unified-tab-v8 {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Hide any old tabs if they somehow appear */
+li:has(a[data-nav="my-classes"]),
+li:has(a[data-nav="exam-assignments"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+</style>

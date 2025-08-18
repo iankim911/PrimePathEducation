@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-08-17T20:08:06.750569",
+  "summary": {
+    "total_tests": 9,
+    "passed": 7,
+    "failed": 2,
+    "success_rate": 77.77777777777779,
+    "total_duration": 0.37296295166015625
+  },
+  "performance_metrics": {
+    "Error Handler Initialization": 0.0003509521484375,
+    "Database Error Handling": 9.179115295410156e-05,
+    "Performance Monitoring": 0.10136795043945312,
+    "Matrix Operations": 0.007534027099609375,
+    "Exam Functionality": 0.001497030258178711,
+    "View Decorators": 0.0004076957702636719,
+    "Frontend Integration": 0.260178804397583,
+    "Cache and Performance": 0.001065969467163086,
+    "Security and Validation": 0.0004298686981201172
+  },
+  "errors": []
+}

@@ -51,8 +51,8 @@ def api_exam_detail(request, exam_id):
             'duration_minutes': exam.timer_minutes,
             'total_questions': exam.total_questions,
             'passing_score': exam.passing_score,
-            'has_audio': exam.audio_files.exists(),
-            'audio_count': exam.audio_files.count()
+            'has_audio': exam.routine_audio_files.exists(),
+            'audio_count': exam.routine_audio_files.count()
         }
         
         return JsonResponse({'status': 'success', 'exam': data})

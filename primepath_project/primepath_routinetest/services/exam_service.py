@@ -392,7 +392,7 @@ class ExamService:
             exam.pdf_file.delete()
         
         # Delete audio files
-        for audio in exam.audio_files.all():
+        for audio in exam.routine_audio_files.all():
             if audio.audio_file:
                 try:
                     audio.audio_file.delete()
@@ -532,88 +532,27 @@ class ExamService:
         teacher = None
     ) -> Dict[str, Any]:
         """
-        Phase 5: Manage student roster assignments for an exam.
+        REMOVED: Roster functionality has been completely removed.
+        This method is kept for backward compatibility but returns empty results.
+        The prime goal in Answer Keys section is to assign answers, not manage rosters.
         
         Args:
-            exam: Exam instance
-            roster_data: List of student data dictionaries
-            teacher: Teacher instance (for tracking who assigned)
+            exam: Exam instance (ignored)
+            roster_data: List of student data dictionaries (ignored)
+            teacher: Teacher instance (ignored)
             
         Returns:
-            Summary of roster operations
+            Empty summary indicating roster functionality is removed
         """
-        from ..models import StudentRoster
-        import json
-        
-        created_count = 0
-        updated_count = 0
-        errors = []
-        
-        # Log roster management start
-        console_log = {
-            "service": "ExamService",
-            "action": "manage_roster_start",
-            "exam_id": str(exam.id),
-            "exam_name": exam.name,
-            "roster_count": len(roster_data),
-            "teacher": teacher.name if teacher else None
-        }
-        logger.info(f"[PHASE5_ROSTER_MANAGE] {json.dumps(console_log)}")
-        print(f"[PHASE5_ROSTER_MANAGE] {json.dumps(console_log)}")
-        
-        for student_data in roster_data:
-            try:
-                # Check if roster entry already exists
-                roster_entry, created = StudentRoster.objects.update_or_create(
-                    exam=exam,
-                    student_name=student_data['student_name'],
-                    student_id=student_data.get('student_id', ''),
-                    defaults={
-                        'class_code': student_data['class_code'],
-                        'assigned_by': teacher,
-                        'notes': student_data.get('notes', '')
-                    }
-                )
-                
-                if created:
-                    created_count += 1
-                    console_log = {
-                        "action": "roster_entry_created",
-                        "student": student_data['student_name'],
-                        "class": student_data['class_code']
-                    }
-                    logger.info(f"[PHASE5_ROSTER_CREATED] {json.dumps(console_log)}")
-                else:
-                    updated_count += 1
-                    console_log = {
-                        "action": "roster_entry_updated",
-                        "student": student_data['student_name'],
-                        "class": student_data['class_code']
-                    }
-                    logger.info(f"[PHASE5_ROSTER_UPDATED] {json.dumps(console_log)}")
-                    
-            except Exception as e:
-                error_msg = f"Error processing {student_data.get('student_name', 'unknown')}: {str(e)}"
-                errors.append(error_msg)
-                logger.error(f"[PHASE5_ROSTER_ERROR] {error_msg}")
-        
-        # Log completion
-        console_log = {
-            "service": "ExamService",
-            "action": "manage_roster_complete",
-            "exam_id": str(exam.id),
-            "created": created_count,
-            "updated": updated_count,
-            "errors": len(errors)
-        }
-        logger.info(f"[PHASE5_ROSTER_COMPLETE] {json.dumps(console_log)}")
-        print(f"[PHASE5_ROSTER_COMPLETE] {json.dumps(console_log)}")
+        # Roster functionality completely removed - not needed for Answer Keys
+        logger.warning("[ROSTER_REMOVED] manage_student_roster called but roster functionality has been removed")
         
         return {
-            'created': created_count,
-            'updated': updated_count,
-            'errors': errors,
-            'total': len(roster_data)
+            'created': 0,
+            'updated': 0,
+            'errors': ['Roster functionality has been removed. The prime goal in Answer Keys section is to assign answers.'],
+            'total': 0,
+            'message': 'ROSTER FUNCTIONALITY REMOVED - Not needed for Answer Keys'
         }
     
     @staticmethod
@@ -623,68 +562,26 @@ class ExamService:
         teacher = None
     ) -> Dict[str, Any]:
         """
-        Phase 5: Bulk import student roster from CSV.
-        
-        Expected CSV format:
-        student_name,student_id,class_code,notes
+        REMOVED: Roster functionality has been completely removed.
         
         Args:
-            exam: Exam instance
-            csv_content: CSV content as string
-            teacher: Teacher instance
+            exam: Exam instance (ignored)
+            csv_content: CSV content as string (ignored)
+            teacher: Teacher instance (ignored)
             
         Returns:
-            Import results
+            Empty result indicating roster functionality is removed
         """
-        import csv
-        import io
+        # Roster functionality completely removed - not needed for Answer Keys
+        logger.warning("[ROSTER_REMOVED] bulk_import_roster called but roster functionality has been removed")
         
-        roster_data = []
-        errors = []
-        
-        try:
-            csv_reader = csv.DictReader(io.StringIO(csv_content))
-            
-            for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 (header is line 1)
-                try:
-                    if not row.get('student_name'):
-                        errors.append(f"Row {row_num}: Missing student name")
-                        continue
-                    
-                    if not row.get('class_code'):
-                        errors.append(f"Row {row_num}: Missing class code")
-                        continue
-                    
-                    roster_data.append({
-                        'student_name': row['student_name'].strip(),
-                        'student_id': row.get('student_id', '').strip(),
-                        'class_code': row['class_code'].strip(),
-                        'notes': row.get('notes', '').strip()
-                    })
-                    
-                except Exception as e:
-                    errors.append(f"Row {row_num}: {str(e)}")
-            
-            if roster_data:
-                results = ExamService.manage_student_roster(exam, roster_data, teacher)
-                results['csv_errors'] = errors
-                return results
-            else:
-                return {
-                    'created': 0,
-                    'updated': 0,
-                    'errors': errors,
-                    'total': 0
-                }
-                
-        except Exception as e:
-            logger.error(f"[PHASE5_ROSTER_IMPORT_ERROR] CSV parsing error: {str(e)}")
-            return {
-                'created': 0,
-                'updated': 0,
-                'errors': [f"CSV parsing error: {str(e)}"],
-                'total': 0
-            }
+        return {
+            'created': 0,
+            'updated': 0,
+            'errors': ['Roster functionality has been removed. The prime goal in Answer Keys section is to assign answers.'],
+            'total': 0,
+            'message': 'ROSTER FUNCTIONALITY REMOVED'
+        }
     
     @staticmethod
     def update_roster_completion(
@@ -692,118 +589,43 @@ class ExamService:
         session = None
     ) -> bool:
         """
-        Phase 5: Update roster entry when student starts or completes exam.
+        REMOVED: Roster functionality has been completely removed.
         
         Args:
-            roster_entry_id: StudentRoster entry ID
-            session: StudentSession instance (optional)
+            roster_entry_id: StudentRoster entry ID (ignored)
+            session: StudentSession instance (ignored)
             
         Returns:
-            Success status
+            False - roster functionality removed
         """
-        from ..models import StudentRoster
-        
-        try:
-            roster_entry = StudentRoster.objects.get(id=roster_entry_id)
-            
-            if session:
-                roster_entry.session = session
-                roster_entry.update_completion_status()
-                roster_entry.save()
-                
-                console_log = {
-                    "action": "roster_completion_updated",
-                    "roster_id": str(roster_entry_id),
-                    "student": roster_entry.student_name,
-                    "status": roster_entry.completion_status,
-                    "session_id": str(session.id) if session else None
-                }
-                logger.info(f"[PHASE5_ROSTER_STATUS] {json.dumps(console_log)}")
-                print(f"[PHASE5_ROSTER_STATUS] {json.dumps(console_log)}")
-                
-                return True
-                
-        except StudentRoster.DoesNotExist:
-            logger.error(f"[PHASE5_ROSTER_ERROR] Roster entry {roster_entry_id} not found")
-            
-        return False
+        # Roster functionality completely removed - not needed for Answer Keys
+        logger.warning("[ROSTER_REMOVED] update_roster_completion called but roster functionality has been removed")
+        return False  # Always return False as roster functionality is removed
     
     @staticmethod
     def get_roster_report(exam: Exam) -> Dict[str, Any]:
         """
-        Phase 5: Generate comprehensive roster report for an exam.
+        REMOVED: Roster functionality has been completely removed.
         
         Args:
-            exam: Exam instance
+            exam: Exam instance (ignored)
             
         Returns:
-            Detailed roster report
+            Empty report indicating roster functionality is removed
         """
-        from ..models import StudentRoster
-        import json
+        # Roster functionality completely removed - not needed for Answer Keys
+        logger.warning("[ROSTER_REMOVED] get_roster_report called but roster functionality has been removed")
         
-        roster_entries = StudentRoster.objects.filter(exam=exam).select_related('session')
-        
-        report = {
-            'exam_id': str(exam.id),
-            'exam_name': exam.name,
-            'total_assigned': roster_entries.count(),
+        return {
+            'exam_id': str(exam.id) if exam else 'N/A',
+            'exam_name': exam.name if exam else 'N/A',
+            'total_assigned': 0,
             'by_status': {},
             'by_class': {},
             'completion_rate': 0,
-            'students': []
+            'students': [],
+            'message': 'ROSTER FUNCTIONALITY REMOVED - The prime goal in Answer Keys section is to assign answers, not manage rosters'
         }
-        
-        # Count by status
-        for status_code, status_label in StudentRoster.COMPLETION_STATUS:
-            count = roster_entries.filter(completion_status=status_code).count()
-            report['by_status'][status_label] = count
-        
-        # Count by class
-        for entry in roster_entries:
-            class_code = entry.class_code
-            if class_code not in report['by_class']:
-                report['by_class'][class_code] = {
-                    'total': 0,
-                    'completed': 0,
-                    'in_progress': 0,
-                    'not_started': 0
-                }
-            
-            report['by_class'][class_code]['total'] += 1
-            
-            if entry.completion_status == 'COMPLETED':
-                report['by_class'][class_code]['completed'] += 1
-            elif entry.completion_status == 'IN_PROGRESS':
-                report['by_class'][class_code]['in_progress'] += 1
-            elif entry.completion_status == 'NOT_STARTED':
-                report['by_class'][class_code]['not_started'] += 1
-            
-            # Add student details
-            report['students'].append({
-                'name': entry.student_name,
-                'id': entry.student_id,
-                'class': entry.class_code,
-                'status': entry.get_completion_status_display(),
-                'assigned_at': entry.assigned_at.isoformat() if entry.assigned_at else None,
-                'completed_at': entry.completed_at.isoformat() if entry.completed_at else None
-            })
-        
-        # Calculate overall completion rate
-        if report['total_assigned'] > 0:
-            completed = report['by_status'].get('Completed', 0)
-            report['completion_rate'] = round(completed / report['total_assigned'] * 100, 1)
-        
-        console_log = {
-            "action": "roster_report_generated",
-            "exam_id": str(exam.id),
-            "total_students": report['total_assigned'],
-            "completion_rate": report['completion_rate']
-        }
-        logger.info(f"[PHASE5_ROSTER_REPORT] {json.dumps(console_log)}")
-        print(f"[PHASE5_ROSTER_REPORT] {json.dumps(console_log)}")
-        
-        return report
     
     @staticmethod
     def get_all_exams_with_stats() -> List[Dict[str, Any]]:

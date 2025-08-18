@@ -1,4 +1,5 @@
 {% load static %}
+{% load navigation_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +15,9 @@
     <!-- Mobile Responsive CSS -->
     <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}">
     
+    <!-- Mode Toggle Position Fix - MUST LOAD LAST TO OVERRIDE -->
+    <link rel="stylesheet" href="{% static 'css/mode-toggle-position-fix.css' %}?v={% now 'U' %}">
+    
     <!-- Console Debugging for RoutineTest -->
     <script>
         console.log('%c[RoutineTest] Page Loading...', 'color: #00A65E; font-weight: bold;');
@@ -21,6 +25,8 @@
         console.log('[RoutineTest] Theme: BCG Green (#00A65E)');
         console.log('[RoutineTest] Module: Continuous Assessment Platform');
         window.ROUTINETEST_DEBUG = true;
+        window.MATRIX_TAB_VERSION = '3.0';
+        window.NAVIGATION_TIMESTAMP = new Date().toISOString();
     </script>
     
     <style>
@@ -49,12 +55,57 @@
             font-size: 2rem;
         }
         
+        .header {
+            position: relative; /* For mode toggle positioning */
+        }
+        
         /* Navigation Tabs - Darker Muted Green Theme (Matching PlacementTest style) */
         .nav-tabs {
             background-color: #0D4F1F;  /* Very dark, muted green */
             padding: 0;
             margin-bottom: 30px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;  /* Allow horizontal scroll for many tabs */
+            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
+        }
+        
+        /* Custom scrollbar for nav tabs */
+        .nav-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-track {
+            background: #0A3D15;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-thumb {
+            background: #2E7D32;
+            border-radius: 2px;
+        }
+        
+        /* Matrix Tab Pulse Animation */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 10px 5px rgba(255, 152, 0, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+            }
+        }
+        
+        /* Ensure Matrix Tab is ALWAYS visible */
+        #matrix-tab-item {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        #matrix-tab-item a {
+            display: block !important;
+            visibility: visible !important;
         }
         
         .nav-tabs * {
@@ -65,8 +116,10 @@
             list-style: none;
             display: flex;
             margin: 0 auto;
-            max-width: 1200px;
-            padding: 0 20px;
+            max-width: none;  /* Remove width restriction */
+            padding: 0 10px;  /* Minimal padding */
+            overflow-x: visible;  /* Show all tabs */
+            width: 100%;
         }
         
         .nav-tabs li {
@@ -77,7 +130,7 @@
         
         .nav-tabs a {
             display: block;
-            padding: 15px 25px;
+            padding: 12px 12px;  /* Even more compact */
             color: #ecf0f1;
             text-decoration: none;
             transition: background-color 0.3s;
@@ -85,6 +138,7 @@
             position: relative;
             height: 100%;
             white-space: nowrap;
+            font-size: 13px;  /* Smaller font to fit more */
         }
         
         .nav-tabs a:hover {
@@ -121,11 +175,17 @@
             background-color: #c0392b !important;
         }
         
-        /* Container - Matching PlacementTest */
+        /* Container - Full width for navigation */
         .container {
-            max-width: 1200px;
+            max-width: 100%;  /* Full width */
             margin: 0 auto;
             padding: 20px;
+        }
+        
+        /* Content container with max width */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
         /* Content Area */
@@ -211,12 +271,16 @@
             background-color: #3D6F3F;  /* Darker sage green */
         }
         
+        /* Danger button - MUST stay red for destructive actions */
         .btn-danger {
-            background-color: #dc3545;
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+            color: white !important;
         }
         
         .btn-danger:hover {
-            background-color: #c82333;
+            background-color: #c82333 !important;
+            border-color: #bd2130 !important;
         }
         
         /* Form Controls - Softer Green Theme */
@@ -248,6 +312,52 @@
     </style>
     
     {% block extra_css %}{% endblock %}
+    
+    <!-- Mode Toggle Fix Scripts -->
+    <script src="{% static 'js/routinetest/mode-toggle-fix.js' %}?v={% now 'U' %}" defer></script>
+    <script src="{% static 'js/routinetest/aggressive-mode-fix.js' %}?v={% now 'U' %}"></script>
+    
+    <!-- Inline Mode Toggle Fix (Immediate Execution) -->
+    <script>
+    // Immediate fix for "function:" text issue
+    (function() {
+        function fixModeToggleText() {
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                if (el.childNodes.length === 1 && el.firstChild && el.firstChild.nodeType === 3) {
+                    const text = el.firstChild.nodeValue;
+                    if (text && text.includes('function:')) {
+                        console.warn('[IMMEDIATE_FIX] Found and fixing "function:" text:', text);
+                        el.firstChild.nodeValue = text.replace(/function\s*:\s*/gi, '');
+                    }
+                }
+            });
+            
+            // Remove any toggles from stats areas
+            const statsAreas = document.querySelectorAll('.class-stats, .class-stat, .stats-box, .stat-box');
+            statsAreas.forEach(area => {
+                const toggles = area.querySelectorAll('[class*="toggle"]');
+                if (toggles.length > 0) {
+                    console.warn('[IMMEDIATE_FIX] Removing toggles from stats area');
+                    toggles.forEach(t => t.remove());
+                }
+            });
+        }
+        
+        // Run multiple times to catch dynamic content
+        fixModeToggleText();
+        setTimeout(fixModeToggleText, 0);
+        setTimeout(fixModeToggleText, 100);
+        setTimeout(fixModeToggleText, 500);
+        
+        // Also run on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fixModeToggleText);
+        } else {
+            fixModeToggleText();
+        }
+    })();
+    </script>
 </head>
 <body>
     <!-- Debug Console Logger -->
@@ -255,7 +365,7 @@
         console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #00A65E; color: white; padding: 5px; border-radius: 3px;');
         console.log('Theme: BCG Green (#00A65E)');
         console.log('Navigation: Horizontal Tab Layout');
-        console.log('Module: RoutineTest - Continuous Assessment');
+        console.log('Module: RoutineTest - Exam Management System');
         console.log('User: {% if user.is_authenticated %}{{ user.username }}{% else %}Anonymous{% endif %}');
         console.groupEnd();
     </script>
@@ -263,78 +373,25 @@
     <!-- Header Section -->
     <div class="header">
         <div class="container">
-            <h1>{% block header %}RoutineTest - Continuous Assessment{% endblock %}</h1>
+            <h1>{% block header %}RoutineTest - Exam Management{% endblock %}</h1>
         </div>
     </div>
     
-    <!-- Navigation Tabs -->
-    <nav class="nav-tabs">
-        <ul style="display: flex; justify-content: space-between;">
-            <div style="display: flex;">
-                <!-- Dashboard -->
-                <li><a href="{% url 'RoutineTest:index' %}" 
-                       class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}"
-                       data-nav="dashboard">Dashboard</a></li>
-                
-                <!-- Upload Exam -->
-                <li><a href="{% url 'RoutineTest:create_exam' %}" 
-                       class="{% if request.resolver_match.url_name == 'create_exam' %}active{% endif %}"
-                       data-nav="upload-exam">Upload Exam</a></li>
-                
-                <!-- Manage Exams -->
-                <li><a href="{% url 'RoutineTest:exam_list' %}" 
-                       class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}"
-                       data-nav="manage-exams">Manage Exams</a></li>
-                
-                <!-- Class Management (Placeholder for now) -->
-                <li><a href="#" 
-                       class="{% if request.resolver_match.url_name == 'class_management' %}active{% endif %}"
-                       data-nav="class-management"
-                       onclick="console.log('[RoutineTest] Class Management - Coming Soon'); alert('Class Management - Coming in Phase 2.2'); return false;">Class Management</a></li>
-                
-                <!-- Test Schedules (Placeholder for now) -->
-                <li><a href="#" 
-                       class="{% if request.resolver_match.url_name == 'test_schedules' %}active{% endif %}"
-                       data-nav="test-schedules"
-                       onclick="console.log('[RoutineTest] Test Schedules - Coming Soon'); alert('Test Schedules - Coming in Phase 2.3'); return false;">Test Schedules</a></li>
-                
-                <!-- Results & Analytics -->
-                <li><a href="{% url 'RoutineTest:session_list' %}" 
-                       class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}"
-                       data-nav="results">Results & Analytics</a></li>
-            </div>
-            
-            <!-- Right side: Profile and Logout -->
-            <div style="display: flex; margin-left: auto; align-items: stretch;">
-                {% if user.is_authenticated %}
-                    <!-- Profile Link -->
-                    <li style="display: flex;">
-                        <a href="#" 
-                           class="profile-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}" 
-                           title="My Profile" 
-                           style="white-space: nowrap; padding-right: 30px;"
-                           onclick="console.log('[RoutineTest] Profile clicked'); return false;">
-                            <span style="display: inline-block; margin-right: 5px;">👤</span>
-                            <span style="display: inline-block;">{{ user.get_full_name|default:user.username }}</span>
-                        </a>
-                    </li>
-                    
-                    <!-- Logout Button -->
-                    <li style="display: flex;">
-                        <a href="{% url 'core:logout' %}" 
-                           id="logout-link" 
-                           style="background-color: #e74c3c; white-space: nowrap;">Logout</a>
-                    </li>
-                {% else %}
-                    <!-- Login Link -->
-                    <li style="display: flex;">
-                        <a href="{% url 'PlacementTest:teacher_login' %}" 
-                           style="background-color: #00A65E;">Login</a>
-                    </li>
-                {% endif %}
-            </div>
-        </ul>
-    </nav>
+    <!-- Navigation Tabs - Version 8.0 with Complete Cache Busting -->
+    <!-- UNIFIED CLASSES & EXAMS ONLY - NO OLD TABS -->
+    {% include 'primepath_routinetest/includes/navigation_tabs_v8.html' %}
+    
+    <!-- Mode Toggle - Positioned below navigation -->
+    {% if user.is_authenticated and user.is_staff %}
+        {% include 'primepath_routinetest/includes/mode_toggle_enhanced.html' %}
+    {% endif %}
+    
+    <!-- Additional Navigation Verification -->
+    <script>
+        console.log('[ROUTINETEST_BASE] Loading Navigation V8 at', new Date().toISOString());
+        console.log('[ROUTINETEST_BASE] User: {{ user.username|default:"Anonymous" }}');
+        console.log('[ROUTINETEST_BASE] Cache Bust: {% now "U" %}');
+    </script>
     
     <!-- Main Container -->
     <div class="container">
@@ -379,6 +436,8 @@
     
     <!-- Load RoutineTest Theme JS -->
     <script src="{% static 'js/routinetest-theme.js' %}"></script>
+    
+    <!-- Removed redundant matrix tab JavaScript files - Navigation V8 handles this -->
     
     <!-- Navigation JavaScript with Console Debugging -->
     <script>

@@ -3,39 +3,287 @@
 
 {% block title %}Dashboard - RoutineTest{% endblock %}
 
-{% block header %}Dashboard - Continuous Assessment{% endblock %}
+{% block header %}Dashboard - Exam Management{% endblock %}
 
 {% block content %}
+<!-- Mode Toggle Fix - Inline JavaScript -->
 <script>
-    console.log('%c[RoutineTest Dashboard] Page loaded', 'color: #00A65E; font-weight: bold;');
-    console.log('[RoutineTest Dashboard] Stats:', {
+(function() {
+    console.log('[MODE_TOGGLE_FIX_INLINE] Starting inline fix for stats box toggle issue');
+    
+    // Function to fix any "function:" text
+    function fixFunctionText() {
+        // Get all text nodes in the document
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+        
+        let node;
+        let fixedCount = 0;
+        
+        while (node = walker.nextNode()) {
+            if (node.nodeValue && node.nodeValue.includes('function:')) {
+                console.warn('[MODE_TOGGLE_FIX_INLINE] Found "function:" in text:', node.nodeValue);
+                node.nodeValue = node.nodeValue.replace(/function\s*:\s*/gi, '');
+                fixedCount++;
+            }
+        }
+        
+        if (fixedCount > 0) {
+            console.log('[MODE_TOGGLE_FIX_INLINE] Fixed', fixedCount, 'instances of "function:" text');
+        }
+        
+        // Also check for any toggle elements in stats areas
+        const statsAreas = document.querySelectorAll('.class-stats, .class-stat, .stats-box, .stat-box, [class*="stat-"]');
+        statsAreas.forEach(area => {
+            const toggles = area.querySelectorAll('.mode-toggle-container, .mode-toggle-wrapper, .mode-toggle-btn, [class*="toggle"]');
+            toggles.forEach(toggle => {
+                console.warn('[MODE_TOGGLE_FIX_INLINE] Removing toggle from stats area:', toggle);
+                toggle.remove();
+            });
+        });
+    }
+    
+    // Run immediately
+    fixFunctionText();
+    
+    // Run after DOM is fully loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixFunctionText);
+    }
+    
+    // Run after a short delay to catch any dynamic content
+    setTimeout(fixFunctionText, 100);
+    setTimeout(fixFunctionText, 500);
+    setTimeout(fixFunctionText, 1000);
+    
+    // Monitor for changes
+    const observer = new MutationObserver(() => {
+        fixFunctionText();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+    
+    console.log('[MODE_TOGGLE_FIX_INLINE] Inline fix initialized with monitoring');
+})();
+</script>
+
+<!-- Navigation Verification Script -->
+<script>
+    // CRITICAL: Navigation Tab Verification
+    console.group('%c🔍 [NAVIGATION VERIFICATION] Dashboard Page', 'background: #4CAF50; color: white; padding: 5px 10px; border-radius: 3px;');
+    
+    // Check template information
+    console.log('📄 Template Info:', {
+        currentTemplate: 'primepath_routinetest/index.html',
+        extendsTemplate: 'routinetest_base.html',
+        renderTime: new Date().toISOString(),
+        djangoVersion: '{{ django.VERSION|default:"unknown" }}'
+    });
+    
+    // Check user context
+    console.log('👤 User Context:', {
+        isAuthenticated: {{ user.is_authenticated|lower }},
+        username: '{{ user.username|default:"Anonymous" }}',
+        isStaff: {{ user.is_staff|lower }},
+        isTeacher: {{ is_teacher|default:"false"|lower }},
+        isHeadTeacher: {{ is_head_teacher|default:"false"|lower }}
+    });
+    
+    // Check dashboard stats
+    console.log('📊 Dashboard Stats:', {
         activeExams: {{ active_exams }},
         totalSessions: {{ total_sessions }},
         recentSessions: {{ recent_sessions|length }}
     });
+    
+    // Verify navigation tabs presence
+    window.addEventListener('DOMContentLoaded', function() {
+        console.group('🎯 Navigation Tabs Check');
+        
+        // Get all navigation tabs
+        const navTabs = document.querySelectorAll('.nav-tabs a');
+        console.log(`Found ${navTabs.length} navigation tabs`);
+        
+        // List all tabs
+        const tabInfo = [];
+        navTabs.forEach((tab, index) => {
+            tabInfo.push({
+                index: index + 1,
+                text: tab.textContent.trim(),
+                href: tab.getAttribute('href'),
+                dataNav: tab.getAttribute('data-nav'),
+                dataTabId: tab.getAttribute('data-tab-id'),
+                isActive: tab.classList.contains('active'),
+                isVisible: tab.offsetParent !== null,
+                style: tab.getAttribute('style') || 'default'
+            });
+        });
+        console.table(tabInfo);
+        
+        // CRITICAL: Check for Matrix Tab specifically
+        const matrixTab = document.querySelector('[data-tab-id="exam-assignments-matrix"]');
+        if (matrixTab) {
+            console.log('%c✅ MATRIX TAB FOUND!', 'background: #FF9800; color: white; padding: 5px 10px; font-weight: bold;');
+            console.log('Matrix Tab Details:', {
+                text: matrixTab.textContent.trim(),
+                href: matrixTab.getAttribute('href'),
+                isVisible: matrixTab.offsetParent !== null,
+                parentVisible: matrixTab.parentElement.offsetParent !== null,
+                computedDisplay: window.getComputedStyle(matrixTab).display,
+                computedVisibility: window.getComputedStyle(matrixTab).visibility
+            });
+        } else {
+            console.error('%c❌ MATRIX TAB NOT FOUND!', 'background: #F44336; color: white; padding: 5px 10px; font-weight: bold;');
+            console.log('Searching for any element with "matrix" in text or attributes...');
+            const allElements = document.querySelectorAll('*');
+            const matrixElements = Array.from(allElements).filter(el => {
+                const text = el.textContent?.toLowerCase() || '';
+                const href = el.getAttribute('href')?.toLowerCase() || '';
+                const dataNav = el.getAttribute('data-nav')?.toLowerCase() || '';
+                return text.includes('matrix') || href.includes('matrix') || dataNav.includes('matrix');
+            });
+            console.log(`Found ${matrixElements.length} elements with "matrix":`, matrixElements);
+        }
+        
+        // Check navigation container
+        const navContainer = document.querySelector('.nav-tabs');
+        if (navContainer) {
+            console.log('Navigation Container:', {
+                id: navContainer.id,
+                dataVersion: navContainer.getAttribute('data-version'),
+                dataTimestamp: navContainer.getAttribute('data-timestamp'),
+                childCount: navContainer.children.length,
+                innerHTML: navContainer.innerHTML.substring(0, 200) + '...'
+            });
+        }
+        
+        console.groupEnd();
+    });
+    
+    console.groupEnd();
 </script>
 
 <!-- Welcome Section -->
 <div style="background: linear-gradient(135deg, #F1F8E9 0%, #E0E7DA 100%); border-left: 4px solid #2E7D32; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
     <h2 style="color: #1B5E20; margin-bottom: 10px;">Welcome to RoutineTest Dashboard</h2>
-    <p style="color: #263238; font-size: 1.1rem;">Manage continuous assessments and track student progress</p>
+    <p style="color: #263238; font-size: 1.1rem;">Comprehensive exam management system for organizing and tracking assessments</p>
 </div>
 
 <!-- Quick Actions -->
 <div style="margin-bottom: 30px;">
     <h3 style="color: #263238; margin-bottom: 15px;">Quick Actions</h3>
-    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;" id="quick-actions-container">
         <a href="{% url 'RoutineTest:create_exam' %}" class="btn" onclick="console.log('[RoutineTest] Quick action: Upload Exam')">
             <i class="fas fa-upload"></i> Upload New Exam
         </a>
-        <a href="{% url 'RoutineTest:exam_list' %}" class="btn btn-secondary" onclick="console.log('[RoutineTest] Quick action: Manage Exams')">
-            <i class="fas fa-edit"></i> Manage Exams
+        <a href="{% url 'RoutineTest:exam_list' %}" class="btn btn-secondary" onclick="console.log('[RoutineTest] Quick action: Answer Keys')">
+            <i class="fas fa-key"></i> Answer Keys
         </a>
         <a href="{% url 'RoutineTest:start_test' %}" class="btn" style="background-color: #66BB6A;" onclick="console.log('[RoutineTest] Quick action: Start Test')">
             <i class="fas fa-play"></i> Start Test Session
         </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'RoutineTest:my_classes' %}" 
+           class="btn" 
+           style="background-color: #FF9800; border: 2px solid #F57C00;" 
+           id="my-classes-btn"
+           onclick="console.log('[RoutineTest] Quick action: My Classes & Access clicked')">
+            <i class="fas fa-users-cog"></i> My Classes & Access
+        </a>
+        {% endif %}
     </div>
 </div>
+
+<!-- Enhanced Button and Navigation Verification -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.group('%c🔎 [QUICK ACTIONS & NAV VERIFICATION]', 'background: #2196F3; color: white; padding: 5px;');
+    
+    // Check Quick Actions buttons
+    const quickActionButtons = document.querySelectorAll('#quick-actions-container a.btn');
+    console.log(`🎯 Quick Action Buttons: ${quickActionButtons.length}`);
+    quickActionButtons.forEach(btn => {
+        console.log(`  - ${btn.textContent.trim()}: ${btn.href}`);
+    });
+    
+    // Check My Classes button specifically
+    const myClassesBtn = document.getElementById('my-classes-btn');
+    const navMyClasses = document.querySelector('a[data-nav="my-classes"]');
+    
+    if (myClassesBtn) {
+        console.log('✅ My Classes Quick Action button found');
+    } else {
+        console.warn('⚠️ My Classes Quick Action button not found');
+    }
+    
+    if (navMyClasses) {
+        console.log('✅ My Classes nav tab found');
+    } else {
+        console.warn('⚠️ My Classes nav tab not found');
+    }
+    
+    // CRITICAL: Force Matrix Tab visibility check
+    const matrixTabItem = document.getElementById('matrix-tab-item');
+    if (matrixTabItem) {
+        console.log('%c🎆 MATRIX TAB ITEM FOUND!', 'background: #FF5722; color: white; padding: 5px; font-weight: bold;');
+        
+        // Force visibility just in case
+        matrixTabItem.style.display = 'flex !important';
+        matrixTabItem.style.visibility = 'visible !important';
+        matrixTabItem.style.opacity = '1 !important';
+        
+        const matrixLink = matrixTabItem.querySelector('a');
+        if (matrixLink) {
+            matrixLink.style.display = 'block !important';
+            matrixLink.style.visibility = 'visible !important';
+            console.log('Matrix tab forced visible with styles:', {
+                display: matrixLink.style.display,
+                visibility: matrixLink.style.visibility,
+                href: matrixLink.href
+            });
+        }
+    } else {
+        console.error('%c🚫 CRITICAL: Matrix tab item (#matrix-tab-item) not found in DOM!', 'background: red; color: white; padding: 5px; font-weight: bold;');
+    }
+    
+    console.groupEnd();
+});
+
+// Additional diagnostic on window load
+window.addEventListener('load', function() {
+    console.group('%c🎯 [FINAL NAV CHECK ON WINDOW LOAD]', 'background: #9C27B0; color: white; padding: 5px;');
+    
+    const allNavLinks = document.querySelectorAll('.nav-tabs a');
+    const navSummary = {
+        totalTabs: allNavLinks.length,
+        tabNames: Array.from(allNavLinks).map(a => a.textContent.trim()),
+        matrixTabExists: !!document.querySelector('[data-tab-id="exam-assignments-matrix"]'),
+        matrixTabVisible: document.querySelector('[data-tab-id="exam-assignments-matrix"]')?.offsetParent !== null
+    };
+    
+    console.table(navSummary);
+    
+    if (!navSummary.matrixTabExists) {
+        console.error('🔴 CRITICAL ISSUE: Matrix tab is completely missing from DOM!');
+        console.log('This suggests the template is not rendering correctly or being overridden.');
+    } else if (!navSummary.matrixTabVisible) {
+        console.error('🟠 WARNING: Matrix tab exists but is not visible!');
+        console.log('This suggests CSS or JavaScript is hiding the tab.');
+    } else {
+        console.log('🟢 SUCCESS: Matrix tab exists and is visible!');
+    }
+    
+    console.groupEnd();
+});
+</script>
 
 <!-- Statistics Cards -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">

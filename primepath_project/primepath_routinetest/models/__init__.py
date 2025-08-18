@@ -10,19 +10,28 @@ All existing imports will continue to work:
 """
 
 # Import all models from their respective modules
-from .exam import Exam, AudioFile, StudentRoster
+from .exam import Exam, AudioFile
+# StudentRoster removed - not needed for Answer Keys functionality
 from .question import Question
 from .session import StudentSession, StudentAnswer, DifficultyAdjustment
 from .class_schedule import ClassExamSchedule  # Class-specific scheduling
+from .class_access import TeacherClassAssignment, ClassAccessRequest, AccessAuditLog  # Teacher class access management
+from .exam_schedule_matrix import ExamScheduleMatrix  # Class × Timeslot Matrix
+from .curriculum_mapping import ClassCurriculumMapping  # Admin curriculum mapping
 
 # Re-export all models for backward compatibility
 __all__ = [
     'Exam',
     'AudioFile',
-    'StudentRoster',  # Phase 5: Student Roster & Assignment
+    # 'StudentRoster' removed - not needed for Answer Keys functionality
     'ClassExamSchedule',  # Class-specific scheduling
     'Question',
     'StudentSession',
     'StudentAnswer',
     'DifficultyAdjustment',
+    'TeacherClassAssignment',  # Teacher class access management
+    'ClassAccessRequest',  # Teacher access requests
+    'AccessAuditLog',  # Access audit logging
+    'ExamScheduleMatrix',  # Class × Timeslot Matrix
+    'ClassCurriculumMapping',  # Admin curriculum mapping
 ]

@@ -1,0 +1,956 @@
+{% extends 'routinetest_base.html' %}
+{% load static %}
+
+{% block title %}Curriculum Mapping - RoutineTest Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Curriculum Mapping Specific Styles */
+.curriculum-mapping-container {
+    display: flex;
+    gap: 20px;
+    min-height: 600px;
+    margin: 20px;
+}
+
+/* Left Panel - Class Codes */
+.class-codes-panel {
+    flex: 0 0 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+.panel-header {
+    background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+    color: white;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.class-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.class-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.class-item:hover {
+    background: #F1F8E9;
+}
+
+.class-item.selected {
+    background: #E8F5E9;
+    border-left: 4px solid #2E7D32;
+}
+
+.class-code {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1B5E20;
+}
+
+.mapping-count {
+    background: #66BB6A;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+}
+
+.mapping-count.empty {
+    background: #EF5350;
+}
+
+/* Right Panel - Curriculum Mapping */
+.curriculum-panel {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.curriculum-content {
+    padding: 20px;
+}
+
+.no-selection {
+    text-align: center;
+    padding: 60px;
+    color: #666;
+}
+
+.no-selection i {
+    font-size: 4rem;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+/* Mapping Display */
+.current-mappings {
+    margin-bottom: 30px;
+}
+
+.mapping-card {
+    background: #F5F5F5;
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.mapping-card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.mapping-info {
+    flex: 1;
+}
+
+.curriculum-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1B5E20;
+    margin-bottom: 5px;
+}
+
+.curriculum-details {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.priority-badge {
+    background: #2196F3;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-right: 10px;
+}
+
+.priority-badge.primary {
+    background: #4CAF50;
+}
+
+.mapping-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-remove {
+    background: #EF5350;
+    color: white;
+}
+
+.btn-remove:hover {
+    background: #F44336;
+}
+
+.btn-priority {
+    background: #2196F3;
+    color: white;
+}
+
+.btn-priority:hover {
+    background: #1976D2;
+}
+
+/* Add Mapping Section */
+.add-mapping-section {
+    background: #F8F9FA;
+    border: 2px dashed #C8E6C9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.add-mapping-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1B5E20;
+    margin-bottom: 15px;
+}
+
+.curriculum-selector {
+    margin-bottom: 15px;
+}
+
+.curriculum-selector label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+.curriculum-selector select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #C8E6C9;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: white;
+}
+
+.curriculum-selector select:focus {
+    outline: none;
+    border-color: #2E7D32;
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+}
+
+.btn-add-mapping {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-add-mapping:hover {
+    background: #45A049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Statistics */
+.stats-bar {
+    background: #F5F5F5;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1B5E20;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Year Selector */
+.year-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.year-selector-wrapper label {
+    font-weight: 600;
+    color: #333;
+}
+
+#year-selector {
+    padding: 8px 15px;
+    border: 1px solid #C8E6C9;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+}
+
+/* Loading State */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    display: none;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2E7D32;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .curriculum-mapping-container {
+        flex-direction: column;
+    }
+    
+    .class-codes-panel {
+        flex: none;
+        max-height: 200px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block header %}🎯 Curriculum Mapping (Admin Only){% endblock %}
+
+{% block content %}
+<!-- Admin Check Notice -->
+<div class="alert alert-info" style="margin: 20px;">
+    <i class="fas fa-shield-alt"></i> <strong>Admin Access:</strong> This page is only accessible to administrators and head teachers.
+</div>
+
+<!-- Statistics Bar -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div class="stat-value">{{ stats.total_classes }}</div>
+        <div class="stat-label">Total Classes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ stats.mapped_classes }}</div>
+        <div class="stat-label">Mapped Classes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ stats.unmapped_classes }}</div>
+        <div class="stat-label">Unmapped Classes</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-value">{{ stats.total_mappings }}</div>
+        <div class="stat-label">Total Mappings</div>
+    </div>
+</div>
+
+<!-- Year Selector -->
+<div style="padding: 20px 20px 0;">
+    <div class="year-selector-wrapper">
+        <label for="year-selector">Academic Year:</label>
+        <select id="year-selector">
+            {% for year in available_years %}
+            <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-small btn-priority" onclick="refreshMappings()">
+            <i class="fas fa-sync"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="curriculum-mapping-container">
+    <!-- Left Panel: Class Codes -->
+    <div class="class-codes-panel">
+        <div class="panel-header">
+            <i class="fas fa-school"></i> Class Codes
+        </div>
+        <ul class="class-list" id="class-list">
+            {% for class_data in class_mapping_data %}
+            <li class="class-item" data-class="{{ class_data.class_code }}">
+                <span class="class-code">{{ class_data.class_code }}</span>
+                <span class="mapping-count {% if not class_data.has_mappings %}empty{% endif %}">
+                    {{ class_data.mappings|length }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- Right Panel: Curriculum Mapping -->
+    <div class="curriculum-panel">
+        <div class="panel-header">
+            <i class="fas fa-graduation-cap"></i> Curriculum Assignments
+        </div>
+        
+        <div class="curriculum-content" id="curriculum-content">
+            <div class="no-selection">
+                <i class="fas fa-arrow-left"></i>
+                <p>Select a class from the left panel to view or manage curriculum mappings</p>
+            </div>
+        </div>
+        
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="spinner"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden Template for Mapping Display -->
+<template id="mapping-template">
+    <div class="selected-class-header">
+        <h3>Class: <span id="selected-class-code"></span></h3>
+    </div>
+    
+    <div class="current-mappings" id="current-mappings">
+        <h4>Current Curriculum Mappings</h4>
+        <div id="mappings-list"></div>
+    </div>
+    
+    <div class="add-mapping-section">
+        <div class="add-mapping-header">
+            <i class="fas fa-plus-circle"></i> Add New Curriculum Mapping
+        </div>
+        
+        <div class="curriculum-selector">
+            <label for="program-select">Program</label>
+            <select id="program-select">
+                <option value="">-- Select Program --</option>
+                {% for program_name, program_data in curriculum_by_program.items %}
+                <option value="{{ program_name }}">{{ program_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="curriculum-selector">
+            <label for="subprogram-select">SubProgram</label>
+            <select id="subprogram-select" disabled>
+                <option value="">-- Select SubProgram --</option>
+            </select>
+        </div>
+        
+        <div class="curriculum-selector">
+            <label for="level-select">Level</label>
+            <select id="level-select" disabled>
+                <option value="">-- Select Level --</option>
+            </select>
+        </div>
+        
+        <div class="curriculum-selector">
+            <label for="priority-select">Priority</label>
+            <select id="priority-select">
+                <option value="1">Primary (1)</option>
+                <option value="2">Secondary (2)</option>
+                <option value="3">Tertiary (3)</option>
+            </select>
+        </div>
+        
+        <button class="btn-add-mapping" onclick="addMapping()">
+            <i class="fas fa-plus"></i> Add Mapping
+        </button>
+    </div>
+</template>
+
+<!-- Store curriculum data for JavaScript -->
+<script type="application/json" id="curriculum-data">
+{{ curriculum_by_program|safe }}
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables
+let selectedClass = null;
+let curriculumData = {};
+let currentMappings = {};
+
+// Console logging helper
+function debugLog(action, data) {
+    const timestamp = new Date().toISOString();
+    console.group('%c[CURRICULUM_MAPPING]', 'background: #2E7D32; color: white; padding: 2px 5px; border-radius: 3px;');
+    console.log('Action:', action);
+    console.log('Timestamp:', timestamp);
+    if (data) {
+        console.log('Data:', data);
+    }
+    console.groupEnd();
+}
+
+// Initialize on document ready
+document.addEventListener('DOMContentLoaded', function() {
+    debugLog('Page initialized', {
+        totalClasses: {{ stats.total_classes }},
+        mappedClasses: {{ stats.mapped_classes }},
+        currentYear: '{{ current_year }}'
+    });
+    
+    // Parse curriculum data
+    try {
+        const dataElement = document.getElementById('curriculum-data');
+        if (dataElement) {
+            curriculumData = JSON.parse(dataElement.textContent);
+            debugLog('Curriculum data loaded', {
+                programs: Object.keys(curriculumData).length
+            });
+        }
+    } catch (e) {
+        console.error('Failed to parse curriculum data:', e);
+    }
+    
+    // Initialize class list clicks
+    initializeClassList();
+    
+    // Initialize year selector
+    document.getElementById('year-selector').addEventListener('change', refreshMappings);
+});
+
+// Initialize class list
+function initializeClassList() {
+    const classItems = document.querySelectorAll('.class-item');
+    
+    classItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Remove previous selection
+            document.querySelectorAll('.class-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Add selection to clicked item
+            this.classList.add('selected');
+            
+            // Load mappings for selected class
+            const classCode = this.dataset.class;
+            loadClassMappings(classCode);
+        });
+    });
+    
+    debugLog('Class list initialized', {
+        classCount: classItems.length
+    });
+}
+
+// Load mappings for selected class
+function loadClassMappings(classCode) {
+    selectedClass = classCode;
+    debugLog('Loading mappings for class', { classCode });
+    
+    // Show loading
+    showLoading(true);
+    
+    // Get current year
+    const year = document.getElementById('year-selector').value;
+    
+    // Fetch mappings via AJAX
+    fetch(`/RoutineTest/api/curriculum-mapping/class/${classCode}/?year=${year}`)
+        .then(response => response.json())
+        .then(data => {
+            debugLog('Mappings loaded', {
+                classCode: classCode,
+                mappingCount: data.mappings.length
+            });
+            
+            currentMappings = data.mappings;
+            displayClassMappings(classCode, data.mappings);
+            showLoading(false);
+        })
+        .catch(error => {
+            console.error('Error loading mappings:', error);
+            showLoading(false);
+            alert('Failed to load mappings');
+        });
+}
+
+// Display class mappings
+function displayClassMappings(classCode, mappings) {
+    const contentDiv = document.getElementById('curriculum-content');
+    const template = document.getElementById('mapping-template');
+    
+    // Clone template content
+    const content = template.content.cloneNode(true);
+    
+    // Set class code
+    content.getElementById('selected-class-code').textContent = classCode;
+    
+    // Build mappings list
+    const mappingsList = content.getElementById('mappings-list');
+    
+    if (mappings.length === 0) {
+        mappingsList.innerHTML = '<p style="color: #666; font-style: italic;">No curriculum mappings for this class yet.</p>';
+    } else {
+        mappings.forEach(mapping => {
+            const mappingCard = createMappingCard(mapping);
+            mappingsList.appendChild(mappingCard);
+        });
+    }
+    
+    // Clear and append new content
+    contentDiv.innerHTML = '';
+    contentDiv.appendChild(content);
+    
+    // Initialize selectors
+    initializeCurriculumSelectors();
+    
+    debugLog('Mappings displayed', {
+        classCode,
+        mappingCount: mappings.length
+    });
+}
+
+// Create mapping card element
+function createMappingCard(mapping) {
+    const card = document.createElement('div');
+    card.className = 'mapping-card';
+    card.dataset.mappingId = mapping.id;
+    
+    const priorityClass = mapping.priority === 1 ? 'primary' : '';
+    
+    card.innerHTML = `
+        <div class="mapping-info">
+            <div class="curriculum-display">${mapping.curriculum.display_name}</div>
+            <div class="curriculum-details">
+                ${mapping.curriculum.program} › ${mapping.curriculum.subprogram} › Level ${mapping.curriculum.level}
+            </div>
+        </div>
+        <span class="priority-badge ${priorityClass}">Priority ${mapping.priority}</span>
+        <div class="mapping-actions">
+            <button class="btn-small btn-priority" onclick="changePriority('${mapping.id}')">
+                <i class="fas fa-sort"></i>
+            </button>
+            <button class="btn-small btn-remove" onclick="removeMapping('${mapping.id}')">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Initialize curriculum selectors
+function initializeCurriculumSelectors() {
+    const programSelect = document.getElementById('program-select');
+    const subprogramSelect = document.getElementById('subprogram-select');
+    const levelSelect = document.getElementById('level-select');
+    
+    if (!programSelect) return;
+    
+    // Program change handler
+    programSelect.addEventListener('change', function() {
+        const program = this.value;
+        subprogramSelect.disabled = !program;
+        levelSelect.disabled = true;
+        
+        // Clear subsequent selects
+        subprogramSelect.innerHTML = '<option value="">-- Select SubProgram --</option>';
+        levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
+        
+        if (program && curriculumData[program]) {
+            const subprograms = curriculumData[program].subprograms;
+            Object.keys(subprograms).forEach(subprogramName => {
+                const option = document.createElement('option');
+                option.value = subprogramName;
+                option.textContent = subprogramName;
+                subprogramSelect.appendChild(option);
+            });
+        }
+        
+        debugLog('Program selected', { program });
+    });
+    
+    // Subprogram change handler
+    subprogramSelect.addEventListener('change', function() {
+        const program = programSelect.value;
+        const subprogram = this.value;
+        levelSelect.disabled = !subprogram;
+        
+        // Clear level select
+        levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
+        
+        if (program && subprogram && curriculumData[program]) {
+            const levels = curriculumData[program].subprograms[subprogram].levels;
+            levels.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level.id;
+                option.textContent = `Level ${level.level_number}`;
+                levelSelect.appendChild(option);
+            });
+        }
+        
+        debugLog('Subprogram selected', { program, subprogram });
+    });
+}
+
+// Add new mapping
+function addMapping() {
+    if (!selectedClass) {
+        alert('Please select a class first');
+        return;
+    }
+    
+    const levelSelect = document.getElementById('level-select');
+    const prioritySelect = document.getElementById('priority-select');
+    const yearSelect = document.getElementById('year-selector');
+    
+    const curriculumLevelId = levelSelect.value;
+    const priority = prioritySelect.value;
+    const year = yearSelect.value;
+    
+    if (!curriculumLevelId) {
+        alert('Please select a curriculum level');
+        return;
+    }
+    
+    debugLog('Adding mapping', {
+        classCode: selectedClass,
+        curriculumLevelId,
+        priority,
+        year
+    });
+    
+    // Show loading
+    showLoading(true);
+    
+    // Send AJAX request
+    fetch('/RoutineTest/api/curriculum-mapping/add/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+            class_code: selectedClass,
+            curriculum_level_id: curriculumLevelId,
+            academic_year: year,
+            priority: priority
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showLoading(false);
+        
+        if (data.success) {
+            debugLog('Mapping added successfully', data.mapping);
+            
+            // Reload mappings
+            loadClassMappings(selectedClass);
+            
+            // Update count
+            updateClassMappingCount(selectedClass, 1);
+            
+            // Clear selectors
+            document.getElementById('program-select').value = '';
+            document.getElementById('subprogram-select').value = '';
+            document.getElementById('level-select').value = '';
+            
+            // Show success message
+            showNotification('Mapping added successfully', 'success');
+        } else {
+            alert(data.error || 'Failed to add mapping');
+        }
+    })
+    .catch(error => {
+        showLoading(false);
+        console.error('Error adding mapping:', error);
+        alert('Failed to add mapping');
+    });
+}
+
+// Remove mapping
+function removeMapping(mappingId) {
+    if (!confirm('Are you sure you want to remove this mapping?')) {
+        return;
+    }
+    
+    debugLog('Removing mapping', { mappingId });
+    
+    // Show loading
+    showLoading(true);
+    
+    // Send AJAX request
+    fetch('/RoutineTest/api/curriculum-mapping/remove/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+            mapping_id: mappingId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showLoading(false);
+        
+        if (data.success) {
+            debugLog('Mapping removed successfully', { mappingId });
+            
+            // Reload mappings
+            loadClassMappings(selectedClass);
+            
+            // Update count
+            updateClassMappingCount(selectedClass, -1);
+            
+            // Show success message
+            showNotification('Mapping removed successfully', 'success');
+        } else {
+            alert(data.error || 'Failed to remove mapping');
+        }
+    })
+    .catch(error => {
+        showLoading(false);
+        console.error('Error removing mapping:', error);
+        alert('Failed to remove mapping');
+    });
+}
+
+// Change priority
+function changePriority(mappingId) {
+    const newPriority = prompt('Enter new priority (1-3):');
+    
+    if (!newPriority || isNaN(newPriority) || newPriority < 1 || newPriority > 3) {
+        alert('Invalid priority. Please enter a number between 1 and 3.');
+        return;
+    }
+    
+    debugLog('Changing priority', { mappingId, newPriority });
+    
+    // Show loading
+    showLoading(true);
+    
+    // Send AJAX request
+    fetch('/RoutineTest/api/curriculum-mapping/update-priority/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        },
+        body: JSON.stringify({
+            mapping_id: mappingId,
+            priority: parseInt(newPriority)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        showLoading(false);
+        
+        if (data.success) {
+            debugLog('Priority updated successfully', { mappingId, newPriority });
+            
+            // Reload mappings
+            loadClassMappings(selectedClass);
+            
+            // Show success message
+            showNotification('Priority updated successfully', 'success');
+        } else {
+            alert(data.error || 'Failed to update priority');
+        }
+    })
+    .catch(error => {
+        showLoading(false);
+        console.error('Error updating priority:', error);
+        alert('Failed to update priority');
+    });
+}
+
+// Update class mapping count in UI
+function updateClassMappingCount(classCode, delta) {
+    const classItem = document.querySelector(`.class-item[data-class="${classCode}"]`);
+    if (classItem) {
+        const countSpan = classItem.querySelector('.mapping-count');
+        const currentCount = parseInt(countSpan.textContent) || 0;
+        const newCount = Math.max(0, currentCount + delta);
+        
+        countSpan.textContent = newCount;
+        
+        if (newCount === 0) {
+            countSpan.classList.add('empty');
+        } else {
+            countSpan.classList.remove('empty');
+        }
+    }
+}
+
+// Refresh mappings
+function refreshMappings() {
+    debugLog('Refreshing mappings');
+    
+    if (selectedClass) {
+        loadClassMappings(selectedClass);
+    }
+    
+    // Could also reload the entire page to update stats
+    // location.reload();
+}
+
+// Show/hide loading overlay
+function showLoading(show) {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        if (show) {
+            overlay.classList.add('active');
+        } else {
+            overlay.classList.remove('active');
+        }
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type}`;
+    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="fas fa-check-circle"></i> ${message}
+        <button onclick="this.parentElement.remove()" style="float: right; border: none; background: none; cursor: pointer;">×</button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Get CSRF token
+function getCsrfToken() {
+    const cookie = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken='));
+    
+    return cookie ? cookie.split('=')[1] : '';
+}
+
+// Log initial load
+debugLog('Curriculum Mapping Interface Loaded', {
+    user: '{{ request.user.username }}',
+    isAdmin: {{ is_admin|lower }},
+    academicYear: '{{ current_year }}'
+});
+</script>
+{% endblock %}

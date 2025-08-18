@@ -1,0 +1,95 @@
+<!-- RoutineTest Navigation - VERSION 7.0 UNIFIED FINAL -->
+<!-- Unified Classes & Exams Tab ONLY - NO SEPARATE TABS -->
+<!-- Generated: {% now "c" %} | Cache Bust: {% now "U" %} -->
+<nav class="nav-tabs" id="routinetest-nav-v7" data-version="7.0">
+    <ul style="display: flex; justify-content: space-between; width: 100%;">
+        <div style="display: flex; flex: 1;">
+            <li><a href="/RoutineTest/" data-nav="dashboard">Dashboard</a></li>
+            <li><a href="/RoutineTest/create-exam/" data-nav="upload">Upload Exam</a></li>
+            <li><a href="/RoutineTest/exam-list/" data-nav="keys">Answer Keys</a></li>
+            
+            <!-- UNIFIED TAB V7 - Classes & Exams (REPLACES My Classes & Exam Assignments) -->
+            <li id="unified-tab-v7" style="display: flex !important; visibility: visible !important;">
+                <a href="/RoutineTest/classes-exams/" 
+                   data-nav="classes-exams"
+                   class="unified-tab-link"
+                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; 
+                          color: white !important; 
+                          font-weight: bold !important; 
+                          padding: 12px 20px !important;
+                          border: 2px solid #667eea !important;
+                          display: block !important;
+                          box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+                          text-decoration: none !important;">
+                   🎓 Classes & Exams
+                </a>
+            </li>
+            <!-- NO SEPARATE MY CLASSES TAB -->
+            <!-- NO SEPARATE EXAM ASSIGNMENTS TAB -->
+            
+            <li><a href="/RoutineTest/sessions/" data-nav="results">Results & Analytics</a></li>
+        </div>
+        
+        <div style="display: flex; margin-left: auto;">
+            {% if user.is_authenticated %}
+                <li><a href="#">👤 {{ user.username }}</a></li>
+                <li><a href="/logout/" style="background: #e74c3c;">Logout</a></li>
+            {% else %}
+                <li><a href="/PlacementTest/teacher/login/">Login</a></li>
+            {% endif %}
+        </div>
+    </ul>
+</nav>
+
+<script>
+// VERSION 7.0 - FINAL UNIFIED NAVIGATION
+console.log('%c[NAV_V7_FINAL] Navigation with UNIFIED Classes & Exams Tab', 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px; border-radius: 3px; font-weight: bold;');
+console.log('✅ MERGED: My Classes & Access + Exam Assignments → Classes & Exams');
+console.log('📊 Single unified tab at /RoutineTest/classes-exams/');
+console.log('🚫 Old URLs redirect: /access/my-classes/ → /classes-exams/');
+console.log('🚫 Old URLs redirect: /schedule-matrix/ → /classes-exams/');
+
+// Force visibility and log navigation structure
+(function() {
+    const verifyNavigation = () => {
+        const tab = document.getElementById('unified-tab-v7');
+        if (tab) {
+            tab.style.display = 'flex';
+            tab.style.visibility = 'visible';
+            tab.style.opacity = '1';
+            console.log('✅ [NAV_V7] Unified Classes & Exams tab verified visible');
+        } else {
+            console.error('❌ [NAV_V7] Unified tab element not found!');
+        }
+        
+        // Log complete navigation structure
+        const allTabs = document.querySelectorAll('.nav-tabs a[data-nav]');
+        console.group('📋 Navigation Structure V7 FINAL:');
+        allTabs.forEach((tab, index) => {
+            const isUnified = tab.getAttribute('data-nav') === 'classes-exams';
+            const marker = isUnified ? '🎯' : '  ';
+            console.log(`${marker} Tab ${index + 1}: ${tab.textContent.trim()} → ${tab.getAttribute('data-nav')}`);
+        });
+        console.groupEnd();
+        
+        // Check for old tabs that should NOT exist
+        const oldTabs = Array.from(allTabs).filter(tab => 
+            tab.textContent.includes('My Classes & Access') || 
+            tab.textContent.includes('Exam Assignments') ||
+            tab.getAttribute('data-nav') === 'my-classes' ||
+            tab.getAttribute('data-nav') === 'exam-assignments'
+        );
+        
+        if (oldTabs.length > 0) {
+            console.error('❌ [NAV_V7] OLD TABS STILL PRESENT! These should be removed:', oldTabs.map(t => t.textContent.trim()));
+        } else {
+            console.log('✅ [NAV_V7] Old tabs successfully removed');
+        }
+    };
+    
+    // Run immediately and after slight delay
+    verifyNavigation();
+    setTimeout(verifyNavigation, 100);
+    setTimeout(verifyNavigation, 500);
+})();
+</script>

@@ -46,15 +46,35 @@ def index(request):
     logger.debug(f"[RoutineTest Stats] Total Sessions: {context['total_sessions']}")
     logger.debug(f"[RoutineTest Stats] Recent Sessions: {len(context['recent_sessions'])}")
     
-    # Check if user is a teacher/staff
-    if request.user.is_authenticated and (request.user.is_staff or 
-                                          hasattr(request.user, 'groups') and 
-                                          request.user.groups.filter(name='Teachers').exists()):
-        context['is_teacher'] = True
-        context['pending_sessions'] = StudentSession.objects.filter(
-            completed_at__isnull=False,
-            score__isnull=True
-        ).count()
+    # Check if user is a teacher/staff - Enhanced detection
+    context['is_teacher'] = False
+    context['is_admin'] = False
+    
+    if request.user.is_authenticated:
+        # Multiple ways to detect teacher status
+        is_teacher_by_staff = request.user.is_staff
+        is_teacher_by_group = (hasattr(request.user, 'groups') and 
+                               request.user.groups.filter(name='Teachers').exists())
+        is_teacher_by_profile = hasattr(request.user, 'teacher_profile')
+        is_admin = request.user.is_superuser
+        
+        # Set teacher status if ANY condition is true
+        if is_teacher_by_staff or is_teacher_by_group or is_teacher_by_profile:
+            context['is_teacher'] = True
+            context['pending_sessions'] = StudentSession.objects.filter(
+                completed_at__isnull=False,
+                score__isnull=True
+            ).count()
+            
+        context['is_admin'] = is_admin
+        
+        # Debug logging
+        logger.info(f"[Teacher Detection] User: {request.user.username}")
+        logger.info(f"  - is_staff: {is_teacher_by_staff}")
+        logger.info(f"  - has Teachers group: {is_teacher_by_group}")
+        logger.info(f"  - has teacher_profile: {is_teacher_by_profile}")
+        logger.info(f"  - is_superuser: {is_admin}")
+        logger.info(f"  - Final is_teacher: {context['is_teacher']}")
     
     return render(request, 'primepath_routinetest/index.html', context)
 

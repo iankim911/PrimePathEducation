@@ -17,7 +17,13 @@ from .student_urls import urlpatterns as student_patterns
 from .exam_urls import urlpatterns as exam_patterns
 from .session_urls import urlpatterns as session_patterns
 from .api_urls import urlpatterns as api_patterns
-from .roster_urls import urlpatterns as roster_patterns  # Phase 5: Roster management
+from .legacy_urls import urlpatterns as legacy_patterns  # Legacy URL patterns for backward compatibility
+# Roster management removed - not needed for Answer Keys functionality
+from .access_urls import urlpatterns as access_patterns  # Teacher class access management
+from .matrix_urls import urlpatterns as matrix_patterns  # Schedule Matrix URLs
+from .curriculum_urls import urlpatterns as curriculum_patterns  # Admin curriculum mapping
+from .unified_urls import urlpatterns as unified_patterns  # NEW: Unified Classes & Exams
+from .assessment_urls import urlpatterns as assessment_patterns  # NEW: Teacher Assessment Module (Admin Only)
 from .views import index
 
 app_name = 'RoutineTest'
@@ -30,8 +36,40 @@ index_patterns = [
 # Combine all URL patterns from modular files
 urlpatterns = []
 urlpatterns.extend(index_patterns)  # Index must come first
+urlpatterns.extend(unified_patterns)  # NEW: Unified Classes & Exams (should come early for priority)
 urlpatterns.extend(student_patterns)
 urlpatterns.extend(exam_patterns)
 urlpatterns.extend(session_patterns)
 urlpatterns.extend(api_patterns)
-urlpatterns.extend(roster_patterns)  # Phase 5: Roster management URLs
+# Roster patterns removed - not needed for Answer Keys functionality
+urlpatterns.extend(access_patterns)  # Teacher class access management URLs (kept for backward compatibility)
+urlpatterns.extend(matrix_patterns)  # Schedule Matrix URLs (kept for backward compatibility)
+urlpatterns.extend(curriculum_patterns)  # Admin curriculum mapping URLs
+urlpatterns.extend(assessment_patterns)  # Teacher Assessment Module URLs (Admin Only)
+urlpatterns.extend(legacy_patterns)  # Legacy URL patterns added last for backward compatibility
+
+# Console logging for debugging URL resolution
+import json
+url_debug_info = {
+    "module": "RoutineTest URLs",
+    "total_patterns": len(urlpatterns),
+    "pattern_sources": {
+        "index": len(index_patterns),
+        "unified": len(unified_patterns),
+        "student": len(student_patterns),
+        "exam": len(exam_patterns),
+        "session": len(session_patterns),
+        "api": len(api_patterns),
+        "access": len(access_patterns),
+        "matrix": len(matrix_patterns),
+        "curriculum": len(curriculum_patterns),
+        "assessment": len(assessment_patterns),
+        "legacy": len(legacy_patterns)
+    },
+    "legacy_urls_included": True,
+    "create_exam_patterns": [
+        str(p.pattern) for p in urlpatterns 
+        if hasattr(p, 'pattern') and 'create' in str(p.pattern)
+    ][:5]  # Show first 5 create patterns
+}
+print(f"[ROUTINETEST_URLS_LOADED] {json.dumps(url_debug_info, indent=2)}")

@@ -1,0 +1,1481 @@
+{% extends 'routinetest_base.html' %}
+{% load static %}
+{% comment %}
+Loading custom template filters for matrix operations
+If this fails, the view will need to be updated to provide pre-formatted data
+{% endcomment %}
+{% load matrix_filters %}
+
+{% block title %}Exam Assignments - RoutineTest{% endblock %}
+
+{% block extra_css %}
+<style>
+/* CACHE BUSTER: {{ "now"|date:"YmdHis" }} - QUARTERLY MATRIX COMPLETE HIDE FIX */
+/* MATRIX DISPLAY FIXES - Ensure visibility */
+.matrix-container {
+    background: white !important;
+    border-radius: 8px;
+    padding: 20px !important;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.matrix-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 400px !important;
+    /* Container sizing */
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Table scroll wrapper */
+.table-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding-bottom: 10px;
+    /* Show shadow when scrollable */
+    box-shadow: inset -1px 0 0 0 #ddd;
+}
+
+/* Force horizontal scrollbar to be visible */
+.table-scroll-wrapper::-webkit-scrollbar {
+    height: 14px;
+    background: #f5f5f5;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+    background: #E0E0E0;
+    border: 1px solid #ccc;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 7px;
+    border: 2px solid #E0E0E0;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #333;
+}
+
+/* Custom scrollbar styling - make it more visible */
+.matrix-content::-webkit-scrollbar {
+    height: 12px;
+}
+
+.matrix-content::-webkit-scrollbar-track {
+    background: #E0E0E0;
+    border-radius: 4px;
+    margin: 0 10px;
+}
+
+.matrix-content::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 4px;
+    border: 1px solid #E0E0E0;
+}
+
+.matrix-content::-webkit-scrollbar-thumb:hover {
+    background: #333;
+}
+
+/* Force scrollbar to always show on webkit browsers */
+.matrix-content {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* For Firefox */
+.matrix-content {
+    scrollbar-width: thin;
+    scrollbar-color: #666 #E0E0E0;
+}
+
+/* CRITICAL FIX: Force quarterly matrix to be completely invisible */
+#monthly-matrix {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+#quarterly-matrix {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    z-index: -1 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Matrix Table - Ensure table is wide enough for all columns */
+.matrix-table {
+    width: max-content !important;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    display: table !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    table-layout: auto !important;
+}
+
+.matrix-table thead {
+    background: #2E7D32 !important;
+    color: white !important;
+    display: table-header-group !important;
+    visibility: visible !important;
+}
+
+.matrix-table tbody {
+    display: table-row-group !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.matrix-table th {
+    padding: 12px 8px !important;
+    text-align: center !important;
+    font-weight: 600;
+    font-size: 14px !important;
+    border: 1px solid #1B5E20 !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: table-cell !important;
+    visibility: visible !important;
+    background: #2E7D32 !important;
+    color: white !important;
+}
+
+.matrix-table td {
+    border: 1px solid #E0E0E0 !important;
+    padding: 4px !important;
+    text-align: center !important;
+    position: relative;
+    display: table-cell !important;
+    visibility: visible !important;
+    min-width: 80px !important;
+    min-height: 60px !important;
+}
+
+/* Matrix Cell Critical Fixes */
+.matrix-cell {
+    min-height: 60px !important;
+    max-height: none !important;
+    padding: 8px !important;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: #FAFAFA !important;
+    border-radius: 4px;
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.matrix-cell.empty {
+    background: #FAFAFA !important;
+    border: 1px solid #E0E0E0 !important;
+}
+
+.matrix-cell.scheduled {
+    background: #E3F2FD !important;
+    border: 1px solid #2196F3 !important;
+}
+
+.cell-icon {
+    font-size: 24px !important;
+    margin-bottom: 4px !important;
+    display: block !important;
+    visibility: visible !important;
+    line-height: 1 !important;
+}
+
+.cell-count {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #555 !important;
+    background: white !important;
+    padding: 2px 8px !important;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Responsive fixes */
+@media (max-width: 1200px) {
+    .matrix-table {
+        font-size: 14px !important;
+        min-width: 100% !important;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        padding: 6px 4px !important;
+        min-width: 60px !important;
+    }
+    
+    .cell-icon {
+        font-size: 20px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .matrix-container {
+        padding: 15px !important;
+        overflow-x: auto !important;
+    }
+    
+    .matrix-table {
+        min-width: 800px !important;
+        width: 800px !important;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        min-width: 50px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* Debug borders (temporary) */
+.debug-mode .matrix-table th {
+    border: 2px solid red !important;
+}
+
+.debug-mode .matrix-table td {
+    border: 2px solid blue !important;
+}
+
+.debug-mode .matrix-cell {
+    border: 2px solid green !important;
+    background: yellow !important;
+}
+
+/* =============================================== */
+/* MERGED CSS FROM SECOND BLOCK - MATRIX LAYOUT   */
+/* =============================================== */
+/* Cache Buster: {{ "now"|date:"YmdHis" }} */
+/* Matrix Layout Styles */
+.matrix-container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* Prevent container overflow */
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.matrix-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+.matrix-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1B5E20;
+}
+
+.matrix-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.year-selector {
+    padding: 8px 12px;
+    border: 1px solid #90A4AE;
+    border-radius: 4px;
+    font-size: 16px;
+    background: white;
+}
+
+/* Tab Navigation */
+.matrix-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+.matrix-tab {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.matrix-tab:hover {
+    color: #2E7D32;
+    background: #F1F8E9;
+}
+
+.matrix-tab.active {
+    color: #1B5E20;
+    border-bottom-color: #2E7D32;
+    background: #F1F8E9;
+}
+
+/* Matrix Table Styles */
+.matrix-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+}
+
+.matrix-table thead {
+    background: #2E7D32;
+    color: white;
+}
+
+.matrix-table th {
+    padding: 10px 6px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+    border: 1px solid #1B5E20;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    white-space: nowrap;
+    /* Optimize column widths */
+    min-width: 70px;
+}
+
+.matrix-table th:first-child {
+    text-align: left;
+    padding-left: 15px;
+    min-width: 100px;
+    background: #1B5E20;
+}
+
+/* Curriculum column styling */
+.matrix-table th:nth-child(2) {
+    min-width: 140px;
+    background: #266B2A;
+}
+
+.matrix-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.matrix-table tbody tr:hover {
+    background: #F5F5F5;
+}
+
+.matrix-table td {
+    border: 1px solid #E0E0E0;
+    padding: 0;
+    text-align: center;
+    position: relative;
+}
+
+.matrix-table td:first-child {
+    background: #F5F5F5;
+    padding: 10px 15px;
+    font-weight: 500;
+    text-align: left;
+    color: #263238;
+    border-right: 1px solid #E0E0E0;
+}
+
+/* Matrix Cell Styles - Simplified Green/Red System */
+.matrix-cell {
+    min-height: 60px;
+    padding: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.matrix-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    z-index: 5;
+}
+
+/* Simplified color scheme - Red for no exams, Green for has exams */
+.matrix-cell.empty {
+    background: #FFEBEE !important; /* Light red/pink for no exams */
+    border: 1px solid #EF5350 !important;
+}
+
+.matrix-cell.scheduled,
+.matrix-cell.in-progress,
+.matrix-cell.completed,
+.matrix-cell.draft {
+    background: #E8F5E9 !important; /* Light green for has exams */
+    border: 1px solid #66BB6A !important;
+    position: relative;
+}
+
+/* Pulse animation for cells with exams */
+.matrix-cell.scheduled::before,
+.matrix-cell.in-progress::before,
+.matrix-cell.completed::before,
+.matrix-cell.draft::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background: #4CAF50;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+.cell-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+    color: #EF5350;
+}
+
+.cell-count {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1B5E20;
+    background: white;
+    padding: 4px 10px;
+    border-radius: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    min-width: 40px;
+}
+
+.cell-date {
+    font-size: 10px;
+    color: #777;
+    margin-top: 2px;
+}
+
+/* Curriculum Mapping Column */
+.curriculum-mapping {
+    padding: 6px 4px !important;
+    background: #F8F9FA;
+    font-size: 11px;
+    /* Remove sticky positioning that's causing misalignment */
+    /* position: sticky;
+    left: 100px;
+    z-index: 4; */
+    border-right: 2px solid #E0E0E0;
+}
+
+.curriculum-badge {
+    display: inline-block;
+    padding: 3px 6px;
+    background: #E3F2FD;
+    color: #1565C0;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+}
+
+.curriculum-badge.not-assigned {
+    background: #FFF3E0;
+    color: #E65100;
+    font-style: italic;
+}
+
+/* Legend */
+.matrix-legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    padding: 15px;
+    background: #F5F5F5;
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid #CCC;
+}
+
+.legend-label {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Action Buttons */
+.matrix-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-matrix {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-matrix-primary {
+    background: #2E7D32;
+    color: white;
+}
+
+.btn-matrix-primary:hover {
+    background: #1B5E20;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+}
+
+.btn-matrix-secondary {
+    background: #558B57;
+    color: white;
+}
+
+.btn-matrix-secondary:hover {
+    background: #3D6F3F;
+}
+
+/* Modal Styles */
+.matrix-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.matrix-modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+.modal-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1B5E20;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+/* Exam List in Modal */
+.exam-list {
+    margin: 20px 0;
+}
+
+.exam-item {
+    padding: 12px;
+    margin: 8px 0;
+    background: #F5F5F5;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.exam-item:hover {
+    background: #E8F5E9;
+}
+
+.exam-info {
+    flex: 1;
+}
+
+.exam-name {
+    font-weight: 500;
+    color: #263238;
+    margin-bottom: 4px;
+}
+
+.exam-details {
+    font-size: 12px;
+    color: #666;
+}
+
+.exam-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Loading Indicator */
+.matrix-loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.spinner {
+    border: 3px solid #F3F3F3;
+    border-top: 3px solid #2E7D32;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .matrix-table {
+        font-size: 14px;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        padding: 6px 4px;
+    }
+    
+    .cell-icon {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .matrix-container {
+        padding: 15px;
+        overflow-x: auto;
+    }
+    
+    .matrix-table {
+        min-width: 600px;
+    }
+    
+    .matrix-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .matrix-tabs {
+        overflow-x: auto;
+    }
+}
+
+/* Debug Console Styles */
+.debug-console {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.8);
+    color: #0F0;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    max-width: 300px;
+    z-index: 9999;
+    display: none;
+}
+
+.debug-console.active {
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- DEBUG MODE INDICATOR -->
+<div id="matrix-debug-panel" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #00ff00; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; z-index: 9999; display: none;">
+    <div>🐛 Matrix Debug Mode</div>
+    <div>Press Ctrl+Shift+D to toggle</div>
+    <div id="debug-info"></div>
+</div>
+
+<script>
+// Show debug panel in debug mode
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        const panel = document.getElementById('matrix-debug-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        
+        if (panel.style.display === 'block') {
+            updateDebugInfo();
+        }
+    }
+});
+
+function updateDebugInfo() {
+    const debugInfo = document.getElementById('debug-info');
+    if (debugInfo) {
+        const matrixCells = document.querySelectorAll('.matrix-cell');
+        const visibleCells = Array.from(matrixCells).filter(cell => 
+            getComputedStyle(cell).display !== 'none' && 
+            getComputedStyle(cell).visibility !== 'hidden'
+        );
+        
+        debugInfo.innerHTML = `
+            <div>Total cells: ${matrixCells.length}</div>
+            <div>Visible cells: ${visibleCells.length}</div>
+            <div>Current tab: ${currentTab || 'unknown'}</div>
+        `;
+    }
+}
+</script>
+
+<div class="matrix-container">
+    <!-- Header -->
+    <div class="matrix-header">
+        <h1 class="matrix-title">📊 Exam Assignments Overview</h1>
+        <div class="matrix-controls">
+            <label for="year-selector">Academic Year:</label>
+            <select id="year-selector" class="year-selector">
+                {% for year in available_years %}
+                <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-matrix-primary" onclick="refreshMatrix()">
+                🔄 Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="matrix-tabs">
+        <button class="matrix-tab active" data-type="monthly" onclick="switchTab('monthly')">
+            📅 Monthly/Review Exams
+        </button>
+        <button class="matrix-tab" data-type="quarterly" onclick="switchTab('quarterly')">
+            📊 Quarterly Exams
+        </button>
+    </div>
+
+    <!-- Monthly Matrix -->
+    <div id="monthly-matrix" class="matrix-content">
+        <div class="table-scroll-wrapper" style="width: 100%; max-width: 100%; overflow-x: auto !important; overflow-y: visible; padding-bottom: 20px;">
+            <table class="matrix-table" style="width: 1400px !important; min-width: 1400px !important;">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Curriculum</th>
+                    {% for month in months %}
+                    <th>{{ month_names|get_item:month }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for class_code, class_data in monthly_matrix.items %}
+                <tr data-class="{{ class_code }}">
+                    <td>{{ class_data.display_name }}</td>
+                    <td class="curriculum-mapping">
+                        {% if class_data.curriculum_mapping.combined != 'Not Assigned' %}
+                        <span class="curriculum-badge">{{ class_data.curriculum_mapping.combined }}</span>
+                        {% else %}
+                        <span class="curriculum-badge not-assigned">Not Assigned</span>
+                        {% endif %}
+                    </td>
+                    {% for month in months %}
+                    {% with cell=class_data.cells|get_item:month %}
+                    <td>
+                        <div class="matrix-cell {{ cell.status|lower }}" 
+                             data-cell-id="{{ cell.id }}"
+                             data-class="{{ class_code }}"
+                             data-period="{{ month }}"
+                             data-type="monthly"
+                             onclick="openCellDetail('{{ cell.id }}')">
+                            {% if cell.exam_count > 0 %}
+                            <div class="cell-count">{{ cell.exam_count }}</div>
+                            {% else %}
+                            <div class="cell-icon">➖</div>
+                            {% endif %}
+                            {% if cell.scheduled_date %}
+                            <div class="cell-date">{{ cell.scheduled_date|date:"M d" }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    {% endwith %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <!-- Quarterly Matrix (COMPLETELY HIDDEN - only shown via tab click) -->
+    <div id="quarterly-matrix" class="matrix-content" style="display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;">
+        <div class="table-scroll-wrapper" style="width: 100%; max-width: 100%; overflow-x: auto !important; overflow-y: visible; padding-bottom: 20px;">
+            <table class="matrix-table" style="width: 1400px !important; min-width: 1400px !important;">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Curriculum</th>
+                    {% for quarter in quarters %}
+                    <th>{{ quarter_names|get_item:quarter }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for class_code, class_data in quarterly_matrix.items %}
+                <tr data-class="{{ class_code }}">
+                    <td>{{ class_data.display_name }}</td>
+                    <td class="curriculum-mapping">
+                        {% if class_data.curriculum_mapping.combined != 'Not Assigned' %}
+                        <span class="curriculum-badge">{{ class_data.curriculum_mapping.combined }}</span>
+                        {% else %}
+                        <span class="curriculum-badge not-assigned">Not Assigned</span>
+                        {% endif %}
+                    </td>
+                    {% for quarter in quarters %}
+                    {% with cell=class_data.cells|get_item:quarter %}
+                    <td>
+                        <div class="matrix-cell {{ cell.status|lower }}"
+                             data-cell-id="{{ cell.id }}"
+                             data-class="{{ class_code }}"
+                             data-period="{{ quarter }}"
+                             data-type="quarterly"
+                             onclick="openCellDetail('{{ cell.id }}')">
+                            {% if cell.exam_count > 0 %}
+                            <div class="cell-count">{{ cell.exam_count }}</div>
+                            {% else %}
+                            <div class="cell-icon">➖</div>
+                            {% endif %}
+                            {% if cell.scheduled_date %}
+                            <div class="cell-date">{{ cell.scheduled_date|date:"M d" }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    {% endwith %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="matrix-legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #FFEBEE; border: 1px solid #EF5350;"></div>
+            <span class="legend-label">No Exams</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #E8F5E9; border: 1px solid #66BB6A;"></div>
+            <span class="legend-label">Has Exams</span>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="matrix-actions">
+        <button class="btn btn-matrix-primary" onclick="openBulkAssign()">
+            ➕ Bulk Assign Exams
+        </button>
+        <button class="btn btn-matrix-secondary" onclick="exportMatrix()">
+            📥 Export Schedule
+        </button>
+        <button class="btn btn-matrix-secondary" onclick="printMatrix()">
+            🖨️ Print View
+        </button>
+    </div>
+</div>
+
+<!-- Cell Detail Modal -->
+<div id="cell-detail-modal" class="matrix-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Cell Details</h2>
+            <button class="modal-close" onclick="closeCellDetail()">&times;</button>
+        </div>
+        <div id="cell-detail-content">
+            <div class="matrix-loading">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Debug Console -->
+<div id="debug-console" class="debug-console">
+    <div id="debug-content"></div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced Console debugging with comprehensive logging
+console.group('%c📊 [EXAM_ASSIGNMENTS] Page Initialization', 'background: #00A65E; color: white; padding: 5px; border-radius: 3px; font-weight: bold;');
+console.log('Module: Exam Assignments (formerly Schedule Matrix)');
+console.log('Purpose: View and manage exam assignments across classes and time periods');
+console.log('Teacher:', '{{ teacher.name }}');
+console.log('Classes Assigned:', {{ assigned_classes.count }});
+console.log('Academic Year:', '{{ current_year }}');
+console.log('Features: Monthly/Review Exams, Quarterly Exams, Assignment Management');
+console.groupEnd();
+
+// Global variables
+let currentTab = 'monthly';
+let selectedCells = [];
+let debugMode = true;
+
+// Ensure proper initialization on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[EXAM_ASSIGNMENTS] DOM Ready - Initializing tab view...');
+    
+    // CRITICAL FIX: Force quarterly to be completely invisible on page load
+    const quarterly = document.getElementById('quarterly-matrix');
+    if (quarterly) {
+        quarterly.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;');
+        console.log('[EXAM_ASSIGNMENTS] Quarterly matrix completely hidden');
+    }
+    
+    // Force monthly to be fully visible
+    const monthly = document.getElementById('monthly-matrix');
+    if (monthly) {
+        monthly.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: auto !important; height: auto !important; overflow: visible !important; pointer-events: auto !important;');
+        console.log('[EXAM_ASSIGNMENTS] Monthly matrix fully visible');
+    }
+    
+    // Set initial tab state
+    currentTab = 'monthly';
+    
+    // Ensure monthly tab is active
+    document.querySelectorAll('.matrix-tab').forEach(tab => {
+        if (tab.dataset.type === 'monthly') {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    
+    console.log('[EXAM_ASSIGNMENTS] Initial setup complete - Monthly view active');
+});
+
+// Debug logging function
+function debugLog(message, data = null) {
+    if (debugMode) {
+        const timestamp = new Date().toISOString();
+        const logMessage = `[EXAM_ASSIGNMENTS ${timestamp}] ${message}`;
+        console.log(logMessage, data || '');
+        
+        // Update debug console
+        const debugContent = document.getElementById('debug-content');
+        if (debugContent) {
+            debugContent.innerHTML = `${logMessage}<br>${debugContent.innerHTML}`.substring(0, 500);
+        }
+    }
+}
+
+// Tab switching - Clean implementation with !important handling
+function switchTab(type) {
+    console.log('[EXAM_ASSIGNMENTS] Switching to:', type);
+    
+    // Update tab buttons
+    document.querySelectorAll('.matrix-tab').forEach(tab => {
+        if (tab.dataset.type === type) {
+            tab.classList.add('active');
+        } else {
+            tab.classList.remove('active');
+        }
+    });
+    
+    // Get matrix elements
+    const monthlyMatrix = document.getElementById('monthly-matrix');
+    const quarterlyMatrix = document.getElementById('quarterly-matrix');
+    
+    // Use setAttribute to override !important styles with complete visibility control
+    if (type === 'monthly') {
+        monthlyMatrix.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: auto !important; height: auto !important; overflow: visible !important; pointer-events: auto !important;');
+        quarterlyMatrix.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;');
+    } else if (type === 'quarterly') {
+        monthlyMatrix.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;');
+        quarterlyMatrix.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: auto !important; height: auto !important; overflow: visible !important; pointer-events: auto !important;');
+    }
+    
+    currentTab = type;
+    console.log('[EXAM_ASSIGNMENTS] Tab switched to:', type);
+}
+
+// Enhanced cell detail modal with exam assignment capabilities
+function openCellDetail(cellId) {
+    console.group('%c🔍 [EXAM_ASSIGNMENTS] Opening Cell Detail', 'background: #2196F3; color: white; padding: 3px; border-radius: 3px;');
+    console.log('Cell ID:', cellId);
+    console.log('Current Tab:', currentTab);
+    console.log('Action: Loading exam assignments for this cell');
+    console.groupEnd();
+    
+    debugLog('Opening cell detail for assignment management', cellId);
+    
+    const modal = document.getElementById('cell-detail-modal');
+    modal.classList.add('active');
+    
+    // Update modal title to reflect new purpose
+    const modalTitle = modal.querySelector('.modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = 'Manage Exam Assignments';
+    }
+    
+    // Load cell details via AJAX with enhanced error handling
+    fetch(`/RoutineTest/schedule-matrix/cell/${cellId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(html => {
+            document.getElementById('cell-detail-content').innerHTML = html;
+            debugLog('Cell detail loaded');
+        })
+        .catch(error => {
+            console.error('[MATRIX ERROR] Loading cell detail:', error);
+            document.getElementById('cell-detail-content').innerHTML = 
+                '<p class="error">Error loading cell details</p>';
+        });
+}
+
+// Close cell detail modal
+function closeCellDetail() {
+    debugLog('Closing cell detail');
+    document.getElementById('cell-detail-modal').classList.remove('active');
+}
+
+// Refresh matrix data
+function refreshMatrix() {
+    const year = document.getElementById('year-selector').value;
+    debugLog('Refreshing matrix for year', year);
+    
+    // Show loading state
+    document.querySelectorAll('.matrix-cell').forEach(cell => {
+        cell.style.opacity = '0.5';
+    });
+    
+    // Reload page with new year
+    window.location.href = `/RoutineTest/schedule-matrix/?year=${year}`;
+}
+
+// Enhanced exam assignment functions
+function assignExamToCell(cellId, examId) {
+    console.group('%c➕ [EXAM_ASSIGNMENTS] Assigning Exam', 'background: #4CAF50; color: white; padding: 3px; border-radius: 3px;');
+    console.log('Cell ID:', cellId);
+    console.log('Exam ID:', examId);
+    console.log('Action: Adding exam to cell');
+    console.groupEnd();
+    
+    const formData = new FormData();
+    formData.append('action', 'add_exam');
+    formData.append('exam_id', examId);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch(`/RoutineTest/schedule-matrix/cell/${cellId}/`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Exam assigned successfully:', data.message);
+            refreshCell(cellId);
+            showNotification('success', data.message);
+        } else {
+            console.error('❌ Failed to assign exam:', data.error);
+            showNotification('error', data.error || 'Failed to assign exam');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error assigning exam:', error);
+        showNotification('error', 'Network error occurred');
+    });
+}
+
+function removeExamFromCell(cellId, examId) {
+    console.group('%c➖ [EXAM_ASSIGNMENTS] Removing Exam', 'background: #F44336; color: white; padding: 3px; border-radius: 3px;');
+    console.log('Cell ID:', cellId);
+    console.log('Exam ID:', examId);
+    console.log('Action: Removing exam from cell');
+    console.groupEnd();
+    
+    if (!confirm('Are you sure you want to remove this exam from the assignment?')) {
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('action', 'remove_exam');
+    formData.append('exam_id', examId);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch(`/RoutineTest/schedule-matrix/cell/${cellId}/`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Exam removed successfully:', data.message);
+            refreshCell(cellId);
+            showNotification('success', data.message);
+        } else {
+            console.error('❌ Failed to remove exam:', data.error);
+            showNotification('error', data.error || 'Failed to remove exam');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error removing exam:', error);
+        showNotification('error', 'Network error occurred');
+    });
+}
+
+function refreshCell(cellId) {
+    // Refresh the specific cell to show updated exam count
+    const cell = document.querySelector(`[data-cell-id="${cellId}"]`);
+    if (cell) {
+        cell.style.animation = 'pulse 0.5s';
+        setTimeout(() => {
+            cell.style.animation = '';
+        }, 500);
+    }
+}
+
+function showNotification(type, message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#4CAF50' : '#F44336'};
+        color: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Bulk assign exams with enhanced UI
+function openBulkAssign() {
+    console.group('%c📦 [EXAM_ASSIGNMENTS] Bulk Assignment', 'background: #FF9800; color: white; padding: 3px; border-radius: 3px;');
+    console.log('Action: Opening bulk assignment dialog');
+    
+    // Get selected cells
+    const selected = document.querySelectorAll('.matrix-cell.selected');
+    console.log('Selected cells:', selected.length);
+    
+    if (selected.length === 0) {
+        console.log('No cells selected - prompting user');
+        alert('Please select cells by clicking them while holding Ctrl/Cmd');
+        console.groupEnd();
+        return;
+    }
+    
+    console.log('Opening exam selection modal for bulk assignment');
+    console.groupEnd();
+    
+    // This would open a modal with exam selection
+    // Implementation would include a list of available exams to assign
+}
+
+// Export matrix
+function exportMatrix() {
+    debugLog('Exporting matrix');
+    
+    const year = document.getElementById('year-selector').value;
+    const type = currentTab;
+    
+    // Create export URL
+    const exportUrl = `/RoutineTest/api/schedule-matrix/export/?year=${year}&type=${type}`;
+    window.open(exportUrl, '_blank');
+}
+
+// Print matrix
+function printMatrix() {
+    debugLog('Printing matrix');
+    window.print();
+}
+
+// Cell selection for bulk operations
+document.addEventListener('DOMContentLoaded', function() {
+    debugLog('DOM Content Loaded');
+    
+    // Add click handlers for cell selection
+    document.querySelectorAll('.matrix-cell').forEach(cell => {
+        cell.addEventListener('click', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.toggle('selected');
+                
+                // Update selected cells array
+                const cellId = this.dataset.cellId;
+                const index = selectedCells.indexOf(cellId);
+                if (index > -1) {
+                    selectedCells.splice(index, 1);
+                } else {
+                    selectedCells.push(cellId);
+                }
+                
+                debugLog('Cell selection updated', selectedCells);
+            }
+        });
+    });
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + A to select all
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+            e.preventDefault();
+            document.querySelectorAll('.matrix-cell').forEach(cell => {
+                cell.classList.add('selected');
+                selectedCells.push(cell.dataset.cellId);
+            });
+            debugLog('All cells selected');
+        }
+        
+        // Escape to clear selection
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.matrix-cell.selected').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            selectedCells = [];
+            debugLog('Selection cleared');
+        }
+        
+        // D for debug console toggle
+        if (e.key === 'd' && e.ctrlKey) {
+            e.preventDefault();
+            const debugConsole = document.getElementById('debug-console');
+            debugConsole.classList.toggle('active');
+            debugLog('Debug console toggled');
+        }
+    });
+    
+    // Modal close on background click
+    document.getElementById('cell-detail-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCellDetail();
+        }
+    });
+    
+    // Initialize tooltips
+    document.querySelectorAll('.matrix-cell').forEach(cell => {
+        cell.title = `Click to view details\nCtrl+Click to select for bulk operations`;
+    });
+    
+    debugLog('Matrix initialization complete');
+});
+
+// Auto-refresh every 5 minutes
+setInterval(function() {
+    debugLog('Auto-refresh check');
+    // Could implement auto-refresh logic here
+}, 300000);
+
+// Performance monitoring
+if (window.performance) {
+    const perfData = window.performance.timing;
+    const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+    debugLog('Page load time', pageLoadTime + 'ms');
+}
+
+// MATRIX DISPLAY FIXES - Ensure proper initialization
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[MATRIX FIX] DOM loaded, initializing matrix fixes...');
+    
+    // Force show monthly matrix on page load
+    const monthlyMatrix = document.getElementById('monthly-matrix');
+    const quarterlyMatrix = document.getElementById('quarterly-matrix');
+    
+    if (monthlyMatrix) {
+        monthlyMatrix.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: auto !important; height: auto !important; overflow: visible !important; pointer-events: auto !important;');
+        console.log('[MATRIX FIX] Monthly matrix forced fully visible');
+    }
+    
+    if (quarterlyMatrix) {
+        quarterlyMatrix.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;');
+        console.log('[MATRIX FIX] Quarterly matrix completely hidden initially');
+    }
+    
+    // Ensure all matrix cells are visible
+    const matrixCells = document.querySelectorAll('.matrix-cell');
+    console.log('[MATRIX FIX] Found', matrixCells.length, 'matrix cells');
+    
+    matrixCells.forEach((cell, index) => {
+        cell.style.display = 'flex';
+        cell.style.visibility = 'visible';
+        cell.style.opacity = '1';
+        cell.style.minHeight = '60px';
+        
+        // Add debug info for first few cells
+        if (index < 5) {
+            console.log('[MATRIX FIX] Cell', index, 'data:', {
+                id: cell.dataset.cellId,
+                class: cell.dataset.class,
+                period: cell.dataset.period,
+                type: cell.dataset.type
+            });
+        }
+    });
+    
+    // Ensure table is visible
+    const matrixTables = document.querySelectorAll('.matrix-table');
+    console.log('[MATRIX FIX] Found', matrixTables.length, 'matrix tables');
+    
+    matrixTables.forEach(table => {
+        table.style.display = 'table';
+        table.style.visibility = 'visible';
+        table.style.opacity = '1';
+        table.style.width = '100%';
+    });
+    
+    console.log('[MATRIX FIX] Matrix initialization complete');
+});
+
+// Enhanced switchTab function with forced visibility
+function switchTab(type) {
+    console.log('[MATRIX FIX] Enhanced switchTab called:', type);
+    
+    // Force visibility fixes
+    const monthlyMatrix = document.getElementById('monthly-matrix');
+    const quarterlyMatrix = document.getElementById('quarterly-matrix');
+    
+    if (type === 'monthly') {
+        if (monthlyMatrix) {
+            monthlyMatrix.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: auto !important; height: auto !important; overflow: visible !important; pointer-events: auto !important;');
+            console.log('[MATRIX FIX] Monthly matrix made fully visible');
+        }
+        if (quarterlyMatrix) {
+            quarterlyMatrix.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;');
+            console.log('[MATRIX FIX] Quarterly matrix completely hidden');
+        }
+    } else if (type === 'quarterly') {
+        if (monthlyMatrix) {
+            monthlyMatrix.setAttribute('style', 'display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important; overflow: hidden !important; pointer-events: none !important;');
+            console.log('[MATRIX FIX] Monthly matrix completely hidden');
+        }
+        if (quarterlyMatrix) {
+            quarterlyMatrix.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; width: auto !important; height: auto !important; overflow: visible !important; pointer-events: auto !important;');
+            console.log('[MATRIX FIX] Quarterly matrix made fully visible');
+        }
+    }
+    
+    // Update current tab
+    currentTab = type;
+    
+    // Update tab states
+    document.querySelectorAll('.matrix-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.type === type) {
+            tab.classList.add('active');
+        }
+    });
+}
+</script>
+{% endblock %}
+

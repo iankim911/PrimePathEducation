@@ -1,0 +1,30 @@
+{
+  "absolute_protection": [
+    "placement_test/views.py",
+    "placement_test/models.py",
+    "placement_test/forms.py",
+    "placement_test/urls.py",
+    "placement_test/admin.py",
+    "core/models/*.py",
+    "core/services/*.py",
+    "static/js/modules/timer.js",
+    "static/js/modules/answer-manager.js",
+    "static/js/modules/pdf-viewer.js",
+    "templates/placement_test/*.html"
+  ],
+  "warning_zones": [
+    "static/css/base.css",
+    "static/js/modules/*.js",
+    "templates/base.html",
+    "settings*.py",
+    "requirements.txt"
+  ],
+  "free_zones": [
+    "primepath_routinetest/*",
+    "static/js/routinetest/*",
+    "static/css/routinetest/*",
+    "templates/primepath_routinetest/*"
+  ],
+  "last_update": "2024-01-18",
+  "protected_by": "PROTECTOR"
+}

@@ -1,0 +1,107 @@
+{
+  "timestamp": "2025-08-18T12:15:14.753803",
+  "tests_passed": 16,
+  "tests_failed": 0,
+  "issues_found": [
+    {
+      "page": "RoutineTest Dashboard",
+      "issue": "Multiple toggles (3)",
+      "details": {
+        "containers": 1,
+        "wrappers": 1,
+        "buttons": 1
+      }
+    },
+    {
+      "page": "Classes & Exams",
+      "issue": "Multiple toggles (3)",
+      "details": {
+        "containers": 1,
+        "wrappers": 1,
+        "buttons": 1
+      }
+    },
+    {
+      "page": "Create Exam",
+      "issue": "HTTP 404"
+    },
+    {
+      "page": "Exam List",
+      "issue": "Multiple toggles (3)",
+      "details": {
+        "containers": 1,
+        "wrappers": 1,
+        "buttons": 1
+      }
+    },
+    {
+      "page": "Session List",
+      "issue": "Multiple toggles (3)",
+      "details": {
+        "containers": 1,
+        "wrappers": 1,
+        "buttons": 1
+      }
+    }
+  ],
+  "pages_tested": [
+    {
+      "name": "RoutineTest Dashboard",
+      "url": "/RoutineTest/",
+      "status": "tested"
+    },
+    {
+      "name": "Classes & Exams",
+      "url": "/RoutineTest/classes-exams/",
+      "status": "tested"
+    },
+    {
+      "name": "Exam List",
+      "url": "/RoutineTest/exams/",
+      "status": "tested"
+    },
+    {
+      "name": "Session List",
+      "url": "/RoutineTest/sessions/",
+      "status": "tested"
+    }
+  ],
+  "toggle_locations": [
+    {
+      "page": "RoutineTest Dashboard",
+      "location": {
+        "element_id": "modeToggleContainer",
+        "parent_classes": "header",
+        "in_stats_area": false,
+        "text": "Current Mode:\n\n Teacher Mode"
+      }
+    },
+    {
+      "page": "Classes & Exams",
+      "location": {
+        "element_id": "modeToggleContainer",
+        "parent_classes": "header",
+        "in_stats_area": false,
+        "text": "Current Mode:\n\n Teacher Mode"
+      }
+    },
+    {
+      "page": "Exam List",
+      "location": {
+        "element_id": "modeToggleContainer",
+        "parent_classes": "header",
+        "in_stats_area": false,
+        "text": "Current Mode:\n\n Teacher Mode"
+      }
+    },
+    {
+      "page": "Session List",
+      "location": {
+        "element_id": "modeToggleContainer",
+        "parent_classes": "header",
+        "in_stats_area": false,
+        "text": "Current Mode:\n\n Teacher Mode"
+      }
+    }
+  ]
+}

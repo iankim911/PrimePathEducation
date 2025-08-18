@@ -1,0 +1,994 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+{% load matrix_filters %}
+
+{% block title %}Classes & Exams - RoutineTest{% endblock %}
+
+{% block extra_css %}
+<!-- Unified Classes & Exams Styles with Cache Busting -->
+<style>
+    /* Main Container */
+    .unified-container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Classes Section */
+    .classes-section {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #2E7D32;
+    }
+    
+    .section-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2E7D32;
+    }
+    
+    .class-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .class-card {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        background: #fafafa;
+    }
+    
+    .class-card:hover {
+        border-color: #2E7D32;
+        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .class-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .class-name {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .class-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .badge-full {
+        background: #4CAF50;
+        color: white;
+    }
+    
+    .badge-limited {
+        background: #FF9800;
+        color: white;
+    }
+    
+    .class-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .class-stat {
+        text-align: center;
+    }
+    
+    .class-stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2E7D32;
+    }
+    
+    .class-stat-label {
+        font-size: 12px;
+        color: #666;
+    }
+    
+    /* Matrix Preview Section */
+    .matrix-preview {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        padding: 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+    
+    .matrix-table th {
+        background: #2E7D32;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .matrix-cell {
+        position: relative;
+        min-height: 40px;
+    }
+    
+    .has-exam {
+        background: #E8F5E9;
+    }
+    
+    .exam-indicator {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        margin: 2px;
+    }
+    
+    .exam-review {
+        background: #2196F3;
+        color: white;
+    }
+    
+    .exam-quarterly {
+        background: #FF9800;
+        color: white;
+    }
+    
+    /* Scroll indicator */
+    .scroll-indicator {
+        text-align: center;
+        margin: 20px 0;
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-5px);
+        }
+    }
+    
+    /* Loading states */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .class-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* ===== EXAM TYPE TAB TOGGLE STYLES ===== */
+    .exam-type-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #dee2e6;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .exam-type-tab {
+        flex: 1;
+        padding: 12px 16px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        outline: none;
+    }
+    
+    .exam-type-tab:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+    
+    .exam-type-tab.active {
+        background: #2E7D32;
+        color: white;
+        font-weight: 600;
+        box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .exam-type-tab.active:hover {
+        background: #1B5E20;
+    }
+    
+    .tab-icon {
+        font-size: 1rem;
+    }
+    
+    .tab-badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        min-width: 20px;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .exam-type-tab.active .tab-badge {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Matrix content based on active tab */
+    .matrix-content {
+        transition: opacity 0.3s ease;
+    }
+    
+    .matrix-content.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    /* Hide cells based on active filter */
+    .matrix-filter-active .exam-indicator {
+        display: none;
+    }
+    
+    .matrix-filter-review .exam-indicator.exam-review,
+    .matrix-filter-quarterly .exam-indicator.exam-quarterly,
+    .matrix-filter-all .exam-indicator {
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block header %}Classes & Exams Management{% endblock %}
+
+{% block content %}
+<!-- Mode Toggle Fix - Inline JavaScript -->
+<script>
+(function() {
+    console.log('[MODE_TOGGLE_FIX_INLINE] Starting inline fix for stats box toggle issue');
+    
+    // Function to fix any "function:" text
+    function fixFunctionText() {
+        // Get all text nodes in the document
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+        
+        let node;
+        let fixedCount = 0;
+        
+        while (node = walker.nextNode()) {
+            if (node.nodeValue && node.nodeValue.includes('function:')) {
+                console.warn('[MODE_TOGGLE_FIX_INLINE] Found "function:" in text:', node.nodeValue);
+                node.nodeValue = node.nodeValue.replace(/function\s*:\s*/gi, '');
+                fixedCount++;
+            }
+        }
+        
+        if (fixedCount > 0) {
+            console.log('[MODE_TOGGLE_FIX_INLINE] Fixed', fixedCount, 'instances of "function:" text');
+        }
+        
+        // Also check for any toggle elements in stats areas
+        const statsAreas = document.querySelectorAll('.class-stats, .class-stat, .stats-box, .stat-box');
+        statsAreas.forEach(area => {
+            const toggles = area.querySelectorAll('.mode-toggle-container, .mode-toggle-wrapper, .mode-toggle-btn, [class*="toggle"]');
+            toggles.forEach(toggle => {
+                console.warn('[MODE_TOGGLE_FIX_INLINE] Removing toggle from stats area:', toggle);
+                toggle.remove();
+            });
+        });
+    }
+    
+    // Run immediately
+    fixFunctionText();
+    
+    // Run after DOM is fully loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixFunctionText);
+    }
+    
+    // Run after a short delay to catch any dynamic content
+    setTimeout(fixFunctionText, 100);
+    setTimeout(fixFunctionText, 500);
+    setTimeout(fixFunctionText, 1000);
+    
+    // Monitor for changes
+    const observer = new MutationObserver(() => {
+        fixFunctionText();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+    
+    console.log('[MODE_TOGGLE_FIX_INLINE] Inline fix initialized with monitoring');
+})();
+</script>
+
+<!-- Debug Console Logging -->
+<script>
+console.group('%c[UNIFIED_VIEW] Classes & Exams Page Loaded', 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;');
+console.log('📊 View Type: Unified (Classes & Exams)');
+console.log('👤 User:', '{{ user.username }}');
+console.log('🎓 Is Admin:', {{ is_admin|lower }});
+console.log('📅 Academic Year:', {{ current_year }});
+console.log('⏱️ Render Time:', '{{ render_time }}');
+console.log('🔄 Cache Bust:', '{{ cache_bust }}');
+console.log('📋 Total Classes:', {{ classes_info|length }});
+
+console.groupEnd();
+
+// MATRIX RESTORATION DEBUGGING - Comprehensive Matrix Data Analysis
+console.group('%c[MATRIX_DEBUG] Schedule Matrix Data Analysis', 'background: #FF6B6B; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;');
+
+// Matrix basic info
+const matrixData = {{ matrix_data|default:'{}'|safe }};
+const timeslots = {{ timeslots|default:'[]'|safe }};
+console.log('🗓️ Timeslots Available:', timeslots);
+console.log('📊 Matrix Classes:', Object.keys(matrixData));
+console.log('🎯 Total Matrix Cells:', Object.keys(matrixData).length * timeslots.length);
+
+// Analyze matrix cell population
+let totalCells = 0;
+let populatedCells = 0;
+let reviewExams = 0;
+let quarterlyExams = 0;
+let emptyCells = 0;
+let errorCells = 0;
+
+for (const [className, classData] of Object.entries(matrixData)) {
+    console.group(`📚 Class: ${className}`);
+    
+    for (const timeslot of timeslots) {
+        const cell = classData[timeslot];
+        totalCells++;
+        
+        if (cell) {
+            if (cell.status === 'ERROR') {
+                errorCells++;
+                console.warn(`  ❌ ${timeslot}: ERROR - ${cell.error || 'Unknown error'}`);
+            } else if (cell.has_exam) {
+                populatedCells++;
+                let examTypes = [];
+                if (cell.review) {
+                    reviewExams++;
+                    examTypes.push(`Review: "${cell.review.name}"`);
+                }
+                if (cell.quarterly) {
+                    quarterlyExams++;
+                    examTypes.push(`Quarterly: "${cell.quarterly.name}"`);
+                }
+                console.log(`  ✅ ${timeslot}: ${examTypes.join(', ')} (${cell.exam_count} total)`);
+            } else {
+                emptyCells++;
+                console.log(`  ⬜ ${timeslot}: Empty (${cell.status})`);
+            }
+        } else {
+            emptyCells++;
+            console.warn(`  ❓ ${timeslot}: No cell data`);
+        }
+    }
+    console.groupEnd();
+}
+
+// Matrix statistics
+console.group('📊 Matrix Population Statistics');
+console.table({
+    'Total Cells': totalCells,
+    'Populated Cells': populatedCells,
+    'Empty Cells': emptyCells,
+    'Error Cells': errorCells,
+    'Review Exams': reviewExams,
+    'Quarterly Exams': quarterlyExams,
+    'Population Rate': totalCells > 0 ? `${Math.round((populatedCells / totalCells) * 100)}%` : '0%'
+});
+console.groupEnd();
+
+// Matrix health check
+if (totalCells === 0) {
+    console.error('🚨 MATRIX CRITICAL: No matrix cells found! Matrix data may not be loading.');
+} else if (populatedCells === 0) {
+    console.warn('⚠️ MATRIX WARNING: No populated cells found. Check if exams are assigned to matrix.');
+} else if (errorCells > 0) {
+    console.warn(`⚠️ MATRIX WARNING: ${errorCells} cells have errors. Check server logs.`);
+} else {
+    console.log('✅ MATRIX HEALTHY: Matrix data loaded successfully with populated cells.');
+}
+
+// Timeslot validation
+const expectedMonths = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+const expectedQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+const expectedTimeslots = [...expectedMonths, ...expectedQuarters];
+
+const missingTimeslots = expectedTimeslots.filter(slot => !timeslots.includes(slot));
+const extraTimeslots = timeslots.filter(slot => !expectedTimeslots.includes(slot));
+
+if (missingTimeslots.length > 0) {
+    console.warn('⚠️ TIMESLOT WARNING: Missing expected timeslots:', missingTimeslots);
+}
+if (extraTimeslots.length > 0) {
+    console.warn('⚠️ TIMESLOT WARNING: Unexpected timeslots found:', extraTimeslots);
+}
+
+// Matrix rendering validation
+setTimeout(() => {
+    const matrixTable = document.querySelector('.matrix-table');
+    if (matrixTable) {
+        const cells = matrixTable.querySelectorAll('.matrix-cell');
+        const indicatorCells = matrixTable.querySelectorAll('.matrix-cell .exam-indicator');
+        
+        console.group('🖼️ Matrix DOM Rendering Validation');
+        console.log(`Total matrix cells rendered: ${cells.length}`);
+        console.log(`Cells with exam indicators: ${indicatorCells.length}`);
+        
+        // Check for rendering issues
+        const emptyCellsRendered = Array.from(cells).filter(cell => 
+            cell.textContent.trim() === '' && !cell.querySelector('.exam-indicator')
+        ).length;
+        
+        console.log(`Empty cells rendered: ${emptyCellsRendered}`);
+        console.log(`Expected total cells: ${Object.keys(matrixData).length * timeslots.length}`);
+        
+        if (cells.length !== Object.keys(matrixData).length * timeslots.length) {
+            console.error('🚨 DOM RENDERING ERROR: Cell count mismatch!');
+        } else {
+            console.log('✅ DOM RENDERING: Cell count matches expected.');
+        }
+        console.groupEnd();
+    } else {
+        console.error('🚨 DOM ERROR: Matrix table not found! Template rendering may have failed.');
+    }
+}, 100);
+
+console.groupEnd();
+</script>
+
+<div class="unified-container">
+    {% if error %}
+    <!-- Error State -->
+    <div class="alert alert-danger">
+        <h4>Error Loading Classes & Exams</h4>
+        <p>{{ error_message }}</p>
+        <a href="{% url 'RoutineTest:index' %}" class="btn btn-primary">Return to Dashboard</a>
+    </div>
+    {% else %}
+    
+    <!-- Admin Badge (Simple) -->
+    {% if is_admin %}
+    <div style="text-align: center; margin-bottom: 20px;">
+        <span class="badge badge-full" style="font-size: 14px; padding: 8px 16px; background: #2E7D32; color: white; border-radius: 20px;">
+            👑 ADMIN - Full Access to All Classes
+        </span>
+    </div>
+    {% endif %}
+    
+    <!-- SECTION 2: My Classes Details -->
+    <div class="classes-section">
+        <div class="section-header">
+            <div class="section-title">📚 My Classes & Access</div>
+            <div>
+                {% if not is_admin and pending_requests_count > 0 %}
+                <span class="badge badge-warning">{{ pending_requests_count }} Pending Request{{ pending_requests_count|pluralize }}</span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="class-grid">
+            {% for class in classes_info %}
+            <div class="class-card">
+                <div class="class-header">
+                    <div class="class-name">{{ class.class_name }}</div>
+                    <div class="class-badge badge-{{ class.access_level|lower }}">
+                        {{ class.access_level }}
+                    </div>
+                </div>
+                
+                <div class="class-info">
+                    <p><strong>Class Code:</strong> {{ class.class_code }}</p>
+                    <p><strong>Active Exams:</strong> {{ class.active_exams }}</p>
+                    
+                    {% if class.recent_activity %}
+                    <div style="margin-top: 10px;">
+                        <small><strong>Recent Activity:</strong></small>
+                        {% for activity in class.recent_activity|slice:":2" %}
+                        <div style="font-size: 12px; margin-top: 5px; padding: 5px; background: #f5f5f5; border-radius: 3px;">
+                            {{ activity.student }} - {{ activity.exam|truncatechars:20 }}
+                            {% if activity.completed %}✅{% else %}⏳{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="class-stats">
+                    <div class="class-stat">
+                        <div class="class-stat-value">{{ class.active_exams }}</div>
+                        <div class="class-stat-label">Active Exams</div>
+                    </div>
+                    <div class="class-stat">
+                        <div class="class-stat-value">{{ class.student_count }}</div>
+                        <div class="class-stat-label">Students</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- SECTION 3: Matrix Preview with Exam Type Toggle -->
+    <div class="matrix-preview">
+        <div class="section-header">
+            <div class="section-title">📅 Exam Assignments Matrix</div>
+            <div>
+                <a href="{% url 'RoutineTest:schedule_matrix' %}" class="btn btn-primary">
+                    View Full Matrix →
+                </a>
+            </div>
+        </div>
+        
+        <!-- EXAM TYPE TAB TOGGLE -->
+        <div class="exam-type-tabs" role="tablist" aria-label="Exam Type Filter">
+            <button type="button" 
+                    class="exam-type-tab active" 
+                    id="matrix-review-tab"
+                    role="tab"
+                    aria-selected="true"
+                    data-exam-type="review">
+                <span class="tab-icon">📚</span>
+                <span>Review</span>
+                <span class="tab-badge" id="review-count">0</span>
+            </button>
+            
+            <button type="button" 
+                    class="exam-type-tab" 
+                    id="matrix-quarterly-tab"
+                    role="tab"
+                    aria-selected="false"
+                    data-exam-type="quarterly">
+                <span class="tab-icon">📊</span>
+                <span>Quarterly</span>
+                <span class="tab-badge" id="quarterly-count">0</span>
+            </button>
+            
+            <button type="button" 
+                    class="exam-type-tab" 
+                    id="matrix-all-tab"
+                    role="tab"
+                    aria-selected="false"
+                    data-exam-type="all">
+                <span class="tab-icon">📋</span>
+                <span>All Exams</span>
+                <span class="tab-badge" id="all-count">0</span>
+            </button>
+        </div>
+        
+        <div class="matrix-content matrix-filter-review" id="matrix-content" style="overflow-x: auto;">
+            <table class="matrix-table" id="matrix-table">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        {% for timeslot in timeslots %}
+                        <th data-timeslot="{{ timeslot }}" 
+                            data-column-type="{% if 'Q' in timeslot %}quarterly{% else %}monthly{% endif %}"
+                            class="timeslot-column {% if 'Q' in timeslot %}quarterly-column{% else %}monthly-column{% endif %}">
+                            {{ timeslot }}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for class_code, slots in matrix_data.items %}
+                    <tr>
+                        <td><strong>{{ class_code }}</strong></td>
+                        {% for timeslot in timeslots %}
+                            {% with cell=slots|dict_get:timeslot %}
+                            <td class="matrix-cell {% if cell.has_exam %}has-exam{% endif %} {% if 'Q' in timeslot %}quarterly-column{% else %}monthly-column{% endif %}"
+                                data-timeslot="{{ timeslot }}"
+                                data-column-type="{% if 'Q' in timeslot %}quarterly{% else %}monthly{% endif %}">
+                                {% if cell.review %}
+                                    <span class="exam-indicator exam-review" title="{{ cell.review.name }}">R</span>
+                                {% endif %}
+                                {% if cell.quarterly %}
+                                    <span class="exam-indicator exam-quarterly" title="{{ cell.quarterly.name }}">Q</span>
+                                {% endif %}
+                            </td>
+                            {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="margin-top: 15px; display: flex; gap: 20px; font-size: 12px;">
+            <span><span class="exam-indicator exam-review">R</span> = Review Exam</span>
+            <span><span class="exam-indicator exam-quarterly">Q</span> = Quarterly Exam</span>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+
+<!-- Dynamic Updates Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[UNIFIED_VIEW] DOM loaded, initializing dynamic features...');
+    
+    // ===== EXAM TYPE TAB TOGGLE SYSTEM =====
+    (function initializeMatrixTabToggle() {
+        console.group('%c[MATRIX_TAB_TOGGLE] Initializing Enhanced Column Visibility System v2.0', 'background: #2E7D32; color: white; padding: 4px 8px; border-radius: 3px; font-weight: bold;');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('Feature: Column hiding based on tab selection');
+        
+        const tabs = document.querySelectorAll('.exam-type-tabs .exam-type-tab');
+        const matrixContent = document.getElementById('matrix-content');
+        const matrixTable = document.getElementById('matrix-table');
+        
+        // COLUMN DETECTION AND ANALYSIS
+        console.group('[COLUMN_DETECTION] Analyzing Table Structure');
+        const allColumns = document.querySelectorAll('.timeslot-column');
+        const monthlyColumns = document.querySelectorAll('.monthly-column');
+        const quarterlyColumns = document.querySelectorAll('.quarterly-column');
+        
+        console.log('📊 Column Detection Results:');
+        console.log('  Total columns with timeslot class:', allColumns.length);
+        console.log('  Monthly columns detected:', monthlyColumns.length);
+        console.log('  Quarterly columns detected:', quarterlyColumns.length);
+        
+        // Verify column headers
+        const monthlyHeaders = Array.from(document.querySelectorAll('th.monthly-column')).map(th => th.textContent.trim());
+        const quarterlyHeaders = Array.from(document.querySelectorAll('th.quarterly-column')).map(th => th.textContent.trim());
+        
+        console.log('📅 Monthly column headers:', monthlyHeaders);
+        console.log('📊 Quarterly column headers:', quarterlyHeaders);
+        
+        // Verify column cells
+        const monthlyCells = document.querySelectorAll('td.monthly-column');
+        const quarterlyCells = document.querySelectorAll('td.quarterly-column');
+        
+        console.log('📋 Table cell counts:');
+        console.log('  Monthly cells:', monthlyCells.length);
+        console.log('  Quarterly cells:', quarterlyCells.length);
+        
+        if (monthlyColumns.length === 0 && quarterlyColumns.length === 0) {
+            console.error('⚠️ WARNING: No columns detected with monthly-column or quarterly-column classes!');
+            console.log('Attempting fallback detection by data attributes...');
+            
+            const fallbackMonthly = document.querySelectorAll('[data-column-type="monthly"]');
+            const fallbackQuarterly = document.querySelectorAll('[data-column-type="quarterly"]');
+            console.log('Fallback monthly:', fallbackMonthly.length);
+            console.log('Fallback quarterly:', fallbackQuarterly.length);
+        }
+        
+        console.groupEnd();
+        
+        if (!tabs.length || !matrixContent) {
+            console.warn('[MATRIX_TAB_TOGGLE] Required elements not found');
+            console.groupEnd();
+            return;
+        }
+        
+        // Count exams by type
+        function countExamsByType() {
+            let reviewCount = 0;
+            let quarterlyCount = 0;
+            
+            const examIndicators = matrixTable.querySelectorAll('.exam-indicator');
+            examIndicators.forEach(indicator => {
+                if (indicator.classList.contains('exam-review')) {
+                    reviewCount++;
+                } else if (indicator.classList.contains('exam-quarterly')) {
+                    quarterlyCount++;
+                }
+            });
+            
+            // Update badge counts
+            const reviewBadge = document.getElementById('review-count');
+            const quarterlyBadge = document.getElementById('quarterly-count');
+            const allBadge = document.getElementById('all-count');
+            
+            if (reviewBadge) reviewBadge.textContent = reviewCount;
+            if (quarterlyBadge) quarterlyBadge.textContent = quarterlyCount;
+            if (allBadge) allBadge.textContent = reviewCount + quarterlyCount;
+            
+            console.log('[MATRIX_TAB_TOGGLE] Exam counts updated:', {
+                review: reviewCount,
+                quarterly: quarterlyCount,
+                total: reviewCount + quarterlyCount
+            });
+            
+            return { review: reviewCount, quarterly: quarterlyCount };
+        }
+        
+        // Apply filter based on active tab - ENHANCED WITH COLUMN VISIBILITY
+        function applyMatrixFilter(examType) {
+            console.group('[MATRIX_TAB_TOGGLE] Applying Column Visibility Filter');
+            console.log('Filter Type:', examType);
+            console.log('Timestamp:', new Date().toISOString());
+            
+            // Get all monthly and quarterly columns
+            const monthlyColumns = document.querySelectorAll('.monthly-column');
+            const quarterlyColumns = document.querySelectorAll('.quarterly-column');
+            
+            console.log('Monthly columns found:', monthlyColumns.length);
+            console.log('Quarterly columns found:', quarterlyColumns.length);
+            
+            // Remove all filter classes
+            matrixContent.classList.remove('matrix-filter-review', 'matrix-filter-quarterly', 'matrix-filter-all');
+            
+            // Apply column visibility based on selected tab
+            let visibleColumns = 0;
+            let hiddenColumns = 0;
+            
+            switch(examType) {
+                case 'review':
+                    matrixContent.classList.add('matrix-filter-review');
+                    console.log('[COLUMN_VISIBILITY] Showing Review tab - hiding quarterly columns');
+                    
+                    // Show monthly columns, hide quarterly columns
+                    monthlyColumns.forEach(col => {
+                        col.style.display = '';
+                        visibleColumns++;
+                    });
+                    quarterlyColumns.forEach(col => {
+                        col.style.display = 'none';
+                        hiddenColumns++;
+                    });
+                    
+                    console.log('✅ Monthly columns SHOWN:', monthlyColumns.length);
+                    console.log('❌ Quarterly columns HIDDEN:', quarterlyColumns.length);
+                    break;
+                    
+                case 'quarterly':
+                    matrixContent.classList.add('matrix-filter-quarterly');
+                    console.log('[COLUMN_VISIBILITY] Showing Quarterly tab - hiding monthly columns');
+                    
+                    // Hide monthly columns, show quarterly columns
+                    monthlyColumns.forEach(col => {
+                        col.style.display = 'none';
+                        hiddenColumns++;
+                    });
+                    quarterlyColumns.forEach(col => {
+                        col.style.display = '';
+                        visibleColumns++;
+                    });
+                    
+                    console.log('❌ Monthly columns HIDDEN:', monthlyColumns.length);
+                    console.log('✅ Quarterly columns SHOWN:', quarterlyColumns.length);
+                    break;
+                    
+                case 'all':
+                    matrixContent.classList.add('matrix-filter-all');
+                    console.log('[COLUMN_VISIBILITY] Showing ALL tab - displaying all columns');
+                    
+                    // Show all columns
+                    monthlyColumns.forEach(col => {
+                        col.style.display = '';
+                        visibleColumns++;
+                    });
+                    quarterlyColumns.forEach(col => {
+                        col.style.display = '';
+                        visibleColumns++;
+                    });
+                    
+                    console.log('✅ ALL columns SHOWN:', monthlyColumns.length + quarterlyColumns.length);
+                    break;
+            }
+            
+            console.log('[COLUMN_VISIBILITY] Summary:', {
+                'Visible Columns': visibleColumns,
+                'Hidden Columns': hiddenColumns,
+                'Total Columns': visibleColumns + hiddenColumns,
+                'Filter Applied': examType
+            });
+            
+            // Update cell visibility for highlighting
+            updateCellVisibility(examType);
+            
+            console.groupEnd();
+        }
+        
+        // Update cell background colors based on filter
+        function updateCellVisibility(examType) {
+            const cells = matrixTable.querySelectorAll('.matrix-cell');
+            let visibleCells = 0;
+            let hiddenCells = 0;
+            
+            cells.forEach(cell => {
+                const hasReview = cell.querySelector('.exam-review');
+                const hasQuarterly = cell.querySelector('.exam-quarterly');
+                
+                let shouldHighlight = false;
+                
+                if (examType === 'review' && hasReview) {
+                    shouldHighlight = true;
+                } else if (examType === 'quarterly' && hasQuarterly) {
+                    shouldHighlight = true;
+                } else if (examType === 'all' && (hasReview || hasQuarterly)) {
+                    shouldHighlight = true;
+                }
+                
+                if (shouldHighlight) {
+                    cell.classList.add('has-exam');
+                    visibleCells++;
+                } else {
+                    cell.classList.remove('has-exam');
+                    hiddenCells++;
+                }
+            });
+            
+            console.log('[MATRIX_TAB_TOGGLE] Cell visibility updated:', {
+                visible: visibleCells,
+                hidden: hiddenCells,
+                total: cells.length
+            });
+        }
+        
+        // Handle tab clicks
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const examType = this.dataset.examType;
+                
+                console.log('[MATRIX_TAB_TOGGLE] Tab clicked:', examType);
+                
+                // Update active states
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+                
+                // Apply filter
+                applyMatrixFilter(examType);
+                
+                // Store preference
+                try {
+                    sessionStorage.setItem('matrixExamTypeFilter', examType);
+                    console.log('[MATRIX_TAB_TOGGLE] Filter preference saved:', examType);
+                } catch(e) {
+                    console.warn('[MATRIX_TAB_TOGGLE] Could not save preference:', e);
+                }
+            });
+        });
+        
+        // Initialize counts
+        const counts = countExamsByType();
+        
+        // Restore saved filter preference
+        try {
+            const savedFilter = sessionStorage.getItem('matrixExamTypeFilter');
+            if (savedFilter && ['review', 'quarterly', 'all'].includes(savedFilter)) {
+                console.log('[MATRIX_TAB_TOGGLE] Restoring saved filter:', savedFilter);
+                const savedTab = document.querySelector(`[data-exam-type="${savedFilter}"]`);
+                if (savedTab) {
+                    savedTab.click();
+                }
+            } else {
+                // Apply default filter
+                applyMatrixFilter('review');
+            }
+        } catch(e) {
+            console.warn('[MATRIX_TAB_TOGGLE] Could not restore preference:', e);
+            applyMatrixFilter('review');
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.altKey) {
+                switch(e.key) {
+                    case '1':
+                        document.getElementById('matrix-review-tab')?.click();
+                        e.preventDefault();
+                        break;
+                    case '2':
+                        document.getElementById('matrix-quarterly-tab')?.click();
+                        e.preventDefault();
+                        break;
+                    case '3':
+                        document.getElementById('matrix-all-tab')?.click();
+                        e.preventDefault();
+                        break;
+                }
+            }
+        });
+        
+        console.log('[MATRIX_TAB_TOGGLE] System ready with keyboard shortcuts:');
+        console.log('  Alt+1: Review');
+        console.log('  Alt+2: Quarterly');
+        console.log('  Alt+3: All Exams');
+        console.groupEnd();
+    })();
+    
+    // Auto-refresh stats every 5 minutes
+    setInterval(function() {
+        console.log('[UNIFIED_VIEW] Auto-refreshing statistics...');
+        // Could implement AJAX refresh here if needed
+    }, 300000);
+    
+    // Smooth scroll to sections
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Add loading states for async operations
+    document.querySelectorAll('.class-card').forEach(card => {
+        card.addEventListener('click', function() {
+            console.log('[UNIFIED_VIEW] Class card clicked:', this.querySelector('.class-name').textContent);
+        });
+    });
+    
+    console.log('[UNIFIED_VIEW] Initialization complete');
+});
+</script>
+{% endblock %}

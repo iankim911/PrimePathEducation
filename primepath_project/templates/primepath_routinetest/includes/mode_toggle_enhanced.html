@@ -1,0 +1,812 @@
+{% comment %}
+Enhanced Mode Toggle Component - Admin/Teacher Mode Switcher with Authentication
+Version 2.0 - With proper authentication for Admin mode
+{% endcomment %}
+
+<div class="mode-toggle-container" id="modeToggleContainer">
+    <div class="mode-toggle-wrapper">
+        <span class="mode-label">Current Mode:</span>
+        <button class="mode-toggle-btn" id="modeToggleBtn" onclick="handleModeToggle()">
+            {% if current_view_mode == 'Admin' %}
+                <i class="fas fa-user-shield"></i> Admin Mode
+            {% else %}
+                <i class="fas fa-chalkboard-teacher"></i> Teacher Mode
+            {% endif %}
+        </button>
+        <span class="mode-indicator" id="modeIndicator">
+            {% if current_view_mode == 'Admin' %}
+                <span class="admin-active">●</span> Admin Active
+            {% else %}
+                <span class="teacher-active">●</span> Teacher Active
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<!-- Authentication Modal -->
+<div id="adminAuthModal" class="auth-modal" style="display: none;">
+    <div class="auth-modal-content">
+        <div class="auth-modal-header">
+            <h3>🔐 Admin Authentication Required</h3>
+            <button class="auth-modal-close" onclick="closeAuthModal()">&times;</button>
+        </div>
+        <div class="auth-modal-body">
+            <p>Please enter your credentials to switch to Admin Mode:</p>
+            <form id="adminAuthForm" onsubmit="return authenticateAdmin(event)">
+                <div class="form-group">
+                    <label for="authUsername">Username:</label>
+                    <input type="text" id="authUsername" name="username" required class="form-control" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="authPassword">Password:</label>
+                    <input type="password" id="authPassword" name="password" required class="form-control" autocomplete="current-password">
+                </div>
+                <div class="auth-error" id="authError" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="authErrorMsg"></span>
+                </div>
+                <div class="auth-modal-footer">
+                    <button type="submit" class="btn-auth-submit">
+                        <i class="fas fa-sign-in-alt"></i> Authenticate
+                    </button>
+                    <button type="button" class="btn-auth-cancel" onclick="closeAuthModal()">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enhanced Mode Toggle Styles - Positioned below navigation */
+.mode-toggle-container {
+    position: relative !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    padding: 20px 30px 0 0 !important; /* Top padding for spacing from nav, right padding to align with logout */
+    margin-bottom: 20px !important; /* Bottom margin for spacing from content */
+    z-index: 100 !important;
+    /* CRITICAL: Ensure it's never absolutely positioned */
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    /* Ensure it takes full width for proper right alignment */
+    width: 100% !important;
+    max-width: 100% !important;
+    /* Background for debugging - remove after testing */
+    /* background: rgba(255, 0, 0, 0.1); */
+}
+
+.mode-toggle-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+    padding: 10px 20px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #2E7D32;
+    transition: all 0.3s ease;
+}
+
+.mode-toggle-wrapper:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.mode-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.mode-toggle-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #4CAF50;
+    color: white;
+}
+
+.mode-toggle-btn:hover {
+    background: #45a049;
+    transform: scale(1.05);
+}
+
+.mode-toggle-btn:active {
+    transform: scale(0.98);
+}
+
+.mode-indicator {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.admin-active {
+    color: #FF9800;
+    font-size: 16px;
+    animation: pulse 2s infinite;
+}
+
+.teacher-active {
+    color: #4CAF50;
+    font-size: 16px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Authentication Modal Styles */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.auth-modal-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.auth-modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.auth-modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.auth-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.auth-modal-body {
+    padding: 25px;
+}
+
+.auth-modal-body p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.auth-error {
+    background: #FFEBEE;
+    color: #C62828;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-modal-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-auth-submit {
+    flex: 1;
+    padding: 12px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-auth-submit:hover {
+    background: #45a049;
+}
+
+.btn-auth-cancel {
+    flex: 1;
+    padding: 12px 20px;
+    background: #f5f5f5;
+    color: #666;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-auth-cancel:hover {
+    background: #e0e0e0;
+}
+
+/* Loading state */
+.auth-loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #4CAF50;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .mode-toggle-container {
+        /* Remove absolute positioning attempts */
+        /* These don't work with position: relative */
+        padding: 15px 15px 0 0 !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .mode-toggle-wrapper {
+        padding: 8px 12px;
+        gap: 8px;
+    }
+    
+    .mode-label {
+        display: none;
+    }
+    
+    .mode-indicator {
+        font-size: 11px;
+    }
+}
+</style>
+
+<script>
+// Enhanced Mode Toggle JavaScript with Authentication
+console.log('[MODE_TOGGLE_ENHANCED] Initializing enhanced mode toggle system');
+
+// DEBUGGING: Check actual position of mode toggle
+document.addEventListener('DOMContentLoaded', function() {
+    console.group('%c[MODE_TOGGLE_POSITION_DEBUG]', 'background: #FF5722; color: white; padding: 5px;');
+    
+    const toggleContainer = document.querySelector('.mode-toggle-container');
+    if (toggleContainer) {
+        const rect = toggleContainer.getBoundingClientRect();
+        const styles = window.getComputedStyle(toggleContainer);
+        
+        console.log('Toggle Container Found!');
+        console.log('DOM Position:', {
+            parent: toggleContainer.parentElement?.tagName,
+            previousSibling: toggleContainer.previousElementSibling?.tagName,
+            nextSibling: toggleContainer.nextElementSibling?.tagName
+        });
+        
+        console.log('Computed Styles:', {
+            position: styles.position,
+            top: styles.top,
+            right: styles.right,
+            padding: styles.padding,
+            margin: styles.margin,
+            zIndex: styles.zIndex
+        });
+        
+        console.log('Actual Position on Page:', {
+            top: rect.top + 'px',
+            left: rect.left + 'px',
+            right: (window.innerWidth - rect.right) + 'px',
+            bottom: (window.innerHeight - rect.bottom) + 'px',
+            width: rect.width + 'px',
+            height: rect.height + 'px'
+        });
+        
+        // Check if it's below the navigation
+        const nav = document.querySelector('.nav-tabs');
+        if (nav) {
+            const navRect = nav.getBoundingClientRect();
+            const isBelow = rect.top > navRect.bottom;
+            console.log('Navigation Position:', {
+                navBottom: navRect.bottom + 'px',
+                toggleTop: rect.top + 'px',
+                isBelowNav: isBelow ? '✅ YES' : '❌ NO',
+                gap: (rect.top - navRect.bottom) + 'px'
+            });
+            
+            if (!isBelow) {
+                console.error('⚠️ MODE TOGGLE IS NOT BELOW NAVIGATION!');
+                console.log('Attempting to fix position...');
+                // Force it below nav if needed
+                toggleContainer.style.cssText += 'position: relative !important; top: auto !important; right: auto !important;';
+            }
+        }
+    } else {
+        console.error('Toggle container not found!');
+    }
+    
+    console.groupEnd();
+});
+
+let currentMode = '{{ current_view_mode|default:"Teacher" }}';
+let isAuthenticating = false;
+
+function handleModeToggle() {
+    console.group('[MODE_TOGGLE] Mode toggle initiated');
+    console.log('Current mode:', currentMode);
+    
+    if (currentMode === 'Teacher') {
+        // Switching to Admin Mode - ALWAYS require authentication
+        console.log('Switching to Admin Mode - showing authentication modal');
+        showAuthModal();
+    } else {
+        // Switching back to Teacher Mode - show confirmation
+        console.log('Switching to Teacher Mode - asking for confirmation');
+        confirmSwitchToTeacher();
+    }
+    console.groupEnd();
+}
+
+function showAuthModal() {
+    console.log('[AUTH_MODAL] Showing authentication modal');
+    const modal = document.getElementById('adminAuthModal');
+    if (!modal) {
+        console.error('[AUTH_MODAL] Modal element not found!');
+        alert('Authentication modal not found. Please refresh the page.');
+        return;
+    }
+    
+    modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    
+    console.log('[AUTH_MODAL] Modal display set to flex');
+    
+    // Focus on username field
+    setTimeout(() => {
+        const usernameField = document.getElementById('authUsername');
+        if (usernameField) {
+            usernameField.focus();
+            console.log('[AUTH_MODAL] Focused on username field');
+        }
+    }, 100);
+    
+    // Clear any previous errors
+    const errorDiv = document.getElementById('authError');
+    if (errorDiv) {
+        errorDiv.style.display = 'none';
+    }
+    
+    const errorMsg = document.getElementById('authErrorMsg');
+    if (errorMsg) {
+        errorMsg.textContent = '';
+    }
+    
+    // Clear form
+    const form = document.getElementById('adminAuthForm');
+    if (form) {
+        form.reset();
+    }
+    
+    console.log('[AUTH_MODAL] Modal should now be visible');
+}
+
+function closeAuthModal() {
+    console.log('[AUTH_MODAL] Closing authentication modal');
+    const modal = document.getElementById('adminAuthModal');
+    modal.style.display = 'none';
+    
+    // Clear form and errors
+    document.getElementById('adminAuthForm').reset();
+    document.getElementById('authError').style.display = 'none';
+}
+
+function confirmSwitchToTeacher() {
+    if (confirm('Are you sure you want to switch back to Teacher Mode? You will lose access to admin features.')) {
+        switchMode('Teacher');
+    }
+}
+
+function authenticateAdmin(event) {
+    event.preventDefault();
+    
+    if (isAuthenticating) {
+        console.log('[AUTH] Authentication already in progress');
+        return false;
+    }
+    
+    console.group('[AUTH] Starting admin authentication');
+    isAuthenticating = true;
+    
+    const username = document.getElementById('authUsername').value;
+    const password = document.getElementById('authPassword').value;
+    
+    console.log('Authenticating user:', username);
+    
+    // For testing: show what credentials are being used
+    console.log('[AUTH] Attempting authentication with username:', username);
+    // Note: In production, never log passwords!
+    
+    // Show loading state
+    const submitBtn = document.querySelector('.btn-auth-submit');
+    const originalBtnContent = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+    submitBtn.disabled = true;
+    
+    // Send authentication request
+    fetch('/RoutineTest/api/authenticate-admin/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[AUTH] Authentication response:', data);
+        
+        if (data.success) {
+            console.log('[AUTH] ✅ Authentication successful');
+            // Close modal
+            closeAuthModal();
+            // Switch to admin mode
+            switchMode('Admin');
+        } else {
+            console.error('[AUTH] ❌ Authentication failed:', data.message);
+            showAuthError(data.message || 'Invalid credentials. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('[AUTH] Error during authentication:', error);
+        showAuthError('An error occurred. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalBtnContent;
+        submitBtn.disabled = false;
+        isAuthenticating = false;
+        console.groupEnd();
+    });
+    
+    return false;
+}
+
+function showAuthError(message) {
+    console.log('[AUTH_ERROR] Showing error:', message);
+    const errorDiv = document.getElementById('authError');
+    const errorMsg = document.getElementById('authErrorMsg');
+    
+    errorMsg.textContent = message;
+    errorDiv.style.display = 'flex';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+function switchMode(newMode) {
+    console.group('[MODE_SWITCH] Switching mode');
+    console.log('From:', currentMode, 'To:', newMode);
+    
+    // Update UI immediately
+    updateModeUI(newMode);
+    
+    // Send request to update session
+    fetch('/RoutineTest/api/toggle-mode/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ mode: newMode })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('[MODE_SWITCH] ✅ Successfully switched to', data.mode, 'mode');
+            console.log('[MODE_SWITCH] Available features:', data.features);
+            
+            currentMode = data.mode;
+            
+            // Show success notification
+            showNotification(`Successfully switched to ${data.mode} Mode`, 'success');
+            
+            // Reload page to apply mode changes
+            setTimeout(() => {
+                console.log('[MODE_SWITCH] Reloading page to apply changes...');
+                window.location.reload();
+            }, 1000);
+        } else {
+            console.error('[MODE_SWITCH] ❌ Failed to switch mode:', data.message);
+            // Revert UI on error
+            updateModeUI(currentMode);
+            showNotification(data.message || 'Failed to switch mode', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('[MODE_SWITCH] Error:', error);
+        // Revert UI on error
+        updateModeUI(currentMode);
+        showNotification('An error occurred while switching modes', 'error');
+    })
+    .finally(() => {
+        console.groupEnd();
+    });
+}
+
+function updateModeUI(mode) {
+    console.log('[UI_UPDATE] Updating UI for mode:', mode);
+    
+    const btn = document.getElementById('modeToggleBtn');
+    const indicator = document.getElementById('modeIndicator');
+    const wrapper = document.querySelector('.mode-toggle-wrapper');
+    
+    if (mode === 'Admin') {
+        btn.innerHTML = '<i class="fas fa-user-shield"></i> Admin Mode';
+        indicator.innerHTML = '<span class="admin-active">●</span> Admin Active';
+        // Update button color for Admin mode
+        btn.style.background = '#FF9800';
+        btn.style.color = 'white';
+        wrapper.style.borderColor = '#FF9800';
+    } else {
+        btn.innerHTML = '<i class="fas fa-chalkboard-teacher"></i> Teacher Mode';
+        indicator.innerHTML = '<span class="teacher-active">●</span> Teacher Active';
+        // Update button color for Teacher mode
+        btn.style.background = '#4CAF50';
+        btn.style.color = 'white';
+        wrapper.style.borderColor = '#2E7D32';
+    }
+    
+    // Add animation effect
+    wrapper.style.animation = 'pulse 0.5s ease';
+    setTimeout(() => {
+        wrapper.style.animation = '';
+    }, 500);
+    
+    console.log('[UI_UPDATE] UI updated successfully for', mode, 'mode');
+}
+
+function showNotification(message, type = 'info') {
+    console.log(`[NOTIFICATION] ${type.toUpperCase()}: ${message}`);
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Add styles
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        z-index: 10001;
+        animation: slideIn 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 500;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Helper function to get CSRF cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[MODE_TOGGLE_INIT] Initializing mode toggle system');
+    
+    // Check if all required elements exist
+    const elements = {
+        'Toggle Button': document.getElementById('modeToggleBtn'),
+        'Toggle Container': document.getElementById('modeToggleContainer'),
+        'Auth Modal': document.getElementById('adminAuthModal'),
+        'Auth Form': document.getElementById('adminAuthForm'),
+        'Username Field': document.getElementById('authUsername'),
+        'Password Field': document.getElementById('authPassword')
+    };
+    
+    console.log('[MODE_TOGGLE_INIT] Element check:');
+    for (const [name, element] of Object.entries(elements)) {
+        console.log(`  - ${name}: ${element ? '✅ Found' : '❌ Missing'}`);
+    }
+    
+    // Set initial mode from template context
+    const initialMode = '{{ current_view_mode|default:"Teacher" }}';
+    console.log('[MODE_TOGGLE_INIT] Initial mode:', initialMode);
+    currentMode = initialMode;
+    
+    // Update UI to match current mode
+    updateModeUI(currentMode);
+});
+
+// Debug commands for testing
+window.debugToggleMode = function() {
+    console.log('[DEBUG] Manual toggle triggered');
+    handleModeToggle();
+};
+
+window.showAuthModalDebug = function() {
+    console.log('[DEBUG] Manually showing auth modal');
+    showAuthModal();
+};
+
+window.setMode = function(mode) {
+    if (mode === 'Admin' || mode === 'Teacher') {
+        console.log('[DEBUG] Setting mode to:', mode);
+        currentMode = mode === 'Admin' ? 'Teacher' : 'Admin'; // Set opposite to trigger switch
+        handleModeToggle();
+    } else {
+        console.error('Invalid mode. Use "Admin" or "Teacher"');
+    }
+};
+
+console.log('%c[MODE TOGGLE] Debug commands available:', 'color: #4CAF50; font-weight: bold;');
+console.log('  - debugToggleMode() : Toggle between modes');
+console.log('  - setMode("Admin") : Switch to Admin mode');
+console.log('  - setMode("Teacher") : Switch to Teacher mode');
+
+// Keyboard shortcut (Alt+M to toggle mode)
+document.addEventListener('keydown', function(e) {
+    if (e.altKey && e.key === 'm') {
+        console.log('[KEYBOARD] Alt+M pressed - toggling mode');
+        handleModeToggle();
+        e.preventDefault();
+    }
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.group('[MODE_TOGGLE_ENHANCED] Initialization complete');
+    console.log('Current mode:', currentMode);
+    console.log('User is staff:', {{ user.is_staff|lower }});
+    console.log('User is superuser:', {{ user.is_superuser|lower }});
+    console.log('Keyboard shortcut: Alt+M to toggle mode');
+    console.groupEnd();
+});
+
+// Add notification animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>

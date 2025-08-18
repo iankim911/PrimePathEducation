@@ -54,14 +54,35 @@ from .ajax import (
     get_curriculum_hierarchy
 )
 
-# Phase 5: Import roster management views
-from .roster import (
-    manage_roster,
-    import_roster_csv,
-    roster_report,
-    update_roster_status,
-    remove_roster_entry,
-    export_roster
+# Phase 5: Roster management views REMOVED - not needed for Answer Keys functionality
+# Roster functionality has been completely removed from RoutineTest
+# as it is not needed in the Answer Keys section where the prime goal is to assign answers
+
+# Teacher Class Access Management views
+from .class_access import (
+    my_classes_view,
+    request_access,
+    withdraw_request,
+    admin_pending_requests,
+    approve_request,
+    deny_request,
+    bulk_approve_requests,
+    api_my_classes,
+    api_available_classes,
+    api_my_requests,
+    api_class_current_teachers,
+    admin_teacher_assignments,
+    admin_direct_assign,
+    admin_revoke_access
+)
+
+# Schedule Matrix views
+from .schedule_matrix import (
+    schedule_matrix_view,
+    matrix_cell_detail,
+    bulk_assign_exams,
+    get_matrix_data,
+    clone_schedule
 )
 
 # Export all views for backward compatibility
@@ -102,13 +123,30 @@ __all__ = [
     'delete_audio_from_exam',
     'get_curriculum_hierarchy',
     
-    # Phase 5: Roster management views
-    'manage_roster',
-    'import_roster_csv',
-    'roster_report',
-    'update_roster_status',
-    'remove_roster_entry',
-    'export_roster'
+    # Phase 5: Roster management views REMOVED - not needed
+    
+    # Teacher Class Access Management views
+    'my_classes_view',
+    'request_access',
+    'withdraw_request',
+    'admin_pending_requests',
+    'approve_request',
+    'deny_request',
+    'bulk_approve_requests',
+    'api_my_classes',
+    'api_available_classes',
+    'api_my_requests',
+    'api_class_current_teachers',
+    'admin_teacher_assignments',
+    'admin_direct_assign',
+    'admin_revoke_access',
+    
+    # Schedule Matrix views
+    'schedule_matrix_view',
+    'matrix_cell_detail',
+    'bulk_assign_exams',
+    'get_matrix_data',
+    'clone_schedule'
 ]
 
 # This ensures that the following imports continue to work:

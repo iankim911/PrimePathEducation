@@ -3635,7 +3635,30 @@ function saveAnswer(questionNum, answer) {
 }
 
 function saveAllAnswers() {
+    console.log('[SAVE_ALL] ========================================');
+    console.log('[SAVE_ALL] Starting comprehensive save process');
+    console.log('[SAVE_ALL] Timestamp:', new Date().toISOString());
+    
     const questionsData = [];
+    
+    // Check if there are unsaved audio name changes
+    const hasUnsavedAudioNames = changedAudioNames.size > 0;
+    console.log('[SAVE_ALL] Unsaved audio names:', hasUnsavedAudioNames, 'Count:', changedAudioNames.size);
+    
+    // Prepare audio names to save if there are changes
+    let audioNamesToSave = {};
+    if (hasUnsavedAudioNames) {
+        console.log('[SAVE_ALL] Collecting audio names to save...');
+        changedAudioNames.forEach(audioId => {
+            const nameInput = document.getElementById(`audio-name-${audioId}`);
+            if (nameInput) {
+                const newName = nameInput.value.trim();
+                audioNamesToSave[audioId] = newName;
+                localAudioNames[audioId] = newName;
+                console.log(`[SAVE_ALL] Audio ${audioId}: "${newName}"`);
+            }
+        });
+    }
     
     document.querySelectorAll('.question-entry').forEach(entry => {
         const questionNum = entry.dataset.questionNumber;

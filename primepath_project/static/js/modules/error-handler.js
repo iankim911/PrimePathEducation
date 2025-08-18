@@ -18,6 +18,10 @@
                 exponentialBackoff: true,
                 notifyUser: true,
                 logToServer: true,
+                enableBrowserCompatibility: true,
+                enablePerformanceMonitoring: true,
+                enableMatrixSpecificHandling: true,
+                debugMode: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
                 ...options
             };
             
@@ -25,11 +29,44 @@
             this.errorQueue = [];
             this.retryQueue = new Map();
             
+            // Browser compatibility tracking
+            this.browserInfo = this.detectBrowserInfo();
+            
+            // Performance monitoring
+            this.performanceMetrics = {
+                errorCount: 0,
+                avgResponseTime: 0,
+                slowOperations: [],
+                memoryUsage: []
+            };
+            
+            // RoutineTest specific error patterns
+            this.routineTestPatterns = {
+                matrixErrors: [],
+                examErrors: [],
+                sessionErrors: [],
+                audioErrors: []
+            };
+            
             // Setup global error handlers
             this.setupGlobalHandlers();
             
             // Setup periodic error reporting
             this.setupErrorReporting();
+            
+            // Setup browser compatibility checks
+            if (this.options.enableBrowserCompatibility) {
+                this.setupBrowserCompatibility();
+            }
+            
+            // Setup performance monitoring
+            if (this.options.enablePerformanceMonitoring) {
+                this.setupPerformanceMonitoring();
+            }
+            
+            console.log('%c[ErrorHandler] Enhanced error handling initialized', 
+                       'background: #28a745; color: white; padding: 2px 6px; border-radius: 3px;', 
+                       this.browserInfo);
         }
 
         /**
@@ -409,14 +446,339 @@
         }
 
         /**
-         * Get error statistics
+         * Detect browser information for compatibility tracking
+         */
+        detectBrowserInfo() {
+            const ua = navigator.userAgent;
+            const info = {
+                browser: 'Unknown',
+                version: 'Unknown',
+                mobile: /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua),
+                features: {
+                    fetch: typeof fetch !== 'undefined',
+                    promise: typeof Promise !== 'undefined',
+                    arrow: false,
+                    const: false,
+                    let: false,
+                    async: false
+                }
+            };
+            
+            // Detect browser
+            if (ua.indexOf('Chrome') > -1) {
+                info.browser = 'Chrome';
+                const match = ua.match(/Chrome\/(\d+)/);
+                info.version = match ? match[1] : 'Unknown';
+            } else if (ua.indexOf('Firefox') > -1) {
+                info.browser = 'Firefox';
+                const match = ua.match(/Firefox\/(\d+)/);
+                info.version = match ? match[1] : 'Unknown';
+            } else if (ua.indexOf('Safari') > -1) {
+                info.browser = 'Safari';
+                const match = ua.match(/Version\/(\d+)/);
+                info.version = match ? match[1] : 'Unknown';
+            } else if (ua.indexOf('Edge') > -1) {
+                info.browser = 'Edge';
+                const match = ua.match(/Edge\/(\d+)/);
+                info.version = match ? match[1] : 'Unknown';
+            }
+            
+            // Test JavaScript features
+            try {
+                eval('const test = 1;');
+                info.features.const = true;
+            } catch (e) { /* ignored */ }
+            
+            try {
+                eval('let test = 1;');
+                info.features.let = true;
+            } catch (e) { /* ignored */ }
+            
+            try {
+                eval('() => {}');
+                info.features.arrow = true;
+            } catch (e) { /* ignored */ }
+            
+            try {
+                eval('async function test() {}');
+                info.features.async = true;
+            } catch (e) { /* ignored */ }
+            
+            return info;
+        }
+        
+        /**
+         * Setup browser compatibility checks
+         */
+        setupBrowserCompatibility() {
+            const incompatibilities = [];
+            
+            // Check for required features
+            if (!this.browserInfo.features.fetch) {
+                incompatibilities.push('fetch API not supported');
+            }
+            
+            if (!this.browserInfo.features.promise) {
+                incompatibilities.push('Promise not supported');
+            }
+            
+            if (incompatibilities.length > 0) {
+                this.showCompatibilityWarning(incompatibilities);
+            }
+            
+            // Log browser info for debugging
+            if (this.options.debugMode) {
+                console.log('%c[ErrorHandler] Browser Compatibility Check', 
+                           'background: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px;');
+                console.table(this.browserInfo);
+                
+                if (incompatibilities.length > 0) {
+                    console.warn('%c[ErrorHandler] Compatibility Issues:', 
+                                'background: #ffc107; color: black; padding: 2px 6px; border-radius: 3px;',
+                                incompatibilities);
+                }
+            }
+        }
+        
+        /**
+         * Setup performance monitoring
+         */
+        setupPerformanceMonitoring() {
+            // Monitor memory usage periodically
+            if (performance.memory) {
+                setInterval(() => {
+                    this.performanceMetrics.memoryUsage.push({
+                        timestamp: Date.now(),
+                        used: performance.memory.usedJSHeapSize,
+                        total: performance.memory.totalJSHeapSize,
+                        limit: performance.memory.jsHeapSizeLimit
+                    });
+                    
+                    // Keep only last 100 measurements
+                    if (this.performanceMetrics.memoryUsage.length > 100) {
+                        this.performanceMetrics.memoryUsage.shift();
+                    }
+                }, 30000); // Every 30 seconds
+            }
+            
+            // Monitor slow operations
+            this.originalFetch = window.fetch;
+            window.fetch = (...args) => {
+                const start = performance.now();
+                return this.originalFetch.apply(this, args).then(response => {
+                    const duration = performance.now() - start;
+                    
+                    if (duration > 2000) { // Slower than 2 seconds
+                        this.performanceMetrics.slowOperations.push({
+                            url: args[0],
+                            duration: duration,
+                            timestamp: Date.now()
+                        });
+                        
+                        if (this.options.debugMode) {
+                            console.warn(`%c[ErrorHandler] Slow operation detected: ${duration.toFixed(0)}ms`, 
+                                        'background: #ffc107; color: black; padding: 2px 6px; border-radius: 3px;',
+                                        args[0]);
+                        }
+                    }
+                    
+                    return response;
+                }).catch(error => {
+                    const duration = performance.now() - start;
+                    this.handleError(error, {
+                        operation: 'fetch',
+                        url: args[0],
+                        duration: duration,
+                        category: 'network'
+                    });
+                    throw error;
+                });
+            };
+        }
+        
+        /**
+         * Handle RoutineTest specific errors
+         */
+        handleRoutineTestError(error, context = {}) {
+            const category = context.category || 'general';
+            
+            // Categorize by RoutineTest components
+            switch (category) {
+                case 'matrix':
+                    this.routineTestPatterns.matrixErrors.push({
+                        error: error,
+                        context: context,
+                        timestamp: Date.now()
+                    });
+                    break;
+                case 'exam':
+                    this.routineTestPatterns.examErrors.push({
+                        error: error,
+                        context: context,
+                        timestamp: Date.now()
+                    });
+                    break;
+                case 'session':
+                    this.routineTestPatterns.sessionErrors.push({
+                        error: error,
+                        context: context,
+                        timestamp: Date.now()
+                    });
+                    break;
+                case 'audio':
+                    this.routineTestPatterns.audioErrors.push({
+                        error: error,
+                        context: context,
+                        timestamp: Date.now()
+                    });
+                    break;
+            }
+            
+            // Limit arrays to prevent memory leaks
+            Object.keys(this.routineTestPatterns).forEach(key => {
+                if (this.routineTestPatterns[key].length > 50) {
+                    this.routineTestPatterns[key].shift();
+                }
+            });
+            
+            // Enhanced error handling for specific patterns
+            if (category === 'matrix' && error.message.includes('ExamScheduleMatrix')) {
+                context.userMessage = 'Schedule matrix is temporarily unavailable. Please refresh the page.';
+                context.retryable = true;
+            } else if (category === 'audio' && error.message.includes('AudioContext')) {
+                context.userMessage = 'Audio playback failed. Please check your browser settings.';
+                context.retryable = false;
+            }
+            
+            return this.handleError(error, context);
+        }
+        
+        /**
+         * Show compatibility warning
+         */
+        showCompatibilityWarning(incompatibilities) {
+            const message = `Your browser may not support all features. Issues detected: ${incompatibilities.join(', ')}. Please consider updating your browser.`;
+            this.showNotification(message, 'warning', 10000); // Show for 10 seconds
+        }
+        
+        /**
+         * Enhanced notification with warning type
+         */
+        showNotification(message, type = 'info', duration = 5000) {
+            // Remove any existing notification
+            const existing = document.querySelector('.primepath-notification');
+            if (existing) {
+                existing.remove();
+            }
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `primepath-notification primepath-notification-${type}`;
+            
+            // Icon based on type
+            const icons = {
+                error: '❌',
+                success: '✅',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+            
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <span class="notification-icon">${icons[type] || 'ℹ️'}</span>
+                    <span class="notification-message">${message}</span>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+            
+            // Enhanced styling
+            const colors = {
+                error: { bg: '#dc3545', text: 'white' },
+                success: { bg: '#28a745', text: 'white' },
+                info: { bg: '#17a2b8', text: 'white' },
+                warning: { bg: '#ffc107', text: 'black' }
+            };
+            
+            const color = colors[type] || colors.info;
+            
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                max-width: 400px;
+                animation: slideIn 0.3s ease-out;
+                background: ${color.bg};
+                color: ${color.text};
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 14px;
+                line-height: 1.4;
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove based on type and duration
+            if (type !== 'error') {
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.style.animation = 'slideOut 0.3s ease-out forwards';
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, duration);
+            }
+        }
+        
+        /**
+         * Get comprehensive error statistics
          */
         getStats() {
             return {
                 queuedErrors: this.errorQueue.length,
                 retryQueue: this.retryQueue.size,
-                totalErrors: this.errorQueue.length
+                totalErrors: this.performanceMetrics.errorCount,
+                browserInfo: this.browserInfo,
+                performanceMetrics: {
+                    avgResponseTime: this.performanceMetrics.avgResponseTime,
+                    slowOperationsCount: this.performanceMetrics.slowOperations.length,
+                    memoryUsagePoints: this.performanceMetrics.memoryUsage.length
+                },
+                routineTestPatterns: {
+                    matrixErrors: this.routineTestPatterns.matrixErrors.length,
+                    examErrors: this.routineTestPatterns.examErrors.length,
+                    sessionErrors: this.routineTestPatterns.sessionErrors.length,
+                    audioErrors: this.routineTestPatterns.audioErrors.length
+                }
             };
+        }
+        
+        /**
+         * Generate comprehensive error report
+         */
+        generateErrorReport() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                browserInfo: this.browserInfo,
+                stats: this.getStats(),
+                recentErrors: this.errorQueue.slice(-10), // Last 10 errors
+                performanceIssues: this.performanceMetrics.slowOperations.slice(-5), // Last 5 slow operations
+                routineTestIssues: {
+                    matrixErrors: this.routineTestPatterns.matrixErrors.slice(-3),
+                    examErrors: this.routineTestPatterns.examErrors.slice(-3),
+                    sessionErrors: this.routineTestPatterns.sessionErrors.slice(-3),
+                    audioErrors: this.routineTestPatterns.audioErrors.slice(-3)
+                }
+            };
+            
+            if (this.options.debugMode) {
+                console.log('%c[ErrorHandler] Comprehensive Error Report', 
+                           'background: #6f42c1; color: white; padding: 2px 6px; border-radius: 3px;');
+                console.log(report);
+            }
+            
+            return report;
         }
     }
 

@@ -1,0 +1,104 @@
+/**
+ * MODE TOGGLE POSITION FIX
+ * Ensures the Teacher/Admin mode toggle appears BELOW the navigation bar
+ * NOT in the header area
+ * 
+ * Created: August 18, 2025
+ * Issue: Toggle appearing in header instead of below navigation
+ */
+
+/* CRITICAL FIX: Force mode toggle below navigation */
+.mode-toggle-container {
+    /* Force relative positioning - never absolute or fixed */
+    position: relative !important;
+    
+    /* Force flexbox for right alignment */
+    display: flex !important;
+    justify-content: flex-end !important;
+    
+    /* Full width to ensure proper alignment */
+    width: 100% !important;
+    max-width: 100% !important;
+    
+    /* Spacing from navigation above and content below */
+    padding: 20px 30px 0 0 !important;
+    margin-bottom: 20px !important;
+    margin-top: 0 !important;
+    
+    /* Ensure it's not positioned absolutely */
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+    
+    /* Lower z-index to not interfere with header */
+    z-index: 100 !important;
+    
+    /* Ensure visibility */
+    opacity: 1 !important;
+    visibility: visible !important;
+    
+    /* Clear any transforms */
+    transform: none !important;
+    
+    /* Clear any floats */
+    clear: both !important;
+    float: none !important;
+}
+
+/* Ensure the wrapper doesn't break positioning */
+.mode-toggle-wrapper {
+    position: relative !important;
+    display: inline-flex !important;
+    /* Remove any absolute positioning */
+    top: auto !important;
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+}
+
+/* Override any media queries that try to absolutely position */
+@media screen and (max-width: 768px) {
+    .mode-toggle-container {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        left: auto !important;
+        bottom: auto !important;
+        /* Adjust padding for mobile */
+        padding: 15px 15px 0 0 !important;
+        margin-bottom: 15px !important;
+    }
+}
+
+@media screen and (min-width: 769px) {
+    .mode-toggle-container {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        left: auto !important;
+        bottom: auto !important;
+    }
+}
+
+/* Ensure it's not inside the header */
+.header .mode-toggle-container {
+    display: none !important; /* Hide if accidentally placed in header */
+}
+
+/* Debug helper - uncomment to see the container bounds */
+/*
+.mode-toggle-container {
+    border: 2px solid red !important;
+    background: rgba(255, 0, 0, 0.1) !important;
+}
+*/
+
+/* Print debug info to console */
+.mode-toggle-container::before {
+    content: "Mode Toggle Position Fix Applied";
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    display: none;
+}

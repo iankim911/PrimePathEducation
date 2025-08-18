@@ -97,7 +97,7 @@ def take_test(request, session_id):
     
     exam = session.exam
     questions = exam.routine_questions.select_related('audio_file').all()
-    audio_files = exam.audio_files.all()
+    audio_files = exam.routine_audio_files.all()
     student_answers = {sa.question_id: sa for sa in session.answers.all()}
     
     # Prepare JavaScript configuration data (properly serialized)

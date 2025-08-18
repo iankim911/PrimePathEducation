@@ -241,9 +241,9 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        /* Removed min-height to eliminate gap */
-        height: auto;
-        max-height: 85vh;
+        /* [OPTIMAL_BALANCE] Balanced for no-scroll viewing with readable text */
+        height: auto; /* Auto height to prevent white bands */
+        max-height: 72vh; /* Optimal balance: fits screen, still readable */
         width: 100%;
     }
     
@@ -366,16 +366,7 @@
         margin: 0 !important;
     }
     
-    .pdf-viewer {
-        flex: 1;
-        overflow: auto;
-        text-align: center;
-        background-color: #f5f5f5;
-        padding: 10px 20px; /* Reduced vertical padding to minimize gap */
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-    }
+    /* pdf-viewer defined once below */
     
     .answers-content {
         flex: 1;
@@ -876,16 +867,31 @@
     /* Responsive */
     @media (max-width: 1200px) {
         .pdf-section {
-            /* Removed fixed height to prevent gap */
+            /* [OPTIMAL_BALANCE] Auto height with max constraint */
             height: auto;
+            max-height: 70vh; /* Slightly smaller on medium screens */
         }
         
         .answers-content {
             padding: 20px;
         }
+        
+        /* [OPTIMAL_BALANCE] No custom CSS for pdf-image-display */
+        /* Using inline styles like PlacementTest */
     }
     
-    /* PDF Canvas Styles - Enhanced for better display */
+    @media (max-width: 768px) {
+        /* [OPTIMAL_BALANCE] Auto height for mobile */
+        .pdf-section {
+            height: auto;
+            max-height: 65vh; /* Slightly more space on mobile */
+        }
+        
+        /* [OPTIMAL_BALANCE] No custom CSS for pdf-image-display */
+        /* Using inline styles like PlacementTest */
+    }
+    
+    /* PDF Canvas Styles - Match PlacementTest */
     .pdf-viewer {
         flex: 1;
         overflow: auto;
@@ -894,9 +900,16 @@
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
-        padding: 10px 20px; /* Reduced vertical padding */
-        /* Removed min-height to eliminate gap */
+        padding: 10px 20px;
+        /* [OPTIMAL_BALANCE] Match PlacementTest structure */
+        max-width: 100%;
+        position: relative;
     }
+    
+    /* [OPTIMAL_BALANCE] REMOVED custom CSS for pdf-image-display and pdf-page-image */
+    /* Using inline styles exactly like PlacementTest benchmark */
+    /* #pdf-image-display: width: 100%; height: 100%; position: relative; (inline) */
+    /* #pdf-page-image: width: 100%; height: 100%; object-fit: contain; (inline) */
     
     /* Removed complex PDF canvas styles - using browser-native display */
     
@@ -966,6 +979,33 @@
 {% endblock %}
 
 {% block content %}
+<!-- Comprehensive debugging for blank page issue -->
+<script>
+    console.group('%c[ROUTINETEST_PREVIEW_EXAM] Page Initialization', 'color: #FF5722; font-weight: bold');
+    console.log('[PREVIEW_EXAM_DEBUG] Template loaded successfully');
+    console.log('[PREVIEW_EXAM_DEBUG] Exam Name: {{ exam.name|escapejs }}');
+    console.log('[PREVIEW_EXAM_DEBUG] Exam ID: {{ exam.id }}');
+    console.log('[PREVIEW_EXAM_DEBUG] Total Questions: {{ exam.total_questions }}');
+    console.log('[PREVIEW_EXAM_DEBUG] Questions Count: {{ questions|length }}');
+    console.log('[PREVIEW_EXAM_DEBUG] Audio Files Count: {{ audio_files|length }}');
+    console.log('[PREVIEW_EXAM_DEBUG] User: {{ request.user }}');
+    console.log('[PREVIEW_EXAM_DEBUG] Timestamp:', new Date().toISOString());
+    
+    // Check for any JavaScript errors on load
+    window.addEventListener('error', function(e) {
+        console.error('[PREVIEW_EXAM_ERROR] JavaScript Error:', e.message, 'at', e.filename, ':', e.lineno);
+    });
+    
+    // Monitor DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('[PREVIEW_EXAM_DEBUG] DOM Content Loaded');
+        console.log('[PREVIEW_EXAM_DEBUG] Body children count:', document.body.children.length);
+        console.log('[PREVIEW_EXAM_DEBUG] Content visible elements:', document.querySelectorAll('[style*="display: none"]').length, 'hidden elements found');
+    });
+    
+    console.groupEnd();
+</script>
+
 <!-- Success Notification Container -->
 <div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 400px;">
     <div class="alert alert-success" style="margin: 0; padding: 12px 20px; font-size: 1rem; font-weight: 600; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 4px solid #28a745; position: relative;">
@@ -1093,7 +1133,12 @@
                 </div>
             </div>
             <div class="pdf-viewer" id="pdf-viewer">
-                <!-- PDF Image Display -->
+                <!-- PDF Canvas Display (for PDF.js rendering) -->
+                <div id="pdf-canvas-container" style="width: 100%; height: 100%; position: relative; display: none;">
+                    <canvas id="pdf-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+                </div>
+                
+                <!-- PDF Image Display (fallback/alternative rendering) -->
                 <div id="pdf-image-display" style="width: 100%; height: 100%; position: relative;">
                     <div id="pdf-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">
                         <p>Loading PDF...</p>
@@ -1111,7 +1156,7 @@
         </div>
         
         <!-- Audio Files Management Section -->
-        {% if exam.audio_files.exists %}
+        {% if exam.routine_audio_files.exists %}
         <div class="audio-files-section">
             <div class="section-header">
                 <h3 class="section-title">Audio Files</h3>
@@ -1120,7 +1165,7 @@
                 </button>
             </div>
             <div class="audio-files-content">
-                {% for audio in exam.audio_files.all %}
+                {% for audio in exam.routine_audio_files.all %}
                 <div class="audio-file-item" data-audio-id="{{ audio.id }}" id="audio-item-{{ audio.id }}">
                     <div class="audio-file-info">
                         <input type="text" 
@@ -1555,6 +1600,14 @@ let minZoom = 0.5;
 let maxZoom = 3.0;
 
 function initializePdfImageDisplay() {
+    // PDF SIZE FIX ACTIVE - Rendering at optimized scale
+    console.group('[PDF_SIZE_FIX] Initialization');
+    console.log('✅ PDF Size Fix Active');
+    console.log('📏 Render Scale: 1.5 (reduced from 2.5)');
+    console.log('📐 Max Height: 85vh (desktop), 70vh (tablet), 60vh (mobile)');
+    console.log('🎯 Matching PlacementTest benchmark sizing');
+    console.groupEnd();
+    
     {% if exam.pdf_file %}
     const pdfUrl = "{{ exam.pdf_file.url }}";
     {% else %}
@@ -1568,11 +1621,20 @@ function initializePdfImageDisplay() {
     }
     
     if (typeof pdfjsLib === 'undefined') {
-        console.warn('PDF.js not loaded yet, retrying...');
+        console.warn('[PREVIEW_EXAM] PDF.js not loaded yet, retrying...');
         setTimeout(function() {
             initializePdfImageDisplay();
         }, 500);
         return;
+    }
+    
+    console.log('[PREVIEW_EXAM] Initializing PDF with URL:', pdfUrl);
+    console.log('[PREVIEW_EXAM] PDF.js version:', pdfjsLib.version);
+    
+    // Configure PDF.js worker
+    if (pdfjsLib.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        console.log('[PREVIEW_EXAM] PDF.js worker configured');
     }
     
     pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
@@ -1633,10 +1695,51 @@ function renderPageAsImage(pageNum) {
             return;
         }
         
-        // Calculate scale for good quality with rotation - increased for better readability
-        const viewport = page.getViewport({ scale: 2.5, rotation: currentRotation });
+        // [OPTIMAL_BALANCE] High quality render for readability
+        const PDF_RENDER_SCALE = 2.0; // Balanced: good quality, fits viewport
+        const viewport = page.getViewport({ scale: PDF_RENDER_SCALE, rotation: currentRotation });
+        
+        console.log('[OPTIMAL_BALANCE] PDF Rendering Configuration:', {
+            renderScale: PDF_RENDER_SCALE,
+            viewportWidth: viewport.width,
+            viewportHeight: viewport.height,
+            windowHeight: window.innerHeight,
+            maxContainerHeight: '72vh = ' + (window.innerHeight * 0.72) + 'px',
+            note: 'Balanced for no-scroll viewing with readable text'
+        });
+        
+        // [OPTIMAL_BALANCE] Additional debugging
+        const pdfSection = document.querySelector('.pdf-section');
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const imageDisplay = document.getElementById('pdf-image-display');
+        
+        console.log('[OPTIMAL_BALANCE] Container hierarchy check:', {
+            pdfSection: {
+                exists: !!pdfSection,
+                computedHeight: pdfSection ? window.getComputedStyle(pdfSection).height : 'N/A',
+                maxHeight: pdfSection ? window.getComputedStyle(pdfSection).maxHeight : 'N/A'
+            },
+            pdfViewer: {
+                exists: !!pdfViewer,
+                computedHeight: pdfViewer ? window.getComputedStyle(pdfViewer).height : 'N/A',
+                overflow: pdfViewer ? window.getComputedStyle(pdfViewer).overflow : 'N/A'
+            },
+            imageDisplay: {
+                exists: !!imageDisplay,
+                inlineStyles: imageDisplay ? imageDisplay.getAttribute('style') : 'N/A',
+                computedWidth: imageDisplay ? window.getComputedStyle(imageDisplay).width : 'N/A',
+                computedHeight: imageDisplay ? window.getComputedStyle(imageDisplay).height : 'N/A'
+            }
+        });
         canvas.width = viewport.width;
         canvas.height = viewport.height;
+        
+        console.log('[OPTIMAL_BALANCE] Rendering at optimized scale:', PDF_RENDER_SCALE);
+        console.log('[FIT_TO_VIEWPORT_FIX] Canvas dimensions:', { 
+            width: canvas.width, 
+            height: canvas.height,
+            note: 'Full resolution for quality'
+        });
         
         // Render page to canvas
         const renderContext = {
@@ -1654,14 +1757,71 @@ function renderPageAsImage(pageNum) {
             // Display the image
             if (pageImage) {
                 pageImage.src = imageDataURL;
+                
+                // FIXED: Wait for image to load then apply constraints
+                pageImage.onload = function() {
+                    // Apply current zoom level to new image
+                    applyZoomToImage();
+                    updateZoomDisplay();
+                    
+                    // Comprehensive debugging for PDF size
+                    const container = document.getElementById('pdf-viewer');
+                    const imageDisplay = document.getElementById('pdf-image-display');
+                    
+                    console.group('[OPTIMAL_BALANCE] PDF Image Loaded - Auto-sizing Pattern');
+                    console.log('Page:', pageNum);
+                    console.log('Rotation:', currentRotation);
+                    console.log('Scale used:', PDF_RENDER_SCALE); // Quality scale
+                    console.log('Image Natural Size:', {
+                        width: pageImage.naturalWidth + 'px',
+                        height: pageImage.naturalHeight + 'px'
+                    });
+                    console.log('Image Display Size:', {
+                        width: pageImage.clientWidth + 'px',
+                        height: pageImage.clientHeight + 'px',
+                        offsetWidth: pageImage.offsetWidth + 'px',
+                        offsetHeight: pageImage.offsetHeight + 'px'
+                    });
+                    
+                    // [OPTIMAL_BALANCE] Check computed styles
+                    const computedImage = window.getComputedStyle(pageImage);
+                    console.log('Image Computed Styles:', {
+                        width: computedImage.width,
+                        height: computedImage.height,
+                        maxWidth: computedImage.maxWidth,
+                        maxHeight: computedImage.maxHeight,
+                        objectFit: computedImage.objectFit,
+                        objectPosition: computedImage.objectPosition
+                    });
+                    
+                    console.log('Container Size:', {
+                        width: container ? container.clientWidth + 'px' : 'N/A',
+                        height: container ? container.clientHeight + 'px' : 'N/A'
+                    });
+                    console.log('Image Display Container:', {
+                        width: imageDisplay ? imageDisplay.clientWidth + 'px' : 'N/A',
+                        height: imageDisplay ? imageDisplay.clientHeight + 'px' : 'N/A'
+                    });
+                    
+                    // [OPTIMAL_BALANCE] Visibility check
+                    const rect = pageImage.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    console.log('Visibility Analysis:', {
+                        imageTop: rect.top,
+                        imageBottom: rect.bottom,
+                        imageHeight: rect.height,
+                        viewportHeight: viewportHeight,
+                        fitsInViewport: rect.height <= viewportHeight,
+                        visiblePercentage: Math.min(100, (Math.min(viewportHeight, rect.bottom) - Math.max(0, rect.top)) / rect.height * 100).toFixed(1) + '%'
+                    });
+                    
+                    console.log('Zoom Level:', currentZoomLevel);
+                    console.groupEnd();
+                };
             }
             if (loading) {
                 loading.style.display = 'none';
             }
-            
-            // Apply current zoom level to new image
-            applyZoomToImage();
-            updateZoomDisplay();
             
             console.log('[PREVIEW_EXAM] Page rendered as image:', { page: pageNum, rotation: currentRotation, cached: true });
         }).catch(function(error) {
@@ -1727,9 +1887,23 @@ function applyZoomToImage() {
         return;
     }
     if (pageImage) {
+        // Apply zoom with transform
         pageImage.style.transform = `scale(${currentZoomLevel})`;
         pageImage.style.transformOrigin = 'center center';
-        console.log('✅ Applied zoom level:', Math.round(currentZoomLevel * 100) + '%');
+        
+        // [FIT_TO_VIEWPORT_FIX] Don't override sizing - let inline styles handle it
+        // The img element already has width:100%; height:100%; object-fit:contain
+        
+        // Debug logging for size tracking
+        const container = document.getElementById('pdf-viewer');
+        console.log('[OPTIMAL_BALANCE] Applied zoom:', {
+            zoomLevel: Math.round(currentZoomLevel * 100) + '%',
+            imageNaturalWidth: pageImage.naturalWidth,
+            imageNaturalHeight: pageImage.naturalHeight,
+            containerWidth: container ? container.clientWidth : 'N/A',
+            containerHeight: container ? container.clientHeight : 'N/A',
+            transform: pageImage.style.transform
+        });
     }
 }
 
@@ -2056,6 +2230,14 @@ function renderPage(vPageNum) {
         
         currentPdfPage = page; // Store for zoom operations
         const canvas = document.getElementById('pdf-canvas');
+        
+        // Check if canvas exists before trying to use it
+        if (!canvas) {
+            console.warn('[PREVIEW_EXAM] Canvas element not found, falling back to image rendering');
+            renderPageAsImage(pageNum);
+            return;
+        }
+        
         const ctx = canvas.getContext('2d');
         
         console.log('🔥 [PREVIEW_EXAM] Canvas element found:', !!canvas);
@@ -2356,6 +2538,14 @@ function reRenderAtZoomLevel_REMOVED() {
     console.log('🔍 [PREVIEW_EXAM] Re-rendering at zoom level:', currentZoomLevel);
     
     const canvas = document.getElementById('pdf-canvas');
+    
+    // Check if canvas exists before trying to use it
+    if (!canvas) {
+        console.warn('[PREVIEW_EXAM] Canvas not found for zoom, using image zoom instead');
+        applyZoomToImage();
+        return;
+    }
+    
     const ctx = canvas.getContext('2d');
     const container = document.getElementById('pdf-viewer');
     
@@ -3210,7 +3400,7 @@ function toggleAudio(questionNum) {
     
     // Get existing audio files for this exam (for assignment interface only)
     const audioFiles = [
-        {% for audio in exam.audio_files.all %}
+        {% for audio in exam.routine_audio_files.all %}
         {
             id: {{ audio.id }},
             name: "{{ audio.name|escapejs }}",
@@ -3337,7 +3527,30 @@ function saveAnswer(questionNum, answer) {
 }
 
 function saveAllAnswers() {
+    console.log('[SAVE_ALL] ========================================');
+    console.log('[SAVE_ALL] Starting comprehensive save process');
+    console.log('[SAVE_ALL] Timestamp:', new Date().toISOString());
+    
     const questionsData = [];
+    
+    // Check if there are unsaved audio name changes
+    const hasUnsavedAudioNames = changedAudioNames.size > 0;
+    console.log('[SAVE_ALL] Unsaved audio names:', hasUnsavedAudioNames, 'Count:', changedAudioNames.size);
+    
+    // Prepare audio names to save if there are changes
+    let audioNamesToSave = {};
+    if (hasUnsavedAudioNames) {
+        console.log('[SAVE_ALL] Collecting audio names to save...');
+        changedAudioNames.forEach(audioId => {
+            const nameInput = document.getElementById(`audio-name-${audioId}`);
+            if (nameInput) {
+                const newName = nameInput.value.trim();
+                audioNamesToSave[audioId] = newName;
+                localAudioNames[audioId] = newName;
+                console.log(`[SAVE_ALL] Audio ${audioId}: "${newName}"`);
+            }
+        });
+    }
     
     document.querySelectorAll('.question-entry').forEach(entry => {
         const questionNum = entry.dataset.questionNumber;
@@ -3416,12 +3629,45 @@ function saveAllAnswers() {
     
     // Debug: Log the URL being called
     const saveUrl = `/RoutineTest/exams/{{ exam.id }}/save-answers/`;
-    console.log('Saving to URL:', saveUrl);
-    console.log('Data being sent:', questionsData);
-    console.log('Audio assignments being saved:', audioAssignments);
+    console.log('[SAVE_ALL] Primary save URL:', saveUrl);
+    console.log('[SAVE_ALL] Questions data:', questionsData);
+    console.log('[SAVE_ALL] Audio assignments:', audioAssignments);
+    console.log('[SAVE_ALL] Audio names to save:', audioNamesToSave);
+    console.log('[SAVE_ALL] PDF rotation:', currentRotation);
     
-    // Make API call to save all answers and types INCLUDING audio assignments and PDF rotation
-    fetch(saveUrl, {
+    // First, save audio names if there are changes
+    const saveAudioNamesPromise = hasUnsavedAudioNames 
+        ? fetch(`/RoutineTest/exams/{{ exam.id }}/update-audio-names/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ 
+                audio_names: audioNamesToSave
+            })
+        }).then(response => {
+            if (!response.ok) {
+                console.error('[SAVE_ALL] Audio names save failed:', response.status);
+                throw new Error(`Audio names save failed: ${response.status}`);
+            }
+            return response.json();
+        }).then(data => {
+            console.log('[SAVE_ALL] Audio names save result:', data);
+            if (data.success) {
+                // Clear changed audio names tracking
+                changedAudioNames.clear();
+                // Update localStorage
+                const storageKey = `exam_${examId}_audio_names`;
+                localStorage.setItem(storageKey, JSON.stringify(localAudioNames));
+                console.log('[SAVE_ALL] Audio names saved successfully');
+            }
+            return data;
+        })
+        : Promise.resolve({ success: true, message: 'No audio names to save' });
+    
+    // Then save questions and assignments
+    const saveQuestionsPromise = fetch(saveUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -3431,17 +3677,39 @@ function saveAllAnswers() {
             audio_assignments: audioAssignments,
             pdf_rotation: currentRotation  // Include current PDF rotation
         })
+    });
+    
+    // Wait for both saves to complete
+    Promise.all([saveAudioNamesPromise, saveQuestionsPromise])
+    .then(([audioResult, questionsResponse]) => {
+        console.log('[SAVE_ALL] Both saves initiated');
+        console.log('[SAVE_ALL] Audio save result:', audioResult);
+        
+        // Parse questions response
+        return questionsResponse.json().then(questionsData => {
+            return { audioResult, questionsData };
+        });
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
+    .then(({ audioResult, questionsData }) => {
+        console.log('[SAVE_ALL] Questions save result:', questionsData);
+        
+        if (questionsData.success) {
+            console.log('[SAVE_ALL] ✅ All saves successful');
             unsavedChanges = false;
             document.getElementById('unsaved-changes').style.display = 'none';
+            
+            // Show success indicators for audio files if they were saved
+            if (audioResult.success && audioResult.message !== 'No audio names to save') {
+                document.querySelectorAll('.audio-save-indicator').forEach(indicator => {
+                    indicator.style.display = 'inline';
+                });
+                // Hide audio save indicators after 3 seconds
+                setTimeout(() => {
+                    document.querySelectorAll('.audio-save-indicator').forEach(indicator => {
+                        indicator.style.display = 'none';
+                    });
+                }, 3000);
+            }
             
             // Show the prominent success notification
             const notification = document.getElementById('success-notification');
@@ -3456,7 +3724,7 @@ function saveAllAnswers() {
             
             // Force page refresh after brief success display to clear any browser cache
             setTimeout(() => {
-                console.log('🔄 Refreshing page to ensure latest data is displayed');
+                console.log('[SAVE_ALL] 🔄 Refreshing page to ensure latest data is displayed');
                 window.location.reload(true); // Hard refresh to bypass cache
             }, 2000);
             
@@ -3484,13 +3752,16 @@ function saveAllAnswers() {
                 });
             }, 3000);
         } else {
-            console.error('Save error:', data);
-            alert('Error saving answers: ' + (data.error || 'Unknown error'));
+            console.error('[SAVE_ALL] ❌ Questions save failed:', questionsData);
+            alert('Error saving answers: ' + (questionsData.error || 'Unknown error'));
         }
+        
+        console.log('[SAVE_ALL] ========================================');
     })
     .catch(error => {
-        console.error('Save request failed:', error);
+        console.error('[SAVE_ALL] ❌ Save request failed:', error);
         alert('Error saving answers: ' + error.message);
+        console.log('[SAVE_ALL] ========================================');
     });
 }
 
@@ -3649,25 +3920,71 @@ function randomizeAnswers() {
 
 // Mark audio name as changed
 function markAudioNameChanged(audioId) {
-    changedAudioNames.add(audioId);
-    document.getElementById(`audio-saved-${audioId}`).style.display = 'none';
+    console.log('[AUDIO_RENAME] ========================================');
+    console.log('[AUDIO_RENAME] Audio name changed for ID:', audioId);
     
-    // Store the local name
     const nameInput = document.getElementById(`audio-name-${audioId}`);
     if (nameInput) {
-        localAudioNames[audioId] = nameInput.value.trim();
+        const oldName = localAudioNames[audioId] || '';
+        const newName = nameInput.value.trim();
+        
+        console.log('[AUDIO_RENAME] Old name:', oldName);
+        console.log('[AUDIO_RENAME] New name:', newName);
+        
+        // Add to changed set
+        changedAudioNames.add(audioId);
+        console.log('[AUDIO_RENAME] Total changed audio files:', changedAudioNames.size);
+        console.log('[AUDIO_RENAME] Changed IDs:', Array.from(changedAudioNames));
+        
+        // Hide saved indicator
+        const savedIndicator = document.getElementById(`audio-saved-${audioId}`);
+        if (savedIndicator) {
+            savedIndicator.style.display = 'none';
+            console.log('[AUDIO_RENAME] Hid saved indicator');
+        }
+        
+        // Store the local name
+        localAudioNames[audioId] = newName;
+        console.log('[AUDIO_RENAME] Updated local storage:', localAudioNames);
+        
+        // Show unsaved changes warning
+        unsavedChanges = true;
+        const unsavedIndicator = document.getElementById('unsaved-changes');
+        if (unsavedIndicator) {
+            unsavedIndicator.style.display = 'inline';
+            console.log('[AUDIO_RENAME] Showing unsaved changes indicator');
+        }
+    } else {
+        console.error('[AUDIO_RENAME] ❌ Could not find input for audio ID:', audioId);
     }
+    
+    console.log('[AUDIO_RENAME] ========================================');
 }
 
-// Delete audio file from exam
+// Rename audio file (using prompt dialog)
 function renameAudioFile(audioId) {
+    console.log('[AUDIO_RENAME_DIALOG] Opening rename dialog for audio ID:', audioId);
+    
     const input = document.getElementById(`audio-name-${audioId}`);
+    if (!input) {
+        console.error('[AUDIO_RENAME_DIALOG] ❌ Could not find input element');
+        return;
+    }
+    
     const currentName = input.value;
+    console.log('[AUDIO_RENAME_DIALOG] Current name:', currentName);
+    
     const newName = prompt('Enter new name for this audio file:', currentName);
+    console.log('[AUDIO_RENAME_DIALOG] User entered:', newName);
     
     if (newName && newName !== currentName) {
+        console.log('[AUDIO_RENAME_DIALOG] Name changed, updating...');
         input.value = newName;
         markAudioNameChanged(audioId);
+    } else if (newName === currentName) {
+        console.log('[AUDIO_RENAME_DIALOG] Name unchanged, skipping');
+    } else {
+        console.log('[AUDIO_RENAME_DIALOG] User cancelled or entered empty name');
     }
 }
 
@@ -3720,44 +4037,89 @@ function deleteAudioFile(audioId) {
     });
 }
 
-// Save all audio names (locally for this exam view only)
+// Save all audio names (to backend and localStorage)
 function saveAllAudioNames() {
     if (changedAudioNames.size === 0) {
         alert('No audio names have been changed.');
         return;
     }
     
-    // Save to localStorage for this specific exam
-    const storageKey = `exam_${examId}_audio_names`;
+    console.log('[AUDIO_RENAME_SAVE] ========================================');
+    console.log('[AUDIO_RENAME_SAVE] Saving audio names to backend');
+    console.log('[AUDIO_RENAME_SAVE] Changed audio IDs:', Array.from(changedAudioNames));
     
-    // Update localAudioNames with all current values
+    // Prepare data for backend
+    const audioNamesToSave = {};
     changedAudioNames.forEach(audioId => {
         const nameInput = document.getElementById(`audio-name-${audioId}`);
         if (nameInput) {
-            localAudioNames[audioId] = nameInput.value.trim();
+            const newName = nameInput.value.trim();
+            audioNamesToSave[audioId] = newName;
+            localAudioNames[audioId] = newName;
+            console.log(`[AUDIO_RENAME_SAVE] Audio ${audioId}: "${newName}"`);
         }
     });
     
-    // Save to localStorage
-    localStorage.setItem(storageKey, JSON.stringify(localAudioNames));
-    
-    // Clear the changed set and show saved indicators
-    changedAudioNames.forEach(audioId => {
-        document.getElementById(`audio-saved-${audioId}`).style.display = 'inline';
+    // Save to backend
+    fetch(`/RoutineTest/exams/{{ exam.id }}/update-audio-names/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ 
+            audio_names: audioNamesToSave
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            console.log('[AUDIO_RENAME_SAVE] Backend save successful:', data.message);
+            
+            // Also save to localStorage for this specific exam
+            const storageKey = `exam_${examId}_audio_names`;
+            localStorage.setItem(storageKey, JSON.stringify(localAudioNames));
+            
+            // Clear the changed set and show saved indicators
+            changedAudioNames.forEach(audioId => {
+                const savedIndicator = document.getElementById(`audio-saved-${audioId}`);
+                if (savedIndicator) {
+                    savedIndicator.style.display = 'inline';
+                }
+            });
+            
+            const savedCount = changedAudioNames.size;
+            changedAudioNames.clear();
+            
+            // Update audio buttons in the answer section
+            updateAudioButtonNames();
+            
+            // Hide saved indicators after 3 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.audio-save-indicator').forEach(indicator => {
+                    indicator.style.display = 'none';
+                });
+            }, 3000);
+            
+            alert(`Successfully saved ${savedCount} audio name changes!\n\nThe names have been permanently saved to the database.`);
+            console.log('[AUDIO_RENAME_SAVE] Complete - saved to backend and localStorage');
+        } else {
+            alert('Error saving audio names: ' + (data.error || 'Unknown error'));
+            console.error('[AUDIO_RENAME_SAVE] Backend error:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('[AUDIO_RENAME_SAVE] Save request failed:', error);
+        alert('Error saving audio names: ' + error.message);
+    })
+    .finally(() => {
+        console.log('[AUDIO_RENAME_SAVE] ========================================');
     });
-    changedAudioNames.clear();
-    
-    // Update audio buttons in the answer section
-    updateAudioButtonNames();
-    
-    // Hide saved indicators after 3 seconds
-    setTimeout(() => {
-        document.querySelectorAll('.audio-save-indicator').forEach(indicator => {
-            indicator.style.display = 'none';
-        });
-    }, 3000);
-    
-    alert('Audio display names saved locally for this exam!');
 }
 
 // Load local audio names from localStorage

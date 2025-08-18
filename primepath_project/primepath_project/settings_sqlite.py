@@ -62,6 +62,7 @@ MIDDLEWARE = [
     'core.middleware.APIVersionMiddleware',  # Add API versioning
     'core.middleware.SecurityHeadersMiddleware',  # Security headers
     'core.middleware.RateLimitMiddleware',  # Rate limiting
+    'primepath_routinetest.middleware.MatrixTabInjectionMiddleware',  # Ensure Matrix tab is visible
 ]
 
 

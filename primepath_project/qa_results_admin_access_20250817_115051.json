@@ -1,0 +1,146 @@
+{
+  "passed": [
+    {
+      "test": "Admin user exists",
+      "passed": true,
+      "details": "Username: admin",
+      "timestamp": "2025-08-17T11:50:50.468028"
+    },
+    {
+      "test": "Admin is superuser",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.468035"
+    },
+    {
+      "test": "Admin is staff",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.468037"
+    },
+    {
+      "test": "Admin has teacher profile",
+      "passed": true,
+      "details": "Is head teacher: True",
+      "timestamp": "2025-08-17T11:50:50.468385"
+    },
+    {
+      "test": "is_admin_or_head_teacher() works",
+      "passed": true,
+      "details": "Detected as admin: True",
+      "timestamp": "2025-08-17T11:50:50.468661"
+    },
+    {
+      "test": "Function returns teacher object",
+      "passed": true,
+      "details": "Teacher: ",
+      "timestamp": "2025-08-17T11:50:50.468666"
+    },
+    {
+      "test": "Admin has access to ALL classes",
+      "passed": true,
+      "details": "Access to 12/12 classes",
+      "timestamp": "2025-08-17T11:50:50.471747"
+    },
+    {
+      "test": "Admin can login",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.639268"
+    },
+    {
+      "test": "Class access page loads",
+      "passed": true,
+      "details": "Status code: 200",
+      "timestamp": "2025-08-17T11:50:50.739885"
+    },
+    {
+      "test": "Admin banner displayed",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.739934"
+    },
+    {
+      "test": "'No Classes Assigned' NOT shown",
+      "passed": true,
+      "details": "Admin should see all classes, not 'No Classes'",
+      "timestamp": "2025-08-17T11:50:50.739970"
+    },
+    {
+      "test": "Switch view option available",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.739988"
+    },
+    {
+      "test": "Classes are displayed",
+      "passed": true,
+      "details": "Found 14 class cards",
+      "timestamp": "2025-08-17T11:50:50.740010"
+    },
+    {
+      "test": "Admin view mode loads",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.761963"
+    },
+    {
+      "test": "Full access indicator shown",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.761993"
+    },
+    {
+      "test": "Teacher view mode loads",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.769565"
+    },
+    {
+      "test": "Teacher mode indicator shown",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.769588"
+    },
+    {
+      "test": "Debug mode works",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.789367"
+    },
+    {
+      "test": "Console logging included",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.789372"
+    },
+    {
+      "test": "Admin action tracking included",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-08-17T11:50:50.789376"
+    },
+    {
+      "test": "Page loads within 2 seconds",
+      "passed": true,
+      "details": "Load time: 0.022s",
+      "timestamp": "2025-08-17T11:50:51.154804"
+    },
+    {
+      "test": "Response size reasonable",
+      "passed": true,
+      "details": "Size: 47.5KB",
+      "timestamp": "2025-08-17T11:50:51.154809"
+    }
+  ],
+  "failed": [
+    {
+      "test": "Regular teacher comparison",
+      "passed": false,
+      "details": "UNIQUE constraint failed: core_teacher.email",
+      "timestamp": "2025-08-17T11:50:50.959553"
+    }
+  ],
+  "warnings": [],
+  "timestamp": "2025-08-17T11:50:50.465377"
+}

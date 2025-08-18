@@ -354,16 +354,33 @@ function updateDisplays() {
 function updateFinalName() {
     const finalNamePreview = document.getElementById('final_name_preview');
     const finalExamNameHidden = document.getElementById('final_exam_name');
+    // CRITICAL FIX: Also update the 'name' field that backend expects
+    const examNameForBackend = document.getElementById('exam_name_for_backend');
     
     if (generatedBaseName) {
         // Combine base name with user comment
         finalExamName = userComment ? `${generatedBaseName}_${userComment}` : generatedBaseName;
         
+        console.log('[EXAM_NAME_FIX] ========================================');
+        console.log('[EXAM_NAME_FIX] Updating final exam name');
+        console.log('[EXAM_NAME_FIX] Base name:', generatedBaseName);
+        console.log('[EXAM_NAME_FIX] User comment:', userComment);
+        console.log('[EXAM_NAME_FIX] Final name:', finalExamName);
+        
         if (finalNamePreview) {
             finalNamePreview.innerHTML = `<span style="color: #1B5E20; font-weight: 600;">${finalExamName}</span>`;
+            console.log('[EXAM_NAME_FIX] Updated preview display');
         }
         if (finalExamNameHidden) {
             finalExamNameHidden.value = finalExamName;
+            console.log('[EXAM_NAME_FIX] Updated final_exam_name hidden field');
+        }
+        // CRITICAL FIX: Set the 'name' field that backend expects
+        if (examNameForBackend) {
+            examNameForBackend.value = finalExamName;
+            console.log('[EXAM_NAME_FIX] ✅ Updated backend name field with:', finalExamName);
+        } else {
+            console.error('[EXAM_NAME_FIX] ❌ Backend name field not found!');
         }
         
         console.log('[CASCADE_SYSTEM] Final name updated:', {
@@ -371,12 +388,18 @@ function updateFinalName() {
             comment: userComment || '(none)',
             final: finalExamName
         });
+        console.log('[EXAM_NAME_FIX] ========================================');
     } else {
         if (finalNamePreview) {
             finalNamePreview.innerHTML = '<span style="color: #9E9E9E;">Waiting for selections...</span>';
         }
         if (finalExamNameHidden) {
             finalExamNameHidden.value = '';
+        }
+        // CRITICAL FIX: Clear the backend name field too
+        if (examNameForBackend) {
+            examNameForBackend.value = '';
+            console.log('[EXAM_NAME_FIX] Cleared backend name field');
         }
         finalExamName = '';
     }

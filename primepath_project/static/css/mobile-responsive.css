@@ -243,8 +243,9 @@
         line-height: 1.6 !important;
     }
     
-    /* Prevent horizontal scroll */
-    * {
+    /* Prevent horizontal scroll - ONLY ON MOBILE - REMOVED GLOBAL RULE */
+    /* CRITICAL: Removed "* { max-width: 100vw !important; }" as it breaks desktop layouts */
+    .mobile-only-max-width {
         max-width: 100vw !important;
     }
 }

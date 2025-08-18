@@ -22,33 +22,67 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def exam_list(request):
-    """List all exams (requires authentication)"""
-    # Log authentication check
+    """List all exams (requires authentication) - WITH REVIEW/QUARTERLY TOGGLE"""
+    # Version 4.0 - Added Review/Quarterly Toggle System
+    # Get exam type filter from request (default to 'REVIEW')
+    exam_type_filter = request.GET.get('exam_type', 'REVIEW')
+    
+    # Validate exam type filter
+    valid_exam_types = ['REVIEW', 'QUARTERLY', 'ALL']
+    if exam_type_filter not in valid_exam_types:
+        exam_type_filter = 'REVIEW'
+    
+    # Log authentication check and filter info with enhanced logging
     console_log = {
         "view": "exam_list",
+        "template_version": "4.0-review-quarterly-toggle",
+        "exam_type_filter": exam_type_filter,
         "user": str(request.user),
         "authenticated": request.user.is_authenticated,
-        "method": request.method
+        "method": request.method,
+        "query_params": dict(request.GET),
+        "timestamp": timezone.now().isoformat(),
+        "feature": "REVIEW_QUARTERLY_TOGGLE"
     }
-    logger.info(f"[EXAM_LIST] {json.dumps(console_log)}")
+    logger.info(f"[EXAM_LIST_V4_TOGGLE] {json.dumps(console_log)}")
+    print(f"[EXAM_LIST_V4_TOGGLE] {json.dumps(console_log)}")
     
-    # Fetch exams with related data and prefetch questions for answer mapping check
-    exams = Exam.objects.select_related(
+    # Build base query with related data and prefetch
+    base_query = Exam.objects.select_related(
         'curriculum_level__subprogram__program'
     ).prefetch_related(
-        'questions',  # Prefetch questions to avoid N+1 queries
-        'audio_files',  # Also prefetch audio files for display
-        'student_roster'  # Phase 5: Prefetch roster for stats
-    ).all()
+        'routine_questions',  # Prefetch questions to avoid N+1 queries
+        'routine_audio_files'  # Also prefetch audio files for display
+    )
     
-    # Add answer mapping status and roster stats to each exam
+    # Apply exam type filter
+    if exam_type_filter == 'REVIEW':
+        exams = base_query.filter(exam_type='REVIEW')
+        filter_description = "Review/Monthly Exams"
+    elif exam_type_filter == 'QUARTERLY':
+        exams = base_query.filter(exam_type='QUARTERLY')
+        filter_description = "Quarterly Exams"
+    else:  # ALL
+        exams = base_query.all()
+        filter_description = "All Exams"
+    
+    # Log filter results
+    console_log = {
+        "view": "exam_list",
+        "action": "filter_applied",
+        "exam_type_filter": exam_type_filter,
+        "filter_description": filter_description,
+        "total_exams_after_filter": exams.count(),
+        "timestamp": timezone.now().isoformat()
+    }
+    logger.info(f"[EXAM_LIST_FILTER_RESULTS] {json.dumps(console_log)}")
+    print(f"[EXAM_LIST_FILTER_RESULTS] {json.dumps(console_log)}")
+    
+    # Add answer mapping status to each exam
     exams_with_status = []
     for exam in exams:
         # Get answer mapping status
         mapping_status = exam.get_answer_mapping_status()
-        
-        # Phase 5: Get roster statistics
-        roster_stats = exam.get_roster_stats()
         
         # Log the mapping status for each exam
         console_log = {
@@ -60,15 +94,12 @@ def exam_list(request):
             "mapped_questions": mapping_status['mapped_questions'],
             "unmapped_questions": mapping_status['unmapped_questions'],
             "percentage_complete": mapping_status['percentage_complete'],
-            "status": mapping_status['status_label'],
-            "roster_total": roster_stats['total_assigned'],  # Phase 5
-            "roster_completed": roster_stats['completed']  # Phase 5
+            "status": mapping_status['status_label']
         }
         logger.info(f"[EXAM_LIST_MAPPING] {json.dumps(console_log)}")
         
         # Add the status to the exam object for template access
         exam.answer_mapping_status = mapping_status
-        exam.roster_stats = roster_stats  # Phase 5: Add roster stats
         exams_with_status.append(exam)
     
     # Log summary of answer mapping statuses
@@ -86,15 +117,54 @@ def exam_list(request):
     }
     logger.info(f"[EXAM_LIST_SUMMARY] {json.dumps(console_log)}")
     
-    return render(request, 'primepath_routinetest/exam_list.html', {
+    # Get counts for each exam type (for tab badges)
+    review_count = Exam.objects.filter(exam_type='REVIEW').count()
+    quarterly_count = Exam.objects.filter(exam_type='QUARTERLY').count()
+    total_count = Exam.objects.count()
+    
+    # Log counts for debugging
+    console_log = {
+        "view": "exam_list",
+        "action": "exam_type_counts",
+        "review_count": review_count,
+        "quarterly_count": quarterly_count,
+        "total_count": total_count,
+        "current_filter": exam_type_filter,
+        "displayed_count": len(exams_with_status)
+    }
+    logger.info(f"[EXAM_TYPE_COUNTS] {json.dumps(console_log)}")
+    print(f"[EXAM_TYPE_COUNTS] {json.dumps(console_log)}")
+    
+    # Create response with no-cache headers to prevent showing old cached versions
+    from django.views.decorators.cache import never_cache
+    response = render(request, 'primepath_routinetest/exam_list.html', {
         'exams': exams_with_status,
         'mapping_summary': {
             'total': len(exams_with_status),
             'complete': complete_count,
             'partial': partial_count,
             'not_started': not_started_count
-        }
+        },
+        'exam_type_filter': exam_type_filter,  # Current filter
+        'exam_type_counts': {  # Counts for tab badges
+            'review': review_count,
+            'quarterly': quarterly_count,
+            'all': total_count
+        },
+        'filter_description': filter_description,
+        'template_version': '4.0-review-quarterly-toggle',
+        'cache_bust_id': timezone.now().timestamp()
     })
+    
+    # Add cache control headers to prevent caching
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    response['X-Template-Version'] = '4.0-review-quarterly-toggle'
+    response['X-Feature'] = 'REVIEW-QUARTERLY-TOGGLE'
+    response['X-Exam-Type-Filter'] = exam_type_filter
+    
+    return response
 
 
 @handle_errors(ajax_only=True)
@@ -205,6 +275,18 @@ def create_exam(request):
             logger.info(f"[AUTO_NAME_GEN_BACKEND] {json.dumps(console_log)}")
             print(f"[AUTO_NAME_GEN_BACKEND] {json.dumps(console_log)}")
             
+            # EXAM CONFIGURATION FIELDS VALIDATION AND LOGGING
+            console_log = {
+                "view": "create_exam",
+                "action": "exam_config_fields_received",
+                "timer_minutes_raw": request.POST.get('timer_minutes'),
+                "total_questions_raw": request.POST.get('total_questions'),
+                "default_options_count_raw": request.POST.get('default_options_count'),
+                "timestamp": timezone.now().isoformat()
+            }
+            logger.info(f"[EXAM_CONFIG_FIELDS] {json.dumps(console_log)}")
+            print(f"[EXAM_CONFIG_FIELDS] {json.dumps(console_log)}")
+            
             total_questions = request.POST.get('total_questions')
             if not total_questions:
                 raise ValidationException("Total number of questions is required", code="MISSING_QUESTIONS")
@@ -243,6 +325,8 @@ def create_exam(request):
                 "class_codes_count": len(class_codes),
                 "has_instructions": bool(instructions),
                 "total_questions": total_questions,
+                "timer_minutes": request.POST.get('timer_minutes', 60),
+                "default_options_count": request.POST.get('default_options_count', 5),
                 "created_by_teacher_id": teacher_profile.id if teacher_profile else None,
                 "created_by_teacher_name": teacher_profile.name if teacher_profile else None,
                 "note": "Class-specific scheduling will be set separately after exam creation"
@@ -424,16 +508,57 @@ def create_exam(request):
     logger.info(f"[CREATE_EXAM_RT_FINAL] {json.dumps(console_log)}")
     print(f"[CREATE_EXAM_RT_FINAL] {json.dumps(console_log)}")
     
-    return render(request, 'primepath_routinetest/create_exam.html', {
-        'curriculum_levels': levels_with_versions
-    })
+    # Get class choices from the already imported Exam model
+    # Exam is imported at the top: from ..models import Exam
+    class_choices = Exam.CLASS_CODE_CHOICES
+    
+    # Debug: Log class choices to verify they exist
+    console_log = {
+        "view": "create_exam",
+        "action": "class_choices_loaded",
+        "class_count": len(class_choices),
+        "class_codes": [code for code, _ in class_choices][:3] + ['...'] if len(class_choices) > 3 else [code for code, _ in class_choices],
+        "sample_classes": class_choices[:3] if class_choices else [],
+        "message": "Class choices prepared for template"
+    }
+    logger.info(f"[CREATE_EXAM_CLASS_CHOICES] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_CLASS_CHOICES] {json.dumps(console_log)}")
+    
+    # Create context with comprehensive debugging
+    context = {
+        'curriculum_levels': levels_with_versions,
+        'class_choices': class_choices,
+        'class_choices_count': len(class_choices),  # For template debugging
+        'class_choices_json': json.dumps(class_choices),  # For JS debugging
+        'debug_info': {
+            'view_name': 'create_exam',
+            'timestamp': timezone.now().isoformat(),
+            'user': str(request.user),
+            'class_choices_loaded': bool(class_choices),
+            'curriculum_levels_loaded': bool(levels_with_versions)
+        }
+    }
+    
+    # Final debug log before rendering
+    console_log = {
+        "view": "create_exam",
+        "action": "rendering_template",
+        "context_keys": list(context.keys()),
+        "class_choices_type": str(type(class_choices)),
+        "class_choices_length": len(class_choices),
+        "template": "primepath_routinetest/create_exam.html"
+    }
+    logger.info(f"[CREATE_EXAM_RENDER] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_RENDER] {json.dumps(console_log)}")
+    
+    return render(request, 'primepath_routinetest/create_exam.html', context)
 
 
 @login_required
 def exam_detail(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     questions = exam.routine_questions.all()
-    audio_files = exam.audio_files.all()
+    audio_files = exam.routine_audio_files.all()  # Fixed: using correct related_name for RoutineTest
     
     context = {
         'exam': exam,
@@ -451,7 +576,31 @@ def edit_exam(request, exam_id):
 
 @login_required
 def preview_exam(request, exam_id):
+    """Preview exam with answer key management"""
+    # Comprehensive debugging
+    console_log = {
+        "view": "preview_exam",
+        "exam_id": str(exam_id),
+        "user": str(request.user),
+        "method": request.method,
+        "timestamp": timezone.now().isoformat()
+    }
+    logger.info(f"[PREVIEW_EXAM_START] {json.dumps(console_log)}")
+    print(f"[PREVIEW_EXAM_START] {json.dumps(console_log)}")
+    
     exam = get_object_or_404(Exam, id=exam_id)
+    
+    # Log exam details
+    exam_log = {
+        "exam_name": exam.name,
+        "exam_id": str(exam.id),
+        "total_questions": exam.total_questions,
+        "has_pdf": bool(exam.pdf_file),
+        "is_active": exam.is_active,
+        "exam_type": exam.exam_type
+    }
+    logger.info(f"[PREVIEW_EXAM_LOADED] {json.dumps(exam_log)}")
+    print(f"[PREVIEW_EXAM_LOADED] {json.dumps(exam_log)}")
     
     # Get or create questions for the exam with audio files prefetched
     questions = exam.routine_questions.select_related('audio_file').all().order_by('question_number')
@@ -500,13 +649,31 @@ def preview_exam(request, exam_id):
             question.checked_values = []
     
     # Get audio files
-    audio_files = exam.audio_files.all()
+    audio_files = exam.routine_audio_files.all()  # Fixed: using correct related_name for RoutineTest
     
-    return render(request, 'primepath_routinetest/preview_and_answers.html', {
+    # Log context being passed to template
+    context_log = {
+        "questions_count": questions.count(),
+        "audio_files_count": audio_files.count(),
+        "template": "primepath_routinetest/preview_and_answers.html",
+        "exam_id": str(exam.id),
+        "exam_name": exam.name
+    }
+    logger.info(f"[PREVIEW_EXAM_CONTEXT] {json.dumps(context_log)}")
+    print(f"[PREVIEW_EXAM_CONTEXT] {json.dumps(context_log)}")
+    
+    # Build context
+    context = {
         'exam': exam,
         'questions': questions,
         'audio_files': audio_files,
-    })
+    }
+    
+    # Log successful render attempt
+    logger.info(f"[PREVIEW_EXAM_RENDER] Rendering template with context for exam: {exam.name}")
+    print(f"[PREVIEW_EXAM_RENDER] Rendering template with context for exam: {exam.name}")
+    
+    return render(request, 'primepath_routinetest/preview_and_answers.html', context)
 
 
 @login_required
@@ -548,7 +715,7 @@ def delete_exam(request, exam_id):
             exam.pdf_file.delete()
         
         # Delete audio files
-        for audio in exam.audio_files.all():
+        for audio in exam.routine_audio_files.all():  # Fixed: using correct related_name
             if audio.audio_file:
                 audio.audio_file.delete()
             audio.delete()

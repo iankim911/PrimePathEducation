@@ -235,6 +235,44 @@ def update_exam_name(request, exam_id):
         }, status=500)
 
 
+@require_http_methods(["POST"])
+def update_audio_names(request, exam_id):
+    """API endpoint to update audio file names."""
+    try:
+        exam = get_object_or_404(Exam, id=exam_id)
+        data = json.loads(request.body)
+        audio_names = data.get('audio_names', {})
+        
+        logger.info(f"[UPDATE_AUDIO_NAMES] Updating audio names for exam {exam_id}")
+        logger.info(f"[UPDATE_AUDIO_NAMES] Names to update: {audio_names}")
+        
+        updated_count = 0
+        for audio_id, new_name in audio_names.items():
+            if new_name and new_name.strip():
+                try:
+                    audio = AudioFile.objects.get(id=audio_id, exam=exam)
+                    old_name = audio.name
+                    audio.name = new_name.strip()
+                    audio.save()
+                    updated_count += 1
+                    logger.info(f"[UPDATE_AUDIO_NAMES] Updated audio {audio_id}: '{old_name}' -> '{new_name.strip()}'")
+                except AudioFile.DoesNotExist:
+                    logger.warning(f"[UPDATE_AUDIO_NAMES] Audio file {audio_id} not found for exam {exam_id}")
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Successfully updated {updated_count} audio file names',
+            'updated_count': updated_count
+        })
+        
+    except Exception as e:
+        logger.error(f"[UPDATE_AUDIO_NAMES] Error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
 @handle_errors()
 def get_audio(request, audio_id):
     """Stream audio file instead of loading into memory."""

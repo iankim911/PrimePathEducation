@@ -5,6 +5,32 @@
 {% block header %}Upload New Exam{% endblock %}
 
 {% block extra_css %}
+<!-- FontAwesome Icons CDN for PDF controls and other icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<!-- Fallback for icons if CDN fails -->
+<script>
+    console.log('[ICON_LOADER] Loading FontAwesome from CDN...');
+    // Test if FontAwesome loaded
+    window.addEventListener('load', function() {
+        var testIcon = document.createElement('i');
+        testIcon.className = 'fas fa-check';
+        document.body.appendChild(testIcon);
+        var iconLoaded = window.getComputedStyle(testIcon, ':before').content !== 'none';
+        document.body.removeChild(testIcon);
+        
+        if (!iconLoaded) {
+            console.warn('[ICON_LOADER] FontAwesome CDN failed, using text fallbacks');
+            window.USE_TEXT_FALLBACKS = true;
+        } else {
+            console.log('[ICON_LOADER] ✅ FontAwesome loaded successfully');
+            window.USE_TEXT_FALLBACKS = false;
+        }
+    });
+</script>
+
 <style>
     /* Enhanced success message for exam upload - Green theme */
     .alert-success {
@@ -344,6 +370,342 @@
         outline: none;
         box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
     }
+    
+    /* Audio file rename styles for full functionality */
+    .audio-file-item {
+        padding: 15px;
+        background: #f8f9fa;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .audio-file-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 10px;
+    }
+    
+    .audio-file-name-input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.15s ease;
+    }
+    
+    .audio-file-name-input:focus {
+        border-color: #1B5E20;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(27, 94, 32, 0.25);
+    }
+    
+    .audio-file-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .audio-file-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .audio-rename-saved {
+        color: #28a745;
+        font-size: 0.875rem;
+        margin-left: 10px;
+        display: none;
+    }
+    
+    .audio-file-icon {
+        color: #1B5E20;
+        font-size: 1.2rem;
+    }
+    /* PDF Preview Styles */
+    #pdf-preview-container {
+        background-color: #f8f9fa;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+    }
+    
+    #pdf-preview-container::before {
+        content: "Loading PDF...";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #6c757d;
+        font-size: 1.2rem;
+        z-index: 0;
+    }
+    
+    #pdf-canvas {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        z-index: 1;
+        position: relative;
+    }
+    
+    .pdf-controls {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .pdf-controls button {
+        padding: 8px 16px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        color: #495057;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+        min-width: 45px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+    }
+    
+    .pdf-controls button i {
+        font-size: 16px;
+    }
+    
+    .pdf-controls button .icon-fallback {
+        font-size: 18px;
+        font-weight: bold;
+        line-height: 1;
+    }
+    
+    /* Specific styles for zoom buttons */
+    #pdf-zoom-in i, #pdf-zoom-out i {
+        font-size: 18px;
+    }
+    
+    #pdf-zoom-in .icon-fallback, #pdf-zoom-out .icon-fallback {
+        font-size: 20px;
+    }
+    
+    /* Specific styles for rotate buttons */
+    #pdf-rotate-left i, #pdf-rotate-right i {
+        font-size: 16px;
+    }
+    
+    .pdf-controls button:hover:not(:disabled) {
+        background: #00A65E;
+        color: white;
+        border-color: #00A65E;
+    }
+    
+    .pdf-controls button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .pdf-controls input[type="number"] {
+        width: 60px;
+        padding: 6px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        text-align: center;
+    }
+    
+    .pdf-controls .control-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 10px;
+        border-right: 1px solid #dee2e6;
+    }
+    
+    .pdf-controls .control-group:last-child {
+        border-right: none;
+    }
+    
+    /* Desktop optimizations */
+    @media (min-width: 1024px) {
+        #pdf-preview-container {
+            height: 700px;
+            overflow: auto;
+        }
+        
+        .pdf-controls {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.98);
+        }
+    }
+    
+    /* Tablet optimizations */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        #pdf-preview-container {
+            height: 600px;
+            overflow: auto;
+        }
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 767px) {
+        #pdf-preview-container {
+            height: 400px;
+            overflow: auto;
+        }
+        
+        .pdf-controls {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .pdf-controls .control-group {
+            width: 100%;
+            justify-content: center;
+            border-right: none;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+    }
+    
+    /* ===== EXAM TYPE TAB TOGGLE STYLES ===== */
+    .exam-type-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #dee2e6;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .exam-type-tab {
+        flex: 1;
+        padding: 15px 20px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        outline: none;
+    }
+    
+    .exam-type-tab:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+    
+    /* Active tab styling - RoutineTest Green Theme */
+    .exam-type-tab.active {
+        background: #2E7D32;  /* Dark forest green from routinetest theme */
+        color: white;
+        font-weight: 600;
+        box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .exam-type-tab.active:hover {
+        background: #1B5E20;  /* Deeper forest green on hover */
+    }
+    
+    /* Tab icons */
+    .tab-icon {
+        font-size: 1.2rem;
+    }
+    
+    /* Hide exam type dropdown when tabs are active */
+    #exam_type_dropdown_section {
+        display: none !important;
+    }
+    
+    /* Time period section adjustments */
+    .time-period-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .time-period-field {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .time-period-field label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #495057;
+    }
+    
+    .time-period-field select {
+        width: 100%;
+    }
+    
+    /* Tab content description */
+    .tab-description {
+        padding: 15px;
+        background: #f8f9fa;
+        border-left: 4px solid #2E7D32;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .tab-description h5 {
+        margin: 0 0 5px 0;
+        color: #2E7D32;
+        font-size: 1.1rem;
+    }
+    
+    .tab-description p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    /* Mobile responsive tabs */
+    @media (max-width: 768px) {
+        .exam-type-tabs {
+            flex-direction: column;
+            border-radius: 8px;
+        }
+        
+        .exam-type-tab {
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .exam-type-tab:last-child {
+            border-bottom: none;
+        }
+        
+        .time-period-container {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -358,21 +720,53 @@
         {% endfor %}
     {% endif %}
 
+    <!-- EXAM TYPE TAB TOGGLE SYSTEM -->
+    <div class="exam-type-tabs" role="tablist" aria-label="Exam Type Selection">
+        <button type="button" 
+                class="exam-type-tab active" 
+                id="review-tab"
+                role="tab"
+                aria-selected="true"
+                aria-controls="review-panel"
+                data-exam-type="REVIEW">
+            <span class="tab-icon">📚</span>
+            <span>Review / Monthly Exam</span>
+        </button>
+        
+        <button type="button" 
+                class="exam-type-tab" 
+                id="quarterly-tab"
+                role="tab"
+                aria-selected="false"
+                aria-controls="quarterly-panel"
+                data-exam-type="QUARTERLY">
+            <span class="tab-icon">📊</span>
+            <span>Quarterly Exam</span>
+        </button>
+    </div>
+
+    <!-- Tab Description -->
+    <div class="tab-description" id="tab-description">
+        <h5 id="tab-title">Review / Monthly Exam</h5>
+        <p id="tab-info">Regular monthly review exams for continuous assessment and practice.</p>
+    </div>
+
     <form method="post" enctype="multipart/form-data" id="examForm">
         {% csrf_token %}
         
-        <!-- Phase 1: Exam Type Selection -->
+        <!-- Hidden input for exam type (set by tabs) -->
+        <input type="hidden" id="exam_type" name="exam_type" value="REVIEW" required>
+        
+        <!-- Phase 1: Time Period Selection (exam type removed from visible form) -->
         <div class="form-section">
             <h4 class="section-title">
-                <i class="fas fa-clipboard-check"></i> Exam Type & Time Period
+                <i class="fas fa-calendar-alt"></i> Time Period
             </h4>
             
-            <div class="mb-4">
-                <label for="exam_type" class="form-label" style="font-weight: 600;">
-                    Exam Type <span class="text-danger">*</span>
-                </label>
-                <select class="form-control" id="exam_type" name="exam_type" required>
-                    <option value="">-- Select Exam Type --</option>
+            <!-- Old exam type dropdown section (hidden) -->
+            <div id="exam_type_dropdown_section" style="display: none;">
+                <label for="exam_type_old">Exam Type</label>
+                <select id="exam_type_old" disabled>
                     <option value="REVIEW">Review / Monthly Exam</option>
                     <option value="QUARTERLY">Quarterly Exam</option>
                 </select>
@@ -439,10 +833,34 @@
                     Select Classes <span class="text-danger">*</span>
                     <small class="text-muted">(Hold Ctrl/Cmd to select multiple)</small>
                 </label>
+                <!-- Debug: Show class choices status -->
+                {% if debug_info %}
+                <div class="alert alert-info small" style="display: none;" id="debug-class-info">
+                    <strong>Debug Info:</strong> 
+                    Class choices: {{ class_choices_count|default:"0" }} options loaded
+                </div>
+                {% endif %}
+                
                 <select class="form-control" id="class_codes" name="class_codes" multiple required>
-                    {% for class_code, display_name in class_choices %}
-                        <option value="{{ class_code }}">{{ display_name }}</option>
-                    {% endfor %}
+                    {% if class_choices %}
+                        {% for class_code, display_name in class_choices %}
+                            <option value="{{ class_code }}">{{ display_name }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Fallback: Hardcoded class options if context variable missing -->
+                        <option value="CLASS_7A">Class 7A</option>
+                        <option value="CLASS_7B">Class 7B</option>
+                        <option value="CLASS_7C">Class 7C</option>
+                        <option value="CLASS_8A">Class 8A</option>
+                        <option value="CLASS_8B">Class 8B</option>
+                        <option value="CLASS_8C">Class 8C</option>
+                        <option value="CLASS_9A">Class 9A</option>
+                        <option value="CLASS_9B">Class 9B</option>
+                        <option value="CLASS_9C">Class 9C</option>
+                        <option value="CLASS_10A">Class 10A</option>
+                        <option value="CLASS_10B">Class 10B</option>
+                        <option value="CLASS_10C">Class 10C</option>
+                    {% endif %}
                 </select>
             </div>
             
@@ -460,6 +878,41 @@
                 <strong>Selected Classes:</strong> <span id="selected_classes_list"></span>
             </div>
         </div>
+
+<!-- Class Choices Debug Data -->
+<script type="text/javascript">
+    // Pass class choices from Django context to JavaScript
+    {% if class_choices_json %}
+    window.classChoicesFromServer = {{ class_choices_json|safe }};
+    console.log('[CLASS_DATA] Class choices passed from server:', window.classChoicesFromServer);
+    {% else %}
+    console.warn('[CLASS_DATA] No class_choices_json in template context');
+    {% endif %}
+    
+    // Debug info from context
+    {% if debug_info %}
+    window.debugInfo = {
+        view_name: "{{ debug_info.view_name }}",
+        timestamp: "{{ debug_info.timestamp }}",
+        user: "{{ debug_info.user }}",
+        class_choices_loaded: {{ debug_info.class_choices_loaded|lower }},
+        curriculum_levels_loaded: {{ debug_info.curriculum_levels_loaded|lower }}
+    };
+    console.log('[DEBUG_INFO] Context debug info:', window.debugInfo);
+    {% endif %}
+</script>
+
+<!-- PDF.js Library for PDF Preview -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// Configure PDF.js worker
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    console.log('[PDF_PREVIEW] PDF.js library loaded successfully');
+} else {
+    console.error('[PDF_PREVIEW] PDF.js library failed to load');
+}
+</script>
 
 <!-- Cascading Curriculum Selection System -->
 {% load static %}
@@ -560,9 +1013,42 @@
             <input type="hidden" id="curriculum_level" name="curriculum_level" value="">
             <input type="hidden" id="generated_base_name" name="generated_base_name" value="">
             <input type="hidden" id="final_exam_name" name="final_exam_name" value="">
+            <!-- CRITICAL FIX: Backend expects 'name' field for exam name -->
+            <input type="hidden" id="exam_name_for_backend" name="name" value="">
             <input type="hidden" id="selected_program" name="selected_program" value="">
             <input type="hidden" id="selected_subprogram" name="selected_subprogram" value="">
             <input type="hidden" id="selected_level_number" name="selected_level_number" value="">
+        </div>
+
+        <!-- Exam Configuration Fields (MATCHING PLACEMENT TEST) -->
+        <div class="form-section">
+            <h4 class="section-title">
+                <i class="fas fa-cogs"></i> Exam Configuration
+            </h4>
+            
+            <!-- Test Duration -->
+            <div class="form-group">
+                <label for="timer_minutes">Test Duration (minutes) *</label>
+                <input type="number" class="form-control" id="timer_minutes" name="timer_minutes" 
+                       value="60" min="1" max="180" required>
+                <small class="form-text text-muted">Duration of the test in minutes (1-180)</small>
+            </div>
+            
+            <!-- Total Number of Questions -->
+            <div class="form-group">
+                <label for="total_questions">Total Number of Questions *</label>
+                <input type="number" class="form-control" id="total_questions" name="total_questions" 
+                       min="1" max="100" required placeholder="e.g., 50">
+                <small class="form-text text-muted">Total number of questions in the exam (1-100)</small>
+            </div>
+            
+            <!-- Default Options for MCQs -->
+            <div class="form-group">
+                <label for="default_options_count">Default Options for Multiple Choice Questions</label>
+                <input type="number" class="form-control" id="default_options_count" name="default_options_count" 
+                       value="5" min="2" max="10">
+                <small class="form-text text-muted">Number of answer options (A, B, C, etc.) for MCQ questions</small>
+            </div>
         </div>
 
         <!-- Exam PDF File -->
@@ -584,6 +1070,68 @@
             </div>
             
             <small class="text-muted">Upload PDF * - Maximum file size: 10MB. PDF only.</small>
+        </div>
+
+        <!-- PDF Preview Section -->
+        <div class="form-section" id="pdf-preview-section" style="display: none;">
+            <h4 class="section-title">
+                <i class="fas fa-eye"></i> PDF Preview
+            </h4>
+            
+            <!-- PDF Control Bar -->
+            <div class="pdf-controls">
+                <!-- Navigation Group -->
+                <div class="control-group">
+                    <button type="button" id="pdf-prev" class="btn btn-sm" disabled>
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </button>
+                    <span style="padding: 0 10px;">
+                        Page <input type="number" id="pdf-page-num" value="1" min="1" style="width: 50px;"> 
+                        of <span id="pdf-page-count">--</span>
+                    </span>
+                    <button type="button" id="pdf-next" class="btn btn-sm">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Zoom Group -->
+                <div class="control-group">
+                    <button type="button" id="pdf-zoom-out" class="btn btn-sm" title="Zoom Out">
+                        <i class="fas fa-minus"></i>
+                        <span class="icon-fallback" style="display: none;">−</span>
+                    </button>
+                    <span id="pdf-zoom-level" style="min-width: 60px; text-align: center;">100%</span>
+                    <button type="button" id="pdf-zoom-in" class="btn btn-sm" title="Zoom In">
+                        <i class="fas fa-plus"></i>
+                        <span class="icon-fallback" style="display: none;">+</span>
+                    </button>
+                    <button type="button" id="pdf-zoom-fit" class="btn btn-sm" title="Fit to Width">
+                        <i class="fas fa-expand"></i>
+                        <span class="icon-fallback" style="display: none;">Fit</span>
+                    </button>
+                </div>
+                
+                <!-- Rotation Group -->
+                <div class="control-group">
+                    <button type="button" id="pdf-rotate-left" class="btn btn-sm" title="Rotate Left">
+                        <i class="fas fa-rotate-left"></i>
+                        <span class="icon-fallback" style="display: none;">↺</span>
+                    </button>
+                    <button type="button" id="pdf-rotate-right" class="btn btn-sm" title="Rotate Right">
+                        <i class="fas fa-rotate-right"></i>
+                        <span class="icon-fallback" style="display: none;">↻</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- PDF Display Container -->
+            <div id="pdf-preview-container">
+                <canvas id="pdf-canvas"></canvas>
+            </div>
+            
+            <div class="help-text" style="margin-top: 10px; color: #6c757d;">
+                <i class="fas fa-info-circle"></i> Review your PDF to ensure it uploaded correctly. Use the navigation buttons to browse through pages.
+            </div>
         </div>
 
         <!-- Audio Files (Optional) -->
@@ -612,47 +1160,31 @@
             <small class="text-muted">Upload audio files for listening comprehension questions. Formats: MP3, WAV, M4A</small>
         </div>
 
-        <!-- Phase 4: Scheduling & Instructions -->
+        <!-- General Instructions Section (Scheduling removed per requirements) -->
         <div class="form-section">
             <h4 class="section-title">
-                <i class="fas fa-calendar-alt"></i> Scheduling & Instructions
+                <i class="fas fa-list-alt"></i> General Instructions
             </h4>
             
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label for="scheduled_date" class="form-label">Scheduled Date</label>
-                    <input type="date" class="form-control" id="scheduled_date" name="scheduled_date">
-                </div>
-                <div class="col-md-4">
-                    <label for="scheduled_start_time" class="form-label">Start Time</label>
-                    <input type="time" class="form-control" id="scheduled_start_time" name="scheduled_start_time">
-                </div>
-                <div class="col-md-4">
-                    <label for="scheduled_end_time" class="form-label">End Time</label>
-                    <input type="time" class="form-control" id="scheduled_end_time" name="scheduled_end_time">
+            <!-- Instructions field - PRESERVED AND ENHANCED -->
+            <div class="mb-3">
+                <label for="instructions" class="form-label">
+                    <i class="fas fa-info-circle"></i> Exam Instructions
+                </label>
+                <textarea class="form-control" id="instructions" name="instructions" rows="5" 
+                          placeholder="Enter general instructions for this exam (e.g., allowed materials, specific guidelines, important notes)..."></textarea>
+                <small class="text-muted">
+                    <i class="fas fa-exclamation-triangle"></i> These instructions will be displayed to all students before they begin the exam.
+                </small>
+                <!-- Debug info for instructions -->
+                <div id="instructions-debug" style="display: none; margin-top: 10px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                    <small class="text-muted">
+                        <strong>Debug Info:</strong> <span id="instructions-char-count">0</span> characters entered
+                    </small>
                 </div>
             </div>
             
-            <div class="mb-3">
-                <label for="instructions" class="form-label">General Instructions</label>
-                <textarea class="form-control" id="instructions" name="instructions" rows="4" 
-                          placeholder="Enter general instructions for this exam..."></textarea>
-                <small class="text-muted">These instructions will be shown to all students taking this exam.</small>
-            </div>
-            
-            <div class="mb-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="allow_late_submission" name="allow_late_submission">
-                    <label class="form-check-label" for="allow_late_submission">
-                        Allow late submission with penalty
-                    </label>
-                </div>
-                <div id="late_penalty_field" style="display: none; margin-top: 10px;">
-                    <label for="late_submission_penalty" class="form-label">Late Submission Penalty (%)</label>
-                    <input type="number" class="form-control" id="late_submission_penalty" 
-                           name="late_submission_penalty" min="0" max="100" value="10">
-                </div>
-            </div>
+            <!-- Late submission feature removed as requested -->
         </div>
 
         <!-- Submit Button -->
@@ -673,19 +1205,30 @@ console.log('[EXAM_CREATION_v4.0] Initializing with defensive programming');
 console.log('[EXAM_CREATION_v4.0] Legacy code removed, using cascading system only');
 console.log('[EXAM_CREATION_v4.0] ========================================');
 
-// File upload display functions
+// File upload display functions and audio rename tracking
 let selectedAudioFiles = [];
+let audioFileNames = {}; // Track custom names for audio files
+let changedAudioNames = new Set(); // Track which audio names have been changed
+
+// Global PDF variables
+let pdfDoc = null;
+let pageNum = 1;
+let pageRendering = false;
+let pageNumPending = null;
+let pdfScale = 1.0;
+let pdfRotation = 0;
 
 function updatePDFDisplay() {
     const pdfInput = document.getElementById('pdf_file');
     const pdfFileName = document.getElementById('pdf-file-name');
+    const previewSection = document.getElementById('pdf-preview-section');
     
     if (pdfInput.files.length > 0) {
         const file = pdfInput.files[0];
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         pdfFileName.textContent = `${file.name} (${fileSizeMB} MB)`;
         
-        console.log('[FILE_UPLOAD] PDF file selected:', {
+        console.log('[PDF_PREVIEW] PDF file selected:', {
             name: file.name,
             size: file.size,
             sizeMB: fileSizeMB,
@@ -698,24 +1241,245 @@ function updatePDFDisplay() {
             alert('PDF file size exceeds 10MB limit. Please choose a smaller file.');
             pdfInput.value = '';
             pdfFileName.textContent = 'No file selected';
-            console.error('[FILE_UPLOAD] PDF file too large:', fileSizeMB, 'MB');
+            previewSection.style.display = 'none';
+            console.error('[PDF_PREVIEW] PDF file too large:', fileSizeMB, 'MB');
+            return;
         }
+        
+        // Validate file type
+        if (file.type !== 'application/pdf') {
+            alert('Please select a valid PDF file.');
+            pdfInput.value = '';
+            pdfFileName.textContent = 'No file selected';
+            previewSection.style.display = 'none';
+            console.error('[PDF_PREVIEW] Invalid file type:', file.type);
+            return;
+        }
+        
+        // Show preview section and load PDF
+        previewSection.style.display = 'block';
+        loadPDFPreview(file);
+        
     } else {
         pdfFileName.textContent = 'No file selected';
+        previewSection.style.display = 'none';
+        pdfDoc = null;
     }
+}
+
+// Load and render PDF preview
+function loadPDFPreview(file) {
+    console.log('[PDF_PREVIEW] Loading PDF preview...');
+    
+    const fileReader = new FileReader();
+    fileReader.onload = function() {
+        const typedarray = new Uint8Array(this.result);
+        
+        console.log('[PDF_PREVIEW] Calling pdfjsLib.getDocument...');
+        if (typeof pdfjsLib === 'undefined') {
+            console.error('[PDF_PREVIEW] PDF.js library not loaded!');
+            alert('PDF preview library not loaded. Please refresh the page.');
+            return;
+        }
+        
+        pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+            console.log('[PDF_PREVIEW] PDF loaded successfully');
+            pdfDoc = pdf;
+            document.getElementById('pdf-page-count').textContent = pdf.numPages;
+            
+            // Initial page render
+            pageNum = 1;
+            renderPage(pageNum);
+            
+            // Update button states
+            updateNavigationButtons();
+            
+        }).catch(function(error) {
+            console.error('[PDF_PREVIEW] Error loading PDF:', error);
+            alert('Error loading PDF preview. Please try again.');
+        });
+    };
+    
+    fileReader.readAsArrayBuffer(file);
+}
+
+// Render a specific page
+function renderPage(num) {
+    if (!pdfDoc) {
+        console.error('[PDF_PREVIEW] No PDF document loaded');
+        return;
+    }
+    
+    pageRendering = true;
+    console.log('[PDF_PREVIEW] Rendering page', num);
+    
+    pdfDoc.getPage(num).then(function(page) {
+        const canvas = document.getElementById('pdf-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Get container dimensions for responsive scaling
+        const container = document.getElementById('pdf-preview-container');
+        const containerWidth = container.clientWidth - 40;
+        
+        // Calculate viewport
+        let viewport = page.getViewport({ scale: 1.0, rotation: pdfRotation });
+        const scale = containerWidth / viewport.width * pdfScale;
+        viewport = page.getViewport({ scale: scale, rotation: pdfRotation });
+        
+        // Set canvas dimensions
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        // Render PDF page
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+        };
+        
+        const renderTask = page.render(renderContext);
+        
+        renderTask.promise.then(function() {
+            pageRendering = false;
+            console.log('[PDF_PREVIEW] Page rendered successfully');
+            
+            if (pageNumPending !== null) {
+                renderPage(pageNumPending);
+                pageNumPending = null;
+            }
+        }).catch(function(error) {
+            console.error('[PDF_PREVIEW] Error rendering page:', error);
+            pageRendering = false;
+        });
+    });
+    
+    // Update page counter
+    document.getElementById('pdf-page-num').value = num;
+}
+
+// Queue render if already rendering
+function queueRenderPage(num) {
+    if (pageRendering) {
+        pageNumPending = num;
+    } else {
+        renderPage(num);
+    }
+}
+
+// Previous page
+function onPrevPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    queueRenderPage(pageNum);
+    updateNavigationButtons();
+}
+
+// Next page
+function onNextPage() {
+    if (!pdfDoc || pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    queueRenderPage(pageNum);
+    updateNavigationButtons();
+}
+
+// Update navigation button states
+function updateNavigationButtons() {
+    document.getElementById('pdf-prev').disabled = (pageNum <= 1);
+    document.getElementById('pdf-next').disabled = (!pdfDoc || pageNum >= pdfDoc.numPages);
+}
+
+// Zoom functions with enhanced debugging
+function zoomIn() {
+    const oldScale = pdfScale;
+    pdfScale = Math.min(pdfScale * 1.2, 3.0);
+    const newScale = pdfScale;
+    document.getElementById('pdf-zoom-level').textContent = Math.round(pdfScale * 100) + '%';
+    
+    console.log('[PDF_ZOOM] ========================================');
+    console.log('[PDF_ZOOM] Action: ZOOM IN (+)');
+    console.log('[PDF_ZOOM] Previous scale:', Math.round(oldScale * 100) + '%');
+    console.log('[PDF_ZOOM] New scale:', Math.round(newScale * 100) + '%');
+    console.log('[PDF_ZOOM] Max scale limit: 300%');
+    console.log('[PDF_ZOOM] ========================================');
+    
+    queueRenderPage(pageNum);
+}
+
+function zoomOut() {
+    const oldScale = pdfScale;
+    pdfScale = Math.max(pdfScale / 1.2, 0.5);
+    const newScale = pdfScale;
+    document.getElementById('pdf-zoom-level').textContent = Math.round(pdfScale * 100) + '%';
+    
+    console.log('[PDF_ZOOM] ========================================');
+    console.log('[PDF_ZOOM] Action: ZOOM OUT (-)');
+    console.log('[PDF_ZOOM] Previous scale:', Math.round(oldScale * 100) + '%');
+    console.log('[PDF_ZOOM] New scale:', Math.round(newScale * 100) + '%');
+    console.log('[PDF_ZOOM] Min scale limit: 50%');
+    console.log('[PDF_ZOOM] ========================================');
+    
+    queueRenderPage(pageNum);
+}
+
+function zoomFit() {
+    const oldScale = pdfScale;
+    pdfScale = 1.0;
+    document.getElementById('pdf-zoom-level').textContent = '100%';
+    
+    console.log('[PDF_ZOOM] ========================================');
+    console.log('[PDF_ZOOM] Action: ZOOM FIT');
+    console.log('[PDF_ZOOM] Previous scale:', Math.round(oldScale * 100) + '%');
+    console.log('[PDF_ZOOM] Reset to: 100%');
+    console.log('[PDF_ZOOM] ========================================');
+    
+    queueRenderPage(pageNum);
+}
+
+// Rotation functions with enhanced debugging
+function rotateLeft() {
+    const oldRotation = pdfRotation;
+    pdfRotation = (pdfRotation - 90) % 360;
+    if (pdfRotation < 0) pdfRotation += 360;
+    
+    console.log('[PDF_ROTATE] ========================================');
+    console.log('[PDF_ROTATE] Action: ROTATE LEFT (↺)');
+    console.log('[PDF_ROTATE] Previous rotation:', oldRotation + '°');
+    console.log('[PDF_ROTATE] New rotation:', pdfRotation + '°');
+    console.log('[PDF_ROTATE] Direction: Counter-clockwise');
+    console.log('[PDF_ROTATE] ========================================');
+    
+    queueRenderPage(pageNum);
+}
+
+function rotateRight() {
+    const oldRotation = pdfRotation;
+    pdfRotation = (pdfRotation + 90) % 360;
+    
+    console.log('[PDF_ROTATE] ========================================');
+    console.log('[PDF_ROTATE] Action: ROTATE RIGHT (↻)');
+    console.log('[PDF_ROTATE] Previous rotation:', oldRotation + '°');
+    console.log('[PDF_ROTATE] New rotation:', pdfRotation + '°');
+    console.log('[PDF_ROTATE] Direction: Clockwise');
+    console.log('[PDF_ROTATE] ========================================');
+    
+    queueRenderPage(pageNum);
 }
 
 function updateAudioDisplay() {
     const audioInput = document.getElementById('audio_files');
-    const audioFileNames = document.getElementById('audio-file-names');
+    const audioFileNamesDisplay = document.getElementById('audio-file-names');
     const audioDetails = document.getElementById('audio-details');
     const audioList = document.getElementById('audio-file-list');
     
     // Store the selected files
     selectedAudioFiles = Array.from(audioInput.files);
     
+    console.log('[AUDIO_RENAME] ========================================');
+    console.log('[AUDIO_RENAME] Updating audio display with rename feature');
+    console.log('[AUDIO_RENAME] Files count:', selectedAudioFiles.length);
+    console.log('[AUDIO_RENAME] Mode: Full rename functionality enabled');
+    
     if (selectedAudioFiles.length > 0) {
-        audioFileNames.textContent = `${selectedAudioFiles.length} file(s) selected`;
+        audioFileNamesDisplay.textContent = `${selectedAudioFiles.length} file(s) selected`;
         audioDetails.style.display = 'block';
         
         // Clear and rebuild the list
@@ -725,103 +1489,328 @@ function updateAudioDisplay() {
             const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
             const audioItem = document.createElement('div');
             audioItem.className = 'audio-file-item';
-            audioItem.style.cssText = 'padding: 10px; background: #f8f9fa; margin-bottom: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;';
+            audioItem.id = `audio-item-${index}`;
+            
+            // Use custom name if available, otherwise use original filename
+            const displayName = audioFileNames[index] || file.name;
+            
+            // Full rename UI with input field and buttons
             audioItem.innerHTML = `
-                <div>
-                    <i class="fas fa-music" style="color: #1B5E20; margin-right: 10px;"></i>
-                    <strong>${file.name}</strong> 
-                    <span class="text-muted">(${fileSizeMB} MB)</span>
+                <div class="audio-file-header">
+                    <i class="fas fa-music audio-file-icon"></i>
+                    <input type="text" 
+                           class="audio-file-name-input" 
+                           id="audio-name-${index}"
+                           value="${displayName}"
+                           placeholder="Enter display name for audio"
+                           onchange="markAudioNameChanged(${index})"
+                           data-original-name="${file.name}">
+                    <span class="audio-rename-saved" id="audio-saved-${index}">✓ Saved</span>
                 </div>
-                <button type="button" onclick="removeAudioFile(${index})" class="btn btn-sm btn-danger">
-                    <i class="fas fa-times"></i> Remove
-                </button>
+                <div class="audio-file-info">
+                    <div>
+                        <span class="text-muted">Original: ${file.name} (${fileSizeMB} MB)</span>
+                    </div>
+                    <div class="audio-file-actions">
+                        <button type="button" 
+                                onclick="renameAudioFile(${index})" 
+                                class="btn btn-sm btn-primary"
+                                title="Rename this audio file">
+                            <i class="fas fa-edit"></i> Rename
+                        </button>
+                        <button type="button" 
+                                onclick="removeAudioFile(${index})" 
+                                class="btn btn-sm btn-danger"
+                                title="Remove this audio file">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                </div>
             `;
             audioList.appendChild(audioItem);
+            
+            console.log('[AUDIO_RENAME] Added audio item:', {
+                index: index,
+                original_name: file.name,
+                display_name: displayName,
+                size_mb: fileSizeMB
+            });
         });
         
-        console.log('[FILE_UPLOAD] Audio files selected:', {
-            count: selectedAudioFiles.length,
-            files: selectedAudioFiles.map(f => ({
-                name: f.name,
-                size: f.size,
-                type: f.type
-            })),
-            timestamp: new Date().toISOString()
-        });
+        console.log('[AUDIO_RENAME] Audio display updated with rename UI');
+        console.log('[AUDIO_RENAME] ========================================');
     } else {
-        audioFileNames.textContent = 'No files selected';
+        audioFileNamesDisplay.textContent = 'No files selected';
         audioDetails.style.display = 'none';
+        audioFileNames = {}; // Clear custom names when no files
+        changedAudioNames.clear();
+        
+        console.log('[AUDIO_RENAME] No audio files selected, cleared names');
+        console.log('[AUDIO_RENAME] ========================================');
     }
 }
 
+// Mark audio name as changed
+function markAudioNameChanged(index) {
+    changedAudioNames.add(index);
+    const savedIndicator = document.getElementById(`audio-saved-${index}`);
+    if (savedIndicator) {
+        savedIndicator.style.display = 'none';
+    }
+    
+    // Store the custom name
+    const nameInput = document.getElementById(`audio-name-${index}`);
+    if (nameInput) {
+        audioFileNames[index] = nameInput.value.trim();
+        
+        console.log('[AUDIO_RENAME] Name changed:', {
+            index: index,
+            new_name: audioFileNames[index],
+            timestamp: new Date().toISOString()
+        });
+    }
+}
+
+// Rename audio file with prompt
+function renameAudioFile(index) {
+    const input = document.getElementById(`audio-name-${index}`);
+    const currentName = input.value;
+    const newName = prompt('Enter new name for this audio file:', currentName);
+    
+    console.log('[AUDIO_RENAME] Rename requested:', {
+        index: index,
+        current: currentName,
+        proposed: newName
+    });
+    
+    if (newName && newName !== currentName) {
+        input.value = newName;
+        markAudioNameChanged(index);
+        
+        console.log('[AUDIO_RENAME] ========================================');
+        console.log('[AUDIO_RENAME] Audio file renamed');
+        console.log('[AUDIO_RENAME] Index:', index);
+        console.log('[AUDIO_RENAME] New name:', newName);
+        console.log('[AUDIO_RENAME] Status: Pending save');
+        console.log('[AUDIO_RENAME] ========================================');
+    } else {
+        console.log('[AUDIO_RENAME] Rename cancelled or no change');
+    }
+}
+
+// Remove audio file
 function removeAudioFile(index) {
+    console.log('[AUDIO_RENAME] Removing audio file at index:', index);
+    
+    // Remove from the selectedAudioFiles array
     selectedAudioFiles.splice(index, 1);
+    
+    // Remove custom name if exists
+    delete audioFileNames[index];
+    changedAudioNames.delete(index);
+    
+    // Reindex the remaining custom names
+    const newAudioFileNames = {};
+    const newChangedNames = new Set();
+    
+    for (let key in audioFileNames) {
+        const oldIndex = parseInt(key);
+        if (oldIndex > index) {
+            newAudioFileNames[oldIndex - 1] = audioFileNames[oldIndex];
+            if (changedAudioNames.has(oldIndex)) {
+                newChangedNames.add(oldIndex - 1);
+            }
+        } else if (oldIndex < index) {
+            newAudioFileNames[oldIndex] = audioFileNames[oldIndex];
+            if (changedAudioNames.has(oldIndex)) {
+                newChangedNames.add(oldIndex);
+            }
+        }
+    }
+    
+    audioFileNames = newAudioFileNames;
+    changedAudioNames = newChangedNames;
     
     // Update the file input to reflect the change
     const audioInput = document.getElementById('audio_files');
-    const dataTransfer = new DataTransfer();
+    const dt = new DataTransfer();
+    selectedAudioFiles.forEach(file => dt.items.add(file));
+    audioInput.files = dt.files;
     
-    selectedAudioFiles.forEach(file => {
-        dataTransfer.items.add(file);
-    });
-    
-    audioInput.files = dataTransfer.files;
+    // Refresh the display
     updateAudioDisplay();
     
-    console.log('[FILE_UPLOAD] Audio file removed at index:', index);
+    console.log('[AUDIO_RENAME] File removed, display refreshed');
+    console.log('[AUDIO_RENAME] Remaining files:', selectedAudioFiles.length);
 }
 
+// Save all audio names locally before form submission
+function saveAllAudioNames() {
+    if (changedAudioNames.size === 0) {
+        console.log('[AUDIO_RENAME] No audio names to save');
+        return;
+    }
+    
+    console.log('[AUDIO_RENAME] ========================================');
+    console.log('[AUDIO_RENAME] Saving all audio names');
+    console.log('[AUDIO_RENAME] Changed names count:', changedAudioNames.size);
+    
+    // Show saved indicators
+    changedAudioNames.forEach(index => {
+        const savedIndicator = document.getElementById(`audio-saved-${index}`);
+        if (savedIndicator) {
+            savedIndicator.style.display = 'inline';
+        }
+    });
+    
+    // Clear the changed set
+    changedAudioNames.clear();
+    
+    console.log('[AUDIO_RENAME] Audio names saved locally');
+    console.log('[AUDIO_RENAME] Custom names:', audioFileNames);
+    console.log('[AUDIO_RENAME] ========================================');
+}
+
+console.log('[AUDIO_CONFIG] ========================================');
+console.log('[AUDIO_CONFIG] Audio upload configuration');
+console.log('[AUDIO_CONFIG] Mode: Full rename functionality enabled');
+console.log('[AUDIO_CONFIG] Features: Rename, Remove, Custom naming');
+console.log('[AUDIO_CONFIG] Backend: Will receive custom names via audio_names[] parameter');
+console.log('[AUDIO_CONFIG] ========================================');
+
 // ========================================
-// EXAM TYPE AND TIME PERIOD HANDLING
+// EXAM TYPE TAB TOGGLE SYSTEM v2.0
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
     console.log('[DOM_READY] ========================================');
-    console.log('[DOM_READY] Initializing exam creation page v4.0');
-    console.log('[DOM_READY] Cascading curriculum system active');
+    console.log('[DOM_READY] Initializing exam creation page v5.0');
+    console.log('[DOM_READY] Tab-based exam type selection active');
     console.log('[DOM_READY] ========================================');
     
-    // Exam type change handler
-    const examTypeSelect = document.getElementById('exam_type');
+    // Tab system elements
+    const reviewTab = document.getElementById('review-tab');
+    const quarterlyTab = document.getElementById('quarterly-tab');
+    const examTypeInput = document.getElementById('exam_type');
     const monthField = document.getElementById('month_field');
     const quarterField = document.getElementById('quarter_field');
+    const tabTitle = document.getElementById('tab-title');
+    const tabInfo = document.getElementById('tab-info');
     
-    if (examTypeSelect) {
-        examTypeSelect.addEventListener('change', function() {
-            const examType = this.value;
+    // Initialize with Review tab active
+    function initializeTabs() {
+        console.log('[TAB_INIT] Initializing tab system');
+        setActiveTab('REVIEW');
+    }
+    
+    // Function to switch tabs and update form
+    function setActiveTab(examType) {
+        console.log('[TAB_SWITCH] ========================================');
+        console.log('[TAB_SWITCH] Switching to:', examType);
+        console.log('[TAB_SWITCH] Timestamp:', new Date().toISOString());
+        
+        // Update hidden input
+        examTypeInput.value = examType;
+        
+        // Update tab active states
+        if (examType === 'REVIEW') {
+            reviewTab.classList.add('active');
+            quarterlyTab.classList.remove('active');
+            reviewTab.setAttribute('aria-selected', 'true');
+            quarterlyTab.setAttribute('aria-selected', 'false');
             
-            console.log('[EXAM_TYPE] Changed to:', examType);
+            // Update description
+            tabTitle.textContent = 'Review / Monthly Exam';
+            tabInfo.textContent = 'Regular monthly review exams for continuous assessment and practice.';
             
-            if (examType === 'REVIEW') {
-                monthField.style.display = 'block';
-                quarterField.style.display = 'none';
-                document.getElementById('time_period_month').required = true;
-                document.getElementById('time_period_quarter').required = false;
-                document.getElementById('time_period_quarter').value = '';
-            } else if (examType === 'QUARTERLY') {
-                monthField.style.display = 'none';
-                quarterField.style.display = 'block';
-                document.getElementById('time_period_month').required = false;
-                document.getElementById('time_period_quarter').required = true;
-                document.getElementById('time_period_month').value = '';
-            } else {
-                monthField.style.display = 'none';
-                quarterField.style.display = 'none';
-                document.getElementById('time_period_month').required = false;
-                document.getElementById('time_period_quarter').required = false;
+            // Show/hide time period fields
+            monthField.style.display = 'block';
+            quarterField.style.display = 'none';
+            
+            // Update required attributes
+            document.getElementById('time_period_month').required = true;
+            document.getElementById('time_period_quarter').required = false;
+            document.getElementById('time_period_quarter').value = '';
+            
+            console.log('[TAB_SWITCH] Review tab activated');
+            console.log('[TAB_SWITCH] Month field shown, Quarter field hidden');
+            
+        } else if (examType === 'QUARTERLY') {
+            quarterlyTab.classList.add('active');
+            reviewTab.classList.remove('active');
+            quarterlyTab.setAttribute('aria-selected', 'true');
+            reviewTab.setAttribute('aria-selected', 'false');
+            
+            // Update description
+            tabTitle.textContent = 'Quarterly Exam';
+            tabInfo.textContent = 'Comprehensive quarterly assessments covering multiple units.';
+            
+            // Show/hide time period fields
+            monthField.style.display = 'none';
+            quarterField.style.display = 'block';
+            
+            // Update required attributes
+            document.getElementById('time_period_month').required = false;
+            document.getElementById('time_period_quarter').required = true;
+            document.getElementById('time_period_month').value = '';
+            
+            console.log('[TAB_SWITCH] Quarterly tab activated');
+            console.log('[TAB_SWITCH] Quarter field shown, Month field hidden');
+        }
+        
+        // Log state
+        console.log('[TAB_SWITCH] Current state:', {
+            examType: examTypeInput.value,
+            monthFieldVisible: monthField.style.display !== 'none',
+            quarterFieldVisible: quarterField.style.display !== 'none',
+            monthRequired: document.getElementById('time_period_month').required,
+            quarterRequired: document.getElementById('time_period_quarter').required
+        });
+        console.log('[TAB_SWITCH] ========================================');
+    }
+    
+    // Tab click handlers
+    if (reviewTab && quarterlyTab) {
+        reviewTab.addEventListener('click', function() {
+            console.log('[TAB_CLICK] Review tab clicked');
+            setActiveTab('REVIEW');
+        });
+        
+        quarterlyTab.addEventListener('click', function() {
+            console.log('[TAB_CLICK] Quarterly tab clicked');
+            setActiveTab('QUARTERLY');
+        });
+        
+        console.log('[TAB_SYSTEM] ✅ Tab click handlers attached');
+    } else {
+        console.error('[TAB_SYSTEM] ❌ Tab elements not found!');
+    }
+    
+    // Initialize the tabs on page load
+    initializeTabs();
+    
+    // Log initial state
+    console.log('[TAB_SYSTEM] Initial state:', {
+        activeTab: examTypeInput.value,
+        monthVisible: monthField.style.display !== 'none',
+        quarterVisible: quarterField.style.display !== 'none'
+    });
+    
+    // Keyboard navigation for tabs (accessibility)
+    document.addEventListener('keydown', function(e) {
+        if (e.target === reviewTab || e.target === quarterlyTab) {
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                const currentTab = e.target === reviewTab ? 'REVIEW' : 'QUARTERLY';
+                const newTab = currentTab === 'REVIEW' ? 'QUARTERLY' : 'REVIEW';
+                setActiveTab(newTab);
+                const focusTab = newTab === 'REVIEW' ? reviewTab : quarterlyTab;
+                focusTab.focus();
+                console.log('[TAB_KEYBOARD] Tab switched via arrow key to:', newTab);
             }
-        });
-    }
+        }
+    });
     
-    // Late submission checkbox handler
-    const allowLateCheckbox = document.getElementById('allow_late_submission');
-    const latePenaltyField = document.getElementById('late_penalty_field');
-    
-    if (allowLateCheckbox) {
-        allowLateCheckbox.addEventListener('change', function() {
-            latePenaltyField.style.display = this.checked ? 'block' : 'none';
-            console.log('[SCHEDULING] Late submission:', this.checked);
-        });
-    }
+    console.log('[TAB_SYSTEM] Tab-based exam type selection system initialized');
 });
 
 // ========================================
@@ -832,9 +1821,9 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
     console.log('[FORM_SUBMIT] Starting validation...');
     
     try {
-        // Get exam type for validation
+        // Get exam type for validation (now from hidden input)
         const examType = document.getElementById('exam_type').value;
-        const examTypeText = examType ? document.getElementById('exam_type').options[document.getElementById('exam_type').selectedIndex].text : '';
+        const examTypeText = examType === 'REVIEW' ? 'Review / Monthly Exam' : 'Quarterly Exam';
         
         // Get time period data
         const timePeriodMonth = document.getElementById('time_period_month').value;
@@ -845,14 +1834,34 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
         const classCodesSelect = document.getElementById('class_codes');
         const selectedClasses = Array.from(classCodesSelect.selectedOptions).map(opt => opt.value);
         
-        // Get scheduling data
-        const scheduledDate = document.getElementById('scheduled_date').value;
-        const scheduledStartTime = document.getElementById('scheduled_start_time').value;
-        const scheduledEndTime = document.getElementById('scheduled_end_time').value;
+        // Get instructions data (scheduling removed per requirements)
         const instructions = document.getElementById('instructions').value.trim();
-        const allowLateSubmission = document.getElementById('allow_late_submission').checked;
-        const lateSubmissionPenalty = allowLateSubmission ? 
-            parseInt(document.getElementById('late_submission_penalty').value) : 0;
+        
+        console.log('[INSTRUCTIONS_DATA] ========================================');
+        console.log('[INSTRUCTIONS_DATA] Collecting instructions for submission');
+        console.log('[INSTRUCTIONS_DATA] Instructions content:', {
+            has_content: !!instructions,
+            length: instructions.length,
+            first_100_chars: instructions.substring(0, 100),
+            contains_newlines: instructions.includes('\n'),
+            timestamp: new Date().toISOString()
+        });
+        console.log('[INSTRUCTIONS_DATA] ========================================');
+        
+        // Prepare audio names for submission
+        const audioNamesInput = document.createElement('div');
+        audioNamesInput.id = 'audio-names-container';
+        for (let index in audioFileNames) {
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'audio_names[]';
+            hiddenInput.value = audioFileNames[index];
+            this.appendChild(hiddenInput);
+            console.log('[AUDIO_RENAME] Adding audio name to form:', {
+                index: index,
+                name: audioFileNames[index]
+            });
+        }
         
         // Log form submission data
         console.log('[FORM_SUBMIT] Form data:', {
@@ -863,13 +1872,12 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
             academic_year: academicYear,
             class_codes: selectedClasses,
             class_codes_count: selectedClasses.length,
-            scheduled_date: scheduledDate || null,
-            scheduled_start_time: scheduledStartTime || null,
-            scheduled_end_time: scheduledEndTime || null,
+            // Scheduling fields removed per requirements - NOT needed in Upload Exam
             has_instructions: !!instructions,
             instructions_length: instructions.length,
-            allow_late_submission: allowLateSubmission,
-            late_submission_penalty: lateSubmissionPenalty,
+            instructions_preview: instructions.substring(0, 100) + (instructions.length > 100 ? '...' : ''),
+            audio_files_count: selectedAudioFiles.length,
+            audio_custom_names: Object.keys(audioFileNames).length,
             timestamp: new Date().toISOString()
         });
         
@@ -932,6 +1940,44 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
             return;
         }
         
+        // VALIDATION FOR NEW EXAM CONFIGURATION FIELDS
+        console.log('[EXAM_CONFIG] ========================================');
+        console.log('[EXAM_CONFIG] Validating exam configuration fields...');
+        
+        // Validate Test Duration
+        const timerMinutesInput = document.getElementById('timer_minutes');
+        const timerMinutes = parseInt(timerMinutesInput?.value || '60');
+        if (!timerMinutesInput || !timerMinutesInput.value || timerMinutes < 1 || timerMinutes > 180) {
+            e.preventDefault();
+            alert('Please enter a valid test duration between 1 and 180 minutes.');
+            console.error('[EXAM_CONFIG] ❌ Invalid timer_minutes:', timerMinutes);
+            return;
+        }
+        console.log('[EXAM_CONFIG] ✅ Test Duration:', timerMinutes, 'minutes');
+        
+        // Validate Total Questions
+        const totalQuestionsInput = document.getElementById('total_questions');
+        const totalQuestions = parseInt(totalQuestionsInput?.value || '0');
+        if (!totalQuestionsInput || !totalQuestionsInput.value || totalQuestions < 1 || totalQuestions > 100) {
+            e.preventDefault();
+            alert('Please enter a valid number of questions between 1 and 100.');
+            console.error('[EXAM_CONFIG] ❌ Invalid total_questions:', totalQuestions);
+            return;
+        }
+        console.log('[EXAM_CONFIG] ✅ Total Questions:', totalQuestions);
+        
+        // Validate Default Options Count
+        const defaultOptionsInput = document.getElementById('default_options_count');
+        const defaultOptionsCount = parseInt(defaultOptionsInput?.value || '5');
+        if (!defaultOptionsInput || defaultOptionsCount < 2 || defaultOptionsCount > 10) {
+            e.preventDefault();
+            alert('Please enter a valid number of options between 2 and 10.');
+            console.error('[EXAM_CONFIG] ❌ Invalid default_options_count:', defaultOptionsCount);
+            return;
+        }
+        console.log('[EXAM_CONFIG] ✅ Default Options Count:', defaultOptionsCount);
+        console.log('[EXAM_CONFIG] ========================================');
+        
         // Get values from cascading system globals (if available)
         const generatedBaseName = window.generatedBaseName || '';
         const userComment = window.userComment || '';
@@ -943,6 +1989,9 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
             base_name: generatedBaseName,
             user_comment: userComment,
             curriculum_level: curriculumLevelHidden.value,
+            timer_minutes: timerMinutes,
+            total_questions: totalQuestions,
+            default_options_count: defaultOptionsCount,
             pdf_file: pdfFile.name,
             audio_files_count: selectedAudioFiles.length
         });
@@ -953,6 +2002,86 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
         console.error('[FORM_SUBMIT] Stack trace:', error.stack);
         // Don't prevent submission on unexpected errors, let server handle
     }
+});
+
+// ========================================
+// EXAM CONFIGURATION FIELD MONITORING
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[EXAM_CONFIG_MONITOR] ========================================');
+    console.log('[EXAM_CONFIG_MONITOR] Initializing field monitoring for exam configuration');
+    
+    // Monitor Test Duration field
+    const timerMinutesField = document.getElementById('timer_minutes');
+    if (timerMinutesField) {
+        console.log('[EXAM_CONFIG_MONITOR] ✅ Test Duration field found, default value:', timerMinutesField.value);
+        
+        timerMinutesField.addEventListener('change', function() {
+            console.log('[EXAM_CONFIG_MONITOR] Test Duration changed to:', this.value, 'minutes');
+            console.log('[EXAM_CONFIG_MONITOR] Valid range: 1-180 minutes');
+            
+            // Validate range
+            const value = parseInt(this.value);
+            if (value < 1 || value > 180) {
+                console.warn('[EXAM_CONFIG_MONITOR] ⚠️ Test Duration out of range:', value);
+            }
+        });
+        
+        timerMinutesField.addEventListener('input', function() {
+            console.log('[EXAM_CONFIG_MONITOR] Test Duration input:', this.value);
+        });
+    } else {
+        console.error('[EXAM_CONFIG_MONITOR] ❌ Test Duration field not found!');
+    }
+    
+    // Monitor Total Questions field
+    const totalQuestionsField = document.getElementById('total_questions');
+    if (totalQuestionsField) {
+        console.log('[EXAM_CONFIG_MONITOR] ✅ Total Questions field found, current value:', totalQuestionsField.value);
+        
+        totalQuestionsField.addEventListener('change', function() {
+            console.log('[EXAM_CONFIG_MONITOR] Total Questions changed to:', this.value);
+            console.log('[EXAM_CONFIG_MONITOR] Valid range: 1-100 questions');
+            
+            // Validate range
+            const value = parseInt(this.value);
+            if (value < 1 || value > 100) {
+                console.warn('[EXAM_CONFIG_MONITOR] ⚠️ Total Questions out of range:', value);
+            }
+        });
+        
+        totalQuestionsField.addEventListener('input', function() {
+            console.log('[EXAM_CONFIG_MONITOR] Total Questions input:', this.value);
+        });
+    } else {
+        console.error('[EXAM_CONFIG_MONITOR] ❌ Total Questions field not found!');
+    }
+    
+    // Monitor Default Options field
+    const defaultOptionsField = document.getElementById('default_options_count');
+    if (defaultOptionsField) {
+        console.log('[EXAM_CONFIG_MONITOR] ✅ Default Options field found, default value:', defaultOptionsField.value);
+        
+        defaultOptionsField.addEventListener('change', function() {
+            console.log('[EXAM_CONFIG_MONITOR] Default Options changed to:', this.value);
+            console.log('[EXAM_CONFIG_MONITOR] Valid range: 2-10 options');
+            
+            // Validate range
+            const value = parseInt(this.value);
+            if (value < 2 || value > 10) {
+                console.warn('[EXAM_CONFIG_MONITOR] ⚠️ Default Options out of range:', value);
+            }
+        });
+        
+        defaultOptionsField.addEventListener('input', function() {
+            console.log('[EXAM_CONFIG_MONITOR] Default Options input:', this.value);
+        });
+    } else {
+        console.error('[EXAM_CONFIG_MONITOR] ❌ Default Options field not found!');
+    }
+    
+    console.log('[EXAM_CONFIG_MONITOR] Field monitoring initialized');
+    console.log('[EXAM_CONFIG_MONITOR] ========================================');
 });
 
 // ========================================
@@ -1033,27 +2162,76 @@ function updateSelectedClassesDisplay() {
 }
 
 // ========================================
-// INSTRUCTIONS TRACKING
+// INSTRUCTIONS TRACKING (Enhanced - Scheduling removed per requirements)
 // ========================================
 function initInstructionsTracking() {
     const instructions = document.getElementById('instructions');
+    const debugDiv = document.getElementById('instructions-debug');
+    const charCount = document.getElementById('instructions-char-count');
     
-    console.log('[INSTRUCTIONS] Initializing tracking:', {
-        element_found: !!instructions,
+    console.log('[INSTRUCTIONS_INIT] ========================================');
+    console.log('[INSTRUCTIONS_INIT] Initializing General Instructions tracking');
+    console.log('[INSTRUCTIONS_INIT] Note: Scheduling fields removed per requirements');
+    console.log('[INSTRUCTIONS_INIT] Elements found:', {
+        instructions_textarea: !!instructions,
+        debug_div: !!debugDiv,
+        char_count_span: !!charCount,
         timestamp: new Date().toISOString()
     });
+    console.log('[INSTRUCTIONS_INIT] ========================================');
     
     if (instructions) {
+        // Real-time character count and debugging
+        instructions.addEventListener('input', function(e) {
+            const value = e.target.value;
+            if (charCount) {
+                charCount.textContent = value.length;
+            }
+            
+            // Show debug div if debugging enabled
+            if (window.ROUTINETEST_DEBUG && debugDiv && value.length > 0) {
+                debugDiv.style.display = 'block';
+            } else if (debugDiv) {
+                debugDiv.style.display = 'none';
+            }
+            
+            // Log milestones
+            if (value.length === 1) {
+                console.log('[INSTRUCTIONS_INPUT] User started typing instructions');
+            } else if (value.length % 100 === 0 && value.length > 0) {
+                console.log('[INSTRUCTIONS_INPUT] Milestone:', value.length, 'characters entered');
+            }
+        });
+        
+        // Track completion
         instructions.addEventListener('blur', function(e) {
             const value = e.target.value.trim();
             if (value) {
-                console.log('[INSTRUCTIONS] Updated:', {
-                    length: value.length,
-                    has_content: true,
+                console.log('[INSTRUCTIONS_COMPLETE] ========================================');
+                console.log('[INSTRUCTIONS_COMPLETE] Instructions entry completed');
+                console.log('[INSTRUCTIONS_COMPLETE] Summary:', {
+                    total_chars: value.length,
+                    word_count: value.split(/\s+/).filter(w => w.length > 0).length,
+                    line_count: value.split('\n').length,
+                    has_formatting: value.includes('•') || value.includes('-') || value.includes('*'),
+                    preview: value.substring(0, 200) + (value.length > 200 ? '...' : ''),
                     timestamp: new Date().toISOString()
                 });
+                console.log('[INSTRUCTIONS_COMPLETE] ========================================');
+            } else {
+                console.log('[INSTRUCTIONS_COMPLETE] Instructions field left empty');
             }
         });
+        
+        // Track user focus
+        instructions.addEventListener('focus', function(e) {
+            console.log('[INSTRUCTIONS_FOCUS] User focused on General Instructions field');
+            console.log('[INSTRUCTIONS_FOCUS] Ready to enter exam instructions');
+        });
+        
+        console.log('[INSTRUCTIONS_INIT] ✅ Instructions tracking initialized successfully');
+    } else {
+        console.error('[INSTRUCTIONS_INIT] ❌ ERROR: Instructions textarea not found!');
     }
 }
 
@@ -1065,23 +2243,156 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('[PAGE_INIT] Starting comprehensive initialization');
     console.log('[PAGE_INIT] Version: 4.0 (Legacy code removed)');
     
+    // Initialize PDF Preview Event Listeners
+    console.log('[PDF_PREVIEW] Initializing PDF control event listeners...');
     try {
-        // Initialize class selection handlers
+        // Check and handle icon fallbacks
+        console.log('[ICON_CHECK] Checking FontAwesome icons...');
+        if (window.USE_TEXT_FALLBACKS) {
+            console.log('[ICON_CHECK] Using text fallbacks for icons');
+            document.querySelectorAll('.pdf-controls .icon-fallback').forEach(function(el) {
+                el.style.display = 'inline';
+            });
+            document.querySelectorAll('.pdf-controls i.fas').forEach(function(el) {
+                el.style.display = 'none';
+            });
+        } else {
+            console.log('[ICON_CHECK] ✅ Using FontAwesome icons');
+        }
+        
+        // Navigation controls
+        const pdfPrevBtn = document.getElementById('pdf-prev');
+        const pdfNextBtn = document.getElementById('pdf-next');
+        
+        if (pdfPrevBtn) {
+            pdfPrevBtn.addEventListener('click', onPrevPage);
+            console.log('[PDF_PREVIEW] ✅ Previous page button connected');
+        }
+        
+        if (pdfNextBtn) {
+            pdfNextBtn.addEventListener('click', onNextPage);
+            console.log('[PDF_PREVIEW] ✅ Next page button connected');
+        }
+        
+        // Zoom controls with enhanced debugging
+        const zoomInBtn = document.getElementById('pdf-zoom-in');
+        const zoomOutBtn = document.getElementById('pdf-zoom-out');
+        const zoomFitBtn = document.getElementById('pdf-zoom-fit');
+        
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', function() {
+                console.log('[PDF_CONTROLS] Zoom In clicked - Current scale:', pdfScale);
+                zoomIn();
+                console.log('[PDF_CONTROLS] New scale after zoom in:', pdfScale);
+            });
+            console.log('[PDF_PREVIEW] ✅ Zoom in button (+) connected');
+        }
+        
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', function() {
+                console.log('[PDF_CONTROLS] Zoom Out clicked - Current scale:', pdfScale);
+                zoomOut();
+                console.log('[PDF_CONTROLS] New scale after zoom out:', pdfScale);
+            });
+            console.log('[PDF_PREVIEW] ✅ Zoom out button (-) connected');
+        }
+        
+        if (zoomFitBtn) {
+            zoomFitBtn.addEventListener('click', function() {
+                console.log('[PDF_CONTROLS] Zoom Fit clicked');
+                zoomFit();
+                console.log('[PDF_CONTROLS] Scale reset to 100%');
+            });
+            console.log('[PDF_PREVIEW] ✅ Zoom fit button connected');
+        }
+        
+        // Rotation controls with enhanced debugging
+        const rotateLeftBtn = document.getElementById('pdf-rotate-left');
+        const rotateRightBtn = document.getElementById('pdf-rotate-right');
+        
+        if (rotateLeftBtn) {
+            rotateLeftBtn.addEventListener('click', function() {
+                console.log('[PDF_CONTROLS] Rotate Left clicked - Current rotation:', pdfRotation);
+                rotateLeft();
+                console.log('[PDF_CONTROLS] New rotation after left:', pdfRotation);
+            });
+            console.log('[PDF_PREVIEW] ✅ Rotate left button (↺) connected');
+        }
+        
+        if (rotateRightBtn) {
+            rotateRightBtn.addEventListener('click', function() {
+                console.log('[PDF_CONTROLS] Rotate Right clicked - Current rotation:', pdfRotation);
+                rotateRight();
+                console.log('[PDF_CONTROLS] New rotation after right:', pdfRotation);
+            });
+            console.log('[PDF_PREVIEW] ✅ Rotate right button (↻) connected');
+        }
+        
+        // Log button states
+        console.log('[PDF_PREVIEW] Button states:', {
+            zoomIn: zoomInBtn ? 'Ready' : 'Not found',
+            zoomOut: zoomOutBtn ? 'Ready' : 'Not found',
+            zoomFit: zoomFitBtn ? 'Ready' : 'Not found',
+            rotateLeft: rotateLeftBtn ? 'Ready' : 'Not found',
+            rotateRight: rotateRightBtn ? 'Ready' : 'Not found'
+        });
+        
+        console.log('[PDF_PREVIEW] All PDF control event listeners initialized successfully');
+    } catch (pdfError) {
+        console.error('[PDF_PREVIEW] Error initializing PDF controls:', pdfError);
+    }
+    
+    try {
+        // Initialize class selection handlers with enhanced debugging
+        console.log('[CLASS_DEBUG] ========================================');
+        console.log('[CLASS_DEBUG] Checking class selection dropdown...');
+        
         const classCodesSelect = document.getElementById('class_codes');
         if (classCodesSelect) {
-            classCodesSelect.addEventListener('change', updateSelectedClassesDisplay);
+            const optionCount = classCodesSelect.options.length;
             
             // Log initial state
             console.log('[PAGE_INIT] Class codes initialized:', {
-                total_classes: classCodesSelect.options.length,
+                total_classes: optionCount,
                 grade_7_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_7')).length,
                 grade_8_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_8')).length,
                 grade_9_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_9')).length,
                 grade_10_count: Array.from(classCodesSelect.options).filter(opt => opt.value.startsWith('CLASS_10')).length,
                 timestamp: new Date().toISOString()
             });
+            
+            // CRITICAL: Check if options are empty and apply JavaScript fallback
+            if (optionCount === 0) {
+                console.error('[CLASS_DEBUG] ❌ NO OPTIONS IN DROPDOWN! Applying JavaScript fallback...');
+                
+                // JavaScript fallback population
+                const fallbackClasses = [
+                    ['CLASS_7A', 'Class 7A'], ['CLASS_7B', 'Class 7B'], ['CLASS_7C', 'Class 7C'],
+                    ['CLASS_8A', 'Class 8A'], ['CLASS_8B', 'Class 8B'], ['CLASS_8C', 'Class 8C'],
+                    ['CLASS_9A', 'Class 9A'], ['CLASS_9B', 'Class 9B'], ['CLASS_9C', 'Class 9C'],
+                    ['CLASS_10A', 'Class 10A'], ['CLASS_10B', 'Class 10B'], ['CLASS_10C', 'Class 10C']
+                ];
+                
+                fallbackClasses.forEach(([value, text]) => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.text = text;
+                    classCodesSelect.add(option);
+                });
+                
+                console.log(`[CLASS_DEBUG] ✅ Added ${fallbackClasses.length} fallback options via JavaScript`);
+                console.log('[CLASS_DEBUG] Fallback population complete - dropdown should now work');
+            } else {
+                console.log(`[CLASS_DEBUG] ✅ Dropdown has ${optionCount} options from server`);
+                // Show first 3 options for verification
+                for (let i = 0; i < Math.min(3, optionCount); i++) {
+                    console.log(`[CLASS_DEBUG]   ${i+1}. "${classCodesSelect.options[i].text}" (${classCodesSelect.options[i].value})`);
+                }
+            }
+            
+            classCodesSelect.addEventListener('change', updateSelectedClassesDisplay);
         } else {
-            console.warn('[PAGE_INIT] Class codes select not found');
+            console.error('[PAGE_INIT] ❌ Class codes select element not found in DOM!');
         }
         
         // Initialize instructions tracking
