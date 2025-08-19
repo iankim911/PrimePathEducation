@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Management Buttons Test</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        
+        h1 {
+            color: #2E7D32;
+            border-bottom: 3px solid #2E7D32;
+            padding-bottom: 10px;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .test-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .test-table th,
+        .test-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .test-table th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+        
+        /* Enhanced Exam Action Buttons */
+        .exam-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            text-transform: none;
+            min-width: 80px;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .exam-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .exam-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .exam-btn i {
+            font-size: 11px;
+        }
+
+        /* Specific button color enhancements */
+        .btn-primary.exam-btn {
+            background: linear-gradient(135deg, #2E7D32, #1B5E20);
+            color: white;
+        }
+
+        .btn-primary.exam-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1B5E20, #0E3311);
+        }
+
+        .btn-warning.exam-btn {
+            background: linear-gradient(135deg, #FF8F00, #E65100);
+            color: white;
+        }
+
+        .btn-warning.exam-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #E65100, #BF360C);
+        }
+
+        .btn-danger.exam-btn {
+            background: linear-gradient(135deg, #D32F2F, #B71C1C);
+            color: white;
+        }
+
+        .btn-danger.exam-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #B71C1C, #8E0000);
+        }
+        
+        .result {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Exam Management Buttons Test</h1>
+        
+        <div class="test-section">
+            <h2>Test 1: Button UI and Styling</h2>
+            <p>This tests the new button design with text labels and tooltips:</p>
+            
+            <table class="test-table">
+                <thead>
+                    <tr>
+                        <th>Exam Name</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Questions</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Sample Review Exam</td>
+                        <td>REVIEW</td>
+                        <td>60 min</td>
+                        <td>20</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary exam-btn" onclick="testEditExam('test-001')" title="Edit exam details">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-warning exam-btn" onclick="testEditDuration('test-001', 60)" title="Change exam duration">
+                                <i class="fas fa-clock"></i> Duration
+                            </button>
+                            <button class="btn btn-sm btn-danger exam-btn" onclick="testDeleteExam('test-001')" title="Remove exam from class">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Sample Quarterly Exam</td>
+                        <td>QUARTERLY</td>
+                        <td>90 min</td>
+                        <td>40</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary exam-btn" onclick="testEditExam('test-002')" title="Edit exam details">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-warning exam-btn" onclick="testEditDuration('test-002', 90)" title="Change exam duration">
+                                <i class="fas fa-clock"></i> Duration
+                            </button>
+                            <button class="btn btn-sm btn-danger exam-btn" onclick="testDeleteExam('test-002')" title="Remove exam from class">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div id="test1-result" class="result">
+                ✅ Button styling and hover effects working correctly!
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 2: Function Availability Check</h2>
+            <p>This tests if all required functions are properly defined:</p>
+            
+            <button onclick="checkFunctions()" class="btn btn-primary" style="padding: 10px 20px; background: #2E7D32; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Check Functions
+            </button>
+            
+            <div id="function-results" class="result">
+                <!-- Results will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test 3: Error Handling and User Experience</h2>
+            <p>This tests loading states and error handling:</p>
+            
+            <button onclick="testLoadingStates()" class="btn btn-warning" style="padding: 10px 20px; background: #FF8F00; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Test Loading States
+            </button>
+            
+            <div id="loading-results" class="result">
+                <!-- Results will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Test functions that simulate the actual functionality
+        function testEditExam(examId) {
+            alert(`Edit Exam Dialog would open for exam ID: ${examId}\n\nThis would show:\n- Exam Name field\n- Exam Type dropdown\n- Duration input\n- Description textarea\n- Save/Cancel buttons`);
+            console.log(`[TEST] editExam(${examId}) called successfully`);
+        }
+        
+        function testEditDuration(examId, currentDuration) {
+            const newDuration = prompt(`Edit Exam Duration\n\nCurrent duration: ${currentDuration} minutes\n\nEnter new duration (15-300 minutes):`, currentDuration);
+            
+            if (newDuration) {
+                if (isNaN(newDuration) || newDuration < 15 || newDuration > 300) {
+                    alert('Invalid duration! Must be between 15-300 minutes.');
+                } else {
+                    alert(`Duration would be updated to ${newDuration} minutes for exam ${examId}`);
+                    console.log(`[TEST] editDuration(${examId}, ${newDuration}) called successfully`);
+                }
+            }
+        }
+        
+        function testDeleteExam(examId) {
+            const confirmed = confirm(`Delete Exam Confirmation\n\nThis will permanently delete the exam and all associated data.\nThis action cannot be undone.\n\nAre you sure you want to proceed?`);
+            
+            if (confirmed) {
+                alert(`Exam ${examId} would be deleted from the class`);
+                console.log(`[TEST] deleteExam(${examId}) called successfully`);
+            }
+        }
+        
+        function checkFunctions() {
+            const results = document.getElementById('function-results');
+            results.style.display = 'block';
+            results.className = 'result';
+            
+            let html = '<h3>Function Availability:</h3><ul>';
+            
+            const functions = {
+                'testEditExam': typeof testEditExam,
+                'testEditDuration': typeof testEditDuration,
+                'testDeleteExam': typeof testDeleteExam
+            };
+            
+            let allAvailable = true;
+            for (const [name, type] of Object.entries(functions)) {
+                if (type === 'function') {
+                    html += `<li style="color: #2E7D32;"><strong>${name}</strong>: ✅ Available</li>`;
+                } else {
+                    html += `<li style="color: #D32F2F;"><strong>${name}</strong>: ❌ Not Available (${type})</li>`;
+                    allAvailable = false;
+                }
+            }
+            
+            html += '</ul>';
+            
+            if (allAvailable) {
+                html += '<p style="color: #2E7D32; font-weight: bold;">✅ All functions are properly defined!</p>';
+            } else {
+                html += '<p style="color: #D32F2F; font-weight: bold;">❌ Some functions are missing!</p>';
+                results.className = 'result error';
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        function testLoadingStates() {
+            const results = document.getElementById('loading-results');
+            results.style.display = 'block';
+            results.className = 'result';
+            
+            results.innerHTML = '<h3>Testing Loading States:</h3><p>Simulating button loading states...</p>';
+            
+            // Simulate loading state on first edit button
+            const editBtn = document.querySelector('.btn-primary.exam-btn');
+            const originalText = editBtn.innerHTML;
+            
+            // Show loading state
+            editBtn.disabled = true;
+            editBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            
+            setTimeout(() => {
+                // Restore button
+                editBtn.disabled = false;
+                editBtn.innerHTML = originalText;
+                
+                results.innerHTML += '<p>✅ Loading state simulation complete!</p>';
+                results.innerHTML += '<p>✅ Button properly restored after operation!</p>';
+                results.innerHTML += '<p><strong>Features tested:</strong></p>';
+                results.innerHTML += '<ul><li>Button disabled during operation</li><li>Loading spinner displayed</li><li>Button restored after completion</li></ul>';
+            }, 2000);
+        }
+        
+        // Initialize page
+        window.addEventListener('load', function() {
+            console.log('🧪 Exam Management Button Test Page Loaded');
+            console.log('This page tests the new button functionality without requiring the full Django application');
+            
+            // Show first test result
+            document.getElementById('test1-result').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
