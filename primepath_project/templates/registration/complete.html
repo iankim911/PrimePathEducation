@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Registration Complete - Welcome to PrimePath!{% endblock %}
+
+{% block extra_css %}
+<style>
+    .completion-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 40px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 30px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: scaleIn 0.5s ease-out;
+    }
+    
+    @keyframes scaleIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .success-icon svg {
+        width: 60px;
+        height: 60px;
+        fill: white;
+    }
+    
+    .checkmark {
+        stroke: white;
+        stroke-width: 3;
+        fill: none;
+        animation: drawCheck 0.6s ease-out 0.3s forwards;
+        stroke-dasharray: 60;
+        stroke-dashoffset: 60;
+    }
+    
+    @keyframes drawCheck {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+    
+    h1 {
+        color: #28a745;
+        margin-bottom: 15px;
+        font-size: 2.5rem;
+    }
+    
+    .welcome-message {
+        color: #333;
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .user-info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 25px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .user-info-card h3 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 10px;
+    }
+    
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .info-value {
+        color: #333;
+    }
+    
+    .next-steps {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .next-steps h3 {
+        color: white;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+    }
+    
+    .step-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .step-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .step-number {
+        background: rgba(255, 255, 255, 0.2);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .step-content {
+        flex: 1;
+    }
+    
+    .step-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .step-desc {
+        font-size: 14px;
+        opacity: 0.9;
+        line-height: 1.4;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 15px 35px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    }
+    
+    .btn-outline {
+        background: white;
+        color: #007bff;
+        border: 2px solid #007bff;
+    }
+    
+    .btn-outline:hover {
+        background: #007bff;
+        color: white;
+    }
+    
+    .email-verification-notice {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .email-verification-notice h4 {
+        color: #856404;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+    
+    .email-verification-notice p {
+        color: #856404;
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    .profile-completion {
+        margin: 30px 0;
+    }
+    
+    .progress-bar-container {
+        background: #e9ecef;
+        border-radius: 10px;
+        height: 30px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    
+    .progress-bar-fill {
+        background: linear-gradient(90deg, #28a745, #20c997);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        transition: width 1s ease-out;
+        animation: fillProgress 1.5s ease-out;
+    }
+    
+    @keyframes fillProgress {
+        from {
+            width: 0;
+        }
+    }
+    
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: #ffc107;
+        position: absolute;
+        animation: confettiFall 3s linear forwards;
+    }
+    
+    @keyframes confettiFall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="completion-container">
+    <!-- Success Icon -->
+    <div class="success-icon">
+        <svg viewBox="0 0 24 24">
+            <path class="checkmark" d="M4 12l5 5L20 6"></path>
+        </svg>
+    </div>
+    
+    <h1>Welcome to PrimePath!</h1>
+    
+    <p class="welcome-message">
+        Congratulations, <strong>{{ user.first_name }}</strong>! 
+        Your account has been created successfully. 
+        You're now part of the PrimePath learning community!
+    </p>
+    
+    <!-- Email Verification Notice -->
+    {% if not user.profile.email_verified %}
+    <div class="email-verification-notice">
+        <h4>📧 Verify Your Email</h4>
+        <p>
+            We've sent a verification email to <strong>{{ user.email }}</strong>. 
+            Please check your inbox and click the verification link to activate all features.
+        </p>
+    </div>
+    {% endif %}
+    
+    <!-- User Information Summary -->
+    <div class="user-info-card">
+        <h3>Your Account Information</h3>
+        <div class="info-row">
+            <span class="info-label">Account Type:</span>
+            <span class="info-value">{{ user.profile.get_account_type_display }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Name:</span>
+            <span class="info-value">{{ user.get_full_name }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{ user.email }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Student ID:</span>
+            <span class="info-value">{{ user.profile.student_id|default:"Will be assigned" }}</span>
+        </div>
+        {% if user.profile.current_curriculum_level %}
+        <div class="info-row">
+            <span class="info-label">Curriculum Level:</span>
+            <span class="info-value">{{ user.profile.current_curriculum_level }}</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Profile Completion Progress -->
+    <div class="profile-completion">
+        <h4 style="text-align: left; color: #333; margin-bottom: 10px;">
+            Profile Completion: {{ profile_completion }}%
+        </h4>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: {{ profile_completion }}%;">
+                {{ profile_completion }}%
+            </div>
+        </div>
+    </div>
+    
+    <!-- Next Steps -->
+    <div class="next-steps">
+        <h3>What's Next?</h3>
+        <ul class="step-list">
+            <li class="step-item">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Take a Placement Test</div>
+                    <div class="step-desc">
+                        Determine your current English level with our comprehensive placement test.
+                    </div>
+                </div>
+            </li>
+            <li class="step-item">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Browse Available Courses</div>
+                    <div class="step-desc">
+                        Explore our course catalog and find classes that match your schedule and goals.
+                    </div>
+                </div>
+            </li>
+            <li class="step-item">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Schedule Your First Class</div>
+                    <div class="step-desc">
+                        Book a trial class or enroll in a course to begin your learning journey.
+                    </div>
+                </div>
+            </li>
+            <li class="step-item">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">Complete Your Profile</div>
+                    <div class="step-desc">
+                        Add additional information to help us personalize your learning experience.
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'placement_test:student_start' %}" class="btn btn-success">
+            Take Placement Test
+        </a>
+        <a href="{% url 'core:index' %}" class="btn btn-primary">
+            Go to Dashboard
+        </a>
+        <a href="{% url 'user:profile' %}" class="btn btn-outline">
+            Complete Profile
+        </a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create confetti effect
+    function createConfetti() {
+        const colors = ['#ffc107', '#28a745', '#007bff', '#dc3545', '#6610f2', '#e83e8c'];
+        const container = document.querySelector('.completion-container');
+        
+        for (let i = 0; i < 50; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = confetti.style.width;
+                confetti.style.animationDuration = Math.random() * 2 + 3 + 's';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                
+                document.body.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }, i * 50);
+        }
+    }
+    
+    // Trigger confetti on load
+    createConfetti();
+    
+    // Clear session storage
+    sessionStorage.clear();
+    
+    // Show notification if email not verified
+    const emailNotVerified = {{ 'true' if not user.profile.email_verified else 'false' }};
+    if (emailNotVerified) {
+        setTimeout(() => {
+            if (confirm('Would you like us to resend the verification email?')) {
+                // Make AJAX request to resend verification email
+                fetch('{% url "registration:resend_verification" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Verification email has been resent. Please check your inbox.');
+                    }
+                });
+            }
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

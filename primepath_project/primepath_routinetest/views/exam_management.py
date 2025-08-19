@@ -54,8 +54,18 @@ def teacher_required(view_func):
 @admin_required
 @require_http_methods(["POST"])
 def upload_exam(request):
-    """Admin uploads a new exam PDF"""
+    """Admin uploads a new exam PDF - FIXED TO USE PROPER VALIDATION"""
     try:
+        # CRITICAL FIX: Use ExamService instead of direct model creation
+        from ..services import ExamService
+        from core.exceptions import ValidationException
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Log the upload attempt
+        logger.info(f"[EXAM_MGMT_UPLOAD] PDF upload attempt by admin {request.user.username}")
+        print(f"[EXAM_MGMT_UPLOAD] PDF upload attempt by admin {request.user.username}")
+        
         name = request.POST.get('name')
         exam_type = request.POST.get('exam_type')
         curriculum_level = request.POST.get('curriculum_level')
@@ -65,18 +75,64 @@ def upload_exam(request):
         
         # Validate required fields
         if not all([name, exam_type, curriculum_level, academic_year, quarter]):
+            logger.error("[EXAM_MGMT_UPLOAD] Missing required fields")
             return HttpResponseBadRequest("Missing required fields")
         
-        # Create exam
-        exam = RoutineExam.objects.create(
-            name=name,
-            exam_type=exam_type,
-            curriculum_level=curriculum_level,
-            academic_year=academic_year,
-            quarter=quarter,
+        # CRITICAL FIX: Validate PDF file before proceeding
+        if not pdf_file:
+            logger.error("[EXAM_MGMT_UPLOAD] No PDF file provided")
+            return JsonResponse({
+                'success': False,
+                'error': 'PDF file is required'
+            }, status=400)
+        
+        # Get teacher profile
+        teacher_profile = None
+        try:
+            teacher_profile = request.user.teacher_profile
+        except:
+            # Create teacher profile for admin users
+            from core.models import Teacher
+            teacher_profile = Teacher.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    'name': request.user.get_full_name() or request.user.username,
+                    'email': request.user.email or f"{request.user.username}@example.com",
+                    'is_head_teacher': True
+                }
+            )[0]
+        
+        # Prepare exam data using the same structure as the main create_exam view
+        exam_data = {
+            'name': name,
+            'exam_type': exam_type,
+            'academic_year': academic_year,
+            'curriculum_level_id': curriculum_level,
+            'timer_minutes': 60,  # Default
+            'total_questions': 5,  # Default
+            'default_options_count': 5,  # Default  
+            'passing_score': 0,
+            'pdf_rotation': int(request.POST.get('pdf_rotation', 0)),
+            'created_by': teacher_profile,
+            'is_active': True
+        }
+        
+        # Map quarter to appropriate time period fields
+        if exam_type == 'QUARTERLY':
+            exam_data['time_period_quarter'] = quarter
+        else:
+            exam_data['time_period_month'] = quarter
+        
+        # CRITICAL FIX: Use ExamService.create_exam() with full validation
+        exam = ExamService.create_exam(
+            exam_data=exam_data,
             pdf_file=pdf_file,
-            created_by=request.user
+            audio_files=[],  # No audio files in this path
+            audio_names=[]
         )
+        
+        logger.info(f"[EXAM_MGMT_UPLOAD] ✅ Exam created successfully: {exam.id}")
+        print(f"[EXAM_MGMT_UPLOAD] ✅ Exam created successfully: {exam.id}")
         
         return JsonResponse({
             'success': True,

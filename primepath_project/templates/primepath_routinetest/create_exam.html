@@ -753,6 +753,7 @@
 
     <form method="post" enctype="multipart/form-data" id="examForm">
         {% csrf_token %}
+        <input type="hidden" name="pdf_rotation" id="pdf_rotation" value="0">
         
         <!-- Hidden input for exam type (set by tabs) -->
         <input type="hidden" id="exam_type" name="exam_type" value="REVIEW" required>
@@ -1440,6 +1441,9 @@ function rotateLeft() {
     pdfRotation = (pdfRotation - 90) % 360;
     if (pdfRotation < 0) pdfRotation += 360;
     
+    // Update hidden field for form submission
+    document.getElementById('pdf_rotation').value = pdfRotation;
+    
     console.log('[PDF_ROTATE] ========================================');
     console.log('[PDF_ROTATE] Action: ROTATE LEFT (↺)');
     console.log('[PDF_ROTATE] Previous rotation:', oldRotation + '°');
@@ -1453,6 +1457,9 @@ function rotateLeft() {
 function rotateRight() {
     const oldRotation = pdfRotation;
     pdfRotation = (pdfRotation + 90) % 360;
+    
+    // Update hidden field for form submission
+    document.getElementById('pdf_rotation').value = pdfRotation;
     
     console.log('[PDF_ROTATE] ========================================');
     console.log('[PDF_ROTATE] Action: ROTATE RIGHT (↻)');

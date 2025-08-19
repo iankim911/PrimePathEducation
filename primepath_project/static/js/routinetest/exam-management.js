@@ -54,7 +54,7 @@ function showTab(tabName) {
 // Load overview data
 async function loadOverviewData(classCode, timeslot) {
     try {
-        const response = await fetch(`/routinetest/api/class/${classCode}/overview/?timeslot=${timeslot}`);
+        const response = await fetch(`/RoutineTest/api/class/${classCode}/overview/?timeslot=${timeslot}`);
         const data = await response.json();
         
         // Update overview fields
@@ -83,7 +83,7 @@ async function loadOverviewData(classCode, timeslot) {
 // Load exam data
 async function loadExamData(classCode, timeslot) {
     try {
-        const response = await fetch(`/routinetest/api/class/${classCode}/exams/?timeslot=${timeslot}`);
+        const response = await fetch(`/RoutineTest/api/class/${classCode}/exams/?timeslot=${timeslot}`);
         const data = await response.json();
         
         const tableBody = document.getElementById('examTableBody');
@@ -123,7 +123,7 @@ async function loadExamData(classCode, timeslot) {
 // Load student data
 async function loadStudentData(classCode) {
     try {
-        const response = await fetch(`/routinetest/api/class/${classCode}/students/`);
+        const response = await fetch(`/RoutineTest/api/class/${classCode}/students/`);
         const data = await response.json();
         
         // Update student stats
@@ -156,7 +156,7 @@ async function showCopyExamDialog() {
     
     // Load all classes
     try {
-        const response = await fetch('/routinetest/api/all-classes/');
+        const response = await fetch('/RoutineTest/api/all-classes/');
         const data = await response.json();
         
         const select = document.getElementById('sourceClassSelect');
@@ -186,7 +186,7 @@ document.getElementById('sourceClassSelect')?.addEventListener('change', async f
     }
     
     try {
-        const response = await fetch(`/routinetest/api/class/${classCode}/all-exams/`);
+        const response = await fetch(`/RoutineTest/api/class/${classCode}/all-exams/`);
         const data = await response.json();
         
         examSelect.disabled = false;
@@ -209,7 +209,7 @@ async function copySelectedExam() {
     }
     
     try {
-        const response = await fetch('/routinetest/api/copy-exam/', {
+        const response = await fetch('/RoutineTest/api/copy-exam/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -242,7 +242,14 @@ async function deleteExam(examId) {
     }
     
     try {
-        const response = await fetch(`/routinetest/api/exam/${examId}/delete/`, {
+        // Add required query parameters that the backend expects
+        // Use default values if not set
+        const queryParams = new URLSearchParams({
+            class_code: currentClassCode || 'ALL',
+            timeslot: currentTimeslot || 'Morning'
+        });
+        
+        const response = await fetch(`/RoutineTest/api/exam/${examId}/delete/?${queryParams}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
@@ -252,8 +259,17 @@ async function deleteExam(examId) {
         if (response.ok) {
             alert('Exam deleted successfully!');
             loadExamData(currentClassCode, currentTimeslot);
+        } else if (response.status === 302 || response.redirected) {
+            // Authentication redirect - user needs to log in
+            alert('Session expired. Please log in again.');
+            window.location.href = '/login/';
+        } else if (response.status === 405) {
+            // Method not allowed - check if this is actually an auth redirect
+            alert('Delete operation not allowed. Please check your permissions.');
         } else {
-            alert('Failed to delete exam');
+            const errorText = await response.text();
+            console.error('Delete failed:', response.status, errorText);
+            alert(`Failed to delete exam (${response.status})`);
         }
     } catch (error) {
         console.error('Error deleting exam:', error);
@@ -270,7 +286,7 @@ async function editDuration(examId, currentDuration) {
     }
     
     try {
-        const response = await fetch(`/routinetest/api/exam/${examId}/duration/`, {
+        const response = await fetch(`/RoutineTest/api/exam/${examId}/duration/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -306,7 +322,7 @@ async function saveSchedule() {
     }
     
     try {
-        const response = await fetch('/routinetest/api/schedule-exam/', {
+        const response = await fetch('/RoutineTest/api/schedule-exam/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

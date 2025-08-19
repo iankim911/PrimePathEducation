@@ -108,6 +108,54 @@ If you get `HTTP/1.1 200 OK`, the server is working. Browser issues are separate
 
 ## 📋 Standard Operating Procedures
 
+### 🔄 Server Management & Auto-Compact Protocol
+
+**CRITICAL**: These practices are mandatory for project stability
+
+#### Auto-Compact Threshold
+- **Auto-compact trigger**: When reaching **50% of current threshold**
+- Monitor conversation length and proactively compact at 50% to prevent context overflow
+- Always maintain sufficient context for current work session
+
+#### Server Restart Protocol
+**ALWAYS restart server after:**
+1. ✅ Major feature implementations
+2. ✅ Critical bug fixes  
+3. ✅ Database migrations
+4. ✅ Settings file changes
+5. ✅ Template structural changes
+6. ✅ JavaScript module updates
+
+#### Verification Steps (MANDATORY)
+After every server restart:
+```bash
+# 1. Verify server is running
+curl -I http://127.0.0.1:8000/
+
+# 2. Check key functionality
+# - Login page loads
+# - Navigation works
+# - PDF rendering works
+# - Audio playback works (if applicable)
+
+# 3. Monitor server logs for errors
+# Look for StatReloader message = SUCCESS
+```
+
+#### Server Restart Commands
+```bash
+# Kill existing processes
+tasklist | findstr python
+taskkill /F /IM python.exe
+
+# Start server (use appropriate method)
+cd primepath_project
+../venv/Scripts/python.exe manage.py runserver 127.0.0.1:8000 --settings=primepath_project.settings_sqlite
+
+# Verify success
+curl -I http://127.0.0.1:8000/
+```
+
 ### When Browser Shows "Connection Refused"
 1. **DO NOT RESTART SERVER**
 2. Run: `curl -I http://127.0.0.1:8000/`

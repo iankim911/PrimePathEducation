@@ -4887,3 +4887,28 @@ window.addEventListener('beforeunload', function(e) {
 });
 </script>
 {% endblock %}
+    
+<!-- PDF ROTATION PERSISTENCE DEBUG -->
+<script>
+console.group('🔍 PDF ROTATION PERSISTENCE DEBUG');
+console.log('Exam ID:', '{{ exam.id }}');
+console.log('Exam Name:', '{{ exam.name }}');
+console.log('PDF Rotation:', {{ exam.pdf_rotation|default:0 }});
+console.log('Has PDF File:', {% if exam.pdf_file %}true{% else %}false{% endif %});
+{% if exam.pdf_file %}
+console.log('PDF File Name:', '{{ exam.pdf_file.name }}');
+console.log('PDF File URL:', '{{ exam.pdf_file.url }}');
+{% endif %}
+console.log('Created At:', '{{ exam.created_at|date:"c" }}');
+{% if exam.created_by %}
+console.log('Created By:', '{{ exam.created_by.name }}');
+{% endif %}
+console.groupEnd();
+
+{% if not exam.pdf_file %}
+console.error('❌ PDF ROTATION PERSISTENCE ISSUE DETECTED');
+console.error('This exam has rotation settings but no PDF file saved');
+console.error('Please check server logs for upload errors');
+{% endif %}
+</script>
+<!-- END PDF ROTATION PERSISTENCE DEBUG -->

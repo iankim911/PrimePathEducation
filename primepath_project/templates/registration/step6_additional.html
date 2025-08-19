@@ -1,0 +1,634 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Additional Information - Step 6{% endblock %}
+
+{% block extra_css %}
+<style>
+    .registration-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        position: relative;
+    }
+    
+    .progress-bar::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e0e0e0;
+        z-index: -1;
+    }
+    
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        position: relative;
+        background: white;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .progress-step.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .progress-step.completed {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    
+    .step-label {
+        position: absolute;
+        top: 50px;
+        width: 100px;
+        text-align: center;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: #666;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+    }
+    
+    .form-section h3 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group label .required {
+        color: #dc3545;
+        margin-left: 3px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 15px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+        display: none;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+    
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    
+    .help-text {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .checkbox-group {
+        margin-top: 10px;
+    }
+    
+    .checkbox-item {
+        display: block;
+        margin-bottom: 12px;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .checkbox-item:hover {
+        background: #f8f9fa;
+        border-color: #007bff;
+    }
+    
+    .checkbox-item.selected {
+        background: #e7f1ff;
+        border-color: #007bff;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    
+    .checkbox-label {
+        font-weight: normal;
+        color: #333;
+        cursor: pointer;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+        font-size: 18px;
+        padding: 15px 40px;
+    }
+    
+    .btn-success:hover {
+        background: #218838;
+    }
+    
+    .time-selector {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .time-option {
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+    }
+    
+    .time-option:hover {
+        border-color: #007bff;
+        background: #f0f7ff;
+    }
+    
+    .time-option.selected {
+        border-color: #007bff;
+        background: #007bff;
+        color: white;
+    }
+    
+    .time-option input[type="checkbox"] {
+        display: none;
+    }
+    
+    .terms-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 30px;
+    }
+    
+    .terms-box {
+        background: white;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    
+    .terms-checkbox {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .terms-checkbox input[type="checkbox"] {
+        margin-right: 10px;
+        margin-top: 3px;
+    }
+    
+    .terms-checkbox label {
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+    .terms-checkbox label strong {
+        font-weight: 600;
+    }
+    
+    .completion-notice {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .completion-notice h4 {
+        color: #155724;
+        margin-bottom: 10px;
+    }
+    
+    .completion-notice p {
+        color: #155724;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Additional Information</h2>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-step completed">
+            ✓
+            <span class="step-label">Basic Info</span>
+        </div>
+        <div class="progress-step completed">
+            ✓
+            <span class="step-label">Personal</span>
+        </div>
+        <div class="progress-step completed">
+            ✓
+            <span class="step-label">Contact</span>
+        </div>
+        <div class="progress-step completed">
+            ✓
+            <span class="step-label">Academic</span>
+        </div>
+        <div class="progress-step completed">
+            ✓
+            <span class="step-label">Parent Info</span>
+        </div>
+        <div class="progress-step active">
+            6
+            <span class="step-label">Additional</span>
+        </div>
+    </div>
+    
+    <div class="completion-notice">
+        <h4>🎉 Almost Done!</h4>
+        <p>Just a few more optional details and you'll be ready to start learning!</p>
+    </div>
+    
+    <form method="post" id="additionalInfoForm">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3>Learning Preferences</h3>
+            
+            <div class="form-group">
+                <label for="preferred_class_size">
+                    Preferred Class Size
+                </label>
+                <select class="form-control" id="preferred_class_size" name="preferred_class_size">
+                    <option value="">No preference</option>
+                    <option value="1on1">1-on-1 (Private)</option>
+                    <option value="small">Small Group (2-4 students)</option>
+                    <option value="medium">Medium Group (5-8 students)</option>
+                    <option value="large">Large Class (9+ students)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="preferred_schedule">
+                    Preferred Class Times (Select all that apply)
+                </label>
+                <div class="time-selector">
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="weekday_morning">
+                        Weekday Morning
+                    </label>
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="weekday_afternoon">
+                        Weekday Afternoon
+                    </label>
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="weekday_evening">
+                        Weekday Evening
+                    </label>
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="weekday_night">
+                        Weekday Night
+                    </label>
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="weekend_morning">
+                        Weekend Morning
+                    </label>
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="weekend_afternoon">
+                        Weekend Afternoon
+                    </label>
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="weekend_evening">
+                        Weekend Evening
+                    </label>
+                    <label class="time-option">
+                        <input type="checkbox" name="preferred_times" value="flexible">
+                        Flexible
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="learning_style">
+                    Learning Style
+                </label>
+                <select class="form-control" id="learning_style" name="learning_style">
+                    <option value="">Select your learning style</option>
+                    <option value="visual">Visual (Pictures, diagrams)</option>
+                    <option value="auditory">Auditory (Listening, discussion)</option>
+                    <option value="kinesthetic">Kinesthetic (Hands-on activities)</option>
+                    <option value="reading">Reading/Writing</option>
+                    <option value="mixed">Mixed/Combination</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Additional Information</h3>
+            
+            <div class="form-group">
+                <label for="special_needs">
+                    Special Needs or Accommodations
+                </label>
+                <textarea class="form-control" 
+                          id="special_needs" 
+                          name="special_needs" 
+                          rows="3"
+                          placeholder="Please describe any special needs, learning disabilities, or accommodations required..."
+                          >{{ form.special_needs.value|default:'' }}</textarea>
+                <div class="help-text">This information helps us provide better support for your learning</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="medical_conditions">
+                    Medical Conditions or Allergies
+                </label>
+                <textarea class="form-control" 
+                          id="medical_conditions" 
+                          name="medical_conditions" 
+                          rows="2"
+                          placeholder="Any medical conditions or allergies we should be aware of..."
+                          >{{ form.medical_conditions.value|default:'' }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="how_heard">
+                    How did you hear about PrimePath?
+                </label>
+                <select class="form-control" id="how_heard" name="how_heard">
+                    <option value="">Please select</option>
+                    <option value="search">Internet Search</option>
+                    <option value="social">Social Media</option>
+                    <option value="friend">Friend/Family Recommendation</option>
+                    <option value="school">School Recommendation</option>
+                    <option value="advertisement">Advertisement</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="referralGroup" style="display: none;">
+                <label for="referral_source">
+                    Referral Details
+                </label>
+                <input type="text" 
+                       class="form-control" 
+                       id="referral_source" 
+                       name="referral_source" 
+                       placeholder="Please provide more details..."
+                       value="{{ form.referral_source.value|default:'' }}">
+            </div>
+        </div>
+        
+        <div class="terms-section">
+            <h3 style="margin-bottom: 20px;">Terms and Conditions</h3>
+            
+            <div class="terms-box">
+                <h5>Terms of Service</h5>
+                <p>By creating an account with PrimePath, you agree to the following terms and conditions:</p>
+                <ol>
+                    <li><strong>Account Responsibility:</strong> You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</li>
+                    <li><strong>Accurate Information:</strong> You agree to provide accurate, current, and complete information during registration and to update such information to keep it accurate.</li>
+                    <li><strong>Age Requirements:</strong> For students under 18 years of age, parental or guardian consent is required.</li>
+                    <li><strong>Educational Use:</strong> The services provided are for educational purposes only.</li>
+                    <li><strong>Intellectual Property:</strong> All content, materials, and resources provided through PrimePath are protected by copyright and intellectual property laws.</li>
+                    <li><strong>Code of Conduct:</strong> Users must maintain respectful behavior in all interactions with teachers, staff, and other students.</li>
+                    <li><strong>Payment Terms:</strong> Course fees are due as specified in the enrollment agreement.</li>
+                    <li><strong>Cancellation Policy:</strong> Cancellations must be made at least 24 hours in advance.</li>
+                </ol>
+                
+                <h5 style="margin-top: 20px;">Privacy Policy</h5>
+                <p>We are committed to protecting your privacy and personal information:</p>
+                <ul>
+                    <li>We collect personal information only as necessary to provide our educational services.</li>
+                    <li>Your information will never be sold or shared with third parties without your consent.</li>
+                    <li>We use industry-standard security measures to protect your data.</li>
+                    <li>You have the right to access, correct, or delete your personal information.</li>
+                    <li>We may use anonymized data for improving our services and research purposes.</li>
+                </ul>
+            </div>
+            
+            <div class="terms-checkbox">
+                <input type="checkbox" id="agree_terms" name="agree_terms" required>
+                <label for="agree_terms">
+                    <strong>I have read and agree to the Terms of Service and Privacy Policy</strong>
+                    <span class="required">*</span>
+                </label>
+            </div>
+            
+            <div class="terms-checkbox">
+                <input type="checkbox" id="agree_marketing" name="agree_marketing">
+                <label for="agree_marketing">
+                    I would like to receive promotional emails and updates about PrimePath programs and events
+                </label>
+            </div>
+            
+            <div class="terms-checkbox">
+                <input type="checkbox" id="agree_data" name="agree_data" required>
+                <label for="agree_data">
+                    <strong>I consent to the collection and processing of my personal data as described in the Privacy Policy</strong>
+                    <span class="required">*</span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Error messages -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-actions">
+            <a href="{% url 'registration:step' 'parent' %}" class="btn btn-secondary">
+                ← Back to Step 5
+            </a>
+            <button type="submit" class="btn btn-success">
+                Complete Registration ✓
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Time selector
+    const timeOptions = document.querySelectorAll('.time-option');
+    timeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            this.classList.toggle('selected');
+        });
+        
+        // Set initial selected state
+        if (option.querySelector('input[type="checkbox"]').checked) {
+            option.classList.add('selected');
+        }
+    });
+    
+    // How heard dropdown
+    const howHeardSelect = document.getElementById('how_heard');
+    const referralGroup = document.getElementById('referralGroup');
+    
+    howHeardSelect.addEventListener('change', function() {
+        if (this.value === 'friend' || this.value === 'other') {
+            referralGroup.style.display = 'block';
+        } else {
+            referralGroup.style.display = 'none';
+        }
+    });
+    
+    // Form validation
+    document.getElementById('additionalInfoForm').addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Check required terms checkboxes
+        const agreeTerms = document.getElementById('agree_terms');
+        const agreeData = document.getElementById('agree_data');
+        
+        if (!agreeTerms.checked) {
+            alert('You must agree to the Terms of Service to continue.');
+            isValid = false;
+        }
+        
+        if (!agreeData.checked) {
+            alert('You must consent to data collection to create an account.');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        } else {
+            // Show loading/processing message
+            const submitBtn = e.target.querySelector('.btn-success');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+        }
+    });
+    
+    // Smooth scroll to terms when clicking checkbox without agreeing
+    const termsCheckboxes = document.querySelectorAll('.terms-checkbox input[required]');
+    termsCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('click', function(e) {
+            if (!this.checked) {
+                const termsBox = document.querySelector('.terms-box');
+                termsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

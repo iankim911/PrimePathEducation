@@ -9,14 +9,20 @@ Version 2.0 - With proper authentication for Admin mode
         <button class="mode-toggle-btn" id="modeToggleBtn" onclick="handleModeToggle()">
             {% if current_view_mode == 'Admin' %}
                 <i class="fas fa-user-shield"></i> Admin Mode
+            {% elif current_view_mode == 'Teacher' %}
+                <i class="fas fa-chalkboard-teacher"></i> Teacher Mode
             {% else %}
+                <!-- Fallback if context variable is missing -->
                 <i class="fas fa-chalkboard-teacher"></i> Teacher Mode
             {% endif %}
         </button>
         <span class="mode-indicator" id="modeIndicator">
             {% if current_view_mode == 'Admin' %}
                 <span class="admin-active">●</span> Admin Active
+            {% elif current_view_mode == 'Teacher' %}
+                <span class="teacher-active">●</span> Teacher Active
             {% else %}
+                <!-- Fallback if context variable is missing -->
                 <span class="teacher-active">●</span> Teacher Active
             {% endif %}
         </span>
@@ -66,7 +72,7 @@ Version 2.0 - With proper authentication for Admin mode
     justify-content: flex-end !important;
     padding: 20px 30px 0 0 !important; /* Top padding for spacing from nav, right padding to align with logout */
     margin-bottom: 20px !important; /* Bottom margin for spacing from content */
-    z-index: 100 !important;
+    z-index: 1000 !important; /* Higher z-index to ensure visibility */
     /* CRITICAL: Ensure it's never absolutely positioned */
     top: auto !important;
     right: auto !important;
@@ -75,8 +81,9 @@ Version 2.0 - With proper authentication for Admin mode
     /* Ensure it takes full width for proper right alignment */
     width: 100% !important;
     max-width: 100% !important;
-    /* Background for debugging - remove after testing */
-    /* background: rgba(255, 0, 0, 0.1); */
+    /* Background for debugging - ENABLED for QA */
+    background: rgba(255, 165, 0, 0.1) !important; /* Light orange background for visibility */
+    border: 2px dashed #FF9800; /* Dashed border for QA visibility */
 }
 
 .mode-toggle-wrapper {

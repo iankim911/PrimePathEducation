@@ -66,6 +66,10 @@ class ExamService:
         logger.info(f"[EXAM_SERVICE_CREATE] {json.dumps(console_log)}")
         print(f"[EXAM_SERVICE_CREATE] {json.dumps(console_log)}")
         
+        # CRITICAL: Validate PDF file before creating exam - PDF IS REQUIRED
+        ExamService.validate_pdf_file(pdf_file)  # This will raise ValidationException if pdf_file is None
+        ExamService.log_pdf_save_attempt(None, pdf_file, "before_create")
+        
         # Create the exam
         exam = Exam.objects.create(
             name=exam_data['name'],
@@ -86,13 +90,18 @@ class ExamService:
             is_active=exam_data.get('is_active', True)
         )
         
-        # Log successful exam object creation
+        # Log successful exam object creation with PDF validation
+        if pdf_file:
+            ExamService.log_pdf_save_attempt(exam, pdf_file, "after_save")
+        
         console_log = {
             "service": "ExamService",
             "action": "exam_object_created",
             "exam_id": str(exam.id),
             "exam_name": exam.name,
-            "pdf_file_path": exam.pdf_file.name if exam.pdf_file else None
+            "pdf_file_path": exam.pdf_file.name if exam.pdf_file else None,
+            "pdf_rotation": exam.pdf_rotation,
+            "pdf_validation_passed": bool(pdf_file)
         }
         logger.info(f"[EXAM_SERVICE_CREATED] {json.dumps(console_log)}")
         print(f"[EXAM_SERVICE_CREATED] {json.dumps(console_log)}")
@@ -1120,3 +1129,79 @@ class ExamService:
         print(f"[ROUTINETEST_NAME_RESULT] {json.dumps(console_log)}")
         
         return result
+    
+    # ========== PDF ROTATION PERSISTENCE FIX ==========
+    @staticmethod
+    def validate_pdf_file(pdf_file):
+        """
+        Enhanced PDF file validation to prevent upload failures
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        if not pdf_file:
+            logger.error("[PDF_VALIDATION] No PDF file provided")
+            raise ValidationException("PDF file is required", code="MISSING_PDF")
+        
+        if not pdf_file.name.lower().endswith('.pdf'):
+            logger.error(f"[PDF_VALIDATION] Invalid file type: {pdf_file.name}")
+            raise ValidationException("File must be a PDF", code="INVALID_FILE_TYPE")
+        
+        if pdf_file.size == 0:
+            logger.error("[PDF_VALIDATION] Empty PDF file")
+            raise ValidationException("PDF file is empty", code="EMPTY_FILE")
+        
+        if pdf_file.size > 10 * 1024 * 1024:  # 10MB
+            logger.error(f"[PDF_VALIDATION] File too large: {pdf_file.size} bytes")
+            raise ValidationException("PDF file too large (max 10MB)", code="FILE_TOO_LARGE")
+        
+        # Test file readability
+        try:
+            current_pos = pdf_file.tell()
+            content = pdf_file.read()
+            pdf_file.seek(current_pos)  # Reset position
+            
+            if len(content) == 0:
+                logger.error("[PDF_VALIDATION] PDF content is empty")
+                raise ValidationException("PDF file content is empty", code="EMPTY_CONTENT")
+                
+            logger.info(f"[PDF_VALIDATION] ✅ PDF file validated: {pdf_file.name}, {pdf_file.size} bytes")
+            return True
+            
+        except Exception as e:
+            logger.error(f"[PDF_VALIDATION] Cannot read PDF: {str(e)}")
+            raise ValidationException(f"Cannot read PDF file: {str(e)}", code="READ_ERROR")
+    
+    @staticmethod
+    def log_pdf_save_attempt(exam, pdf_file, step):
+        """
+        Comprehensive logging for PDF save process
+        """
+        import logging
+        import json
+        import os
+        logger = logging.getLogger(__name__)
+        
+        log_data = {
+            "action": "pdf_save_process",
+            "step": step,
+            "exam_id": str(exam.id) if exam else "None",
+            "exam_name": exam.name if exam else "None",
+            "pdf_rotation": exam.pdf_rotation if exam else "None",
+            "pdf_file_name": pdf_file.name if pdf_file else "None",
+            "pdf_file_size": pdf_file.size if pdf_file else 0,
+        }
+        
+        if step == "after_save" and exam and exam.pdf_file:
+            try:
+                log_data.update({
+                    "pdf_field_name": exam.pdf_file.name,
+                    "pdf_field_url": exam.pdf_file.url,
+                    "file_exists_check": os.path.exists(exam.pdf_file.path) if exam.pdf_file.name else False
+                })
+            except Exception as e:
+                log_data["file_check_error"] = str(e)
+        
+        logger.info(f"[PDF_SAVE_LOG] {json.dumps(log_data)}")
+        print(f"[PDF_SAVE_LOG] {json.dumps(log_data)}")
+    # ========== END PDF ROTATION PERSISTENCE FIX ==========
