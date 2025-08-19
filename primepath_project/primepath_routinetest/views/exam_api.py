@@ -356,6 +356,49 @@ def get_class_all_exams(request, class_code):
 
 @login_required
 @require_http_methods(["GET"])
+def get_target_class_existing_exams(request, class_code):
+    """Get exams already assigned to target class for copy conflict detection"""
+    try:
+        timeslot = request.GET.get('timeslot', '')
+        
+        existing_exams = []
+        
+        # Get exams from ExamScheduleMatrix for this class and timeslot
+        try:
+            from primepath_routinetest.models import ExamScheduleMatrix
+            
+            matrix_entries = ExamScheduleMatrix.objects.filter(
+                class_code=class_code,
+                time_period_value=timeslot
+            ).prefetch_related('exams')
+            
+            for matrix in matrix_entries:
+                for exam in matrix.exams.all():
+                    existing_exams.append({
+                        'id': str(exam.id),
+                        'name': exam.name,
+                        'exam_type': getattr(exam, 'exam_type', 'UNKNOWN'),
+                        'time_period': timeslot
+                    })
+            
+            logger.info(f"Found {len(existing_exams)} existing exams for {class_code} in {timeslot}")
+            
+        except Exception as e:
+            logger.warning(f"Error getting existing exams: {e}")
+        
+        return JsonResponse({
+            'existing_exams': existing_exams,
+            'class_code': class_code,
+            'timeslot': timeslot,
+            'count': len(existing_exams)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting existing exams for {class_code}: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@require_http_methods(["GET"])
 def get_class_filtered_exams(request, class_code):
     """Get filtered exams from a class based on exam type and time period"""
     try:
@@ -617,7 +660,15 @@ def copy_exam(request):
         ).exists()
         
         if existing_matrix:
-            return JsonResponse({'error': 'Exam already assigned to this class/period'}, status=400)
+            # Return more detailed error information for better UX
+            return JsonResponse({
+                'error': f'The exam "{source_exam.name}" is already assigned to {target_class_code} for {target_timeslot}',
+                'error_type': 'DUPLICATE_ASSIGNMENT',
+                'exam_name': source_exam.name,
+                'target_class': target_class_code,
+                'target_timeslot': target_timeslot,
+                'message': 'This exam has already been copied to this class and time period. Each exam can only be assigned once per class/period.'
+            }, status=400)
         
         # Get or create the matrix entry for this class and time period
         current_year = datetime.now().year

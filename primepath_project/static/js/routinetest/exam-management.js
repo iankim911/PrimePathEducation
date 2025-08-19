@@ -444,15 +444,22 @@ document.getElementById('quarterSelect')?.addEventListener('change', function() 
     loadMatchingExams();
 });
 
-// Step 4: Enable copy button when exam is selected
+// Step 4: Enable copy button when exam is selected (only if not already assigned)
 document.getElementById('sourceExamSelect')?.addEventListener('change', function() {
     const examId = this.value;
+    const selectedOption = this.options[this.selectedIndex];
     const copyBtn = document.getElementById('copyExamBtn');
     
-    copyBtn.disabled = !examId;
+    // Check if the selected exam is already assigned (disabled option)
+    const isAlreadyAssigned = selectedOption && selectedOption.disabled;
     
-    if (examId) {
+    // Only enable copy button if exam is selected and not already assigned
+    copyBtn.disabled = !examId || isAlreadyAssigned;
+    
+    if (examId && !isAlreadyAssigned) {
         console.log(`Exam selected: ${examId}. Copy button enabled.`);
+    } else if (isAlreadyAssigned) {
+        console.log(`Exam selected but already assigned: ${examId}. Copy button disabled.`);
     }
 });
 
@@ -476,6 +483,59 @@ function resetDependentSelectors(selectorIds) {
     
     // Always disable copy button when resetting
     document.getElementById('copyExamBtn').disabled = true;
+}
+
+// Check which exams are already assigned to target class
+async function checkExistingAssignments(exams) {
+    try {
+        // Get the target timeslot for checking
+        const examType = document.getElementById('examTypeSelect').value;
+        const month = document.getElementById('monthSelect').value;
+        const quarter = document.getElementById('quarterSelect').value;
+        
+        let targetTimeslot = '';
+        if (examType === 'REVIEW' && month) {
+            targetTimeslot = month;
+        } else if (examType === 'QUARTERLY' && quarter) {
+            targetTimeslot = quarter;
+        }
+        
+        if (!targetTimeslot || !currentClassCode) {
+            // No target info available, return exams without status
+            return exams.map(exam => 
+                `<option value="${exam.id}">${exam.name}</option>`
+            ).join('');
+        }
+        
+        // Check existing assignments in target class
+        const response = await fetch(`/RoutineTest/api/class/${currentClassCode}/existing-exams/?timeslot=${targetTimeslot}`);
+        
+        if (!response.ok) {
+            throw new Error('Could not check existing assignments');
+        }
+        
+        const existingData = await response.json();
+        const existingExamIds = new Set(existingData.existing_exams.map(exam => exam.id));
+        
+        // Create options with status indicators
+        return exams.map(exam => {
+            const isAlreadyAssigned = existingExamIds.has(exam.id);
+            const optionText = isAlreadyAssigned ? 
+                `${exam.name} (Already assigned)` : 
+                exam.name;
+            const optionClass = isAlreadyAssigned ? ' style="color: #dc3545; font-style: italic;"' : '';
+            const disabled = isAlreadyAssigned ? ' disabled' : '';
+            
+            return `<option value="${exam.id}"${optionClass}${disabled}>${optionText}</option>`;
+        }).join('');
+        
+    } catch (error) {
+        console.warn('Error checking existing assignments:', error);
+        // Return exams without status indicators on error
+        return exams.map(exam => 
+            `<option value="${exam.id}">${exam.name}</option>`
+        ).join('');
+    }
 }
 
 // Load matching exams based on all selections
@@ -556,11 +616,19 @@ async function loadMatchingExams() {
             }
             examSelect.disabled = true;
         } else {
-            examSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
-                data.exams.map(exam => 
-                    `<option value="${exam.id}">${exam.name}</option>`
-                ).join('');
-            examCount.textContent = `${data.exams.length} exam(s) found`;
+            // Check which exams are already assigned to the target class
+            checkExistingAssignments(data.exams).then(examOptionsWithStatus => {
+                examSelect.innerHTML = '<option value="">-- Select Exam --</option>' + examOptionsWithStatus;
+                examCount.textContent = `${data.exams.length} exam(s) found`;
+            }).catch(error => {
+                console.warn('Could not check existing assignments, showing all exams:', error);
+                // Fallback: show all exams without status indicators
+                examSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
+                    data.exams.map(exam => 
+                        `<option value="${exam.id}">${exam.name}</option>`
+                    ).join('');
+                examCount.textContent = `${data.exams.length} exam(s) found`;
+            });
         }
         
         console.log(`Loaded ${data.exams.length} filtered exams for class ${classCode}`);
@@ -595,6 +663,13 @@ async function copySelectedExam() {
     
     if (!sourceExamId) {
         alert('Please select an exam to copy');
+        return;
+    }
+    
+    // Check if selected exam is already assigned
+    const selectedOption = document.getElementById('sourceExamSelect').options[document.getElementById('sourceExamSelect').selectedIndex];
+    if (selectedOption && selectedOption.disabled) {
+        alert('This exam is already assigned to the target class and time period.\\n\\nEach exam can only be assigned once per class/period.');
         return;
     }
     
@@ -645,8 +720,17 @@ async function copySelectedExam() {
             loadOverviewData(currentClassCode, timePeriod);
             console.log('Copy exam success:', result);
         } else {
-            const errorMsg = result.error || 'Failed to copy exam';
-            alert(`Failed to copy exam: ${errorMsg}`);
+            // Enhanced error handling for different error types
+            if (result.error_type === 'DUPLICATE_ASSIGNMENT') {
+                // More user-friendly error for duplicates
+                const message = `This exam has already been copied to ${currentClassCode} for ${timePeriod}.\n\n` +
+                    `Each exam can only be assigned once per class and time period. ` +
+                    `If you need to update the exam, you can delete the existing one first and then copy the new version.`;
+                alert(message);
+            } else {
+                const errorMsg = result.error || 'Failed to copy exam';
+                alert(`Failed to copy exam: ${errorMsg}`);
+            }
             console.error('Copy exam failed:', result);
         }
     } catch (error) {
