@@ -1,0 +1,44 @@
+{
+  "timestamp": "2025-08-19T10:13:08.890184",
+  "tests_run": 33,
+  "tests_passed": 24,
+  "tests_failed": 9,
+  "failures": [
+    {
+      "test": "URL Resolution: index",
+      "error": "Reverse for 'index' not found. 'index' is not a valid view function or pattern name."
+    },
+    {
+      "test": "URL Resolution: placement_test:index",
+      "error": "'placement_test' is not a registered namespace"
+    },
+    {
+      "test": "URL Resolution: placement_test:start_test",
+      "error": "'placement_test' is not a registered namespace"
+    },
+    {
+      "test": "URL Resolution: placement_test:exam_list",
+      "error": "'placement_test' is not a registered namespace"
+    },
+    {
+      "test": "URL Resolution: primepath_routinetest:index",
+      "error": "'primepath_routinetest' is not a registered namespace"
+    },
+    {
+      "test": "URL Resolution: primepath_routinetest:classes_exams_unified",
+      "error": "'primepath_routinetest' is not a registered namespace"
+    },
+    {
+      "test": "URL Resolution: api:api_v1:programs",
+      "error": "Reverse for 'programs' not found. 'programs' is not a valid view function or pattern name."
+    },
+    {
+      "test": "Static File: /static/css/styles.css",
+      "error": "None"
+    },
+    {
+      "test": "Authentication System",
+      "error": "'registration' is not a registered namespace"
+    }
+  ]
+}

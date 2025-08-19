@@ -154,6 +154,9 @@ async function loadStudentData(classCode) {
 async function showCopyExamDialog() {
     document.getElementById('copyExamDialog').style.display = 'block';
     
+    // Reset all selectors to initial state
+    resetCopyExamDialog();
+    
     // Load all classes
     try {
         const response = await fetch('/api/RoutineTest/api/all-classes/');
@@ -200,24 +203,170 @@ async function showCopyExamDialog() {
     }
 }
 
+// Reset copy exam dialog to initial state
+function resetCopyExamDialog() {
+    // Reset all dropdowns
+    document.getElementById('sourceClassSelect').innerHTML = '<option value="">-- Select Class --</option>';
+    document.getElementById('examTypeSelect').innerHTML = '<option value="">-- Select Exam Type --</option><option value="REVIEW">Review / Monthly</option><option value="QUARTERLY">Quarterly</option>';
+    document.getElementById('monthSelect').innerHTML = '<option value="">-- Select Month --</option><option value="JAN">January</option><option value="FEB">February</option><option value="MAR">March</option><option value="APR">April</option><option value="MAY">May</option><option value="JUN">June</option><option value="JUL">July</option><option value="AUG">August</option><option value="SEP">September</option><option value="OCT">October</option><option value="NOV">November</option><option value="DEC">December</option>';
+    document.getElementById('quarterSelect').innerHTML = '<option value="">-- Select Quarter --</option><option value="Q1">Q1 (Jan-Mar)</option><option value="Q2">Q2 (Apr-Jun)</option><option value="Q3">Q3 (Jul-Sep)</option><option value="Q4">Q4 (Oct-Dec)</option>';
+    document.getElementById('sourceExamSelect').innerHTML = '<option value="">-- Select Exam --</option>';
+    
+    // Disable dependent selectors
+    document.getElementById('examTypeSelect').disabled = true;
+    document.getElementById('monthSelect').disabled = true;
+    document.getElementById('quarterSelect').disabled = true;
+    document.getElementById('sourceExamSelect').disabled = true;
+    document.getElementById('copyExamBtn').disabled = true;
+    
+    // Hide time period selectors
+    document.getElementById('monthSelect').style.display = 'none';
+    document.getElementById('quarterSelect').style.display = 'none';
+    
+    // Clear exam count
+    document.getElementById('examCount').textContent = '';
+}
+
 // Hide copy exam dialog
 function hideCopyExamDialog() {
     document.getElementById('copyExamDialog').style.display = 'none';
+    resetCopyExamDialog();
 }
 
-// Load exams for selected source class
-document.getElementById('sourceClassSelect')?.addEventListener('change', async function() {
+// Step 1: Load exam types when source class is selected
+document.getElementById('sourceClassSelect')?.addEventListener('change', function() {
     const classCode = this.value;
-    const examSelect = document.getElementById('sourceExamSelect');
+    const examTypeSelect = document.getElementById('examTypeSelect');
     
     if (!classCode) {
+        // Reset all dependent dropdowns
+        resetDependentSelectors(['examTypeSelect', 'monthSelect', 'quarterSelect', 'sourceExamSelect']);
+        return;
+    }
+    
+    // Enable exam type selector
+    examTypeSelect.disabled = false;
+    
+    // Reset dependent selectors
+    resetDependentSelectors(['monthSelect', 'quarterSelect', 'sourceExamSelect']);
+    
+    console.log(`Source class selected: ${classCode}. Exam type selector enabled.`);
+});
+
+// Step 2: Show/hide time period selector when exam type is selected
+document.getElementById('examTypeSelect')?.addEventListener('change', function() {
+    const examType = this.value;
+    const monthSelect = document.getElementById('monthSelect');
+    const quarterSelect = document.getElementById('quarterSelect');
+    
+    if (!examType) {
+        // Hide both time period selectors and reset dependent selectors
+        monthSelect.style.display = 'none';
+        quarterSelect.style.display = 'none';
+        resetDependentSelectors(['monthSelect', 'quarterSelect', 'sourceExamSelect']);
+        return;
+    }
+    
+    // Show appropriate time period selector based on exam type
+    if (examType === 'REVIEW') {
+        monthSelect.style.display = 'block';
+        quarterSelect.style.display = 'none';
+        monthSelect.disabled = false;
+        quarterSelect.disabled = true;
+        quarterSelect.value = '';
+    } else if (examType === 'QUARTERLY') {
+        monthSelect.style.display = 'none';
+        quarterSelect.style.display = 'block';
+        quarterSelect.disabled = false;
+        monthSelect.disabled = true;
+        monthSelect.value = '';
+    }
+    
+    // Reset exam selector
+    resetDependentSelectors(['sourceExamSelect']);
+    
+    console.log(`Exam type selected: ${examType}. Time period selector updated.`);
+});
+
+// Step 3: Load matching exams when time period is selected
+document.getElementById('monthSelect')?.addEventListener('change', function() {
+    loadMatchingExams();
+});
+
+document.getElementById('quarterSelect')?.addEventListener('change', function() {
+    loadMatchingExams();
+});
+
+// Step 4: Enable copy button when exam is selected
+document.getElementById('sourceExamSelect')?.addEventListener('change', function() {
+    const examId = this.value;
+    const copyBtn = document.getElementById('copyExamBtn');
+    
+    copyBtn.disabled = !examId;
+    
+    if (examId) {
+        console.log(`Exam selected: ${examId}. Copy button enabled.`);
+    }
+});
+
+// Helper function to reset dependent selectors
+function resetDependentSelectors(selectorIds) {
+    selectorIds.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.disabled = true;
+            if (id === 'monthSelect' || id === 'quarterSelect') {
+                element.style.display = 'none';
+                element.value = '';
+            } else if (id === 'sourceExamSelect') {
+                element.innerHTML = '<option value="">-- Select Exam --</option>';
+                document.getElementById('examCount').textContent = '';
+            } else if (id === 'examTypeSelect') {
+                element.value = '';
+            }
+        }
+    });
+    
+    // Always disable copy button when resetting
+    document.getElementById('copyExamBtn').disabled = true;
+}
+
+// Load matching exams based on all selections
+async function loadMatchingExams() {
+    const classCode = document.getElementById('sourceClassSelect').value;
+    const examType = document.getElementById('examTypeSelect').value;
+    const month = document.getElementById('monthSelect').value;
+    const quarter = document.getElementById('quarterSelect').value;
+    const examSelect = document.getElementById('sourceExamSelect');
+    const examCount = document.getElementById('examCount');
+    
+    if (!classCode || !examType) {
+        return;
+    }
+    
+    // Determine time period value based on exam type
+    let timePeriod = '';
+    if (examType === 'REVIEW' && month) {
+        timePeriod = month;
+    } else if (examType === 'QUARTERLY' && quarter) {
+        timePeriod = quarter;
+    }
+    
+    if (!timePeriod) {
         examSelect.disabled = true;
         examSelect.innerHTML = '<option value="">-- Select Exam --</option>';
+        examCount.textContent = '';
         return;
     }
     
     try {
-        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/all-exams/`);
+        // Build query parameters for filtering
+        const params = new URLSearchParams({
+            exam_type: examType,
+            time_period: timePeriod
+        });
+        
+        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/filtered-exams/?${params}`);
         
         if (!response.ok) {
             // Check for authentication redirect (status 302) or unauthorized (401/403)
@@ -234,38 +383,73 @@ document.getElementById('sourceClassSelect')?.addEventListener('change', async f
         }
         
         const data = await response.json();
-        console.log(`Loading exams for class ${classCode}:`, data);
+        console.log(`Loading filtered exams for class ${classCode}, type ${examType}, period ${timePeriod}:`, data);
         
         // Check if data.exams exists and is an array
         if (!data.exams || !Array.isArray(data.exams)) {
             console.error('Invalid API response structure. Expected data.exams to be an array, got:', data);
             examSelect.disabled = true;
             examSelect.innerHTML = '<option value="">Error loading exams</option>';
+            examCount.textContent = 'Error loading exam count';
             return;
         }
         
         examSelect.disabled = false;
-        examSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
-            data.exams.map(exam => 
-                `<option value="${exam.id}">${exam.name} (${exam.type})</option>`
-            ).join('');
-            
-        console.log(`Loaded ${data.exams.length} exams for class ${classCode}`);
+        
+        if (data.exams.length === 0) {
+            examSelect.innerHTML = '<option value="">No matching exams found</option>';
+            examCount.textContent = 'No exams found matching your criteria';
+            examSelect.disabled = true;
+        } else {
+            examSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
+                data.exams.map(exam => 
+                    `<option value="${exam.id}">${exam.name}</option>`
+                ).join('');
+            examCount.textContent = `${data.exams.length} exam(s) found`;
+        }
+        
+        console.log(`Loaded ${data.exams.length} filtered exams for class ${classCode}`);
     } catch (error) {
-        console.error('Error loading source exams:', error);
+        console.error('Error loading filtered exams:', error);
         examSelect.disabled = true;
         examSelect.innerHTML = '<option value="">Error loading exams</option>';
+        examCount.textContent = 'Error loading exams';
     }
-});
+}
 
 // Copy selected exam
 async function copySelectedExam() {
     const sourceExamId = document.getElementById('sourceExamSelect').value;
+    const sourceClassCode = document.getElementById('sourceClassSelect').value;
+    const examType = document.getElementById('examTypeSelect').value;
+    const monthSelect = document.getElementById('monthSelect');
+    const quarterSelect = document.getElementById('quarterSelect');
     
     if (!sourceExamId) {
         alert('Please select an exam to copy');
         return;
     }
+    
+    // Determine the time period based on exam type
+    let timePeriod = '';
+    if (examType === 'REVIEW') {
+        timePeriod = monthSelect.value;
+    } else if (examType === 'QUARTERLY') {
+        timePeriod = quarterSelect.value;
+    }
+    
+    if (!timePeriod) {
+        alert('Please select a time period');
+        return;
+    }
+    
+    console.log('Copying exam:', {
+        source_exam_id: sourceExamId,
+        from_class: sourceClassCode,
+        to_class: currentClassCode,
+        exam_type: examType,
+        time_period: timePeriod
+    });
     
     try {
         const response = await fetch('/api/RoutineTest/api/copy-exam/', {
@@ -277,21 +461,54 @@ async function copySelectedExam() {
             body: JSON.stringify({
                 source_exam_id: sourceExamId,
                 target_class: currentClassCode,
-                target_timeslot: currentTimeslot
+                target_timeslot: timePeriod  // Use the selected time period (month or quarter)
             })
         });
+        
+        const result = await response.json();
         
         if (response.ok) {
             alert('Exam copied successfully!');
             hideCopyExamDialog();
             loadExamData(currentClassCode, currentTimeslot);
+            console.log('Copy exam success:', result);
         } else {
-            alert('Failed to copy exam');
+            const errorMsg = result.error || 'Failed to copy exam';
+            alert(`Failed to copy exam: ${errorMsg}`);
+            console.error('Copy exam failed:', result);
         }
     } catch (error) {
         console.error('Error copying exam:', error);
         alert('Error copying exam');
     }
+}
+
+// Debug function to test the new workflow (for testing purposes)
+function testCopyExamWorkflow() {
+    console.log('=== Testing Copy Exam Workflow ===');
+    
+    const elements = {
+        sourceClassSelect: document.getElementById('sourceClassSelect'),
+        examTypeSelect: document.getElementById('examTypeSelect'),
+        monthSelect: document.getElementById('monthSelect'),
+        quarterSelect: document.getElementById('quarterSelect'),
+        sourceExamSelect: document.getElementById('sourceExamSelect'),
+        copyExamBtn: document.getElementById('copyExamBtn'),
+        examCount: document.getElementById('examCount')
+    };
+    
+    console.log('Dialog elements found:', Object.keys(elements).filter(key => elements[key]));
+    console.log('Dialog elements missing:', Object.keys(elements).filter(key => !elements[key]));
+    
+    // Test initial state
+    console.log('Initial disabled states:');
+    Object.entries(elements).forEach(([name, element]) => {
+        if (element && element.disabled !== undefined) {
+            console.log(`  ${name}: disabled=${element.disabled}`);
+        }
+    });
+    
+    return elements;
 }
 
 // Delete exam
@@ -439,6 +656,68 @@ function exportStudentList() {
     a.href = url;
     a.download = `${currentClassCode}_students.csv`;
     a.click();
+}
+
+// Save Changes button handler
+function saveChanges() {
+    console.log('SaveChanges button clicked');
+    
+    // Determine which tab is currently active
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (!activeTab) {
+        console.log('No active tab found');
+        closeExamModal();
+        return;
+    }
+    
+    const tabName = activeTab.getAttribute('data-tab');
+    console.log('Active tab:', tabName);
+    
+    // Handle save based on active tab
+    switch(tabName) {
+        case 'overview':
+            // No save action needed for overview
+            console.log('Overview tab - no save action needed');
+            closeExamModal();
+            break;
+            
+        case 'manage':
+            // Check if copy exam dialog is open
+            const copyDialog = document.getElementById('copyExamDialog');
+            if (copyDialog && copyDialog.style.display !== 'none') {
+                // If copy dialog is open, trigger the copy action
+                const copyBtn = document.getElementById('copyExamBtn');
+                if (copyBtn && !copyBtn.disabled) {
+                    copySelectedExam();
+                } else {
+                    alert('Please complete all steps to copy an exam');
+                }
+            } else {
+                // Otherwise just close
+                closeExamModal();
+            }
+            break;
+            
+        case 'schedule':
+            // Save schedule if there are changes
+            const scheduleData = document.getElementById('scheduleForm');
+            if (scheduleData) {
+                saveSchedule();
+            } else {
+                closeExamModal();
+            }
+            break;
+            
+        case 'students':
+            // No save action for students tab
+            console.log('Students tab - no save action needed');
+            closeExamModal();
+            break;
+            
+        default:
+            console.log('Unknown tab - closing modal');
+            closeExamModal();
+    }
 }
 
 // Helper function to get CSRF token

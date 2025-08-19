@@ -49,6 +49,7 @@ urlpatterns = [
     path('api/class/<str:class_code>/exams/', exam_api.get_class_exams, name='class_exams'),
     path('api/class/<str:class_code>/students/', exam_api.get_class_students, name='class_students'),
     path('api/class/<str:class_code>/all-exams/', exam_api.get_class_all_exams, name='class_all_exams'),
+    path('api/class/<str:class_code>/filtered-exams/', exam_api.get_class_filtered_exams, name='class_filtered_exams'),
     path('api/all-classes/', exam_api.get_all_classes, name='all_classes'),
     path('api/copy-exam/', exam_api.copy_exam, name='copy_exam'),
     path('api/exam/<uuid:exam_id>/delete/', exam_api.delete_exam, name='delete_exam'),

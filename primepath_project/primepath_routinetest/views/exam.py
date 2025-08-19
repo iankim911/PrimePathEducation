@@ -24,13 +24,13 @@ logger = logging.getLogger(__name__)
 def exam_list(request):
     """List all exams (requires authentication) - WITH REVIEW/QUARTERLY TOGGLE"""
     # Version 4.0 - Added Review/Quarterly Toggle System
-    # Get exam type filter from request (default to 'REVIEW')
-    exam_type_filter = request.GET.get('exam_type', 'REVIEW')
+    # Get exam type filter from request (default to 'ALL' to show all exams)
+    exam_type_filter = request.GET.get('exam_type', 'ALL')
     
     # Validate exam type filter
     valid_exam_types = ['REVIEW', 'QUARTERLY', 'ALL']
     if exam_type_filter not in valid_exam_types:
-        exam_type_filter = 'REVIEW'
+        exam_type_filter = 'ALL'
     
     # Log authentication check and filter info with enhanced logging
     console_log = {

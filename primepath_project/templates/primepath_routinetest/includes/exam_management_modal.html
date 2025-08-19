@@ -82,20 +82,67 @@
                         <!-- Copy Exam Dialog -->
                         <div id="copyExamDialog" class="sub-dialog" style="display: none;">
                             <h5>Copy Exam from Another Class</h5>
+                            
+                            <!-- Step 1: Select Source Class -->
                             <div class="form-group">
-                                <label>Select Source Class:</label>
+                                <label>Step 1: Select Source Class:</label>
                                 <select id="sourceClassSelect" class="form-control">
                                     <option value="">-- Select Class --</option>
                                 </select>
                             </div>
+                            
+                            <!-- Step 2: Select Exam Type -->
                             <div class="form-group">
-                                <label>Select Exam to Copy:</label>
+                                <label>Step 2: Select Exam Type:</label>
+                                <select id="examTypeSelect" class="form-control" disabled>
+                                    <option value="">-- Select Exam Type --</option>
+                                    <option value="REVIEW">Review / Monthly</option>
+                                    <option value="QUARTERLY">Quarterly</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Step 3: Select Time Period -->
+                            <div class="form-group">
+                                <label id="timePeriodLabel">Step 3: Select Time Period:</label>
+                                
+                                <!-- Month selector for Review exams -->
+                                <select id="monthSelect" class="form-control" style="display: none;" disabled>
+                                    <option value="">-- Select Month --</option>
+                                    <option value="JAN">January</option>
+                                    <option value="FEB">February</option>
+                                    <option value="MAR">March</option>
+                                    <option value="APR">April</option>
+                                    <option value="MAY">May</option>
+                                    <option value="JUN">June</option>
+                                    <option value="JUL">July</option>
+                                    <option value="AUG">August</option>
+                                    <option value="SEP">September</option>
+                                    <option value="OCT">October</option>
+                                    <option value="NOV">November</option>
+                                    <option value="DEC">December</option>
+                                </select>
+                                
+                                <!-- Quarter selector for Quarterly exams -->
+                                <select id="quarterSelect" class="form-control" style="display: none;" disabled>
+                                    <option value="">-- Select Quarter --</option>
+                                    <option value="Q1">Q1 (Jan-Mar)</option>
+                                    <option value="Q2">Q2 (Apr-Jun)</option>
+                                    <option value="Q3">Q3 (Jul-Sep)</option>
+                                    <option value="Q4">Q4 (Oct-Dec)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Step 4: Select Matching Exam -->
+                            <div class="form-group">
+                                <label>Step 4: Select Matching Exam:</label>
                                 <select id="sourceExamSelect" class="form-control" disabled>
                                     <option value="">-- Select Exam --</option>
                                 </select>
+                                <div id="examCount" class="form-text"></div>
                             </div>
+                            
                             <div class="dialog-buttons">
-                                <button class="btn btn-primary" onclick="copySelectedExam()">Copy</button>
+                                <button class="btn btn-primary" onclick="copySelectedExam()" disabled id="copyExamBtn">Copy</button>
                                 <button class="btn btn-secondary" onclick="hideCopyExamDialog()">Cancel</button>
                             </div>
                         </div>
