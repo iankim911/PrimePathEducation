@@ -188,14 +188,14 @@ async function loadExamData(classCode, timeslot) {
                     <td>${exam.duration || 60} min</td>
                     <td>${exam.question_count || 0}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary" onclick="editExam('${exam.id}')" title="Edit Exam">
-                            ✏️
+                        <button class="btn btn-sm btn-primary exam-btn" onclick="editExam('${exam.id}')" title="Edit exam details">
+                            <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="btn btn-sm btn-warning" onclick="editDuration('${exam.id}', ${exam.duration || 60})" title="Edit Duration">
-                            ⏱️
+                        <button class="btn btn-sm btn-warning exam-btn" onclick="editDuration('${exam.id}', ${exam.duration || 60})" title="Change exam duration">
+                            <i class="fas fa-clock"></i> Duration
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteExam('${exam.id}')" title="Delete Exam">
-                            🗑️
+                        <button class="btn btn-sm btn-danger exam-btn" onclick="deleteExam('${exam.id}')" title="Remove exam from class">
+                            <i class="fas fa-trash"></i> Delete
                         </button>
                     </td>
                 </tr>
@@ -683,10 +683,26 @@ function testCopyExamWorkflow() {
     return elements;
 }
 
-// Delete exam
+// Delete exam (enhanced with better confirmation and error handling)
 async function deleteExam(examId) {
-    if (!confirm('Are you sure you want to delete this exam?')) {
+    console.log(`[EXAM_DELETE] Attempting to delete exam ID: ${examId}`);
+    
+    // Enhanced confirmation dialog with more details
+    const confirmMessage = `Delete Exam Confirmation\n\n` +
+        `This will permanently delete the exam and all associated data.\n` +
+        `This action cannot be undone.\n\n` +
+        `Are you sure you want to proceed?`;
+    
+    if (!confirm(confirmMessage)) {
+        console.log('[EXAM_DELETE] User cancelled deletion');
         return;
+    }
+    
+    // Show loading state
+    const deleteButton = document.querySelector(`button[onclick*="deleteExam('${examId}')"]`);
+    if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
     }
     
     try {
@@ -705,32 +721,307 @@ async function deleteExam(examId) {
         });
         
         if (response.ok) {
+            const result = await response.json().catch(() => ({}));
+            console.log('[EXAM_DELETE] Delete successful:', result);
+            
             alert('Exam deleted successfully!');
+            
+            // Refresh the exam list and overview
             loadExamData(currentClassCode, currentTimeslot);
+            loadOverviewData(currentClassCode, currentTimeslot);
+            
         } else if (response.status === 302 || response.redirected) {
             // Authentication redirect - user needs to log in
+            console.error('[EXAM_DELETE] Authentication required');
             alert('Session expired. Please log in again.');
             window.location.href = '/login/';
+            
         } else if (response.status === 405) {
             // Method not allowed - check if this is actually an auth redirect
+            console.error('[EXAM_DELETE] Method not allowed');
             alert('Delete operation not allowed. Please check your permissions.');
+            
+        } else if (response.status === 403) {
+            console.error('[EXAM_DELETE] Access denied');
+            alert('Access denied. You do not have permission to delete this exam.');
+            
+        } else if (response.status === 404) {
+            console.error('[EXAM_DELETE] Exam not found');
+            alert('Exam not found. It may have already been deleted.');
+            
+            // Still refresh the list to remove from UI
+            loadExamData(currentClassCode, currentTimeslot);
+            loadOverviewData(currentClassCode, currentTimeslot);
+            
         } else {
             const errorText = await response.text();
-            console.error('Delete failed:', response.status, errorText);
-            alert(`Failed to delete exam (${response.status})`);
+            console.error('[EXAM_DELETE] Delete failed:', response.status, errorText);
+            alert(`Failed to delete exam: HTTP ${response.status}`);
         }
+        
     } catch (error) {
-        console.error('Error deleting exam:', error);
-        alert('Error deleting exam');
+        console.error('[EXAM_DELETE] Error deleting exam:', error);
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            alert('Network error. Please check your connection and try again.');
+        } else {
+            alert(`Error deleting exam: ${error.message}`);
+        }
+    } finally {
+        // Restore button state
+        if (deleteButton) {
+            deleteButton.disabled = false;
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i> Delete';
+        }
     }
 }
 
-// Edit exam duration
-async function editDuration(examId, currentDuration) {
-    const newDuration = prompt(`Enter new duration in minutes (current: ${currentDuration}):`, currentDuration);
+// Edit exam (main edit function)
+async function editExam(examId) {
+    console.log(`[EXAM_EDIT] Opening edit dialog for exam ID: ${examId}`);
     
-    if (!newDuration || newDuration == currentDuration) {
+    // Show loading state
+    const editButton = document.querySelector(`button[onclick*="editExam('${examId}')"]`);
+    if (editButton) {
+        editButton.disabled = true;
+        editButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    }
+    
+    try {
+        // Fetch current exam data
+        const response = await fetch(`/RoutineTest/api/exam/${examId}/details/`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const examData = await response.json();
+        console.log('[EXAM_EDIT] Exam data loaded:', examData);
+        
+        // Create and show edit modal
+        showExamEditDialog(examId, examData);
+        
+    } catch (error) {
+        console.error('[EXAM_EDIT] Error loading exam details:', error);
+        
+        // Show user-friendly error based on error type
+        if (error.message.includes('404')) {
+            alert('Exam not found. It may have been deleted.');
+        } else if (error.message.includes('403')) {
+            alert('Access denied. You do not have permission to edit this exam.');
+        } else {
+            alert(`Failed to load exam details: ${error.message}`);
+        }
+    } finally {
+        // Restore button state
+        if (editButton) {
+            editButton.disabled = false;
+            editButton.innerHTML = '<i class="fas fa-edit"></i> Edit';
+        }
+    }
+}
+
+// Show exam edit dialog
+function showExamEditDialog(examId, examData) {
+    console.log('[EXAM_EDIT_DIALOG] Showing edit dialog for exam:', examData);
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div id="examEditModal" class="modal" style="display: flex;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Edit Exam: ${examData.name || 'Unnamed Exam'}</h4>
+                        <button type="button" class="close-modal" onclick="closeExamEditDialog()">\u00d7</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="examEditForm">
+                            <div class="form-group">
+                                <label for="examName">Exam Name:</label>
+                                <input type="text" id="examName" class="form-control" 
+                                       value="${examData.name || ''}" 
+                                       placeholder="Enter exam name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="examType">Exam Type:</label>
+                                <select id="examType" class="form-control">
+                                    <option value="REVIEW" ${examData.type === 'REVIEW' ? 'selected' : ''}>Review / Monthly</option>
+                                    <option value="QUARTERLY" ${examData.type === 'QUARTERLY' ? 'selected' : ''}>Quarterly</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="examDurationEdit">Duration (minutes):</label>
+                                <input type="number" id="examDurationEdit" class="form-control" 
+                                       value="${examData.duration || 60}" 
+                                       min="15" max="300" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="examDescription">Description:</label>
+                                <textarea id="examDescription" class="form-control" rows="3" 
+                                          placeholder="Optional exam description">${examData.description || ''}</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Question Count:</label>
+                                <p class="form-text">${examData.question_count || 0} questions</p>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeExamEditDialog()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="saveExamChanges('${examId}')">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('examEditModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+// Close exam edit dialog
+function closeExamEditDialog() {
+    const modal = document.getElementById('examEditModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Save exam changes
+async function saveExamChanges(examId) {
+    console.log(`[EXAM_SAVE] Saving changes for exam ID: ${examId}`);
+    
+    // Get form data
+    const examName = document.getElementById('examName').value.trim();
+    const examType = document.getElementById('examType').value;
+    const examDuration = parseInt(document.getElementById('examDurationEdit').value);
+    const examDescription = document.getElementById('examDescription').value.trim();
+    
+    // Validation
+    if (!examName) {
+        alert('Please enter an exam name.');
         return;
+    }
+    
+    if (!examType) {
+        alert('Please select an exam type.');
+        return;
+    }
+    
+    if (!examDuration || examDuration < 15 || examDuration > 300) {
+        alert('Please enter a valid duration between 15 and 300 minutes.');
+        return;
+    }
+    
+    // Show loading state
+    const saveButton = document.querySelector('button[onclick*="saveExamChanges"]');
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
+    
+    try {
+        const response = await fetch(`/RoutineTest/api/exam/${examId}/update/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                name: examName,
+                type: examType,
+                duration: examDuration,
+                description: examDescription
+            })
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('[EXAM_SAVE] Save successful:', result);
+            
+            alert('Exam updated successfully!');
+            closeExamEditDialog();
+            
+            // Refresh the exam list
+            loadExamData(currentClassCode, currentTimeslot);
+            loadOverviewData(currentClassCode, currentTimeslot);
+            
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+        
+    } catch (error) {
+        console.error('[EXAM_SAVE] Error saving exam:', error);
+        
+        // Show user-friendly error
+        if (error.message.includes('403')) {
+            alert('Access denied. You do not have permission to edit this exam.');
+        } else if (error.message.includes('404')) {
+            alert('Exam not found. It may have been deleted.');
+        } else {
+            alert(`Failed to save exam: ${error.message}`);
+        }
+    } finally {
+        // Restore button state
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        }
+    }
+}
+
+// Edit exam duration (enhanced version with better UI)
+async function editDuration(examId, currentDuration) {
+    console.log(`[DURATION_EDIT] Editing duration for exam ID: ${examId}, current: ${currentDuration}`);
+    
+    // Create a more user-friendly dialog
+    const newDuration = prompt(
+        `Edit Exam Duration\n\nCurrent duration: ${currentDuration} minutes\n\nEnter new duration (15-300 minutes):`, 
+        currentDuration
+    );
+    
+    // Validate input
+    if (!newDuration) {
+        console.log('[DURATION_EDIT] User cancelled');
+        return;
+    }
+    
+    const duration = parseInt(newDuration);
+    
+    if (isNaN(duration)) {
+        alert('Please enter a valid number.');
+        return;
+    }
+    
+    if (duration < 15 || duration > 300) {
+        alert('Duration must be between 15 and 300 minutes.');
+        return;
+    }
+    
+    if (duration === currentDuration) {
+        console.log('[DURATION_EDIT] No change in duration');
+        return;
+    }
+    
+    // Show loading state
+    const durationButton = document.querySelector(`button[onclick*="editDuration('${examId}'"]`);
+    if (durationButton) {
+        durationButton.disabled = true;
+        durationButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
     }
     
     try {
@@ -741,19 +1032,42 @@ async function editDuration(examId, currentDuration) {
                 'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({
-                duration: parseInt(newDuration)
+                duration: duration
             })
         });
         
         if (response.ok) {
-            alert('Duration updated successfully!');
+            const result = await response.json();
+            console.log('[DURATION_EDIT] Update successful:', result);
+            
+            alert(`Duration updated successfully! New duration: ${duration} minutes`);
+            
+            // Refresh the exam list to show updated duration
             loadExamData(currentClassCode, currentTimeslot);
+            
         } else {
-            alert('Failed to update duration');
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error || `HTTP ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
         }
+        
     } catch (error) {
-        console.error('Error updating duration:', error);
-        alert('Error updating duration');
+        console.error('[DURATION_EDIT] Error updating duration:', error);
+        
+        // Show user-friendly error
+        if (error.message.includes('403')) {
+            alert('Access denied. You do not have permission to edit this exam.');
+        } else if (error.message.includes('404')) {
+            alert('Exam not found. It may have been deleted.');
+        } else {
+            alert(`Failed to update duration: ${error.message}`);
+        }
+    } finally {
+        // Restore button state
+        if (durationButton) {
+            durationButton.disabled = false;
+            durationButton.innerHTML = '<i class="fas fa-clock"></i> Duration';
+        }
     }
 }
 

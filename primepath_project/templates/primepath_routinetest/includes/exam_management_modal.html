@@ -464,4 +464,77 @@
     justify-content: flex-end;
     gap: 10px;
 }
+
+/* Enhanced Exam Action Buttons */
+.exam-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    text-transform: none;
+    min-width: 80px;
+    justify-content: center;
+}
+
+.exam-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.exam-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.exam-btn i {
+    font-size: 11px;
+}
+
+/* Specific button color enhancements */
+.btn-primary.exam-btn {
+    background: linear-gradient(135deg, #2E7D32, #1B5E20);
+    border: none;
+}
+
+.btn-primary.exam-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1B5E20, #0E3311);
+}
+
+.btn-warning.exam-btn {
+    background: linear-gradient(135deg, #FF8F00, #E65100);
+    border: none;
+    color: white;
+}
+
+.btn-warning.exam-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #E65100, #BF360C);
+}
+
+.btn-danger.exam-btn {
+    background: linear-gradient(135deg, #D32F2F, #B71C1C);
+    border: none;
+}
+
+.btn-danger.exam-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #B71C1C, #8E0000);
+}
+
+/* Action buttons container spacing */
+.table td:last-child {
+    white-space: nowrap;
+    padding: 8px 10px;
+}
+
+.table td:last-child .exam-btn {
+    margin-right: 5px;
+}
+
+.table td:last-child .exam-btn:last-child {
+    margin-right: 0;
+}
 </style>
