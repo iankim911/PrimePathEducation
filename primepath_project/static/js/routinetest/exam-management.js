@@ -54,7 +54,7 @@ function showTab(tabName) {
 // Load overview data
 async function loadOverviewData(classCode, timeslot) {
     try {
-        const response = await fetch(`/RoutineTest/api/class/${classCode}/overview/?timeslot=${timeslot}`);
+        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/overview/?timeslot=${timeslot}`);
         const data = await response.json();
         
         // Update overview fields
@@ -83,7 +83,7 @@ async function loadOverviewData(classCode, timeslot) {
 // Load exam data
 async function loadExamData(classCode, timeslot) {
     try {
-        const response = await fetch(`/RoutineTest/api/class/${classCode}/exams/?timeslot=${timeslot}`);
+        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/exams/?timeslot=${timeslot}`);
         const data = await response.json();
         
         const tableBody = document.getElementById('examTableBody');
@@ -123,7 +123,7 @@ async function loadExamData(classCode, timeslot) {
 // Load student data
 async function loadStudentData(classCode) {
     try {
-        const response = await fetch(`/RoutineTest/api/class/${classCode}/students/`);
+        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/students/`);
         const data = await response.json();
         
         // Update student stats
@@ -156,16 +156,47 @@ async function showCopyExamDialog() {
     
     // Load all classes
     try {
-        const response = await fetch('/RoutineTest/api/all-classes/');
+        const response = await fetch('/api/RoutineTest/api/all-classes/');
+        
+        if (!response.ok) {
+            // Check for authentication redirect (status 302) or unauthorized (401/403)
+            if (response.status === 302 || response.status === 401 || response.status === 403) {
+                throw new Error('Authentication required. Please log in and try again.');
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Check content type to ensure we're getting JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Expected JSON response, but got: ${contentType}`);
+        }
+        
         const data = await response.json();
+        console.log('Copy exam dialog - API response:', data);
+        
+        // Check if data.classes exists and is an array
+        if (!data.classes || !Array.isArray(data.classes)) {
+            console.error('Invalid API response structure. Expected data.classes to be an array, got:', data);
+            throw new Error('Invalid API response: classes data not found');
+        }
         
         const select = document.getElementById('sourceClassSelect');
         select.innerHTML = '<option value="">-- Select Class --</option>' +
             data.classes.map(cls => 
                 `<option value="${cls.code}">${cls.code} - ${cls.name}</option>`
             ).join('');
+            
+        console.log(`Loaded ${data.classes.length} classes for copying`);
     } catch (error) {
         console.error('Error loading classes:', error);
+        
+        // Show user-friendly error message
+        const select = document.getElementById('sourceClassSelect');
+        select.innerHTML = '<option value="">Error loading classes</option>';
+        
+        // Optionally show an alert to the user
+        alert('Failed to load classes. Please try again or contact support if the problem persists.');
     }
 }
 
@@ -186,16 +217,44 @@ document.getElementById('sourceClassSelect')?.addEventListener('change', async f
     }
     
     try {
-        const response = await fetch(`/RoutineTest/api/class/${classCode}/all-exams/`);
+        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/all-exams/`);
+        
+        if (!response.ok) {
+            // Check for authentication redirect (status 302) or unauthorized (401/403)
+            if (response.status === 302 || response.status === 401 || response.status === 403) {
+                throw new Error('Authentication required. Please log in and try again.');
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Check content type to ensure we're getting JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error(`Expected JSON response, but got: ${contentType}`);
+        }
+        
         const data = await response.json();
+        console.log(`Loading exams for class ${classCode}:`, data);
+        
+        // Check if data.exams exists and is an array
+        if (!data.exams || !Array.isArray(data.exams)) {
+            console.error('Invalid API response structure. Expected data.exams to be an array, got:', data);
+            examSelect.disabled = true;
+            examSelect.innerHTML = '<option value="">Error loading exams</option>';
+            return;
+        }
         
         examSelect.disabled = false;
         examSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
             data.exams.map(exam => 
                 `<option value="${exam.id}">${exam.name} (${exam.type})</option>`
             ).join('');
+            
+        console.log(`Loaded ${data.exams.length} exams for class ${classCode}`);
     } catch (error) {
         console.error('Error loading source exams:', error);
+        examSelect.disabled = true;
+        examSelect.innerHTML = '<option value="">Error loading exams</option>';
     }
 });
 
@@ -209,7 +268,7 @@ async function copySelectedExam() {
     }
     
     try {
-        const response = await fetch('/RoutineTest/api/copy-exam/', {
+        const response = await fetch('/api/RoutineTest/api/copy-exam/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -249,7 +308,7 @@ async function deleteExam(examId) {
             timeslot: currentTimeslot || 'Morning'
         });
         
-        const response = await fetch(`/RoutineTest/api/exam/${examId}/delete/?${queryParams}`, {
+        const response = await fetch(`/api/RoutineTest/api/exam/${examId}/delete/?${queryParams}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
@@ -286,7 +345,7 @@ async function editDuration(examId, currentDuration) {
     }
     
     try {
-        const response = await fetch(`/RoutineTest/api/exam/${examId}/duration/`, {
+        const response = await fetch(`/api/RoutineTest/api/exam/${examId}/duration/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -322,7 +381,7 @@ async function saveSchedule() {
     }
     
     try {
-        const response = await fetch('/RoutineTest/api/schedule-exam/', {
+        const response = await fetch('/api/RoutineTest/api/schedule-exam/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
