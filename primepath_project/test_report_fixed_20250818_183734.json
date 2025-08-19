@@ -1,7 +1,0 @@
-{
-  "passed": 9,
-  "failed": 1,
-  "errors": [
-    "Auto-save functionality: UNIQUE constraint failed: routinetest_exam_attempt.student_id, routinetest_exam_attempt.exam_id, routinetest_exam_attempt.attempt_number"
-  ]
-}
