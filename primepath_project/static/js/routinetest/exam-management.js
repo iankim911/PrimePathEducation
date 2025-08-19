@@ -106,7 +106,16 @@ async function loadOverviewData(classCode, timeslot) {
         const response = await fetch(url);
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // Enhanced error handling for specific status codes
+            let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            if (response.status === 404) {
+                errorMessage = `Class "${classCode}" not found or no data available`;
+            } else if (response.status === 403) {
+                errorMessage = 'Access denied - insufficient permissions';
+            } else if (response.status === 500) {
+                errorMessage = 'Server error - please try again later';
+            }
+            throw new Error(errorMessage);
         }
         
         const data = await response.json();
@@ -229,7 +238,16 @@ async function loadStudentData(classCode) {
         const response = await fetch(url);
         
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // Enhanced error handling for specific status codes
+            let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            if (response.status === 404) {
+                errorMessage = `No student data found for class "${classCode}"`;
+            } else if (response.status === 403) {
+                errorMessage = 'Access denied - insufficient permissions';
+            } else if (response.status === 500) {
+                errorMessage = 'Server error - please try again later';
+            }
+            throw new Error(errorMessage);
         }
         
         const data = await response.json();
@@ -526,8 +544,16 @@ async function loadMatchingExams() {
         examSelect.disabled = false;
         
         if (data.exams.length === 0) {
-            examSelect.innerHTML = '<option value="">No matching exams found</option>';
-            examCount.textContent = 'No exams found matching your criteria';
+            // Show user-friendly message from API if available
+            const message = data.message || 'No matching exams found';
+            examSelect.innerHTML = `<option value="">${message}</option>`;
+            
+            // Show helpful exam count information
+            if (data.filters_applied && data.filters_applied.total_system_wide > 0) {
+                examCount.textContent = `${data.filters_applied.total_system_wide} exam(s) exist system-wide but none assigned to this class`;
+            } else {
+                examCount.textContent = message;
+            }
             examSelect.disabled = true;
         } else {
             examSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
@@ -539,10 +565,23 @@ async function loadMatchingExams() {
         
         console.log(`Loaded ${data.exams.length} filtered exams for class ${classCode}`);
     } catch (error) {
-        console.error('Error loading filtered exams:', error);
+        console.error('Error loading filtered exams at loadMatchingExams:', error);
         examSelect.disabled = true;
-        examSelect.innerHTML = '<option value="">Error loading exams</option>';
-        examCount.textContent = 'Error loading exams';
+        
+        // Provide different error messages based on error type
+        if (error.message.includes('Authentication required')) {
+            examSelect.innerHTML = '<option value="">Please log in and try again</option>';
+            examCount.textContent = 'Authentication required';
+        } else if (error.message.includes('HTTP error! status: 500')) {
+            examSelect.innerHTML = '<option value="">Server error - please try again</option>';
+            examCount.textContent = 'Server error occurred';
+        } else if (error.message.includes('HTTP error! status: 404')) {
+            examSelect.innerHTML = '<option value="">Class not found</option>';
+            examCount.textContent = 'Selected class not found';
+        } else {
+            examSelect.innerHTML = '<option value="">Unable to load exams</option>';
+            examCount.textContent = 'Unable to load exams. Please try again.';
+        }
     }
 }
 
@@ -599,7 +638,11 @@ async function copySelectedExam() {
         if (response.ok) {
             alert('Exam copied successfully!');
             hideCopyExamDialog();
-            loadExamData(currentClassCode, currentTimeslot);
+            // CRITICAL FIX: Use the actual time period that was copied to, not the original currentTimeslot
+            // This ensures the UI shows the copied exam immediately
+            loadExamData(currentClassCode, timePeriod);
+            // Also refresh overview data to update exam counts
+            loadOverviewData(currentClassCode, timePeriod);
             console.log('Copy exam success:', result);
         } else {
             const errorMsg = result.error || 'Failed to copy exam';

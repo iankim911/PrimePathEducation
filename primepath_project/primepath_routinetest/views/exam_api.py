@@ -10,9 +10,10 @@ from django.shortcuts import get_object_or_404
 import json
 import logging
 
-from ..models import ExamAssignment, TeacherClassAssignment, Class, StudentEnrollment
+from ..models import ExamAssignment, Class, StudentEnrollment
+from ..models.class_access import TeacherClassAssignment  # Import from correct module
 from ..models.exam_management import RoutineExam  # Use RoutineExam for exam management
-from ..models.exam import Exam  # Legacy placement test exams
+# Removed legacy Exam import - only use RoutineExam for RoutineTest module
 from core.models import Student, Teacher
 from placement_test.models import StudentSession
 
@@ -25,45 +26,96 @@ def get_class_overview(request, class_code):
     timeslot = request.GET.get('timeslot', '')
     
     try:
-        # Get class information - class_code is actually class name
+        # First, check if class exists in TeacherClassAssignment (this is the actual data)
+        assignment = TeacherClassAssignment.objects.filter(
+            class_code=class_code, 
+            is_active=True
+        ).first()
+        
+        if not assignment:
+            # If no assignment exists, return meaningful data anyway
+            logger.warning(f"No active assignment found for class {class_code}")
+            return JsonResponse({
+                'class_code': class_code,
+                'class_name': class_code.replace('_', ' ').title(),
+                'curriculum': 'Not configured',
+                'timeslot': timeslot,
+                'exams': [],
+                'warning': 'No active teacher assignment found for this class'
+            })
+        
+        # Get class information - try Class model first, fallback to assignment data
         class_obj = Class.objects.filter(name=class_code).first()
-        if not class_obj:
-            return JsonResponse({'error': 'Class not found'}, status=404)
+        class_display_name = class_obj.name if class_obj else assignment.get_class_code_display()
         
         # Get curriculum mapping
         from ..views.schedule_matrix_optimized import get_class_curriculum_mapping_cached
         curriculum = get_class_curriculum_mapping_cached(class_code, request.GET.get('year', 2024))
         
-        # Get exams for this timeslot
+        # Get exams for this timeslot from multiple sources
         exams = []
-        # ExamAssignment uses class_assigned ForeignKey to Class model
-        assignments = ExamAssignment.objects.filter(
-            class_assigned=class_obj
-        ).select_related('exam')
         
-        for assignment in assignments:
-            exam = assignment.exam  # This is a RoutineExam instance
-            # RoutineExam has different field names than legacy Exam
-            exam_name = exam.name
-            exam_type = getattr(exam, 'exam_type', 'monthly_review')
+        # Method 1: Try ExamAssignment if Class object exists
+        if class_obj:
+            assignments = ExamAssignment.objects.filter(
+                class_assigned=class_obj
+            ).select_related('exam')
             
-            # Convert exam_type to display format
-            type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
+            for assignment in assignments:
+                exam = assignment.exam  # This is a RoutineExam instance
+                exam_name = exam.name
+                exam_type = getattr(exam, 'exam_type', 'monthly_review')
+                
+                # Convert exam_type to display format
+                type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
+                
+                exams.append({
+                    'id': str(exam.id),
+                    'name': exam_name,
+                    'type': type_display,
+                    'status': 'Assigned',
+                    'duration': 60  # RoutineExam doesn't have timer_minutes field
+                })
+        
+        # Method 2: Get exams from ExamScheduleMatrix
+        try:
+            from ..models import ExamScheduleMatrix
+            matrix_entries = ExamScheduleMatrix.objects.filter(
+                class_code=class_code
+            ).prefetch_related('exams')
             
-            exams.append({
-                'id': str(exam.id),
-                'name': exam_name,
-                'type': type_display,
-                'status': 'Assigned',
-                'duration': 60  # RoutineExam doesn't have timer_minutes field
-            })
+            for matrix_entry in matrix_entries:
+                for exam in matrix_entry.exams.all():
+                    # Avoid duplicates
+                    existing_ids = [e['id'] for e in exams]
+                    if str(exam.id) not in existing_ids:
+                        exam_type = getattr(exam, 'exam_type', None)
+                        if exam_type:
+                            # RoutineExam
+                            type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
+                            duration = 60
+                        else:
+                            # Legacy Exam
+                            type_display = 'Review' if 'review' in exam.name.lower() else 'Quarterly'
+                            duration = getattr(exam, 'timer_minutes', 60)
+                        
+                        exams.append({
+                            'id': str(exam.id),
+                            'name': exam.name,
+                            'type': type_display,
+                            'status': 'Scheduled',
+                            'duration': duration
+                        })
+        except Exception as matrix_error:
+            logger.warning(f"Could not access ExamScheduleMatrix: {matrix_error}")
         
         return JsonResponse({
             'class_code': class_code,
-            'class_name': class_obj.name if class_obj else class_code,
+            'class_name': class_display_name,
             'curriculum': curriculum,
             'timeslot': timeslot,
-            'exams': exams
+            'exams': exams,
+            'teacher': assignment.teacher.name if assignment and assignment.teacher else 'Not assigned'
         })
         
     except Exception as e:
@@ -71,7 +123,8 @@ def get_class_overview(request, class_code):
         return JsonResponse({
             'error': f'Error loading overview data: {str(e)}',
             'class_code': class_code,
-            'timeslot': timeslot
+            'timeslot': timeslot,
+            'exams': []
         }, status=500)
 
 @login_required
@@ -167,41 +220,70 @@ def get_class_exams(request, class_code):
 def get_class_students(request, class_code):
     """Get students enrolled in a class"""
     try:
+        # First check if the class exists in TeacherClassAssignment
+        assignment = TeacherClassAssignment.objects.filter(
+            class_code=class_code, 
+            is_active=True
+        ).first()
+        
+        if not assignment:
+            logger.warning(f"No active teacher assignment found for class {class_code}")
+            # Return empty but valid response instead of 404
+            return JsonResponse({
+                'students': [],
+                'total': 0,
+                'active': 0,
+                'class_code': class_code,
+                'warning': 'No active teacher assignment found for this class'
+            })
+        
         # Get students for this class through enrollments
         students_data = []
         from primepath_routinetest.models import StudentEnrollment
-        enrollments = StudentEnrollment.objects.filter(
-            class_assigned__name=class_code,
-            status='active'
-        ).select_related('student')
         
-        for enrollment in enrollments:
-            student = enrollment.student
-            # Get last activity from sessions
-            last_session = StudentSession.objects.filter(
-                student_name=student.name
-            ).order_by('-created_at').first()
+        # Try to get enrollments by class object if it exists
+        class_obj = Class.objects.filter(name=class_code).first()
+        if class_obj:
+            enrollments = StudentEnrollment.objects.filter(
+                class_assigned=class_obj,
+                status='active'
+            ).select_related('student')
             
-            students_data.append({
-                'id': str(student.id),
-                'name': student.name,
-                'email': student.parent_email or '',  # Students have parent_email, not email
-                'status': 'Active' if enrollment.status == 'active' else 'Inactive',
-                'last_activity': last_session.created_at.strftime('%Y-%m-%d %H:%M') if last_session else 'Never'
-            })
+            for enrollment in enrollments:
+                student = enrollment.student
+                # Get last activity from sessions
+                last_session = StudentSession.objects.filter(
+                    student_name=student.name
+                ).order_by('-created_at').first()
+                
+                students_data.append({
+                    'id': str(student.id),
+                    'name': student.name,
+                    'email': student.parent_email or '',  # Students have parent_email, not email
+                    'status': 'Active' if enrollment.status == 'active' else 'Inactive',
+                    'last_activity': last_session.created_at.strftime('%Y-%m-%d %H:%M') if last_session else 'Never'
+                })
+        else:
+            # If no Class object exists, we can't find enrollments
+            # But we can still return valid response for the assignment that exists
+            logger.info(f"Class object not found for {class_code}, but teacher assignment exists")
         
         return JsonResponse({
             'students': students_data,
             'total': len(students_data),
-            'active': sum(1 for s in students_data if s['status'] == 'Active')
+            'active': sum(1 for s in students_data if s['status'] == 'Active'),
+            'class_code': class_code,
+            'teacher': assignment.teacher.name if assignment and assignment.teacher else None
         })
         
     except Exception as e:
         logger.error(f"Error getting class students for {class_code}: {e}", exc_info=True)
         return JsonResponse({
-            'error': f'Error loading student data: {str(e)}',
+            'students': [],
+            'total': 0,
+            'active': 0,
             'class_code': class_code,
-            'student_count': 0
+            'error': f'Error loading student data: {str(e)}'
         }, status=500)
 
 @login_required
@@ -282,29 +364,94 @@ def get_class_filtered_exams(request, class_code):
         
         logger.info(f"Filtering exams for class {class_code}, type: {exam_type}, period: {time_period}")
         
+        # Validate input parameters
+        if not exam_type:
+            logger.warning(f"No exam type provided for class {class_code}")
+            return JsonResponse({
+                'exams': [],
+                'message': 'Please select an exam type',
+                'filters_applied': {
+                    'class_code': class_code,
+                    'exam_type': exam_type,
+                    'time_period': time_period,
+                    'total_found': 0
+                }
+            })
+        
+        if not time_period:
+            logger.warning(f"No time period provided for class {class_code}")
+            return JsonResponse({
+                'exams': [],
+                'message': 'Please select a time period',
+                'filters_applied': {
+                    'class_code': class_code,
+                    'exam_type': exam_type,
+                    'time_period': time_period,
+                    'total_found': 0
+                }
+            })
+        
+        # Verify class exists
+        from primepath_routinetest.models import TeacherClassAssignment
+        class_exists = TeacherClassAssignment.objects.filter(
+            class_code=class_code,
+            is_active=True
+        ).exists()
+        
+        if not class_exists:
+            logger.warning(f"Class {class_code} not found or not active")
+            return JsonResponse({
+                'exams': [],
+                'message': f'Class {class_code} not found in the system',
+                'filters_applied': {
+                    'class_code': class_code,
+                    'exam_type': exam_type,
+                    'time_period': time_period,
+                    'total_found': 0
+                }
+            })
+        
         exams = []
         
-        # Import the RoutineExam model for routine test management
-        from primepath_routinetest.models import RoutineExam as Exam
+        # Use RoutineExam for routine test management (already imported at top)
         
-        # Build filter conditions
+        # Build filter conditions with defensive programming
         filter_conditions = {
             'is_active': True
         }
         
-        # Add exam type filter
+        # Add exam type filter - handle both new and legacy formats
         if exam_type:
-            filter_conditions['exam_type'] = exam_type
+            # Handle legacy exam types
+            if exam_type == 'REVIEW':
+                filter_conditions['exam_type__in'] = ['REVIEW', 'monthly_review']
+            elif exam_type == 'QUARTERLY':
+                filter_conditions['exam_type__in'] = ['QUARTERLY', 'quarterly']
+            else:
+                filter_conditions['exam_type'] = exam_type
         
         # Add time period filter based on exam type
+        # Use Django Q objects to combine OR conditions instead of union() to avoid SQLite issues
+        from django.db.models import Q
+        
         if time_period:
             if exam_type == 'REVIEW':
-                filter_conditions['time_period_month'] = time_period
+                # Try both new and legacy fields for backward compatibility
+                time_period_q = Q(time_period_month=time_period) | Q(quarter=time_period)
+                filter_conditions_combined = {**filter_conditions}
+                filtered_exams = RoutineExam.objects.filter(Q(**filter_conditions_combined) & time_period_q)
+                
             elif exam_type == 'QUARTERLY':
-                filter_conditions['time_period_quarter'] = time_period
+                # Try both new and legacy fields for backward compatibility
+                time_period_q = Q(time_period_quarter=time_period) | Q(quarter=time_period)
+                filter_conditions_combined = {**filter_conditions}
+                filtered_exams = RoutineExam.objects.filter(Q(**filter_conditions_combined) & time_period_q)
+            else:
+                filtered_exams = RoutineExam.objects.filter(**filter_conditions)
+        else:
+            filtered_exams = RoutineExam.objects.filter(**filter_conditions)
         
-        # Query exams with filters
-        filtered_exams = Exam.objects.filter(**filter_conditions)
+        logger.info(f"Initial filter found {filtered_exams.count()} exams before class association check")
         
         # Additional filtering: check if exams are associated with the source class
         # This ensures we only show exams that actually exist for the source class
@@ -323,6 +470,8 @@ def get_class_filtered_exams(request, class_code):
                 for exam in matrix.exams.all():
                     available_exam_ids.add(exam.id)
             
+            logger.info(f"Found {len(available_exam_ids)} exams in ExamScheduleMatrix for {class_code}")
+            
             # Also try ExamAssignment
             class_obj = Class.objects.filter(name=class_code).first()
             if class_obj:
@@ -332,44 +481,102 @@ def get_class_filtered_exams(request, class_code):
             
                 for assignment in assignments:
                     available_exam_ids.add(assignment.exam.id)
+                    
+                logger.info(f"Added {assignments.count()} exams from ExamAssignment for {class_code}")
                 
         except Exception as matrix_error:
             logger.warning(f"Error accessing exam associations: {matrix_error}")
             # If we can't determine class associations, show all filtered exams
             available_exam_ids = set(exam.id for exam in filtered_exams)
+            logger.info(f"Using all filtered exams as fallback: {len(available_exam_ids)} exams")
         
         # Filter exams to only those available for the source class
-        final_exams = filtered_exams.filter(id__in=available_exam_ids)
+        if available_exam_ids:
+            final_exams = filtered_exams.filter(id__in=available_exam_ids)
+        else:
+            # If no class associations found, still show filtered exams for testing
+            final_exams = filtered_exams
+            logger.warning(f"No class associations found for {class_code}, showing all filtered exams")
         
         # Convert to list format
         for exam in final_exams:
-            # Get time period display
+            # Get time period display with fallback
             time_period_display = exam.get_time_period_display()
+            
+            # Get question count with multiple fallback methods
+            question_count = 0
+            if hasattr(exam, 'routine_questions'):
+                question_count = exam.routine_questions.count()
+            elif hasattr(exam, 'get_questions'):
+                question_count = len(exam.get_questions())
+            elif hasattr(exam, 'answer_key') and exam.answer_key:
+                question_count = len(exam.answer_key)
             
             exams.append({
                 'id': str(exam.id),
                 'name': exam.name,
                 'exam_type': exam.exam_type,
                 'time_period': time_period_display,
-                'question_count': exam.routine_questions.count() if hasattr(exam, 'routine_questions') else 0,
-                'curriculum': exam.curriculum_level.full_name if exam.curriculum_level else ''
+                'question_count': question_count,
+                'curriculum': getattr(exam, 'curriculum_level', 'Not specified')
             })
         
-        logger.info(f"Found {len(exams)} exams matching filters for class {class_code}")
+        # Determine appropriate message based on results
+        message = None
+        if len(exams) == 0:
+            if exam_type == 'REVIEW':
+                message = f'No Review exams found for {time_period}'
+            elif exam_type == 'QUARTERLY':
+                message = f'No Quarterly exams found for {time_period}'
+            else:
+                message = f'No {exam_type} exams found for {time_period}'
+            
+            # Provide helpful context - safely get count to avoid SQLite issues
+            try:
+                total_filtered = filtered_exams.count()
+                if total_filtered > 0:
+                    message += f' in class {class_code} (found {total_filtered} exams system-wide but none assigned to this class)'
+                else:
+                    message += f' in the system'
+            except Exception as count_error:
+                logger.warning(f"Could not get filtered exam count: {count_error}")
+                message += f' in class {class_code}'
+        
+        logger.info(f"Final result: {len(exams)} exams matching filters for class {class_code}")
+        
+        # Safely get system-wide count
+        total_system_wide = 0
+        try:
+            if 'filtered_exams' in locals():
+                total_system_wide = filtered_exams.count()
+        except Exception as count_error:
+            logger.warning(f"Could not get system-wide count: {count_error}")
+            total_system_wide = 0
         
         return JsonResponse({
             'exams': exams,
+            'message': message,
             'filters_applied': {
                 'class_code': class_code,
                 'exam_type': exam_type,
                 'time_period': time_period,
-                'total_found': len(exams)
+                'total_found': len(exams),
+                'total_system_wide': total_system_wide
             }
         })
         
     except Exception as e:
-        logger.error(f"Error getting filtered exams: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f"Error getting filtered exams for class {class_code}: {e}", exc_info=True)
+        return JsonResponse({
+            'error': f'Unable to load exams. Error: {str(e)}',
+            'exams': [],
+            'filters_applied': {
+                'class_code': class_code,
+                'exam_type': exam_type,
+                'time_period': time_period,
+                'total_found': 0
+            }
+        }, status=500)
 
 @login_required
 @csrf_exempt
@@ -388,10 +595,8 @@ def copy_exam(request):
         
         logger.info(f"Copy exam request: exam={source_exam_id}, class={target_class_code}, timeslot={target_timeslot}")
         
-        # Get source exam - try both Exam and RoutineExam models
+        # Get source exam - use RoutineExam model only
         source_exam = RoutineExam.objects.filter(id=source_exam_id).first()
-        if not source_exam:
-            source_exam = Exam.objects.filter(id=source_exam_id).first()
         if not source_exam:
             logger.error(f"Source exam not found: {source_exam_id}")
             return JsonResponse({'error': f'Source exam not found: {source_exam_id}'}, status=404)
@@ -524,10 +729,8 @@ def update_exam_duration(request, exam_id):
         data = json.loads(request.body)
         duration = data.get('duration', 60)
         
-        # Try to get exam from RoutineExam first, then Exam
-        exam = RoutineExam.objects.filter(id=exam_id).first()
-        if not exam:
-            exam = get_object_or_404(Exam, id=exam_id)
+        # Get exam from RoutineExam only
+        exam = get_object_or_404(RoutineExam, id=exam_id)
         
         # Update the timer_minutes field which stores the exam duration
         exam.timer_minutes = duration

@@ -19,8 +19,8 @@ class RoutineExam(models.Model):
     """Represents a routine test exam (monthly review or quarterly)"""
     
     EXAM_TYPES = [
-        ('monthly_review', 'Monthly Review'),
-        ('quarterly', 'Quarterly Exam')
+        ('REVIEW', 'Monthly Review'),
+        ('QUARTERLY', 'Quarterly Exam')
     ]
     
     QUARTERS = [
@@ -30,12 +30,33 @@ class RoutineExam(models.Model):
         ('Q4', 'Quarter 4')
     ]
     
+    MONTHS = [
+        ('JAN', 'January'),
+        ('FEB', 'February'),
+        ('MAR', 'March'),
+        ('APR', 'April'),
+        ('MAY', 'May'),
+        ('JUN', 'June'),
+        ('JUL', 'July'),
+        ('AUG', 'August'),
+        ('SEP', 'September'),
+        ('OCT', 'October'),
+        ('NOV', 'November'),
+        ('DEC', 'December')
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     exam_type = models.CharField(max_length=20, choices=EXAM_TYPES)
     curriculum_level = models.CharField(max_length=100)  # From 44 levels
     academic_year = models.CharField(max_length=10)  # e.g., "2025"
-    quarter = models.CharField(max_length=2, choices=QUARTERS)
+    
+    # Time period fields - use quarter for QUARTERLY exams, month for REVIEW exams
+    time_period_quarter = models.CharField(max_length=2, choices=QUARTERS, null=True, blank=True)
+    time_period_month = models.CharField(max_length=3, choices=MONTHS, null=True, blank=True)
+    
+    # Keep quarter field for backward compatibility
+    quarter = models.CharField(max_length=2, choices=QUARTERS, null=True, blank=True)
     
     # Content
     pdf_file = models.FileField(upload_to='routine_exams/', null=True, blank=True)
@@ -52,14 +73,28 @@ class RoutineExam(models.Model):
         db_table = 'routinetest_exam'
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['curriculum_level', 'quarter', 'exam_type']),
-            models.Index(fields=['academic_year', 'quarter']),
+            models.Index(fields=['curriculum_level', 'time_period_quarter', 'exam_type']),
+            models.Index(fields=['curriculum_level', 'time_period_month', 'exam_type']),
+            models.Index(fields=['academic_year', 'time_period_quarter']),
+            models.Index(fields=['academic_year', 'time_period_month']),
             models.Index(fields=['is_active']),
+            models.Index(fields=['exam_type']),
         ]
-        unique_together = [['name', 'academic_year', 'quarter']]
+        unique_together = [['name', 'academic_year', 'time_period_quarter', 'time_period_month']]
     
     def __str__(self):
-        return f"{self.name} - {self.get_exam_type_display()} ({self.quarter} {self.academic_year})"
+        time_period = self.get_time_period_display()
+        return f"{self.name} - {self.get_exam_type_display()} ({time_period} {self.academic_year})"
+    
+    def get_time_period_display(self):
+        """Get the time period display based on exam type"""
+        if self.exam_type == 'QUARTERLY' and self.time_period_quarter:
+            return self.get_time_period_quarter_display()
+        elif self.exam_type == 'REVIEW' and self.time_period_month:
+            return self.get_time_period_month_display()
+        elif self.quarter:  # Backward compatibility
+            return self.get_quarter_display()
+        return 'Unknown Period'
     
     def get_questions(self):
         """Get questions from answer key"""

@@ -49,7 +49,7 @@ class ExamScheduleMatrix(models.Model):
     
     # Multiple exams can be assigned to one matrix cell
     exams = models.ManyToManyField(
-        'primepath_routinetest.Exam',
+        'primepath_routinetest.RoutineExam',
         related_name='matrix_schedules',
         blank=True
     )
@@ -156,19 +156,19 @@ class ExamScheduleMatrix(models.Model):
     
     def get_class_display(self):
         """Get display name for the class code"""
-        from .exam import Exam
-        class_dict = dict(Exam.CLASS_CODE_CHOICES)
+        from .class_constants import CLASS_CODE_CHOICES
+        class_dict = dict(CLASS_CODE_CHOICES)
         return class_dict.get(self.class_code, self.class_code)
     
     def get_time_period_display(self):
         """Get formatted time period display"""
         if self.time_period_type == 'MONTHLY':
-            from .exam import Exam
-            month_dict = dict(Exam.MONTH_CHOICES)
+            from .exam_management import RoutineExam
+            month_dict = dict(RoutineExam.MONTHS)
             return month_dict.get(self.time_period_value, self.time_period_value)
         else:  # QUARTERLY
-            from .exam import Exam
-            quarter_dict = dict(Exam.QUARTER_CHOICES)
+            from .exam_management import RoutineExam
+            quarter_dict = dict(RoutineExam.QUARTERS)
             return quarter_dict.get(self.time_period_value, self.time_period_value)
     
     def get_exam_count(self):
