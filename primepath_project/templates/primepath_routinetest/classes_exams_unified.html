@@ -1362,8 +1362,91 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Include Exam Management Modal -->
 {% include 'primepath_routinetest/includes/exam_management_modal.html' %}
 
+<!-- Debug Script for Modal Issues -->
+<script>
+// Global error handler for debugging modal issues
+window.addEventListener('error', function(e) {
+    console.error('[GLOBAL_ERROR] JavaScript error detected:', {
+        message: e.message,
+        filename: e.filename,
+        lineno: e.lineno,
+        colno: e.colno,
+        error: e.error
+    });
+    
+    // Check if this is related to exam modal
+    if (e.message && (e.message.includes('openExamModal') || e.message.includes('exam'))) {
+        console.error('[EXAM_MODAL_ERROR] This error is related to exam modal functionality');
+    }
+});
+
+// Debug function to check modal elements
+function debugModalElements() {
+    console.group('[MODAL_DEBUG] Checking Modal Elements');
+    
+    const requiredElements = [
+        'examManagementModal',
+        'modalClassCode',
+        'modalTimeslot',
+        'overviewClassCode',
+        'overviewCurriculum',
+        'overviewPeriod',
+        'overviewAccessLevel',
+        'currentExamsList',
+        'examTableBody',
+        'totalStudents',
+        'activeStudents',
+        'studentTableBody'
+    ];
+    
+    requiredElements.forEach(id => {
+        const element = document.getElementById(id);
+        console.log(`${id}: ${element ? '✅ Found' : '❌ Missing'}`);
+    });
+    
+    console.groupEnd();
+}
+
+// Check modal elements on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[MODAL_DEBUG] Page loaded, checking modal elements...');
+    setTimeout(debugModalElements, 100); // Give time for elements to load
+});
+
+// Test function to verify modal functionality
+function testExamModal() {
+    console.log('[MODAL_TEST] Testing exam modal functionality...');
+    
+    // Find first class card to test with
+    const firstClassCard = document.querySelector('.class-card');
+    if (firstClassCard) {
+        const className = firstClassCard.querySelector('.class-name')?.textContent || 'TEST_CLASS';
+        console.log(`[MODAL_TEST] Testing with class: ${className}`);
+        
+        // Try to open modal
+        try {
+            openExamModal(className, 'overview', 'FULL');
+            console.log('[MODAL_TEST] Modal opened successfully');
+            
+            // Close modal after 2 seconds
+            setTimeout(() => {
+                closeExamModal();
+                console.log('[MODAL_TEST] Modal closed successfully');
+            }, 2000);
+        } catch (error) {
+            console.error('[MODAL_TEST] Error opening modal:', error);
+        }
+    } else {
+        console.warn('[MODAL_TEST] No class cards found to test with');
+    }
+}
+
+// Add test button to console
+console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
+</script>
+
 <!-- Exam Management Script -->
-<script src="{% static 'js/routinetest/exam-management.js' %}"></script>
+<script src="{% static 'js/routinetest/exam-management.js' %}?v={{ cache_bust }}"></script>
 
 <!-- Curriculum Management Script (Admin Only) -->
 {% if user.is_superuser or user.is_staff %}

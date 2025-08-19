@@ -9,24 +9,48 @@ let currentAccessLevel = null;
 
 // Open exam management modal
 function openExamModal(classCode, timeslot, accessLevel = 'VIEW') {
+    console.log(`[EXAM_MODAL] Opening modal for class: ${classCode}, timeslot: ${timeslot}, access: ${accessLevel}`);
+    
+    // Validate required elements exist
+    const modal = document.getElementById('examManagementModal');
+    if (!modal) {
+        console.error('[EXAM_MODAL] Modal element not found!');
+        alert('Modal not available. Please refresh the page.');
+        return;
+    }
+    
+    const modalClassCode = document.getElementById('modalClassCode');
+    const modalTimeslot = document.getElementById('modalTimeslot');
+    
+    if (!modalClassCode || !modalTimeslot) {
+        console.error('[EXAM_MODAL] Modal header elements not found!');
+    }
+    
+    // Store current context
     currentClassCode = classCode;
     currentTimeslot = timeslot;
     currentAccessLevel = accessLevel;
     
-    // Update modal header
-    document.getElementById('modalClassCode').textContent = classCode;
-    document.getElementById('modalTimeslot').textContent = timeslot;
+    // Update modal header with defensive checks
+    if (modalClassCode) modalClassCode.textContent = classCode || 'Unknown Class';
+    if (modalTimeslot) modalTimeslot.textContent = timeslot || 'Overview';
     
-    // Load data for all tabs
-    loadOverviewData(classCode, timeslot);
-    loadExamData(classCode, timeslot);
-    loadStudentData(classCode);
-    
-    // Show modal
-    document.getElementById('examManagementModal').style.display = 'flex';
+    // Show modal first
+    modal.style.display = 'flex';
     
     // Reset to first tab
     showTab('overview');
+    
+    // Load data for all tabs with error handling
+    try {
+        loadOverviewData(classCode, timeslot);
+        loadExamData(classCode, timeslot);
+        loadStudentData(classCode);
+    } catch (error) {
+        console.error('[EXAM_MODAL] Error during initial data load:', error);
+    }
+    
+    console.log('[EXAM_MODAL] Modal opened successfully');
 }
 
 // Close modal
@@ -38,71 +62,131 @@ function closeExamModal() {
 
 // Tab navigation
 function showTab(tabName) {
-    // Remove active class from all tabs and panes
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    document.querySelectorAll('.tab-pane').forEach(pane => {
-        pane.classList.remove('active');
-    });
+    console.log(`[EXAM_MODAL] Switching to tab: ${tabName}`);
     
-    // Add active class to selected tab and pane
-    document.querySelector(`[data-tab="${tabName}"]`).parentElement.classList.add('active');
-    document.getElementById(tabName).classList.add('active');
+    try {
+        // Remove active class from all tabs and panes
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('active');
+        });
+        
+        // Add active class to selected tab and pane
+        const tabLink = document.querySelector(`[data-tab="${tabName}"]`);
+        const tabPane = document.getElementById(tabName);
+        
+        if (tabLink && tabLink.parentElement) {
+            tabLink.parentElement.classList.add('active');
+        } else {
+            console.error(`[EXAM_MODAL] Tab link not found for: ${tabName}`);
+        }
+        
+        if (tabPane) {
+            tabPane.classList.add('active');
+        } else {
+            console.error(`[EXAM_MODAL] Tab pane not found for: ${tabName}`);
+        }
+        
+        console.log(`[EXAM_MODAL] Tab switch complete: ${tabName}`);
+    } catch (error) {
+        console.error(`[EXAM_MODAL] Error switching tabs:`, error);
+    }
 }
 
 // Load overview data
 async function loadOverviewData(classCode, timeslot) {
+    console.log(`[EXAM_MODAL] Loading overview data for class: ${classCode}, timeslot: ${timeslot}`);
+    
     try {
-        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/overview/?timeslot=${timeslot}`);
-        const data = await response.json();
+        const url = `/RoutineTest/api/class/${classCode}/overview/?timeslot=${timeslot}`;
+        console.log(`[EXAM_MODAL] Fetching from: ${url}`);
         
-        // Update overview fields
-        document.getElementById('overviewClassCode').textContent = classCode;
-        document.getElementById('overviewCurriculum').textContent = data.curriculum || 'Not Assigned';
-        document.getElementById('overviewPeriod').textContent = timeslot;
-        document.getElementById('overviewAccessLevel').textContent = currentAccessLevel;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log(`[EXAM_MODAL] Overview data received:`, data);
+        
+        // Update overview fields with defensive checks
+        const overviewClassCode = document.getElementById('overviewClassCode');
+        const overviewCurriculum = document.getElementById('overviewCurriculum');
+        const overviewPeriod = document.getElementById('overviewPeriod');
+        const overviewAccessLevel = document.getElementById('overviewAccessLevel');
+        
+        if (overviewClassCode) overviewClassCode.textContent = classCode;
+        if (overviewCurriculum) overviewCurriculum.textContent = data.curriculum || 'Not Assigned';
+        if (overviewPeriod) overviewPeriod.textContent = timeslot || 'Overview';
+        if (overviewAccessLevel) overviewAccessLevel.textContent = currentAccessLevel || 'VIEW';
         
         // Update current exams list
         const examsList = document.getElementById('currentExamsList');
-        if (data.exams && data.exams.length > 0) {
-            examsList.innerHTML = data.exams.map(exam => `
-                <div class="exam-item">
-                    <strong>${exam.name}</strong> - ${exam.type}
-                    <span class="exam-status">${exam.status}</span>
-                </div>
-            `).join('');
-        } else {
-            examsList.innerHTML = '<p class="no-data">No exams assigned for this period</p>';
+        if (examsList) {
+            if (data.exams && data.exams.length > 0) {
+                examsList.innerHTML = data.exams.map(exam => `
+                    <div class="exam-item" style="padding: 8px; margin: 4px 0; background: #f5f5f5; border-radius: 4px;">
+                        <strong>${exam.name}</strong> - <span style="color: #666;">${exam.type}</span>
+                        <span class="exam-status" style="float: right; color: #2E7D32;">${exam.status}</span>
+                    </div>
+                `).join('');
+            } else {
+                examsList.innerHTML = '<p class="no-data" style="text-align: center; color: #666; font-style: italic;">No exams assigned for this period</p>';
+            }
         }
     } catch (error) {
-        console.error('Error loading overview data:', error);
+        console.error('[EXAM_MODAL] Error loading overview data:', error);
+        
+        // Show error in UI
+        const examsList = document.getElementById('currentExamsList');
+        if (examsList) {
+            examsList.innerHTML = `<p style="color: red; text-align: center;">Error loading exam data: ${error.message}</p>`;
+        }
     }
 }
 
 // Load exam data
 async function loadExamData(classCode, timeslot) {
+    console.log(`[EXAM_MODAL] Loading exam data for class: ${classCode}, timeslot: ${timeslot}`);
+    
     try {
-        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/exams/?timeslot=${timeslot}`);
+        const url = `/RoutineTest/api/class/${classCode}/exams/?timeslot=${timeslot}`;
+        console.log(`[EXAM_MODAL] Fetching from: ${url}`);
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
         const data = await response.json();
+        console.log(`[EXAM_MODAL] Exam data received:`, data);
         
         const tableBody = document.getElementById('examTableBody');
+        if (!tableBody) {
+            console.error('[EXAM_MODAL] examTableBody element not found');
+            return;
+        }
+        
         if (data.exams && data.exams.length > 0) {
             tableBody.innerHTML = data.exams.map(exam => `
                 <tr>
-                    <td>${exam.name}</td>
-                    <td>${exam.type}</td>
-                    <td>${exam.duration} min</td>
-                    <td>${exam.question_count}</td>
+                    <td>${exam.name || 'Unnamed Exam'}</td>
+                    <td>${exam.type || 'Unknown'}</td>
+                    <td>${exam.duration || 60} min</td>
+                    <td>${exam.question_count || 0}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary" onclick="editExam('${exam.id}')">
-                            <i class="fas fa-edit"></i>
+                        <button class="btn btn-sm btn-primary" onclick="editExam('${exam.id}')" title="Edit Exam">
+                            ✏️
                         </button>
-                        <button class="btn btn-sm btn-warning" onclick="editDuration('${exam.id}', ${exam.duration})">
-                            <i class="fas fa-clock"></i>
+                        <button class="btn btn-sm btn-warning" onclick="editDuration('${exam.id}', ${exam.duration || 60})" title="Edit Duration">
+                            ⏱️
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteExam('${exam.id}')">
-                            <i class="fas fa-trash"></i>
+                        <button class="btn btn-sm btn-danger" onclick="deleteExam('${exam.id}')" title="Delete Exam">
+                            🗑️
                         </button>
                     </td>
                 </tr>
@@ -110,43 +194,88 @@ async function loadExamData(classCode, timeslot) {
             
             // Populate schedule dropdown
             const scheduleSelect = document.getElementById('scheduleExamSelect');
-            scheduleSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
-                data.exams.map(exam => `<option value="${exam.id}">${exam.name}</option>`).join('');
+            if (scheduleSelect) {
+                scheduleSelect.innerHTML = '<option value="">-- Select Exam --</option>' +
+                    data.exams.map(exam => `<option value="${exam.id}">${exam.name}</option>`).join('');
+            }
         } else {
-            tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No exams assigned</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center" style="color: #666; font-style: italic;">No exams assigned</td></tr>';
+            
+            // Clear schedule dropdown
+            const scheduleSelect = document.getElementById('scheduleExamSelect');
+            if (scheduleSelect) {
+                scheduleSelect.innerHTML = '<option value="">-- No Exams Available --</option>';
+            }
         }
     } catch (error) {
-        console.error('Error loading exam data:', error);
+        console.error('[EXAM_MODAL] Error loading exam data:', error);
+        
+        // Show error in UI
+        const tableBody = document.getElementById('examTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="color: red;">Error loading exam data: ${error.message}</td></tr>`;
+        }
     }
 }
 
 // Load student data
 async function loadStudentData(classCode) {
+    console.log(`[EXAM_MODAL] Loading student data for class: ${classCode}`);
+    
     try {
-        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/students/`);
-        const data = await response.json();
+        const url = `/RoutineTest/api/class/${classCode}/students/`;
+        console.log(`[EXAM_MODAL] Fetching from: ${url}`);
         
-        // Update student stats
-        document.getElementById('totalStudents').textContent = data.total || 0;
-        document.getElementById('activeStudents').textContent = data.active || 0;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log(`[EXAM_MODAL] Student data received:`, data);
+        
+        // Update student stats with defensive checks
+        const totalStudentsEl = document.getElementById('totalStudents');
+        const activeStudentsEl = document.getElementById('activeStudents');
+        
+        if (totalStudentsEl) totalStudentsEl.textContent = data.total || 0;
+        if (activeStudentsEl) activeStudentsEl.textContent = data.active || 0;
         
         // Update student table
         const tableBody = document.getElementById('studentTableBody');
+        if (!tableBody) {
+            console.error('[EXAM_MODAL] studentTableBody element not found');
+            return;
+        }
+        
         if (data.students && data.students.length > 0) {
             tableBody.innerHTML = data.students.map(student => `
                 <tr>
-                    <td>${student.id}</td>
-                    <td>${student.name}</td>
-                    <td>${student.email}</td>
-                    <td><span class="badge ${student.status === 'Active' ? 'badge-success' : 'badge-secondary'}">${student.status}</span></td>
+                    <td>${student.id || 'N/A'}</td>
+                    <td>${student.name || 'Unknown'}</td>
+                    <td>${student.email || 'No email'}</td>
+                    <td><span class="badge ${student.status === 'Active' ? 'badge-success' : 'badge-secondary'}" style="padding: 2px 6px; border-radius: 3px; color: white; background: ${student.status === 'Active' ? '#28a745' : '#6c757d'};">${student.status || 'Unknown'}</span></td>
                     <td>${student.last_activity || 'Never'}</td>
                 </tr>
             `).join('');
         } else {
-            tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No students enrolled</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center" style="color: #666; font-style: italic;">No students enrolled</td></tr>';
         }
     } catch (error) {
-        console.error('Error loading student data:', error);
+        console.error('[EXAM_MODAL] Error loading student data:', error);
+        
+        // Show error in UI
+        const tableBody = document.getElementById('studentTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="5" class="text-center" style="color: red;">Error loading student data: ${error.message}</td></tr>`;
+        }
+        
+        // Reset stats
+        const totalStudentsEl = document.getElementById('totalStudents');
+        const activeStudentsEl = document.getElementById('activeStudents');
+        if (totalStudentsEl) totalStudentsEl.textContent = '0';
+        if (activeStudentsEl) activeStudentsEl.textContent = '0';
     }
 }
 
@@ -159,7 +288,7 @@ async function showCopyExamDialog() {
     
     // Load all classes
     try {
-        const response = await fetch('/api/RoutineTest/api/all-classes/');
+        const response = await fetch('/RoutineTest/api/all-classes/');
         
         if (!response.ok) {
             // Check for authentication redirect (status 302) or unauthorized (401/403)
@@ -366,7 +495,7 @@ async function loadMatchingExams() {
             time_period: timePeriod
         });
         
-        const response = await fetch(`/api/RoutineTest/api/class/${classCode}/filtered-exams/?${params}`);
+        const response = await fetch(`/RoutineTest/api/class/${classCode}/filtered-exams/?${params}`);
         
         if (!response.ok) {
             // Check for authentication redirect (status 302) or unauthorized (401/403)
@@ -452,7 +581,7 @@ async function copySelectedExam() {
     });
     
     try {
-        const response = await fetch('/api/RoutineTest/api/copy-exam/', {
+        const response = await fetch('/RoutineTest/api/copy-exam/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -525,7 +654,7 @@ async function deleteExam(examId) {
             timeslot: currentTimeslot || 'Morning'
         });
         
-        const response = await fetch(`/api/RoutineTest/api/exam/${examId}/delete/?${queryParams}`, {
+        const response = await fetch(`/RoutineTest/api/exam/${examId}/delete/?${queryParams}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
@@ -562,7 +691,7 @@ async function editDuration(examId, currentDuration) {
     }
     
     try {
-        const response = await fetch(`/api/RoutineTest/api/exam/${examId}/duration/`, {
+        const response = await fetch(`/RoutineTest/api/exam/${examId}/duration/`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -598,7 +727,7 @@ async function saveSchedule() {
     }
     
     try {
-        const response = await fetch('/api/RoutineTest/api/schedule-exam/', {
+        const response = await fetch('/RoutineTest/api/schedule-exam/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -32,7 +32,7 @@ let editingClassCode = null;
 // Load all classes for admin management
 async function loadAdminClasses() {
     try {
-        const response = await fetch('/api/RoutineTest/api/admin/classes/');
+        const response = await fetch('/RoutineTest/api/admin/classes/');
         const data = await response.json();
         
         const tableBody = document.getElementById('adminClassTableBody');
@@ -170,7 +170,7 @@ async function saveCurriculumMapping(classCode) {
     };
     
     try {
-        const response = await fetch('/api/RoutineTest/api/admin/curriculum-mapping/', {
+        const response = await fetch('/RoutineTest/api/admin/curriculum-mapping/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ async function editClass(classCode) {
     document.getElementById('classModalTitle').textContent = 'Edit Class';
     
     try {
-        const response = await fetch(`/api/RoutineTest/api/admin/class/${classCode}/`);
+        const response = await fetch(`/RoutineTest/api/admin/class/${classCode}/`);
         const data = await response.json();
         
         document.getElementById('classCode').value = data.code;
@@ -245,7 +245,7 @@ async function deleteClass(classCode) {
     }
     
     try {
-        const response = await fetch(`/api/RoutineTest/api/admin/class/${classCode}/`, {
+        const response = await fetch(`/RoutineTest/api/admin/class/${classCode}/`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': getCookie('csrftoken')
@@ -331,8 +331,8 @@ async function saveClass() {
     
     try {
         const url = editingClassCode 
-            ? `/api/RoutineTest/api/admin/class/${editingClassCode}/`
-            : '/api/RoutineTest/api/admin/class/';
+            ? `/RoutineTest/api/admin/class/${editingClassCode}/`
+            : '/RoutineTest/api/admin/class/';
         
         const method = editingClassCode ? 'PUT' : 'POST';
         
