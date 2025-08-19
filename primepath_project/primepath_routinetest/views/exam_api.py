@@ -10,7 +10,9 @@ from django.shortcuts import get_object_or_404
 import json
 import logging
 
-from ..models import Exam, ExamAssignment, TeacherClassAssignment, Class, StudentEnrollment
+from ..models import ExamAssignment, TeacherClassAssignment, Class, StudentEnrollment
+from ..models.exam_management import RoutineExam  # Use RoutineExam for exam management
+from ..models.exam import Exam  # Legacy placement test exams
 from core.models import Student, Teacher
 from placement_test.models import StudentSession
 
@@ -23,8 +25,8 @@ def get_class_overview(request, class_code):
     timeslot = request.GET.get('timeslot', '')
     
     try:
-        # Get class information
-        class_obj = Class.objects.filter(code=class_code).first()
+        # Get class information - class_code is actually class name
+        class_obj = Class.objects.filter(name=class_code).first()
         if not class_obj:
             return JsonResponse({'error': 'Class not found'}, status=404)
         
@@ -34,18 +36,26 @@ def get_class_overview(request, class_code):
         
         # Get exams for this timeslot
         exams = []
+        # ExamAssignment uses class_assigned ForeignKey to Class model
         assignments = ExamAssignment.objects.filter(
-            class_code=class_code,
-            timeslot=timeslot
+            class_assigned=class_obj
         ).select_related('exam')
         
         for assignment in assignments:
+            exam = assignment.exam  # This is a RoutineExam instance
+            # RoutineExam has different field names than legacy Exam
+            exam_name = exam.name
+            exam_type = getattr(exam, 'exam_type', 'monthly_review')
+            
+            # Convert exam_type to display format
+            type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
+            
             exams.append({
-                'id': str(assignment.exam.id),
-                'name': assignment.exam.name,
-                'type': 'Review' if 'review' in assignment.exam.name.lower() else 'Quarterly',
-                'status': assignment.status or 'Assigned',
-                'duration': getattr(assignment.exam, 'duration', 60)
+                'id': str(exam.id),
+                'name': exam_name,
+                'type': type_display,
+                'status': 'Assigned',
+                'duration': 60  # RoutineExam doesn't have timer_minutes field
             })
         
         return JsonResponse({
@@ -57,8 +67,12 @@ def get_class_overview(request, class_code):
         })
         
     except Exception as e:
-        logger.error(f"Error getting class overview: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f"Error getting class overview for {class_code}: {e}", exc_info=True)
+        return JsonResponse({
+            'error': f'Error loading overview data: {str(e)}',
+            'class_code': class_code,
+            'timeslot': timeslot
+        }, status=500)
 
 @login_required
 @require_http_methods(["GET"])
@@ -80,15 +94,18 @@ def get_class_exams(request, class_code):
                 ).select_related('exam')
                 
                 for assignment in assignments:
-                    exam = assignment.exam
+                    exam = assignment.exam  # This is a RoutineExam instance
+                    exam_type = getattr(exam, 'exam_type', 'monthly_review')
+                    type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
+                    
                     exams.append({
                         'id': str(exam.id),
                         'name': exam.name,
-                        'type': 'Review' if 'review' in exam.name.lower() else 'Quarterly',
-                        'duration': exam.timer_minutes,
-                        'question_count': exam.questions.count() if hasattr(exam, 'questions') else 0,
+                        'type': type_display,
+                        'duration': 60,  # Default duration for RoutineExam
+                        'question_count': len(exam.get_questions()) if hasattr(exam, 'get_questions') else 0,
                         'created_date': exam.created_at.strftime('%Y-%m-%d') if hasattr(exam, 'created_at') else '',
-                        'status': getattr(assignment, 'status', 'Active'),
+                        'status': 'Active',  # RoutineExam.is_active field
                         'source': 'ExamAssignment'
                     })
         except Exception as e:
@@ -108,12 +125,25 @@ def get_class_exams(request, class_code):
                         # Check if this exam is already in the list from ExamAssignment
                         existing_exam_ids = [e['id'] for e in exams]
                         if str(exam.id) not in existing_exam_ids:
+                            # Handle both RoutineExam and legacy Exam
+                            exam_type = getattr(exam, 'exam_type', None)
+                            if exam_type:
+                                # This is a RoutineExam
+                                type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
+                                duration = 60
+                                question_count = len(exam.get_questions()) if hasattr(exam, 'get_questions') else 0
+                            else:
+                                # This is a legacy Exam (placement test)
+                                type_display = 'Review' if 'review' in exam.name.lower() else 'Quarterly'
+                                duration = getattr(exam, 'timer_minutes', 60)
+                                question_count = exam.questions.count() if hasattr(exam, 'questions') else 0
+                            
                             exams.append({
                                 'id': str(exam.id),
                                 'name': exam.name,
-                                'type': 'Review' if 'review' in exam.name.lower() else 'Quarterly',
-                                'duration': exam.timer_minutes,
-                                'question_count': exam.questions.count() if hasattr(exam, 'questions') else 0,
+                                'type': type_display,
+                                'duration': duration,
+                                'question_count': question_count,
                                 'created_date': exam.created_at.strftime('%Y-%m-%d') if hasattr(exam, 'created_at') else '',
                                 'status': matrix_entry.status or 'Active',
                                 'source': 'ExamScheduleMatrix'
@@ -125,29 +155,38 @@ def get_class_exams(request, class_code):
         return JsonResponse({'exams': exams})
         
     except Exception as e:
-        logger.error(f"Error getting class exams: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f"Error getting class exams for {class_code}: {e}", exc_info=True)
+        return JsonResponse({
+            'error': f'Error loading exam data: {str(e)}',
+            'class_code': class_code,
+            'timeslot': timeslot
+        }, status=500)
 
 @login_required
 @require_http_methods(["GET"])
 def get_class_students(request, class_code):
     """Get students enrolled in a class"""
     try:
-        # Get students for this class
+        # Get students for this class through enrollments
         students_data = []
-        students = Student.objects.filter(class_code=class_code)
+        from primepath_routinetest.models import StudentEnrollment
+        enrollments = StudentEnrollment.objects.filter(
+            class_assigned__name=class_code,
+            status='active'
+        ).select_related('student')
         
-        for student in students:
+        for enrollment in enrollments:
+            student = enrollment.student
             # Get last activity from sessions
             last_session = StudentSession.objects.filter(
                 student_name=student.name
             ).order_by('-created_at').first()
             
             students_data.append({
-                'id': student.id,
+                'id': str(student.id),
                 'name': student.name,
-                'email': getattr(student, 'email', ''),
-                'status': 'Active' if student.is_active else 'Inactive',
+                'email': student.parent_email or '',  # Students have parent_email, not email
+                'status': 'Active' if enrollment.status == 'active' else 'Inactive',
                 'last_activity': last_session.created_at.strftime('%Y-%m-%d %H:%M') if last_session else 'Never'
             })
         
@@ -158,8 +197,12 @@ def get_class_students(request, class_code):
         })
         
     except Exception as e:
-        logger.error(f"Error getting class students: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f"Error getting class students for {class_code}: {e}", exc_info=True)
+        return JsonResponse({
+            'error': f'Error loading student data: {str(e)}',
+            'class_code': class_code,
+            'student_count': 0
+        }, status=500)
 
 @login_required
 @require_http_methods(["GET"])
@@ -241,8 +284,8 @@ def get_class_filtered_exams(request, class_code):
         
         exams = []
         
-        # Import the Exam model
-        from primepath_routinetest.models import Exam
+        # Import the RoutineExam model for routine test management
+        from primepath_routinetest.models import RoutineExam as Exam
         
         # Build filter conditions
         filter_conditions = {
@@ -281,12 +324,14 @@ def get_class_filtered_exams(request, class_code):
                     available_exam_ids.add(exam.id)
             
             # Also try ExamAssignment
-            assignments = ExamAssignment.objects.filter(
-                class_code=class_code
-            ).select_related('exam')
+            class_obj = Class.objects.filter(name=class_code).first()
+            if class_obj:
+                assignments = ExamAssignment.objects.filter(
+                    class_assigned=class_obj
+                ).select_related('exam')
             
-            for assignment in assignments:
-                available_exam_ids.add(assignment.exam.id)
+                for assignment in assignments:
+                    available_exam_ids.add(assignment.exam.id)
                 
         except Exception as matrix_error:
             logger.warning(f"Error accessing exam associations: {matrix_error}")
@@ -343,8 +388,10 @@ def copy_exam(request):
         
         logger.info(f"Copy exam request: exam={source_exam_id}, class={target_class_code}, timeslot={target_timeslot}")
         
-        # Get source exam
-        source_exam = Exam.objects.filter(id=source_exam_id).first()
+        # Get source exam - try both Exam and RoutineExam models
+        source_exam = RoutineExam.objects.filter(id=source_exam_id).first()
+        if not source_exam:
+            source_exam = Exam.objects.filter(id=source_exam_id).first()
         if not source_exam:
             logger.error(f"Source exam not found: {source_exam_id}")
             return JsonResponse({'error': f'Source exam not found: {source_exam_id}'}, status=404)
@@ -477,7 +524,10 @@ def update_exam_duration(request, exam_id):
         data = json.loads(request.body)
         duration = data.get('duration', 60)
         
-        exam = get_object_or_404(Exam, id=exam_id)
+        # Try to get exam from RoutineExam first, then Exam
+        exam = RoutineExam.objects.filter(id=exam_id).first()
+        if not exam:
+            exam = get_object_or_404(Exam, id=exam_id)
         
         # Update the timer_minutes field which stores the exam duration
         exam.timer_minutes = duration
