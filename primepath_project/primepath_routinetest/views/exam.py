@@ -756,6 +756,8 @@ def manage_questions(request, exam_id):
 @require_http_methods(["POST", "DELETE"])
 @login_required
 def delete_exam(request, exam_id):
+    from django.http import JsonResponse
+    
     exam = get_object_or_404(Exam, id=exam_id)
     exam_name = exam.name
     
@@ -773,13 +775,25 @@ def delete_exam(request, exam_id):
         # Delete the exam (questions will cascade)
         exam.delete()
         
-        messages.success(request, f'Exam "{exam_name}" deleted successfully!')
+        success_message = f'Exam "{exam_name}" deleted successfully!'
+        
+        # Return JSON for AJAX requests (DELETE method or AJAX header)
+        if request.method == 'DELETE' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': success_message})
+        else:
+            messages.success(request, success_message)
+            return redirect('RoutineTest:exam_list')
         
     except Exception as e:
-        logger.error(f"Error deleting exam: {str(e)}")
-        messages.error(request, f'Error deleting exam: {str(e)}')
-    
-    return redirect('RoutineTest:exam_list')
+        error_message = f'Error deleting exam: {str(e)}'
+        logger.error(error_message)
+        
+        # Return JSON for AJAX requests (DELETE method or AJAX header)
+        if request.method == 'DELETE' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': error_message}, status=500)
+        else:
+            messages.error(request, error_message)
+            return redirect('RoutineTest:exam_list')
 
 
 # ========== ANSWER KEYS LIBRARY API ENDPOINTS ==========

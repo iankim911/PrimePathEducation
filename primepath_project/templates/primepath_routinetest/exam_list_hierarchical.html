@@ -810,6 +810,39 @@
 </div>
 
 <script>
+// IMMEDIATE DELETE BUTTON FIX - Run before anything else
+(function() {
+    // Apply red color to all delete buttons immediately
+    const fixDeleteButtons = function() {
+        const deleteButtons = document.querySelectorAll('.btn-danger, button[onclick*="confirmDelete"]');
+        deleteButtons.forEach(button => {
+            // Force red styling via inline styles with highest priority
+            button.style.setProperty('background-color', '#dc3545', 'important');
+            button.style.setProperty('border-color', '#dc3545', 'important');
+            button.style.setProperty('color', 'white', 'important');
+            
+            // Remove any conflicting classes
+            button.classList.remove('btn-success', 'btn-primary', 'btn-secondary');
+            // Ensure btn-danger class is present
+            if (!button.classList.contains('btn-danger')) {
+                button.classList.add('btn-danger');
+            }
+        });
+    };
+    
+    // Run immediately
+    fixDeleteButtons();
+    
+    // Run on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixDeleteButtons);
+    }
+    
+    // Run after a short delay to catch any late-applied styles
+    setTimeout(fixDeleteButtons, 100);
+    setTimeout(fixDeleteButtons, 500);
+})();
+
 // Toggle functions
 function toggleProgram(program) {
     const section = document.querySelector(`.program-section[data-program="${program}"]`);
@@ -888,36 +921,64 @@ function confirmDelete(examId, examName) {
 
 async function deleteExam(examId) {
     try {
-        const response = await fetch(`/RoutineTest/exams/${examId}/delete/`, {
+        // Use the correct exam delete endpoint that actually deletes the exam
+        const deleteUrl = `/RoutineTest/exams/${examId}/delete/`;
+        
+        const response = await fetch(deleteUrl, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}'
             }
         });
         
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const result = await response.json();
         
         if (result.success) {
-            alert('Exam deleted successfully');
-            window.location.reload();
+            alert(result.message || 'Exam deleted successfully');
+            // Find and remove the exam card from DOM instead of full page reload
+            const examCard = document.querySelector(`button[onclick*="${examId}"]`)?.closest('.exam-card');
+            if (examCard) {
+                examCard.remove();
+                
+                // Check if this was the last exam in the class section
+                const classSection = examCard.closest('.class-section');
+                if (classSection && classSection.querySelectorAll('.exam-card').length === 0) {
+                    const classExams = classSection.querySelector('.class-exams');
+                    if (classExams) {
+                        classExams.innerHTML = '<div class="no-exams">No exams in this class</div>';
+                    }
+                }
+            } else {
+                // Fallback to page reload if we can't find the exam card
+                window.location.reload();
+            }
         } else {
-            alert('Error: ' + result.error);
+            alert('Error: ' + (result.message || result.error || 'Unknown error'));
         }
     } catch (error) {
+        console.error('Delete error:', error);
         alert('Error deleting exam: ' + error.message);
     }
 }
 
 // ULTIMATE DELETE BUTTON COLOR ENFORCEMENT
 function enforceDeleteButtonColors() {
-    // Find all possible delete button selectors
+    // Find all possible delete button selectors that haven't been fixed yet
     const deleteButtons = document.querySelectorAll(`
-        button[onclick*="confirmDelete"],
-        .btn-danger,
-        button.btn-danger,
-        .exam-actions button[onclick*="confirmDelete"],
-        .exam-actions .btn-danger
+        button[onclick*="confirmDelete"]:not([data-delete-button-fixed]),
+        .btn-danger:not([data-delete-button-fixed]),
+        button.btn-danger:not([data-delete-button-fixed]),
+        .exam-actions button[onclick*="confirmDelete"]:not([data-delete-button-fixed]),
+        .exam-actions .btn-danger:not([data-delete-button-fixed])
     `);
+    
+    if (deleteButtons.length === 0) {
+        return; // No buttons to fix, prevents infinite loop
+    }
     
     console.log(`[DELETE FIX] Found ${deleteButtons.length} delete buttons to fix`);
     
@@ -964,12 +1025,18 @@ function enforceDeleteButtonColors() {
         console.log(`[DELETE FIX] Fixed button ${index}: ${newButton.textContent.trim()}`);
     });
     
-    // Also check for and fix any buttons that might be added by theme JS
+    // Also check for and fix any buttons that might be added by theme JS (FIXED: Prevent infinite recursion)
     setTimeout(() => {
         const themeButtons = document.querySelectorAll('.routinetest-theme .btn:not([data-delete-button-fixed])');
         themeButtons.forEach(btn => {
             if (btn.onclick && btn.onclick.toString().includes('confirmDelete')) {
-                enforceDeleteButtonColors();
+                // Fix this specific button instead of calling the entire function
+                btn.classList.remove('btn-success', 'btn-primary', 'btn-secondary', 'btn-info');
+                btn.classList.add('btn-danger');
+                btn.style.setProperty('background-color', '#dc3545', 'important');
+                btn.style.setProperty('border-color', '#dc3545', 'important');
+                btn.style.setProperty('color', 'white', 'important');
+                btn.setAttribute('data-delete-button-fixed', 'true');
             }
         });
     }, 100);
@@ -980,44 +1047,48 @@ document.addEventListener('DOMContentLoaded', enforceDeleteButtonColors);
 
 // Run after a short delay to catch theme-applied buttons
 setTimeout(enforceDeleteButtonColors, 500);
-setTimeout(enforceDeleteButtonColors, 1000);
 
-// Watch for dynamic content changes with debouncing
+// Watch for dynamic content changes with debouncing (FIXED: Prevent infinite loop)
 let timeoutId;
+let isProcessing = false; // Prevent recursive processing
+
 const observer = new MutationObserver(function(mutations) {
+    if (isProcessing) {
+        return; // Prevent recursive processing
+    }
+    
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
         let shouldReprocess = false;
+        
         mutations.forEach(function(mutation) {
+            // Only process new nodes, not attribute changes that we caused
             if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                 mutation.addedNodes.forEach(node => {
                     if (node.nodeType === 1 && (
-                        node.matches && node.matches('button[onclick*="confirmDelete"]') ||
-                        node.querySelector && node.querySelector('button[onclick*="confirmDelete"]')
+                        (node.matches && node.matches('button[onclick*="confirmDelete"]:not([data-delete-button-fixed])')) ||
+                        (node.querySelector && node.querySelector('button[onclick*="confirmDelete"]:not([data-delete-button-fixed])'))
                     )) {
                         shouldReprocess = true;
                     }
                 });
-            } else if (mutation.type === 'attributes' && 
-                       mutation.target.matches && 
-                       mutation.target.matches('button[onclick*="confirmDelete"]')) {
-                shouldReprocess = true;
             }
         });
         
         if (shouldReprocess) {
-            console.log('[DELETE FIX] DOM changes detected, re-processing delete buttons');
+            console.log('[DELETE FIX] New delete buttons detected, processing');
+            isProcessing = true;
             enforceDeleteButtonColors();
+            isProcessing = false;
         }
     }, 250); // Debounce for 250ms
 });
 
-// Start observing with more specific configuration
+// Start observing with more specific configuration (only childList changes)
 observer.observe(document.body, {
     childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['class', 'style', 'onclick']
+    subtree: true
+    // Removed attributes watching to prevent infinite loop
 });
 
 // Populate timeslots based on exam type

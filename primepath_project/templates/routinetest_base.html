@@ -272,15 +272,38 @@
         }
         
         /* Danger button - MUST stay red for destructive actions */
-        .btn-danger {
+        .btn-danger,
+        button.btn-danger,
+        .btn.btn-danger,
+        button[onclick*="confirmDelete"] {
             background-color: #dc3545 !important;
+            background-image: none !important;
             border-color: #dc3545 !important;
             color: white !important;
         }
         
-        .btn-danger:hover {
+        .btn-danger:hover,
+        button.btn-danger:hover,
+        .btn.btn-danger:hover,
+        button[onclick*="confirmDelete"]:hover {
             background-color: #c82333 !important;
+            background-image: none !important;
             border-color: #bd2130 !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        /* NUCLEAR OVERRIDE - Ensure delete buttons are NEVER green */
+        .routinetest-theme .btn-danger,
+        .routinetest-theme button.btn-danger,
+        .routinetest-theme .btn.btn-danger,
+        .routinetest-theme button[onclick*="confirmDelete"],
+        body.routinetest-theme .btn-danger,
+        body.routinetest-theme button.btn-danger,
+        body.routinetest-theme button[onclick*="confirmDelete"] {
+            background-color: #dc3545 !important;
+            background-image: none !important;
+            border-color: #dc3545 !important;
+            color: white !important;
         }
         
         /* Form Controls - Softer Green Theme */
@@ -359,7 +382,15 @@
     })();
     </script>
 </head>
-<body>
+<body class="routinetest-theme">
+    <!-- Immediate theme application -->
+    <script>
+        // Apply theme class immediately to prevent FOUC
+        document.documentElement.classList.add('routinetest-theme');
+        if (document.body) {
+            document.body.classList.add('routinetest-theme');
+        }
+    </script>
     <!-- Debug Console Logger -->
     <script>
         console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #00A65E; color: white; padding: 5px; border-radius: 3px;');
