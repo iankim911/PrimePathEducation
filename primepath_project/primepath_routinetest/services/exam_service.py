@@ -1205,3 +1205,304 @@ class ExamService:
         logger.info(f"[PDF_SAVE_LOG] {json.dumps(log_data)}")
         print(f"[PDF_SAVE_LOG] {json.dumps(log_data)}")
     # ========== END PDF ROTATION PERSISTENCE FIX ==========
+
+
+class ExamPermissionService:
+    """
+    Service class for handling all exam-related permissions in the Answer Keys library.
+    Provides centralized logic for teacher access control and exam visibility.
+    """
+    
+    # Map class codes to program levels
+    CLASS_TO_PROGRAM = {
+        # Primary (1-3) -> CORE
+        'PRIMARY_1A': 'CORE', 'PRIMARY_1B': 'CORE', 'PRIMARY_1C': 'CORE', 'PRIMARY_1D': 'CORE',
+        'PRIMARY_2A': 'CORE', 'PRIMARY_2B': 'CORE', 'PRIMARY_2C': 'CORE', 'PRIMARY_2D': 'CORE',
+        'PRIMARY_3A': 'CORE', 'PRIMARY_3B': 'CORE', 'PRIMARY_3C': 'CORE', 'PRIMARY_3D': 'CORE',
+        # Primary (4-6) -> ASCENT
+        'PRIMARY_4A': 'ASCENT', 'PRIMARY_4B': 'ASCENT', 'PRIMARY_4C': 'ASCENT', 'PRIMARY_4D': 'ASCENT',
+        'PRIMARY_5A': 'ASCENT', 'PRIMARY_5B': 'ASCENT', 'PRIMARY_5C': 'ASCENT', 'PRIMARY_5D': 'ASCENT',
+        'PRIMARY_6A': 'ASCENT', 'PRIMARY_6B': 'ASCENT', 'PRIMARY_6C': 'ASCENT', 'PRIMARY_6D': 'ASCENT',
+        # Middle School -> EDGE
+        'MIDDLE_1A': 'EDGE', 'MIDDLE_1B': 'EDGE', 'MIDDLE_1C': 'EDGE', 'MIDDLE_1D': 'EDGE',
+        'MIDDLE_2A': 'EDGE', 'MIDDLE_2B': 'EDGE', 'MIDDLE_2C': 'EDGE', 'MIDDLE_2D': 'EDGE',
+        'MIDDLE_3A': 'EDGE', 'MIDDLE_3B': 'EDGE', 'MIDDLE_3C': 'EDGE', 'MIDDLE_3D': 'EDGE',
+        # High School -> PINNACLE
+        'HIGH_1A': 'PINNACLE', 'HIGH_1B': 'PINNACLE', 'HIGH_1C': 'PINNACLE', 'HIGH_1D': 'PINNACLE',
+        'HIGH_2A': 'PINNACLE', 'HIGH_2B': 'PINNACLE', 'HIGH_2C': 'PINNACLE', 'HIGH_2D': 'PINNACLE',
+        'HIGH_3A': 'PINNACLE', 'HIGH_3B': 'PINNACLE', 'HIGH_3C': 'PINNACLE', 'HIGH_3D': 'PINNACLE',
+    }
+    
+    PROGRAM_ORDER = ['CORE', 'ASCENT', 'EDGE', 'PINNACLE']
+    
+    @classmethod
+    def is_admin(cls, user):
+        """Check if user is admin"""
+        return user.is_superuser or user.is_staff
+    
+    @classmethod
+    def get_teacher_assignments(cls, user):
+        """Get all class assignments for a teacher"""
+        if not hasattr(user, 'teacher_profile'):
+            return {}
+        
+        from ..models import TeacherClassAssignment
+        assignments = TeacherClassAssignment.objects.filter(
+            teacher=user.teacher_profile,
+            is_active=True
+        ).values_list('class_code', 'access_level')
+        
+        return dict(assignments)
+    
+    @classmethod
+    def get_teacher_accessible_classes(cls, user):
+        """Get all classes the teacher can access (with any permission level)"""
+        if cls.is_admin(user):
+            return 'ALL'  # Admins can access all classes
+        
+        return list(cls.get_teacher_assignments(user).keys())
+    
+    @classmethod
+    def get_teacher_editable_classes(cls, user):
+        """Get classes where teacher has edit permissions"""
+        if cls.is_admin(user):
+            return 'ALL'
+        
+        assignments = cls.get_teacher_assignments(user)
+        return [class_code for class_code, access_level in assignments.items() 
+                if access_level in ['FULL', 'CO_TEACHER']]
+    
+    @classmethod
+    def can_teacher_edit_exam(cls, user, exam):
+        """Check if teacher can edit a specific exam"""
+        if cls.is_admin(user):
+            return True
+        
+        if not hasattr(user, 'teacher_profile'):
+            return False
+        
+        editable_classes = cls.get_teacher_editable_classes(user)
+        if editable_classes == 'ALL':
+            return True
+        
+        # Check if any of the exam's class codes are editable by this teacher
+        exam_class_codes = exam.class_codes if exam.class_codes else []
+        return any(class_code in editable_classes for class_code in exam_class_codes)
+    
+    @classmethod
+    def can_teacher_copy_exam(cls, user, source_exam):
+        """Check if teacher can copy an exam"""
+        if cls.is_admin(user):
+            return True
+        
+        if not hasattr(user, 'teacher_profile'):
+            return False
+        
+        # Teacher can copy if they have at least one assigned class
+        accessible_classes = cls.get_teacher_accessible_classes(user)
+        return accessible_classes and accessible_classes != []
+    
+    @classmethod
+    def get_teacher_copyable_classes(cls, user):
+        """Get classes where teacher can copy exams to"""
+        if cls.is_admin(user):
+            # Return all class codes for admins
+            all_class_codes = list(cls.CLASS_TO_PROGRAM.keys())
+            return all_class_codes
+        
+        # For teachers, only return assigned classes
+        return cls.get_teacher_accessible_classes(user)
+    
+    @classmethod
+    def get_exam_access_level(cls, user, exam):
+        """
+        Get the access level for a specific exam
+        Returns: 'EDIT', 'COPY', 'VIEW'
+        """
+        if cls.is_admin(user):
+            return 'EDIT'
+        
+        if not hasattr(user, 'teacher_profile'):
+            return 'VIEW'
+        
+        if cls.can_teacher_edit_exam(user, exam):
+            return 'EDIT'
+        elif cls.can_teacher_copy_exam(user, source_exam=exam):
+            return 'COPY'
+        else:
+            return 'VIEW'
+    
+    @classmethod
+    def organize_exams_hierarchically(cls, exams, user, assigned_only=False):
+        """
+        Organize exams hierarchically by program and add permission info
+        
+        Args:
+            exams: QuerySet of exams
+            user: Current user
+            assigned_only: If True, only show exams from classes teacher is assigned to
+        
+        Returns:
+            dict: Hierarchical structure with permission metadata
+        """
+        from collections import defaultdict
+        
+        # Get teacher assignments
+        teacher_assignments = cls.get_teacher_assignments(user)
+        is_admin = cls.is_admin(user)
+        
+        logger.info(f"[EXAM_PERMISSION] Organizing exams hierarchically for user: {user}")
+        logger.info(f"[EXAM_PERMISSION] Teacher assignments: {list(teacher_assignments.keys())}")
+        logger.info(f"[EXAM_PERMISSION] Assigned only filter: {assigned_only}")
+        
+        # Initialize hierarchical structure
+        hierarchical_exams = {program: defaultdict(list) for program in cls.PROGRAM_ORDER}
+        
+        for exam in exams:
+            # Add permission metadata to exam
+            exam.permission_info = cls.get_exam_permission_info(user, exam)
+            
+            # Determine which class codes this exam applies to
+            exam_class_codes = exam.class_codes if exam.class_codes else []
+            
+            # If assigned_only filter is on, skip exams from unassigned classes
+            if assigned_only and not is_admin:
+                # Filter to only show class codes the teacher is assigned to
+                accessible_codes = [code for code in exam_class_codes 
+                                  if code in teacher_assignments]
+                if not accessible_codes:
+                    continue  # Skip this exam entirely
+                exam_class_codes = accessible_codes
+            
+            # Organize by program and class code
+            for class_code in exam_class_codes:
+                program = cls.CLASS_TO_PROGRAM.get(class_code, 'CORE')
+                hierarchical_exams[program][class_code].append(exam)
+        
+        logger.info(f"[EXAM_PERMISSION] Hierarchical organization complete")
+        return hierarchical_exams
+    
+    @classmethod
+    def get_exam_permission_info(cls, user, exam):
+        """
+        Get comprehensive permission info for an exam
+        
+        Returns:
+            dict: Permission metadata for the exam
+        """
+        is_admin = cls.is_admin(user)
+        access_level = cls.get_exam_access_level(user, exam)
+        teacher_assignments = cls.get_teacher_assignments(user)
+        
+        # Check permissions for each class code
+        class_permissions = {}
+        exam_class_codes = exam.class_codes if exam.class_codes else []
+        
+        for class_code in exam_class_codes:
+            if is_admin:
+                class_permissions[class_code] = {
+                    'access_level': 'FULL',
+                    'can_edit': True,
+                    'can_copy': True,
+                    'is_accessible': True,
+                    'visual_style': 'accessible'
+                }
+            elif class_code in teacher_assignments:
+                teacher_access = teacher_assignments[class_code]
+                can_edit = teacher_access in ['FULL', 'CO_TEACHER']
+                class_permissions[class_code] = {
+                    'access_level': teacher_access,
+                    'can_edit': can_edit,
+                    'can_copy': True,
+                    'is_accessible': True,
+                    'visual_style': 'accessible'
+                }
+            else:
+                class_permissions[class_code] = {
+                    'access_level': 'VIEW',
+                    'can_edit': False,
+                    'can_copy': True,  # Can copy to their own classes
+                    'is_accessible': False,
+                    'visual_style': 'view-only'
+                }
+        
+        # Determine overall exam permissions
+        can_edit_any = any(perm['can_edit'] for perm in class_permissions.values())
+        can_copy = cls.can_teacher_copy_exam(user, exam)
+        has_accessible_classes = any(perm['is_accessible'] for perm in class_permissions.values())
+        
+        return {
+            'access_level': access_level,
+            'can_edit': can_edit_any,
+            'can_copy': can_copy,
+            'can_view': True,  # Everyone can view
+            'has_accessible_classes': has_accessible_classes,
+            'class_permissions': class_permissions,
+            'is_admin': is_admin
+        }
+    
+    @classmethod
+    def filter_exams_by_permission(cls, exams, user, filter_type='all'):
+        """
+        Filter exams based on user permissions
+        
+        Args:
+            exams: QuerySet of exams
+            user: Current user
+            filter_type: 'all', 'editable', 'assigned_only'
+        
+        Returns:
+            Filtered QuerySet
+        """
+        if filter_type == 'all':
+            return exams
+        
+        if cls.is_admin(user):
+            return exams  # Admins see everything
+        
+        if not hasattr(user, 'teacher_profile'):
+            return exams  # Non-teachers see everything in view mode
+        
+        teacher_assignments = cls.get_teacher_assignments(user)
+        assigned_class_codes = list(teacher_assignments.keys())
+        
+        if filter_type == 'assigned_only':
+            # Only show exams from classes teacher is assigned to
+            filtered_exams = []
+            for exam in exams:
+                exam_class_codes = exam.class_codes if exam.class_codes else []
+                if any(code in assigned_class_codes for code in exam_class_codes):
+                    filtered_exams.append(exam.id)
+            return exams.filter(id__in=filtered_exams)
+        
+        elif filter_type == 'editable':
+            # Only show exams teacher can edit
+            editable_class_codes = [
+                code for code, access in teacher_assignments.items() 
+                if access in ['FULL', 'CO_TEACHER']
+            ]
+            filtered_exams = []
+            for exam in exams:
+                exam_class_codes = exam.class_codes if exam.class_codes else []
+                if any(code in editable_class_codes for code in exam_class_codes):
+                    filtered_exams.append(exam.id)
+            return exams.filter(id__in=filtered_exams)
+        
+        return exams
+    
+    @classmethod
+    def get_permission_summary(cls, user):
+        """Get summary of user's permissions for debugging"""
+        teacher_assignments = cls.get_teacher_assignments(user)
+        accessible_classes = cls.get_teacher_accessible_classes(user)
+        editable_classes = cls.get_teacher_editable_classes(user)
+        copyable_classes = cls.get_teacher_copyable_classes(user)
+        
+        return {
+            'is_admin': cls.is_admin(user),
+            'has_teacher_profile': hasattr(user, 'teacher_profile'),
+            'teacher_assignments': teacher_assignments,
+            'accessible_classes': accessible_classes,
+            'editable_classes': editable_classes,
+            'copyable_classes_count': len(copyable_classes) if isinstance(copyable_classes, list) else 'ALL',
+        }

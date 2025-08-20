@@ -104,6 +104,71 @@ def exam_count_label_class(count):
         return "count-multiple"
 
 
+@register.filter(name='lookup')
+def lookup(dictionary, key):
+    """
+    Enhanced dictionary lookup filter for Answer Keys Library.
+    Usage: {{ dict|lookup:key }}
+    """
+    if not dictionary:
+        return None
+    
+    try:
+        # Handle different types of containers
+        if hasattr(dictionary, 'get'):
+            # Dictionary-like object
+            return dictionary.get(key, None)
+        elif hasattr(dictionary, '__getitem__'):
+            # List-like or dict-like with __getitem__
+            try:
+                return dictionary[key]
+            except (KeyError, IndexError, TypeError):
+                return None
+        else:
+            return None
+    except Exception as e:
+        logger.warning(f"[MATRIX_FILTERS] lookup filter error: {e}")
+        return None
+
+
+@register.filter(name='has_key')
+def has_key(dictionary, key):
+    """
+    Check if dictionary has a specific key.
+    Usage: {{ dict|has_key:key }}
+    """
+    if not dictionary:
+        return False
+    
+    try:
+        if hasattr(dictionary, 'get'):
+            return key in dictionary
+        elif hasattr(dictionary, '__contains__'):
+            return key in dictionary
+        else:
+            return False
+    except Exception:
+        return False
+
+
+@register.filter(name='keys')
+def keys(dictionary):
+    """
+    Get keys from a dictionary.
+    Usage: {{ dict|keys }}
+    """
+    if not dictionary:
+        return []
+    
+    try:
+        if hasattr(dictionary, 'keys'):
+            return list(dictionary.keys())
+        else:
+            return []
+    except Exception:
+        return []
+
+
 # Debug log to confirm the module loaded
 logger.info(f"[MATRIX_FILTERS] Registered filters: {list(register.filters.keys())}")
 print(f"[MATRIX_FILTERS] Registered filters: {list(register.filters.keys())}")

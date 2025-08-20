@@ -78,11 +78,22 @@ def get_class_overview(request, class_code):
                 })
         
         # Method 2: Get exams from ExamScheduleMatrix
+        # CRITICAL FIX: Apply same overview logic here for consistency
         try:
             from ..models import ExamScheduleMatrix
-            matrix_entries = ExamScheduleMatrix.objects.filter(
-                class_code=class_code
-            ).prefetch_related('exams')
+            if timeslot and timeslot.lower() != 'overview':
+                # Filter by specific timeslot
+                logger.info(f"[OVERVIEW_API_FIX] Filtering by specific timeslot: {timeslot} for class {class_code}")
+                matrix_entries = ExamScheduleMatrix.objects.filter(
+                    class_code=class_code,
+                    time_period_value=timeslot
+                ).prefetch_related('exams')
+            else:
+                # For 'overview', get ALL exams for this class
+                logger.info(f"[OVERVIEW_API_FIX] Getting ALL exams for class {class_code} (overview mode)")
+                matrix_entries = ExamScheduleMatrix.objects.filter(
+                    class_code=class_code
+                ).prefetch_related('exams')
             
             for matrix_entry in matrix_entries:
                 for exam in matrix_entry.exams.all():
@@ -166,11 +177,19 @@ def get_class_exams(request, class_code):
         
         # Second, get exams from ExamScheduleMatrix (new system for copied exams)
         try:
-            if timeslot:
-                # Find exams in the matrix for this class and timeslot
+            # CRITICAL FIX: Handle 'overview' timeslot to show ALL exams for class
+            if timeslot and timeslot.lower() != 'overview':
+                # Find exams in the matrix for this class and specific timeslot
+                logger.info(f"[EXAM_API_FIX] Filtering by specific timeslot: {timeslot} for class {class_code}")
                 matrix_entries = ExamScheduleMatrix.objects.filter(
                     class_code=class_code,
                     time_period_value=timeslot
+                ).prefetch_related('exams')
+            else:
+                # For 'overview' or no timeslot, get ALL exams for this class
+                logger.info(f"[EXAM_API_FIX] Getting ALL exams for class {class_code} (overview mode)")
+                matrix_entries = ExamScheduleMatrix.objects.filter(
+                    class_code=class_code
                 ).prefetch_related('exams')
                 
                 for matrix_entry in matrix_entries:
@@ -204,8 +223,17 @@ def get_class_exams(request, class_code):
         except Exception as e:
             logger.warning(f"Error getting ExamScheduleMatrix data: {e}")
         
-        logger.info(f"Retrieved {len(exams)} exams for class {class_code}, timeslot {timeslot}")
-        return JsonResponse({'exams': exams})
+        # Log the fix for debugging
+        filter_mode = "ALL exams (overview)" if not timeslot or timeslot.lower() == 'overview' else f"filtered by {timeslot}"
+        logger.info(f"[EXAM_API_FIX] Retrieved {len(exams)} exams for class {class_code}, mode: {filter_mode}")
+        
+        return JsonResponse({
+            'exams': exams,
+            'filter_mode': filter_mode,
+            'class_code': class_code,
+            'timeslot': timeslot,
+            'total_found': len(exams)
+        })
         
     except Exception as e:
         logger.error(f"Error getting class exams for {class_code}: {e}", exc_info=True)

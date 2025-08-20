@@ -552,6 +552,211 @@ class Exam(models.Model):
     def has_student_roster(self):
         """Check if exam has any roster assignments"""
         return self.student_roster.exists()
+    
+    # ========== PERMISSION AND ACCESS METHODS FOR ANSWER KEYS LIBRARY ==========
+    
+    def get_accessible_classes(self, teacher):
+        """
+        Get class codes from this exam that the teacher can access
+        
+        Args:
+            teacher: Teacher instance
+            
+        Returns:
+            list: Class codes the teacher can access
+        """
+        from ..services.exam_service import ExamPermissionService
+        if not teacher or not hasattr(teacher, 'user'):
+            return []
+        
+        teacher_assignments = ExamPermissionService.get_teacher_assignments(teacher.user)
+        exam_class_codes = self.class_codes if self.class_codes else []
+        
+        return [code for code in exam_class_codes if code in teacher_assignments]
+    
+    def can_teacher_edit(self, teacher):
+        """
+        Check if teacher can edit this exam
+        
+        Args:
+            teacher: Teacher instance or User instance
+            
+        Returns:
+            bool: True if teacher can edit this exam
+        """
+        from ..services.exam_service import ExamPermissionService
+        
+        # Handle both Teacher and User instances
+        if hasattr(teacher, 'user'):
+            user = teacher.user
+        else:
+            user = teacher
+        
+        return ExamPermissionService.can_teacher_edit_exam(user, self)
+    
+    def can_teacher_copy(self, teacher):
+        """
+        Check if teacher can copy this exam
+        
+        Args:
+            teacher: Teacher instance or User instance
+            
+        Returns:
+            bool: True if teacher can copy this exam
+        """
+        from ..services.exam_service import ExamPermissionService
+        
+        # Handle both Teacher and User instances  
+        if hasattr(teacher, 'user'):
+            user = teacher.user
+        else:
+            user = teacher
+        
+        return ExamPermissionService.can_teacher_copy_exam(user, self)
+    
+    def get_permission_info(self, user):
+        """
+        Get comprehensive permission info for this exam and the given user
+        
+        Args:
+            user: User instance
+            
+        Returns:
+            dict: Permission metadata
+        """
+        from ..services.exam_service import ExamPermissionService
+        return ExamPermissionService.get_exam_permission_info(user, self)
+    
+    def get_program_from_class_codes(self):
+        """
+        Get the program level(s) this exam belongs to based on class codes
+        
+        Returns:
+            set: Program names (CORE, ASCENT, EDGE, PINNACLE)
+        """
+        from ..services.exam_service import ExamPermissionService
+        
+        programs = set()
+        exam_class_codes = self.class_codes if self.class_codes else []
+        
+        for class_code in exam_class_codes:
+            program = ExamPermissionService.CLASS_TO_PROGRAM.get(class_code, 'CORE')
+            programs.add(program)
+        
+        return programs
+    
+    def get_primary_program(self):
+        """
+        Get the primary program for this exam (first one alphabetically)
+        
+        Returns:
+            str: Program name
+        """
+        programs = self.get_program_from_class_codes()
+        if not programs:
+            return 'CORE'
+        
+        # Return in order of PROGRAM_ORDER
+        from ..services.exam_service import ExamPermissionService
+        for program in ExamPermissionService.PROGRAM_ORDER:
+            if program in programs:
+                return program
+        
+        return 'CORE'
+    
+    def get_class_permissions_for_user(self, user):
+        """
+        Get permission info for each class code in this exam
+        
+        Args:
+            user: User instance
+            
+        Returns:
+            dict: Class code -> permission info mapping
+        """
+        permission_info = self.get_permission_info(user)
+        return permission_info.get('class_permissions', {})
+    
+    def has_accessible_classes_for_user(self, user):
+        """
+        Check if user has any accessible classes for this exam
+        
+        Args:
+            user: User instance
+            
+        Returns:
+            bool: True if user can access at least one class
+        """
+        permission_info = self.get_permission_info(user)
+        return permission_info.get('has_accessible_classes', False)
+    
+    @classmethod
+    def create_copy(cls, source_exam, target_class_codes, exam_type=None, time_period=None, 
+                   academic_year=None, created_by=None):
+        """
+        Create a copy of an exam for different classes
+        
+        Args:
+            source_exam: Source Exam instance to copy
+            target_class_codes: List of class codes for the new exam
+            exam_type: New exam type (REVIEW/QUARTERLY) or None to keep same
+            time_period: New time period or None to keep same
+            academic_year: New academic year or None to keep same
+            created_by: Teacher creating the copy
+            
+        Returns:
+            Exam: New exam instance
+        """
+        import copy
+        from django.db import transaction
+        
+        with transaction.atomic():
+            # Create the new exam
+            new_exam = cls()
+            
+            # Copy basic fields
+            new_exam.name = f"Copy of {source_exam.name}"
+            new_exam.exam_type = exam_type or source_exam.exam_type
+            new_exam.curriculum_level = source_exam.curriculum_level
+            new_exam.timer_minutes = source_exam.timer_minutes
+            new_exam.total_questions = source_exam.total_questions
+            new_exam.default_options_count = source_exam.default_options_count
+            new_exam.passing_score = source_exam.passing_score
+            new_exam.pdf_rotation = source_exam.pdf_rotation
+            new_exam.instructions = source_exam.instructions
+            new_exam.created_by = created_by
+            new_exam.is_active = True
+            
+            # Set time period fields based on exam type
+            if new_exam.exam_type == 'REVIEW':
+                new_exam.time_period_month = time_period or source_exam.time_period_month
+                new_exam.time_period_quarter = None
+            elif new_exam.exam_type == 'QUARTERLY':
+                new_exam.time_period_quarter = time_period or source_exam.time_period_quarter
+                new_exam.time_period_month = None
+            
+            new_exam.academic_year = academic_year or source_exam.academic_year
+            new_exam.class_codes = target_class_codes
+            
+            # Copy PDF file
+            if source_exam.pdf_file:
+                new_exam.pdf_file = source_exam.pdf_file
+            
+            new_exam.save()
+            
+            # Copy questions
+            for source_question in source_exam.routine_questions.all():
+                source_question.pk = None  # Reset primary key
+                source_question.exam = new_exam
+                source_question.save()
+            
+            # Copy audio files
+            for source_audio in source_exam.routine_audio_files.all():
+                source_audio.pk = None  # Reset primary key
+                source_audio.exam = new_exam
+                source_audio.save()
+            
+            return new_exam
 
 
 class StudentRoster(models.Model):

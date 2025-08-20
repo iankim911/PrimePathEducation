@@ -22,37 +22,45 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def exam_list(request):
-    """List all exams (requires authentication) - WITH REVIEW/QUARTERLY TOGGLE"""
-    # Version 4.0 - Added Review/Quarterly Toggle System
-    # Get exam type filter from request (default to 'ALL' to show all exams)
+    """List all exams hierarchically by Program and Class Code - Version 6.0 Answer Keys Library"""
+    from ..services import ExamPermissionService
+    from collections import defaultdict
+    
+    # Get filters from request
     exam_type_filter = request.GET.get('exam_type', 'ALL')
+    assigned_only_filter = request.GET.get('assigned_only', 'false').lower() == 'true'
     
     # Validate exam type filter
     valid_exam_types = ['REVIEW', 'QUARTERLY', 'ALL']
     if exam_type_filter not in valid_exam_types:
         exam_type_filter = 'ALL'
     
-    # Log authentication check and filter info with enhanced logging
+    # Get permission info for current user
+    is_admin = ExamPermissionService.is_admin(request.user)
+    teacher_assignments = ExamPermissionService.get_teacher_assignments(request.user)
+    permission_summary = ExamPermissionService.get_permission_summary(request.user)
+    
+    # Log authentication and permissions
     console_log = {
         "view": "exam_list",
-        "template_version": "4.0-review-quarterly-toggle",
-        "exam_type_filter": exam_type_filter,
+        "version": "6.0-answer-keys-library",
         "user": str(request.user),
-        "authenticated": request.user.is_authenticated,
-        "method": request.method,
-        "query_params": dict(request.GET),
-        "timestamp": timezone.now().isoformat(),
-        "feature": "REVIEW_QUARTERLY_TOGGLE"
+        "is_admin": is_admin,
+        "teacher_assignments": list(teacher_assignments.keys()),
+        "assigned_only_filter": assigned_only_filter,
+        "exam_type_filter": exam_type_filter,
+        "permission_summary": permission_summary,
+        "timestamp": timezone.now().isoformat()
     }
-    logger.info(f"[EXAM_LIST_V4_TOGGLE] {json.dumps(console_log)}")
-    print(f"[EXAM_LIST_V4_TOGGLE] {json.dumps(console_log)}")
+    logger.info(f"[EXAM_LIST_V6_LIBRARY] {json.dumps(console_log)}")
+    print(f"[EXAM_LIST_V6_LIBRARY] {json.dumps(console_log)}")
     
-    # Build base query with related data and prefetch
+    # Build base query with related data
     base_query = Exam.objects.select_related(
         'curriculum_level__subprogram__program'
     ).prefetch_related(
-        'routine_questions',  # Prefetch questions to avoid N+1 queries
-        'routine_audio_files'  # Also prefetch audio files for display
+        'routine_questions',
+        'routine_audio_files'
     )
     
     # Apply exam type filter
@@ -62,107 +70,130 @@ def exam_list(request):
     elif exam_type_filter == 'QUARTERLY':
         exams = base_query.filter(exam_type='QUARTERLY')
         filter_description = "Quarterly Exams"
-    else:  # ALL
+    else:
         exams = base_query.all()
         filter_description = "All Exams"
     
-    # Log filter results
-    console_log = {
-        "view": "exam_list",
-        "action": "filter_applied",
-        "exam_type_filter": exam_type_filter,
-        "filter_description": filter_description,
-        "total_exams_after_filter": exams.count(),
-        "timestamp": timezone.now().isoformat()
-    }
-    logger.info(f"[EXAM_LIST_FILTER_RESULTS] {json.dumps(console_log)}")
-    print(f"[EXAM_LIST_FILTER_RESULTS] {json.dumps(console_log)}")
+    # Apply permission-based filtering
+    if assigned_only_filter:
+        exams = ExamPermissionService.filter_exams_by_permission(
+            exams, request.user, filter_type='assigned_only'
+        )
+        filter_description += " (Assigned Classes Only)"
     
-    # Add answer mapping status to each exam
-    exams_with_status = []
-    for exam in exams:
-        # Get answer mapping status
-        mapping_status = exam.get_answer_mapping_status()
-        
-        # Log the mapping status for each exam
-        console_log = {
-            "view": "exam_list",
-            "action": "answer_mapping_check",
-            "exam_id": str(exam.id),
-            "exam_name": exam.name,
-            "total_questions": mapping_status['total_questions'],
-            "mapped_questions": mapping_status['mapped_questions'],
-            "unmapped_questions": mapping_status['unmapped_questions'],
-            "percentage_complete": mapping_status['percentage_complete'],
-            "status": mapping_status['status_label']
-        }
-        logger.info(f"[EXAM_LIST_MAPPING] {json.dumps(console_log)}")
-        
-        # Add the status to the exam object for template access
-        exam.answer_mapping_status = mapping_status
-        exams_with_status.append(exam)
+    # Organize exams hierarchically with permission info
+    hierarchical_exams = ExamPermissionService.organize_exams_hierarchically(
+        exams, request.user, assigned_only=assigned_only_filter
+    )
     
-    # Log summary of answer mapping statuses
-    complete_count = sum(1 for e in exams_with_status if e.answer_mapping_status['is_complete'])
-    partial_count = sum(1 for e in exams_with_status if e.answer_mapping_status['status_label'] == 'Partial')
-    not_started_count = sum(1 for e in exams_with_status if e.answer_mapping_status['status_label'] == 'Not Started')
+    # Calculate summary statistics
+    total_exam_count = 0
+    complete_count = 0
+    partial_count = 0
+    not_started_count = 0
+    accessible_count = 0
+    editable_count = 0
     
-    console_log = {
-        "view": "exam_list",
-        "action": "answer_mapping_summary",
-        "total_exams": len(exams_with_status),
-        "complete": complete_count,
-        "partial": partial_count,
-        "not_started": not_started_count
-    }
-    logger.info(f"[EXAM_LIST_SUMMARY] {json.dumps(console_log)}")
+    for program_classes in hierarchical_exams.values():
+        for class_exams in program_classes.values():
+            for exam in class_exams:
+                total_exam_count += 1
+                
+                # Answer mapping status
+                if exam.answer_mapping_status['is_complete']:
+                    complete_count += 1
+                elif exam.answer_mapping_status['status_label'] == 'Partial':
+                    partial_count += 1
+                elif exam.answer_mapping_status['status_label'] == 'Not Started':
+                    not_started_count += 1
+                
+                # Permission counts
+                if exam.permission_info['has_accessible_classes']:
+                    accessible_count += 1
+                if exam.permission_info['can_edit']:
+                    editable_count += 1
     
-    # Get counts for each exam type (for tab badges)
+    # Get counts for each exam type (for tabs)
     review_count = Exam.objects.filter(exam_type='REVIEW').count()
     quarterly_count = Exam.objects.filter(exam_type='QUARTERLY').count()
     total_count = Exam.objects.count()
     
-    # Log counts for debugging
-    console_log = {
-        "view": "exam_list",
-        "action": "exam_type_counts",
-        "review_count": review_count,
-        "quarterly_count": quarterly_count,
-        "total_count": total_count,
-        "current_filter": exam_type_filter,
-        "displayed_count": len(exams_with_status)
-    }
-    logger.info(f"[EXAM_TYPE_COUNTS] {json.dumps(console_log)}")
-    print(f"[EXAM_TYPE_COUNTS] {json.dumps(console_log)}")
+    # Calculate assigned vs all counts for filter toggle
+    if not assigned_only_filter:
+        # Get count if we applied assigned filter
+        assigned_exams = ExamPermissionService.filter_exams_by_permission(
+            base_query.all(), request.user, filter_type='assigned_only'
+        )
+        assigned_count = assigned_exams.count()
+    else:
+        assigned_count = total_exam_count
     
-    # Create response with no-cache headers to prevent showing old cached versions
-    from django.views.decorators.cache import never_cache
-    response = render(request, 'primepath_routinetest/exam_list.html', {
-        'exams': exams_with_status,
+    # Log hierarchical organization results
+    console_log = {
+        "view": "exam_list", 
+        "action": "hierarchical_organization_complete",
+        "programs_with_exams": {
+            program: len(classes) for program, classes in hierarchical_exams.items() if classes
+        },
+        "total_exams": total_exam_count,
+        "accessible_exams": accessible_count,
+        "editable_exams": editable_count,
+        "assigned_exams": assigned_count,
+        "answer_mapping": {
+            "complete": complete_count,
+            "partial": partial_count,
+            "not_started": not_started_count
+        }
+    }
+    logger.info(f"[EXAM_LIST_HIERARCHY_COMPLETE] {json.dumps(console_log)}")
+    
+    # Prepare context for template
+    context = {
+        'hierarchical_exams': hierarchical_exams,
+        'program_order': ExamPermissionService.PROGRAM_ORDER,
+        'teacher_assignments': teacher_assignments,
+        'is_admin': is_admin,
+        'permission_summary': permission_summary,
         'mapping_summary': {
-            'total': len(exams_with_status),
+            'total': total_exam_count,
             'complete': complete_count,
             'partial': partial_count,
-            'not_started': not_started_count
+            'not_started': not_started_count,
+            'accessible': accessible_count,
+            'editable': editable_count
         },
-        'exam_type_filter': exam_type_filter,  # Current filter
-        'exam_type_counts': {  # Counts for tab badges
+        'exam_type_filter': exam_type_filter,
+        'assigned_only_filter': assigned_only_filter,
+        'exam_type_counts': {
             'review': review_count,
             'quarterly': quarterly_count,
-            'all': total_count
+            'all': total_count,
+            'assigned': assigned_count
         },
         'filter_description': filter_description,
-        'template_version': '4.0-review-quarterly-toggle',
-        'cache_bust_id': timezone.now().timestamp()
-    })
+        'template_version': '6.0-answer-keys-library',
+        'cache_bust_id': timezone.now().timestamp(),
+        
+        # Pass class to program mapping for frontend
+        'class_to_program_json': json.dumps(ExamPermissionService.CLASS_TO_PROGRAM),
+        
+        # Feature flags
+        'features': {
+            'copy_exam': True,
+            'permission_based_access': True,
+            'hierarchical_display': True,
+            'assigned_filter': True
+        }
+    }
     
-    # Add cache control headers to prevent caching
+    response = render(request, 'primepath_routinetest/exam_list.html', context)
+    
+    # Add cache control headers
     response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
-    response['X-Template-Version'] = '4.0-review-quarterly-toggle'
-    response['X-Feature'] = 'REVIEW-QUARTERLY-TOGGLE'
-    response['X-Exam-Type-Filter'] = exam_type_filter
+    response['X-Template-Version'] = '6.0-answer-keys-library'
+    response['X-Feature'] = 'ANSWER-KEYS-LIBRARY'
     
     return response
 
@@ -730,3 +761,153 @@ def delete_exam(request, exam_id):
         messages.error(request, f'Error deleting exam: {str(e)}')
     
     return redirect('RoutineTest:exam_list')
+
+
+# ========== ANSWER KEYS LIBRARY API ENDPOINTS ==========
+
+@login_required
+@require_http_methods(["GET"])
+def get_teacher_copyable_classes(request):
+    """API endpoint to get classes where teacher can copy exams to"""
+    from ..services import ExamPermissionService
+    
+    try:
+        copyable_classes = ExamPermissionService.get_teacher_copyable_classes(request.user)
+        is_admin = ExamPermissionService.is_admin(request.user)
+        
+        # Convert to display format
+        if copyable_classes == 'ALL':
+            # For admins, return all available class codes
+            all_classes = list(ExamPermissionService.CLASS_TO_PROGRAM.keys())
+            class_options = []
+            for class_code in sorted(all_classes):
+                program = ExamPermissionService.CLASS_TO_PROGRAM[class_code]
+                class_options.append({
+                    'value': class_code,
+                    'label': class_code.replace('_', ' '),
+                    'program': program
+                })
+        else:
+            # For teachers, return their assigned classes
+            class_options = []
+            for class_code in sorted(copyable_classes):
+                program = ExamPermissionService.CLASS_TO_PROGRAM.get(class_code, 'CORE')
+                class_options.append({
+                    'value': class_code,
+                    'label': class_code.replace('_', ' '),
+                    'program': program
+                })
+        
+        return JsonResponse({
+            'success': True,
+            'classes': class_options,
+            'is_admin': is_admin,
+            'total_classes': len(class_options)
+        })
+        
+    except Exception as e:
+        logger.error(f"[GET_COPYABLE_CLASSES] Error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def copy_exam(request, exam_id):
+    """API endpoint to copy an exam to different classes"""
+    from ..services import ExamPermissionService
+    
+    try:
+        # Get source exam
+        source_exam = get_object_or_404(Exam, id=exam_id)
+        
+        # Check if user can copy this exam
+        if not ExamPermissionService.can_teacher_copy_exam(request.user, source_exam):
+            return JsonResponse({
+                'success': False,
+                'error': 'You do not have permission to copy this exam'
+            }, status=403)
+        
+        # Parse request data
+        data = json.loads(request.body)
+        target_class_codes = data.get('target_class_codes', [])
+        exam_type = data.get('exam_type', source_exam.exam_type)
+        time_period = data.get('time_period')
+        academic_year = data.get('academic_year', source_exam.academic_year)
+        
+        # Validate target classes
+        copyable_classes = ExamPermissionService.get_teacher_copyable_classes(request.user)
+        if copyable_classes != 'ALL':
+            # Check if all target classes are allowed
+            invalid_classes = [code for code in target_class_codes if code not in copyable_classes]
+            if invalid_classes:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'You do not have permission to copy to classes: {", ".join(invalid_classes)}'
+                }, status=403)
+        
+        # Validate required fields
+        if not target_class_codes:
+            return JsonResponse({
+                'success': False,
+                'error': 'At least one target class must be selected'
+            }, status=400)
+        
+        if not time_period:
+            return JsonResponse({
+                'success': False,
+                'error': 'Time period is required'
+            }, status=400)
+        
+        # Get teacher for copy attribution
+        created_by = None
+        if hasattr(request.user, 'teacher_profile'):
+            created_by = request.user.teacher_profile
+        
+        # Create the copy
+        new_exam = Exam.create_copy(
+            source_exam=source_exam,
+            target_class_codes=target_class_codes,
+            exam_type=exam_type,
+            time_period=time_period,
+            academic_year=academic_year,
+            created_by=created_by
+        )
+        
+        # Log the copy operation
+        console_log = {
+            "action": "exam_copied",
+            "source_exam_id": str(source_exam.id),
+            "source_exam_name": source_exam.name,
+            "new_exam_id": str(new_exam.id),
+            "new_exam_name": new_exam.name,
+            "target_class_codes": target_class_codes,
+            "exam_type": exam_type,
+            "time_period": time_period,
+            "academic_year": academic_year,
+            "copied_by": str(request.user),
+            "timestamp": timezone.now().isoformat()
+        }
+        logger.info(f"[EXAM_COPY_SUCCESS] {json.dumps(console_log)}")
+        print(f"[EXAM_COPY_SUCCESS] {json.dumps(console_log)}")
+        
+        return JsonResponse({
+            'success': True,
+            'new_exam_id': str(new_exam.id),
+            'new_exam_name': new_exam.name,
+            'message': f'Exam copied successfully to {len(target_class_codes)} class(es)'
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"[EXAM_COPY_ERROR] Error copying exam {exam_id}: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
