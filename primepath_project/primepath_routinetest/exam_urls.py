@@ -4,6 +4,7 @@ URLs for exam creation, editing, and management
 """
 from django.urls import path
 from . import views
+from .views import exam
 
 urlpatterns = [
     # Exam management
@@ -18,6 +19,6 @@ urlpatterns = [
     path('exams/<uuid:exam_id>/delete/', views.delete_exam, name='delete_exam'),
     
     # Answer Keys Library API endpoints
-    path('api/teacher/copyable-classes/', views.get_teacher_copyable_classes, name='get_teacher_copyable_classes'),
-    path('api/exams/<uuid:exam_id>/copy/', views.copy_exam, name='copy_exam'),
+    path('api/teacher/copyable-classes/', exam.get_teacher_copyable_classes, name='get_teacher_copyable_classes'),
+    path('api/exams/<uuid:exam_id>/copy/', exam.copy_exam, name='copy_exam'),
 ]

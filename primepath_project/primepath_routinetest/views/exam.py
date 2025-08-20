@@ -22,13 +22,12 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def exam_list(request):
-    """List all exams hierarchically by Program and Class Code - Version 6.0 Answer Keys Library"""
-    from ..services import ExamPermissionService
+    """List all exams hierarchically by Program and Class Code - Version 6.0 Library View"""
     from collections import defaultdict
     
     # Get filters from request
     exam_type_filter = request.GET.get('exam_type', 'ALL')
-    assigned_only_filter = request.GET.get('assigned_only', 'false').lower() == 'true'
+    show_assigned_only = request.GET.get('assigned_only', 'false').lower() == 'true'
     
     # Validate exam type filter
     valid_exam_types = ['REVIEW', 'QUARTERLY', 'ALL']
@@ -36,9 +35,11 @@ def exam_list(request):
         exam_type_filter = 'ALL'
     
     # Get permission info for current user
-    is_admin = ExamPermissionService.is_admin(request.user)
-    teacher_assignments = ExamPermissionService.get_teacher_assignments(request.user)
-    permission_summary = ExamPermissionService.get_permission_summary(request.user)
+    is_admin = request.user.is_superuser or request.user.is_staff
+    teacher_assignments = ExamService.get_teacher_assignments(request.user)
+    
+    # Debug logging
+    logger.info(f"[EXAM_LIST_DEBUG] User: {request.user.username}, is_superuser: {request.user.is_superuser}, is_staff: {request.user.is_staff}, is_admin: {is_admin}")
     
     # Log authentication and permissions
     console_log = {
@@ -47,9 +48,8 @@ def exam_list(request):
         "user": str(request.user),
         "is_admin": is_admin,
         "teacher_assignments": list(teacher_assignments.keys()),
-        "assigned_only_filter": assigned_only_filter,
+        "assigned_only_filter": show_assigned_only,
         "exam_type_filter": exam_type_filter,
-        "permission_summary": permission_summary,
         "timestamp": timezone.now().isoformat()
     }
     logger.info(f"[EXAM_LIST_V6_LIBRARY] {json.dumps(console_log)}")
@@ -74,17 +74,28 @@ def exam_list(request):
         exams = base_query.all()
         filter_description = "All Exams"
     
-    # Apply permission-based filtering
-    if assigned_only_filter:
-        exams = ExamPermissionService.filter_exams_by_permission(
-            exams, request.user, filter_type='assigned_only'
-        )
+    # Note: filtering will be handled in organize_exams_hierarchically
+    if show_assigned_only:
         filter_description += " (Assigned Classes Only)"
     
+    # Add answer mapping status to each exam
+    for exam in exams:
+        exam.answer_mapping_status = exam.get_answer_mapping_status()
+    
     # Organize exams hierarchically with permission info
-    hierarchical_exams = ExamPermissionService.organize_exams_hierarchically(
-        exams, request.user, assigned_only=assigned_only_filter
+    hierarchical_exams = ExamService.organize_exams_hierarchically(
+        exams, request.user, filter_assigned_only=show_assigned_only
     )
+    
+    # Debug logging
+    logger.info(f"[EXAM_LIST_DEBUG] Total exams before hierarchical: {exams.count()}")
+    logger.info(f"[EXAM_LIST_DEBUG] hierarchical_exams type: {type(hierarchical_exams)}")
+    logger.info(f"[EXAM_LIST_DEBUG] hierarchical_exams keys: {list(hierarchical_exams.keys())}")
+    for program, program_data in hierarchical_exams.items():
+        if program_data:
+            logger.info(f"[EXAM_LIST_DEBUG] {program}: {len(program_data)} classes, type: {type(program_data)}")
+            for class_code, class_exams in list(program_data.items())[:2]:  # Log first 2 classes
+                logger.info(f"[EXAM_LIST_DEBUG]   {class_code}: {len(class_exams)} exams")
     
     # Calculate summary statistics
     total_exam_count = 0
@@ -108,9 +119,9 @@ def exam_list(request):
                     not_started_count += 1
                 
                 # Permission counts
-                if exam.permission_info['has_accessible_classes']:
+                if exam.is_accessible:
                     accessible_count += 1
-                if exam.permission_info['can_edit']:
+                if exam.can_edit:
                     editable_count += 1
     
     # Get counts for each exam type (for tabs)
@@ -118,15 +129,8 @@ def exam_list(request):
     quarterly_count = Exam.objects.filter(exam_type='QUARTERLY').count()
     total_count = Exam.objects.count()
     
-    # Calculate assigned vs all counts for filter toggle
-    if not assigned_only_filter:
-        # Get count if we applied assigned filter
-        assigned_exams = ExamPermissionService.filter_exams_by_permission(
-            base_query.all(), request.user, filter_type='assigned_only'
-        )
-        assigned_count = assigned_exams.count()
-    else:
-        assigned_count = total_exam_count
+    # Calculate assigned count
+    assigned_count = accessible_count
     
     # Log hierarchical organization results
     console_log = {
@@ -147,13 +151,28 @@ def exam_list(request):
     }
     logger.info(f"[EXAM_LIST_HIERARCHY_COMPLETE] {json.dumps(console_log)}")
     
+    # Get editable classes for the current user
+    editable_classes = [
+        class_code for class_code, access_level in teacher_assignments.items()
+        if access_level in ['FULL', 'CO_TEACHER']
+    ]
+    
+    # Create class display name dictionary
+    class_display_names = {}
+    for program_classes in ExamService.PROGRAM_CLASS_MAPPING.values():
+        for class_code in program_classes:
+            class_display_names[class_code] = ExamService.get_class_display_name(class_code)
+    
+    # Debug: Log what we're passing to template
+    logger.info(f"[EXAM_LIST_CONTEXT] Passing is_admin={is_admin} to template")
+    
     # Prepare context for template
     context = {
         'hierarchical_exams': hierarchical_exams,
-        'program_order': ExamPermissionService.PROGRAM_ORDER,
+        'program_order': ExamService.PROGRAM_CLASS_MAPPING.keys(),
         'teacher_assignments': teacher_assignments,
+        'editable_classes': editable_classes,
         'is_admin': is_admin,
-        'permission_summary': permission_summary,
         'mapping_summary': {
             'total': total_exam_count,
             'complete': complete_count,
@@ -163,7 +182,7 @@ def exam_list(request):
             'editable': editable_count
         },
         'exam_type_filter': exam_type_filter,
-        'assigned_only_filter': assigned_only_filter,
+        'show_assigned_only': show_assigned_only,
         'exam_type_counts': {
             'review': review_count,
             'quarterly': quarterly_count,
@@ -174,8 +193,8 @@ def exam_list(request):
         'template_version': '6.0-answer-keys-library',
         'cache_bust_id': timezone.now().timestamp(),
         
-        # Pass class to program mapping for frontend
-        'class_to_program_json': json.dumps(ExamPermissionService.CLASS_TO_PROGRAM),
+        # Class display names dictionary
+        'get_class_display_name': class_display_names,
         
         # Feature flags
         'features': {
@@ -186,7 +205,7 @@ def exam_list(request):
         }
     }
     
-    response = render(request, 'primepath_routinetest/exam_list.html', context)
+    response = render(request, 'primepath_routinetest/exam_list_hierarchical.html', context)
     
     # Add cache control headers
     response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
@@ -734,7 +753,7 @@ def manage_questions(request, exam_id):
     })
 
 
-@require_http_methods(["POST"])
+@require_http_methods(["POST", "DELETE"])
 @login_required
 def delete_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
@@ -769,32 +788,40 @@ def delete_exam(request, exam_id):
 @require_http_methods(["GET"])
 def get_teacher_copyable_classes(request):
     """API endpoint to get classes where teacher can copy exams to"""
-    from ..services import ExamPermissionService
     
     try:
-        copyable_classes = ExamPermissionService.get_teacher_copyable_classes(request.user)
-        is_admin = ExamPermissionService.is_admin(request.user)
+        # Get teacher's editable classes
+        teacher_assignments = ExamService.get_teacher_assignments(request.user)
+        copyable_classes = [
+            class_code for class_code, access_level in teacher_assignments.items()
+            if access_level in ['FULL', 'CO_TEACHER']
+        ]
+        is_admin = request.user.is_superuser or request.user.is_staff
         
         # Convert to display format
-        if copyable_classes == 'ALL':
+        class_options = []
+        if is_admin:
             # For admins, return all available class codes
-            all_classes = list(ExamPermissionService.CLASS_TO_PROGRAM.keys())
-            class_options = []
-            for class_code in sorted(all_classes):
-                program = ExamPermissionService.CLASS_TO_PROGRAM[class_code]
-                class_options.append({
-                    'value': class_code,
-                    'label': class_code.replace('_', ' '),
-                    'program': program
-                })
+            for program, classes in ExamService.PROGRAM_CLASS_MAPPING.items():
+                for class_code in sorted(classes):
+                    class_options.append({
+                        'value': class_code,
+                        'label': ExamService.get_class_display_name(class_code),
+                        'program': program
+                    })
         else:
             # For teachers, return their assigned classes
-            class_options = []
             for class_code in sorted(copyable_classes):
-                program = ExamPermissionService.CLASS_TO_PROGRAM.get(class_code, 'CORE')
+                # Find which program this class belongs to
+                program = 'CORE'  # Default
+                for prog, classes in ExamService.PROGRAM_CLASS_MAPPING.items():
+                    if class_code in classes:
+                        program = prog
+                        break
+                
                 class_options.append({
                     'value': class_code,
-                    'label': class_code.replace('_', ' '),
+                    'label': ExamService.get_class_display_name(class_code),
                     'program': program
                 })
         

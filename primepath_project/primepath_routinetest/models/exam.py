@@ -397,6 +397,7 @@ class Exam(models.Model):
                 'percentage_complete': float - Percentage of questions with answers
                 'status_label': str - 'Complete', 'Partial', or 'Not Started'
                 'status_color': str - CSS color class for status display
+                'status_class': str - CSS-friendly class name for status (complete, partial, not-started)
             }
         """
         import logging
@@ -448,14 +449,17 @@ class Exam(models.Model):
             if unmapped_count == 0:
                 status_label = 'Complete'
                 status_color = 'success'
+                status_class = 'complete'
                 is_complete = True
             elif mapped_count == 0:
                 status_label = 'Not Started'
                 status_color = 'danger'
+                status_class = 'not-started'
                 is_complete = False
             else:
                 status_label = 'Partial'
                 status_color = 'warning'
+                status_class = 'partial'
                 is_complete = False
             
             # Log the status check
@@ -471,7 +475,8 @@ class Exam(models.Model):
                 'unmapped_question_numbers': unmapped[:10],  # Limit to first 10 for display
                 'percentage_complete': round(percentage_complete, 1),
                 'status_label': status_label,
-                'status_color': status_color
+                'status_color': status_color,
+                'status_class': status_class
             }
             
         except Exception as e:
@@ -484,7 +489,8 @@ class Exam(models.Model):
                 'unmapped_question_numbers': [],
                 'percentage_complete': 0,
                 'status_label': 'Error',
-                'status_color': 'danger'
+                'status_color': 'danger',
+                'status_class': 'error'
             }
     
     def has_all_answers_mapped(self):

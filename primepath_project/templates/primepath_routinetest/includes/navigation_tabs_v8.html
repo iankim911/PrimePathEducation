@@ -22,12 +22,12 @@
                 </a>
             </li>
             
-            <!-- Answer Keys -->
+            <!-- Exam Library -->
             <li>
                 <a href="{% url 'RoutineTest:exam_list' %}" 
                    data-nav="keys"
                    class="{% if request.resolver_match.url_name == 'exam_list' or request.resolver_match.url_name == 'preview_exam' or request.resolver_match.url_name == 'edit_exam' %}active{% endif %}">
-                   Answer Keys
+                   Exam Library
                 </a>
             </li>
             

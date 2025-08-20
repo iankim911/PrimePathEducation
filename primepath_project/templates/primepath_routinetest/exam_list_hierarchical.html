@@ -1,0 +1,1048 @@
+{% extends "routinetest_base.html" %}
+{% load custom_filters %}
+{# Template Version 6.0 - Hierarchical Library View with Permissions #}
+
+{% block title %}Exam Library - RoutineTest{% endblock %}
+
+{% block header %}Exam Library{% endblock %}
+
+{% block content %}
+<style>
+    /* Main Layout */
+    .exam-library-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .library-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .library-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .header-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    /* Filter Toggle */
+    .filter-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .filter-toggle input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .filter-toggle label {
+        cursor: pointer;
+        user-select: none;
+        font-weight: 500;
+    }
+    
+    /* Tab System */
+    .exam-type-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #dee2e6;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+    }
+    
+    .exam-type-tab {
+        flex: 1;
+        padding: 15px 20px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .exam-type-tab:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+    
+    .exam-type-tab.active {
+        background: #2E7D32;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .tab-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        background: rgba(0,0,0,0.1);
+        min-width: 24px;
+    }
+    
+    .exam-type-tab.active .tab-badge {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    /* Hierarchical Display */
+    .program-section {
+        margin-bottom: 40px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .program-header {
+        background: linear-gradient(135deg, #2E7D32, #4CAF50);
+        color: white;
+        padding: 15px 20px;
+        font-size: 1.3rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .program-header:hover {
+        background: linear-gradient(135deg, #1B5E20, #388E3C);
+    }
+    
+    .program-toggle {
+        font-size: 1.2rem;
+        transition: transform 0.3s;
+    }
+    
+    .program-section.collapsed .program-toggle {
+        transform: rotate(-90deg);
+    }
+    
+    .program-content {
+        padding: 20px;
+        background: #fafafa;
+    }
+    
+    .program-section.collapsed .program-content {
+        display: none;
+    }
+    
+    /* Class Sections */
+    .class-section {
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+    }
+    
+    .class-section.accessible {
+        border: 2px solid #81C784;
+        background: linear-gradient(to right, #E8F5E9 0%, white 5%);
+    }
+    
+    .class-header {
+        padding: 12px 15px;
+        background: #f5f5f5;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+    }
+    
+    .class-section.accessible .class-header {
+        background: #E8F5E9;
+    }
+    
+    .class-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .access-badge {
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .access-badge.full {
+        background: #4CAF50;
+        color: white;
+    }
+    
+    .access-badge.co-teacher {
+        background: #2196F3;
+        color: white;
+    }
+    
+    .access-badge.view {
+        background: #9E9E9E;
+        color: white;
+    }
+    
+    .class-toggle {
+        transition: transform 0.3s;
+    }
+    
+    .class-section.collapsed .class-toggle {
+        transform: rotate(-90deg);
+    }
+    
+    .class-exams {
+        padding: 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 15px;
+    }
+    
+    .class-section.collapsed .class-exams {
+        display: none;
+    }
+    
+    /* Exam Cards */
+    .exam-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        transition: box-shadow 0.2s;
+        position: relative;
+    }
+    
+    .exam-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .exam-card.editable {
+        border-left: 4px solid #4CAF50;
+    }
+    
+    .exam-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        font-size: 1rem;
+    }
+    
+    .exam-meta {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .exam-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    /* Answer Mapping Status */
+    .answer-status {
+        padding: 8px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .answer-status.complete {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .answer-status.partial {
+        background: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+    }
+    
+    .answer-status.not-started {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .answer-progress-bar {
+        width: 100%;
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 5px 0;
+    }
+    
+    .answer-progress-fill {
+        height: 100%;
+        transition: width 0.3s;
+    }
+    
+    .answer-progress-fill.complete {
+        background: #28a745;
+    }
+    
+    .answer-progress-fill.partial {
+        background: #ffc107;
+    }
+    
+    /* Action Buttons */
+    .exam-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+    
+    .btn {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+    
+    .btn-view {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-view:hover {
+        background: #5a6268;
+    }
+    
+    .btn-edit {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: #0056b3;
+    }
+    
+    .btn-copy {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .btn-copy:hover {
+        background: #138496;
+    }
+    
+    /* ULTIMATE DELETE BUTTON FIX - Maximum CSS specificity and comprehensive coverage */
+    
+    /* Target ALL possible delete button selectors with maximum specificity */
+    html body.routinetest-theme .exam-library-container .exam-actions button.btn-danger,
+    html body.routinetest-theme .exam-library-container .exam-actions button[onclick*="confirmDelete"],
+    html body.routinetest-theme .exam-hierarchy .exam-actions button.btn-danger,
+    html body.routinetest-theme .exam-hierarchy .exam-actions button[onclick*="confirmDelete"],
+    html body .exam-library-container .exam-actions button.btn-danger,
+    html body .exam-library-container .exam-actions button[onclick*="confirmDelete"],
+    html body .exam-hierarchy .exam-actions button.btn-danger,
+    html body .exam-hierarchy .exam-actions button[onclick*="confirmDelete"],
+    /* Fallback selectors for various scenarios */
+    button.btn-danger,
+    .btn.btn-danger,
+    .exam-actions .btn-danger,
+    button[onclick*="confirmDelete"],
+    .exam-actions button[onclick*="confirmDelete"],
+    /* Override theme CSS that might be greening the buttons */
+    .routinetest-theme .btn.btn-danger,
+    .routinetest-theme button.btn-danger,
+    .routinetest-theme .exam-actions .btn-danger,
+    .routinetest-theme .exam-actions button[onclick*="confirmDelete"] {
+        background: #dc3545 !important;
+        background-color: #dc3545 !important;
+        background-image: none !important;
+        color: white !important;
+        border: 1px solid #dc3545 !important;
+        border-color: #dc3545 !important;
+        border-top-color: #dc3545 !important;
+        border-right-color: #dc3545 !important;
+        border-bottom-color: #dc3545 !important;
+        border-left-color: #dc3545 !important;
+        /* Prevent any theme overrides */
+        box-shadow: none !important;
+        transform: none !important;
+    }
+    
+    /* Hover states with same specificity pattern */
+    html body.routinetest-theme .exam-library-container .exam-actions button.btn-danger:hover,
+    html body.routinetest-theme .exam-library-container .exam-actions button[onclick*="confirmDelete"]:hover,
+    html body.routinetest-theme .exam-hierarchy .exam-actions button.btn-danger:hover,
+    html body.routinetest-theme .exam-hierarchy .exam-actions button[onclick*="confirmDelete"]:hover,
+    html body .exam-library-container .exam-actions button.btn-danger:hover,
+    html body .exam-library-container .exam-actions button[onclick*="confirmDelete"]:hover,
+    html body .exam-hierarchy .exam-actions button.btn-danger:hover,
+    html body .exam-hierarchy .exam-actions button[onclick*="confirmDelete"]:hover,
+    button.btn-danger:hover,
+    .btn.btn-danger:hover,
+    .exam-actions .btn-danger:hover,
+    button[onclick*="confirmDelete"]:hover,
+    .exam-actions button[onclick*="confirmDelete"]:hover,
+    .routinetest-theme .btn.btn-danger:hover,
+    .routinetest-theme button.btn-danger:hover,
+    .routinetest-theme .exam-actions .btn-danger:hover,
+    .routinetest-theme .exam-actions button[onclick*="confirmDelete"]:hover {
+        background: #c82333 !important;
+        background-color: #c82333 !important;
+        background-image: none !important;
+        border-color: #bd2130 !important;
+        border-top-color: #bd2130 !important;
+        border-right-color: #bd2130 !important;
+        border-bottom-color: #bd2130 !important;
+        border-left-color: #bd2130 !important;
+        color: white !important;
+        /* Keep hover effects but ensure red color */
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3) !important;
+    }
+    
+    /* Focus and active states */
+    html body .exam-actions button.btn-danger:focus,
+    html body .exam-actions button.btn-danger:active,
+    html body .exam-actions button[onclick*="confirmDelete"]:focus,
+    html body .exam-actions button[onclick*="confirmDelete"]:active {
+        background: #bd2130 !important;
+        background-color: #bd2130 !important;
+        border-color: #bd2130 !important;
+        color: white !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+    
+    .no-exams {
+        padding: 20px;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    /* Summary Stats */
+    .summary-stats {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .stat-label {
+        font-weight: 500;
+        color: #6c757d;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    
+    .modal-content h3 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        font-size: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .form-group p {
+        margin: 5px 0;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .library-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .class-exams {
+            grid-template-columns: 1fr;
+        }
+        
+        .summary-stats {
+            flex-direction: column;
+        }
+        
+        .modal-content {
+            width: 95%;
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="exam-library-container">
+    <!-- Header -->
+    <div class="library-header">
+        <h1 class="library-title">Exam Library</h1>
+        <div class="header-controls">
+            <!-- Filter Toggle -->
+            <div class="filter-toggle">
+                <input type="checkbox" id="assignedOnlyFilter" {% if show_assigned_only %}checked{% endif %}>
+                <label for="assignedOnlyFilter">Show Assigned Classes Only</label>
+            </div>
+            
+            <!-- Upload Button (Admin Only) -->
+            {% if is_admin %}
+            <a href="{% url 'RoutineTest:create_exam' %}" class="btn btn-edit">
+                📤 Upload New Exam
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="summary-stats">
+        <div class="stat-item">
+            <span class="stat-label">Total Exams:</span>
+            <span class="stat-value">{{ mapping_summary.total }}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Complete:</span>
+            <span class="stat-value" style="color: #28a745;">{{ mapping_summary.complete }}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Partial:</span>
+            <span class="stat-value" style="color: #ffc107;">{{ mapping_summary.partial }}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Not Started:</span>
+            <span class="stat-value" style="color: #dc3545;">{{ mapping_summary.not_started }}</span>
+        </div>
+        {% if not is_admin %}
+        <div class="stat-item">
+            <span class="stat-label">Editable:</span>
+            <span class="stat-value" style="color: #4CAF50;">{{ mapping_summary.editable }}</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Exam Type Tabs -->
+    <div class="exam-type-tabs">
+        <a href="?exam_type=REVIEW{% if show_assigned_only %}&assigned_only=true{% endif %}" 
+           class="exam-type-tab {% if exam_type_filter == 'REVIEW' %}active{% endif %}">
+            <span>📚 Review / Monthly</span>
+            <span class="tab-badge">{{ exam_type_counts.review }}</span>
+        </a>
+        
+        <a href="?exam_type=QUARTERLY{% if show_assigned_only %}&assigned_only=true{% endif %}" 
+           class="exam-type-tab {% if exam_type_filter == 'QUARTERLY' %}active{% endif %}">
+            <span>📊 Quarterly</span>
+            <span class="tab-badge">{{ exam_type_counts.quarterly }}</span>
+        </a>
+        
+        <a href="?exam_type=ALL{% if show_assigned_only %}&assigned_only=true{% endif %}" 
+           class="exam-type-tab {% if exam_type_filter == 'ALL' %}active{% endif %}">
+            <span>📋 All Exams</span>
+            <span class="tab-badge">{{ exam_type_counts.all }}</span>
+        </a>
+    </div>
+    
+    <!-- Hierarchical Exam Display -->
+    <!-- Debug: hierarchical_exams = {{ hierarchical_exams }} -->
+    <div class="exam-hierarchy">
+        {% for program in program_order %}
+            {% with program_exams=hierarchical_exams|get_item:program %}
+            {% if program_exams and program_exams|length > 0 %}
+            <div class="program-section" data-program="{{ program }}">
+                <div class="program-header" onclick="toggleProgram('{{ program }}')">
+                    <span>{{ program }} Program</span>
+                    <span class="program-toggle">▼</span>
+                </div>
+                
+                <div class="program-content">
+                    <!-- Debug: {{ program_exams|length }} classes in {{ program }} -->
+                    {% for class_code, class_exams in program_exams.items %}
+                        {% with access_level=teacher_assignments|get_item:class_code %}
+                        <div class="class-section {% if access_level and access_level != 'VIEW' %}accessible{% endif %}" 
+                             data-class="{{ class_code }}">
+                            <div class="class-header" onclick="toggleClass('{{ class_code }}')">
+                                <div class="class-name">
+                                    <span>{{ get_class_display_name|get_item:class_code|default:class_code }}</span>
+                                    {% if access_level %}
+                                        {% if access_level == 'FULL' %}
+                                            <span class="access-badge full">Full Access</span>
+                                        {% elif access_level == 'CO_TEACHER' %}
+                                            <span class="access-badge co-teacher">Co-Teacher</span>
+                                        {% elif access_level == 'VIEW' %}
+                                            <span class="access-badge view">View Only</span>
+                                        {% endif %}
+                                    {% elif not is_admin %}
+                                        <span class="access-badge view">View Only</span>
+                                    {% endif %}
+                                    <span style="color: #6c757d;">({{ class_exams|length }} exam{{ class_exams|length|pluralize }})</span>
+                                </div>
+                                <span class="class-toggle">▼</span>
+                            </div>
+                            
+                            <div class="class-exams">
+                                {% for exam in class_exams %}
+                                <!-- Debug: exam.can_edit = {{ exam.can_edit }}, is_admin = {{ is_admin }} -->
+                                <div class="exam-card {% if exam.can_edit %}editable{% endif %}">
+                                    <div class="exam-title">{{ exam.name }}</div>
+                                    
+                                    <div class="exam-meta">
+                                        <div class="exam-meta-item">
+                                            📄 {{ exam.routine_questions.count }} Questions
+                                        </div>
+                                        <div class="exam-meta-item">
+                                            🎵 {{ exam.routine_audio_files.count }} Audio
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Answer Mapping Status -->
+                                    <div class="answer-status {{ exam.answer_mapping_status.status_class }}">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span>Answer Keys: {{ exam.answer_mapping_status.status_label }}</span>
+                                            <span>{{ exam.answer_mapping_status.percentage_complete }}%</span>
+                                        </div>
+                                        <div class="answer-progress-bar">
+                                            <div class="answer-progress-fill {{ exam.answer_mapping_status.status_class }}"
+                                                 style="width: {{ exam.answer_mapping_status.percentage_complete }}%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="exam-actions">
+                                        {% if exam.can_edit %}
+                                            <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-edit">
+                                                ✏️ Edit Answers
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-view">
+                                                📝 Manage Answers
+                                            </a>
+                                        {% endif %}
+                                        
+                                        {% if exam.can_copy %}
+                                            <button onclick="openCopyModal('{{ exam.id }}', '{{ exam.name }}')" class="btn btn-copy">
+                                                📋 Copy
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {# Always show delete button for admins #}
+                                        {% if is_admin or exam.can_edit %}
+                                            <button onclick="confirmDelete('{{ exam.id }}', '{{ exam.name }}')" 
+                                                    class="btn btn-danger">
+                                                🗑️ Delete
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="no-exams">No exams in this class</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endwith %}
+        {% endfor %}
+        
+        {% comment %}Show empty state if no exams in any program{% endcomment %}
+        {% if mapping_summary.total == 0 and exam_type_counts.all > 0 %}
+        <div class="empty-state">
+            <h3>Exams not organized</h3>
+            <p>{{ exam_type_counts.all }} exam(s) found in database but could not be organized into programs. This typically means exams are missing class assignments.</p>
+            <p><small>Debug: hierarchical_exams has {{ hierarchical_exams|length }} programs</small></p>
+        </div>
+        {% elif mapping_summary.total == 0 %}
+        <div class="empty-state">
+            <h3>No exams found</h3>
+            <p>{% if show_assigned_only %}No exams in your assigned classes. Try turning off the filter.{% else %}No exams available in the library.{% endif %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Copy Exam Modal -->
+<div id="copyExamModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Copy Exam</h3>
+        <form id="copyExamForm">
+            <input type="hidden" id="sourceExamId" name="source_exam_id">
+            
+            <div class="form-group">
+                <label>Source Exam:</label>
+                <p id="sourceExamName"></p>
+            </div>
+            
+            <div class="form-group">
+                <label for="targetClass">Target Class:</label>
+                <select id="targetClass" name="target_class" required>
+                    <option value="">Select a class...</option>
+                    {% for class_code, access_level in teacher_assignments.items %}
+                        {% if access_level == 'FULL' or access_level == 'CO_TEACHER' %}
+                        <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="copyExamType">Exam Type:</label>
+                <select id="copyExamType" name="exam_type" required>
+                    <option value="REVIEW">Review / Monthly</option>
+                    <option value="QUARTERLY">Quarterly</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeslot">Timeslot:</label>
+                <select id="timeslot" name="timeslot" required>
+                    <option value="">Select timeslot...</option>
+                    <!-- Populated dynamically based on exam type -->
+                </select>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" onclick="closeCopyModal()" class="btn btn-view">Cancel</button>
+                <button type="submit" class="btn btn-copy">Copy Exam</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Toggle functions
+function toggleProgram(program) {
+    const section = document.querySelector(`.program-section[data-program="${program}"]`);
+    section.classList.toggle('collapsed');
+}
+
+function toggleClass(classCode) {
+    const section = document.querySelector(`.class-section[data-class="${classCode}"]`);
+    section.classList.toggle('collapsed');
+}
+
+// Filter toggle
+document.getElementById('assignedOnlyFilter').addEventListener('change', function() {
+    const currentUrl = new URL(window.location.href);
+    if (this.checked) {
+        currentUrl.searchParams.set('assigned_only', 'true');
+    } else {
+        currentUrl.searchParams.delete('assigned_only');
+    }
+    window.location.href = currentUrl.toString();
+});
+
+// Copy modal functions
+function openCopyModal(examId, examName) {
+    console.log('Opening copy modal for exam:', examId, examName);
+    document.getElementById('sourceExamId').value = examId;
+    document.getElementById('sourceExamName').textContent = examName;
+    document.getElementById('copyExamModal').style.display = 'flex';
+}
+
+function closeCopyModal() {
+    document.getElementById('copyExamModal').style.display = 'none';
+    document.getElementById('copyExamForm').reset();
+}
+
+// Handle copy form submission
+document.getElementById('copyExamForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        source_exam_id: formData.get('source_exam_id'),
+        target_class: formData.get('target_class'),
+        target_timeslot: formData.get('timeslot')
+    };
+    
+    try {
+        const response = await fetch('/RoutineTest/api/copy-exam/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Exam copied successfully!');
+            window.location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error copying exam: ' + error.message);
+    }
+});
+
+// Delete confirmation
+function confirmDelete(examId, examName) {
+    if (confirm(`Are you sure you want to delete "${examName}"? This action cannot be undone.`)) {
+        deleteExam(examId);
+    }
+}
+
+async function deleteExam(examId) {
+    try {
+        const response = await fetch(`/RoutineTest/exams/${examId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Exam deleted successfully');
+            window.location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error deleting exam: ' + error.message);
+    }
+}
+
+// ULTIMATE DELETE BUTTON COLOR ENFORCEMENT
+function enforceDeleteButtonColors() {
+    // Find all possible delete button selectors
+    const deleteButtons = document.querySelectorAll(`
+        button[onclick*="confirmDelete"],
+        .btn-danger,
+        button.btn-danger,
+        .exam-actions button[onclick*="confirmDelete"],
+        .exam-actions .btn-danger
+    `);
+    
+    console.log(`[DELETE FIX] Found ${deleteButtons.length} delete buttons to fix`);
+    
+    deleteButtons.forEach((button, index) => {
+        // Remove any conflicting theme classes that might make it green
+        button.classList.remove('btn-success', 'btn-primary', 'btn-secondary', 'btn-info');
+        
+        // Ensure btn-danger class is present
+        if (!button.classList.contains('btn-danger')) {
+            button.classList.add('btn-danger');
+        }
+        
+        // Force red styling with maximum specificity through inline styles
+        button.style.setProperty('background-color', '#dc3545', 'important');
+        button.style.setProperty('background', '#dc3545', 'important');
+        button.style.setProperty('border-color', '#dc3545', 'important');
+        button.style.setProperty('color', 'white', 'important');
+        button.style.setProperty('background-image', 'none', 'important');
+        
+        // Set data attribute for identification
+        button.setAttribute('data-delete-button-fixed', 'true');
+        
+        // Remove and re-add hover event listeners to prevent conflicts
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        // Add proper hover events
+        newButton.addEventListener('mouseenter', function(e) {
+            e.target.style.setProperty('background-color', '#c82333', 'important');
+            e.target.style.setProperty('background', '#c82333', 'important');
+            e.target.style.setProperty('border-color', '#bd2130', 'important');
+            e.target.style.setProperty('transform', 'translateY(-2px)', 'important');
+            e.target.style.setProperty('box-shadow', '0 4px 8px rgba(220, 53, 69, 0.3)', 'important');
+        });
+        
+        newButton.addEventListener('mouseleave', function(e) {
+            e.target.style.setProperty('background-color', '#dc3545', 'important');
+            e.target.style.setProperty('background', '#dc3545', 'important');
+            e.target.style.setProperty('border-color', '#dc3545', 'important');
+            e.target.style.setProperty('transform', 'none', 'important');
+            e.target.style.setProperty('box-shadow', 'none', 'important');
+        });
+        
+        console.log(`[DELETE FIX] Fixed button ${index}: ${newButton.textContent.trim()}`);
+    });
+    
+    // Also check for and fix any buttons that might be added by theme JS
+    setTimeout(() => {
+        const themeButtons = document.querySelectorAll('.routinetest-theme .btn:not([data-delete-button-fixed])');
+        themeButtons.forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes('confirmDelete')) {
+                enforceDeleteButtonColors();
+            }
+        });
+    }, 100);
+}
+
+// Run immediately when page loads
+document.addEventListener('DOMContentLoaded', enforceDeleteButtonColors);
+
+// Run after a short delay to catch theme-applied buttons
+setTimeout(enforceDeleteButtonColors, 500);
+setTimeout(enforceDeleteButtonColors, 1000);
+
+// Watch for dynamic content changes with debouncing
+let timeoutId;
+const observer = new MutationObserver(function(mutations) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+        let shouldReprocess = false;
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1 && (
+                        node.matches && node.matches('button[onclick*="confirmDelete"]') ||
+                        node.querySelector && node.querySelector('button[onclick*="confirmDelete"]')
+                    )) {
+                        shouldReprocess = true;
+                    }
+                });
+            } else if (mutation.type === 'attributes' && 
+                       mutation.target.matches && 
+                       mutation.target.matches('button[onclick*="confirmDelete"]')) {
+                shouldReprocess = true;
+            }
+        });
+        
+        if (shouldReprocess) {
+            console.log('[DELETE FIX] DOM changes detected, re-processing delete buttons');
+            enforceDeleteButtonColors();
+        }
+    }, 250); // Debounce for 250ms
+});
+
+// Start observing with more specific configuration
+observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class', 'style', 'onclick']
+});
+
+// Populate timeslots based on exam type
+document.getElementById('copyExamType').addEventListener('change', function() {
+    const timeslotSelect = document.getElementById('timeslot');
+    timeslotSelect.innerHTML = '<option value="">Select timeslot...</option>';
+    
+    if (this.value === 'REVIEW') {
+        // Monthly timeslots
+        for (let i = 1; i <= 12; i++) {
+            const option = document.createElement('option');
+            option.value = `month_${i}`;
+            option.textContent = `Month ${i}`;
+            timeslotSelect.appendChild(option);
+        }
+    } else if (this.value === 'QUARTERLY') {
+        // Quarterly timeslots
+        ['Q1', 'Q2', 'Q3', 'Q4'].forEach(quarter => {
+            const option = document.createElement('option');
+            option.value = quarter.toLowerCase();
+            option.textContent = quarter;
+            timeslotSelect.appendChild(option);
+        });
+    }
+});
+</script>
+
+{% endblock %}

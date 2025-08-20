@@ -431,11 +431,25 @@
         </div>
     </div>
     
-    <!-- Load RoutineTest Theme CSS -->
-    <link rel="stylesheet" href="{% static 'css/routinetest-theme.css' %}">
+    <!-- Load RoutineTest Theme CSS IMMEDIATELY after base styles -->
+    <link rel="stylesheet" href="{% static 'css/routinetest-theme.css' %}?v={% now 'U' %}">
+    
+    <!-- Pre-apply theme class to prevent FOUC and ensure CSS rules work -->
+    <script>
+    (function() {
+        // Apply theme class immediately to prevent flash of unstyled content
+        document.documentElement.classList.add('routinetest-theme');
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!document.body.classList.contains('routinetest-theme')) {
+                document.body.classList.add('routinetest-theme');
+                console.log('[Theme Pre-apply] Added routinetest-theme class to body');
+            }
+        });
+    })();
+    </script>
     
     <!-- Load RoutineTest Theme JS -->
-    <script src="{% static 'js/routinetest-theme.js' %}"></script>
+    <script src="{% static 'js/routinetest-theme.js' %}?v={% now 'U' %}"></script>
     
     <!-- Removed redundant matrix tab JavaScript files - Navigation V8 handles this -->
     

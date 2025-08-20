@@ -4,9 +4,11 @@ Service for exam management and operations.
 from typing import List, Dict, Any, Optional
 from django.db import transaction
 from django.core.files.uploadedfile import UploadedFile
+from django.contrib.auth.models import User
 from core.exceptions import ValidationException, ExamConfigurationException
 from core.constants import DEFAULT_OPTIONS_COUNT, DEFAULT_QUESTION_POINTS
-from ..models import Exam, Question, AudioFile
+from ..models import Exam, Question, AudioFile, TeacherClassAssignment
+from collections import defaultdict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -412,6 +414,242 @@ class ExamService:
         exam.delete()
         
         logger.info(f"Deleted exam {exam_id}: {exam_name}")
+    
+    # ============== PERMISSION METHODS ==============
+    
+    # Program to class code mapping
+    PROGRAM_CLASS_MAPPING = {
+        'CORE': [
+            'PRIMARY_1A', 'PRIMARY_1B', 'PRIMARY_1C', 'PRIMARY_1D',
+            'PRIMARY_2A', 'PRIMARY_2B', 'PRIMARY_2C', 'PRIMARY_2D',
+            'PRIMARY_3A', 'PRIMARY_3B', 'PRIMARY_3C', 'PRIMARY_3D',
+        ],
+        'ASCENT': [
+            'PRIMARY_4A', 'PRIMARY_4B', 'PRIMARY_4C', 'PRIMARY_4D',
+            'PRIMARY_5A', 'PRIMARY_5B', 'PRIMARY_5C', 'PRIMARY_5D',
+            'PRIMARY_6A', 'PRIMARY_6B', 'PRIMARY_6C', 'PRIMARY_6D',
+        ],
+        'EDGE': [
+            'MIDDLE_1A', 'MIDDLE_1B', 'MIDDLE_1C', 'MIDDLE_1D',
+            'MIDDLE_2A', 'MIDDLE_2B', 'MIDDLE_2C', 'MIDDLE_2D',
+            'MIDDLE_3A', 'MIDDLE_3B', 'MIDDLE_3C', 'MIDDLE_3D',
+        ],
+        'PINNACLE': [
+            'HIGH_1A', 'HIGH_1B', 'HIGH_1C', 'HIGH_1D',
+            'HIGH_2A', 'HIGH_2B', 'HIGH_2C', 'HIGH_2D',
+            'HIGH_3A', 'HIGH_3B', 'HIGH_3C', 'HIGH_3D',
+        ]
+    }
+    
+    @classmethod
+    def get_teacher_assignments(cls, user: User) -> Dict[str, str]:
+        """Get all class assignments for a teacher"""
+        if not user.is_authenticated:
+            return {}
+        
+        # Admins have full access to everything
+        if user.is_superuser or user.is_staff:
+            all_classes = {}
+            for program_classes in cls.PROGRAM_CLASS_MAPPING.values():
+                for class_code in program_classes:
+                    all_classes[class_code] = 'FULL'
+            return all_classes
+        
+        # Get teacher assignments
+        if hasattr(user, 'teacher_profile'):
+            assignments = TeacherClassAssignment.objects.filter(
+                teacher=user.teacher_profile,
+                is_active=True
+            ).values_list('class_code', 'access_level')
+            return dict(assignments)
+        
+        return {}
+    
+    @classmethod
+    def can_teacher_edit_exam(cls, user: User, exam: Exam) -> bool:
+        """Check if teacher can edit a specific exam"""
+        if not user.is_authenticated:
+            return False
+        
+        # Admins can edit everything
+        if user.is_superuser or user.is_staff:
+            return True
+        
+        # Get teacher's assignments
+        assignments = cls.get_teacher_assignments(user)
+        
+        # Check if teacher has edit access to any of the exam's classes
+        exam_classes = exam.class_codes if exam.class_codes else []
+        
+        # If exam has no specific class codes, check if teacher has any edit permissions
+        # This allows teachers with edit permissions to manage program-level exams
+        if not exam_classes:
+            # Teacher can edit program-level exams if they have edit access to any class
+            return any(access in ['FULL', 'CO_TEACHER'] for access in assignments.values())
+        
+        # Check specific class codes
+        for class_code in exam_classes:
+            if class_code in assignments and assignments[class_code] in ['FULL', 'CO_TEACHER']:
+                return True
+        
+        return False
+    
+    @classmethod
+    def organize_exams_hierarchically(
+        cls, 
+        exams, 
+        user: User,
+        filter_assigned_only: bool = False
+    ) -> Dict[str, Dict[str, List]]:
+        """Organize exams hierarchically by program and class with access info"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Get teacher assignments
+        assignments = cls.get_teacher_assignments(user)
+        is_admin = user.is_superuser or user.is_staff
+        
+        # Initialize structure
+        organized = {program: defaultdict(list) for program in cls.PROGRAM_CLASS_MAPPING.keys()}
+        
+        # Map class codes to programs
+        class_to_program = {}
+        for program, classes in cls.PROGRAM_CLASS_MAPPING.items():
+            for class_code in classes:
+                class_to_program[class_code] = program
+        
+        # Log debugging info
+        logger.info(f"[EXAM_HIERARCHY] Processing {len(list(exams))} exams")
+        logger.info(f"[EXAM_HIERARCHY] User: {user}, is_admin: {is_admin}")
+        logger.info(f"[EXAM_HIERARCHY] Filter assigned only: {filter_assigned_only}")
+        
+        # Process each exam
+        exam_count = 0
+        for exam in exams:
+            exam_classes = exam.class_codes if exam.class_codes else []
+            
+            # Log exam details
+            if exam_count < 5:  # Log first 5 exams for debugging
+                logger.info(f"[EXAM_HIERARCHY] Exam: {exam.name}, class_codes: {exam_classes}, has_curriculum: {hasattr(exam, 'curriculum_level') and exam.curriculum_level}")
+            
+            # If no class codes (empty list or None), try to infer from curriculum level
+            if (not exam_classes or exam_classes == []) and hasattr(exam, 'curriculum_level') and exam.curriculum_level:
+                # Infer class codes from curriculum level's program
+                try:
+                    program_name = exam.curriculum_level.subprogram.program.name  # CORE, ASCENT, EDGE, or PINNACLE
+                    logger.info(f"[EXAM_HIERARCHY] Found program {program_name} for exam {exam.name}")
+                    
+                    # Use a special marker to indicate this is a program-level exam
+                    exam_classes = [f"PROGRAM_{program_name}"]
+                    logger.info(f"[EXAM_HIERARCHY] Exam {exam.name} marked as program-level for {program_name}")
+                except Exception as e:
+                    logger.warning(f"[EXAM_HIERARCHY] Could not infer program from curriculum_level: {e}")
+                    exam_classes = ['GENERAL']
+            
+            # Skip if filtering and no assigned classes
+            if filter_assigned_only and not is_admin:
+                if not any(cls in assignments for cls in exam_classes):
+                    continue
+            
+            # Add permissions to exam
+            exam.can_edit = cls.can_teacher_edit_exam(user, exam)
+            exam.can_copy = len(assignments) > 0 or is_admin
+            
+            # Organize by class code
+            if exam_classes:
+                for class_code in exam_classes:
+                    if class_code.startswith('PROGRAM_'):
+                        # This is a program-level exam without specific class assignment
+                        program = class_code.replace('PROGRAM_', '')
+                        if program in cls.PROGRAM_CLASS_MAPPING:
+                            exam.class_access_level = 'FULL' if is_admin else 'VIEW'
+                            exam.is_accessible = is_admin
+                            organized[program]['All Classes'].append(exam)
+                            logger.info(f"[EXAM_HIERARCHY] Added exam to {program}/All Classes")
+                        else:
+                            logger.warning(f"[EXAM_HIERARCHY] Unknown program {program}")
+                            organized['CORE']['GENERAL'].append(exam)
+                    elif class_code == 'GENERAL':
+                        # Fall back for exams without proper classification
+                        exam.class_access_level = 'FULL' if is_admin else 'VIEW'
+                        exam.is_accessible = is_admin
+                        organized['CORE']['GENERAL'].append(exam)
+                        logger.info(f"[EXAM_HIERARCHY] Added exam to CORE/GENERAL")
+                    else:
+                        # Normal class code processing
+                        program = class_to_program.get(class_code)
+                        if not program:
+                            logger.warning(f"[EXAM_HIERARCHY] Unknown class_code: {class_code}, defaulting to CORE")
+                            program = 'CORE'
+                        
+                        # Add access level info
+                        exam.class_access_level = 'FULL' if is_admin else assignments.get(class_code, 'VIEW')
+                        exam.is_accessible = class_code in assignments or is_admin
+                        
+                        organized[program][class_code].append(exam)
+            else:
+                # If no class codes at all, put in CORE with a generic class
+                logger.warning(f"[EXAM_HIERARCHY] Exam {exam.name} has no class_codes, placing in CORE/UNASSIGNED")
+                exam.class_access_level = 'FULL' if is_admin else 'VIEW'
+                exam.is_accessible = is_admin
+                organized['CORE']['UNASSIGNED'].append(exam)
+            
+            exam_count += 1
+        
+        # Log summary and clean up empty programs
+        result = {}
+        for program, classes in organized.items():
+            # Convert defaultdict to regular dict
+            class_dict = dict(classes)
+            if class_dict:  # Only add program if it has classes with exams
+                result[program] = class_dict
+                logger.info(f"[EXAM_HIERARCHY] {program}: {len(class_dict)} classes, "
+                          f"{sum(len(exams) for exams in class_dict.values())} exams")
+        
+        if not result:
+            logger.warning(f"[EXAM_HIERARCHY] No exams were organized into any programs!")
+        else:
+            logger.info(f"[EXAM_HIERARCHY] Final result: {list(result.keys())} programs")
+        
+        return result
+    
+    @classmethod
+    def get_class_display_name(cls, class_code: str) -> str:
+        """Get human-readable display name for a class code"""
+        display_names = {
+            # Special categories
+            'All Classes': 'All Classes',
+            'GENERAL': 'General',
+            'UNASSIGNED': 'Unassigned',
+            # Primary School
+            'PRIMARY_1A': 'Grade 1A', 'PRIMARY_1B': 'Grade 1B', 
+            'PRIMARY_1C': 'Grade 1C', 'PRIMARY_1D': 'Grade 1D',
+            'PRIMARY_2A': 'Grade 2A', 'PRIMARY_2B': 'Grade 2B',
+            'PRIMARY_2C': 'Grade 2C', 'PRIMARY_2D': 'Grade 2D',
+            'PRIMARY_3A': 'Grade 3A', 'PRIMARY_3B': 'Grade 3B',
+            'PRIMARY_3C': 'Grade 3C', 'PRIMARY_3D': 'Grade 3D',
+            'PRIMARY_4A': 'Grade 4A', 'PRIMARY_4B': 'Grade 4B',
+            'PRIMARY_4C': 'Grade 4C', 'PRIMARY_4D': 'Grade 4D',
+            'PRIMARY_5A': 'Grade 5A', 'PRIMARY_5B': 'Grade 5B',
+            'PRIMARY_5C': 'Grade 5C', 'PRIMARY_5D': 'Grade 5D',
+            'PRIMARY_6A': 'Grade 6A', 'PRIMARY_6B': 'Grade 6B',
+            'PRIMARY_6C': 'Grade 6C', 'PRIMARY_6D': 'Grade 6D',
+            # Middle School
+            'MIDDLE_1A': 'Middle 1A', 'MIDDLE_1B': 'Middle 1B',
+            'MIDDLE_1C': 'Middle 1C', 'MIDDLE_1D': 'Middle 1D',
+            'MIDDLE_2A': 'Middle 2A', 'MIDDLE_2B': 'Middle 2B',
+            'MIDDLE_2C': 'Middle 2C', 'MIDDLE_2D': 'Middle 2D',
+            'MIDDLE_3A': 'Middle 3A', 'MIDDLE_3B': 'Middle 3B',
+            'MIDDLE_3C': 'Middle 3C', 'MIDDLE_3D': 'Middle 3D',
+            # High School
+            'HIGH_1A': 'High 1A', 'HIGH_1B': 'High 1B',
+            'HIGH_1C': 'High 1C', 'HIGH_1D': 'High 1D',
+            'HIGH_2A': 'High 2A', 'HIGH_2B': 'High 2B',
+            'HIGH_2C': 'High 2C', 'HIGH_2D': 'High 2D',
+            'HIGH_3A': 'High 3A', 'HIGH_3B': 'High 3B',
+            'HIGH_3C': 'High 3C', 'HIGH_3D': 'High 3D',
+        }
+        return display_names.get(class_code, class_code)
     
     @staticmethod
     @transaction.atomic
@@ -1287,6 +1525,12 @@ class ExamPermissionService:
         
         # Check if any of the exam's class codes are editable by this teacher
         exam_class_codes = exam.class_codes if exam.class_codes else []
+        
+        # If exam has no specific class codes (program-level exam),
+        # allow teachers with any edit permissions to manage it
+        if not exam_class_codes and editable_classes and editable_classes != 'ALL':
+            return len(editable_classes) > 0
+        
         return any(class_code in editable_classes for class_code in exam_class_codes)
     
     @classmethod
@@ -1332,55 +1576,11 @@ class ExamPermissionService:
         else:
             return 'VIEW'
     
-    @classmethod
-    def organize_exams_hierarchically(cls, exams, user, assigned_only=False):
-        """
-        Organize exams hierarchically by program and add permission info
-        
-        Args:
-            exams: QuerySet of exams
-            user: Current user
-            assigned_only: If True, only show exams from classes teacher is assigned to
-        
-        Returns:
-            dict: Hierarchical structure with permission metadata
-        """
-        from collections import defaultdict
-        
-        # Get teacher assignments
-        teacher_assignments = cls.get_teacher_assignments(user)
-        is_admin = cls.is_admin(user)
-        
-        logger.info(f"[EXAM_PERMISSION] Organizing exams hierarchically for user: {user}")
-        logger.info(f"[EXAM_PERMISSION] Teacher assignments: {list(teacher_assignments.keys())}")
-        logger.info(f"[EXAM_PERMISSION] Assigned only filter: {assigned_only}")
-        
-        # Initialize hierarchical structure
-        hierarchical_exams = {program: defaultdict(list) for program in cls.PROGRAM_ORDER}
-        
-        for exam in exams:
-            # Add permission metadata to exam
-            exam.permission_info = cls.get_exam_permission_info(user, exam)
-            
-            # Determine which class codes this exam applies to
-            exam_class_codes = exam.class_codes if exam.class_codes else []
-            
-            # If assigned_only filter is on, skip exams from unassigned classes
-            if assigned_only and not is_admin:
-                # Filter to only show class codes the teacher is assigned to
-                accessible_codes = [code for code in exam_class_codes 
-                                  if code in teacher_assignments]
-                if not accessible_codes:
-                    continue  # Skip this exam entirely
-                exam_class_codes = accessible_codes
-            
-            # Organize by program and class code
-            for class_code in exam_class_codes:
-                program = cls.CLASS_TO_PROGRAM.get(class_code, 'CORE')
-                hierarchical_exams[program][class_code].append(exam)
-        
-        logger.info(f"[EXAM_PERMISSION] Hierarchical organization complete")
-        return hierarchical_exams
+    # REMOVED: Duplicate method - using the primary version above
+    # @classmethod
+    # def organize_exams_hierarchically(cls, exams, user, assigned_only=False):
+    #     """DUPLICATE METHOD REMOVED - SEE PRIMARY VERSION ABOVE"""
+    #     pass
     
     @classmethod
     def get_exam_permission_info(cls, user, exam):
