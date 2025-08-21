@@ -643,7 +643,6 @@ def classes_exams_unified_view(request):
             context['total_assigned_exams'] = total_assigned_exams
         
         # Add current date for the header
-        from django.utils import timezone
         context['current_date'] = timezone.now()
         
         # SECTION 5: My Classes detailed information (keep for backward compatibility)
