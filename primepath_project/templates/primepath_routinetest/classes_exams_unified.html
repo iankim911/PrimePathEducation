@@ -15,14 +15,14 @@
         padding: 20px;
     }
     
-    /* Access Summary Section */
+    /* Access Summary Section - NEW CLEAN MINIMAL DESIGN */
     .access-summary-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 25px;
-        border-radius: 15px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 20px;
+        border-radius: 8px;
         margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-        color: white;
+        color: #333;
     }
     
     .access-summary-header {
@@ -31,27 +31,27 @@
         align-items: center;
         margin-bottom: 20px;
         padding-bottom: 15px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1px solid #dee2e6;
     }
     
     .access-title {
         margin: 0;
-        font-size: 24px;
-        font-weight: 600;
-        color: white;
+        font-size: 20px;
+        font-weight: 500;
+        color: #495057;
     }
     
     .access-date {
         font-size: 14px;
-        opacity: 0.9;
+        color: #6c757d;
     }
     
-    /* Admin Access Box */
+    /* Admin Access Box - CLEAN MINIMAL DESIGN */
     .access-admin-box {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
         padding: 20px;
-        backdrop-filter: blur(10px);
     }
     
     .access-admin-badge {
@@ -60,9 +60,11 @@
         gap: 10px;
         margin-bottom: 20px;
         padding: 10px 15px;
-        background: rgba(255, 255, 255, 0.2);
+        background: #e3f2fd;
+        border: 1px solid #2196f3;
         border-radius: 8px;
         width: fit-content;
+        color: #1976d2;
     }
     
     .badge-icon {
@@ -78,7 +80,7 @@
     .access-admin-details {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 20px;
+        gap: 15px;
         margin-bottom: 15px;
     }
     
@@ -87,19 +89,20 @@
         flex-direction: column;
         align-items: center;
         padding: 15px;
-        background: rgba(255, 255, 255, 0.1);
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
         border-radius: 8px;
     }
     
     .stat-number {
-        font-size: 28px;
-        font-weight: bold;
-        color: white;
+        font-size: 24px;
+        font-weight: 600;
+        color: #495057;
     }
     
     .stat-label {
         font-size: 12px;
-        opacity: 0.9;
+        color: #6c757d;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-top: 5px;
@@ -107,141 +110,116 @@
     
     .access-admin-note {
         font-size: 14px;
-        opacity: 0.9;
+        color: #6c757d;
         text-align: center;
-        padding: 10px;
-        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
         border-radius: 8px;
     }
     
-    /* Teacher Access Grid */
-    .access-teacher-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
+    /* NEW SIMPLIFIED TEACHER ACCESS SECTION - MINIMAL DESIGN */
+    .teacher-access-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
         margin-bottom: 20px;
     }
     
-    .access-level-card {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .access-level-card.full-access .access-level-header {
-        background: linear-gradient(135deg, #4CAF50, #45a049);
-    }
-    
-    .access-level-card.co-teacher .access-level-header {
-        background: linear-gradient(135deg, #2196F3, #1976D2);
-    }
-    
-    .access-level-card.view-only .access-level-header {
-        background: linear-gradient(135deg, #FF9800, #F57C00);
-    }
-    
-    .access-level-header {
-        display: flex;
+    .global-access-badge {
+        display: inline-flex;
         align-items: center;
         gap: 10px;
-        padding: 12px 15px;
-        color: white;
-    }
-    
-    .access-icon {
-        font-size: 20px;
-    }
-    
-    .access-level-title {
-        font-size: 16px;
+        padding: 10px 15px;
+        border-radius: 8px;
         font-weight: 600;
+        margin-bottom: 20px;
     }
     
-    .access-level-body {
+    .global-access-badge.full {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #4caf50;
+    }
+    
+    .global-access-badge.view-only {
+        background: #fff3e0;
+        color: #f57c00;
+        border: 1px solid #ff9800;
+    }
+    
+    .assigned-classes-list {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
         padding: 15px;
-        background: white;
-        color: #333;
-        max-height: 200px;
-        overflow-y: auto;
+        margin-top: 15px;
     }
     
-    .access-class-list {
+    .assigned-classes-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+    }
+    
+    .class-list {
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 8px;
     }
     
-    .access-class-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 10px;
-        background: #f8f9fa;
+    .class-item {
+        padding: 6px 12px;
+        background: white;
+        border: 1px solid #dee2e6;
         border-radius: 6px;
-        font-size: 14px;
-    }
-    
-    .class-code {
-        font-weight: 600;
-        color: #2E7D32;
-    }
-    
-    .class-name {
-        color: #666;
         font-size: 13px;
+        color: #495057;
     }
     
-    .access-level-footer {
-        padding: 10px 15px;
-        background: #f8f9fa;
-        border-top: 1px solid #e0e0e0;
-        text-align: center;
-        font-size: 14px;
-        color: #666;
-    }
-    
-    .access-empty {
-        text-align: center;
-        color: #999;
-        font-style: italic;
-        padding: 20px;
-    }
-    
-    /* Teacher Summary Stats */
-    .access-teacher-stats {
-        display: flex;
-        justify-content: space-around;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 15px;
-        backdrop-filter: blur(10px);
+    /* NEW MINIMAL TEACHER STATS */
+    .teacher-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
     }
     
     .teacher-stat {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        padding: 15px;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        text-align: center;
     }
     
     .teacher-stat .stat-icon {
-        font-size: 24px;
+        font-size: 20px;
+        margin-bottom: 8px;
+        color: #6c757d;
     }
     
     .teacher-stat .stat-value {
-        font-size: 24px;
-        font-weight: bold;
-        color: white;
+        font-size: 20px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 4px;
     }
     
     .teacher-stat .stat-label {
-        font-size: 12px;
-        opacity: 0.9;
+        font-size: 11px;
+        color: #6c757d;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .teacher-stat.pending .stat-value {
-        color: #FFC107;
+        color: #f57c00;
     }
     
     /* Classes Section */
@@ -1066,9 +1044,9 @@ console.groupEnd();
         <div class="access-summary-header">
             <h3 class="access-title">
                 {% if is_admin %}
-                    👑 Administrator Access Overview
+                    Administrator Access Overview
                 {% else %}
-                    🔑 My Access Overview
+                    My Access Overview
                 {% endif %}
             </h3>
             <span class="access-date">{{ current_date|date:"F j, Y" }}</span>
@@ -1079,7 +1057,7 @@ console.groupEnd();
                 <!-- Admin Summary -->
                 <div class="access-admin-box">
                     <div class="access-admin-badge">
-                        <span class="badge-icon">👑</span>
+                        <span class="badge-icon">🔐</span>
                         <span class="badge-text">FULL ADMINISTRATOR</span>
                     </div>
                     <div class="access-admin-details">
@@ -1105,106 +1083,65 @@ console.groupEnd();
                     </div>
                 </div>
             {% else %}
-                <!-- Teacher Summary -->
-                <div class="access-teacher-grid">
-                    <!-- Full Access Classes -->
-                    <div class="access-level-card full-access">
-                        <div class="access-level-header">
-                            <span class="access-icon">✅</span>
-                            <span class="access-level-title">Full Access</span>
-                        </div>
-                        <div class="access-level-body">
-                            {% if full_access_classes %}
-                                <div class="access-class-list">
-                                    {% for class in full_access_classes %}
-                                    <div class="access-class-item">
-                                        <span class="class-code">{{ class.class_code }}</span>
-                                        <span class="class-name">{{ class.class_name }}</span>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="access-level-footer">
-                                    <strong>{{ full_access_classes|length }}</strong> class{{ full_access_classes|length|pluralize:"es" }}
-                                </div>
-                            {% else %}
-                                <div class="access-empty">No classes with full access</div>
-                            {% endif %}
-                        </div>
+                <!-- NEW SIMPLIFIED TEACHER ACCESS SECTION -->
+                <div class="teacher-access-section">
+                    <!-- Global Access Level Badge -->
+                    <div class="global-access-badge {% if global_access_level == 'FULL' %}full{% else %}view-only{% endif %}">
+                        {% if global_access_level == 'FULL' %}
+                            <span>✅</span>
+                            <span>Full Access - Can manage all assigned classes</span>
+                        {% else %}
+                            <span>👁️</span>
+                            <span>View Only - Can view but not edit assigned classes</span>
+                        {% endif %}
                     </div>
                     
-                    <!-- Co-Teacher Access Classes -->
-                    <div class="access-level-card co-teacher">
-                        <div class="access-level-header">
-                            <span class="access-icon">👥</span>
-                            <span class="access-level-title">Co-Teacher Access</span>
+                    <!-- Global Access Message -->
+                    {% if global_access_message %}
+                    <div style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 14px; color: #1976d2;">
+                        ℹ️ {{ global_access_message }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Teacher Stats Grid -->
+                    <div class="teacher-stats-grid">
+                        <div class="teacher-stat">
+                            <span class="stat-icon">📚</span>
+                            <span class="stat-value">{{ total_assigned_classes|default:"0" }}</span>
+                            <span class="stat-label">Assigned Classes</span>
                         </div>
-                        <div class="access-level-body">
-                            {% if co_teacher_classes %}
-                                <div class="access-class-list">
-                                    {% for class in co_teacher_classes %}
-                                    <div class="access-class-item">
-                                        <span class="class-code">{{ class.class_code }}</span>
-                                        <span class="class-name">{{ class.class_name }}</span>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="access-level-footer">
-                                    <strong>{{ co_teacher_classes|length }}</strong> class{{ co_teacher_classes|length|pluralize:"es" }}
-                                </div>
-                            {% else %}
-                                <div class="access-empty">No classes with co-teacher access</div>
-                            {% endif %}
+                        <div class="teacher-stat">
+                            <span class="stat-icon">👥</span>
+                            <span class="stat-value">{{ total_assigned_students|default:"0" }}</span>
+                            <span class="stat-label">Students</span>
                         </div>
+                        <div class="teacher-stat">
+                            <span class="stat-icon">📝</span>
+                            <span class="stat-value">{{ total_assigned_exams|default:"0" }}</span>
+                            <span class="stat-label">Active Exams</span>
+                        </div>
+                        {% if pending_requests_count > 0 %}
+                        <div class="teacher-stat pending">
+                            <span class="stat-icon">⏳</span>
+                            <span class="stat-value">{{ pending_requests_count }}</span>
+                            <span class="stat-label">Pending</span>
+                        </div>
+                        {% endif %}
                     </div>
                     
-                    <!-- View Only Access Classes -->
-                    <div class="access-level-card view-only">
-                        <div class="access-level-header">
-                            <span class="access-icon">👁️</span>
-                            <span class="access-level-title">View Only</span>
+                    <!-- Assigned Classes List -->
+                    {% if assigned_classes %}
+                    <div class="assigned-classes-list">
+                        <div class="assigned-classes-title">
+                            Your Assigned Classes ({{ assigned_classes|length }})
                         </div>
-                        <div class="access-level-body">
-                            {% if view_only_classes %}
-                                <div class="access-class-list">
-                                    {% for class in view_only_classes %}
-                                    <div class="access-class-item">
-                                        <span class="class-code">{{ class.class_code }}</span>
-                                        <span class="class-name">{{ class.class_name }}</span>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                <div class="access-level-footer">
-                                    <strong>{{ view_only_classes|length }}</strong> class{{ view_only_classes|length|pluralize:"es" }}
-                                </div>
-                            {% else %}
-                                <div class="access-empty">No classes with view-only access</div>
-                            {% endif %}
+                        <div class="class-list">
+                            {% for class in assigned_classes %}
+                            <div class="class-item">
+                                {{ class.class_code }}
+                            </div>
+                            {% endfor %}
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Teacher Summary Stats -->
-                <div class="access-teacher-stats">
-                    <div class="teacher-stat">
-                        <span class="stat-icon">📚</span>
-                        <span class="stat-value">{{ total_assigned_classes|default:"0" }}</span>
-                        <span class="stat-label">Total Classes</span>
-                    </div>
-                    <div class="teacher-stat">
-                        <span class="stat-icon">👥</span>
-                        <span class="stat-value">{{ total_assigned_students|default:"0" }}</span>
-                        <span class="stat-label">Students</span>
-                    </div>
-                    <div class="teacher-stat">
-                        <span class="stat-icon">📝</span>
-                        <span class="stat-value">{{ total_assigned_exams|default:"0" }}</span>
-                        <span class="stat-label">Active Exams</span>
-                    </div>
-                    {% if pending_requests_count > 0 %}
-                    <div class="teacher-stat pending">
-                        <span class="stat-icon">⏳</span>
-                        <span class="stat-value">{{ pending_requests_count }}</span>
-                        <span class="stat-label">Pending Requests</span>
                     </div>
                     {% endif %}
                 </div>

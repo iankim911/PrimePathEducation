@@ -35,30 +35,53 @@ def exam_list(request):
     if exam_type_filter not in valid_exam_types:
         exam_type_filter = 'ALL'
     
-    # Get permission info for current user
+    # Get permission info for current user - UPDATED FOR GLOBAL ACCESS SYSTEM
     is_admin = request.user.is_superuser or request.user.is_staff
+    teacher = None
+    global_access_level = 'FULL'  # Default for admin
+    can_manage_exams = True      # Default for admin
+    
+    if not is_admin:
+        # Get teacher profile and check GLOBAL access level
+        try:
+            teacher = request.user.teacher_profile
+            global_access_level = teacher.global_access_level
+            can_manage_exams = teacher.can_manage_exams()
+            
+            logger.info(f"[GLOBAL_ACCESS_EXAM_LIBRARY] Teacher {teacher.name}: Global access = {global_access_level}, Can manage = {can_manage_exams}")
+            print(f"[GLOBAL_ACCESS_EXAM_LIBRARY] {teacher.name} - Global: {global_access_level}, Manage: {can_manage_exams}")
+        except:
+            # No teacher profile - treat as view only
+            global_access_level = 'VIEW_ONLY'
+            can_manage_exams = False
+            logger.warning(f"[GLOBAL_ACCESS_EXAM_LIBRARY] User {request.user.username} has no teacher profile - defaulting to VIEW_ONLY")
+    
     teacher_assignments = ExamPermissionService.get_teacher_assignments(request.user)
     
-    # ENHANCED DEBUG LOGGING FOR DELETE BUTTON ISSUE
+    # ENHANCED DEBUG LOGGING FOR GLOBAL ACCESS SYSTEM
     debug_info = {
         "user": request.user.username,
         "is_superuser": request.user.is_superuser,
         "is_staff": request.user.is_staff,
         "is_admin": is_admin,
         "has_teacher_profile": hasattr(request.user, 'teacher_profile'),
+        "global_access_level": global_access_level,
+        "can_manage_exams": can_manage_exams,
         "teacher_assignments_count": len(teacher_assignments),
-        "view": "exam_list",
+        "view": "exam_list_global_access",
         "timestamp": timezone.now().isoformat()
     }
     
-    logger.info(f"[DELETE_BUTTON_DEBUG] {json.dumps(debug_info)}")
+    logger.info(f"[GLOBAL_ACCESS_DEBUG] {json.dumps(debug_info)}")
     print(f"\n{'='*80}")
-    print(f"[DELETE_BUTTON_DEBUG] Permission Check:")
+    print(f"[GLOBAL_ACCESS_DEBUG] Exam Library Permission Check:")
     print(f"  User: {request.user.username}")
     print(f"  is_superuser: {request.user.is_superuser}")
     print(f"  is_staff: {request.user.is_staff}")
     print(f"  is_admin (calculated): {is_admin}")
     print(f"  has_teacher_profile: {hasattr(request.user, 'teacher_profile')}")
+    print(f"  global_access_level: {global_access_level}")
+    print(f"  can_manage_exams: {can_manage_exams}")
     print(f"{'='*80}\n")
     
     # Log authentication and permissions
@@ -193,6 +216,11 @@ def exam_list(request):
         'teacher_assignments': teacher_assignments,
         'editable_classes': editable_classes,
         'is_admin': is_admin,
+        
+        # NEW: Global access system variables
+        'global_access_level': global_access_level,
+        'can_manage_exams': can_manage_exams,
+        'is_view_only_teacher': global_access_level == 'VIEW_ONLY' and not is_admin,
         'mapping_summary': {
             'total': total_exam_count,
             'complete': complete_count,

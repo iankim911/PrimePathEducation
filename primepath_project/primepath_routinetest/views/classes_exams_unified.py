@@ -238,25 +238,53 @@ def classes_exams_unified_view(request):
             console_log["total_classes"] = len(all_class_codes)
             
         else:
-            # Regular teacher - get actual assignments
-            # CRITICAL FIX: For Classes & Exams, only show FULL access classes
-            # VIEW ONLY doesn't make sense in this management context
-            my_assignments = TeacherClassAssignment.objects.filter(
-                teacher=teacher,
-                is_active=True,
-                access_level='FULL'  # ONLY FULL ACCESS for Classes & Exams tab
-            ).select_related('teacher')
+            # Regular teacher - check GLOBAL access level first
+            # CRITICAL: Global access setting determines what they can see/do
+            if teacher.has_view_only_access():
+                # VIEW ONLY teachers can only see classes but cannot manage them
+                my_assignments = TeacherClassAssignment.objects.filter(
+                    teacher=teacher,
+                    is_active=True
+                ).select_related('teacher')
+                
+                # Add global access indicator to assignments
+                for assignment in my_assignments:
+                    assignment.effective_access = 'VIEW_ONLY'  # Override with global setting
+                
+                context['is_view_only_teacher'] = True
+                context['global_access_message'] = "View Only Access - You can view class data but cannot create/edit/delete exams"
+                
+                logger.info(f"[GLOBAL_ACCESS] Teacher {teacher.name} has VIEW ONLY global access - showing all assigned classes in read-only mode")
+                print(f"[GLOBAL_ACCESS] VIEW ONLY teacher: {teacher.name} - {len(my_assignments)} classes (read-only)")
+                
+            else:
+                # FULL ACCESS teachers can manage classes
+                my_assignments = TeacherClassAssignment.objects.filter(
+                    teacher=teacher,
+                    is_active=True
+                ).select_related('teacher')
+                
+                # Add global access indicator to assignments
+                for assignment in my_assignments:
+                    assignment.effective_access = 'FULL'  # Global setting allows full access
+                
+                context['is_view_only_teacher'] = False
+                context['global_access_message'] = "Full Access - You can create, edit, and delete exams in your assigned classes"
+                
+                logger.info(f"[GLOBAL_ACCESS] Teacher {teacher.name} has FULL global access - can manage all assigned classes")
+                print(f"[GLOBAL_ACCESS] FULL ACCESS teacher: {teacher.name} - {len(my_assignments)} classes (full management)")
             
             my_class_codes = [a.class_code for a in my_assignments]
             context['admin_all_access'] = False
+            context['teacher_global_access'] = teacher.global_access_level
             
-            # Log the filtering
+            # Log the global access system
             total_assignments = TeacherClassAssignment.objects.filter(
                 teacher=teacher,
                 is_active=True
             ).count()
-            logger.info(f"[CLASSES_EXAMS_FILTER] Teacher {teacher.name} has {len(my_assignments)}/{total_assignments} FULL access classes")
-            print(f"[CLASSES_EXAMS_FILTER] Showing {len(my_assignments)} FULL access classes out of {total_assignments} total assignments")
+            logger.info(f"[GLOBAL_ACCESS_SYSTEM] Teacher {teacher.name}: Global={teacher.global_access_level}, Assignments={total_assignments}, CanManage={teacher.can_manage_exams()}")
+            print(f"[GLOBAL_ACCESS_SYSTEM] {teacher.name}: {teacher.global_access_level} access level, {total_assignments} classes")
             
             console_log["admin_mode"] = False
             console_log["assigned_classes"] = my_class_codes
@@ -583,11 +611,9 @@ def classes_exams_unified_view(request):
         
         context['programs_data'] = programs_data
         
-        # SECTION 4.5: Build Access Summary Data
-        # Categorize classes by access level for the summary
-        full_access_classes = []
-        co_teacher_classes = []
-        view_only_classes = []
+        # SECTION 4.5: Build Access Summary Data - UPDATED FOR GLOBAL ACCESS SYSTEM
+        # NEW: Use GLOBAL access level instead of per-class access levels
+        assigned_classes = []
         total_assigned_students = 0
         total_assigned_exams = 0
         
@@ -601,20 +627,17 @@ def classes_exams_unified_view(request):
             context['total_students'] = total_students
             context['total_exams'] = total_exams
         else:
-            # Teacher stats - categorize by access level
+            # Teacher stats - ALL classes shown with GLOBAL access level
+            # This is the key change: show all assigned classes with global access level
             for assignment in my_assignments:
                 class_info = {
                     'class_code': assignment.class_code,
-                    'class_name': assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code
+                    'class_name': assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code,
+                    'global_access_level': teacher.global_access_level  # Use teacher's global setting
                 }
                 
-                # Categorize by access level
-                if assignment.access_level == 'FULL':
-                    full_access_classes.append(class_info)
-                elif assignment.access_level == 'CO_TEACHER':
-                    co_teacher_classes.append(class_info)
-                elif assignment.access_level == 'VIEW':
-                    view_only_classes.append(class_info)
+                # ALL classes go into the same list - no more categorization by per-class access
+                assigned_classes.append(class_info)
                 
                 # Count students for assigned classes
                 try:
@@ -635,12 +658,17 @@ def classes_exams_unified_view(request):
                 except:
                     pass
             
-            context['full_access_classes'] = full_access_classes
-            context['co_teacher_classes'] = co_teacher_classes
-            context['view_only_classes'] = view_only_classes
+            # NEW: Single list of assigned classes with global access level
+            context['assigned_classes'] = assigned_classes
             context['total_assigned_classes'] = len(my_assignments)
             context['total_assigned_students'] = total_assigned_students
             context['total_assigned_exams'] = total_assigned_exams
+            context['global_access_level'] = teacher.global_access_level
+            context['can_manage_exams'] = teacher.can_manage_exams()
+            
+            # Log the new simplified access structure
+            logger.info(f"[GLOBAL_ACCESS_SUMMARY] Teacher {teacher.name}: {len(assigned_classes)} classes, global access: {teacher.global_access_level}")
+            print(f"[GLOBAL_ACCESS_SUMMARY] Simplified access structure: {len(assigned_classes)} classes with {teacher.global_access_level} access")
         
         # Add current date for the header
         context['current_date'] = timezone.now()

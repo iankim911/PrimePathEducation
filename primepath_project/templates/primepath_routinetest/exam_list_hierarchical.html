@@ -30,6 +30,27 @@
         gap: 15px;
     }
     
+    /* Global Access Level Indicator */
+    .global-access-indicator {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+    
+    .global-access-indicator.view-only {
+        background: #fff3e0;
+        border: 1px solid #ff9800;
+        color: #f57c00;
+    }
+    
+    .global-access-indicator.full-access {
+        background: #e8f5e9;
+        border: 1px solid #4caf50;
+        color: #2e7d32;
+    }
+    
     .library-title {
         font-size: 1.8rem;
         font-weight: 600;
@@ -705,14 +726,25 @@
                 <label for="assignedOnlyFilter">Show Assigned Classes Only</label>
             </div>
             
-            <!-- Upload Button (Admin Only) -->
-            {% if is_admin %}
+            <!-- Upload Button (Admin or Full Access Teachers) -->
+            {% if is_admin or can_manage_exams %}
             <a href="{% url 'RoutineTest:create_exam' %}" class="btn btn-edit">
                 📤 Upload New Exam
             </a>
             {% endif %}
         </div>
     </div>
+    
+    <!-- Global Access Level Indicator -->
+    {% if not is_admin %}
+    <div class="global-access-indicator {% if is_view_only_teacher %}view-only{% else %}full-access{% endif %}">
+        {% if is_view_only_teacher %}
+            👁️ View Only Access - You can view exams but cannot edit or delete them
+        {% else %}
+            ✅ Full Access - You can create, edit, and delete exams in your assigned classes
+        {% endif %}
+    </div>
+    {% endif %}
     
     <!-- Summary Stats -->
     <div class="summary-stats">
@@ -890,23 +922,23 @@
                                     
                                     <!-- Action Buttons -->
                                     <div class="exam-actions">
-                                        {% if exam.can_edit %}
+                                        {% if is_admin or can_manage_exams %}
                                             <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-edit">
                                                 Edit Answers
                                             </a>
                                         {% else %}
                                             <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-view">
-                                                Manage Answers
+                                                View Answers
                                             </a>
                                         {% endif %}
                                         
-                                        {% if exam.can_copy %}
+                                        {% if is_admin or can_manage_exams %}
                                             <button onclick="openCopyModal('{{ exam.id }}', '{{ exam.name|escapejs }}')" class="btn btn-copy">
                                                 Copy Exam
                                             </button>
                                         {% endif %}
                                         
-                                        {% if is_admin or exam.can_delete %}
+                                        {% if is_admin or can_manage_exams %}
                                             <button onclick="confirmDelete('{{ exam.id }}', '{{ exam.name|escapejs }}')" 
                                                     class="btn btn-danger delete-exam-btn">
                                                 Delete

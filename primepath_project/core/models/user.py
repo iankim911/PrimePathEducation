@@ -26,6 +26,12 @@ class School(models.Model):
 
 class Teacher(models.Model):
     """Teacher/Staff user model with Django authentication integration"""
+    # Global access level choices
+    GLOBAL_ACCESS_CHOICES = [
+        ('FULL', 'Full Access'),     # Can manage all assigned classes - create/edit/delete exams
+        ('VIEW_ONLY', 'View Only'),  # Can only view assigned classes - no create/edit/delete
+    ]
+    
     # Link to Django User for authentication
     user = models.OneToOneField(
         User, 
@@ -43,6 +49,14 @@ class Teacher(models.Model):
     is_head_teacher = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True, help_text="Can login and access system")
     
+    # Global Access Setting - NEW REQUIREMENT
+    global_access_level = models.CharField(
+        max_length=20,
+        choices=GLOBAL_ACCESS_CHOICES,
+        default='FULL',
+        help_text="Global access level that applies to ALL assigned classes. FULL = can manage everything, VIEW_ONLY = can only view data."
+    )
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -56,6 +70,26 @@ class Teacher(models.Model):
             full_name = f"{self.user.first_name} {self.user.last_name}".strip()
             return full_name if full_name else self.user.username
         return self.name
+    
+    def has_full_access(self):
+        """Check if teacher has full access globally"""
+        return self.global_access_level == 'FULL'
+    
+    def has_view_only_access(self):
+        """Check if teacher has view-only access globally"""
+        return self.global_access_level == 'VIEW_ONLY'
+    
+    def get_effective_access_level(self):
+        """Get the effective access level that applies to all classes"""
+        return self.global_access_level
+    
+    def can_manage_exams(self):
+        """Check if teacher can create/edit/delete exams"""
+        return self.global_access_level == 'FULL'
+    
+    def can_edit_classes(self):
+        """Check if teacher can edit class data"""
+        return self.global_access_level == 'FULL'
     
     def sync_with_user(self):
         """Sync Teacher data with linked User"""
