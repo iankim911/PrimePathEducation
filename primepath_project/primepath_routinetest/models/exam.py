@@ -50,25 +50,35 @@ class Exam(models.Model):
     ]
     
     
-    # Phase 3: Class code choices (temporary implementation)
-    CLASS_CODE_CHOICES = [
-        # Class 7
-        ('CLASS_7A', 'Class 7A'),
-        ('CLASS_7B', 'Class 7B'),
-        ('CLASS_7C', 'Class 7C'),
-        # Class 8
-        ('CLASS_8A', 'Class 8A'),
-        ('CLASS_8B', 'Class 8B'),
-        ('CLASS_8C', 'Class 8C'),
-        # Class 9
-        ('CLASS_9A', 'Class 9A'),
-        ('CLASS_9B', 'Class 9B'),
-        ('CLASS_9C', 'Class 9C'),
-        # Class 10
-        ('CLASS_10A', 'Class 10A'),
-        ('CLASS_10B', 'Class 10B'),
-        ('CLASS_10C', 'Class 10C'),
-    ]
+    # Dynamic class code choices from PrimePath curriculum mapping
+    @classmethod
+    def get_class_code_choices(cls):
+        """Get class choices dynamically from the Class model and curriculum mapping"""
+        from primepath_routinetest.class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
+        from .class_model import Class
+        
+        choices = []
+        
+        # First, add all class codes from the curriculum mapping
+        for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
+            choices.append((code, f"{code} - {curriculum}"))
+        
+        # Also include any existing classes from the database
+        existing_classes = Class.objects.filter(is_active=True).values_list('section', 'name')
+        existing_codes = {code for code, _ in choices}
+        
+        for section, name in existing_classes:
+            if section and section not in existing_codes:
+                display_name = name if name else section
+                choices.append((section, display_name))
+        
+        # Sort by code for consistent ordering
+        choices.sort(key=lambda x: x[0])
+        
+        return choices
+    
+    # For backward compatibility, maintain CLASS_CODE_CHOICES as a property
+    CLASS_CODE_CHOICES = []  # Will be populated dynamically
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)

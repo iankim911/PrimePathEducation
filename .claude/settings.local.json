@@ -253,7 +253,11 @@
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python -c \"\nimport os\nimport django\nos.environ.setdefault(''DJANGO_SETTINGS_MODULE'', ''primepath_project.settings_sqlite'')\ndjango.setup()\n\nfrom django.contrib.auth.models import User\nfrom core.models import Teacher\nfrom primepath_routinetest.models import TeacherClassAssignment\n\nprint(''=== USER AND TEACHER STATUS CHECK ==='')\n\n# Check admin user\nadmin_user = User.objects.filter(username=''admin'').first()\nif admin_user:\n    print(f''User: {admin_user.username}'')\n    print(f''  is_superuser: {admin_user.is_superuser}'')\n    print(f''  is_staff: {admin_user.is_staff}'')\n    \n    # Check teacher profile\n    try:\n        teacher = Teacher.objects.get(user=admin_user)\n        print(f''  Teacher profile exists: {teacher.name}'')\n        print(f''  is_head_teacher: {teacher.is_head_teacher}'')\n        \n        # Check class assignments\n        assignments = TeacherClassAssignment.objects.filter(teacher=teacher, is_active=True)\n        print(f''  Active class assignments: {assignments.count()}'')\n        for a in assignments:\n            print(f''    - {a.get_class_code_display()} ({a.access_level})'')\n    except Teacher.DoesNotExist:\n        print(''  NO TEACHER PROFILE'')\nelse:\n    print(''No admin user found'')\n\nprint()\nprint(''=== ALL TEACHERS ==='')\nfor teacher in Teacher.objects.all():\n    print(f''{teacher.name} (User: {teacher.user.username})'')\n    print(f''  is_head_teacher: {teacher.is_head_teacher}'')\n    print(f''  is_staff: {teacher.user.is_staff}'')\n    print(f''  is_superuser: {teacher.user.is_superuser}'')\n\")",
       "Bash(md5sum:*)",
       "Bash(./venv/bin/python primepath_project/manage.py runserver:*)",
-      "Bash(./venv/bin/python:*)"
+      "Bash(./venv/bin/python:*)",
+      "Bash(node:*)",
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite ../venv/bin/python test_copy_modal_comprehensive_fix.py)",
+      "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_toggle_filter_comprehensive_check.py)",
+      "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_toggle_filter_results_summary.py)"
     ],
     "deny": []
   }

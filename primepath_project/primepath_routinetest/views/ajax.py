@@ -167,8 +167,33 @@ def create_questions(request, exam_id):
 @csrf_exempt
 @handle_errors(ajax_only=True)
 def save_exam_answers(request, exam_id):
-    """Save exam questions and answers configuration."""
+    """Save exam questions and answers configuration - WITH PERMISSION CHECK."""
     exam = get_object_or_404(Exam, id=exam_id)
+    
+    # CRITICAL: Check if user has permission to edit this exam
+    can_edit = ExamService.can_teacher_edit_exam(request.user, exam)
+    
+    # Log permission check
+    permission_log = {
+        "view": "save_exam_answers",
+        "exam_id": str(exam_id),
+        "exam_name": exam.name,
+        "user": request.user.username,
+        "can_edit": can_edit,
+        "is_admin": request.user.is_superuser or request.user.is_staff,
+        "is_owner": exam.created_by and hasattr(request.user, 'teacher_profile') and exam.created_by.id == request.user.teacher_profile.id
+    }
+    logger.info(f"[SAVE_ANSWERS_PERMISSION] {json.dumps(permission_log)}")
+    print(f"[SAVE_ANSWERS_PERMISSION] User {request.user.username} {'CAN SAVE' if can_edit else 'CANNOT SAVE'} exam {exam.name}")
+    
+    # If user doesn't have edit permission, reject the save
+    if not can_edit:
+        logger.warning(f"[SAVE_ANSWERS_BLOCKED] User {request.user.username} tried to save answers for exam {exam.name} without permission")
+        return JsonResponse({
+            'success': False,
+            'error': 'You do not have permission to edit this exam. Only the exam owner or assigned teachers with edit access can save changes.',
+            'permission_level': 'VIEW_ONLY'
+        }, status=403)
     
     try:
         data = json.loads(request.body)

@@ -653,24 +653,36 @@ def get_class_filtered_exams(request, class_code):
 @csrf_exempt
 @require_http_methods(["POST"])
 def copy_exam(request):
-    """Copy an exam from one class to another"""
+    """Copy an exam from one class to another with proper naming convention"""
     try:
-        from primepath_routinetest.models import ExamScheduleMatrix
-        from datetime import datetime, timedelta
+        from primepath_routinetest.models import ExamScheduleMatrix, Exam
+        from datetime import datetime
         from django.utils import timezone
+        import uuid
         
         data = json.loads(request.body)
         source_exam_id = data.get('source_exam_id')
         target_class_code = data.get('target_class')  # This is the class code string
         target_timeslot = data.get('target_timeslot')
+        academic_year = data.get('academic_year')  # NEW: Year selection
+        custom_suffix = data.get('custom_suffix', '').strip()  # NEW: Custom naming suffix
         
-        logger.info(f"Copy exam request: exam={source_exam_id}, class={target_class_code}, timeslot={target_timeslot}")
+        # Enhanced console logging
+        logger.info(f"[COPY_EXAM_REQUEST] exam={source_exam_id}, class={target_class_code}, timeslot={target_timeslot}, year={academic_year}, suffix={custom_suffix}")
         
-        # Get source exam - use RoutineExam model only
+        # Get source exam - Use RoutineExam model for compatibility with ExamScheduleMatrix
+        from primepath_routinetest.models.exam_management import RoutineExam
         source_exam = RoutineExam.objects.filter(id=source_exam_id).first()
         if not source_exam:
-            logger.error(f"Source exam not found: {source_exam_id}")
-            return JsonResponse({'error': f'Source exam not found: {source_exam_id}'}, status=404)
+            logger.error(f"[COPY_EXAM_ERROR] Source exam not found in RoutineExam model: {source_exam_id}")
+            # Try Exam as fallback (from primepath_routinetest.models)
+            source_exam_alt = Exam.objects.filter(id=source_exam_id).first()
+            if source_exam_alt:
+                logger.info(f"[COPY_EXAM_FALLBACK] Found in Exam model instead")
+                # Use Exam data
+                source_exam = source_exam_alt
+            else:
+                return JsonResponse({'error': f'Source exam not found: {source_exam_id}'}, status=404)
         
         # Determine exam type and period from target_timeslot
         exam_type = 'REVIEW'  # Default
@@ -680,26 +692,55 @@ def copy_exam(request):
         if target_timeslot and target_timeslot.startswith('Q'):
             exam_type = 'QUARTERLY'
         
+        # Use provided year or default to current year
+        if not academic_year:
+            academic_year = str(datetime.now().year)
+        
+        # Generate the new exam name based on the same convention as Upload Exam
+        new_exam_name = generate_exam_name(
+            exam_type=exam_type,
+            time_period=target_timeslot,
+            academic_year=academic_year,
+            source_exam=source_exam,
+            custom_suffix=custom_suffix
+        )
+        
+        logger.info(f"[COPY_EXAM_NAME_GENERATED] Generated name: {new_exam_name}")
+        
+        # Create a copy of the exam with the new name
+        try:
+            # Use the user directly for RoutineExam.created_by field
+            created_by = request.user if request.user.is_authenticated else None
+            
+            # Create the copied exam
+            copied_exam = create_copied_exam(
+                source_exam=source_exam,
+                new_name=new_exam_name,
+                target_class_code=target_class_code,
+                exam_type=exam_type,
+                time_period=target_timeslot,
+                academic_year=academic_year,
+                created_by=created_by
+            )
+            
+            logger.info(f"[COPY_EXAM_SUCCESS] Created exam copy: {copied_exam.id} - {copied_exam.name}")
+        except Exception as e:
+            logger.error(f"[COPY_EXAM_ERROR] Failed to create exam copy: {str(e)}")
+            return JsonResponse({'error': f'Failed to create exam copy: {str(e)}'}, status=500)
+        
         # Check if exam already exists in the matrix for this class and period
         existing_matrix = ExamScheduleMatrix.objects.filter(
             class_code=target_class_code,
             time_period_value=target_timeslot,
-            exams=source_exam
+            exams=copied_exam
         ).exists()
         
         if existing_matrix:
-            # Return more detailed error information for better UX
-            return JsonResponse({
-                'error': f'The exam "{source_exam.name}" is already assigned to {target_class_code} for {target_timeslot}',
-                'error_type': 'DUPLICATE_ASSIGNMENT',
-                'exam_name': source_exam.name,
-                'target_class': target_class_code,
-                'target_timeslot': target_timeslot,
-                'message': 'This exam has already been copied to this class and time period. Each exam can only be assigned once per class/period.'
-            }, status=400)
+            # This shouldn't happen with a new copy, but check anyway
+            logger.warning(f"[COPY_EXAM_WARNING] Exam already in matrix: {copied_exam.name}")
         
         # Get or create the matrix entry for this class and time period
-        current_year = datetime.now().year
+        current_year = academic_year or str(datetime.now().year)
         
         # Try to get the Teacher instance for the current user
         created_by_teacher = None
@@ -712,7 +753,7 @@ def copy_exam(request):
         
         matrix_entry, created = ExamScheduleMatrix.objects.get_or_create(
             class_code=target_class_code,
-            academic_year=str(current_year),
+            academic_year=current_year,
             time_period_type='QUARTERLY' if exam_type == 'QUARTERLY' else 'MONTHLY',
             time_period_value=target_timeslot,
             defaults={
@@ -721,18 +762,22 @@ def copy_exam(request):
             }
         )
         
-        # Add the exam to the matrix entry
-        matrix_entry.exams.add(source_exam)
+        # Add the copied exam to the matrix entry (not the source exam!)
+        matrix_entry.exams.add(copied_exam)
         
-        logger.info(f"Successfully copied exam {source_exam.name} to {target_class_code} for {target_timeslot}")
+        logger.info(f"[COPY_EXAM_MATRIX_SUCCESS] Added exam {copied_exam.name} to matrix for {target_class_code} - {target_timeslot}")
         
         return JsonResponse({
             'success': True,
             'matrix_id': str(matrix_entry.id),
-            'exam_name': source_exam.name,
+            'exam_id': str(copied_exam.id),
+            'exam_name': copied_exam.name,
+            'original_name': source_exam.name,
             'class_code': target_class_code,
             'timeslot': target_timeslot,
-            'message': f'Exam "{source_exam.name}" copied to {target_class_code} for {target_timeslot}'
+            'academic_year': academic_year,
+            'custom_suffix': custom_suffix,
+            'message': f'Exam "{copied_exam.name}" successfully created and assigned to {target_class_code} for {target_timeslot}'
         })
         
     except Exception as e:
@@ -853,3 +898,128 @@ def schedule_exam(request):
     except Exception as e:
         logger.error(f"Error scheduling exam: {e}")
         return JsonResponse({'error': str(e)}, status=500)
+
+
+# ============================================================================
+# HELPER FUNCTIONS FOR COPY EXAM
+# ============================================================================
+
+def generate_exam_name(exam_type, time_period, academic_year, source_exam, custom_suffix=''):
+    """
+    Generate exam name following the same convention as Upload Exam
+    Format: [RT/QTR] - [Mon Year] - [Program] [SubProgram] Lv[X]_[custom]
+    """
+    from primepath_routinetest.models import Exam
+    
+    name_parts = []
+    
+    # Add exam type prefix
+    prefix = '[QTR]' if exam_type == 'QUARTERLY' else '[RT]'
+    name_parts.append(prefix)
+    
+    # Add time period with year
+    if exam_type == 'REVIEW':
+        # Convert month code to abbreviated name
+        month_abbrev = {
+            'JAN': 'Jan', 'FEB': 'Feb', 'MAR': 'Mar', 'APR': 'Apr',
+            'MAY': 'May', 'JUN': 'Jun', 'JUL': 'Jul', 'AUG': 'Aug',
+            'SEP': 'Sep', 'OCT': 'Oct', 'NOV': 'Nov', 'DEC': 'Dec'
+        }
+        month_name = month_abbrev.get(time_period, time_period)
+        period_str = f"{month_name} {academic_year}"
+    else:  # QUARTERLY
+        period_str = f"{time_period} {academic_year}"
+    
+    name_parts.append(period_str)
+    
+    # Extract curriculum info from source exam
+    curriculum_str = ""
+    if hasattr(source_exam, 'curriculum_level') and source_exam.curriculum_level:
+        curriculum = source_exam.curriculum_level
+        if hasattr(curriculum, 'subprogram') and curriculum.subprogram:
+            program_name = curriculum.subprogram.program.name
+            subprogram_name = curriculum.subprogram.name
+            level_number = curriculum.level_number
+            curriculum_str = f"{program_name} {subprogram_name} Lv{level_number}"
+    else:
+        # Try to extract from the source exam name if no curriculum level
+        import re
+        pattern = r'(CORE|ASCENT|EDGE|PINNACLE)\s+(\w+)\s+Lv(\d+)'
+        match = re.search(pattern, source_exam.name)
+        if match:
+            curriculum_str = f"{match.group(1)} {match.group(2)} Lv{match.group(3)}"
+        else:
+            # Fallback to generic
+            curriculum_str = "General Exam"
+    
+    if curriculum_str:
+        name_parts.append(curriculum_str)
+    
+    # Join with separator
+    base_name = ' - '.join(name_parts)
+    
+    # Add custom suffix if provided
+    if custom_suffix:
+        # Add underscore separator if suffix doesn't start with one
+        if not custom_suffix.startswith('_'):
+            custom_suffix = '_' + custom_suffix
+        base_name += custom_suffix
+    
+    logger.info(f"[GENERATE_EXAM_NAME] Generated: {base_name}")
+    
+    return base_name
+
+
+def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time_period, academic_year, created_by=None):
+    """
+    Create a copy of an exam with a new name and metadata
+    """
+    from primepath_routinetest.models import RoutineExam, Question, AudioFile
+    from django.db import transaction
+    import uuid
+    
+    with transaction.atomic():
+        # Create the new exam as RoutineExam (compatible with ExamScheduleMatrix)
+        # Extract curriculum level as string
+        curriculum_level_str = ""
+        if hasattr(source_exam, 'curriculum_level'):
+            curriculum = source_exam.curriculum_level
+            if curriculum and hasattr(curriculum, 'subprogram'):
+                # Convert curriculum object to string format
+                program_name = curriculum.subprogram.program.name
+                subprogram_name = curriculum.subprogram.name
+                level_number = curriculum.level_number
+                curriculum_level_str = f"{program_name} {subprogram_name} Level {level_number}"
+            elif isinstance(curriculum, str):
+                curriculum_level_str = curriculum
+        
+        copied_exam = RoutineExam.objects.create(
+            id=uuid.uuid4(),
+            name=new_name,
+            exam_type=exam_type,
+            time_period_month=time_period if exam_type == 'REVIEW' else None,
+            time_period_quarter=time_period if exam_type == 'QUARTERLY' else None,
+            quarter=time_period if exam_type == 'QUARTERLY' else None,  # backward compatibility
+            academic_year=academic_year,
+            curriculum_level=curriculum_level_str,
+            pdf_file=source_exam.pdf_file if hasattr(source_exam, 'pdf_file') else None,
+            timer_minutes=source_exam.timer_minutes if hasattr(source_exam, 'timer_minutes') else 60,  # Inherit timer_minutes
+            total_questions=source_exam.total_questions if hasattr(source_exam, 'total_questions') else 0,  # Inherit total_questions
+            default_options_count=source_exam.default_options_count if hasattr(source_exam, 'default_options_count') else 5,  # Inherit default_options_count
+            passing_score=source_exam.passing_score if hasattr(source_exam, 'passing_score') else None,  # Inherit passing_score
+            pdf_rotation=source_exam.pdf_rotation if hasattr(source_exam, 'pdf_rotation') else 0,  # Inherit pdf_rotation
+            instructions=source_exam.instructions if hasattr(source_exam, 'instructions') else '',  # Inherit instructions
+            answer_key=source_exam.answer_key if hasattr(source_exam, 'answer_key') else {},
+            created_by=created_by,
+            is_active=True
+        )
+        
+        # Note: RoutineExam doesn't have class_codes field - classes are managed through ExamScheduleMatrix
+        
+        # Note: Skipping questions and audio files for RoutineExam copy
+        # because Question and AudioFile models expect primepath_routinetest.Exam, not RoutineExam
+        # The copied exam will need questions to be added separately through the exam editor
+        
+        logger.info(f"[CREATE_COPIED_EXAM] Successfully created exam copy: {copied_exam.id} - {copied_exam.name}")
+        
+        return copied_exam

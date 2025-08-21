@@ -1,5 +1,6 @@
 {% extends "routinetest_base.html" %}
 {% load custom_filters %}
+{% load access_display %}
 {# Template Version 6.0 - Hierarchical Library View with Permissions #}
 
 {% block title %}Exam Library - RoutineTest{% endblock %}
@@ -7,6 +8,11 @@
 {% block header %}Exam Library{% endblock %}
 
 {% block content %}
+<!-- ============================================================================ -->
+<!-- CRITICAL: Global Functions - MUST load before any buttons are rendered      -->
+<!-- ============================================================================ -->
+{% include 'primepath_routinetest/exam_list_hierarchical_critical_functions.html' %}
+
 <style>
     /* Main Layout */
     .exam-library-container {
@@ -316,50 +322,81 @@
         background: #ffc107;
     }
     
-    /* Action Buttons */
+    /* Action Buttons - Improved alignment */
     .exam-actions {
         display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+        gap: 10px;
+        flex-wrap: nowrap;  /* Keep buttons on same line */
         margin-top: 10px;
+        align-items: center;
     }
     
     .btn {
-        padding: 6px 12px;
+        padding: 8px 16px;
         border-radius: 4px;
         font-size: 0.9rem;
         text-decoration: none;
-        border: none;
+        border: 1px solid transparent;
         cursor: pointer;
         transition: all 0.2s;
         white-space: nowrap;
+        font-weight: 500;
+        min-width: 90px;
+        text-align: center;
+        display: inline-block;
     }
     
     .btn-view {
         background: #6c757d;
         color: white;
+        border-color: #6c757d;
     }
     
     .btn-view:hover {
         background: #5a6268;
+        border-color: #545b62;
+        color: white;
     }
     
     .btn-edit {
         background: #007bff;
         color: white;
+        border-color: #007bff;
     }
     
     .btn-edit:hover {
         background: #0056b3;
+        border-color: #004085;
+        color: white;
     }
     
     .btn-copy {
         background: #17a2b8;
         color: white;
+        border-color: #17a2b8;
     }
     
     .btn-copy:hover {
         background: #138496;
+        border-color: #117a8b;
+    }
+    
+    /* Delete Button - Clean Red Styling */
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+        border-color: #bd2130;
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+    }
+    
+    .btn-danger:active {
+        background: #bd2130;
+        border-color: #b21f2d;
     }
     
     /* ULTIMATE DELETE BUTTON FIX - Maximum CSS specificity and comprehensive coverage */
@@ -483,11 +520,11 @@
         color: #2c3e50;
     }
     
-    /* Modal Styles */
+    /* Modal Styles - Fixed with proper specificity */
     .modal {
         display: none;
         position: fixed;
-        z-index: 1000;
+        z-index: 10001;
         left: 0;
         top: 0;
         width: 100%;
@@ -495,6 +532,17 @@
         background-color: rgba(0, 0, 0, 0.5);
         align-items: center;
         justify-content: center;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    /* High specificity rule to ensure modal shows */
+    body .modal.show,
+    body #copyExamModal.show {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
     .modal-content {
@@ -506,6 +554,35 @@
         width: 90%;
         max-height: 80vh;
         overflow-y: auto;
+        position: relative;
+        z-index: 10002;
+    }
+    
+    /* Ensure modal content is visible */
+    #copyExamModal .modal-content {
+        background-color: white !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 28px;
+        font-weight: bold;
+        color: #aaa;
+        cursor: pointer;
+        line-height: 20px;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+    }
+    
+    .modal-close:hover,
+    .modal-close:focus {
+        color: #000;
     }
     
     .modal-content h3 {
@@ -552,6 +629,39 @@
         border-top: 1px solid #dee2e6;
     }
     
+    .modal-actions .btn {
+        min-width: 100px;
+    }
+    
+    .modal-actions .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .modal-actions .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    /* Ensure modal is always on top */
+    #copyExamModal {
+        z-index: 10000;
+    }
+    
+    #copyExamModal .modal-content {
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
         .library-header {
@@ -561,6 +671,16 @@
         
         .class-exams {
             grid-template-columns: 1fr;
+        }
+        
+        /* Responsive button layout for mobile */
+        .exam-actions {
+            flex-wrap: wrap;  /* Allow wrapping on small screens */
+        }
+        
+        .exam-actions .btn {
+            flex: 1;  /* Equal width buttons on mobile */
+            min-width: 80px;  /* Smaller minimum width on mobile */
         }
         
         .summary-stats {
@@ -680,9 +800,72 @@
                             
                             <div class="class-exams">
                                 {% for exam in class_exams %}
-                                <!-- Debug: exam.can_edit = {{ exam.can_edit }}, is_admin = {{ is_admin }} -->
+                                <!-- COMPREHENSIVE DEBUG START -->
+                                <!-- 
+                                    DELETE BUTTON DEBUG:
+                                    - is_admin = {{ is_admin }}
+                                    - exam.can_edit = {{ exam.can_edit }}
+                                    - exam.id = {{ exam.id }}
+                                    - exam.name = {{ exam.name }}
+                                    - User: {{ user.username }}
+                                    - User.is_superuser = {{ user.is_superuser }}
+                                    - User.is_staff = {{ user.is_staff }}
+                                    - Condition (is_admin or exam.can_edit) = {% if is_admin or exam.can_edit %}TRUE{% else %}FALSE{% endif %}
+                                -->
+                                <script>
+                                    console.log('[DELETE_BUTTON_DEBUG] Exam: {{ exam.name|escapejs }}', {
+                                        is_admin: {{ is_admin|lower }},
+                                        exam_can_edit: {{ exam.can_edit|lower }},
+                                        user_is_superuser: {{ user.is_superuser|lower }},
+                                        user_is_staff: {{ user.is_staff|lower }},
+                                        should_show_delete: {% if is_admin or exam.can_edit %}true{% else %}false{% endif %}
+                                    });
+                                </script>
+                                <!-- COMPREHENSIVE DEBUG END -->
                                 <div class="exam-card {% if exam.can_edit %}editable{% endif %}">
-                                    <div class="exam-title">{{ exam.name }}</div>
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <div class="exam-title">{{ exam.name }}</div>
+                                            <!-- Year and Month/Quarter Display -->
+                                            <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center;">
+                                                {% if exam.academic_year %}
+                                                <span style="background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
+                                                    {{ exam.academic_year|slice:":4" }}
+                                                </span>
+                                                {% endif %}
+                                                {% if exam.exam_type == 'REVIEW' and exam.time_period_month %}
+                                                <span style="background: #f3e5f5; color: #6a1b9a; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
+                                                    {{ exam.get_time_period_month_display }}
+                                                </span>
+                                                {% elif exam.exam_type == 'QUARTERLY' and exam.time_period_quarter %}
+                                                <span style="background: #fff3e0; color: #e65100; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
+                                                    {{ exam.get_time_period_quarter_display }}
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% if exam.access_badge %}
+                                        <span class="badge" style="background: {% if exam.access_badge == 'OWNER' %}#4CAF50{% elif exam.access_badge == 'ADMIN' %}#2196F3{% elif exam.access_badge == 'FULL ACCESS' %}#4CAF50{% elif exam.access_badge == 'EDIT' %}#FF9800{% else %}#9E9E9E{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                            {{ exam.access_badge|display_access_level }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Display Assigned Class Codes -->
+                                    {% if exam.class_codes %}
+                                    <div class="exam-classes" style="margin: 8px 0; padding: 8px 12px; background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 3px solid #4CAF50; border-radius: 4px; font-size: 0.85rem;">
+                                        <strong style="color: #2e7d32; margin-right: 6px;">📚 Assigned Classes:</strong>
+                                        <span style="color: #1b5e20; font-weight: 500;">
+                                            {% for code in exam.class_codes %}
+                                                <span style="background: white; padding: 2px 6px; border-radius: 3px; margin: 0 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">{{ code }}</span>{% if not forloop.last %} {% endif %}
+                                            {% endfor %}
+                                        </span>
+                                    </div>
+                                    {% elif not exam.class_codes %}
+                                    <div class="exam-classes" style="margin: 8px 0; padding: 8px 12px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 4px; font-size: 0.85rem;">
+                                        <strong style="color: #e65100;">⚠️ No classes assigned</strong>
+                                    </div>
+                                    {% endif %}
                                     
                                     <div class="exam-meta">
                                         <div class="exam-meta-item">
@@ -709,25 +892,24 @@
                                     <div class="exam-actions">
                                         {% if exam.can_edit %}
                                             <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-edit">
-                                                ✏️ Edit Answers
+                                                Edit Answers
                                             </a>
                                         {% else %}
                                             <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-view">
-                                                📝 Manage Answers
+                                                Manage Answers
                                             </a>
                                         {% endif %}
                                         
                                         {% if exam.can_copy %}
-                                            <button onclick="openCopyModal('{{ exam.id }}', '{{ exam.name }}')" class="btn btn-copy">
-                                                📋 Copy
+                                            <button onclick="openCopyModal('{{ exam.id }}', '{{ exam.name|escapejs }}')" class="btn btn-copy">
+                                                Copy Exam
                                             </button>
                                         {% endif %}
                                         
-                                        {# Always show delete button for admins #}
-                                        {% if is_admin or exam.can_edit %}
-                                            <button onclick="confirmDelete('{{ exam.id }}', '{{ exam.name }}')" 
-                                                    class="btn btn-danger">
-                                                🗑️ Delete
+                                        {% if is_admin or exam.can_delete %}
+                                            <button onclick="confirmDelete('{{ exam.id }}', '{{ exam.name|escapejs }}')" 
+                                                    class="btn btn-danger delete-exam-btn">
+                                                Delete
                                             </button>
                                         {% endif %}
                                     </div>
@@ -762,15 +944,16 @@
 </div>
 
 <!-- Copy Exam Modal -->
-<div id="copyExamModal" class="modal" style="display: none;">
+<div id="copyExamModal" class="modal">
     <div class="modal-content">
-        <h3>Copy Exam</h3>
+        <span class="modal-close" onclick="closeCopyModal()">&times;</span>
+        <h3>Copy Exam to Another Class</h3>
         <form id="copyExamForm">
             <input type="hidden" id="sourceExamId" name="source_exam_id">
             
             <div class="form-group">
                 <label>Source Exam:</label>
-                <p id="sourceExamName"></p>
+                <p id="sourceExamName" style="font-weight: 600; color: #2c3e50;">Loading...</p>
             </div>
             
             <div class="form-group">
@@ -782,27 +965,62 @@
                         <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }}</option>
                         {% endif %}
                     {% endfor %}
+                    {% if is_admin %}
+                        <!-- Admin can copy to any class -->
+                        {% for program, classes in hierarchical_exams.items %}
+                            {% for class_code, exams in classes.items %}
+                                {% if class_code not in teacher_assignments %}
+                                <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }} (Admin)</option>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
                 </select>
             </div>
             
             <div class="form-group">
                 <label for="copyExamType">Exam Type:</label>
                 <select id="copyExamType" name="exam_type" required>
+                    <option value="">Select exam type...</option>
                     <option value="REVIEW">Review / Monthly</option>
                     <option value="QUARTERLY">Quarterly</option>
                 </select>
             </div>
             
             <div class="form-group">
-                <label for="timeslot">Timeslot:</label>
-                <select id="timeslot" name="timeslot" required>
-                    <option value="">Select timeslot...</option>
-                    <!-- Populated dynamically based on exam type -->
+                <label for="timeslot">Time Period:</label>
+                <select id="timeslot" name="timeslot" required disabled>
+                    <option value="">First select exam type...</option>
                 </select>
             </div>
             
+            <div class="form-group">
+                <label for="academicYear">Academic Year:</label>
+                <select id="academicYear" name="academic_year" required>
+                    <option value="">Select year...</option>
+                    <option value="2024">2024</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="customSuffix">Custom Name Suffix (Optional):</label>
+                <input type="text" id="customSuffix" name="custom_suffix" class="form-control" 
+                       placeholder="e.g., 123 or version2" maxlength="50">
+                <small class="text-muted">This will be appended to the auto-generated exam name (e.g., _123)</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Preview of New Exam Name:</label>
+                <div id="examNamePreview" style="padding: 10px; background: #f0f0f0; border-radius: 4px; font-weight: 600;">
+                    <span id="previewText">Please complete all fields to see preview...</span>
+                </div>
+            </div>
+            
             <div class="modal-actions">
-                <button type="button" onclick="closeCopyModal()" class="btn btn-view">Cancel</button>
+                <button type="button" onclick="closeCopyModal()" class="btn btn-secondary">Cancel</button>
                 <button type="submit" class="btn btn-copy">Copy Exam</button>
             </div>
         </form>
@@ -810,11 +1028,176 @@
 </div>
 
 <script>
-// IMMEDIATE DELETE BUTTON FIX - Run before anything else
+// ============================================================================
+// COPY EXAM MODAL - COMPREHENSIVE FIX V2.0
+// Date: {{ 'now'|date:'Y-m-d H:i:s' }}
+// ============================================================================
+
+console.log('%c[COPY MODAL FIX] Initializing comprehensive copy modal system...', 'color: #00A65E; font-weight: bold;');
+
+// Global state management
+window.CopyModalState = {
+    initialized: false,
+    currentExamId: null,
+    currentExamName: null,
+    debugMode: true,
+    initTime: Date.now()
+};
+
+// ============================================================================
+// INTERNAL COPY MODAL FUNCTION - Called by the global openCopyModal
+// ============================================================================
+window.openCopyModalInternal = function(examId, examName) {
+    const startTime = performance.now();
+    
+    console.group('%c[COPY MODAL] Opening Modal', 'color: #00A65E; font-weight: bold;');
+    console.log('Exam ID:', examId);
+    console.log('Exam Name:', examName);
+    console.log('Call Stack:', new Error().stack.split('\n')[2].trim());
+    
+    try {
+        // Store current exam info
+        window.CopyModalState.currentExamId = examId;
+        window.CopyModalState.currentExamName = examName;
+        
+        // Find the modal element
+        const modal = document.getElementById('copyExamModal');
+        if (!modal) {
+            console.error('[COPY MODAL] CRITICAL: Modal element #copyExamModal not found in DOM');
+            console.log('Available modal IDs:', Array.from(document.querySelectorAll('[id*="modal"]')).map(el => el.id));
+            alert('Error: Copy modal not found. Please refresh the page and try again.');
+            console.groupEnd();
+            return false;
+        }
+        
+        console.log('[COPY MODAL] Modal element found successfully');
+        
+        // Find and update source exam elements
+        const sourceExamIdInput = document.getElementById('sourceExamId');
+        const sourceExamNameDisplay = document.getElementById('sourceExamName');
+        
+        if (!sourceExamIdInput) {
+            console.error('[COPY MODAL] sourceExamId input not found');
+        } else {
+            sourceExamIdInput.value = examId;
+            console.log('[COPY MODAL] Set source exam ID:', examId);
+        }
+        
+        if (!sourceExamNameDisplay) {
+            console.error('[COPY MODAL] sourceExamName display element not found');
+        } else {
+            sourceExamNameDisplay.textContent = examName || 'Unknown Exam';
+            console.log('[COPY MODAL] Set source exam name:', examName);
+        }
+        
+        // Reset the form
+        const copyForm = document.getElementById('copyExamForm');
+        if (copyForm) {
+            copyForm.reset();
+            // Re-set the exam ID after reset
+            if (sourceExamIdInput) {
+                sourceExamIdInput.value = examId;
+            }
+            console.log('[COPY MODAL] Form reset completed');
+        } else {
+            console.warn('[COPY MODAL] Copy form not found for reset');
+        }
+        
+        // Reset timeslot dropdown
+        const timeslotSelect = document.getElementById('timeslot');
+        if (timeslotSelect) {
+            timeslotSelect.innerHTML = '<option value="">First select exam type...</option>';
+            timeslotSelect.disabled = true;
+            console.log('[COPY MODAL] Timeslot dropdown reset');
+        }
+        
+        // Show the modal
+        modal.style.display = 'block';
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        
+        // Set up close handlers
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                console.log('[COPY MODAL] Background clicked - closing modal');
+                window.closeCopyModal();
+            }
+        };
+        
+        const executionTime = performance.now() - startTime;
+        console.log(`[COPY MODAL] Modal opened successfully in ${executionTime.toFixed(2)}ms`);
+        console.log('[COPY MODAL] Modal display:', window.getComputedStyle(modal).display);
+        console.log('[COPY MODAL] Modal visibility:', window.getComputedStyle(modal).visibility);
+        console.groupEnd();
+        
+        return true;
+        
+    } catch (error) {
+        console.error('[COPY MODAL] CRITICAL ERROR:', error);
+        console.error('Stack trace:', error.stack);
+        alert('An error occurred while opening the copy modal. Please try again.');
+        console.groupEnd();
+        return false;
+    }
+};
+
+// ============================================================================
+// CLOSE MODAL FUNCTION - Internal implementation
+// ============================================================================
+window.closeCopyModalInternal = function() {
+    console.group('%c[COPY MODAL] Closing Modal', 'color: #888; font-weight: bold;');
+    
+    try {
+        const modal = document.getElementById('copyExamModal');
+        if (!modal) {
+            console.warn('[COPY MODAL] Modal element not found during close');
+            console.groupEnd();
+            return;
+        }
+        
+        // Hide the modal
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scrolling
+        
+        // Clear state
+        window.CopyModalState.currentExamId = null;
+        window.CopyModalState.currentExamName = null;
+        
+        // Reset form
+        const copyForm = document.getElementById('copyExamForm');
+        if (copyForm) {
+            copyForm.reset();
+            console.log('[COPY MODAL] Form reset on close');
+        }
+        
+        // Remove event handlers
+        modal.onclick = null;
+        
+        console.log('[COPY MODAL] Modal closed successfully');
+        console.groupEnd();
+        
+    } catch (error) {
+        console.error('[COPY MODAL] Error during close:', error);
+        console.groupEnd();
+    }
+};
+
+// Create global aliases for backward compatibility
+var openCopyModal = window.openCopyModal;
+var closeCopyModal = window.closeCopyModal;
+
+console.log('[COPY MODAL] Functions registered globally:');
+console.log('  - window.openCopyModal:', typeof window.openCopyModal);
+console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
+console.log('  - openCopyModal (alias):', typeof openCopyModal);
+console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
+
+// IMMEDIATE DELETE BUTTON FIX - Run once without infinite loop
 (function() {
     // Apply red color to all delete buttons immediately
     const fixDeleteButtons = function() {
-        const deleteButtons = document.querySelectorAll('.btn-danger, button[onclick*="confirmDelete"]');
+        const deleteButtons = document.querySelectorAll('.btn-danger:not([data-delete-fixed]), button[onclick*="confirmDelete"]:not([data-delete-fixed])');
         deleteButtons.forEach(button => {
             // Force red styling via inline styles with highest priority
             button.style.setProperty('background-color', '#dc3545', 'important');
@@ -827,6 +1210,9 @@
             if (!button.classList.contains('btn-danger')) {
                 button.classList.add('btn-danger');
             }
+            
+            // Mark as fixed to avoid reprocessing
+            button.setAttribute('data-delete-fixed', 'true');
         });
     };
     
@@ -838,10 +1224,11 @@
         document.addEventListener('DOMContentLoaded', fixDeleteButtons);
     }
     
-    // Run after a short delay to catch any late-applied styles
+    // Run once after a short delay to catch any late-applied styles
     setTimeout(fixDeleteButtons, 100);
-    setTimeout(fixDeleteButtons, 500);
 })();
+
+// DELETE BUTTON FIX CONTINUES HERE - Functions already defined above
 
 // Toggle functions
 function toggleProgram(program) {
@@ -865,29 +1252,87 @@ document.getElementById('assignedOnlyFilter').addEventListener('change', functio
     window.location.href = currentUrl.toString();
 });
 
-// Copy modal functions
-function openCopyModal(examId, examName) {
-    console.log('Opening copy modal for exam:', examId, examName);
-    document.getElementById('sourceExamId').value = examId;
-    document.getElementById('sourceExamName').textContent = examName;
-    document.getElementById('copyExamModal').style.display = 'flex';
+// ============================================================================
+// COPY MODAL EVENT INITIALIZATION AND FORM HANDLING
+// ============================================================================
+console.log('[COPY MODAL] Setting up event handlers and form submission...');
+        modal.style.removeProperty('visibility');
+        modal.style.removeProperty('opacity');
+        
+        // Force a reflow to ensure the class change is applied
+        modal.offsetHeight;
+        
+        console.log('Modal should be visible now');
+        console.log('Modal classes:', modal.className);
+        console.log('Computed display:', window.getComputedStyle(modal).display);
+        console.log('Computed visibility:', window.getComputedStyle(modal).visibility);
+        
+        // Add click handler to close on background click
+        modal.onclick = function(event) {
+            if (event.target === modal) {
+                closeCopyModal();
+            }
+        };
+        
+    } catch (error) {
+        console.error('Error opening copy modal:', error);
+        alert('Error opening copy modal: ' + error.message);
+    }
 }
 
-function closeCopyModal() {
-    document.getElementById('copyExamModal').style.display = 'none';
-    document.getElementById('copyExamForm').reset();
+// This function is now defined in critical_functions.html
+// which calls closeCopyModalInternal defined above
+console.log('[FUNCTION_NOTE] closeCopyModal is defined globally, using closeCopyModalInternal internally');
+
+// Validate that all copy modal functions are available
+function validateCopyModalFunctions() {
+    console.log('[VALIDATE] Checking copy modal functions...');
+    const checks = {
+        modal: document.getElementById('copyExamModal'),
+        form: document.getElementById('copyExamForm'),
+        openCopyModal: typeof window.openCopyModal === 'function',
+        closeCopyModal: typeof window.closeCopyModal === 'function',
+        openCopyModalInternal: typeof window.openCopyModalInternal === 'function',
+        closeCopyModalInternal: typeof window.closeCopyModalInternal === 'function'
+    };
+    
+    console.log('[VALIDATE] Copy modal status:', checks);
+    return checks;
 }
 
 // Handle copy form submission
-document.getElementById('copyExamForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+function initializeCopyFormSubmission() {
+    const copyExamForm = document.getElementById('copyExamForm');
+    if (!copyExamForm) {
+        console.error('copyExamForm not found');
+        return;
+    }
     
-    const formData = new FormData(this);
-    const data = {
-        source_exam_id: formData.get('source_exam_id'),
-        target_class: formData.get('target_class'),
-        target_timeslot: formData.get('timeslot')
-    };
+    copyExamForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        console.log('Copy form submitted');
+        
+        const formData = new FormData(this);
+        const data = {
+            source_exam_id: formData.get('source_exam_id'),
+            target_class: formData.get('target_class'),
+            target_timeslot: formData.get('timeslot')
+        };
+        
+        console.log('Form data:', data);
+        
+        // Validate data
+        if (!data.source_exam_id || !data.target_class || !data.target_timeslot) {
+            console.error('Validation failed:', data);
+            showErrorNotification('Please fill in all required fields');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Copying...';
+        submitBtn.disabled = true;
     
     try {
         const response = await fetch('/RoutineTest/api/copy-exam/', {
@@ -902,71 +1347,128 @@ document.getElementById('copyExamForm').addEventListener('submit', async functio
         const result = await response.json();
         
         if (result.success) {
-            alert('Exam copied successfully!');
-            window.location.reload();
-        } else {
-            alert('Error: ' + result.error);
-        }
-    } catch (error) {
-        alert('Error copying exam: ' + error.message);
-    }
-});
-
-// Delete confirmation
-function confirmDelete(examId, examName) {
-    if (confirm(`Are you sure you want to delete "${examName}"? This action cannot be undone.`)) {
-        deleteExam(examId);
-    }
-}
-
-async function deleteExam(examId) {
-    try {
-        // Use the correct exam delete endpoint that actually deletes the exam
-        const deleteUrl = `/RoutineTest/exams/${examId}/delete/`;
-        
-        const response = await fetch(deleteUrl, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            alert(result.message || 'Exam deleted successfully');
-            // Find and remove the exam card from DOM instead of full page reload
-            const examCard = document.querySelector(`button[onclick*="${examId}"]`)?.closest('.exam-card');
-            if (examCard) {
-                examCard.remove();
-                
-                // Check if this was the last exam in the class section
-                const classSection = examCard.closest('.class-section');
-                if (classSection && classSection.querySelectorAll('.exam-card').length === 0) {
-                    const classExams = classSection.querySelector('.class-exams');
-                    if (classExams) {
-                        classExams.innerHTML = '<div class="no-exams">No exams in this class</div>';
-                    }
-                }
-            } else {
-                // Fallback to page reload if we can't find the exam card
+            showSuccessNotification(result.message || 'Exam copied successfully!');
+            closeCopyModal();
+            // Reload after a short delay to show the notification
+            setTimeout(() => {
                 window.location.reload();
-            }
+            }, 1500);
         } else {
-            alert('Error: ' + (result.message || result.error || 'Unknown error'));
+            showErrorNotification(result.error || 'Failed to copy exam');
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
         }
     } catch (error) {
-        console.error('Delete error:', error);
-        alert('Error deleting exam: ' + error.message);
+        console.error('Copy error:', error);
+        showErrorNotification('Error copying exam: ' + error.message);
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
     }
+    });
+    
+    console.log('Copy form submission handler initialized');
 }
 
-// ULTIMATE DELETE BUTTON COLOR ENFORCEMENT
+// Delete functions are now defined in critical_functions.html at the top of the page
+// This ensures they're available before any onclick handlers are rendered
+// The functions are: window.confirmDelete and window.deleteExam
+
+// Verify delete functions are available
+function verifyDeleteFunctions() {
+    const functionsAvailable = {
+        confirmDelete: typeof window.confirmDelete === 'function',
+        deleteExam: typeof window.deleteExam === 'function',
+        openCopyModal: typeof window.openCopyModal === 'function',
+        closeCopyModal: typeof window.closeCopyModal === 'function',
+        ready: window.EXAM_FUNCTIONS_READY
+    };
+    
+    console.log('[VERIFY] Critical functions status:', functionsAvailable);
+    
+    if (!functionsAvailable.confirmDelete || !functionsAvailable.deleteExam) {
+        console.error('[VERIFY] Critical delete functions not available!');
+    }
+    
+    return functionsAvailable;
+}
+
+// Notification helper functions
+function showSuccessNotification(message) {
+    showNotification(message, 'success');
+}
+
+function showErrorNotification(message) {
+    showNotification(message, 'error');
+}
+
+function showNotification(message, type = 'info') {
+    // Remove any existing notification
+    const existingNotification = document.getElementById('exam-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Create new notification
+    const notification = document.createElement('div');
+    notification.id = 'exam-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 4px;
+        z-index: 10000;
+        transition: opacity 0.3s;
+        font-weight: 500;
+        min-width: 250px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    
+    // Set colors based on type
+    if (type === 'success') {
+        notification.style.backgroundColor = '#d4edda';
+        notification.style.color = '#155724';
+        notification.style.border = '1px solid #c3e6cb';
+    } else if (type === 'error') {
+        notification.style.backgroundColor = '#f8d7da';
+        notification.style.color = '#721c24';
+        notification.style.border = '1px solid #f5c6cb';
+    } else {
+        notification.style.backgroundColor = '#d1ecf1';
+        notification.style.color = '#0c5460';
+        notification.style.border = '1px solid #bee5eb';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Fade in
+    setTimeout(() => {
+        notification.style.opacity = '1';
+    }, 10);
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Delete button color enforcement - Fixed to prevent infinite loop
+let isProcessingDeleteButtons = false;
+
 function enforceDeleteButtonColors() {
+    // Prevent recursive calls
+    if (isProcessingDeleteButtons) {
+        return;
+    }
+    
+    isProcessingDeleteButtons = true;
+    
     // Find all possible delete button selectors that haven't been fixed yet
     const deleteButtons = document.querySelectorAll(`
         button[onclick*="confirmDelete"]:not([data-delete-button-fixed]),
@@ -977,7 +1479,8 @@ function enforceDeleteButtonColors() {
     `);
     
     if (deleteButtons.length === 0) {
-        return; // No buttons to fix, prevents infinite loop
+        isProcessingDeleteButtons = false;
+        return; // No buttons to fix
     }
     
     console.log(`[DELETE FIX] Found ${deleteButtons.length} delete buttons to fix`);
@@ -1025,19 +1528,24 @@ function enforceDeleteButtonColors() {
         console.log(`[DELETE FIX] Fixed button ${index}: ${newButton.textContent.trim()}`);
     });
     
-    // Also check for and fix any buttons that might be added by theme JS (FIXED: Prevent infinite recursion)
+    // Release the processing flag
+    isProcessingDeleteButtons = false;
+    
+    // Check once more after a delay for any dynamically added buttons
     setTimeout(() => {
-        const themeButtons = document.querySelectorAll('.routinetest-theme .btn:not([data-delete-button-fixed])');
-        themeButtons.forEach(btn => {
-            if (btn.onclick && btn.onclick.toString().includes('confirmDelete')) {
-                // Fix this specific button instead of calling the entire function
-                btn.classList.remove('btn-success', 'btn-primary', 'btn-secondary', 'btn-info');
-                btn.classList.add('btn-danger');
-                btn.style.setProperty('background-color', '#dc3545', 'important');
-                btn.style.setProperty('border-color', '#dc3545', 'important');
-                btn.style.setProperty('color', 'white', 'important');
-                btn.setAttribute('data-delete-button-fixed', 'true');
-            }
+        // Only process if not already processing
+        if (!isProcessingDeleteButtons) {
+            const themeButtons = document.querySelectorAll('.routinetest-theme .btn:not([data-delete-button-fixed])');
+            themeButtons.forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes('confirmDelete')) {
+                    // Fix this specific button inline without recursion
+                    btn.classList.remove('btn-success', 'btn-primary', 'btn-secondary', 'btn-info');
+                    btn.classList.add('btn-danger');
+                    btn.style.setProperty('background-color', '#dc3545', 'important');
+                    btn.style.setProperty('border-color', '#dc3545', 'important');
+                    btn.style.setProperty('color', 'white', 'important');
+                    btn.setAttribute('data-delete-button-fixed', 'true');
+                }
         });
     }, 100);
 }
@@ -1048,38 +1556,34 @@ document.addEventListener('DOMContentLoaded', enforceDeleteButtonColors);
 // Run after a short delay to catch theme-applied buttons
 setTimeout(enforceDeleteButtonColors, 500);
 
-// Watch for dynamic content changes with debouncing (FIXED: Prevent infinite loop)
-let timeoutId;
-let isProcessing = false; // Prevent recursive processing
+// Watch for dynamic content changes - Fixed to prevent infinite loop
+let observerTimeoutId;
 
 const observer = new MutationObserver(function(mutations) {
-    if (isProcessing) {
-        return; // Prevent recursive processing
-    }
+    // Clear any pending timeouts
+    clearTimeout(observerTimeoutId);
     
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-        let shouldReprocess = false;
+    // Debounce the enforcement to prevent rapid re-processing
+    observerTimeoutId = setTimeout(() => {
+        let hasNewDeleteButtons = false;
         
         mutations.forEach(function(mutation) {
-            // Only process new nodes, not attribute changes that we caused
+            // Only process new nodes, not attribute changes
             if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                 mutation.addedNodes.forEach(node => {
                     if (node.nodeType === 1 && (
                         (node.matches && node.matches('button[onclick*="confirmDelete"]:not([data-delete-button-fixed])')) ||
                         (node.querySelector && node.querySelector('button[onclick*="confirmDelete"]:not([data-delete-button-fixed])'))
                     )) {
-                        shouldReprocess = true;
+                        hasNewDeleteButtons = true;
                     }
                 });
             }
         });
         
-        if (shouldReprocess) {
+        if (hasNewDeleteButtons) {
             console.log('[DELETE FIX] New delete buttons detected, processing');
-            isProcessing = true;
             enforceDeleteButtonColors();
-            isProcessing = false;
         }
     }, 250); // Debounce for 250ms
 });
@@ -1091,29 +1595,270 @@ observer.observe(document.body, {
     // Removed attributes watching to prevent infinite loop
 });
 
-// Populate timeslots based on exam type
-document.getElementById('copyExamType').addEventListener('change', function() {
-    const timeslotSelect = document.getElementById('timeslot');
-    timeslotSelect.innerHTML = '<option value="">Select timeslot...</option>';
+// Function to update the exam name preview
+function updateCopyExamNamePreview() {
+    console.log('[COPY_MODAL_PREVIEW] Updating exam name preview...');
     
-    if (this.value === 'REVIEW') {
-        // Monthly timeslots
-        for (let i = 1; i <= 12; i++) {
-            const option = document.createElement('option');
-            option.value = `month_${i}`;
-            option.textContent = `Month ${i}`;
-            timeslotSelect.appendChild(option);
+    const examTypeSelect = document.getElementById('copyExamType');
+    const timeslotSelect = document.getElementById('timeslot');
+    const academicYearSelect = document.getElementById('academicYear');
+    const customSuffixInput = document.getElementById('customSuffix');
+    const previewText = document.getElementById('previewText');
+    
+    if (!previewText) {
+        console.error('[COPY_MODAL_PREVIEW] Preview text element not found');
+        return;
+    }
+    
+    // Check if all required fields are filled
+    if (!examTypeSelect?.value || !timeslotSelect?.value || !academicYearSelect?.value) {
+        previewText.textContent = 'Please complete all fields to see preview...';
+        console.log('[COPY_MODAL_PREVIEW] Missing required fields');
+        return;
+    }
+    
+    // Get the source exam name from the display
+    const sourceExamName = document.getElementById('sourceExamName')?.textContent || '';
+    
+    // Build the name preview
+    let nameParts = [];
+    
+    // Add exam type prefix
+    const prefix = examTypeSelect.value === 'QUARTERLY' ? '[QTR]' : '[RT]';
+    nameParts.push(prefix);
+    
+    // Add time period with year
+    if (examTypeSelect.value === 'REVIEW') {
+        // Convert month code to abbreviated name
+        const monthAbbrev = {
+            'JAN': 'Jan', 'FEB': 'Feb', 'MAR': 'Mar', 'APR': 'Apr',
+            'MAY': 'May', 'JUN': 'Jun', 'JUL': 'Jul', 'AUG': 'Aug',
+            'SEP': 'Sep', 'OCT': 'Oct', 'NOV': 'Nov', 'DEC': 'Dec'
+        };
+        const monthName = monthAbbrev[timeslotSelect.value] || timeslotSelect.value;
+        nameParts.push(`${monthName} ${academicYearSelect.value}`);
+    } else {
+        nameParts.push(`${timeslotSelect.value} ${academicYearSelect.value}`);
+    }
+    
+    // Extract curriculum from source exam name
+    const curriculumMatch = sourceExamName.match(/(CORE|ASCENT|EDGE|PINNACLE)\s+(\w+)\s+Lv(\d+)/);
+    if (curriculumMatch) {
+        const curriculum = `${curriculumMatch[1]} ${curriculumMatch[2]} Lv${curriculumMatch[3]}`;
+        nameParts.push(curriculum);
+    } else {
+        // Try to extract any curriculum-like pattern
+        const levelMatch = sourceExamName.match(/Lv\d+/);
+        if (levelMatch) {
+            const beforeLevel = sourceExamName.substring(
+                sourceExamName.lastIndexOf('-') + 1,
+                sourceExamName.indexOf(levelMatch[0])
+            ).trim();
+            if (beforeLevel) {
+                nameParts.push(`${beforeLevel}${levelMatch[0]}`);
+            }
         }
-    } else if (this.value === 'QUARTERLY') {
-        // Quarterly timeslots
-        ['Q1', 'Q2', 'Q3', 'Q4'].forEach(quarter => {
-            const option = document.createElement('option');
-            option.value = quarter.toLowerCase();
-            option.textContent = quarter;
-            timeslotSelect.appendChild(option);
+    }
+    
+    // Join parts
+    let previewName = nameParts.join(' - ');
+    
+    // Add custom suffix if provided
+    const customSuffix = customSuffixInput?.value?.trim();
+    if (customSuffix) {
+        previewName += customSuffix.startsWith('_') ? customSuffix : `_${customSuffix}`;
+    }
+    
+    previewText.textContent = previewName;
+    console.log('[COPY_MODAL_PREVIEW] Generated preview:', previewName);
+}
+
+// Populate timeslots based on exam type
+function initializeCopyExamEventListeners() {
+    console.log('Initializing copy exam event listeners...');
+    
+    const copyExamTypeSelect = document.getElementById('copyExamType');
+    if (!copyExamTypeSelect) {
+        console.error('copyExamType element not found');
+        return;
+    }
+    
+    copyExamTypeSelect.addEventListener('change', function() {
+        console.log('[COPY_MODAL] Exam type changed to:', this.value);
+        
+        const timeslotSelect = document.getElementById('timeslot');
+        if (!timeslotSelect) {
+            console.error('[COPY_MODAL] timeslot element not found');
+            return;
+        }
+        
+        // Clear existing options
+        timeslotSelect.innerHTML = '<option value="">Select time period...</option>';
+        
+        if (this.value === 'REVIEW') {
+            console.log('[COPY_MODAL] Setting up monthly timeslots...');
+            // Enable the select
+            timeslotSelect.disabled = false;
+            
+            // Monthly timeslots with proper month codes
+            const months = [
+                {value: 'JAN', text: 'January'},
+                {value: 'FEB', text: 'February'},
+                {value: 'MAR', text: 'March'},
+                {value: 'APR', text: 'April'},
+                {value: 'MAY', text: 'May'},
+                {value: 'JUN', text: 'June'},
+                {value: 'JUL', text: 'July'},
+                {value: 'AUG', text: 'August'},
+                {value: 'SEP', text: 'September'},
+                {value: 'OCT', text: 'October'},
+                {value: 'NOV', text: 'November'},
+                {value: 'DEC', text: 'December'}
+            ];
+            
+            months.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month.value;
+                option.textContent = month.text;
+                timeslotSelect.appendChild(option);
+            });
+        } else if (this.value === 'QUARTERLY') {
+            console.log('[COPY_MODAL] Setting up quarterly timeslots...');
+            // Enable the select
+            timeslotSelect.disabled = false;
+            
+            // Quarterly timeslots
+            ['Q1', 'Q2', 'Q3', 'Q4'].forEach(quarter => {
+                const option = document.createElement('option');
+                option.value = quarter;
+                option.textContent = quarter;
+                timeslotSelect.appendChild(option);
+            });
+        } else {
+            console.log('[COPY_MODAL] No exam type selected, disabling timeslot');
+            // No exam type selected, disable timeslot
+            timeslotSelect.disabled = true;
+            timeslotSelect.innerHTML = '<option value="">First select exam type...</option>';
+        }
+        
+        // Update name preview
+        updateCopyExamNamePreview();
+    });
+    
+    // Add event listeners for name preview updates
+    const timeslotSelect = document.getElementById('timeslot');
+    const academicYearSelect = document.getElementById('academicYear');
+    const customSuffixInput = document.getElementById('customSuffix');
+    
+    if (timeslotSelect) {
+        timeslotSelect.addEventListener('change', updateCopyExamNamePreview);
+    }
+    
+    if (academicYearSelect) {
+        academicYearSelect.addEventListener('change', updateCopyExamNamePreview);
+    }
+    
+    if (customSuffixInput) {
+        customSuffixInput.addEventListener('input', updateCopyExamNamePreview);
+    }
+    
+    console.log('Copy exam event listeners initialized successfully');
+}
+
+// Initialize all copy exam functionality when DOM is ready
+function initializeAllCopyExamFunctionality() {
+    initializeCopyExamEventListeners();
+    initializeCopyFormSubmission();
+    console.log('All copy exam functionality initialized');
+}
+
+// Debug function to test modal directly
+window.testCopyModal = function() {
+    console.log('Testing copy modal...');
+    const modal = document.getElementById('copyExamModal');
+    if (modal) {
+        console.log('Modal found. Current display:', window.getComputedStyle(modal).display);
+        console.log('Modal has show class:', modal.classList.contains('show'));
+        
+        // Toggle the modal using the proper functions
+        if (modal.classList.contains('show')) {
+            console.log('Closing modal...');
+            closeCopyModal();
+        } else {
+            console.log('Opening modal with test data...');
+            openCopyModal('test-id-123', 'Test Exam Name');
+        }
+        
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            console.log('Modal content found');
+        } else {
+            console.error('Modal content not found');
+        }
+        
+        console.log('Modal should be visible now');
+        console.log('Final display:', window.getComputedStyle(modal).display);
+    } else {
+        console.error('Modal not found in DOM');
+        
+        // Check if the modal HTML exists at all
+        const allModals = document.querySelectorAll('.modal');
+        console.log('Found modals:', allModals.length);
+        allModals.forEach((m, i) => {
+            console.log(`Modal ${i}:`, m.id, m.className);
         });
     }
-});
+};
+
+// CRITICAL: Ensure openCopyModal is always available
+(function() {
+    // Create a robust fallback function if not defined
+    if (typeof window.openCopyModal === 'undefined') {
+        console.warn('[FALLBACK] Creating fallback openCopyModal function');
+        window.openCopyModal = function(examId, examName) {
+            alert('Fallback function called. examId: ' + examId + ', examName: ' + examName);
+        };
+    }
+    
+    if (typeof window.closeCopyModal === 'undefined') {
+        console.warn('[FALLBACK] Creating fallback closeCopyModal function');
+        window.closeCopyModal = function() {
+            console.log('Fallback closeCopyModal called');
+        };
+    }
+    
+    console.log('[FUNCTION_CHECK] openCopyModal type:', typeof window.openCopyModal);
+    console.log('[FUNCTION_CHECK] closeCopyModal type:', typeof window.closeCopyModal);
+})();
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeAllCopyExamFunctionality();
+        console.log('Copy exam functionality initialized on DOMContentLoaded');
+        
+        // Verify functions are available after initialization
+        console.log('[POST_INIT] openCopyModal available:', typeof window.openCopyModal === 'function');
+        console.log('[POST_INIT] closeCopyModal available:', typeof window.closeCopyModal === 'function');
+    });
+} else {
+    initializeAllCopyExamFunctionality();
+    console.log('Copy exam functionality initialized immediately');
+    
+    // Verify functions are available after initialization
+    console.log('[POST_INIT] openCopyModal available:', typeof window.openCopyModal === 'function');
+    console.log('[POST_INIT] closeCopyModal available:', typeof window.closeCopyModal === 'function');
+}
+
+// ============================================================================
+// CLEANUP: Ensure no duplicate functions exist
+// ============================================================================
+console.log('[COPY MODAL] Final verification of functions:');
+console.log('  - window.openCopyModal:', typeof window.openCopyModal);
+console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
 </script>
+
+<!-- Load the comprehensive copy modal module -->
+<script src="{% load static %}{% static 'js/routinetest/copy-exam-modal.js' %}?v={% now 'U' %}" defer></script>
 
 {% endblock %}

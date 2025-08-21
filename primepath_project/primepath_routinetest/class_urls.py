@@ -1,8 +1,9 @@
 """
 BUILDER: Day 2 & 3 - Class and Student Management URLs
+Includes admin Classes & Teachers management interface
 """
 from django.urls import path
-from .views import class_management, student_management
+from .views import class_management, student_management, class_details, admin_classes_teachers
 
 urlpatterns = [
     # Admin class management
@@ -21,4 +22,22 @@ urlpatterns = [
     path('teacher/students/<uuid:student_id>/update/', student_management.update_student, name='update_student'),
     path('teacher/students/search/', student_management.search_students, name='search_students'),
     path('teacher/students/bulk-enroll/', student_management.bulk_enroll_students, name='bulk_enroll'),
+    
+    # Class Details with Student Management and Exam Schedule
+    path('class/<str:class_code>/details/', class_details.class_details, name='class_details'),
+    path('class/<str:class_code>/add-student/', class_details.add_student_to_class, name='add_student_to_class'),
+    path('class/<str:class_code>/remove-student/', class_details.remove_student_from_class, name='remove_student_from_class'),
+    path('class/<str:class_code>/start-exam/', class_details.start_exam_for_class, name='start_exam_for_class'),
+    path('class/<str:class_code>/delete-exam/', class_details.delete_exam_from_schedule, name='delete_exam_from_schedule'),
+    path('student/<uuid:student_id>/details/', class_details.get_student_details, name='get_student_details'),
+    
+    # Admin Classes & Teachers Management
+    path('admin/classes-teachers/', admin_classes_teachers.admin_classes_teachers, name='admin_classes_teachers'),
+    path('admin/classes-teachers/create-class/', admin_classes_teachers.create_class, name='admin_create_class'),
+    path('admin/classes-teachers/delete-class/', admin_classes_teachers.delete_class, name='admin_delete_class'),
+    path('admin/classes-teachers/set-curriculum/', admin_classes_teachers.set_curriculum_recommendation, name='admin_set_curriculum_recommendation'),
+    path('admin/classes-teachers/assign-teacher/', admin_classes_teachers.assign_teacher_to_class, name='admin_assign_teacher_to_class'),
+    path('admin/classes-teachers/remove-teacher/', admin_classes_teachers.remove_teacher_from_class, name='admin_remove_teacher_from_class'),
+    path('admin/classes-teachers/handle-request/', admin_classes_teachers.handle_access_request, name='admin_handle_access_request'),
+    path('admin/classes-teachers/pending-requests-count/', admin_classes_teachers.get_pending_requests_count, name='admin_get_pending_requests_count'),
 ]

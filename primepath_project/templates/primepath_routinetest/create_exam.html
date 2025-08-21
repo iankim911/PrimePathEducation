@@ -237,28 +237,7 @@
         min-height: 200px;
     }
     
-    .class-quick-select {
-        margin-top: 15px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-    
-    .class-quick-select button {
-        margin: 5px;
-        padding: 8px 16px;
-        background: white;
-        border: 2px solid #1B5E20;
-        color: #1B5E20;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .class-quick-select button:hover {
-        background: #1B5E20;
-        color: white;
-    }
+    /* Quick select styles removed - no longer valid with new curriculum structure */
     
     #selected_classes_display {
         margin-top: 15px;
@@ -843,38 +822,16 @@
                 {% endif %}
                 
                 <select class="form-control" id="class_codes" name="class_codes" multiple required>
-                    {% if class_choices %}
-                        {% for class_code, display_name in class_choices %}
-                            <option value="{{ class_code }}">{{ display_name }}</option>
-                        {% endfor %}
-                    {% else %}
-                        <!-- Fallback: Hardcoded class options if context variable missing -->
-                        <option value="CLASS_7A">Class 7A</option>
-                        <option value="CLASS_7B">Class 7B</option>
-                        <option value="CLASS_7C">Class 7C</option>
-                        <option value="CLASS_8A">Class 8A</option>
-                        <option value="CLASS_8B">Class 8B</option>
-                        <option value="CLASS_8C">Class 8C</option>
-                        <option value="CLASS_9A">Class 9A</option>
-                        <option value="CLASS_9B">Class 9B</option>
-                        <option value="CLASS_9C">Class 9C</option>
-                        <option value="CLASS_10A">Class 10A</option>
-                        <option value="CLASS_10B">Class 10B</option>
-                        <option value="CLASS_10C">Class 10C</option>
-                    {% endif %}
+                    {% for class_code, display_name in class_choices %}
+                        <option value="{{ class_code }}">{{ display_name }}</option>
+                    {% empty %}
+                        <!-- No classes available message -->
+                        <option value="" disabled>No classes available. Please sync class codes first.</option>
+                    {% endfor %}
                 </select>
             </div>
             
-            <div class="class-quick-select">
-                <strong>Quick Select:</strong>
-                <button type="button" onclick="selectAllClasses()" class="btn btn-sm">All Classes</button>
-                <button type="button" onclick="clearAllClasses()" class="btn btn-sm">Clear All</button>
-                <button type="button" onclick="selectGrade(7)" class="btn btn-sm">Grade 7</button>
-                <button type="button" onclick="selectGrade(8)" class="btn btn-sm">Grade 8</button>
-                <button type="button" onclick="selectGrade(9)" class="btn btn-sm">Grade 9</button>
-                <button type="button" onclick="selectGrade(10)" class="btn btn-sm">Grade 10</button>
-            </div>
-            
+            <!-- QUICK SELECT REMOVED: 2025-08-21 11:15 -->
             <div id="selected_classes_display">
                 <strong>Selected Classes:</strong> <span id="selected_classes_list"></span>
             </div>
@@ -2094,45 +2051,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 // CLASS SELECTION FUNCTIONS
 // ========================================
-function selectAllClasses() {
-    const classSelect = document.getElementById('class_codes');
-    console.log('[CLASS_SELECT] Selecting all classes');
-    
-    if (classSelect) {
-        for (let i = 0; i < classSelect.options.length; i++) {
-            classSelect.options[i].selected = true;
-        }
-        updateSelectedClassesDisplay();
-    }
-}
-
-function clearAllClasses() {
-    const classSelect = document.getElementById('class_codes');
-    console.log('[CLASS_SELECT] Clearing all classes');
-    
-    if (classSelect) {
-        for (let i = 0; i < classSelect.options.length; i++) {
-            classSelect.options[i].selected = false;
-        }
-        updateSelectedClassesDisplay();
-    }
-}
-
-function selectGrade(gradeNumber) {
-    const classSelect = document.getElementById('class_codes');
-    const gradePrefix = `CLASS_${gradeNumber}`;
-    console.log('[CLASS_SELECT] Selecting all classes for grade:', gradeNumber);
-    
-    if (classSelect) {
-        for (let i = 0; i < classSelect.options.length; i++) {
-            const option = classSelect.options[i];
-            if (option.value.startsWith(gradePrefix)) {
-                option.selected = true;
-            }
-        }
-        updateSelectedClassesDisplay();
-    }
-}
+// Quick select functions removed - no longer valid with new curriculum structure
 
 function updateSelectedClassesDisplay() {
     const classSelect = document.getElementById('class_codes');
@@ -2368,27 +2287,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 timestamp: new Date().toISOString()
             });
             
-            // CRITICAL: Check if options are empty and apply JavaScript fallback
+            // CRITICAL: Check if options are empty
             if (optionCount === 0) {
-                console.error('[CLASS_DEBUG] ❌ NO OPTIONS IN DROPDOWN! Applying JavaScript fallback...');
+                console.error('[CLASS_DEBUG] ❌ NO OPTIONS IN DROPDOWN! Classes need to be synced.');
                 
-                // JavaScript fallback population
-                const fallbackClasses = [
-                    ['CLASS_7A', 'Class 7A'], ['CLASS_7B', 'Class 7B'], ['CLASS_7C', 'Class 7C'],
-                    ['CLASS_8A', 'Class 8A'], ['CLASS_8B', 'Class 8B'], ['CLASS_8C', 'Class 8C'],
-                    ['CLASS_9A', 'Class 9A'], ['CLASS_9B', 'Class 9B'], ['CLASS_9C', 'Class 9C'],
-                    ['CLASS_10A', 'Class 10A'], ['CLASS_10B', 'Class 10B'], ['CLASS_10C', 'Class 10C']
-                ];
+                // Show informative message instead of adding fallback classes
+                const option = document.createElement('option');
+                option.value = '';
+                option.text = 'No classes available. Please sync class codes first.';
+                option.disabled = true;
+                option.selected = true;
+                classCodesSelect.add(option);
                 
-                fallbackClasses.forEach(([value, text]) => {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.text = text;
-                    classCodesSelect.add(option);
-                });
-                
-                console.log(`[CLASS_DEBUG] ✅ Added ${fallbackClasses.length} fallback options via JavaScript`);
-                console.log('[CLASS_DEBUG] Fallback population complete - dropdown should now work');
+                console.log('[CLASS_DEBUG] No classes loaded - sync required via /RoutineTest/admin/class-codes/');
+                console.log('[CLASS_DEBUG] Classes should be synced from PrimePath curriculum mapping');
             } else {
                 console.log(`[CLASS_DEBUG] ✅ Dropdown has ${optionCount} options from server`);
                 // Show first 3 options for verification

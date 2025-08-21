@@ -14,6 +14,7 @@ from core.models import CurriculumLevel
 from core.exceptions import ValidationException, ExamConfigurationException
 from core.decorators import handle_errors
 from ..services import ExamService
+from ..services.exam_service import ExamPermissionService
 import logging
 import json
 
@@ -36,10 +37,29 @@ def exam_list(request):
     
     # Get permission info for current user
     is_admin = request.user.is_superuser or request.user.is_staff
-    teacher_assignments = ExamService.get_teacher_assignments(request.user)
+    teacher_assignments = ExamPermissionService.get_teacher_assignments(request.user)
     
-    # Debug logging
-    logger.info(f"[EXAM_LIST_DEBUG] User: {request.user.username}, is_superuser: {request.user.is_superuser}, is_staff: {request.user.is_staff}, is_admin: {is_admin}")
+    # ENHANCED DEBUG LOGGING FOR DELETE BUTTON ISSUE
+    debug_info = {
+        "user": request.user.username,
+        "is_superuser": request.user.is_superuser,
+        "is_staff": request.user.is_staff,
+        "is_admin": is_admin,
+        "has_teacher_profile": hasattr(request.user, 'teacher_profile'),
+        "teacher_assignments_count": len(teacher_assignments),
+        "view": "exam_list",
+        "timestamp": timezone.now().isoformat()
+    }
+    
+    logger.info(f"[DELETE_BUTTON_DEBUG] {json.dumps(debug_info)}")
+    print(f"\n{'='*80}")
+    print(f"[DELETE_BUTTON_DEBUG] Permission Check:")
+    print(f"  User: {request.user.username}")
+    print(f"  is_superuser: {request.user.is_superuser}")
+    print(f"  is_staff: {request.user.is_staff}")
+    print(f"  is_admin (calculated): {is_admin}")
+    print(f"  has_teacher_profile: {hasattr(request.user, 'teacher_profile')}")
+    print(f"{'='*80}\n")
     
     # Log authentication and permissions
     console_log = {
@@ -358,6 +378,20 @@ def create_exam(request):
             # Phase 3: Get selected class codes
             class_codes = request.POST.getlist('class_codes[]')  # Get array of selected class codes
             
+            # CRITICAL: Validate that teacher can only select their assigned classes
+            if not (request.user.is_superuser or request.user.is_staff):
+                teacher_assignments = ExamService.get_teacher_assignments(request.user)
+                invalid_classes = [code for code in class_codes if code not in teacher_assignments]
+                
+                if invalid_classes:
+                    error_msg = f"You cannot create exams for classes you're not assigned to: {', '.join(invalid_classes)}"
+                    logger.warning(f"[CREATE_EXAM_VALIDATION] Teacher {request.user.username} tried to select unauthorized classes: {invalid_classes}")
+                    print(f"[CREATE_EXAM_VALIDATION] BLOCKED: Teacher tried to select {invalid_classes}")
+                    messages.error(request, error_msg)
+                    return redirect('RoutineTest:create_exam')
+                
+                logger.info(f"[CREATE_EXAM_VALIDATION] Teacher {request.user.username} selected valid classes: {class_codes}")
+            
             # Get general instructions (kept at exam level)
             instructions = request.POST.get('instructions', '').strip()
             # Note: Scheduling is now handled per-class via ClassExamSchedule
@@ -558,21 +592,23 @@ def create_exam(request):
     logger.info(f"[CREATE_EXAM_RT_FINAL] {json.dumps(console_log)}")
     print(f"[CREATE_EXAM_RT_FINAL] {json.dumps(console_log)}")
     
-    # Get class choices from the already imported Exam model
-    # Exam is imported at the top: from ..models import Exam
-    class_choices = Exam.CLASS_CODE_CHOICES
+    # CRITICAL FIX: Get FILTERED class choices based on teacher's assignments
+    # For Upload/Create, teachers should only see classes where they have FULL access
+    class_choices = ExamService.get_filtered_class_choices_for_teacher(request.user, full_access_only=True)
     
-    # Debug: Log class choices to verify they exist
+    # Debug: Log filtered class choices to verify proper filtering
     console_log = {
         "view": "create_exam",
-        "action": "class_choices_loaded",
+        "action": "filtered_class_choices_loaded",
+        "user": request.user.username,
+        "is_admin": request.user.is_superuser or request.user.is_staff,
         "class_count": len(class_choices),
-        "class_codes": [code for code, _ in class_choices][:3] + ['...'] if len(class_choices) > 3 else [code for code, _ in class_choices],
+        "class_codes": [code for code, _ in class_choices][:5] if class_choices else [],
         "sample_classes": class_choices[:3] if class_choices else [],
-        "message": "Class choices prepared for template"
+        "message": "FILTERED class choices based on teacher assignments"
     }
-    logger.info(f"[CREATE_EXAM_CLASS_CHOICES] {json.dumps(console_log)}")
-    print(f"[CREATE_EXAM_CLASS_CHOICES] {json.dumps(console_log)}")
+    logger.info(f"[CREATE_EXAM_FILTERED_CLASSES] {json.dumps(console_log)}")
+    print(f"[CREATE_EXAM_FILTERED_CLASSES] User {request.user.username} sees {len(class_choices)} classes (filtered)")
     
     # Create context with comprehensive debugging
     context = {
@@ -626,7 +662,7 @@ def edit_exam(request, exam_id):
 
 @login_required
 def preview_exam(request, exam_id):
-    """Preview exam with answer key management"""
+    """Preview exam with answer key management - WITH PERMISSION CHECK"""
     # Comprehensive debugging
     console_log = {
         "view": "preview_exam",
@@ -639,6 +675,23 @@ def preview_exam(request, exam_id):
     print(f"[PREVIEW_EXAM_START] {json.dumps(console_log)}")
     
     exam = get_object_or_404(Exam, id=exam_id)
+    
+    # CRITICAL: Check if user can edit this exam
+    can_edit = ExamService.can_teacher_edit_exam(request.user, exam)
+    is_read_only = not can_edit
+    
+    # Log permission check result
+    permission_log = {
+        "exam_id": str(exam_id),
+        "exam_name": exam.name,
+        "user": request.user.username,
+        "can_edit": can_edit,
+        "is_read_only": is_read_only,
+        "is_admin": request.user.is_superuser or request.user.is_staff,
+        "is_owner": exam.created_by and hasattr(request.user, 'teacher_profile') and exam.created_by.id == request.user.teacher_profile.id
+    }
+    logger.info(f"[PREVIEW_EXAM_PERMISSION] {json.dumps(permission_log)}")
+    print(f"[PREVIEW_EXAM_PERMISSION] User {request.user.username} {'CAN EDIT' if can_edit else 'READ-ONLY'} exam {exam.name}")
     
     # Log exam details
     exam_log = {
@@ -712,11 +765,14 @@ def preview_exam(request, exam_id):
     logger.info(f"[PREVIEW_EXAM_CONTEXT] {json.dumps(context_log)}")
     print(f"[PREVIEW_EXAM_CONTEXT] {json.dumps(context_log)}")
     
-    # Build context
+    # Build context with permission info
     context = {
         'exam': exam,
         'questions': questions,
         'audio_files': audio_files,
+        'can_edit': can_edit,  # CRITICAL: Pass edit permission to template
+        'is_read_only': is_read_only,  # For clarity in template
+        'permission_message': 'Full Access' if can_edit else 'View Only - Cannot Save Changes'
     }
     
     # Log successful render attempt
@@ -757,9 +813,83 @@ def manage_questions(request, exam_id):
 @login_required
 def delete_exam(request, exam_id):
     from django.http import JsonResponse
+    from primepath_routinetest.models import TeacherClassAssignment
+    from primepath_routinetest.services.exam_service import ExamPermissionService
     
     exam = get_object_or_404(Exam, id=exam_id)
     exam_name = exam.name
+    
+    # Check permissions
+    is_admin = request.user.is_superuser or request.user.is_staff
+    
+    if not is_admin:
+        # Get teacher profile
+        teacher_profile = getattr(request.user, 'teacher_profile', None)
+        if not teacher_profile:
+            error_msg = "You do not have permission to delete this exam. No teacher profile found."
+            if request.method == 'DELETE' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': error_msg}, status=403)
+            else:
+                messages.error(request, error_msg)
+                return redirect('RoutineTest:exam_list')
+        
+        # Check if teacher can delete this exam (pass user, not teacher_profile)
+        can_delete = ExamPermissionService.can_teacher_delete_exam(request.user, exam)
+        
+        # Debug logging
+        logger.info(f"[DELETE_VIEW] User {request.user.username} attempting to delete exam {exam_id}")
+        logger.info(f"[DELETE_VIEW] Exam: {exam.name}, Created by: {exam.created_by.id if exam.created_by else 'None'}")
+        logger.info(f"[DELETE_VIEW] Teacher profile ID: {teacher_profile.id if teacher_profile else 'None'}")
+        logger.info(f"[DELETE_VIEW] can_delete result: {can_delete}")
+        
+        if not can_delete:
+            # Get the exam's classes and teacher's access levels for a detailed message
+            exam_classes = []
+            if hasattr(exam, 'class_codes') and exam.class_codes:
+                exam_classes = exam.class_codes
+            
+            # Get teacher's access levels for these classes
+            teacher_assignments = TeacherClassAssignment.objects.filter(
+                teacher=teacher_profile,
+                is_active=True
+            )
+            
+            access_details = []
+            for class_code in exam_classes:
+                assignment = teacher_assignments.filter(class_code=class_code).first()
+                if assignment:
+                    access_details.append(f"{class_code} ({assignment.access_level} access)")
+                else:
+                    access_details.append(f"{class_code} (no access)")
+            
+            # Build a clear, single error message
+            if access_details:
+                error_msg = (
+                    f"Access Denied: You cannot delete this exam.\n\n"
+                    f"Required: FULL access level\n"
+                    f"Your access: {', '.join(access_details)}\n\n"
+                    f"Only teachers with FULL access can delete exams."
+                )
+            else:
+                error_msg = (
+                    f"Access Denied: You cannot delete this exam.\n\n"
+                    f"This exam is assigned to classes: {', '.join(exam_classes) if exam_classes else 'none'}\n"
+                    f"You do not have access to these classes."
+                )
+            
+            # Log the permission denial for debugging
+            logger.error(f"[DELETE_DENIED] User {request.user.username} cannot delete exam {exam_id}")
+            logger.error(f"[DELETE_DENIED] Exam created by: {exam.created_by.id if exam.created_by else 'None'}")
+            logger.error(f"[DELETE_DENIED] Teacher profile ID: {teacher_profile.id}")
+            logger.error(f"[DELETE_DENIED] Error message: {error_msg}")
+            
+            if request.method == 'DELETE' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # Return simple error message that won't be replaced by JavaScript
+                simple_error = "You do not have adequate permissions to delete this exam."
+                return JsonResponse({'success': False, 'error': simple_error}, status=403)
+            else:
+                messages.error(request, error_msg)
+                return redirect('RoutineTest:exam_list')
     
     try:
         # Delete associated files
@@ -804,12 +934,10 @@ def get_teacher_copyable_classes(request):
     """API endpoint to get classes where teacher can copy exams to"""
     
     try:
-        # Get teacher's editable classes
+        # Get teacher's assigned classes - can copy to ANY assigned class (not just FULL)
+        # This aligns with the requirement that teachers can copy to all their assigned classes
         teacher_assignments = ExamService.get_teacher_assignments(request.user)
-        copyable_classes = [
-            class_code for class_code, access_level in teacher_assignments.items()
-            if access_level in ['FULL', 'CO_TEACHER']
-        ]
+        copyable_classes = list(teacher_assignments.keys())  # ALL assigned classes are copyable destinations
         is_admin = request.user.is_superuser or request.user.is_staff
         
         # Convert to display format
@@ -902,20 +1030,29 @@ def copy_exam(request, exam_id):
                 'error': 'Time period is required'
             }, status=400)
         
-        # Get teacher for copy attribution
+        # Get teacher for copy attribution - CRITICAL: Copier becomes owner with FULL access
         created_by = None
         if hasattr(request.user, 'teacher_profile'):
             created_by = request.user.teacher_profile
+            logger.info(f"[EXAM_COPY_OWNERSHIP] Teacher {created_by.name} will OWN the copied exam")
+            print(f"[EXAM_COPY_OWNERSHIP] Setting {created_by.name} as OWNER of copied exam")
+        else:
+            logger.warning(f"[EXAM_COPY_OWNERSHIP] User {request.user.username} has no teacher profile")
         
-        # Create the copy
+        # Create the copy with new ownership
         new_exam = Exam.create_copy(
             source_exam=source_exam,
             target_class_codes=target_class_codes,
             exam_type=exam_type,
             time_period=time_period,
             academic_year=academic_year,
-            created_by=created_by
+            created_by=created_by  # CRITICAL: This makes copier the owner
         )
+        
+        # Verify ownership was set
+        if new_exam.created_by:
+            logger.info(f"[EXAM_COPY_OWNERSHIP] SUCCESS: {new_exam.created_by.name} now OWNS exam {new_exam.id}")
+            print(f"[EXAM_COPY_OWNERSHIP] ✅ {new_exam.created_by.name} has FULL ACCESS to copied exam")
         
         # Log the copy operation
         console_log = {

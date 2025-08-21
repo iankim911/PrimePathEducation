@@ -450,7 +450,7 @@ class ExamService:
         # Admins have full access to everything
         if user.is_superuser or user.is_staff:
             all_classes = {}
-            for program_classes in cls.PROGRAM_CLASS_MAPPING.values():
+            for program_classes in ExamService.PROGRAM_CLASS_MAPPING.values():
                 for class_code in program_classes:
                     all_classes[class_code] = 'FULL'
             return all_classes
@@ -466,17 +466,99 @@ class ExamService:
         return {}
     
     @classmethod
+    def get_filtered_class_choices_for_teacher(cls, user: User, full_access_only: bool = True) -> list:
+        """
+        Get filtered class choices for a teacher based on their assignments.
+        Returns list of tuples: [(class_code, display_name), ...]
+        
+        Args:
+            user: The user to get classes for
+            full_access_only: If True, only return classes where teacher has FULL access (for Upload/Create)
+                            If False, return all assigned classes (for Copy destination)
+        
+        This is the CRITICAL method that ensures teachers only see appropriate classes
+        when creating, editing, or copying exams.
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Get all available class choices
+        from ..models import Exam
+        all_choices = Exam.get_class_code_choices()
+        
+        # For admins, return all choices
+        if user.is_superuser or user.is_staff:
+            logger.info(f"[CLASS_FILTER] Admin {user.username} gets ALL {len(all_choices)} classes")
+            print(f"[CLASS_FILTER] Admin {user.username} can access ALL classes")
+            return all_choices
+        
+        # For teachers, filter based on assignments
+        teacher_assignments = ExamService.get_teacher_assignments(user)
+        
+        if not teacher_assignments:
+            logger.warning(f"[CLASS_FILTER] User {user.username} has NO class assignments")
+            print(f"[CLASS_FILTER] Teacher {user.username} has NO assigned classes")
+            return []
+        
+        # Filter choices based on access level requirement
+        filtered_choices = []
+        for class_code, display_name in all_choices:
+            if class_code in teacher_assignments:
+                access_level = teacher_assignments[class_code]
+                
+                # CRITICAL: For Upload/Create, only show FULL access classes
+                if full_access_only and access_level != 'FULL':
+                    logger.debug(f"[CLASS_FILTER] Skipping {class_code} - has {access_level} access (need FULL)")
+                    continue
+                
+                # Add access level to display name for clarity
+                # Convert "FULL" to "FULL ACCESS" for better clarity
+                display_access = "FULL ACCESS" if access_level == "FULL" else access_level
+                enhanced_display = f"{display_name} ({display_access})"
+                filtered_choices.append((class_code, enhanced_display))
+                logger.debug(f"[CLASS_FILTER] Including class {class_code} with {access_level} access")
+        
+        filter_type = "FULL access only" if full_access_only else "all assigned"
+        logger.info(f"[CLASS_FILTER] Teacher {user.username} gets {len(filtered_choices)}/{len(all_choices)} classes ({filter_type})")
+        print(f"[CLASS_FILTER] Teacher {user.username} can access {len(filtered_choices)} classes ({filter_type}): {[c[0] for c in filtered_choices][:5]}...")
+        
+        return filtered_choices
+    
+    @classmethod
     def can_teacher_edit_exam(cls, user: User, exam: Exam) -> bool:
-        """Check if teacher can edit a specific exam"""
+        """Check if teacher can edit a specific exam - ENHANCED VERSION WITH OWNERSHIP"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # CRITICAL: Check admin status FIRST
         if not user.is_authenticated:
+            logger.debug(f"[PERMISSION_EDIT] User not authenticated")
             return False
         
         # Admins can edit everything
         if user.is_superuser or user.is_staff:
+            logger.info(f"[PERMISSION_EDIT] User {user.username} is admin, granting edit permission")
+            print(f"[PERMISSION_EDIT] Admin {user.username} has EDIT access to exam {exam.id}")
+            return True
+        
+        # For non-admins, check teacher profile
+        if not hasattr(user, 'teacher_profile'):
+            logger.warning(f"[PERMISSION_EDIT] User {user.username} has no teacher_profile and is not admin")
+            return False
+        
+        teacher = user.teacher_profile
+        
+        # CRITICAL FIX: Check if teacher is the creator/owner of the exam
+        if exam.created_by and exam.created_by.id == teacher.id:
+            logger.info(f"[PERMISSION_EDIT] Teacher {teacher.name} is the OWNER of exam {exam.name}, granting FULL edit permission")
+            print(f"[PERMISSION_EDIT] Teacher {teacher.name} OWNS exam {exam.id} - FULL ACCESS")
             return True
         
         # Get teacher's assignments
-        assignments = cls.get_teacher_assignments(user)
+        assignments = ExamService.get_teacher_assignments(user)
+        
+        # Log teacher's assignments for debugging
+        logger.debug(f"[PERMISSION_EDIT] Teacher {teacher.name} has assignments: {list(assignments.keys())}")
         
         # Check if teacher has edit access to any of the exam's classes
         exam_classes = exam.class_codes if exam.class_codes else []
@@ -485,13 +567,18 @@ class ExamService:
         # This allows teachers with edit permissions to manage program-level exams
         if not exam_classes:
             # Teacher can edit program-level exams if they have edit access to any class
-            return any(access in ['FULL', 'CO_TEACHER'] for access in assignments.values())
+            can_edit = any(access in ['FULL', 'CO_TEACHER'] for access in assignments.values())
+            logger.debug(f"[PERMISSION_EDIT] Program-level exam, teacher {teacher.name} can_edit: {can_edit}")
+            return can_edit
         
         # Check specific class codes
         for class_code in exam_classes:
             if class_code in assignments and assignments[class_code] in ['FULL', 'CO_TEACHER']:
+                logger.info(f"[PERMISSION_EDIT] Teacher {teacher.name} has {assignments[class_code]} access to class {class_code}, granting edit permission")
+                print(f"[PERMISSION_EDIT] Teacher {teacher.name} has EDIT access via class {class_code}")
                 return True
         
+        logger.debug(f"[PERMISSION_EDIT] Teacher {teacher.name} has NO edit access to exam {exam.name}")
         return False
     
     @classmethod
@@ -506,15 +593,15 @@ class ExamService:
         logger = logging.getLogger(__name__)
         
         # Get teacher assignments
-        assignments = cls.get_teacher_assignments(user)
+        assignments = ExamService.get_teacher_assignments(user)
         is_admin = user.is_superuser or user.is_staff
         
         # Initialize structure
-        organized = {program: defaultdict(list) for program in cls.PROGRAM_CLASS_MAPPING.keys()}
+        organized = {program: defaultdict(list) for program in ExamService.PROGRAM_CLASS_MAPPING.keys()}
         
         # Map class codes to programs
         class_to_program = {}
-        for program, classes in cls.PROGRAM_CLASS_MAPPING.items():
+        for program, classes in ExamService.PROGRAM_CLASS_MAPPING.items():
             for class_code in classes:
                 class_to_program[class_code] = program
         
@@ -546,14 +633,82 @@ class ExamService:
                     logger.warning(f"[EXAM_HIERARCHY] Could not infer program from curriculum_level: {e}")
                     exam_classes = ['GENERAL']
             
-            # Skip if filtering and no assigned classes
-            if filter_assigned_only and not is_admin:
-                if not any(cls in assignments for cls in exam_classes):
+            # CRITICAL: Check ownership FIRST - owners have FULL access regardless
+            is_owner = False
+            if exam.created_by and hasattr(user, 'teacher_profile'):
+                try:
+                    is_owner = exam.created_by.id == user.teacher_profile.id
+                    if is_owner:
+                        logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} OWNS exam {exam.name} - FULL ACCESS")
+                except:
+                    pass
+            
+            # Skip if filtering and no assigned classes (BUT keep owned exams)
+            if filter_assigned_only and not is_admin and not is_owner:
+                # CORRECTED FIX (Aug 21, 2025): "Show Assigned Classes Only" means show exams from 
+                # classes where teacher has EDITING rights (FULL or CO_TEACHER), NOT VIEW ONLY.
+                # This hides VIEW ONLY exams when the toggle is checked.
+                has_editable_class = False
+                for cls in exam_classes:
+                    # Skip program-level exams when filtering by assigned only
+                    if cls.startswith('PROGRAM_'):
+                        logger.debug(f"[EXAM_FILTER] Skipping program-level exam {exam.name}")
+                        continue
+                    
+                    # Check if teacher has EDITING access to this class (FULL or CO_TEACHER only)
+                    # VIEW access is excluded when "Show Assigned Classes Only" is checked
+                    if cls in assignments and assignments[cls] in ['FULL', 'CO_TEACHER']:
+                        has_editable_class = True
+                        logger.debug(f"[EXAM_FILTER] Including exam {exam.name} - teacher has {assignments[cls]} access to class {cls}")
+                        break
+                
+                if not has_editable_class:
+                    logger.debug(f"[EXAM_FILTER] Skipping exam {exam.name} - not owned and no editing access to its classes")
                     continue
             
-            # Add permissions to exam
-            exam.can_edit = cls.can_teacher_edit_exam(user, exam)
-            exam.can_copy = len(assignments) > 0 or is_admin
+            # Add permissions to exam with ownership priority
+            if is_owner:
+                # OWNER ALWAYS HAS FULL PERMISSIONS
+                exam.can_edit = True
+                exam.can_copy = True
+                exam.can_delete = True
+                exam.is_owner = True
+                exam.access_badge = 'OWNER'
+            elif is_admin:
+                # ADMIN ALWAYS HAS FULL PERMISSIONS
+                exam.can_edit = True
+                exam.can_copy = True
+                exam.can_delete = True
+                exam.is_owner = False
+                exam.access_badge = 'ADMIN'
+            elif not filter_assigned_only:
+                # SHOWING ALL EXAMS (toggle = All Exams) - Default to VIEW ONLY
+                exam.can_edit = False
+                exam.can_copy = True  # Can copy to their classes
+                exam.can_delete = False
+                exam.is_owner = False
+                exam.access_badge = 'VIEW ONLY'
+                
+                # But check if they have edit access through class assignments
+                if ExamService.can_teacher_edit_exam(user, exam):
+                    exam.can_edit = True
+                    exam.access_badge = 'EDIT'
+                if ExamPermissionService.can_teacher_delete_exam(user, exam):
+                    exam.can_delete = True
+            else:
+                # ASSIGNED ONLY MODE - standard class-based permissions
+                exam.can_edit = ExamService.can_teacher_edit_exam(user, exam)
+                exam.can_copy = len(assignments) > 0 or is_admin
+                exam.can_delete = ExamPermissionService.can_teacher_delete_exam(user, exam)
+                exam.is_owner = is_owner
+                
+                # Determine proper access badge based on permissions
+                if exam.can_edit and exam.can_delete:
+                    exam.access_badge = 'FULL ACCESS'
+                elif exam.can_edit:
+                    exam.access_badge = 'EDIT'
+                else:
+                    exam.access_badge = 'VIEW ONLY'
             
             # Organize by class code
             if exam_classes:
@@ -561,7 +716,7 @@ class ExamService:
                     if class_code.startswith('PROGRAM_'):
                         # This is a program-level exam without specific class assignment
                         program = class_code.replace('PROGRAM_', '')
-                        if program in cls.PROGRAM_CLASS_MAPPING:
+                        if program in ExamService.PROGRAM_CLASS_MAPPING:
                             exam.class_access_level = 'FULL' if is_admin else 'VIEW'
                             exam.is_accessible = is_admin
                             organized[program]['All Classes'].append(exam)
@@ -1495,7 +1650,7 @@ class ExamPermissionService:
     @classmethod
     def get_teacher_accessible_classes(cls, user):
         """Get all classes the teacher can access (with any permission level)"""
-        if cls.is_admin(user):
+        if ExamPermissionService.is_admin(user):
             return 'ALL'  # Admins can access all classes
         
         return list(cls.get_teacher_assignments(user).keys())
@@ -1503,40 +1658,24 @@ class ExamPermissionService:
     @classmethod
     def get_teacher_editable_classes(cls, user):
         """Get classes where teacher has edit permissions"""
-        if cls.is_admin(user):
+        if ExamPermissionService.is_admin(user):
             return 'ALL'
         
-        assignments = cls.get_teacher_assignments(user)
+        assignments = ExamService.get_teacher_assignments(user)
         return [class_code for class_code, access_level in assignments.items() 
                 if access_level in ['FULL', 'CO_TEACHER']]
     
-    @classmethod
-    def can_teacher_edit_exam(cls, user, exam):
-        """Check if teacher can edit a specific exam"""
-        if cls.is_admin(user):
-            return True
-        
-        if not hasattr(user, 'teacher_profile'):
-            return False
-        
-        editable_classes = cls.get_teacher_editable_classes(user)
-        if editable_classes == 'ALL':
-            return True
-        
-        # Check if any of the exam's class codes are editable by this teacher
-        exam_class_codes = exam.class_codes if exam.class_codes else []
-        
-        # If exam has no specific class codes (program-level exam),
-        # allow teachers with any edit permissions to manage it
-        if not exam_class_codes and editable_classes and editable_classes != 'ALL':
-            return len(editable_classes) > 0
-        
-        return any(class_code in editable_classes for class_code in exam_class_codes)
+    # DUPLICATE METHOD REMOVED - Using primary version at line 469
+    # The primary version has been fixed with proper admin check
+    # @classmethod
+    # def can_teacher_edit_exam(cls, user, exam):
+    #     """DUPLICATE - See line 469 for the active version"""
+    #     pass
     
     @classmethod
     def can_teacher_copy_exam(cls, user, source_exam):
         """Check if teacher can copy an exam"""
-        if cls.is_admin(user):
+        if ExamPermissionService.is_admin(user):
             return True
         
         if not hasattr(user, 'teacher_profile'):
@@ -1547,9 +1686,71 @@ class ExamPermissionService:
         return accessible_classes and accessible_classes != []
     
     @classmethod
+    def can_teacher_delete_exam(cls, user, exam):
+        """
+        Check if teacher can delete an exam - ENHANCED WITH OWNERSHIP RECOGNITION.
+        
+        Teacher can delete if:
+        1. They are admin (superuser or staff)
+        2. They created the exam (exam.created_by matches their teacher profile) - OWNER HAS FULL RIGHTS
+        3. They have FULL access to at least one of the exam's assigned classes
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Check if user is authenticated
+        if not user.is_authenticated:
+            logger.info(f"[DELETE_PERMISSION] User not authenticated")
+            return False
+        
+        # Admins can delete everything
+        if user.is_superuser or user.is_staff:
+            logger.info(f"[DELETE_PERMISSION] User {user.username} is admin, granting delete permission")
+            print(f"[DELETE_PERMISSION] Admin {user.username} can DELETE exam {exam.id}")
+            return True
+        
+        # Check if user has teacher profile
+        if not hasattr(user, 'teacher_profile'):
+            logger.info(f"[DELETE_PERMISSION] User {user.username} has no teacher profile")
+            return False
+        
+        teacher = user.teacher_profile
+        
+        # CRITICAL FIX: Check if teacher created the exam - OWNER HAS FULL RIGHTS
+        if exam.created_by:
+            logger.debug(f"[DELETE_PERMISSION] Exam created_by ID: {exam.created_by.id}, Teacher ID: {teacher.id}")
+            print(f"[DELETE_PERMISSION_DEBUG] Comparing exam.created_by.id={exam.created_by.id} with teacher.id={teacher.id}")
+            
+            if exam.created_by.id == teacher.id:
+                logger.info(f"[DELETE_PERMISSION] Teacher {teacher.name} is the OWNER of exam {exam.name}, granting FULL delete permission")
+                print(f"[DELETE_PERMISSION] Teacher {teacher.name} OWNS exam {exam.id} - CAN DELETE")
+                return True
+            else:
+                logger.debug(f"[DELETE_PERMISSION] Teacher {teacher.name} is NOT the owner (owner ID: {exam.created_by.id})")
+        else:
+            logger.warning(f"[DELETE_PERMISSION] Exam {exam.name} has no created_by field set")
+        
+        # Check if teacher has FULL access to any of the exam's classes
+        assignments = ExamService.get_teacher_assignments(user)
+        exam_classes = exam.class_codes if exam.class_codes else []
+        
+        logger.debug(f"[DELETE_PERMISSION] Teacher {teacher.name} assignments: {list(assignments.keys())}")
+        logger.debug(f"[DELETE_PERMISSION] Exam {exam.name} classes: {exam_classes}")
+        
+        for class_code in exam_classes:
+            if class_code in assignments and assignments[class_code] == 'FULL':
+                logger.info(f"[DELETE_PERMISSION] Teacher {teacher.name} has FULL access to class {class_code}, granting delete permission")
+                print(f"[DELETE_PERMISSION] Teacher {teacher.name} has FULL access to class {class_code} - CAN DELETE")
+                return True
+        
+        logger.info(f"[DELETE_PERMISSION] Teacher {teacher.name} does NOT have delete permission for exam {exam.name}")
+        print(f"[DELETE_PERMISSION] Teacher {teacher.name} CANNOT delete exam {exam.id}")
+        return False
+    
+    @classmethod
     def get_teacher_copyable_classes(cls, user):
         """Get classes where teacher can copy exams to"""
-        if cls.is_admin(user):
+        if ExamPermissionService.is_admin(user):
             # Return all class codes for admins
             all_class_codes = list(cls.CLASS_TO_PROGRAM.keys())
             return all_class_codes
@@ -1563,7 +1764,7 @@ class ExamPermissionService:
         Get the access level for a specific exam
         Returns: 'EDIT', 'COPY', 'VIEW'
         """
-        if cls.is_admin(user):
+        if ExamPermissionService.is_admin(user):
             return 'EDIT'
         
         if not hasattr(user, 'teacher_profile'):
@@ -1592,7 +1793,7 @@ class ExamPermissionService:
         """
         is_admin = cls.is_admin(user)
         access_level = cls.get_exam_access_level(user, exam)
-        teacher_assignments = cls.get_teacher_assignments(user)
+        teacher_assignments = ExamService.get_teacher_assignments(user)
         
         # Check permissions for each class code
         class_permissions = {}
@@ -1657,13 +1858,13 @@ class ExamPermissionService:
         if filter_type == 'all':
             return exams
         
-        if cls.is_admin(user):
+        if ExamPermissionService.is_admin(user):
             return exams  # Admins see everything
         
         if not hasattr(user, 'teacher_profile'):
             return exams  # Non-teachers see everything in view mode
         
-        teacher_assignments = cls.get_teacher_assignments(user)
+        teacher_assignments = ExamService.get_teacher_assignments(user)
         assigned_class_codes = list(teacher_assignments.keys())
         
         if filter_type == 'assigned_only':
@@ -1693,7 +1894,7 @@ class ExamPermissionService:
     @classmethod
     def get_permission_summary(cls, user):
         """Get summary of user's permissions for debugging"""
-        teacher_assignments = cls.get_teacher_assignments(user)
+        teacher_assignments = ExamService.get_teacher_assignments(user)
         accessible_classes = cls.get_teacher_accessible_classes(user)
         editable_classes = cls.get_teacher_editable_classes(user)
         copyable_classes = cls.get_teacher_copyable_classes(user)
@@ -1706,3 +1907,13 @@ class ExamPermissionService:
             'editable_classes': editable_classes,
             'copyable_classes_count': len(copyable_classes) if isinstance(copyable_classes, list) else 'ALL',
         }
+    
+    @classmethod
+    def organize_exams_hierarchically(cls, exams, user, filter_assigned_only=False):
+        """
+        Delegate to ExamService.organize_exams_hierarchically for backward compatibility.
+        This prevents AttributeError if code tries to call this method on ExamPermissionService.
+        """
+        return ExamService.organize_exams_hierarchically(
+            exams, user, filter_assigned_only=filter_assigned_only
+        )

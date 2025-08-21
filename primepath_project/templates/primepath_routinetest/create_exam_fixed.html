@@ -446,16 +446,6 @@
                 </select>
             </div>
             
-            <div class="class-quick-select">
-                <strong>Quick Select:</strong>
-                <button type="button" onclick="selectAllClasses()" class="btn btn-sm">All Classes</button>
-                <button type="button" onclick="clearAllClasses()" class="btn btn-sm">Clear All</button>
-                <button type="button" onclick="selectGrade(7)" class="btn btn-sm">Grade 7</button>
-                <button type="button" onclick="selectGrade(8)" class="btn btn-sm">Grade 8</button>
-                <button type="button" onclick="selectGrade(9)" class="btn btn-sm">Grade 9</button>
-                <button type="button" onclick="selectGrade(10)" class="btn btn-sm">Grade 10</button>
-            </div>
-            
             <div id="selected_classes_display">
                 <strong>Selected Classes:</strong> <span id="selected_classes_list"></span>
             </div>
@@ -958,45 +948,7 @@ document.getElementById('examForm')?.addEventListener('submit', function(e) {
 // ========================================
 // CLASS SELECTION FUNCTIONS
 // ========================================
-function selectAllClasses() {
-    const classSelect = document.getElementById('class_codes');
-    console.log('[CLASS_SELECT] Selecting all classes');
-    
-    if (classSelect) {
-        for (let i = 0; i < classSelect.options.length; i++) {
-            classSelect.options[i].selected = true;
-        }
-        updateSelectedClassesDisplay();
-    }
-}
-
-function clearAllClasses() {
-    const classSelect = document.getElementById('class_codes');
-    console.log('[CLASS_SELECT] Clearing all classes');
-    
-    if (classSelect) {
-        for (let i = 0; i < classSelect.options.length; i++) {
-            classSelect.options[i].selected = false;
-        }
-        updateSelectedClassesDisplay();
-    }
-}
-
-function selectGrade(gradeNumber) {
-    const classSelect = document.getElementById('class_codes');
-    const gradePrefix = `CLASS_${gradeNumber}`;
-    console.log('[CLASS_SELECT] Selecting all classes for grade:', gradeNumber);
-    
-    if (classSelect) {
-        for (let i = 0; i < classSelect.options.length; i++) {
-            const option = classSelect.options[i];
-            if (option.value.startsWith(gradePrefix)) {
-                option.selected = true;
-            }
-        }
-        updateSelectedClassesDisplay();
-    }
-}
+// Quick select functions removed - no longer valid with new curriculum structure
 
 function updateSelectedClassesDisplay() {
     const classSelect = document.getElementById('class_codes');

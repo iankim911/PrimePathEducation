@@ -177,35 +177,52 @@ def classes_exams_unified_view(request):
         
         # SECTION 1: Get teacher's class assignments
         if is_admin:
-            # Admin has access to all classes
-            # NOTE: Exam is already imported globally on line 25, no local import needed
+            # Admin has access to all classes - get from actual Class model
+            from primepath_routinetest.models.class_model import Class
+            from primepath_routinetest.class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
+            
             try:
-                all_class_codes = [code for code, _ in Exam.CLASS_CODE_CHOICES]
-                logger.info(f"[CLASSES_EXAMS_UNIFIED] Admin mode: Retrieved {len(all_class_codes)} class codes from Exam.CLASS_CODE_CHOICES")
-                print(f"[CLASSES_EXAMS_UNIFIED] Admin class codes: {all_class_codes}")
+                # Get all active classes from database
+                active_classes = Class.objects.filter(is_active=True).order_by('section')
+                all_class_codes = [cls.section for cls in active_classes if cls.section]
+                
+                logger.info(f"[CLASSES_EXAMS_UNIFIED] Admin mode: Retrieved {len(all_class_codes)} PrimePath classes from database")
+                print(f"[CLASSES_EXAMS_UNIFIED] Admin class codes (sample): {all_class_codes[:5] if all_class_codes else 'None'}")
             except Exception as e:
-                logger.error(f"[CLASSES_EXAMS_UNIFIED] Error accessing Exam.CLASS_CODE_CHOICES: {str(e)}")
+                logger.error(f"[CLASSES_EXAMS_UNIFIED] Error accessing classes: {str(e)}")
                 print(f"[CLASSES_EXAMS_UNIFIED] ERROR: Could not access class codes: {str(e)}")
-                # Fallback to hardcoded choices to prevent complete failure
-                all_class_codes = ['CLASS_7A', 'CLASS_7B', 'CLASS_7C', 'CLASS_8A', 'CLASS_8B', 'CLASS_8C']
+                # No fallback - let it properly show no classes
+                all_class_codes = []
             
             # Create virtual assignments for display with robust error handling
             my_assignments = []
+            class_lookup = {}
+            
+            # Build lookup table for class names
+            for cls in active_classes:
+                if cls.section:
+                    # Use curriculum mapping if available, otherwise use class name
+                    if cls.section in CLASS_CODE_CURRICULUM_MAPPING:
+                        class_lookup[cls.section] = CLASS_CODE_CURRICULUM_MAPPING[cls.section]
+                    else:
+                        class_lookup[cls.section] = cls.name
+            
             for class_code in all_class_codes:
                 try:
                     # Create mock assignment object with proper closure handling
                     class MockAssignment:
-                        def __init__(self, code):
+                        def __init__(self, code, display_name):
                             self.class_code = code
                             self.access_level = 'FULL'
                             self.is_virtual = True
                             # Pre-calculate display name to avoid closure issues
-                            self._display_name = dict(Exam.CLASS_CODE_CHOICES).get(code, code)
+                            self._display_name = display_name
                         
                         def get_class_code_display(self):
                             return self._display_name
                     
-                    mock_assignment = MockAssignment(class_code)
+                    display_name = class_lookup.get(class_code, class_code)
+                    mock_assignment = MockAssignment(class_code, display_name)
                     my_assignments.append(mock_assignment)
                     logger.debug(f"[CLASSES_EXAMS_UNIFIED] Created mock assignment for {class_code}")
                     
@@ -222,13 +239,24 @@ def classes_exams_unified_view(request):
             
         else:
             # Regular teacher - get actual assignments
+            # CRITICAL FIX: For Classes & Exams, only show FULL access classes
+            # VIEW ONLY doesn't make sense in this management context
             my_assignments = TeacherClassAssignment.objects.filter(
                 teacher=teacher,
-                is_active=True
+                is_active=True,
+                access_level='FULL'  # ONLY FULL ACCESS for Classes & Exams tab
             ).select_related('teacher')
             
             my_class_codes = [a.class_code for a in my_assignments]
             context['admin_all_access'] = False
+            
+            # Log the filtering
+            total_assignments = TeacherClassAssignment.objects.filter(
+                teacher=teacher,
+                is_active=True
+            ).count()
+            logger.info(f"[CLASSES_EXAMS_FILTER] Teacher {teacher.name} has {len(my_assignments)}/{total_assignments} FULL access classes")
+            print(f"[CLASSES_EXAMS_FILTER] Showing {len(my_assignments)} FULL access classes out of {total_assignments} total assignments")
             
             console_log["admin_mode"] = False
             console_log["assigned_classes"] = my_class_codes
@@ -427,7 +455,135 @@ def classes_exams_unified_view(request):
         context['matrix_data'] = matrix_data
         context['timeslots'] = timeslots
         
-        # SECTION 4: My Classes detailed information
+        # SECTION 4: Organize classes by program for new Class Management section
+        from collections import defaultdict
+        from primepath_routinetest.class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
+        
+        # Define program mapping
+        PROGRAM_MAPPING = {
+            'CORE': [],
+            'ASCENT': [],
+            'EDGE': [],
+            'PINNACLE': []
+        }
+        
+        # Map class codes to programs based on curriculum mapping
+        for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
+            if 'CORE' in curriculum:
+                PROGRAM_MAPPING['CORE'].append(code)
+            elif 'ASCENT' in curriculum:
+                PROGRAM_MAPPING['ASCENT'].append(code)
+            elif 'EDGE' in curriculum:
+                PROGRAM_MAPPING['EDGE'].append(code)
+            elif 'PINNACLE' in curriculum:
+                PROGRAM_MAPPING['PINNACLE'].append(code)
+        
+        # Get all exams for counting
+        all_class_exams = Exam.objects.filter(
+            is_active=True,
+            academic_year=current_year
+        )
+        
+        # Build program-organized data structure
+        programs_data = []
+        
+        for program_name in ['CORE', 'ASCENT', 'EDGE', 'PINNACLE']:
+            program_classes = []
+            total_students = 0
+            total_exams = 0
+            incomplete_assignments = 0
+            
+            # Get classes for this program that the user has access to
+            for assignment in my_assignments[:20]:  # Limit for performance
+                if assignment.class_code in PROGRAM_MAPPING[program_name]:
+                    # Get class details
+                    class_name = assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code
+                    
+                    # Get full curriculum information from mapping
+                    curriculum_full = CLASS_CODE_CURRICULUM_MAPPING.get(assignment.class_code, '')
+                    
+                    # Parse curriculum components (e.g., "CORE Phonics Level 1")
+                    if curriculum_full:
+                        parts = curriculum_full.split()
+                        if len(parts) >= 3:
+                            # Format: "CORE • Phonics • Level 1"
+                            curriculum_display = f"{parts[0]} • {' '.join(parts[1:-1])} • {parts[-1]}"
+                        else:
+                            curriculum_display = curriculum_full
+                    else:
+                        curriculum_display = "Level 1"
+                    
+                    curriculum_level = curriculum_full.split(' ')[-1] if curriculum_full else 'Level 1'
+                    
+                    # Count active exams for this class
+                    class_exam_count = 0
+                    for exam in all_class_exams:
+                        if exam.class_codes and assignment.class_code in exam.class_codes:
+                            class_exam_count += 1
+                    
+                    # Check if all required exams are assigned (simplified logic)
+                    # Assuming 12 months + 4 quarters = 16 required assignments per year
+                    required_assignments = 16
+                    all_exams_assigned = class_exam_count >= required_assignments
+                    
+                    # Get student sessions for this class
+                    completed_sessions = 0
+                    pending_sessions = 0
+                    total_score = 0
+                    score_count = 0
+                    
+                    # For SQLite compatibility, we'll use simplified counts
+                    try:
+                        sessions = StudentSession.objects.filter(
+                            exam__class_codes__contains=assignment.class_code
+                        )[:100]  # Limit for performance
+                        
+                        for session in sessions:
+                            if session.completed_at:
+                                completed_sessions += 1
+                                if hasattr(session, 'final_score') and session.final_score:
+                                    total_score += session.final_score
+                                    score_count += 1
+                            else:
+                                pending_sessions += 1
+                    except:
+                        pass
+                    
+                    avg_score = round(total_score / score_count) if score_count > 0 else None
+                    
+                    class_data = {
+                        'class_code': assignment.class_code,
+                        'class_name': class_name,
+                        'access_level': assignment.access_level,
+                        'curriculum_level': curriculum_level,
+                        'curriculum_full': curriculum_display,  # Full curriculum display
+                        'student_count': 0,  # Simplified for now
+                        'active_exams': class_exam_count,
+                        'all_exams_assigned': all_exams_assigned,
+                        'completed_sessions': completed_sessions,
+                        'pending_sessions': pending_sessions,
+                        'avg_score': avg_score
+                    }
+                    
+                    program_classes.append(class_data)
+                    total_students += class_data['student_count']
+                    total_exams += class_data['active_exams']
+                    if not all_exams_assigned:
+                        incomplete_assignments += 1
+            
+            # Only add program if it has classes
+            if program_classes or is_admin:
+                programs_data.append({
+                    'name': program_name,
+                    'classes': program_classes,
+                    'total_students': total_students,
+                    'total_exams': total_exams,
+                    'incomplete_assignments': incomplete_assignments
+                })
+        
+        context['programs_data'] = programs_data
+        
+        # SECTION 5: My Classes detailed information (keep for backward compatibility)
         classes_info = []
         for assignment in my_assignments[:20]:  # Limit for performance
             class_info = {

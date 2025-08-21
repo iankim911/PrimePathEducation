@@ -1015,6 +1015,28 @@
     </div>
 </div>
 <div class="container-main">
+    <!-- PERMISSION BANNER -->
+    {% if is_read_only %}
+    <div class="alert alert-warning" role="alert" style="margin-bottom: 20px;">
+        <h5 class="alert-heading">🔒 View Only Mode</h5>
+        <p class="mb-0">
+            <strong>{{ permission_message }}</strong><br>
+            You can view the exam and answer keys, but you cannot make any changes.
+            {% if not is_admin %}
+                To edit this exam, you need to be the exam owner or have edit access to the assigned classes.
+            {% endif %}
+        </p>
+    </div>
+    {% else %}
+    <div class="alert alert-success" role="alert" style="margin-bottom: 20px;">
+        <h5 class="alert-heading">✅ Full Access</h5>
+        <p class="mb-0">
+            <strong>{{ permission_message }}</strong><br>
+            You can view and edit all exam answers and settings.
+        </p>
+    </div>
+    {% endif %}
+    
     <!-- PDF Title -->
     <div class="pdf-title-section">
         <h1 class="pdf-title">
@@ -1446,9 +1468,15 @@
                     <button type="button" class="btn btn-secondary" onclick="clearAllAnswers()">
                         Clear All
                     </button>
+                    {% if not is_read_only %}
                     <button type="button" class="btn btn-primary" onclick="saveAllAnswers()">
                         Save All Answers
                     </button>
+                    {% else %}
+                    <button type="button" class="btn btn-secondary" disabled title="You don't have permission to save changes">
+                        Save All Answers (Disabled)
+                    </button>
+                    {% endif %}
                 </div>
             </div>
         </div>

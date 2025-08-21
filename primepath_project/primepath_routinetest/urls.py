@@ -25,6 +25,7 @@ from .curriculum_urls import urlpatterns as curriculum_patterns  # Admin curricu
 from .unified_urls import urlpatterns as unified_patterns  # NEW: Unified Classes & Exams
 from .assessment_urls import urlpatterns as assessment_patterns  # NEW: Teacher Assessment Module (Admin Only)
 from .auth_urls import urlpatterns as auth_patterns  # BUILDER: Day 1 - Authentication
+from .class_code_urls import urlpatterns as class_code_patterns  # Class Code Management
 from .class_urls import urlpatterns as class_patterns  # BUILDER: Day 2 - Class Management
 from .exam_management_urls import urlpatterns as exam_mgmt_patterns  # BUILDER: Day 4 - Exam Management
 from .views import index
@@ -51,6 +52,7 @@ urlpatterns.extend(api_patterns)
 urlpatterns.extend(access_patterns)  # Teacher class access management URLs (kept for backward compatibility)
 urlpatterns.extend(matrix_patterns)  # Schedule Matrix URLs (kept for backward compatibility)
 urlpatterns.extend(curriculum_patterns)  # Admin curriculum mapping URLs
+urlpatterns.extend(class_code_patterns)  # Class Code Management URLs
 urlpatterns.extend(assessment_patterns)  # Teacher Assessment Module URLs (Admin Only)
 urlpatterns.extend(legacy_patterns)  # Legacy URL patterns added last for backward compatibility
 
