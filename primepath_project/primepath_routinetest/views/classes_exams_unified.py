@@ -583,6 +583,69 @@ def classes_exams_unified_view(request):
         
         context['programs_data'] = programs_data
         
+        # SECTION 4.5: Build Access Summary Data
+        # Categorize classes by access level for the summary
+        full_access_classes = []
+        co_teacher_classes = []
+        view_only_classes = []
+        total_assigned_students = 0
+        total_assigned_exams = 0
+        
+        if is_admin:
+            # Admin stats
+            total_classes = len(all_class_codes) if 'all_class_codes' in locals() else 0
+            total_students = StudentSession.objects.values('student_name').distinct().count()
+            total_exams = Exam.objects.filter(is_active=True).count()
+            
+            context['total_classes'] = total_classes
+            context['total_students'] = total_students
+            context['total_exams'] = total_exams
+        else:
+            # Teacher stats - categorize by access level
+            for assignment in my_assignments:
+                class_info = {
+                    'class_code': assignment.class_code,
+                    'class_name': assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code
+                }
+                
+                # Categorize by access level
+                if assignment.access_level == 'FULL':
+                    full_access_classes.append(class_info)
+                elif assignment.access_level == 'CO_TEACHER':
+                    co_teacher_classes.append(class_info)
+                elif assignment.access_level == 'VIEW':
+                    view_only_classes.append(class_info)
+                
+                # Count students for assigned classes
+                try:
+                    class_students = StudentSession.objects.filter(
+                        exam__class_codes__contains=assignment.class_code
+                    ).values('student_name').distinct().count()
+                    total_assigned_students += class_students
+                except:
+                    pass
+                
+                # Count exams for assigned classes
+                try:
+                    class_exams = Exam.objects.filter(
+                        is_active=True,
+                        class_codes__contains=assignment.class_code
+                    ).count()
+                    total_assigned_exams += class_exams
+                except:
+                    pass
+            
+            context['full_access_classes'] = full_access_classes
+            context['co_teacher_classes'] = co_teacher_classes
+            context['view_only_classes'] = view_only_classes
+            context['total_assigned_classes'] = len(my_assignments)
+            context['total_assigned_students'] = total_assigned_students
+            context['total_assigned_exams'] = total_assigned_exams
+        
+        # Add current date for the header
+        from django.utils import timezone
+        context['current_date'] = timezone.now()
+        
         # SECTION 5: My Classes detailed information (keep for backward compatibility)
         classes_info = []
         for assignment in my_assignments[:20]:  # Limit for performance
