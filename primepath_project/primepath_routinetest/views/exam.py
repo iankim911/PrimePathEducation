@@ -131,7 +131,8 @@ def exam_list(request):
     
     # Build base query with related data
     base_query = Exam.objects.select_related(
-        'curriculum_level__subprogram__program'
+        'curriculum_level__subprogram__program',
+        'created_by'  # CRITICAL: Include created_by for ownership checks
     ).prefetch_related(
         'routine_questions',
         'routine_audio_files'

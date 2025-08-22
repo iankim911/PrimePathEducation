@@ -290,17 +290,27 @@
     }
     
     .class-header {
-        padding: 12px 15px;
-        background: #f5f5f5;
+        padding: 14px 18px;
+        background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
         font-weight: 600;
         display: flex;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
+        transition: background 0.2s ease;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .class-header:hover {
+        background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
     }
     
     .class-section.accessible .class-header {
-        background: #E8F5E9;
+        background: linear-gradient(135deg, #E8F5E9 0%, #E0F2E0 100%);
+    }
+    
+    .class-section.accessible .class-header:hover {
+        background: linear-gradient(135deg, #E0F2E0 0%, #D4E8D4 100%);
     }
     
     .class-name {
@@ -954,7 +964,17 @@
                              data-class="{{ class_code }}">
                             <div class="class-header" onclick="toggleClass('{{ class_code }}')">
                                 <div class="class-name">
-                                    <span>{{ get_class_display_name|get_item:class_code|default:class_code }}</span>
+                                    <span style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="background: #f0f4f8; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; color: #495057; font-weight: 500;">
+                                            <i class="fas fa-chalkboard" style="margin-right: 4px; color: #6c757d;"></i>
+                                            Class Code: <strong style="color: #2c3e50;">{{ class_code }}</strong>
+                                        </span>
+                                        {% if get_class_display_name|get_item:class_code and get_class_display_name|get_item:class_code != class_code %}
+                                            <span style="color: #495057; font-style: italic;">
+                                                ({{ get_class_display_name|get_item:class_code }})
+                                            </span>
+                                        {% endif %}
+                                    </span>
                                     {% if access_level %}
                                         {% if access_level == 'FULL' %}
                                             <span class="access-badge full">Full Access</span>
@@ -1036,19 +1056,30 @@
                                         {% endif %}
                                     </div>
                                     
-                                    <!-- Display Assigned Class Codes -->
+                                    <!-- Display Assigned Class Codes with Better UX -->
                                     {% if exam.class_codes %}
-                                    <div class="exam-classes" style="margin: 8px 0; padding: 8px 12px; background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 3px solid #4CAF50; border-radius: 4px; font-size: 0.85rem;">
-                                        <strong style="color: #2e7d32; margin-right: 6px;">📚 Assigned Classes:</strong>
-                                        <span style="color: #1b5e20; font-weight: 500;">
-                                            {% for code in exam.class_codes %}
-                                                <span style="background: white; padding: 2px 6px; border-radius: 3px; margin: 0 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">{{ code }}</span>{% if not forloop.last %} {% endif %}
-                                            {% endfor %}
-                                        </span>
+                                    <div class="exam-classes" style="margin: 8px 0; padding: 10px 14px; background: linear-gradient(135deg, #f0f7ff 0%, #f8fbff 100%); border-left: 3px solid #2196F3; border-radius: 6px; font-size: 0.85rem;">
+                                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                            <strong style="color: #1565C0; display: flex; align-items: center; gap: 4px;">
+                                                <i class="fas fa-chalkboard-teacher" style="font-size: 0.9rem;"></i>
+                                                Assigned to Classes:
+                                            </strong>
+                                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                                                {% for code in exam.class_codes %}
+                                                    <span style="background: white; padding: 3px 10px; border-radius: 12px; border: 1px solid #e0e0e0; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                                                        <span style="color: #6c757d; font-size: 0.75rem;">Class:</span>
+                                                        <strong style="color: #1976D2;">{{ code }}</strong>
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
                                     </div>
                                     {% elif not exam.class_codes %}
-                                    <div class="exam-classes" style="margin: 8px 0; padding: 8px 12px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 4px; font-size: 0.85rem;">
-                                        <strong style="color: #e65100;">⚠️ No classes assigned</strong>
+                                    <div class="exam-classes" style="margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 6px; font-size: 0.85rem;">
+                                        <strong style="color: #e65100; display: flex; align-items: center; gap: 6px;">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            No classes assigned yet
+                                        </strong>
                                     </div>
                                     {% endif %}
                                     
@@ -1183,7 +1214,6 @@
                 <label for="academicYear">Academic Year:</label>
                 <select id="academicYear" name="academic_year" required>
                     <option value="">Select year...</option>
-                    <option value="2024">2024</option>
                     <option value="2025" selected>2025</option>
                     <option value="2026">2026</option>
                     <option value="2027">2027</option>
