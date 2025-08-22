@@ -84,6 +84,10 @@
         elements.academicYear = document.getElementById('academicYear');
         elements.customSuffix = document.getElementById('customSuffix');
         elements.examNamePreview = document.getElementById('previewText');
+        elements.programSelect = document.getElementById('copyProgramSelect');
+        elements.subprogramSelect = document.getElementById('copySubprogramSelect');
+        elements.levelSelect = document.getElementById('copyLevelSelect');
+        elements.curriculumLevel = document.getElementById('copyCurriculumLevel');
         
         // Log which elements were found
         const elementStatus = {};
@@ -170,6 +174,27 @@
             
             // Set up event handlers
             setupModalEventHandlers();
+            
+            // Try to populate curriculum dropdown if available
+            if (typeof window.populateCopyProgramDropdown === 'function') {
+                try {
+                    // Add a small delay to ensure modal and dropdowns are rendered
+                    setTimeout(() => {
+                        window.populateCopyProgramDropdown();
+                        logger.log('Curriculum dropdown populated on modal open');
+                    }, 150);
+                } catch (error) {
+                    logger.error('Failed to populate curriculum dropdown:', error);
+                }
+            } else {
+                logger.log('populateCopyProgramDropdown function not available, will use fallback data');
+            }
+            
+            // Initial preview update after modal setup
+            setTimeout(() => {
+                updateNamePreview();
+                logger.log('Initial name preview updated');
+            }, 100);
             
             const executionTime = performance.now() - startTime;
             logger.log(`Modal opened successfully in ${executionTime.toFixed(2)}ms`);
@@ -301,13 +326,57 @@
             elements.form.onsubmit = handleFormSubmit;
         }
         
-        logger.log('Event handlers attached');
+        // CRITICAL FIX: Add preview update event listeners
+        if (elements.examType) {
+            elements.examType.addEventListener('change', updateNamePreview);
+        }
+        if (elements.timeslot) {
+            elements.timeslot.addEventListener('change', updateNamePreview);
+        }
+        if (elements.academicYear) {
+            elements.academicYear.addEventListener('change', updateNamePreview);
+        }
+        if (elements.customSuffix) {
+            elements.customSuffix.addEventListener('input', updateNamePreview);
+        }
+        if (elements.programSelect) {
+            elements.programSelect.addEventListener('change', updateNamePreview);
+        }
+        if (elements.subprogramSelect) {
+            elements.subprogramSelect.addEventListener('change', updateNamePreview);
+        }
+        if (elements.levelSelect) {
+            elements.levelSelect.addEventListener('change', updateNamePreview);
+        }
+        
+        logger.log('Event handlers attached including preview updates');
     }
     
     function clearModalEventHandlers() {
         if (elements.modal) elements.modal.onclick = null;
-        if (elements.examType) elements.examType.onchange = null;
+        if (elements.examType) {
+            elements.examType.onchange = null;
+            elements.examType.removeEventListener('change', updateNamePreview);
+        }
         if (elements.form) elements.form.onsubmit = null;
+        if (elements.timeslot) {
+            elements.timeslot.removeEventListener('change', updateNamePreview);
+        }
+        if (elements.academicYear) {
+            elements.academicYear.removeEventListener('change', updateNamePreview);
+        }
+        if (elements.customSuffix) {
+            elements.customSuffix.removeEventListener('input', updateNamePreview);
+        }
+        if (elements.programSelect) {
+            elements.programSelect.removeEventListener('change', updateNamePreview);
+        }
+        if (elements.subprogramSelect) {
+            elements.subprogramSelect.removeEventListener('change', updateNamePreview);
+        }
+        if (elements.levelSelect) {
+            elements.levelSelect.removeEventListener('change', updateNamePreview);
+        }
         
         logger.log('Event handlers cleared');
     }
@@ -506,6 +575,19 @@
     function updateNamePreview() {
         logger.log('[NAME_PREVIEW] Updating exam name preview...');
         
+        // First check if the template-based function exists and use it
+        if (typeof window.updateCopyExamNamePreview === 'function') {
+            logger.log('[NAME_PREVIEW] Using template-based preview function');
+            try {
+                window.updateCopyExamNamePreview();
+                return;
+            } catch (error) {
+                logger.error('[NAME_PREVIEW] Template function failed:', error);
+                // Fall through to module-based implementation
+            }
+        }
+        
+        // Module-based implementation as fallback
         if (!elements.examNamePreview) {
             logger.error('[NAME_PREVIEW] Preview element not found');
             return;
@@ -515,6 +597,11 @@
         const timeslot = elements.timeslot?.value;
         const academicYear = elements.academicYear?.value;
         const customSuffix = elements.customSuffix?.value?.trim();
+        
+        logger.log('[NAME_PREVIEW] Field values:', {
+            examType, timeslot, academicYear, customSuffix,
+            currentExamName: state.currentExamName
+        });
         
         // Check if all required fields are filled
         if (!examType || !timeslot || !academicYear) {
@@ -526,19 +613,27 @@
         // Build the name preview
         let nameParts = [];
         
-        // Add exam type prefix
-        const prefix = examType === 'QUARTERLY' ? '[QTR]' : '[RT]';
+        // Add exam type prefix - handle multiple formats
+        let prefix = '[RT]'; // default
+        if (examType === 'QUARTERLY' || examType.includes('Quarterly')) {
+            prefix = '[QTR]';
+        } else if (examType === 'REVIEW' || examType.includes('Review') || examType.includes('Monthly')) {
+            prefix = '[RT]';
+        }
         nameParts.push(prefix);
         
-        // Add time period with year
-        if (examType === 'REVIEW') {
-            // Convert month code to abbreviated name
-            const monthAbbrev = {
+        // Add time period with year - handle month names and codes
+        if (examType.includes('Review') || examType.includes('Monthly') || examType === 'REVIEW') {
+            // Convert month names/codes to abbreviated name
+            const monthMapping = {
                 'JAN': 'Jan', 'FEB': 'Feb', 'MAR': 'Mar', 'APR': 'Apr',
                 'MAY': 'May', 'JUN': 'Jun', 'JUL': 'Jul', 'AUG': 'Aug',
-                'SEP': 'Sep', 'OCT': 'Oct', 'NOV': 'Nov', 'DEC': 'Dec'
+                'SEP': 'Sep', 'OCT': 'Oct', 'NOV': 'Nov', 'DEC': 'Dec',
+                'January': 'Jan', 'February': 'Feb', 'March': 'Mar', 'April': 'Apr',
+                'May': 'May', 'June': 'Jun', 'July': 'Jul', 'August': 'Aug',
+                'September': 'Sep', 'October': 'Oct', 'November': 'Nov', 'December': 'Dec'
             };
-            const monthName = monthAbbrev[timeslot] || timeslot;
+            const monthName = monthMapping[timeslot] || timeslot;
             nameParts.push(`${monthName} ${academicYear}`);
         } else {
             nameParts.push(`${timeslot} ${academicYear}`);

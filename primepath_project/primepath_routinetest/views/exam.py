@@ -27,23 +27,44 @@ def exam_list(request):
     """List all exams hierarchically by Program and Class Code - Version 6.0 Library View"""
     from collections import defaultdict
     
-    # Get filters from request
+    # Get filters from request - NEW OWNERSHIP-BASED SYSTEM
     exam_type_filter = request.GET.get('exam_type', 'ALL')
-    assigned_only_param = request.GET.get('assigned_only', 'false')
-    show_assigned_only = assigned_only_param.lower() == 'true'
+    ownership_filter = request.GET.get('ownership', 'my')  # NEW: 'my' or 'others'
     
-    # DEBUG: Log the filter state
+    # BACKWARD COMPATIBILITY: Support old assigned_only parameter
+    assigned_only_param = request.GET.get('assigned_only', 'false')
+    legacy_show_assigned_only = assigned_only_param.lower() == 'true'
+    
+    # If old parameter is used, convert to new system
+    if 'assigned_only' in request.GET and 'ownership' not in request.GET:
+        ownership_filter = 'my' if legacy_show_assigned_only else 'others'
+    
+    # CRITICAL: Apply ownership logic to determine effective filtering
+    if ownership_filter == 'my':
+        show_assigned_only = True  # My Test Files = filter out VIEW ONLY
+    elif ownership_filter == 'others':
+        show_assigned_only = False  # Other Teachers' Test Files = show all including VIEW ONLY
+    else:
+        show_assigned_only = legacy_show_assigned_only  # Fallback to legacy
+    
+    # DEBUG: Enhanced logging for new system
     import logging
     logger = logging.getLogger(__name__)
-    logger.info(f"[FILTER_VIEW_DEBUG] URL: {request.get_full_path()}")
-    logger.info(f"[FILTER_VIEW_DEBUG] assigned_only parameter: '{assigned_only_param}'")
-    logger.info(f"[FILTER_VIEW_DEBUG] show_assigned_only boolean: {show_assigned_only}")
-    logger.info(f"[FILTER_VIEW_DEBUG] All GET params: {dict(request.GET)}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] URL: {request.get_full_path()}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] ownership parameter: '{ownership_filter}'")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] exam_type parameter: '{exam_type_filter}'")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Legacy assigned_only: '{assigned_only_param}' -> {show_assigned_only}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] All GET params: {dict(request.GET)}")
     
-    # Validate exam type filter
+    # Validate filters
     valid_exam_types = ['REVIEW', 'QUARTERLY', 'ALL']
+    valid_ownership_types = ['my', 'others']
+    
     if exam_type_filter not in valid_exam_types:
         exam_type_filter = 'ALL'
+        
+    if ownership_filter not in valid_ownership_types:
+        ownership_filter = 'my'  # Default to "My Test Files"
     
     # Get permission info for current user - UPDATED FOR GLOBAL ACCESS SYSTEM
     is_admin = request.user.is_superuser or request.user.is_staff
@@ -127,20 +148,35 @@ def exam_list(request):
         exams = base_query.all()
         filter_description = "All Exams"
     
-    # Note: filtering will be handled in organize_exams_hierarchically
-    if show_assigned_only:
-        filter_description += " (Assigned Classes Only)"
+    # UPDATED: New ownership-based filtering description
+    if ownership_filter == 'my':
+        filter_description += " (My Test Files)"
+    elif ownership_filter == 'others':
+        filter_description += " (Other Teachers' Test Files)"
+    
+    # Backward compatibility support
+    if 'assigned_only' in request.GET and ownership_filter == 'my':
+        filter_description = filter_description.replace(" (My Test Files)", " (Assigned Classes Only)")
+        
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Final filter description: {filter_description}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Effective show_assigned_only: {show_assigned_only}")
     
     # Add answer mapping status to each exam
     for exam in exams:
         exam.answer_mapping_status = exam.get_answer_mapping_status()
     
-    # Organize exams hierarchically with permission info
-    logger.info(f"[FILTER_VIEW_DEBUG] About to call organize_exams_hierarchically with filter_assigned_only={show_assigned_only}")
-    logger.info(f"[FILTER_VIEW_DEBUG] Number of exams before filtering: {exams.count()}")
+    # UPDATED: Organize exams hierarchically with new ownership-based filtering
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] About to call organize_exams_hierarchically")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Ownership filter: {ownership_filter}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Legacy filter_assigned_only: {show_assigned_only}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Number of exams before filtering: {exams.count()}")
     
+    # NEW: Enhanced service call with ownership parameter
     hierarchical_exams = ExamService.organize_exams_hierarchically(
-        exams, request.user, filter_assigned_only=show_assigned_only
+        exams, 
+        request.user, 
+        filter_assigned_only=show_assigned_only,  # Backward compatibility 
+        ownership_filter=ownership_filter  # NEW: ownership-based filtering
     )
     
     # CRITICAL FIX: Double-check filtering at view level
@@ -262,6 +298,9 @@ def exam_list(request):
     # Debug: Log what we're passing to template
     logger.info(f"[EXAM_LIST_CONTEXT] Passing is_admin={is_admin} to template")
     
+    # Get curriculum data for copy modal
+    curriculum_data_for_copy_modal = ExamService.get_routinetest_curriculum_levels()
+    
     # Prepare context for template
     context = {
         'hierarchical_exams': hierarchical_exams,
@@ -282,8 +321,17 @@ def exam_list(request):
             'accessible': accessible_count,
             'editable': editable_count
         },
+        
+        # Copy modal curriculum data
+        'curriculum_levels_for_copy': curriculum_data_for_copy_modal,
         'exam_type_filter': exam_type_filter,
-        'show_assigned_only': show_assigned_only,
+        'show_assigned_only': show_assigned_only,  # Keep for backward compatibility
+        
+        # NEW: Ownership-based system variables
+        'ownership_filter': ownership_filter,
+        'is_my_files_active': ownership_filter == 'my',
+        'is_others_files_active': ownership_filter == 'others',
+        
         'exam_type_counts': {
             'review': review_count,
             'quarterly': quarterly_count,

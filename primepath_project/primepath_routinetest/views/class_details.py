@@ -36,9 +36,12 @@ def class_details(request, class_code):
         "view": "class_details",
         "user": request.user.username,
         "class_code": class_code,
-        "timestamp": timezone.now().isoformat()
+        "timestamp": timezone.now().isoformat(),
+        "request_path": request.path,
+        "method": request.method
     }
-    logger.info(f"[CLASS_DETAILS_VIEW] {json.dumps(console_log)}")
+    logger.info(f"[CLASS_DETAILS_VIEW] Starting view: {json.dumps(console_log)}")
+    logger.debug(f"[CLASS_DETAILS_VIEW] Full request path: {request.get_full_path()}")
     
     # Check user permissions
     is_admin = request.user.is_superuser or request.user.is_staff
@@ -119,37 +122,80 @@ def class_details(request, class_code):
     ).prefetch_related('exams').order_by('time_period_value')
     
     # Process schedules for display
+    logger.info(f"[CLASS_DETAILS] Processing schedules for class {class_code}")
     monthly_data = []
     for schedule in monthly_schedules:
-        schedule_data = {
-            'id': str(schedule.id),
-            'month': schedule.time_period_value,
-            'month_display': schedule.get_time_period_display(),
-            'exam_count': schedule.get_exam_count(),
-            'exams': schedule.get_detailed_exam_list(),
-            'status': schedule.status,
-            'status_icon': schedule.get_status_icon(),
-            'scheduled_date': schedule.scheduled_date,
-            'scheduled_time': f"{schedule.scheduled_start_time} - {schedule.scheduled_end_time}" if schedule.scheduled_start_time else None,
-            'can_edit': access_level in ['FULL', 'CO_TEACHER'] or is_admin
-        }
-        monthly_data.append(schedule_data)
+        try:
+            logger.debug(f"[CLASS_DETAILS] Processing monthly schedule: {schedule.time_period_value}")
+            exam_list = schedule.get_detailed_exam_list()
+            logger.debug(f"[CLASS_DETAILS] Retrieved {len(exam_list)} exams for {schedule.time_period_value}")
+            
+            schedule_data = {
+                'id': str(schedule.id),
+                'month': schedule.time_period_value,
+                'month_display': schedule.get_time_period_display(),
+                'exam_count': schedule.get_exam_count(),
+                'exams': exam_list,
+                'status': schedule.status,
+                'status_icon': schedule.get_status_icon(),
+                'scheduled_date': schedule.scheduled_date,
+                'scheduled_time': f"{schedule.scheduled_start_time} - {schedule.scheduled_end_time}" if schedule.scheduled_start_time else None,
+                'can_edit': access_level in ['FULL', 'CO_TEACHER'] or is_admin
+            }
+            monthly_data.append(schedule_data)
+            
+        except Exception as e:
+            logger.error(f"[CLASS_DETAILS] Error processing monthly schedule {schedule.time_period_value}: {str(e)}")
+            # Add minimal data on error
+            monthly_data.append({
+                'id': str(schedule.id),
+                'month': schedule.time_period_value,
+                'month_display': 'Error loading',
+                'exam_count': 0,
+                'exams': [],
+                'status': 'ERROR',
+                'status_icon': '❌',
+                'scheduled_date': None,
+                'scheduled_time': None,
+                'can_edit': False
+            })
     
     quarterly_data = []
     for schedule in quarterly_schedules:
-        schedule_data = {
-            'id': str(schedule.id),
-            'quarter': schedule.time_period_value,
-            'quarter_display': schedule.get_time_period_display(),
-            'exam_count': schedule.get_exam_count(),
-            'exams': schedule.get_detailed_exam_list(),
-            'status': schedule.status,
-            'status_icon': schedule.get_status_icon(),
-            'scheduled_date': schedule.scheduled_date,
-            'scheduled_time': f"{schedule.scheduled_start_time} - {schedule.scheduled_end_time}" if schedule.scheduled_start_time else None,
-            'can_edit': access_level in ['FULL', 'CO_TEACHER'] or is_admin
-        }
-        quarterly_data.append(schedule_data)
+        try:
+            logger.debug(f"[CLASS_DETAILS] Processing quarterly schedule: {schedule.time_period_value}")
+            exam_list = schedule.get_detailed_exam_list()
+            logger.debug(f"[CLASS_DETAILS] Retrieved {len(exam_list)} exams for {schedule.time_period_value}")
+            
+            schedule_data = {
+                'id': str(schedule.id),
+                'quarter': schedule.time_period_value,
+                'quarter_display': schedule.get_time_period_display(),
+                'exam_count': schedule.get_exam_count(),
+                'exams': exam_list,
+                'status': schedule.status,
+                'status_icon': schedule.get_status_icon(),
+                'scheduled_date': schedule.scheduled_date,
+                'scheduled_time': f"{schedule.scheduled_start_time} - {schedule.scheduled_end_time}" if schedule.scheduled_start_time else None,
+                'can_edit': access_level in ['FULL', 'CO_TEACHER'] or is_admin
+            }
+            quarterly_data.append(schedule_data)
+            
+        except Exception as e:
+            logger.error(f"[CLASS_DETAILS] Error processing quarterly schedule {schedule.time_period_value}: {str(e)}")
+            # Add minimal data on error
+            quarterly_data.append({
+                'id': str(schedule.id),
+                'quarter': schedule.time_period_value,
+                'quarter_display': 'Error loading',
+                'exam_count': 0,
+                'exams': [],
+                'status': 'ERROR',
+                'status_icon': '❌',
+                'scheduled_date': None,
+                'scheduled_time': None,
+                'can_edit': False
+            })
     
     # Get available students to add (not enrolled in this class)
     available_students = []

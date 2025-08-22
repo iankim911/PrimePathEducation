@@ -819,74 +819,6 @@
 {% block header %}Classes & Exams Management{% endblock %}
 
 {% block content %}
-<!-- Mode Toggle Fix - Inline JavaScript -->
-<script>
-(function() {
-    console.log('[MODE_TOGGLE_FIX_INLINE] Starting inline fix for stats box toggle issue');
-    
-    // Function to fix any "function:" text
-    function fixFunctionText() {
-        // Get all text nodes in the document
-        const walker = document.createTreeWalker(
-            document.body,
-            NodeFilter.SHOW_TEXT,
-            null,
-            false
-        );
-        
-        let node;
-        let fixedCount = 0;
-        
-        while (node = walker.nextNode()) {
-            if (node.nodeValue && node.nodeValue.includes('function:')) {
-                console.warn('[MODE_TOGGLE_FIX_INLINE] Found "function:" in text:', node.nodeValue);
-                node.nodeValue = node.nodeValue.replace(/function\s*:\s*/gi, '');
-                fixedCount++;
-            }
-        }
-        
-        if (fixedCount > 0) {
-            console.log('[MODE_TOGGLE_FIX_INLINE] Fixed', fixedCount, 'instances of "function:" text');
-        }
-        
-        // Also check for any toggle elements in stats areas
-        const statsAreas = document.querySelectorAll('.class-stats, .class-stat, .stats-box, .stat-box');
-        statsAreas.forEach(area => {
-            const toggles = area.querySelectorAll('.mode-toggle-container, .mode-toggle-wrapper, .mode-toggle-btn, [class*="toggle"]');
-            toggles.forEach(toggle => {
-                console.warn('[MODE_TOGGLE_FIX_INLINE] Removing toggle from stats area:', toggle);
-                toggle.remove();
-            });
-        });
-    }
-    
-    // Run immediately
-    fixFunctionText();
-    
-    // Run after DOM is fully loaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', fixFunctionText);
-    }
-    
-    // Run after a short delay to catch any dynamic content
-    setTimeout(fixFunctionText, 100);
-    setTimeout(fixFunctionText, 500);
-    setTimeout(fixFunctionText, 1000);
-    
-    // Monitor for changes
-    const observer = new MutationObserver(() => {
-        fixFunctionText();
-    });
-    
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        characterData: true
-    });
-    
-    console.log('[MODE_TOGGLE_FIX_INLINE] Inline fix initialized with monitoring');
-})();
-</script>
 
 <!-- Debug Console Logging -->
 <script>
@@ -1026,8 +958,6 @@ setTimeout(() => {
 console.groupEnd();
 </script>
 
-<!-- QA Mode Toggle - Admin/Teacher Switch -->
-{% include 'primepath_routinetest/includes/mode_toggle_enhanced.html' %}
 
 <div class="unified-container">
     {% if error %}

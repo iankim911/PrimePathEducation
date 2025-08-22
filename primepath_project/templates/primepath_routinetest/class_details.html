@@ -666,9 +666,10 @@
 
 {% block content %}
 <div class="class-details-container">
-    <!-- Debug Console Logging -->
+    <!-- Enhanced Debug Console Logging -->
     <script>
-        console.log('[CLASS_DETAILS_INIT]', {
+        console.group('%c[CLASS_DETAILS_INIT]', 'background: #4CAF50; color: white; padding: 5px; border-radius: 3px;');
+        console.log('🏫 Class Information:', {
             class_code: '{{ class_code }}',
             class_display: '{{ class_display }}',
             is_admin: {{ is_admin|lower }},
@@ -678,6 +679,39 @@
             user: '{{ debug_info.user }}',
             timestamp: new Date().toISOString()
         });
+        
+        // Log schedule data for debugging
+        console.log('📅 Monthly Schedule Data:', {{ monthly_data|safe|default:'[]' }});
+        console.log('📊 Quarterly Schedule Data:', {{ quarterly_data|safe|default:'[]' }});
+        
+        // Check for exam loading errors
+        try {
+            const monthlyData = {{ monthly_data|safe|default:'[]' }};
+            const quarterlyData = {{ quarterly_data|safe|default:'[]' }};
+            
+            let hasErrors = false;
+            monthlyData.forEach(schedule => {
+                if (schedule.status === 'ERROR' || !schedule.exams) {
+                    console.error('❌ Error loading monthly schedule:', schedule.month_display);
+                    hasErrors = true;
+                }
+            });
+            
+            quarterlyData.forEach(schedule => {
+                if (schedule.status === 'ERROR' || !schedule.exams) {
+                    console.error('❌ Error loading quarterly schedule:', schedule.quarter_display);
+                    hasErrors = true;
+                }
+            });
+            
+            if (!hasErrors) {
+                console.log('✅ All schedules loaded successfully');
+            }
+        } catch (e) {
+            console.error('❌ Error parsing schedule data:', e);
+        }
+        
+        console.groupEnd();
     </script>
     
     <!-- Header Section -->

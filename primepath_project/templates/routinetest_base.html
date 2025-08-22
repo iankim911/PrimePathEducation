@@ -15,8 +15,6 @@
     <!-- Mobile Responsive CSS -->
     <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}">
     
-    <!-- Mode Toggle Position Fix - MUST LOAD LAST TO OVERRIDE -->
-    <link rel="stylesheet" href="{% static 'css/mode-toggle-position-fix.css' %}?v={% now 'U' %}">
     
     <!-- Console Debugging for RoutineTest -->
     <script>
@@ -67,6 +65,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             overflow-x: auto;  /* Allow horizontal scroll for many tabs */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
+            border-bottom: 2px solid #2E7D32;  /* Visual separation */
         }
         
         /* Custom scrollbar for nav tabs */
@@ -83,30 +82,7 @@
             border-radius: 2px;
         }
         
-        /* Matrix Tab Pulse Animation */
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
-            }
-            50% {
-                box-shadow: 0 0 10px 5px rgba(255, 152, 0, 0.3);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
-            }
-        }
-        
-        /* Ensure Matrix Tab is ALWAYS visible */
-        #matrix-tab-item {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-        
-        #matrix-tab-item a {
-            display: block !important;
-            visibility: visible !important;
-        }
+        /* Removed Matrix tab styles - no longer part of V8 navigation */
         
         .nav-tabs * {
             box-sizing: border-box;
@@ -133,7 +109,7 @@
             padding: 12px 12px;  /* Even more compact */
             color: #ecf0f1;
             text-decoration: none;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
             font-weight: 500;
             position: relative;
             height: 100%;
@@ -143,13 +119,29 @@
         
         .nav-tabs a:hover {
             background-color: #1B5E20;  /* Darker muted green on hover */
+            color: white;
         }
         
+        /* WCAG AAA Compliant - High Contrast Active Tab */
         .nav-tabs a.active {
-            background-color: #2E7D32 !important;  /* Darker green for active */
-            color: white;
-            font-weight: 600;
-            box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.15);
+            background-color: #E8F5E9 !important;  /* Light green background */
+            color: #0D4F1F !important;  /* Very dark green text - contrast ratio > 7:1 */
+            font-weight: 700;
+            box-shadow: inset 0 -3px 0 #2E7D32;
+            border-top: 2px solid #2E7D32;  /* Top accent for better visibility */
+            position: relative;
+        }
+        
+        /* Focus styles for keyboard navigation */
+        .nav-tabs a:focus {
+            outline: 2px solid #81C784;
+            outline-offset: 2px;
+            background-color: #1B5E20;
+        }
+        
+        .nav-tabs a.active:focus {
+            outline: 2px solid #2E7D32;
+            outline-offset: 2px;
         }
         
         /* Profile Link Styling */
@@ -336,51 +328,6 @@
     
     {% block extra_css %}{% endblock %}
     
-    <!-- Mode Toggle Fix Scripts -->
-    <script src="{% static 'js/routinetest/mode-toggle-fix.js' %}?v={% now 'U' %}" defer></script>
-    <script src="{% static 'js/routinetest/aggressive-mode-fix.js' %}?v={% now 'U' %}"></script>
-    
-    <!-- Inline Mode Toggle Fix (Immediate Execution) -->
-    <script>
-    // Immediate fix for "function:" text issue
-    (function() {
-        function fixModeToggleText() {
-            const allElements = document.querySelectorAll('*');
-            allElements.forEach(el => {
-                if (el.childNodes.length === 1 && el.firstChild && el.firstChild.nodeType === 3) {
-                    const text = el.firstChild.nodeValue;
-                    if (text && text.includes('function:')) {
-                        console.warn('[IMMEDIATE_FIX] Found and fixing "function:" text:', text);
-                        el.firstChild.nodeValue = text.replace(/function\s*:\s*/gi, '');
-                    }
-                }
-            });
-            
-            // Remove any toggles from stats areas
-            const statsAreas = document.querySelectorAll('.class-stats, .class-stat, .stats-box, .stat-box');
-            statsAreas.forEach(area => {
-                const toggles = area.querySelectorAll('[class*="toggle"]');
-                if (toggles.length > 0) {
-                    console.warn('[IMMEDIATE_FIX] Removing toggles from stats area');
-                    toggles.forEach(t => t.remove());
-                }
-            });
-        }
-        
-        // Run multiple times to catch dynamic content
-        fixModeToggleText();
-        setTimeout(fixModeToggleText, 0);
-        setTimeout(fixModeToggleText, 100);
-        setTimeout(fixModeToggleText, 500);
-        
-        // Also run on DOM ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fixModeToggleText);
-        } else {
-            fixModeToggleText();
-        }
-    })();
-    </script>
 </head>
 <body class="routinetest-theme">
     <!-- Immediate theme application -->
@@ -412,10 +359,6 @@
     <!-- UNIFIED CLASSES & EXAMS ONLY - NO OLD TABS -->
     {% include 'primepath_routinetest/includes/navigation_tabs_v8.html' %}
     
-    <!-- Mode Toggle - Positioned below navigation -->
-    {% if user.is_authenticated and user.is_staff %}
-        {% include 'primepath_routinetest/includes/mode_toggle_enhanced.html' %}
-    {% endif %}
     
     <!-- Additional Navigation Verification -->
     <script>

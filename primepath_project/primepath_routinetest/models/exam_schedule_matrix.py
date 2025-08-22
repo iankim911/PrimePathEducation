@@ -192,18 +192,39 @@ class ExamScheduleMatrix(models.Model):
     
     def get_detailed_exam_list(self):
         """Get comprehensive exam details for modular exam card display"""
+        from .exam_abstraction import ExamAbstraction
+        
+        logger.info("[EXAM_SCHEDULE_MATRIX] Starting get_detailed_exam_list()")
         detailed_exams = []
-        for exam in self.exams.prefetch_related('routine_questions', 'routine_audio_files').all():
-            # Get answer mapping status
-            answer_status = exam.get_answer_mapping_status()
+        
+        # Don't prefetch relationships that might not exist
+        for exam in self.exams.all():
+            logger.debug(f"[EXAM_SCHEDULE_MATRIX] Processing exam: {exam.name} (type: {type(exam).__name__})")
             
-            # Calculate completion percentage
-            total_questions = exam.total_questions
-            mapped_questions = exam.routine_questions.filter(correct_answer__isnull=False).count()
-            mapping_percentage = round((mapped_questions / total_questions * 100), 1) if total_questions > 0 else 0.0
-            
-            # Get audio file count
-            audio_count = exam.routine_audio_files.count()
+            try:
+                # Use abstraction layer for safe access
+                # Get answer mapping status
+                answer_status = ExamAbstraction.get_answer_mapping_status(exam)
+                
+                # Calculate completion percentage using abstraction
+                total_questions = ExamAbstraction.get_total_questions(exam)
+                questions = ExamAbstraction.get_questions(exam)
+                mapped_questions = questions.filter(correct_answer__isnull=False).count() if questions else 0
+                mapping_percentage = round((mapped_questions / total_questions * 100), 1) if total_questions > 0 else 0.0
+                
+                # Get audio file count using abstraction
+                audio_files = ExamAbstraction.get_audio_files(exam)
+                audio_count = audio_files.count() if audio_files else 0
+                
+                logger.debug(f"[EXAM_SCHEDULE_MATRIX] Exam {exam.name} - Questions: {total_questions}, Mapped: {mapped_questions}, Audio: {audio_count}")
+            except Exception as e:
+                logger.error(f"[EXAM_SCHEDULE_MATRIX] Error processing exam {exam.name}: {str(e)}")
+                # Fallback values on error
+                answer_status = {'all_mapped': False, 'partially_mapped': False, 'percentage': 0.0}
+                total_questions = 0
+                mapped_questions = 0
+                mapping_percentage = 0.0
+                audio_count = 0
             
             # Determine status color and label
             if mapping_percentage >= 100:
@@ -219,68 +240,108 @@ class ExamScheduleMatrix(models.Model):
                 status_label = 'Not mapped'
                 status_icon = '✗'
             
-            detailed_exam = {
-                'id': str(exam.id),
-                'name': exam.name,
-                'exam_type': exam.exam_type,
-                'exam_type_display': exam.get_exam_type_display(),
-                'exam_type_short': exam.get_exam_type_display_short(),
+            # Build detailed exam data using abstraction layer
+            try:
+                curriculum_level_str = ExamAbstraction.get_curriculum_level(exam)
+                timer_minutes = ExamAbstraction.get_timer_minutes(exam)
+                exam_type = ExamAbstraction.safely_get_attribute(exam, 'exam_type', 'REVIEW')
                 
-                # Curriculum information
-                'curriculum': {
-                    'level': exam.curriculum_level.full_name if exam.curriculum_level else None,
-                    'program': exam.curriculum_level.subprogram.program.name if exam.curriculum_level and exam.curriculum_level.subprogram and exam.curriculum_level.subprogram.program else None,
-                    'subprogram': exam.curriculum_level.subprogram.name if exam.curriculum_level and exam.curriculum_level.subprogram else None,
-                    'level_number': exam.curriculum_level.level_number if exam.curriculum_level else None,
-                },
+                detailed_exam = {
+                    'id': str(exam.id),
+                    'name': exam.name,
+                    'exam_type': exam_type,
+                    'exam_type_display': ExamAbstraction.get_exam_type_display(exam),
+                    'exam_type_short': ExamAbstraction.get_exam_type_short(exam),
+                    
+                    # Curriculum information - safely handle both string and object curriculum_level
+                    'curriculum': {
+                        'level': curriculum_level_str,
+                        'program': None,  # Will be extracted from curriculum_level string if needed
+                        'subprogram': None,
+                        'level_number': None,
+                    },
+                    
+                    # Question and content details
+                    'questions': {
+                        'total': total_questions,
+                        'mapped': mapped_questions,
+                        'unmapped': total_questions - mapped_questions
+                    },
+                    
+                    # Timing information
+                    'timer': {
+                        'minutes': timer_minutes,
+                        'display': f"{timer_minutes} minutes" if timer_minutes else "No timer"
+                    },
                 
-                # Question and content details
-                'questions': {
-                    'total': total_questions,
-                    'mapped': mapped_questions,
-                    'unmapped': total_questions - mapped_questions
-                },
-                
-                # Timing information
-                'timer': {
-                    'minutes': exam.timer_minutes,
-                    'display': f"{exam.timer_minutes} minutes" if exam.timer_minutes else "No timer"
-                },
-                
-                # Audio files
-                'audio': {
-                    'count': audio_count,
-                    'display': f"{audio_count} file{'s' if audio_count != 1 else ''}" if audio_count > 0 else "No audio"
-                },
-                
-                # Answer mapping status
-                'answer_status': {
-                    'percentage': mapping_percentage,
-                    'color': status_color,
-                    'label': status_label,
-                    'icon': status_icon,
-                    'complete': mapping_percentage >= 100
-                },
-                
-                # Activity status
-                'is_active': exam.is_active,
-                'activity_status': 'Active' if exam.is_active else 'Inactive',
-                'activity_color': 'success' if exam.is_active else 'secondary',
-                
-                # Metadata
-                'created_at': exam.created_at.isoformat() if exam.created_at else None,
-                'updated_at': exam.updated_at.isoformat() if exam.updated_at else None,
-                
-                # Actions available
-                'actions': {
-                    'can_manage': True,  # Based on permissions
-                    'can_update_name': True,
-                    'can_delete': True,
-                    'can_preview': True
+                    # Audio files
+                    'audio': {
+                        'count': audio_count,
+                        'display': f"{audio_count} file{'s' if audio_count != 1 else ''}" if audio_count > 0 else "No audio"
+                    },
+                    
+                    # Answer mapping status
+                    'answer_status': {
+                        'percentage': mapping_percentage,
+                        'color': status_color,
+                        'label': status_label,
+                        'icon': status_icon,
+                        'complete': mapping_percentage >= 100
+                    },
+                    
+                    # Activity status
+                    'is_active': ExamAbstraction.safely_get_attribute(exam, 'is_active', True),
+                    'activity_status': 'Active' if ExamAbstraction.safely_get_attribute(exam, 'is_active', True) else 'Inactive',
+                    'activity_color': 'success' if ExamAbstraction.safely_get_attribute(exam, 'is_active', True) else 'secondary',
+                    
+                    # Metadata
+                    'created_at': exam.created_at.isoformat() if hasattr(exam, 'created_at') and exam.created_at else None,
+                    'updated_at': exam.updated_at.isoformat() if hasattr(exam, 'updated_at') and exam.updated_at else None,
+                    
+                    # Actions available
+                    'actions': {
+                        'can_manage': True,  # Based on permissions
+                        'can_update_name': True,
+                        'can_delete': True,
+                        'can_preview': True
+                    }
                 }
-            }
-            
-            detailed_exams.append(detailed_exam)
+                
+                detailed_exams.append(detailed_exam)
+                logger.info(f"[EXAM_SCHEDULE_MATRIX] Successfully processed exam: {exam.name}")
+                
+            except Exception as e:
+                logger.error(f"[EXAM_SCHEDULE_MATRIX] Error building detailed exam data for {exam.name}: {str(e)}")
+                # Add minimal exam data on error
+                detailed_exams.append({
+                    'id': str(exam.id) if hasattr(exam, 'id') else 'unknown',
+                    'name': exam.name if hasattr(exam, 'name') else 'Unknown Exam',
+                    'exam_type': 'REVIEW',
+                    'exam_type_display': 'Review',
+                    'exam_type_short': 'Review',
+                    'curriculum': {'level': 'N/A'},
+                    'questions': {'total': 0, 'mapped': 0, 'unmapped': 0},
+                    'timer': {'minutes': 60, 'display': '60 minutes'},
+                    'audio': {'count': 0, 'display': 'No audio'},
+                    'answer_status': {
+                        'percentage': 0,
+                        'color': 'danger',
+                        'label': 'Error loading',
+                        'icon': '✗',
+                        'complete': False
+                    },
+                    'is_active': False,
+                    'activity_status': 'Error',
+                    'activity_color': 'danger',
+                    'created_at': None,
+                    'updated_at': None,
+                    'actions': {
+                        'can_manage': False,
+                        'can_update_name': False,
+                        'can_delete': False,
+                        'can_preview': False
+                    }
+                })
         
         # Sort by exam name for consistent display
         detailed_exams.sort(key=lambda x: x['name'])

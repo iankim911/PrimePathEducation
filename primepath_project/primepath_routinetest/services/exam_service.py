@@ -145,9 +145,12 @@ class ExamService:
         Returns:
             List of created Question instances
         """
+        from primepath_routinetest.models.exam_abstraction import ExamAbstraction
+        questions = ExamAbstraction.get_questions(exam)
         existing_numbers = set(
-            exam.routine_questions.values_list('question_number', flat=True)
+            questions.values_list('question_number', flat=True) if questions else []
         )
+        logger.debug(f"[EXAM_SERVICE] Creating questions for exam type: {type(exam).__name__}, existing: {len(existing_numbers)}")
         
         questions_to_create = []
         for num in range(1, exam.total_questions + 1):
@@ -586,9 +589,10 @@ class ExamService:
         cls, 
         exams, 
         user: User,
-        filter_assigned_only: bool = False
+        filter_assigned_only: bool = False,  # Backward compatibility
+        ownership_filter: str = 'my'  # NEW: 'my' or 'others'
     ) -> Dict[str, Dict[str, List]]:
-        """Organize exams hierarchically by program and class with access info"""
+        """Organize exams hierarchically by program and class with access info - ENHANCED with ownership filtering"""
         import logging
         logger = logging.getLogger(__name__)
         
@@ -605,10 +609,33 @@ class ExamService:
             for class_code in classes:
                 class_to_program[class_code] = program
         
-        # Log debugging info
-        logger.info(f"[EXAM_HIERARCHY] Processing {len(list(exams))} exams")
-        logger.info(f"[EXAM_HIERARCHY] User: {user}, is_admin: {is_admin}")
-        logger.info(f"[EXAM_HIERARCHY] Filter assigned only: {filter_assigned_only}")
+        # ENHANCED: Log debugging info with new ownership system
+        logger.info(f"[EXAM_HIERARCHY_ENHANCED] Processing {len(list(exams))} exams")
+        logger.info(f"[EXAM_HIERARCHY_ENHANCED] User: {user}, is_admin: {is_admin}")
+        logger.info(f"[EXAM_HIERARCHY_ENHANCED] Legacy filter_assigned_only: {filter_assigned_only}")
+        logger.info(f"[EXAM_HIERARCHY_ENHANCED] NEW ownership_filter: {ownership_filter}")
+        logger.info(f"[EXAM_HIERARCHY_ENHANCED] Teacher assignments: {assignments}")
+        
+        # CRITICAL FIX: Proper filtering for ownership-based system
+        # ownership='my' → Show ONLY exams where user has FULL/CO_TEACHER/OWNER access
+        # ownership='others' → Show ONLY exams where user has VIEW ONLY access
+        if ownership_filter == 'my':
+            filter_mode = 'MY_EXAMS'  # Show only editable exams
+            effective_filter_assigned = True  # Keep for backward compat
+            filter_description = "My Test Files (FULL/CO_TEACHER/OWNER access only)"
+        elif ownership_filter == 'others':
+            filter_mode = 'OTHERS_EXAMS'  # Show only VIEW ONLY exams
+            effective_filter_assigned = True  # CHANGED: Must filter, not show all!
+            filter_description = "Other Teachers' Test Files (VIEW ONLY access only)"
+        else:
+            filter_mode = 'LEGACY'
+            effective_filter_assigned = filter_assigned_only  # Fallback to legacy
+            filter_description = f"Legacy filtering (assigned_only={filter_assigned_only})"
+            
+        logger.info(f"[EXAM_HIERARCHY_FIX] Ownership filter: {ownership_filter}")
+        logger.info(f"[EXAM_HIERARCHY_FIX] Filter mode: {filter_mode}")
+        logger.info(f"[EXAM_HIERARCHY_FIX] Effective filtering: {filter_description}")
+        logger.info(f"[EXAM_HIERARCHY_FIX] Will apply filtering: {effective_filter_assigned}")
         
         # Process each exam
         exam_count = 0
@@ -643,78 +670,95 @@ class ExamService:
                 except:
                     pass
             
-            # Skip if filtering and no assigned classes
-            # CRITICAL FIX: Don't automatically include owned exams - they must also meet filter criteria
-            if filter_assigned_only and not is_admin:
-                # UPDATED (Aug 22, 2025): "Show Assigned Classes Only" means show exams from 
-                # classes where teacher has EDITING rights (FULL or CO_TEACHER), NOT VIEW ONLY.
-                # This HIDES VIEW ONLY exams when the toggle is checked.
-                # ABSOLUTELY NO EXCEPTIONS - VIEW ONLY MUST BE FILTERED OUT
-                has_editable_class = False
+            # CRITICAL FIX: Apply proper filtering based on ownership mode
+            if effective_filter_assigned and not is_admin:
+                should_include = False
                 
                 # ENHANCED DEBUG LOGGING
-                logger.info(f"[FILTER_COMPREHENSIVE] ====== FILTERING EXAM: {exam.name} ======")
-                logger.info(f"[FILTER_COMPREHENSIVE] Exam ID: {exam.id}")
-                logger.info(f"[FILTER_COMPREHENSIVE] Exam classes: {exam_classes}")
-                logger.info(f"[FILTER_COMPREHENSIVE] Teacher assignments: {assignments}")
-                logger.info(f"[FILTER_COMPREHENSIVE] Is owner: {is_owner}")
-                logger.info(f"[FILTER_COMPREHENSIVE] Filter enabled: {filter_assigned_only}")
+                logger.info(f"[FILTER_FIX] ====== FILTERING EXAM: {exam.name} ======")
+                logger.info(f"[FILTER_FIX] Filter mode: {filter_mode}")
+                logger.info(f"[FILTER_FIX] Exam ID: {exam.id}")
+                logger.info(f"[FILTER_FIX] Exam classes: {exam_classes}")
+                logger.info(f"[FILTER_FIX] Teacher assignments: {assignments}")
+                logger.info(f"[FILTER_FIX] Is owner: {is_owner}")
                 
                 # Track why exam is included/excluded
                 inclusion_reasons = []
                 exclusion_reasons = []
                 
-                # CRITICAL: Handle exams with no class codes
-                if not exam_classes or exam_classes == []:
-                    # Special case: Owners can see their own unassigned exams
-                    if is_owner:
-                        has_editable_class = True
-                        inclusion_reasons.append("Owner of unassigned exam")
-                        logger.info(f"[FILTER_COMPREHENSIVE] ✅ Owner can see their own unassigned exam")
-                    else:
-                        exclusion_reasons.append("No class codes assigned to exam")
-                        logger.info(f"[FILTER_COMPREHENSIVE] ❌ Exam has no class codes - EXCLUDING")
-                        has_editable_class = False
-                else:
-                    # Check each class for editable access
-                    for cls in exam_classes:
-                        # Skip program-level exams when filtering by assigned only
-                        if cls.startswith('PROGRAM_'):
-                            exclusion_reasons.append(f"Program-level exam ({cls}) - no specific class")
-                            logger.info(f"[FILTER_COMPREHENSIVE] ❌ {cls}: Program-level, skipping")
-                            continue
-                        
-                        # Check if teacher has access to this class
-                        if cls not in assignments:
-                            exclusion_reasons.append(f"Class {cls} not in teacher assignments")
-                            logger.info(f"[FILTER_COMPREHENSIVE] ❌ {cls}: Not in teacher assignments")
-                        else:
-                            access_level = assignments[cls]
-                            logger.info(f"[FILTER_COMPREHENSIVE] 🔍 {cls}: Teacher has {access_level} access")
-                            
-                            # Check if teacher has EDITING access (FULL or CO_TEACHER only)
-                            if access_level in ['FULL', 'CO_TEACHER']:
-                                has_editable_class = True
-                                inclusion_reasons.append(f"Has {access_level} access to {cls}")
-                                logger.info(f"[FILTER_COMPREHENSIVE] ✅ {cls}: EDITABLE access ({access_level}) - INCLUDING EXAM")
-                                break  # Found editable access, include the exam
-                            elif access_level == 'VIEW':
-                                exclusion_reasons.append(f"Only VIEW access to {cls}")
-                                logger.info(f"[FILTER_COMPREHENSIVE] ⚠️ {cls}: VIEW ONLY access - NOT sufficient for filter")
-                            else:
-                                exclusion_reasons.append(f"Unknown access level {access_level} for {cls}")
-                                logger.info(f"[FILTER_COMPREHENSIVE] ❓ {cls}: Unknown access level: {access_level}")
+                # Determine the user's access level for this exam
+                user_access_level = None
                 
-                # Final decision logging
-                if not has_editable_class:
-                    logger.info(f"[FILTER_COMPREHENSIVE] ❌❌❌ EXCLUDING EXAM: {exam.name}")
-                    logger.info(f"[FILTER_COMPREHENSIVE] Exclusion reasons: {exclusion_reasons}")
-                    logger.info(f"[FILTER_COMPREHENSIVE] ====== END FILTERING (EXCLUDED) ======")
+                # Check ownership first
+                if is_owner:
+                    user_access_level = 'OWNER'
+                    logger.info(f"[FILTER_FIX] User is OWNER of this exam")
+                elif not exam_classes or exam_classes == []:
+                    # No class codes - user has no access unless owner
+                    user_access_level = 'NONE'
+                    logger.info(f"[FILTER_FIX] Exam has no class codes, user has NO access")
+                else:
+                    # Check access level from class assignments
+                    highest_access = 'NONE'
+                    for cls in exam_classes:
+                        if cls.startswith('PROGRAM_'):
+                            continue  # Skip program-level markers
+                        
+                        if cls in assignments:
+                            access = assignments[cls]
+                            logger.info(f"[FILTER_FIX] Class {cls}: User has {access} access")
+                            
+                            # Determine highest access level
+                            if access == 'FULL':
+                                highest_access = 'FULL'
+                                break  # FULL is highest, no need to check more
+                            elif access == 'CO_TEACHER' and highest_access in ['NONE', 'VIEW']:
+                                highest_access = 'CO_TEACHER'
+                            elif access == 'VIEW' and highest_access == 'NONE':
+                                highest_access = 'VIEW'
+                    
+                    user_access_level = highest_access
+                    logger.info(f"[FILTER_FIX] User's highest access level: {user_access_level}")
+                
+                # Apply filter based on mode
+                if filter_mode == 'MY_EXAMS':
+                    # Show ONLY exams where user has FULL/CO_TEACHER/OWNER access
+                    if user_access_level in ['OWNER', 'FULL', 'CO_TEACHER']:
+                        should_include = True
+                        inclusion_reasons.append(f"User has {user_access_level} access (MY_EXAMS mode)")
+                        logger.info(f"[FILTER_FIX] ✅ INCLUDING: User has editable access ({user_access_level})")
+                    else:
+                        exclusion_reasons.append(f"User has {user_access_level} access, need FULL/CO_TEACHER/OWNER for MY_EXAMS")
+                        logger.info(f"[FILTER_FIX] ❌ EXCLUDING: User only has {user_access_level} access")
+                
+                elif filter_mode == 'OTHERS_EXAMS':
+                    # Show ONLY exams where user has VIEW ONLY access (not FULL/CO_TEACHER/OWNER)
+                    if user_access_level == 'VIEW':
+                        should_include = True
+                        inclusion_reasons.append(f"User has VIEW ONLY access (OTHERS_EXAMS mode)")
+                        logger.info(f"[FILTER_FIX] ✅ INCLUDING: User has VIEW ONLY access")
+                    else:
+                        exclusion_reasons.append(f"User has {user_access_level} access, need VIEW ONLY for OTHERS_EXAMS")
+                        logger.info(f"[FILTER_FIX] ❌ EXCLUDING: User has {user_access_level} access, not VIEW ONLY")
+                
+                else:  # LEGACY mode
+                    # Original behavior: show exams from editable classes
+                    if user_access_level in ['OWNER', 'FULL', 'CO_TEACHER']:
+                        should_include = True
+                        inclusion_reasons.append(f"User has editable access (LEGACY mode)")
+                    else:
+                        exclusion_reasons.append(f"User has {user_access_level} access, not editable")
+                
+                # Final decision
+                if not should_include:
+                    logger.info(f"[FILTER_FIX] ❌❌❌ EXCLUDING EXAM: {exam.name}")
+                    logger.info(f"[FILTER_FIX] Exclusion reasons: {exclusion_reasons}")
+                    logger.info(f"[FILTER_FIX] ====== END FILTERING (EXCLUDED) ======")
                     continue  # Skip this exam
                 else:
-                    logger.info(f"[FILTER_COMPREHENSIVE] ✅✅✅ INCLUDING EXAM: {exam.name}")
-                    logger.info(f"[FILTER_COMPREHENSIVE] Inclusion reasons: {inclusion_reasons}")
-                    logger.info(f"[FILTER_COMPREHENSIVE] ====== END FILTERING (INCLUDED) ======")
+                    logger.info(f"[FILTER_FIX] ✅✅✅ INCLUDING EXAM: {exam.name}")
+                    logger.info(f"[FILTER_FIX] Inclusion reasons: {inclusion_reasons}")
+                    logger.info(f"[FILTER_FIX] ====== END FILTERING (INCLUDED) ======")
             
             # Add permissions to exam with ownership priority
             if is_admin:
@@ -724,7 +768,7 @@ class ExamService:
                 exam.can_delete = True
                 exam.is_owner = False
                 exam.access_badge = 'ADMIN'
-            elif not filter_assigned_only:
+            elif not effective_filter_assigned:
                 # SHOWING ALL EXAMS (toggle = All Exams) - Set initial permissions
                 logger.debug(f"[PERMISSION_DEBUG] Setting permissions for exam '{exam.name}' in 'Show All' mode")
                 logger.debug(f"[PERMISSION_DEBUG] is_owner={is_owner}, user={user.username}")
@@ -808,7 +852,7 @@ class ExamService:
                     logger.debug(f"[PERMISSION_DEBUG] Exam '{exam.name}' access badge: {exam.access_badge} (highest: {highest_access})")
             
             # CRITICAL CHECK: If we're in filter mode and somehow got here with a VIEW ONLY exam, skip it
-            if filter_assigned_only and not is_admin and hasattr(exam, 'access_badge') and exam.access_badge == 'VIEW ONLY':
+            if effective_filter_assigned and not is_admin and hasattr(exam, 'access_badge') and exam.access_badge == 'VIEW ONLY':
                 logger.error(f"[FILTER_CRITICAL] ❌❌❌ CAUGHT VIEW ONLY exam '{exam.name}' about to be added - SKIPPING!")
                 continue
             
@@ -869,7 +913,7 @@ class ExamService:
             logger.info(f"[EXAM_HIERARCHY] Final result: {list(result.keys())} programs")
         
         # FINAL SAFETY CHECK: If filter is on, ensure NO VIEW ONLY exams in result
-        if filter_assigned_only and not is_admin:
+        if effective_filter_assigned and not is_admin:
             logger.info(f"[FILTER_FINAL_CHECK] Running final safety check for VIEW ONLY exams...")
             view_only_found = []
             cleaned_result = {}

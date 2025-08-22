@@ -260,7 +260,14 @@
       "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_toggle_filter_results_summary.py)",
       "Bash(../venv/bin/pip install:*)",
       "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python test_filter_fix_absolute_final.py)",
-      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_real_browser_issue.py)"
+      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_real_browser_issue.py)",
+      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_actual_template.py)",
+      "Bash(DJANGO_LOG_LEVEL=DEBUG ../venv/bin/python debug_filter_logic.py)",
+      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_filter_logic.py)",
+      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_django_view.py)",
+      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_actual_badges.py)",
+      "Bash(git log:*)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/fix_vscode_ide_disconnect.sh)"
     ],
     "deny": []
   }

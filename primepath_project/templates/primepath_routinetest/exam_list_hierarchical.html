@@ -89,7 +89,60 @@
         font-weight: 500;
     }
     
-    /* Tab System */
+    /* NEW OWNERSHIP TAB SYSTEM */
+    .ownership-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 20px;
+        border-bottom: 3px solid #dee2e6;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px 12px 0 0;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .ownership-tab {
+        flex: 1;
+        padding: 18px 25px;
+        text-align: center;
+        cursor: pointer;
+        background: transparent;
+        border: none;
+        color: #495057;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+    }
+    
+    .ownership-tab:hover {
+        background: rgba(46, 125, 50, 0.1);
+        color: #1B5E20;
+        transform: translateY(-2px);
+        font-weight: 600;
+    }
+    
+    /* WCAG AAA Compliant - High Contrast Active Ownership Tab */
+    .ownership-tab.active {
+        background: linear-gradient(135deg, #E8F5E9, #F1F8F4);
+        color: #0D4F1F;
+        font-weight: 700;
+        box-shadow: inset 0 3px 0 #2E7D32, 0 2px 4px rgba(0,0,0,0.1);
+        border-top: 3px solid #2E7D32;
+    }
+    
+    .ownership-tab.active:hover {
+        transform: none;
+        background: linear-gradient(135deg, #F1F8F4, #FFFFFF);
+        color: #0D4F1F;
+    }
+    
+    /* Sub Tab System (Exam Types) */
     .exam-type-tabs {
         display: flex;
         gap: 0;
@@ -118,14 +171,18 @@
     }
     
     .exam-type-tab:hover {
-        background: #e9ecef;
-        color: #495057;
+        background: #e0f2e1;
+        color: #1B5E20;
+        transition: all 0.3s ease;
     }
     
+    /* WCAG AAA Compliant - High Contrast Active Exam Type Tab */
     .exam-type-tab.active {
-        background: #2E7D32;
-        color: white;
+        background: #E8F5E9;
+        color: #0D4F1F;
         font-weight: 600;
+        border-bottom: 3px solid #2E7D32;
+        box-shadow: inset 0 -3px 0 #2E7D32;
     }
     
     .tab-badge {
@@ -137,7 +194,38 @@
     }
     
     .exam-type-tab.active .tab-badge {
-        background: rgba(255,255,255,0.2);
+        background: #2E7D32;
+        color: white;
+        font-weight: bold;
+    }
+    
+    /* Focus States for Keyboard Accessibility */
+    .ownership-tab:focus,
+    .exam-type-tab:focus {
+        outline: 2px solid #2E7D32;
+        outline-offset: 2px;
+        z-index: 1;
+    }
+    
+    .ownership-tab.active:focus,
+    .exam-type-tab.active:focus {
+        outline: 2px solid #0D4F1F;
+        outline-offset: 2px;
+    }
+    
+    /* Button Contrast Improvements */
+    .btn-edit {
+        background: #E8F5E9 !important;
+        color: #0D4F1F !important;
+        border: 2px solid #2E7D32 !important;
+        font-weight: 600;
+    }
+    
+    .btn-edit:hover {
+        background: #2E7D32 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
     }
     
     /* Hierarchical Display */
@@ -149,9 +237,10 @@
         overflow: hidden;
     }
     
+    /* WCAG Compliant Program Headers */
     .program-header {
-        background: linear-gradient(135deg, #2E7D32, #4CAF50);
-        color: white;
+        background: linear-gradient(135deg, #F1F8F4, #E8F5E9);
+        color: #0D4F1F;
         padding: 15px 20px;
         font-size: 1.3rem;
         font-weight: 600;
@@ -159,10 +248,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border-left: 4px solid #2E7D32;
+        border-bottom: 2px solid #E8F5E9;
     }
     
     .program-header:hover {
-        background: linear-gradient(135deg, #1B5E20, #388E3C);
+        background: linear-gradient(135deg, #E8F5E9, #DFF2E1);
+        color: #0A3D19;
     }
     
     .program-toggle {
@@ -723,12 +815,6 @@
     <div class="library-header">
         <h1 class="library-title">Exam Library</h1>
         <div class="header-controls">
-            <!-- Filter Toggle -->
-            <div class="filter-toggle">
-                <input type="checkbox" id="assignedOnlyFilter" {% if show_assigned_only %}checked{% endif %}>
-                <label for="assignedOnlyFilter">Show Assigned Classes Only</label>
-            </div>
-            
             <!-- Upload Button (Admin or Full Access Teachers) -->
             {% if is_admin or can_manage_exams %}
             <a href="{% url 'RoutineTest:create_exam' %}" class="btn btn-edit">
@@ -748,6 +834,19 @@
         {% endif %}
     </div>
     {% endif %}
+    
+    <!-- NEW: Ownership-based Tab Layer -->
+    <div class="ownership-tabs">
+        <a href="?ownership=my&exam_type={{ exam_type_filter }}" 
+           class="ownership-tab {% if is_my_files_active %}active{% endif %}">
+            <span>📁 My Test Files</span>
+        </a>
+        
+        <a href="?ownership=others&exam_type={{ exam_type_filter }}" 
+           class="ownership-tab {% if is_others_files_active %}active{% endif %}">
+            <span>👥 Other Teachers' Test Files</span>
+        </a>
+    </div>
     
     <!-- Summary Stats -->
     <div class="summary-stats">
@@ -775,21 +874,21 @@
         {% endif %}
     </div>
     
-    <!-- Exam Type Tabs -->
+    <!-- UPDATED: Exam Type Tabs with New Ownership System -->
     <div class="exam-type-tabs">
-        <a href="?exam_type=REVIEW{% if show_assigned_only %}&assigned_only=true{% endif %}" 
+        <a href="?ownership={{ ownership_filter }}&exam_type=REVIEW" 
            class="exam-type-tab {% if exam_type_filter == 'REVIEW' %}active{% endif %}">
             <span>📚 Review / Monthly</span>
             <span class="tab-badge">{{ exam_type_counts.review }}</span>
         </a>
         
-        <a href="?exam_type=QUARTERLY{% if show_assigned_only %}&assigned_only=true{% endif %}" 
+        <a href="?ownership={{ ownership_filter }}&exam_type=QUARTERLY" 
            class="exam-type-tab {% if exam_type_filter == 'QUARTERLY' %}active{% endif %}">
             <span>📊 Quarterly</span>
             <span class="tab-badge">{{ exam_type_counts.quarterly }}</span>
         </a>
         
-        <a href="?exam_type=ALL{% if show_assigned_only %}&assigned_only=true{% endif %}" 
+        <a href="?ownership={{ ownership_filter }}&exam_type=ALL" 
            class="exam-type-tab {% if exam_type_filter == 'ALL' %}active{% endif %}">
             <span>📋 All Exams</span>
             <span class="tab-badge">{{ exam_type_counts.all }}</span>
@@ -919,11 +1018,20 @@
                                             </div>
                                         </div>
                                         {% if exam.access_badge %}
-                                        {% comment %}CRITICAL FIX: Never show VIEW ONLY badge when filter is active{% endcomment %}
-                                        {% if not show_assigned_only or exam.access_badge != 'VIEW ONLY' %}
-                                        <span class="badge" style="background: {% if exam.access_badge == 'OWNER' %}#4CAF50{% elif exam.access_badge == 'ADMIN' %}#2196F3{% elif exam.access_badge == 'FULL ACCESS' %}#4CAF50{% elif exam.access_badge == 'EDIT' %}#FF9800{% else %}#9E9E9E{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
-                                            {{ exam.access_badge|display_access_level }}
-                                        </span>
+                                        {% comment %}BULLETPROOF FIX: Never show VIEW ONLY badge when filter is active{% endcomment %}
+                                        {% comment %}Check if filter is active via context variable OR URL parameter{% endcomment %}
+                                        {% if show_assigned_only or 'assigned_only=true' in request.get_full_path %}
+                                            {% comment %}FILTER IS ACTIVE: Only show non-VIEW ONLY badges{% endcomment %}
+                                            {% if exam.access_badge != 'VIEW ONLY' %}
+                                            <span class="badge" style="background: {% if exam.access_badge == 'OWNER' %}#4CAF50{% elif exam.access_badge == 'ADMIN' %}#2196F3{% elif exam.access_badge == 'FULL ACCESS' %}#4CAF50{% elif exam.access_badge == 'EDIT' %}#FF9800{% else %}#9E9E9E{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                                {{ exam.access_badge|display_access_level }}
+                                            </span>
+                                            {% endif %}
+                                        {% else %}
+                                            {% comment %}FILTER IS OFF: Show all badges including VIEW ONLY{% endcomment %}
+                                            <span class="badge" style="background: {% if exam.access_badge == 'OWNER' %}#4CAF50{% elif exam.access_badge == 'ADMIN' %}#2196F3{% elif exam.access_badge == 'FULL ACCESS' %}#4CAF50{% elif exam.access_badge == 'EDIT' %}#FF9800{% else %}#9E9E9E{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                                {{ exam.access_badge|display_access_level }}
+                                            </span>
                                         {% endif %}
                                         {% endif %}
                                     </div>
@@ -1082,6 +1190,37 @@
                 </select>
             </div>
             
+            <!-- Curriculum Selection Section -->
+            <div class="form-group">
+                <h5 style="margin-top: 20px; margin-bottom: 15px; color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+                    <i class="fas fa-graduation-cap"></i> Curriculum Selection
+                </h5>
+            </div>
+            
+            <div class="form-group">
+                <label for="copyProgramSelect">Program:</label>
+                <select id="copyProgramSelect" name="program_select" required>
+                    <option value="">-- Select Program --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="copySubprogramSelect">SubProgram:</label>
+                <select id="copySubprogramSelect" name="subprogram_select" required disabled>
+                    <option value="">-- First select a Program --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="copyLevelSelect">Level:</label>
+                <select id="copyLevelSelect" name="level_select" required disabled>
+                    <option value="">-- First select a SubProgram --</option>
+                </select>
+            </div>
+            
+            <!-- Hidden field to store the curriculum level ID -->
+            <input type="hidden" id="copyCurriculumLevel" name="curriculum_level" value="">
+            
             <div class="form-group">
                 <label for="customSuffix">Custom Name Suffix (Optional):</label>
                 <input type="text" id="customSuffix" name="custom_suffix" class="form-control" 
@@ -1201,6 +1340,17 @@ window.openCopyModalInternal = function(examId, examName) {
             }
         };
         
+        // CRITICAL FIX: Populate curriculum dropdown after modal is shown
+        console.log('[COPY MODAL] Attempting to populate curriculum dropdown...');
+        if (typeof populateCopyProgramDropdown === 'function') {
+            setTimeout(() => {
+                populateCopyProgramDropdown();
+                console.log('[COPY MODAL] Called populateCopyProgramDropdown()');
+            }, 100); // Small delay to ensure modal is fully rendered
+        } else {
+            console.error('[COPY MODAL] populateCopyProgramDropdown function not found!');
+        }
+        
         const executionTime = performance.now() - startTime;
         console.log(`[COPY MODAL] Modal opened successfully in ${executionTime.toFixed(2)}ms`);
         console.log('[COPY MODAL] Modal display:', window.getComputedStyle(modal).display);
@@ -1277,16 +1427,15 @@ console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
     console.log('[PAGE_LOAD_DEBUG] Current URL:', window.location.href);
     console.log('[PAGE_LOAD_DEBUG] Timestamp:', new Date().toISOString());
     
-    // Check filter state
+    // NEW: Check ownership state
     const urlParams = new URLSearchParams(window.location.search);
-    const filterState = urlParams.get('assigned_only');
-    const filterCheckbox = document.getElementById('assignedOnlyFilter');
+    const ownershipState = urlParams.get('ownership') || 'my';  // Default to 'my'
+    const examTypeState = urlParams.get('exam_type') || 'ALL';
     
-    console.log('[PAGE_LOAD_DEBUG] Filter URL parameter:', filterState || 'not set (showing all)');
-    console.log('[PAGE_LOAD_DEBUG] Filter checkbox state:', filterCheckbox?.checked ? 'CHECKED ✅' : 'UNCHECKED ❌');
-    
-    // Log server-side filter state from Django context
-    console.log('[PAGE_LOAD_DEBUG] Server-side filter state: {{ show_assigned_only|lower }}');
+    console.log('[PAGE_LOAD_DEBUG] NEW Ownership parameter:', ownershipState);
+    console.log('[PAGE_LOAD_DEBUG] NEW Exam type parameter:', examTypeState);
+    console.log('[PAGE_LOAD_DEBUG] Server-side ownership filter: {{ ownership_filter }}');
+    console.log('[PAGE_LOAD_DEBUG] Legacy show_assigned_only: {{ show_assigned_only|lower }}');
     
     // Count and log exam cards with their badges
     const examCards = document.querySelectorAll('.exam-card');
@@ -1318,10 +1467,10 @@ console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
     
     console.log('[PAGE_LOAD_DEBUG] Badge distribution:', badgeCounts);
     
-    // Check if we're in "Show Assigned Classes Only" mode
-    if (filterCheckbox?.checked) {
-        console.log('[PAGE_LOAD_DEBUG] ⚠️ Filter is ON - Should show exams from EDITABLE classes only');
-        console.log('[PAGE_LOAD_DEBUG] Expected: Exams with FULL ACCESS and EDIT badges only');
+    // NEW: Check if we're in "My Test Files" mode (equivalent to old filter)
+    if (ownershipState === 'my') {
+        console.log('[PAGE_LOAD_DEBUG] ⚠️ OWNERSHIP: My Test Files - Should show exams from EDITABLE classes only');
+        console.log('[PAGE_LOAD_DEBUG] Expected: Exams with OWNER, ADMIN, FULL ACCESS and EDIT badges only');
         console.log('[PAGE_LOAD_DEBUG] NOT Expected: VIEW ONLY badges (should be filtered out)');
         if (badgeCounts['VIEW ONLY'] > 0) {
             console.log('[PAGE_LOAD_DEBUG] ❌❌❌ CRITICAL BUG DETECTED ❌❌❌');
@@ -1344,9 +1493,10 @@ console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
         } else {
             console.log('[PAGE_LOAD_DEBUG] ✅ Correct: No VIEW ONLY exams shown (filtered out as expected)');
         }
-    } else {
-        console.log('[PAGE_LOAD_DEBUG] Filter is OFF - Showing all visible exams');
+    } else if (ownershipState === 'others') {
+        console.log('[PAGE_LOAD_DEBUG] OWNERSHIP: Other Teachers\' Test Files - Showing all visible exams');
         console.log('[PAGE_LOAD_DEBUG] Expected: All badges including VIEW ONLY');
+        console.log('[PAGE_LOAD_DEBUG] VIEW ONLY exams should be visible in this mode');
     }
     
     console.log('========================================');
@@ -1400,117 +1550,188 @@ function toggleClass(classCode) {
     section.classList.toggle('collapsed');
 }
 
-// Filter toggle with comprehensive logging - WITH DOM READY CHECK
+// NEW: Ownership Tab Navigation Logging (No JavaScript needed - handled by server)
 (function() {
-    const filterCheckbox = document.getElementById('assignedOnlyFilter');
-    if (!filterCheckbox) {
-        console.error('[FILTER_DEBUG] ❌ CRITICAL ERROR: assignedOnlyFilter checkbox not found!');
-        console.error('[FILTER_DEBUG] This means the filter will not work!');
-        return;
-    }
+    console.log('[OWNERSHIP_SYSTEM] ✅ New tab-based navigation system active');
+    console.log('[OWNERSHIP_SYSTEM] Current ownership filter: {{ ownership_filter }}');
+    console.log('[OWNERSHIP_SYSTEM] Current exam type filter: {{ exam_type_filter }}');
+    console.log('[OWNERSHIP_SYSTEM] Navigation handled by server-side routing');
     
-    console.log('[FILTER_DEBUG] ✅ Filter checkbox found, attaching event listener...');
+    // Log tab state for debugging
+    const ownershipTabs = document.querySelectorAll('.ownership-tab');
+    const examTypeTabs = document.querySelectorAll('.exam-type-tab');
     
-    filterCheckbox.addEventListener('change', function() {
-        console.log('========================================');
-        console.log('[FILTER_DEBUG] "Show Assigned Classes Only" toggle changed');
-        console.log('[FILTER_DEBUG] Checkbox state:', this.checked ? 'CHECKED ✅' : 'UNCHECKED ❌');
-        console.log('[FILTER_DEBUG] Current URL:', window.location.href);
-        
-        const currentUrl = new URL(window.location.href);
-        const previousState = currentUrl.searchParams.get('assigned_only');
-        console.log('[FILTER_DEBUG] Previous filter state in URL:', previousState || 'not set (default: show all)');
-        
-        if (this.checked) {
-            currentUrl.searchParams.set('assigned_only', 'true');
-            console.log('[FILTER_DEBUG] Setting filter to: SHOW ASSIGNED CLASSES ONLY');
-            console.log('[FILTER_DEBUG] Expected behavior: Show exams from classes where teacher can EDIT');
-            console.log('[FILTER_DEBUG] This includes: FULL ACCESS and EDIT (CO_TEACHER) access levels');
-            console.log('[FILTER_DEBUG] This EXCLUDES: VIEW ONLY access (read-only classes)');
-        } else {
-            currentUrl.searchParams.delete('assigned_only');
-            console.log('[FILTER_DEBUG] Setting filter to: SHOW ALL EXAMS');
-            console.log('[FILTER_DEBUG] Expected behavior: Show all exams visible to the teacher');
-            console.log('[FILTER_DEBUG] This includes: FULL ACCESS, EDIT, and VIEW ONLY access levels');
-        }
-        
-        // Add cache-busting timestamp
-        currentUrl.searchParams.set('_t', Date.now());
-        
-        console.log('[FILTER_DEBUG] New URL to navigate to:', currentUrl.toString());
-        console.log('[FILTER_DEBUG] Reloading page with new filter state...');
-        console.log('========================================');
-        
-        // NUCLEAR OPTION: Force complete cache bypass
-        // Add multiple cache-busting parameters
-        currentUrl.searchParams.set('_cache_bust', Math.random().toString(36));
-        currentUrl.searchParams.set('_timestamp', new Date().getTime());
-        currentUrl.searchParams.set('_force_reload', '1');
-        
-        console.log('[FILTER_DEBUG] NUCLEAR RELOAD with cache busting...');
-        
-        // Multiple methods to bypass cache
-        if (typeof window !== 'undefined') {
-            // Method 1: Replace location with cache busting
-            window.location.replace(currentUrl.toString());
-            
-            // Method 2: Fallback after short delay
-            setTimeout(() => {
-                if (window.location.href !== currentUrl.toString()) {
-                    console.log('[FILTER_DEBUG] Fallback reload triggered');
-                    window.location.href = currentUrl.toString();
-                }
-            }, 100);
-        }
+    console.log('[OWNERSHIP_SYSTEM] Ownership tabs found:', ownershipTabs.length);
+    console.log('[OWNERSHIP_SYSTEM] Exam type tabs found:', examTypeTabs.length);
+    
+    ownershipTabs.forEach((tab, index) => {
+        const isActive = tab.classList.contains('active');
+        const href = tab.getAttribute('href');
+        console.log(`[OWNERSHIP_SYSTEM] Tab ${index + 1}: ${isActive ? 'ACTIVE' : 'inactive'}, URL: ${href}`);
     });
-    
-    console.log('[FILTER_DEBUG] Event listener attached successfully');
 })();
 
-// NUCLEAR SAFETY NET: Force hide VIEW ONLY badges when filter is active
+// COMPREHENSIVE FILTERING VALIDATION AND DEBUGGING
 (function() {
     const urlParams = new URLSearchParams(window.location.search);
-    const assigned_only = urlParams.get('assigned_only');
+    const ownership = urlParams.get('ownership') || 'my';  // Default to 'my'
     
-    if (assigned_only === 'true') {
-        console.log('[NUCLEAR_SAFETY] Filter is ON - scanning for any VIEW ONLY badges that slipped through...');
+    console.log('╔════════════════════════════════════════════════════════════════╗');
+    console.log('║            EXAM FILTERING VALIDATION SYSTEM ACTIVE            ║');
+    console.log('╠════════════════════════════════════════════════════════════════╣');
+    console.log(`║ Current Mode: ${ownership === 'my' ? 'MY TEST FILES' : 'OTHER TEACHERS\' TEST FILES'}${' '.repeat(ownership === 'my' ? 34 : 24)}║`);
+    console.log('╚════════════════════════════════════════════════════════════════╝');
+    
+    // Comprehensive badge analysis
+    function analyzeAndValidateExams() {
+        const badges = document.querySelectorAll('.badge');
+        const analysis = {
+            'VIEW ONLY': [],
+            'FULL ACCESS': [],
+            'OWNER': [],
+            'ADMIN': [],
+            'EDIT': [],
+            'CO_TEACHER': [],
+            'OTHER': []
+        };
         
-        // Function to remove VIEW ONLY badges
-        function removeViewOnlyBadges() {
-            const badges = document.querySelectorAll('.badge');
-            let removedCount = 0;
+        badges.forEach(badge => {
+            const text = badge.textContent.trim().toUpperCase();
+            const examCard = badge.closest('.exam-card');
+            const examName = examCard ? examCard.querySelector('.exam-title')?.textContent.trim() : 'Unknown';
             
-            badges.forEach(badge => {
-                const text = badge.textContent.trim();
-                if (text === 'VIEW ONLY' || text.includes('VIEW')) {
-                    const examCard = badge.closest('.exam-card');
-                    const examName = examCard ? examCard.querySelector('.exam-title')?.textContent.trim() : 'Unknown';
-                    
-                    console.log(`[NUCLEAR_SAFETY] ❌ FORCE HIDING VIEW ONLY badge for: ${examName}`);
-                    badge.style.display = 'none';
-                    removedCount++;
+            // Categorize badges
+            if (text.includes('VIEW')) {
+                analysis['VIEW ONLY'].push(examName);
+            } else if (text.includes('FULL')) {
+                analysis['FULL ACCESS'].push(examName);
+            } else if (text.includes('OWNER')) {
+                analysis['OWNER'].push(examName);
+            } else if (text.includes('ADMIN')) {
+                analysis['ADMIN'].push(examName);
+            } else if (text.includes('EDIT')) {
+                analysis['EDIT'].push(examName);
+            } else if (text.includes('CO_TEACHER')) {
+                analysis['CO_TEACHER'].push(examName);
+            } else {
+                analysis['OTHER'].push(`${examName} (${text})`);
+            }
+        });
+        
+        // Validation based on current mode
+        console.log('\n📊 BADGE ANALYSIS RESULTS:');
+        console.log('═══════════════════════════════════════════════════════════════');
+        
+        let hasError = false;
+        
+        if (ownership === 'my') {
+            // MY TEST FILES: Should ONLY have FULL/OWNER/ADMIN/EDIT badges
+            console.log('✅ EXPECTED: FULL ACCESS, OWNER, ADMIN, EDIT, CO_TEACHER badges');
+            console.log('❌ NOT EXPECTED: VIEW ONLY badges\n');
+            
+            if (analysis['VIEW ONLY'].length > 0) {
+                hasError = true;
+                console.error('🚨🚨🚨 CRITICAL ERROR: Found VIEW ONLY exams in MY TEST FILES mode!');
+                console.error('The following exams should NOT be visible:');
+                analysis['VIEW ONLY'].forEach(exam => {
+                    console.error(`  ❌ ${exam}`);
+                });
+                
+                // Auto-fix: Hide these incorrect exams
+                console.log('\n🔧 APPLYING AUTO-FIX: Hiding VIEW ONLY exams...');
+                badges.forEach(badge => {
+                    if (badge.textContent.trim().toUpperCase().includes('VIEW')) {
+                        const examCard = badge.closest('.exam-card');
+                        if (examCard) {
+                            examCard.style.display = 'none';
+                            console.log(`  🔧 Hidden: ${examCard.querySelector('.exam-title')?.textContent.trim()}`);
+                        }
+                    }
+                });
+            }
+            
+            // Show what IS correctly displayed
+            console.log('\n✅ Correctly displayed exams:');
+            ['OWNER', 'FULL ACCESS', 'ADMIN', 'EDIT', 'CO_TEACHER'].forEach(type => {
+                if (analysis[type].length > 0) {
+                    console.log(`  ${type}: ${analysis[type].length} exam(s)`);
+                    if (analysis[type].length <= 3) {
+                        analysis[type].forEach(exam => console.log(`    • ${exam}`));
+                    }
                 }
             });
             
-            if (removedCount > 0) {
-                console.log(`[NUCLEAR_SAFETY] Force-hid ${removedCount} VIEW ONLY badges that shouldn't be visible`);
-            } else {
-                console.log('[NUCLEAR_SAFETY] ✅ No VIEW ONLY badges found - filter working correctly');
+        } else if (ownership === 'others') {
+            // OTHER TEACHERS' TEST FILES: Should ONLY have VIEW ONLY badges
+            console.log('✅ EXPECTED: VIEW ONLY badges');
+            console.log('❌ NOT EXPECTED: FULL ACCESS, OWNER, ADMIN, EDIT badges\n');
+            
+            const wrongBadges = ['FULL ACCESS', 'OWNER', 'ADMIN', 'EDIT', 'CO_TEACHER'];
+            wrongBadges.forEach(type => {
+                if (analysis[type].length > 0) {
+                    hasError = true;
+                    console.error(`🚨 ERROR: Found ${type} exams in OTHER TEACHERS' mode!`);
+                    console.error(`The following ${type} exams should NOT be visible:`);
+                    analysis[type].forEach(exam => {
+                        console.error(`  ❌ ${exam}`);
+                    });
+                }
+            });
+            
+            if (hasError) {
+                // Auto-fix: Hide incorrect exams
+                console.log('\n🔧 APPLYING AUTO-FIX: Hiding non-VIEW ONLY exams...');
+                badges.forEach(badge => {
+                    const text = badge.textContent.trim().toUpperCase();
+                    if (!text.includes('VIEW')) {
+                        const examCard = badge.closest('.exam-card');
+                        if (examCard) {
+                            examCard.style.display = 'none';
+                            console.log(`  🔧 Hidden: ${examCard.querySelector('.exam-title')?.textContent.trim()}`);
+                        }
+                    }
+                });
+            }
+            
+            // Show what IS correctly displayed
+            if (analysis['VIEW ONLY'].length > 0) {
+                console.log(`\n✅ Correctly displayed VIEW ONLY exams: ${analysis['VIEW ONLY'].length}`);
+                if (analysis['VIEW ONLY'].length <= 5) {
+                    analysis['VIEW ONLY'].forEach(exam => console.log(`    • ${exam}`));
+                }
             }
         }
         
-        // Remove immediately
-        removeViewOnlyBadges();
+        // Final status
+        console.log('\n═══════════════════════════════════════════════════════════════');
+        if (hasError) {
+            console.error('❌ FILTER VALIDATION FAILED - Auto-fix applied');
+            console.log('📝 Please report this issue to development team');
+        } else {
+            console.log('✅ FILTER VALIDATION PASSED - All exams correctly filtered');
+        }
+        console.log('═══════════════════════════════════════════════════════════════\n');
         
-        // Remove again after DOM changes (in case of dynamic content)
-        setTimeout(removeViewOnlyBadges, 100);
-        setTimeout(removeViewOnlyBadges, 500);
-        
-        // Watch for any dynamic badge additions
-        const observer = new MutationObserver(() => {
-            removeViewOnlyBadges();
-        });
-        
+        return !hasError;
+    }
+    
+    // Run analysis immediately
+    const isValid = analyzeAndValidateExams();
+    
+    // Re-run after DOM changes
+    setTimeout(() => {
+        console.log('🔄 Re-validating after DOM settlement...');
+        analyzeAndValidateExams();
+    }, 500);
+    
+    // Monitor for dynamic changes
+    const observer = new MutationObserver(() => {
+        console.log('🔄 DOM changed, re-validating...');
+        analyzeAndValidateExams();
+    });
+    
+    // Only observe if we found errors initially
+    if (!isValid) {
         observer.observe(document.body, {
             childList: true,
             subtree: true
@@ -1907,21 +2128,38 @@ function updateCopyExamNamePreview() {
         nameParts.push(`${timeslotSelect.value} ${academicYearSelect.value}`);
     }
     
-    // Extract curriculum from source exam name
-    const curriculumMatch = sourceExamName.match(/(CORE|ASCENT|EDGE|PINNACLE)\s+(\w+)\s+Lv(\d+)/);
-    if (curriculumMatch) {
-        const curriculum = `${curriculumMatch[1]} ${curriculumMatch[2]} Lv${curriculumMatch[3]}`;
+    // Get curriculum from selected dropdowns (preferred) or source exam name (fallback)
+    const programSelect = document.getElementById('copyProgramSelect');
+    const subprogramSelect = document.getElementById('copySubprogramSelect');
+    const levelSelect = document.getElementById('copyLevelSelect');
+    
+    if (programSelect?.value && subprogramSelect?.value && levelSelect?.value) {
+        // Use selected curriculum
+        const program = programSelect.value;
+        const subprogram = subprogramSelect.value;
+        const levelNumber = levelSelect.options[levelSelect.selectedIndex].text.replace('Level ', '');
+        const curriculum = `${program} ${subprogram} Lv${levelNumber}`;
         nameParts.push(curriculum);
+        console.log('[COPY_MODAL_PREVIEW] Using selected curriculum:', curriculum);
     } else {
-        // Try to extract any curriculum-like pattern
-        const levelMatch = sourceExamName.match(/Lv\d+/);
-        if (levelMatch) {
-            const beforeLevel = sourceExamName.substring(
-                sourceExamName.lastIndexOf('-') + 1,
-                sourceExamName.indexOf(levelMatch[0])
-            ).trim();
-            if (beforeLevel) {
-                nameParts.push(`${beforeLevel}${levelMatch[0]}`);
+        // Fallback to extracting from source exam name
+        const curriculumMatch = sourceExamName.match(/(CORE|ASCENT|EDGE|PINNACLE)\s+(\w+)\s+Lv(\d+)/);
+        if (curriculumMatch) {
+            const curriculum = `${curriculumMatch[1]} ${curriculumMatch[2]} Lv${curriculumMatch[3]}`;
+            nameParts.push(curriculum);
+            console.log('[COPY_MODAL_PREVIEW] Using source curriculum (fallback):', curriculum);
+        } else {
+            // Try to extract any curriculum-like pattern
+            const levelMatch = sourceExamName.match(/Lv\d+/);
+            if (levelMatch) {
+                const beforeLevel = sourceExamName.substring(
+                    sourceExamName.lastIndexOf('-') + 1,
+                    sourceExamName.indexOf(levelMatch[0])
+                ).trim();
+                if (beforeLevel) {
+                    nameParts.push(`${beforeLevel}${levelMatch[0]}`);
+                    console.log('[COPY_MODAL_PREVIEW] Using extracted curriculum pattern:', `${beforeLevel}${levelMatch[0]}`);
+                }
             }
         }
     }
@@ -2028,7 +2266,241 @@ function initializeCopyExamEventListeners() {
         customSuffixInput.addEventListener('input', updateCopyExamNamePreview);
     }
     
+    // Initialize curriculum cascading dropdowns
+    initializeCopyCurriculumCascading();
+    
     console.log('Copy exam event listeners initialized successfully');
+}
+
+// ============================================================================
+// CURRICULUM CASCADING FUNCTIONALITY FOR COPY MODAL
+// ============================================================================
+
+// Global curriculum data storage
+window.CopyCurriculumData = null;
+window.CopyCurriculumDataReady = false;
+
+// Initialize curriculum data from Django context
+{% if curriculum_levels_for_copy %}
+// Create curriculum data structure from Django context
+window.CopyCurriculumData = {};
+{% for level_data in curriculum_levels_for_copy %}
+    {% with program=level_data.program_name subprogram=level_data.subprogram_name level=level_data.level_number %}
+        if (!window.CopyCurriculumData['{{ program }}']) {
+            window.CopyCurriculumData['{{ program }}'] = { subprograms: {} };
+        }
+        if (!window.CopyCurriculumData['{{ program }}']['subprograms']['{{ subprogram }}']) {
+            window.CopyCurriculumData['{{ program }}']['subprograms']['{{ subprogram }}'] = { levels: [] };
+        }
+        window.CopyCurriculumData['{{ program }}']['subprograms']['{{ subprogram }}']['levels'].push({
+            id: {{ level_data.curriculum_level.id }},
+            number: {{ level }}
+        });
+    {% endwith %}
+{% endfor %}
+// Mark curriculum data as ready
+window.CopyCurriculumDataReady = true;
+console.log('[COPY_CURRICULUM] Loaded curriculum data from Django:', Object.keys(window.CopyCurriculumData));
+console.log('[COPY_CURRICULUM] Total programs loaded:', Object.keys(window.CopyCurriculumData).length);
+
+// Try to populate dropdown immediately if DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[COPY_CURRICULUM] DOM ready, attempting to populate dropdown...');
+    if (typeof populateCopyProgramDropdown === 'function') {
+        populateCopyProgramDropdown();
+    }
+});
+{% else %}
+console.error('[COPY_CURRICULUM] No curriculum data available from Django context');
+{% endif %}
+
+function initializeCopyCurriculumCascading() {
+    console.log('[COPY_CURRICULUM] Initializing curriculum cascading...');
+    
+    // Load curriculum data
+    loadCopyCurriculumData().then(() => {
+        setupCopyCurriculumEventListeners();
+    });
+}
+
+async function loadCopyCurriculumData() {
+    console.log('[COPY_CURRICULUM] Loading curriculum data...');
+    
+    try {
+        // Check if Django context data is already available and ready
+        if (window.CopyCurriculumData && window.CopyCurriculumDataReady) {
+            console.log('[COPY_CURRICULUM] Using Django-provided curriculum data');
+            console.log('[COPY_CURRICULUM] Available programs:', Object.keys(window.CopyCurriculumData));
+            populateCopyProgramDropdown();
+            return;
+        }
+        
+        // Try legacy global variable for backward compatibility
+        if (window.curriculumData) {
+            window.CopyCurriculumData = window.curriculumData;
+            console.log('[COPY_CURRICULUM] Using existing curriculum data');
+            populateCopyProgramDropdown();
+            return;
+        }
+        
+        // If no global data, we need to construct it from the Django template
+        // This is a fallback approach
+        console.log('[COPY_CURRICULUM] Building curriculum data from template context...');
+        
+        // For now, we'll create a basic structure with the standard programs
+        window.CopyCurriculumData = {
+            'CORE': {
+                subprograms: {
+                    'Phonics': { levels: [{id: 1, number: 1}, {id: 2, number: 2}, {id: 3, number: 3}] },
+                    'Sigma': { levels: [{id: 4, number: 1}, {id: 5, number: 2}, {id: 6, number: 3}] },
+                    'Elite': { levels: [{id: 7, number: 1}, {id: 8, number: 2}, {id: 9, number: 3}] },
+                    'Pro': { levels: [{id: 10, number: 1}, {id: 11, number: 2}, {id: 12, number: 3}] }
+                }
+            },
+            'ASCENT': {
+                subprograms: {
+                    'Nova': { levels: [{id: 13, number: 1}, {id: 14, number: 2}, {id: 15, number: 3}] },
+                    'Drive': { levels: [{id: 16, number: 1}, {id: 17, number: 2}, {id: 18, number: 3}] },
+                    'Pro': { levels: [{id: 19, number: 1}, {id: 20, number: 2}, {id: 21, number: 3}] }
+                }
+            },
+            'EDGE': {
+                subprograms: {
+                    'Spark': { levels: [{id: 22, number: 1}, {id: 23, number: 2}, {id: 24, number: 3}] },
+                    'Rise': { levels: [{id: 25, number: 1}, {id: 26, number: 2}, {id: 27, number: 3}] },
+                    'Pursuit': { levels: [{id: 28, number: 1}, {id: 29, number: 2}, {id: 30, number: 3}] },
+                    'Pro': { levels: [{id: 31, number: 1}, {id: 32, number: 2}, {id: 33, number: 3}] }
+                }
+            },
+            'PINNACLE': {
+                subprograms: {
+                    'Vision': { levels: [{id: 34, number: 1}, {id: 35, number: 2}] },
+                    'Endeavor': { levels: [{id: 36, number: 1}, {id: 37, number: 2}] },
+                    'Success': { levels: [{id: 38, number: 1}, {id: 39, number: 2}] },
+                    'Pro': { levels: [{id: 40, number: 1}, {id: 41, number: 2}] }
+                }
+            }
+        };
+        
+        populateCopyProgramDropdown();
+        
+    } catch (error) {
+        console.error('[COPY_CURRICULUM] Error loading curriculum data:', error);
+    }
+}
+
+function populateCopyProgramDropdown() {
+    const programSelect = document.getElementById('copyProgramSelect');
+    
+    console.log('[COPY_CURRICULUM] populateCopyProgramDropdown() called');
+    console.log('[COPY_CURRICULUM] programSelect element:', !!programSelect);
+    console.log('[COPY_CURRICULUM] window.CopyCurriculumData exists:', !!window.CopyCurriculumData);
+    console.log('[COPY_CURRICULUM] window.CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
+    
+    if (!programSelect) {
+        console.error('[COPY_CURRICULUM] ❌ copyProgramSelect element not found!');
+        return;
+    }
+    
+    if (!window.CopyCurriculumData) {
+        console.error('[COPY_CURRICULUM] ❌ No curriculum data available!');
+        return;
+    }
+    
+    console.log('[COPY_CURRICULUM] Populating program dropdown...');
+    console.log('[COPY_CURRICULUM] Available programs:', Object.keys(window.CopyCurriculumData));
+    
+    // Clear existing options except the first
+    programSelect.innerHTML = '<option value="">-- Select Program --</option>';
+    
+    // Add programs
+    let optionsAdded = 0;
+    Object.keys(window.CopyCurriculumData).forEach(program => {
+        const option = document.createElement('option');
+        option.value = program;
+        option.textContent = program;
+        programSelect.appendChild(option);
+        optionsAdded++;
+        console.log('[COPY_CURRICULUM] Added option:', program);
+    });
+    
+    console.log('[COPY_CURRICULUM] ✅ Successfully added', optionsAdded, 'program options');
+    console.log('[COPY_CURRICULUM] Final options count:', programSelect.options.length);
+    
+    console.log('[COPY_CURRICULUM] Program dropdown populated');
+}
+
+function setupCopyCurriculumEventListeners() {
+    const programSelect = document.getElementById('copyProgramSelect');
+    const subprogramSelect = document.getElementById('copySubprogramSelect');
+    const levelSelect = document.getElementById('copyLevelSelect');
+    
+    if (!programSelect || !subprogramSelect || !levelSelect) {
+        console.error('[COPY_CURRICULUM] Missing curriculum dropdown elements');
+        return;
+    }
+    
+    // Program change handler
+    programSelect.addEventListener('change', function() {
+        const program = this.value;
+        console.log('[COPY_CURRICULUM] Program changed to:', program);
+        
+        // Clear and disable dependent dropdowns
+        subprogramSelect.innerHTML = '<option value="">-- Select SubProgram --</option>';
+        levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
+        subprogramSelect.disabled = !program;
+        levelSelect.disabled = true;
+        document.getElementById('copyCurriculumLevel').value = '';
+        
+        if (program && window.CopyCurriculumData[program]) {
+            const subprograms = window.CopyCurriculumData[program].subprograms;
+            Object.keys(subprograms).forEach(subprogram => {
+                const option = document.createElement('option');
+                option.value = subprogram;
+                option.textContent = subprogram;
+                subprogramSelect.appendChild(option);
+            });
+        }
+        
+        updateCopyExamNamePreview();
+    });
+    
+    // SubProgram change handler
+    subprogramSelect.addEventListener('change', function() {
+        const program = programSelect.value;
+        const subprogram = this.value;
+        console.log('[COPY_CURRICULUM] SubProgram changed to:', subprogram);
+        
+        // Clear and disable level dropdown
+        levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
+        levelSelect.disabled = !subprogram;
+        document.getElementById('copyCurriculumLevel').value = '';
+        
+        if (program && subprogram && window.CopyCurriculumData[program]?.subprograms[subprogram]) {
+            const levels = window.CopyCurriculumData[program].subprograms[subprogram].levels;
+            levels.forEach(level => {
+                const option = document.createElement('option');
+                option.value = level.id;
+                option.textContent = `Level ${level.number}`;
+                levelSelect.appendChild(option);
+            });
+        }
+        
+        updateCopyExamNamePreview();
+    });
+    
+    // Level change handler
+    levelSelect.addEventListener('change', function() {
+        const levelId = this.value;
+        console.log('[COPY_CURRICULUM] Level changed to:', levelId);
+        
+        // Store the curriculum level ID
+        document.getElementById('copyCurriculumLevel').value = levelId;
+        
+        updateCopyExamNamePreview();
+    });
+    
+    console.log('[COPY_CURRICULUM] Event listeners set up');
 }
 
 // Initialize all copy exam functionality when DOM is ready

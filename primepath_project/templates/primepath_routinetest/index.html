@@ -230,28 +230,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn('⚠️ My Classes nav tab not found');
     }
     
-    // CRITICAL: Force Matrix Tab visibility check
-    const matrixTabItem = document.getElementById('matrix-tab-item');
-    if (matrixTabItem) {
-        console.log('%c🎆 MATRIX TAB ITEM FOUND!', 'background: #FF5722; color: white; padding: 5px; font-weight: bold;');
-        
-        // Force visibility just in case
-        matrixTabItem.style.display = 'flex !important';
-        matrixTabItem.style.visibility = 'visible !important';
-        matrixTabItem.style.opacity = '1 !important';
-        
-        const matrixLink = matrixTabItem.querySelector('a');
-        if (matrixLink) {
-            matrixLink.style.display = 'block !important';
-            matrixLink.style.visibility = 'visible !important';
-            console.log('Matrix tab forced visible with styles:', {
-                display: matrixLink.style.display,
-                visibility: matrixLink.style.visibility,
-                href: matrixLink.href
-            });
-        }
+    // Check for Classes & Exams unified tab (V8 navigation)
+    const classesExamsTab = document.querySelector('a[data-nav="classes-exams"]');
+    if (classesExamsTab) {
+        console.log('%c✅ Classes & Exams unified tab found!', 'background: #4CAF50; color: white; padding: 5px; font-weight: bold;');
+        console.log('Unified tab details:', {
+            text: classesExamsTab.textContent.trim(),
+            href: classesExamsTab.href,
+            active: classesExamsTab.classList.contains('active')
+        });
     } else {
-        console.error('%c🚫 CRITICAL: Matrix tab item (#matrix-tab-item) not found in DOM!', 'background: red; color: white; padding: 5px; font-weight: bold;');
+        console.warn('%c⚠️ Classes & Exams tab not found', 'background: orange; color: white; padding: 5px;');
     }
     
     console.groupEnd();
@@ -264,21 +253,17 @@ window.addEventListener('load', function() {
     const allNavLinks = document.querySelectorAll('.nav-tabs a');
     const navSummary = {
         totalTabs: allNavLinks.length,
-        tabNames: Array.from(allNavLinks).map(a => a.textContent.trim()),
-        matrixTabExists: !!document.querySelector('[data-tab-id="exam-assignments-matrix"]'),
-        matrixTabVisible: document.querySelector('[data-tab-id="exam-assignments-matrix"]')?.offsetParent !== null
+        tabNames: Array.from(allNavLinks).map(a => a.textContent.trim())
     };
     
     console.table(navSummary);
     
-    if (!navSummary.matrixTabExists) {
-        console.error('🔴 CRITICAL ISSUE: Matrix tab is completely missing from DOM!');
-        console.log('This suggests the template is not rendering correctly or being overridden.');
-    } else if (!navSummary.matrixTabVisible) {
-        console.error('🟠 WARNING: Matrix tab exists but is not visible!');
-        console.log('This suggests CSS or JavaScript is hiding the tab.');
+    // Check for Classes & Exams unified tab (replaces old Matrix tab)
+    const classesExamsTab = document.querySelector('a[data-nav="classes-exams"]');
+    if (classesExamsTab) {
+        console.log('🟢 SUCCESS: Classes & Exams unified tab found');
     } else {
-        console.log('🟢 SUCCESS: Matrix tab exists and is visible!');
+        console.warn('⚠️ Classes & Exams tab not found in navigation');
     }
     
     console.groupEnd();

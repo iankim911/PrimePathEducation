@@ -57,16 +57,22 @@ class SessionService:
         )
         
         # Create answer placeholders for all questions
-        questions = exam.routine_questions.all()
-        answer_objects = [
-            StudentAnswer(
-                session=session,
-                question=question,
-                answer=''
-            )
-            for question in questions
-        ]
-        StudentAnswer.objects.bulk_create(answer_objects)
+        from primepath_routinetest.models.exam_abstraction import ExamAbstraction
+        questions = ExamAbstraction.get_questions(exam)
+        logger.debug(f"[SESSION_SERVICE] Creating session for exam type: {type(exam).__name__}, questions: {questions.count()}")
+        
+        if questions and questions.exists():
+            answer_objects = [
+                StudentAnswer(
+                    session=session,
+                    question=question,
+                    answer=''
+                )
+                for question in questions
+            ]
+            StudentAnswer.objects.bulk_create(answer_objects)
+        else:
+            logger.warning(f"[SESSION_SERVICE] No questions found for exam {exam.name}")
         
         logger.info(
             f"Created session {session.id} for {student_data['student_name']}",
@@ -274,15 +280,21 @@ class SessionService:
         # Clear existing answers and create new ones
         session.answers.all().delete()
         
-        answer_objects = [
-            StudentAnswer(
-                session=session,
-                question=question,
-                answer=''
-            )
-            for question in new_exam.routine_questions.all()
-        ]
-        StudentAnswer.objects.bulk_create(answer_objects)
+        from primepath_routinetest.models.exam_abstraction import ExamAbstraction
+        questions = ExamAbstraction.get_questions(new_exam)
+        
+        if questions and questions.exists():
+            answer_objects = [
+                StudentAnswer(
+                    session=session,
+                    question=question,
+                    answer=''
+                )
+                for question in questions
+            ]
+            StudentAnswer.objects.bulk_create(answer_objects)
+        else:
+            logger.warning(f"[SESSION_SERVICE] No questions found for adjusted exam {new_exam.name}")
         
         logger.info(
             f"Adjusted difficulty for session {session.id}: "
