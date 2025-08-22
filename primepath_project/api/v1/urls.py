@@ -18,7 +18,7 @@ router.register(r'sessions', StudentSessionViewSet)
 router.register(r'schools', SchoolViewSet)
 router.register(r'programs', ProgramViewSet)
 
-app_name = 'api_v1'
+app_name = 'core_api_v1'
 
 urlpatterns = [
     # Router URLs

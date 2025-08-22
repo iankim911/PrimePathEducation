@@ -720,8 +720,9 @@ def classes_exams_unified_view(request):
         context['classes_info'] = classes_info
         context['my_assignments'] = my_assignments
         
-        # SECTION 5: Pending access requests (for regular teachers)
+        # SECTION 5: Pending access requests
         if not is_admin and teacher:
+            # For teachers - their own pending requests
             pending_requests = ClassAccessRequest.objects.filter(
                 teacher=teacher,
                 status='PENDING'
@@ -729,6 +730,15 @@ def classes_exams_unified_view(request):
             context['pending_requests_count'] = pending_requests
         else:
             context['pending_requests_count'] = 0
+        
+        # For admins - all pending requests to approve
+        if is_admin:
+            admin_pending_requests = ClassAccessRequest.objects.filter(
+                status='PENDING'
+            ).count()
+            context['admin_pending_requests_count'] = admin_pending_requests
+        else:
+            context['admin_pending_requests_count'] = 0
         
         # Add view mode information to context
         view_mode = request.session.get('view_mode', 'Teacher')

@@ -102,11 +102,11 @@ def login_view(request):
                 
                 messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
                 
-                # Redirect to next or default
+                # Redirect to next or default (application chooser page)
                 next_url = request.POST.get('next', request.GET.get('next', '/'))
                 if next_url and next_url != '/accounts/login/':
                     return redirect(next_url)
-                return redirect('core:dashboard')
+                return redirect('/')
             else:
                 # Account inactive
                 console_log = {
@@ -200,14 +200,14 @@ def logout_view(request):
     # Log the redirect
     console_log = {
         "view": "logout_view",
-        "action": "redirecting_to_login",
+        "action": "redirecting_to_app_chooser",
         "from_user": username,
         "timestamp": datetime.now().isoformat()
     }
     logger.info(f"[AUTH_LOGOUT_REDIRECT] {json.dumps(console_log)}")
     print(f"[AUTH_LOGOUT_REDIRECT] {json.dumps(console_log)}")
     
-    return redirect('core:login')
+    return redirect('/')
 
 
 @login_required

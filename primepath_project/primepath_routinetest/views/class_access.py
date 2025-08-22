@@ -437,13 +437,33 @@ def check_admin_access(user, class_code):
 @login_required
 @require_POST
 def request_access(request):
-    """Request access to a class"""
+    """Request access to a class - handles both JSON and form data"""
     try:
-        data = json.loads(request.body)
+        # Handle both JSON and form data
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            # Form data from frontend
+            data = {
+                'class_code': request.POST.get('class_code'),
+                'requested_access_level': request.POST.get('requested_access_level'),
+                'reason': request.POST.get('reason'),
+                'notes': request.POST.get('notes', '')
+            }
+        
         class_code = data.get('class_code')
+        access_level = data.get('requested_access_level', 'FULL')
+        reason = data.get('reason')
+        notes = data.get('notes', '')
         
         if not class_code:
             return JsonResponse({'success': False, 'error': 'Class code required'})
+        
+        if not access_level:
+            return JsonResponse({'success': False, 'error': 'Access level required'})
+            
+        if not reason:
+            return JsonResponse({'success': False, 'error': 'Reason required'})
         
         # Check if admin (admins don't need to request)
         is_admin, teacher = is_admin_or_head_teacher(request.user)
@@ -472,12 +492,14 @@ def request_access(request):
         ).exists():
             return JsonResponse({'success': False, 'error': 'Request already pending'})
         
-        # Create request
+        # Create request with full details
         access_request = ClassAccessRequest.objects.create(
             teacher=teacher,
             class_code=class_code,
-            status='PENDING',
-            requested_reason=data.get('reason', 'Access requested via web interface')
+            requested_access_level=access_level,
+            reason=reason,
+            notes=notes,
+            status='PENDING'
         )
         
         # Log the request
@@ -489,8 +511,9 @@ def request_access(request):
         
         return JsonResponse({
             'success': True,
-            'message': 'Access request submitted',
-            'request_id': access_request.id
+            'message': 'Access request submitted successfully',
+            'request_id': str(access_request.id),
+            'refresh_page': True  # Signal frontend to refresh to show pending count
         })
         
     except Exception as e:

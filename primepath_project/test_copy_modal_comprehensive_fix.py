@@ -1,644 +1,294 @@
 #!/usr/bin/env python3
 """
-Comprehensive Test for Copy Exam Modal Program Dropdown Fix
-Tests the complete flow from backend curriculum data to frontend JavaScript
+COMPREHENSIVE QA TEST: Copy Exam Modal Program Dropdown Fix
+==========================================================
+
+This script tests the complete fix for the Copy Exam modal Program dropdown
+that was not populating with CORE, ASCENT, EDGE, PINNACLE options.
+
+Test Coverage:
+1. Backend enhanced curriculum method
+2. Data structure validation
+3. JSON serialization 
+4. Frontend data integration readiness
+5. Complete data flow verification
+
+Run: python test_copy_modal_comprehensive_fix.py
 """
 
 import os
 import sys
 import django
 import json
+from datetime import datetime
 
-# Setup Django environment
-sys.path.append('/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project')
+# Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqlite')
 django.setup()
 
 from primepath_routinetest.services.exam_service import ExamService
-from django.template import Template, Context
-from django.template.loader import render_to_string
 
-def test_backend_curriculum_data():
-    """Test 1: Verify backend curriculum data generation"""
-    print("=== TEST 1: Backend Curriculum Data Generation ===")
+def run_comprehensive_tests():
+    """Run all comprehensive tests for the Copy Exam modal fix"""
     
-    # Test the individual levels method (legacy)
-    curriculum_levels = ExamService.get_routinetest_curriculum_levels()
-    print(f"✅ Individual levels method returned: {len(curriculum_levels)} items")
+    print("=" * 80)
+    print("COMPREHENSIVE QA TEST: Copy Exam Modal Program Dropdown Fix")
+    print("=" * 80)
+    print(f"Test started at: {datetime.now().isoformat()}")
+    print()
     
-    # Test the new hierarchy method
-    curriculum_hierarchy = ExamService.get_routinetest_curriculum_hierarchy()
-    print(f"✅ Hierarchy method returned: {len(curriculum_hierarchy)} programs")
-    print(f"Programs: {list(curriculum_hierarchy.keys())}")
+    test_results = {
+        'total_tests': 0,
+        'passed': 0,
+        'failed': 0,
+        'errors': []
+    }
     
-    # Verify structure
-    for program, program_data in curriculum_hierarchy.items():
-        subprograms = list(program_data['subprograms'].keys())
-        total_levels = sum(len(sub['levels']) for sub in program_data['subprograms'].values())
-        print(f"  {program}: {len(subprograms)} subprograms, {total_levels} levels")
-    
-    return curriculum_hierarchy
-
-def test_json_serialization(curriculum_hierarchy):
-    """Test 2: Verify JSON serialization works for template"""
-    print("\n=== TEST 2: JSON Serialization for Template ===")
+    # Test 1: Enhanced Backend Method
+    print("🧪 TEST 1: Enhanced Backend Method")
+    print("-" * 50)
     
     try:
-        json_str = json.dumps(curriculum_hierarchy)
-        parsed_back = json.loads(json_str)
-        print(f"✅ JSON serialization successful")
-        print(f"JSON length: {len(json_str)} characters")
-        print(f"Sample: {json_str[:100]}...")
+        test_results['total_tests'] += 1
+        enhanced_data = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()
         
-        # Verify structure after serialization
-        assert parsed_back.keys() == curriculum_hierarchy.keys()
-        print("✅ Structure integrity maintained after JSON serialization")
+        # Validate structure
+        assert 'curriculum_data' in enhanced_data, "Missing curriculum_data"
+        assert 'metadata' in enhanced_data, "Missing metadata"
+        assert 'validation' in enhanced_data, "Missing validation"
+        assert 'debug_info' in enhanced_data, "Missing debug_info"
         
-        return json_str
+        print(f"   ✅ Enhanced method returned proper structure")
+        print(f"   ✅ Version: {enhanced_data['metadata']['version']}")
+        print(f"   ✅ Validation passed: {enhanced_data['validation']['is_valid']}")
+        print(f"   ✅ JSON serializable: {enhanced_data['debug_info']['json_serializable']}")
+        
+        test_results['passed'] += 1
         
     except Exception as e:
-        print(f"❌ JSON serialization failed: {e}")
-        return None
-
-def create_test_file():
-    """Create a test HTML file to manually verify the fix"""
-    print("\n=== Creating Test HTML File ===")
+        test_results['failed'] += 1
+        test_results['errors'].append(f"Test 1 failed: {e}")
+        print(f"   ❌ FAILED: {e}")
     
-    curriculum_hierarchy = ExamService.get_routinetest_curriculum_hierarchy()
+    print()
     
-    test_html = f"""<!DOCTYPE html>
-<html>
-<head>
-    <title>Copy Exam Modal Test - Comprehensive Fix</title>
-    <style>
-        .modal {{ display: none; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000; }}
-        .modal.show {{ display: flex; align-items: center; justify-content: center; }}
-        .modal-content {{ background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }}
-        .form-group {{ margin: 20px 0; }}
-        .form-group label {{ display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50; }}
-        .form-group select {{ width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }}
-        .form-group select:disabled {{ background-color: #f5f5f5; cursor: not-allowed; }}
-        button {{ padding: 12px 24px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }}
-        .btn-primary {{ background: #007bff; color: white; }}
-        .btn-primary:hover {{ background: #0056b3; }}
-        .btn-secondary {{ background: #6c757d; color: white; }}
-        .btn-secondary:hover {{ background: #545b62; }}
-        .test-controls {{ margin-bottom: 20px; }}
-        .test-results {{ background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; }}
-        h1, h2 {{ color: #2c3e50; }}
-        .status {{ padding: 5px 10px; border-radius: 3px; font-size: 12px; }}
-        .status.success {{ background: #d4edda; color: #155724; }}
-        .status.error {{ background: #f8d7da; color: #721c24; }}
-        .status.warning {{ background: #fff3cd; color: #856404; }}
-    </style>
-</head>
-<body>
-    <h1>🎯 Copy Exam Modal - Comprehensive Fix Test</h1>
-    
-    <div class="test-controls">
-        <h2>Test Controls</h2>
-        <button onclick="runFullTest()" class="btn-primary">🧪 Run Full Test</button>
-        <button onclick="openTestModal()" class="btn-primary">📋 Open Copy Modal</button>
-        <button onclick="testCurriculumLoad()" class="btn-secondary">📊 Test Curriculum Load</button>
-        <button onclick="clearConsole()" class="btn-secondary">🧹 Clear Console</button>
-    </div>
-    
-    <div class="test-results">
-        <h3>Test Results</h3>
-        <div id="testResults">
-            Click "Run Full Test" to start comprehensive testing
-        </div>
-    </div>
-
-    <!-- Copy Exam Modal -->
-    <div id="copyExamModal" class="modal">
-        <div class="modal-content">
-            <h3>📋 Copy Exam to Another Class</h3>
-            <form id="copyExamForm">
-                <input type="hidden" id="sourceExamId" value="test-exam-123">
-                
-                <div class="form-group">
-                    <label>Source Exam:</label>
-                    <p id="sourceExamName" style="font-weight: 600; color: #2c3e50;">Test Exam - CORE Elite Level 1</p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="copyProgramSelect">Program: <span class="status" id="programStatus">Not Loaded</span></label>
-                    <select id="copyProgramSelect" name="program_select" required>
-                        <option value="">-- Select Program --</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="copySubprogramSelect">SubProgram: <span class="status" id="subprogramStatus">Disabled</span></label>
-                    <select id="copySubprogramSelect" name="subprogram_select" required disabled>
-                        <option value="">-- Select SubProgram --</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="copyLevelSelect">Level: <span class="status" id="levelStatus">Disabled</span></label>
-                    <select id="copyLevelSelect" name="level_select" required disabled>
-                        <option value="">-- Select Level --</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="copyExamType">Exam Type:</label>
-                    <select id="copyExamType" name="exam_type" required>
-                        <option value="">-- Select Type --</option>
-                        <option value="REVIEW">Review (Monthly)</option>
-                        <option value="QUARTERLY">Quarterly</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="timeslot">Time Period:</label>
-                    <select id="timeslot" name="timeslot" required disabled>
-                        <option value="">First select exam type...</option>
-                    </select>
-                </div>
-                
-                <div style="text-align: right; margin-top: 30px;">
-                    <button type="button" onclick="closeTestModal()" class="btn-secondary">Cancel</button>
-                    <button type="button" onclick="testCopySubmit()" class="btn-primary">Test Copy Process</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- JSON data script (simulates Django template output) -->
-    <script id="copy-curriculum-hierarchy-data" type="application/json">
-    {json.dumps(curriculum_hierarchy)}
-    </script>
-
-    <script>
-    // Global test state
-    window.TestState = {{
-        curriculumLoaded: false,
-        programsPopulated: false,
-        cascadingWorks: false,
-        testResults: []
-    }};
-
-    console.log('🚀 Copy Exam Modal Comprehensive Fix Test - Starting...');
-    
-    // Initialize curriculum data from JSON script (mimics Django template)
-    const curriculumScriptElement = document.getElementById('copy-curriculum-hierarchy-data');
-    if (curriculumScriptElement) {{
-        window.CopyCurriculumData = JSON.parse(curriculumScriptElement.textContent);
-        window.CopyCurriculumDataReady = true;
-        window.TestState.curriculumLoaded = true;
-        
-        console.log('✅ Curriculum data loaded from JSON script');
-        console.log('Programs available:', Object.keys(window.CopyCurriculumData));
-        console.log('Total programs:', Object.keys(window.CopyCurriculumData).length);
-        
-        // Detailed structure logging
-        Object.keys(window.CopyCurriculumData).forEach(program => {{
-            const subprograms = Object.keys(window.CopyCurriculumData[program].subprograms);
-            const totalLevels = Object.values(window.CopyCurriculumData[program].subprograms)
-                .reduce((total, sub) => total + sub.levels.length, 0);
-            console.log(`  ${{program}}: ${{subprograms.length}} subprograms, ${{totalLevels}} levels`);
-        }});
-        
-    }} else {{
-        console.error('❌ Failed to load curriculum hierarchy data from script element');
-        window.CopyCurriculumData = null;
-        window.CopyCurriculumDataReady = false;
-    }}
-
-    // Enhanced populateCopyProgramDropdown function (matches template version)
-    function populateCopyProgramDropdown() {{
-        console.group('[COPY_CURRICULUM] populateCopyProgramDropdown() - COMPREHENSIVE FIX');
-        
-        const programSelect = document.getElementById('copyProgramSelect');
-        const programStatus = document.getElementById('programStatus');
-        
-        // Enhanced debugging information
-        console.log('[COPY_CURRICULUM] Function called at:', new Date().toISOString());
-        console.log('[COPY_CURRICULUM] DOM ready state:', document.readyState);
-        console.log('[COPY_CURRICULUM] programSelect element:', !!programSelect);
-        console.log('[COPY_CURRICULUM] programSelect visible:', programSelect ? window.getComputedStyle(programSelect).display !== 'none' : 'N/A');
-        console.log('[COPY_CURRICULUM] window.CopyCurriculumData exists:', !!window.CopyCurriculumData);
-        console.log('[COPY_CURRICULUM] window.CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
-        
-        if (!programSelect) {{
-            console.error('[COPY_CURRICULUM] ❌ copyProgramSelect element not found in DOM!');
-            programStatus.textContent = 'Element Not Found';
-            programStatus.className = 'status error';
-            console.groupEnd();
-            return false;
-        }}
-        
-        if (!window.CopyCurriculumData) {{
-            console.error('[COPY_CURRICULUM] ❌ No curriculum data available!');
-            programStatus.textContent = 'No Data';
-            programStatus.className = 'status error';
-            console.groupEnd();
-            return false;
-        }}
-        
-        console.log('[COPY_CURRICULUM] 🔄 Starting program dropdown population...');
-        console.log('[COPY_CURRICULUM] Available programs:', Object.keys(window.CopyCurriculumData));
-        
-        // Clear existing options except the first
-        const initialHTML = '<option value="">-- Select Program --</option>';
-        programSelect.innerHTML = initialHTML;
-        console.log('[COPY_CURRICULUM] Reset dropdown to initial state');
-        
-        // Add programs with enhanced error handling
-        let optionsAdded = 0;
-        try {{
-            Object.keys(window.CopyCurriculumData).forEach(program => {{
-                const option = document.createElement('option');
-                option.value = program;
-                option.textContent = program;
-                
-                // Additional attributes for debugging
-                option.setAttribute('data-subprogram-count', Object.keys(window.CopyCurriculumData[program].subprograms).length);
-                
-                programSelect.appendChild(option);
-                optionsAdded++;
-                console.log(`[COPY_CURRICULUM] ➕ Added option: "${{program}}" (${{Object.keys(window.CopyCurriculumData[program].subprograms).length}} subprograms)`);
-            }});
-            
-            console.log('[COPY_CURRICULUM] ✅ Successfully added', optionsAdded, 'program options');
-            console.log('[COPY_CURRICULUM] Final options count:', programSelect.options.length);
-            console.log('[COPY_CURRICULUM] Options array:', Array.from(programSelect.options).map(opt => opt.textContent));
-            
-            // Update status
-            programStatus.textContent = `${{optionsAdded}} Programs Loaded`;
-            programStatus.className = 'status success';
-            window.TestState.programsPopulated = true;
-            
-            console.log('[COPY_CURRICULUM] 🎉 Program dropdown populated successfully');
-            console.groupEnd();
-            return true;
-            
-        }} catch (error) {{
-            console.error('[COPY_CURRICULUM] ❌ Error during option creation:', error);
-            console.error('[COPY_CURRICULUM] Stack trace:', error.stack);
-            
-            // Restore initial state on error
-            programSelect.innerHTML = initialHTML;
-            programStatus.textContent = 'Population Failed';
-            programStatus.className = 'status error';
-            console.log('[COPY_CURRICULUM] Restored initial state after error');
-            console.groupEnd();
-            return false;
-        }}
-    }}
-
-    // Cascading dropdown functionality with status updates
-    function setupCascadingDropdowns() {{
-        const programSelect = document.getElementById('copyProgramSelect');
-        const subprogramSelect = document.getElementById('copySubprogramSelect');
-        const levelSelect = document.getElementById('copyLevelSelect');
-        const subprogramStatus = document.getElementById('subprogramStatus');
-        const levelStatus = document.getElementById('levelStatus');
-        
-        programSelect.addEventListener('change', function() {{
-            const program = this.value;
-            console.log('[CASCADE] Program changed to:', program);
-            
-            // Clear dependent dropdowns
-            subprogramSelect.innerHTML = '<option value="">-- Select SubProgram --</option>';
-            levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
-            subprogramSelect.disabled = !program;
-            levelSelect.disabled = true;
-            
-            if (program && window.CopyCurriculumData[program]) {{
-                const subprograms = window.CopyCurriculumData[program].subprograms;
-                Object.keys(subprograms).forEach(subprogram => {{
-                    const option = document.createElement('option');
-                    option.value = subprogram;
-                    option.textContent = subprogram;
-                    subprogramSelect.appendChild(option);
-                }});
-                
-                subprogramStatus.textContent = `${{Object.keys(subprograms).length}} SubPrograms`;
-                subprogramStatus.className = 'status success';
-                console.log('[CASCADE] ✅ Populated', Object.keys(subprograms).length, 'subprograms for', program);
-            }} else {{
-                subprogramStatus.textContent = 'Disabled';
-                subprogramStatus.className = 'status warning';
-            }}
-            
-            levelStatus.textContent = 'Disabled';
-            levelStatus.className = 'status warning';
-        }});
-
-        subprogramSelect.addEventListener('change', function() {{
-            const program = programSelect.value;
-            const subprogram = this.value;
-            console.log('[CASCADE] SubProgram changed to:', subprogram);
-            
-            levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
-            levelSelect.disabled = !subprogram;
-            
-            if (program && subprogram && window.CopyCurriculumData[program]?.subprograms[subprogram]) {{
-                const levels = window.CopyCurriculumData[program].subprograms[subprogram].levels;
-                levels.forEach(level => {{
-                    const option = document.createElement('option');
-                    option.value = level.id;
-                    option.textContent = `Level ${{level.number}}`;
-                    levelSelect.appendChild(option);
-                }});
-                
-                levelStatus.textContent = `${{levels.length}} Levels`;
-                levelStatus.className = 'status success';
-                window.TestState.cascadingWorks = true;
-                console.log('[CASCADE] ✅ Populated', levels.length, 'levels for', program, subprogram);
-            }} else {{
-                levelStatus.textContent = 'Disabled';
-                levelStatus.className = 'status warning';
-            }}
-        }});
-        
-        // Exam type cascading
-        const examTypeSelect = document.getElementById('copyExamType');
-        const timeslotSelect = document.getElementById('timeslot');
-        
-        examTypeSelect.addEventListener('change', function() {{
-            const examType = this.value;
-            console.log('[CASCADE] Exam type changed to:', examType);
-            
-            timeslotSelect.disabled = false;
-            timeslotSelect.innerHTML = '<option value="">Select time period...</option>';
-            
-            if (examType === 'QUARTERLY') {{
-                const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-                quarters.forEach(q => {{
-                    const option = document.createElement('option');
-                    option.value = q;
-                    option.textContent = `Quarter ${{q.substring(1)}}`;
-                    timeslotSelect.appendChild(option);
-                }});
-            }} else if (examType === 'REVIEW') {{
-                const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-                months.forEach(month => {{
-                    const option = document.createElement('option');
-                    option.value = month;
-                    option.textContent = month;
-                    timeslotSelect.appendChild(option);
-                }});
-            }}
-        }});
-    }}
-
-    // Test functions
-    function runFullTest() {{
-        console.log('🧪 Running comprehensive test...');
-        const results = [];
-        
-        // Test 1: Curriculum data loading
-        const dataTest = window.CopyCurriculumData && window.CopyCurriculumDataReady;
-        results.push({{
-            test: 'Curriculum Data Loading',
-            passed: dataTest,
-            details: dataTest ? `${{Object.keys(window.CopyCurriculumData).length}} programs loaded` : 'No data available'
-        }});
-        
-        // Test 2: Program dropdown population
-        const populationResult = populateCopyProgramDropdown();
-        results.push({{
-            test: 'Program Dropdown Population',
-            passed: populationResult,
-            details: populationResult ? `Programs: ${{Object.keys(window.CopyCurriculumData).join(', ')}}` : 'Population failed'
-        }});
-        
-        // Test 3: DOM elements present
-        const elementsPresent = ['copyProgramSelect', 'copySubprogramSelect', 'copyLevelSelect', 'copyExamType', 'timeslot']
-            .every(id => document.getElementById(id));
-        results.push({{
-            test: 'Required DOM Elements',
-            passed: elementsPresent,
-            details: elementsPresent ? 'All elements found' : 'Missing elements'
-        }});
-        
-        // Test 4: Cascading functionality
-        const cascadingTest = testCascading();
-        results.push(cascadingTest);
-        
-        // Display results
-        displayTestResults(results);
-        
-        const allPassed = results.every(r => r.passed);
-        console.log(allPassed ? '🎉 ALL TESTS PASSED!' : '❌ Some tests failed');
-        
-        return allPassed;
-    }}
-    
-    function testCascading() {{
-        const programSelect = document.getElementById('copyProgramSelect');
-        const subprogramSelect = document.getElementById('copySubprogramSelect');
-        
-        if (programSelect.options.length <= 1) {{
-            return {{ test: 'Cascading Functionality', passed: false, details: 'No programs to test with' }};
-        }}
-        
-        // Simulate selecting first program
-        programSelect.value = programSelect.options[1].value;
-        programSelect.dispatchEvent(new Event('change'));
-        
-        setTimeout(() => {{
-            const hasSubprograms = subprogramSelect.options.length > 1;
-            console.log('[TEST] Cascading test - subprograms populated:', hasSubprograms);
-        }}, 100);
-        
-        return {{ test: 'Cascading Functionality', passed: true, details: 'Cascade events set up successfully' }};
-    }}
-    
-    function testCurriculumLoad() {{
-        console.log('📊 Testing curriculum data structure...');
-        
-        if (!window.CopyCurriculumData) {{
-            console.error('❌ No curriculum data available');
-            return false;
-        }}
-        
-        console.table(Object.keys(window.CopyCurriculumData).map(program => ({{
-            Program: program,
-            SubPrograms: Object.keys(window.CopyCurriculumData[program].subprograms).length,
-            TotalLevels: Object.values(window.CopyCurriculumData[program].subprograms)
-                .reduce((total, sub) => total + sub.levels.length, 0)
-        }})));
-        
-        return true;
-    }}
-    
-    function displayTestResults(results) {{
-        const resultsDiv = document.getElementById('testResults');
-        const timestamp = new Date().toLocaleTimeString();
-        
-        let html = `<h4>🧪 Test Results (${{timestamp}})</h4>`;
-        
-        results.forEach(result => {{
-            const icon = result.passed ? '✅' : '❌';
-            const statusClass = result.passed ? 'success' : 'error';
-            html += `
-                <div style="margin: 10px 0; padding: 10px; border-left: 4px solid ${{result.passed ? '#28a745' : '#dc3545'}}; background: ${{result.passed ? '#d4edda' : '#f8d7da'}};">
-                    <strong>${{icon}} ${{result.test}}</strong><br>
-                    <small>${{result.details}}</small>
-                </div>
-            `;
-        }});
-        
-        const passCount = results.filter(r => r.passed).length;
-        html += `<div style="text-align: center; margin-top: 20px; font-weight: bold; color: ${{passCount === results.length ? '#28a745' : '#dc3545'}};">
-            ${{passCount}}/${{results.length}} tests passed
-        </div>`;
-        
-        resultsDiv.innerHTML = html;
-    }}
-
-    // Modal control functions
-    function openTestModal() {{
-        const modal = document.getElementById('copyExamModal');
-        modal.classList.add('show');
-        
-        // Populate curriculum dropdown when modal opens
-        setTimeout(() => {{
-            populateCopyProgramDropdown();
-        }}, 100);
-    }}
-
-    function closeTestModal() {{
-        const modal = document.getElementById('copyExamModal');
-        modal.classList.remove('show');
-    }}
-
-    function testCopySubmit() {{
-        const formData = new FormData(document.getElementById('copyExamForm'));
-        const data = {{
-            source_exam_id: formData.get('source_exam_id') || document.getElementById('sourceExamId').value,
-            program: document.getElementById('copyProgramSelect').value,
-            subprogram: document.getElementById('copySubprogramSelect').value,
-            level: document.getElementById('copyLevelSelect').value,
-            exam_type: document.getElementById('copyExamType').value,
-            timeslot: document.getElementById('timeslot').value
-        }};
-        
-        console.log('🧪 Test copy submission data:', data);
-        
-        const missingFields = Object.entries(data).filter(([key, value]) => !value).map(([key]) => key);
-        
-        if (missingFields.length === 0) {{
-            console.log('✅ All fields populated - copy would succeed!');
-            alert(`✅ Copy Test Successful!\\n\\nWould copy: ${{data.source_exam_id}}\\nTo: ${{data.program}} ${{data.subprogram}} Level ${{data.level}}\\nAs: ${{data.exam_type}} - ${{data.timeslot}}`);
-        }} else {{
-            console.log('❌ Missing required fields:', missingFields);
-            alert(`❌ Missing fields: ${{missingFields.join(', ')}}\\n\\nPlease complete all dropdowns before testing copy.`);
-        }}
-    }}
-    
-    function clearConsole() {{
-        console.clear();
-        console.log('🧹 Console cleared - Copy Exam Modal Test Ready');
-    }}
-
-    // Auto-initialization
-    document.addEventListener('DOMContentLoaded', function() {{
-        console.log('🚀 Page loaded, setting up Copy Exam Modal test...');
-        
-        // Set up cascading dropdowns
-        setupCascadingDropdowns();
-        
-        // Auto-populate on load
-        if (typeof populateCopyProgramDropdown === 'function') {{
-            const result = populateCopyProgramDropdown();
-            
-            if (result) {{
-                console.log('🎉 AUTO-INITIALIZATION PASSED: Program dropdown populated successfully!');
-            }} else {{
-                console.error('❌ AUTO-INITIALIZATION FAILED: Program dropdown population failed');
-            }}
-        }}
-        
-        console.log('✨ Copy Exam Modal test environment ready');
-    }});
-    
-    // Global debug helpers
-    window.debugCopyModal = {{
-        testData: () => window.CopyCurriculumData,
-        testPopulate: () => populateCopyProgramDropdown(),
-        testCascade: testCascading,
-        runTests: runFullTest,
-        showState: () => console.log('Test State:', window.TestState)
-    }};
-    
-    console.log('🔧 Debug helpers available at: window.debugCopyModal');
-    </script>
-</body>
-</html>"""
-    
-    test_file_path = '/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/copy_exam_modal_comprehensive_test.html'
+    # Test 2: Curriculum Data Structure
+    print("🧪 TEST 2: Curriculum Data Structure Validation")
+    print("-" * 50)
     
     try:
-        with open(test_file_path, 'w', encoding='utf-8') as f:
-            f.write(test_html)
-        print(f"✅ Test file created: {test_file_path}")
-        return test_file_path
+        test_results['total_tests'] += 1
+        enhanced_data = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()
+        curriculum_data = enhanced_data['curriculum_data']
+        
+        # Test expected programs
+        expected_programs = ['CORE', 'ASCENT', 'EDGE', 'PINNACLE']
+        actual_programs = list(curriculum_data.keys())
+        
+        assert len(actual_programs) == 4, f"Expected 4 programs, got {len(actual_programs)}"
+        
+        for program in expected_programs:
+            assert program in actual_programs, f"Missing program: {program}"
+            assert 'subprograms' in curriculum_data[program], f"Program {program} missing subprograms"
+            assert 'meta' in curriculum_data[program], f"Program {program} missing meta"
+            
+            subprograms = curriculum_data[program]['subprograms']
+            assert len(subprograms) > 0, f"Program {program} has no subprograms"
+            
+            for subprogram, sub_data in subprograms.items():
+                assert 'levels' in sub_data, f"Subprogram {program}/{subprogram} missing levels"
+                assert 'meta' in sub_data, f"Subprogram {program}/{subprogram} missing meta"
+                assert len(sub_data['levels']) > 0, f"Subprogram {program}/{subprogram} has no levels"
+        
+        print(f"   ✅ All 4 programs present: {actual_programs}")
+        print(f"   ✅ All programs have proper structure")
+        
+        # Test level counts
+        total_levels = enhanced_data['validation']['total_levels']
+        print(f"   ✅ Total levels: {total_levels}")
+        
+        # Test individual program levels
+        for program in expected_programs:
+            level_count = curriculum_data[program]['meta']['total_levels']
+            subprogram_count = curriculum_data[program]['meta']['total_subprograms']
+            print(f"   ✅ {program}: {subprogram_count} subprograms, {level_count} levels")
+        
+        test_results['passed'] += 1
+        
     except Exception as e:
-        print(f"❌ Failed to create test file: {e}")
-        return None
-
-def main():
-    """Run comprehensive tests"""
-    print("🚀 Starting Comprehensive Copy Exam Modal Fix Test\n")
+        test_results['failed'] += 1
+        test_results['errors'].append(f"Test 2 failed: {e}")
+        print(f"   ❌ FAILED: {e}")
     
-    # Run backend tests
-    curriculum_hierarchy = test_backend_curriculum_data()
+    print()
     
-    if curriculum_hierarchy:
-        json_str = test_json_serialization(curriculum_hierarchy)
-        test_file = create_test_file()
+    # Test 3: JSON Serialization for Frontend
+    print("🧪 TEST 3: JSON Serialization for Frontend Integration")
+    print("-" * 50)
+    
+    try:
+        test_results['total_tests'] += 1
+        enhanced_data = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()
         
-        # Summary
-        print("\n" + "="*60)
-        print("🎯 COMPREHENSIVE TEST SUMMARY")
-        print("="*60)
-        print(f"✅ Backend Data Generation: PASSED ({len(curriculum_hierarchy)} programs)")
-        print(f"{'✅' if json_str else '❌'} JSON Serialization: {'PASSED' if json_str else 'FAILED'}")
-        print(f"{'✅' if test_file else '❌'} Test File Creation: {'PASSED' if test_file else 'FAILED'}")
+        # Test JSON serialization
+        json_str = json.dumps(enhanced_data)
+        assert len(json_str) > 1000, "JSON string too short"
         
-        if test_file:
-            print(f"\n🔗 MANUAL TEST FILE CREATED:")
-            print(f"file://{test_file}")
-            print("\n📋 TEST INSTRUCTIONS:")
-            print("1. Open the HTML file in a web browser")
-            print("2. Click 'Run Full Test' to verify all functionality")
-            print("3. Click 'Open Copy Modal' to test the modal interface")
-            print("4. Test the Program → SubProgram → Level cascading")
-            print("5. Check browser console for detailed logs")
+        # Test deserialization
+        deserialized = json.loads(json_str)
+        assert deserialized == enhanced_data, "Deserialization doesn't match original"
+        
+        print(f"   ✅ JSON serialization successful")
+        print(f"   ✅ JSON length: {len(json_str)} characters")
+        print(f"   ✅ Deserialization matches original")
+        
+        # Test frontend data extraction
+        curriculum_data = deserialized['curriculum_data']
+        program_keys = list(curriculum_data.keys())
+        
+        print(f"   ✅ Frontend can extract programs: {program_keys}")
+        
+        # Test subprogram extraction
+        for program in program_keys[:2]:  # Test first 2 programs
+            subprogram_keys = list(curriculum_data[program]['subprograms'].keys())
+            print(f"   ✅ {program} subprograms extractable: {subprogram_keys}")
+        
+        test_results['passed'] += 1
+        
+    except Exception as e:
+        test_results['failed'] += 1
+        test_results['errors'].append(f"Test 3 failed: {e}")
+        print(f"   ❌ FAILED: {e}")
+    
+    print()
+    
+    # Test 4: Frontend Integration Simulation
+    print("🧪 TEST 4: Frontend Integration Simulation")
+    print("-" * 50)
+    
+    try:
+        test_results['total_tests'] += 1
+        enhanced_data = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()
+        
+        # Simulate what frontend JavaScript will do
+        print("   🔄 Simulating frontend data processing...")
+        
+        # Step 1: Enhanced data structure loaded
+        has_data = bool(enhanced_data)
+        has_curriculum_data = bool(enhanced_data.get('curriculum_data'))
+        has_metadata = bool(enhanced_data.get('metadata'))
+        has_validation = bool(enhanced_data.get('validation'))
+        
+        print(f"   ✅ Enhanced data structure checks:")
+        print(f"      - hasData: {has_data}")
+        print(f"      - hasCurriculumData: {has_curriculum_data}")
+        print(f"      - hasMetadata: {has_metadata}")
+        print(f"      - hasValidation: {has_validation}")
+        
+        # Step 2: Extract curriculum data (what template will do)
+        if enhanced_data.get('curriculum_data'):
+            curriculum_data = enhanced_data['curriculum_data']
+            programs = list(curriculum_data.keys())
             
-        # Detailed program breakdown
-        print(f"\n📊 CURRICULUM DATA BREAKDOWN:")
-        for program, program_data in curriculum_hierarchy.items():
-            subprograms = list(program_data['subprograms'].keys())
-            total_levels = sum(len(sub['levels']) for sub in program_data['subprograms'].values())
-            print(f"  {program}: {len(subprograms)} subprograms, {total_levels} levels")
-            for subprogram, sub_data in program_data['subprograms'].items():
-                levels = [f"Lv{level['number']}" for level in sub_data['levels']]
-                print(f"    └─ {subprogram}: {levels}")
+            print(f"   ✅ Curriculum data extraction successful")
+            print(f"      - Available programs: {programs}")
+            print(f"      - Total programs: {len(programs)}")
             
-        # Final recommendation
-        all_passed = all([curriculum_hierarchy, json_str, test_file])
-        if all_passed:
-            print("\n🎉 ALL TESTS PASSED! The Copy Exam modal fix is ready for deployment.")
-            print("\n✨ KEY IMPROVEMENTS IMPLEMENTED:")
-            print("   • Enhanced backend curriculum hierarchy generation")
-            print("   • Improved JSON serialization for frontend")
-            print("   • Comprehensive error handling and logging")
-            print("   • Robust dropdown population with fallbacks")
-            print("   • Complete cascading functionality")
-            print("   • Detailed debugging and test capabilities")
+            # Step 3: Simulate dropdown population
+            dropdown_options = []
+            for program in programs:
+                dropdown_options.append({
+                    'value': program,
+                    'text': program,
+                    'subprograms': len(curriculum_data[program]['subprograms'])
+                })
+            
+            print(f"   ✅ Dropdown options generated:")
+            for option in dropdown_options:
+                print(f"      - {option['text']}: {option['subprograms']} subprograms")
+        
+        # Step 4: Validation checks
+        validation = enhanced_data.get('validation', {})
+        if validation.get('is_valid') and len(programs) == 4:
+            print(f"   ✅ ALL VALIDATIONS PASSED - DATA READY FOR FRONTEND")
         else:
-            print("\n⚠️  Some tests failed. Check the errors above before deploying.")
-            
+            raise Exception(f"Validation failed: {validation.get('validation_errors')}")
+        
+        test_results['passed'] += 1
+        
+    except Exception as e:
+        test_results['failed'] += 1
+        test_results['errors'].append(f"Test 4 failed: {e}")
+        print(f"   ❌ FAILED: {e}")
+    
+    print()
+    
+    # Test 5: Legacy Method Compatibility
+    print("🧪 TEST 5: Legacy Method Compatibility")
+    print("-" * 50)
+    
+    try:
+        test_results['total_tests'] += 1
+        
+        # Test old method still works
+        old_hierarchy = ExamService.get_routinetest_curriculum_hierarchy()
+        old_levels = ExamService.get_routinetest_curriculum_levels()
+        
+        assert len(old_hierarchy) == 4, "Legacy hierarchy method broken"
+        assert len(old_levels) == 41, "Legacy levels method broken"
+        
+        print(f"   ✅ Legacy hierarchy method: {len(old_hierarchy)} programs")
+        print(f"   ✅ Legacy levels method: {len(old_levels)} levels")
+        
+        # Test enhanced method data matches legacy
+        enhanced_data = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()
+        enhanced_programs = set(enhanced_data['curriculum_data'].keys())
+        legacy_programs = set(old_hierarchy.keys())
+        
+        assert enhanced_programs == legacy_programs, "Enhanced and legacy programs don't match"
+        
+        print(f"   ✅ Enhanced and legacy methods have same programs")
+        print(f"   ✅ Backward compatibility maintained")
+        
+        test_results['passed'] += 1
+        
+    except Exception as e:
+        test_results['failed'] += 1
+        test_results['errors'].append(f"Test 5 failed: {e}")
+        print(f"   ❌ FAILED: {e}")
+    
+    print()
+    
+    # Print Results Summary
+    print("=" * 80)
+    print("TEST RESULTS SUMMARY")
+    print("=" * 80)
+    
+    print(f"Total Tests: {test_results['total_tests']}")
+    print(f"✅ Passed: {test_results['passed']}")
+    print(f"❌ Failed: {test_results['failed']}")
+    
+    if test_results['failed'] == 0:
+        print("\n🎉 ALL TESTS PASSED! 🎉")
+        print("Copy Exam Modal Program Dropdown fix is READY for production!")
+        print("\nExpected behavior:")
+        print("1. Copy Exam modal will show 4 programs: CORE, ASCENT, EDGE, PINNACLE")
+        print("2. Each program will have appropriate subprograms")
+        print("3. Each subprogram will have correct levels")
+        print("4. Comprehensive debugging logs will be available")
+        print("5. Fallback mechanisms will handle edge cases")
     else:
-        print("\n❌ Backend data generation failed. Cannot proceed with other tests.")
+        print("\n⚠️  SOME TESTS FAILED")
+        print("Errors encountered:")
+        for error in test_results['errors']:
+            print(f"  - {error}")
+    
+    print()
+    print(f"Test completed at: {datetime.now().isoformat()}")
+    print("=" * 80)
+    
+    return test_results['failed'] == 0
 
 if __name__ == "__main__":
-    main()
+    success = run_comprehensive_tests()
+    sys.exit(0 if success else 1)

@@ -2310,28 +2310,83 @@ function initializeCopyExamEventListeners() {
 window.CopyCurriculumData = null;
 window.CopyCurriculumDataReady = false;
 
-// Initialize curriculum data from Django context - IMPROVED VERSION
+// COMPREHENSIVE FIX: Initialize enhanced curriculum data from Django context
+console.group('%c🔍 COPY MODAL CURRICULUM DEBUG - TEMPLATE ANALYSIS', 'color: #ff6b35; font-size: 16px; font-weight: bold;');
+console.log('%c[TEMPLATE_DEBUG] Template rendering started at:', 'color: #0066cc;', new Date().toISOString());
+console.log('%c[TEMPLATE_DEBUG] Django template context evaluation:', 'color: #0066cc;');
+console.log('  - curriculum_hierarchy_for_copy available: {{ curriculum_hierarchy_for_copy|yesno:"YES,NO" }}');
+console.log('  - curriculum_levels_for_copy available: {{ curriculum_levels_for_copy|yesno:"YES,NO" }}');
+
 {% if curriculum_hierarchy_for_copy %}
-// Use structured hierarchy data from Django
-console.log('[COPY_CURRICULUM] Loading hierarchical curriculum data from Django backend...');
+// Use ENHANCED structured hierarchy data from Django backend
+console.log('%c[COPY_CURRICULUM_FIX] ✅ curriculum_hierarchy_for_copy IS AVAILABLE from Django backend', 'color: #00aa00; font-weight: bold;');
+console.log('[COPY_CURRICULUM_FIX] Loading ENHANCED hierarchical curriculum data from Django backend...');
 {{ curriculum_hierarchy_for_copy|json_script:"copy-curriculum-hierarchy-data" }}
 const curriculumScriptElement = document.getElementById('copy-curriculum-hierarchy-data');
 if (curriculumScriptElement) {
-    window.CopyCurriculumData = JSON.parse(curriculumScriptElement.textContent);
-    window.CopyCurriculumDataReady = true;
-    
-    console.log('[COPY_CURRICULUM] ✅ Loaded curriculum data from Django hierarchy:', Object.keys(window.CopyCurriculumData));
-    console.log('[COPY_CURRICULUM] Total programs loaded:', Object.keys(window.CopyCurriculumData).length);
-    console.log('[COPY_CURRICULUM] Program structure validation:');
-    Object.keys(window.CopyCurriculumData).forEach(program => {
-        const subprograms = Object.keys(window.CopyCurriculumData[program].subprograms);
-        console.log(`[COPY_CURRICULUM]   ${program}: ${subprograms.length} subprograms (${subprograms.join(', ')})`);
-    });
+    try {
+        const enhancedData = JSON.parse(curriculumScriptElement.textContent);
+        
+        // COMPREHENSIVE FIX: Handle enhanced data structure with validation
+        console.group('[COPY_CURRICULUM_FIX] Processing Enhanced Curriculum Data');
+        console.log('[COPY_CURRICULUM_FIX] Enhanced data structure loaded:', {
+            hasData: !!enhancedData,
+            hasCurriculumData: !!enhancedData.curriculum_data,
+            hasMetadata: !!enhancedData.metadata,
+            hasValidation: !!enhancedData.validation,
+            version: enhancedData.metadata?.version
+        });
+        
+        if (enhancedData.curriculum_data) {
+            // Extract the actual curriculum data from the enhanced structure
+            window.CopyCurriculumData = enhancedData.curriculum_data;
+            window.CopyCurriculumDataReady = true;
+            window.CopyCurriculumMetadata = enhancedData.metadata;
+            window.CopyCurriculumValidation = enhancedData.validation;
+            window.CopyCurriculumDebugInfo = enhancedData.debug_info;
+            
+            console.log('[COPY_CURRICULUM_FIX] ✅ Successfully extracted curriculum data from enhanced structure');
+            console.log('[COPY_CURRICULUM_FIX] Available programs:', Object.keys(window.CopyCurriculumData));
+            console.log('[COPY_CURRICULUM_FIX] Total programs loaded:', Object.keys(window.CopyCurriculumData).length);
+            console.log('[COPY_CURRICULUM_FIX] Data version:', enhancedData.metadata?.version);
+            console.log('[COPY_CURRICULUM_FIX] Validation passed:', enhancedData.validation?.is_valid);
+            console.log('[COPY_CURRICULUM_FIX] Total levels:', enhancedData.validation?.total_levels);
+            
+            // Detailed program structure validation
+            console.log('[COPY_CURRICULUM_FIX] Program structure validation:');
+            Object.keys(window.CopyCurriculumData).forEach(program => {
+                const programData = window.CopyCurriculumData[program];
+                const subprograms = Object.keys(programData.subprograms || {});
+                const meta = programData.meta || {};
+                console.log(`[COPY_CURRICULUM_FIX]   ${program}: ${subprograms.length} subprograms, ${meta.total_levels || 0} levels`);
+                console.log(`[COPY_CURRICULUM_FIX]     Subprograms: ${subprograms.join(', ')}`);
+            });
+            
+            // Test if data is valid for frontend use
+            if (enhancedData.validation?.is_valid && Object.keys(window.CopyCurriculumData).length === 4) {
+                console.log('[COPY_CURRICULUM_FIX] ✅✅✅ ALL VALIDATIONS PASSED - DATA READY FOR FRONTEND');
+            } else {
+                console.warn('[COPY_CURRICULUM_FIX] ⚠️ Data validation concerns:', enhancedData.validation?.validation_errors);
+            }
+        } else {
+            console.error('[COPY_CURRICULUM_FIX] ❌ Enhanced data missing curriculum_data property');
+            console.log('[COPY_CURRICULUM_FIX] Available properties:', Object.keys(enhancedData));
+        }
+        
+        console.groupEnd();
+        
+    } catch (parseError) {
+        console.error('[COPY_CURRICULUM_FIX] ❌ JSON parsing failed:', parseError);
+        console.log('[COPY_CURRICULUM_FIX] Raw content length:', curriculumScriptElement.textContent.length);
+        console.log('[COPY_CURRICULUM_FIX] First 200 chars:', curriculumScriptElement.textContent.substring(0, 200));
+    }
 } else {
-    console.error('[COPY_CURRICULUM] Failed to load curriculum hierarchy data from script element');
+    console.error('[COPY_CURRICULUM_FIX] ❌ Script element #copy-curriculum-hierarchy-data not found in DOM');
+    console.log('[COPY_CURRICULUM_FIX] Available script elements:', Array.from(document.querySelectorAll('script[type="application/json"]')).map(s => s.id));
 }
 {% elif curriculum_levels_for_copy %}
 // Fallback: Build from individual level data (legacy support)
+console.log('%c[TEMPLATE_DEBUG] ⚠️ Using FALLBACK curriculum_levels_for_copy', 'color: #ff9900; font-weight: bold;');
 console.log('[COPY_CURRICULUM] Using fallback curriculum data construction...');
 window.CopyCurriculumData = {};
 {% for level_data in curriculum_levels_for_copy %}
@@ -2352,9 +2407,20 @@ window.CopyCurriculumDataReady = true;
 console.log('[COPY_CURRICULUM] ⚠️  Built curriculum data from individual levels (fallback)');
 console.log('[COPY_CURRICULUM] Total programs loaded:', Object.keys(window.CopyCurriculumData).length);
 {% else %}
-console.error('[COPY_CURRICULUM] ❌ No curriculum data available from Django context');
+console.error('%c[TEMPLATE_DEBUG] ❌❌❌ NO CURRICULUM DATA AVAILABLE FROM DJANGO CONTEXT!', 'color: #ff0000; font-size: 18px; font-weight: bold;');
+console.error('[COPY_CURRICULUM] This means neither curriculum_hierarchy_for_copy nor curriculum_levels_for_copy were passed to template');
 console.log('[COPY_CURRICULUM] Available context variables:', Object.keys({{ curriculum_hierarchy_for_copy|default:"{}"|safe }}));
 {% endif %}
+
+// Close the debug group and provide summary
+console.log('%c[TEMPLATE_DEBUG] Django template processing completed', 'color: #0066cc;');
+console.log('%c[TEMPLATE_DEBUG] Final curriculum data state:', 'color: #0066cc;');
+console.log('  - window.CopyCurriculumData available:', !!window.CopyCurriculumData);
+console.log('  - window.CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
+if (window.CopyCurriculumData) {
+    console.log('  - Programs loaded:', Object.keys(window.CopyCurriculumData));
+}
+console.groupEnd();
 
 // Try to populate dropdown immediately if DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -2440,38 +2506,63 @@ async function loadCopyCurriculumData() {
 }
 
 function populateCopyProgramDropdown(retryCount = 0) {
-    console.group('[COPY_CURRICULUM] populateCopyProgramDropdown() - ENHANCED FIX v2');
+    console.group('[COPY_CURRICULUM_FIX] populateCopyProgramDropdown() - COMPREHENSIVE FIX v3');
     
     const programSelect = document.getElementById('copyProgramSelect');
     
-    // Enhanced debugging information
-    console.log('[COPY_CURRICULUM] Function called at:', new Date().toISOString());
-    console.log('[COPY_CURRICULUM] Retry count:', retryCount);
-    console.log('[COPY_CURRICULUM] Call stack:', new Error().stack.split('\n')[1].trim());
-    console.log('[COPY_CURRICULUM] DOM ready state:', document.readyState);
-    console.log('[COPY_CURRICULUM] programSelect element:', !!programSelect);
-    console.log('[COPY_CURRICULUM] programSelect visible:', programSelect ? window.getComputedStyle(programSelect).display !== 'none' : 'N/A');
-    console.log('[COPY_CURRICULUM] window.CopyCurriculumData exists:', !!window.CopyCurriculumData);
-    console.log('[COPY_CURRICULUM] window.CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
+    // COMPREHENSIVE debugging information with enhanced data integration
+    console.log('[COPY_CURRICULUM_FIX] Function called at:', new Date().toISOString());
+    console.log('[COPY_CURRICULUM_FIX] Retry count:', retryCount);
+    console.log('[COPY_CURRICULUM_FIX] Call stack:', new Error().stack.split('\n')[1].trim());
+    console.log('[COPY_CURRICULUM_FIX] DOM ready state:', document.readyState);
+    console.log('[COPY_CURRICULUM_FIX] programSelect element:', !!programSelect);
+    console.log('[COPY_CURRICULUM_FIX] programSelect visible:', programSelect ? window.getComputedStyle(programSelect).display !== 'none' : 'N/A');
+    console.log('[COPY_CURRICULUM_FIX] window.CopyCurriculumData exists:', !!window.CopyCurriculumData);
+    console.log('[COPY_CURRICULUM_FIX] window.CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
     
-    // Validation with enhanced error reporting
+    // ENHANCED: Check for enhanced data structure metadata
+    console.log('[COPY_CURRICULUM_FIX] Enhanced data structure check:');
+    console.log('[COPY_CURRICULUM_FIX]   Metadata available:', !!window.CopyCurriculumMetadata);
+    console.log('[COPY_CURRICULUM_FIX]   Validation available:', !!window.CopyCurriculumValidation);
+    console.log('[COPY_CURRICULUM_FIX]   Debug info available:', !!window.CopyCurriculumDebugInfo);
+    
+    if (window.CopyCurriculumMetadata) {
+        console.log('[COPY_CURRICULUM_FIX]   Data version:', window.CopyCurriculumMetadata.version);
+        console.log('[COPY_CURRICULUM_FIX]   Generated at:', window.CopyCurriculumMetadata.generated_at);
+        console.log('[COPY_CURRICULUM_FIX]   Frontend optimized:', window.CopyCurriculumMetadata.frontend_optimized);
+    }
+    
+    if (window.CopyCurriculumValidation) {
+        console.log('[COPY_CURRICULUM_FIX]   Validation passed:', window.CopyCurriculumValidation.is_valid);
+        console.log('[COPY_CURRICULUM_FIX]   Total levels expected:', window.CopyCurriculumValidation.total_levels);
+        console.log('[COPY_CURRICULUM_FIX]   Programs expected:', window.CopyCurriculumValidation.expected_programs);
+    }
+    
+    // COMPREHENSIVE validation with enhanced error reporting
     if (!programSelect) {
-        console.error('[COPY_CURRICULUM] ❌ copyProgramSelect element not found in DOM!');
-        console.log('[COPY_CURRICULUM] Checking for similar elements...');
+        console.error('[COPY_CURRICULUM_FIX] ❌ copyProgramSelect element not found in DOM!');
+        console.log('[COPY_CURRICULUM_FIX] Checking for similar elements...');
         const possibleElements = document.querySelectorAll('select[id*="Program"], select[id*="program"]');
-        console.log('[COPY_CURRICULUM] Found similar elements:', Array.from(possibleElements).map(el => el.id));
+        console.log('[COPY_CURRICULUM_FIX] Found similar elements:', Array.from(possibleElements).map(el => el.id));
+        
+        // ENHANCED: Check if Copy Exam modal is even open
+        const copyModal = document.getElementById('copyExamModal');
+        console.log('[COPY_CURRICULUM_FIX] Copy modal exists:', !!copyModal);
+        console.log('[COPY_CURRICULUM_FIX] Copy modal visible:', copyModal ? window.getComputedStyle(copyModal).display !== 'none' : 'N/A');
+        
         console.groupEnd();
         return false;
     }
     
     if (!window.CopyCurriculumData) {
-        console.error('[COPY_CURRICULUM] ❌ No curriculum data available!');
-        console.log('[COPY_CURRICULUM] Checking for alternative data sources...');
-        console.log('[COPY_CURRICULUM] window.curriculumData exists:', !!window.curriculumData);
+        console.error('[COPY_CURRICULUM_FIX] ❌ No curriculum data available!');
+        console.log('[COPY_CURRICULUM_FIX] Checking for alternative data sources...');
+        console.log('[COPY_CURRICULUM_FIX] window.curriculumData exists:', !!window.curriculumData);
+        console.log('[COPY_CURRICULUM_FIX] All window curriculum variables:', Object.keys(window).filter(key => key.toLowerCase().includes('curriculum')));
         
         // Retry logic - wait for data to load
         if (retryCount < 5) {
-            console.log(`[COPY_CURRICULUM] ⏳ Data not ready, retrying in 500ms (attempt ${retryCount + 1}/5)...`);
+            console.log(`[COPY_CURRICULUM_FIX] ⏳ Data not ready, retrying in 500ms (attempt ${retryCount + 1}/5)...`);
             setTimeout(() => {
                 populateCopyProgramDropdown(retryCount + 1);
             }, 500);
@@ -2479,19 +2570,19 @@ function populateCopyProgramDropdown(retryCount = 0) {
             return false;
         }
         
-        console.log('[COPY_CURRICULUM] Attempting fallback data construction...');
+        console.log('[COPY_CURRICULUM_FIX] Attempting fallback data construction...');
         
         // Try fallback construction
         if (typeof loadCopyCurriculumData === 'function') {
-            console.log('[COPY_CURRICULUM] Calling loadCopyCurriculumData fallback...');
+            console.log('[COPY_CURRICULUM_FIX] Calling loadCopyCurriculumData fallback...');
             loadCopyCurriculumData().then(() => {
-                console.log('[COPY_CURRICULUM] Fallback completed, retrying population...');
+                console.log('[COPY_CURRICULUM_FIX] Fallback completed, retrying population...');
                 populateCopyProgramDropdown(0); // Reset retry count for fallback
             }).catch(error => {
-                console.error('[COPY_CURRICULUM] Fallback failed:', error);
+                console.error('[COPY_CURRICULUM_FIX] Fallback failed:', error);
             });
         } else {
-            console.error('[COPY_CURRICULUM] ❌ No fallback available - loadCopyCurriculumData not found');
+            console.error('[COPY_CURRICULUM_FIX] ❌ No fallback available - loadCopyCurriculumData not found');
         }
         console.groupEnd();
         return false;
