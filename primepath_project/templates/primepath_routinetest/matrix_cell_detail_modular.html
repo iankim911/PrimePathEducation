@@ -103,11 +103,6 @@
                             title="Manage exam details and questions">
                         Manage
                     </button>
-                    <button class="btn btn-action btn-secondary" 
-                            onclick="updateExamName('{{ exam.id }}')"
-                            title="Update exam name">
-                        Update Name
-                    </button>
                     {% if can_edit %}
                     <button class="btn btn-action btn-danger" 
                             onclick="deleteExam('{{ exam.id }}')"
@@ -851,14 +846,8 @@ function manageExam(examId) {
     window.open(`/RoutineTest/exams/${examId}/`, '_blank');
 }
 
-function updateExamName(examId) {
-    console.log('[MATRIX CELL MODULAR] Updating exam name:', examId);
-    const newName = prompt('Enter new exam name:');
-    if (newName && newName.trim()) {
-        // TODO: Implement exam name update
-        alert(`Exam name update to "${newName}" - feature coming soon!`);
-    }
-}
+// Exam name update removed - names are now systematically generated
+// based on exam type, time period, and curriculum level
 
 function deleteExam(examId) {
     console.log('[MATRIX CELL MODULAR] Deleting exam:', examId);

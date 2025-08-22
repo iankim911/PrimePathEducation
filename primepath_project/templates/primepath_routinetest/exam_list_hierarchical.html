@@ -2310,9 +2310,29 @@ function initializeCopyExamEventListeners() {
 window.CopyCurriculumData = null;
 window.CopyCurriculumDataReady = false;
 
-// Initialize curriculum data from Django context
-{% if curriculum_levels_for_copy %}
-// Create curriculum data structure from Django context
+// Initialize curriculum data from Django context - IMPROVED VERSION
+{% if curriculum_hierarchy_for_copy %}
+// Use structured hierarchy data from Django
+console.log('[COPY_CURRICULUM] Loading hierarchical curriculum data from Django backend...');
+{{ curriculum_hierarchy_for_copy|json_script:"copy-curriculum-hierarchy-data" }}
+const curriculumScriptElement = document.getElementById('copy-curriculum-hierarchy-data');
+if (curriculumScriptElement) {
+    window.CopyCurriculumData = JSON.parse(curriculumScriptElement.textContent);
+    window.CopyCurriculumDataReady = true;
+    
+    console.log('[COPY_CURRICULUM] ✅ Loaded curriculum data from Django hierarchy:', Object.keys(window.CopyCurriculumData));
+    console.log('[COPY_CURRICULUM] Total programs loaded:', Object.keys(window.CopyCurriculumData).length);
+    console.log('[COPY_CURRICULUM] Program structure validation:');
+    Object.keys(window.CopyCurriculumData).forEach(program => {
+        const subprograms = Object.keys(window.CopyCurriculumData[program].subprograms);
+        console.log(`[COPY_CURRICULUM]   ${program}: ${subprograms.length} subprograms (${subprograms.join(', ')})`);
+    });
+} else {
+    console.error('[COPY_CURRICULUM] Failed to load curriculum hierarchy data from script element');
+}
+{% elif curriculum_levels_for_copy %}
+// Fallback: Build from individual level data (legacy support)
+console.log('[COPY_CURRICULUM] Using fallback curriculum data construction...');
 window.CopyCurriculumData = {};
 {% for level_data in curriculum_levels_for_copy %}
     {% with program=level_data.program_name subprogram=level_data.subprogram_name level=level_data.level_number %}
@@ -2328,10 +2348,13 @@ window.CopyCurriculumData = {};
         });
     {% endwith %}
 {% endfor %}
-// Mark curriculum data as ready
 window.CopyCurriculumDataReady = true;
-console.log('[COPY_CURRICULUM] Loaded curriculum data from Django:', Object.keys(window.CopyCurriculumData));
+console.log('[COPY_CURRICULUM] ⚠️  Built curriculum data from individual levels (fallback)');
 console.log('[COPY_CURRICULUM] Total programs loaded:', Object.keys(window.CopyCurriculumData).length);
+{% else %}
+console.error('[COPY_CURRICULUM] ❌ No curriculum data available from Django context');
+console.log('[COPY_CURRICULUM] Available context variables:', Object.keys({{ curriculum_hierarchy_for_copy|default:"{}"|safe }}));
+{% endif %}
 
 // Try to populate dropdown immediately if DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
@@ -2420,44 +2443,116 @@ async function loadCopyCurriculumData() {
 }
 
 function populateCopyProgramDropdown() {
+    console.group('[COPY_CURRICULUM] populateCopyProgramDropdown() - COMPREHENSIVE FIX');
+    
     const programSelect = document.getElementById('copyProgramSelect');
     
-    console.log('[COPY_CURRICULUM] populateCopyProgramDropdown() called');
+    // Enhanced debugging information
+    console.log('[COPY_CURRICULUM] Function called at:', new Date().toISOString());
+    console.log('[COPY_CURRICULUM] Call stack:', new Error().stack.split('\n')[1].trim());
+    console.log('[COPY_CURRICULUM] DOM ready state:', document.readyState);
     console.log('[COPY_CURRICULUM] programSelect element:', !!programSelect);
+    console.log('[COPY_CURRICULUM] programSelect visible:', programSelect ? window.getComputedStyle(programSelect).display !== 'none' : 'N/A');
     console.log('[COPY_CURRICULUM] window.CopyCurriculumData exists:', !!window.CopyCurriculumData);
     console.log('[COPY_CURRICULUM] window.CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
     
+    // Validation with enhanced error reporting
     if (!programSelect) {
-        console.error('[COPY_CURRICULUM] ❌ copyProgramSelect element not found!');
-        return;
+        console.error('[COPY_CURRICULUM] ❌ copyProgramSelect element not found in DOM!');
+        console.log('[COPY_CURRICULUM] Checking for similar elements...');
+        const possibleElements = document.querySelectorAll('select[id*="Program"], select[id*="program"]');
+        console.log('[COPY_CURRICULUM] Found similar elements:', Array.from(possibleElements).map(el => el.id));
+        console.groupEnd();
+        return false;
     }
     
     if (!window.CopyCurriculumData) {
         console.error('[COPY_CURRICULUM] ❌ No curriculum data available!');
-        return;
+        console.log('[COPY_CURRICULUM] Checking for alternative data sources...');
+        console.log('[COPY_CURRICULUM] window.curriculumData exists:', !!window.curriculumData);
+        console.log('[COPY_CURRICULUM] Attempting fallback data construction...');
+        
+        // Try fallback construction
+        if (typeof loadCopyCurriculumData === 'function') {
+            console.log('[COPY_CURRICULUM] Calling loadCopyCurriculumData fallback...');
+            loadCopyCurriculumData().then(() => {
+                console.log('[COPY_CURRICULUM] Fallback completed, retrying population...');
+                populateCopyProgramDropdown();
+            }).catch(error => {
+                console.error('[COPY_CURRICULUM] Fallback failed:', error);
+            });
+        }
+        console.groupEnd();
+        return false;
     }
     
-    console.log('[COPY_CURRICULUM] Populating program dropdown...');
+    console.log('[COPY_CURRICULUM] 🔄 Starting program dropdown population...');
     console.log('[COPY_CURRICULUM] Available programs:', Object.keys(window.CopyCurriculumData));
+    console.log('[COPY_CURRICULUM] Data structure check:');
     
-    // Clear existing options except the first
-    programSelect.innerHTML = '<option value="">-- Select Program --</option>';
-    
-    // Add programs
-    let optionsAdded = 0;
+    // Validate data structure
+    let structureValid = true;
     Object.keys(window.CopyCurriculumData).forEach(program => {
-        const option = document.createElement('option');
-        option.value = program;
-        option.textContent = program;
-        programSelect.appendChild(option);
-        optionsAdded++;
-        console.log('[COPY_CURRICULUM] Added option:', program);
+        if (!window.CopyCurriculumData[program].subprograms) {
+            console.error(`[COPY_CURRICULUM] ❌ Invalid structure for program ${program}: missing subprograms`);
+            structureValid = false;
+        } else {
+            const subprograms = Object.keys(window.CopyCurriculumData[program].subprograms);
+            console.log(`[COPY_CURRICULUM]   ✅ ${program}: ${subprograms.length} subprograms`);
+        }
     });
     
-    console.log('[COPY_CURRICULUM] ✅ Successfully added', optionsAdded, 'program options');
-    console.log('[COPY_CURRICULUM] Final options count:', programSelect.options.length);
+    if (!structureValid) {
+        console.error('[COPY_CURRICULUM] ❌ Data structure validation failed');
+        console.groupEnd();
+        return false;
+    }
     
-    console.log('[COPY_CURRICULUM] Program dropdown populated');
+    // Clear existing options except the first
+    const initialHTML = '<option value="">-- Select Program --</option>';
+    programSelect.innerHTML = initialHTML;
+    console.log('[COPY_CURRICULUM] Reset dropdown to initial state');
+    
+    // Add programs with enhanced error handling
+    let optionsAdded = 0;
+    try {
+        Object.keys(window.CopyCurriculumData).forEach(program => {
+            const option = document.createElement('option');
+            option.value = program;
+            option.textContent = program;
+            
+            // Additional attributes for debugging
+            option.setAttribute('data-subprogram-count', Object.keys(window.CopyCurriculumData[program].subprograms).length);
+            
+            programSelect.appendChild(option);
+            optionsAdded++;
+            console.log(`[COPY_CURRICULUM] ➕ Added option: "${program}" (${Object.keys(window.CopyCurriculumData[program].subprograms).length} subprograms)`);
+        });
+        
+        console.log('[COPY_CURRICULUM] ✅ Successfully added', optionsAdded, 'program options');
+        console.log('[COPY_CURRICULUM] Final options count:', programSelect.options.length);
+        console.log('[COPY_CURRICULUM] Options array:', Array.from(programSelect.options).map(opt => opt.textContent));
+        
+        // Verify dropdown is interactive
+        console.log('[COPY_CURRICULUM] Dropdown interactive check:');
+        console.log('[COPY_CURRICULUM]   - disabled:', programSelect.disabled);
+        console.log('[COPY_CURRICULUM]   - style.display:', programSelect.style.display);
+        console.log('[COPY_CURRICULUM]   - computed visibility:', window.getComputedStyle(programSelect).visibility);
+        
+        console.log('[COPY_CURRICULUM] 🎉 Program dropdown populated successfully');
+        console.groupEnd();
+        return true;
+        
+    } catch (error) {
+        console.error('[COPY_CURRICULUM] ❌ Error during option creation:', error);
+        console.error('[COPY_CURRICULUM] Stack trace:', error.stack);
+        
+        // Restore initial state on error
+        programSelect.innerHTML = initialHTML;
+        console.log('[COPY_CURRICULUM] Restored initial state after error');
+        console.groupEnd();
+        return false;
+    }
 }
 
 function setupCopyCurriculumEventListeners() {

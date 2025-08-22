@@ -299,8 +299,9 @@ def exam_list(request):
     # Debug: Log what we're passing to template
     logger.info(f"[EXAM_LIST_CONTEXT] Passing is_admin={is_admin} to template")
     
-    # Get curriculum data for copy modal
+    # Get curriculum data for copy modal - use hierarchy for better frontend integration
     curriculum_data_for_copy_modal = ExamService.get_routinetest_curriculum_levels()
+    curriculum_hierarchy_for_copy = ExamService.get_routinetest_curriculum_hierarchy()
     
     # Prepare context for template
     context = {
@@ -325,6 +326,7 @@ def exam_list(request):
         
         # Copy modal curriculum data
         'curriculum_levels_for_copy': curriculum_data_for_copy_modal,
+        'curriculum_hierarchy_for_copy': curriculum_hierarchy_for_copy,
         'exam_type_filter': exam_type_filter,
         'show_assigned_only': show_assigned_only,  # Keep for backward compatibility
         

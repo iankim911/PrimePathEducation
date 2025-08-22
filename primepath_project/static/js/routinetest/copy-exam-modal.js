@@ -175,19 +175,42 @@
             // Set up event handlers
             setupModalEventHandlers();
             
-            // Try to populate curriculum dropdown if available
+            // CRITICAL FIX: Populate curriculum dropdown with comprehensive error handling
+            logger.log('[CURRICULUM_POPULATION] Attempting to populate curriculum dropdown...');
             if (typeof window.populateCopyProgramDropdown === 'function') {
                 try {
-                    // Add a small delay to ensure modal and dropdowns are rendered
+                    // Add a delay to ensure modal DOM is fully rendered
                     setTimeout(() => {
-                        window.populateCopyProgramDropdown();
-                        logger.log('Curriculum dropdown populated on modal open');
-                    }, 150);
+                        logger.log('[CURRICULUM_POPULATION] Calling populateCopyProgramDropdown after delay...');
+                        const result = window.populateCopyProgramDropdown();
+                        if (result === true) {
+                            logger.log('[CURRICULUM_POPULATION] ✅ Curriculum dropdown populated successfully');
+                        } else if (result === false) {
+                            logger.error('[CURRICULUM_POPULATION] ❌ Failed to populate curriculum dropdown');
+                            // Try alternative approaches
+                            if (typeof window.initializeCopyCurriculumCascading === 'function') {
+                                logger.log('[CURRICULUM_POPULATION] Trying initializeCopyCurriculumCascading fallback...');
+                                window.initializeCopyCurriculumCascading();
+                            }
+                        } else {
+                            logger.log('[CURRICULUM_POPULATION] Population completed with undefined result');
+                        }
+                    }, 200); // Increased delay for better reliability
                 } catch (error) {
-                    logger.error('Failed to populate curriculum dropdown:', error);
+                    logger.error('[CURRICULUM_POPULATION] Exception during curriculum dropdown population:', error);
+                    logger.error('[CURRICULUM_POPULATION] Stack trace:', error.stack);
                 }
             } else {
-                logger.log('populateCopyProgramDropdown function not available, will use fallback data');
+                logger.error('[CURRICULUM_POPULATION] ❌ populateCopyProgramDropdown function not available!');
+                logger.log('[CURRICULUM_POPULATION] Available functions:', Object.keys(window).filter(key => key.toLowerCase().includes('curriculum')));
+                
+                // Try alternative initialization
+                if (typeof window.initializeCopyCurriculumCascading === 'function') {
+                    logger.log('[CURRICULUM_POPULATION] Trying initializeCopyCurriculumCascading as fallback...');
+                    setTimeout(() => {
+                        window.initializeCopyCurriculumCascading();
+                    }, 200);
+                }
             }
             
             // Initial preview update after modal setup

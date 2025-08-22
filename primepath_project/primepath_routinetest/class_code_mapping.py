@@ -7,7 +7,6 @@ This file contains the official mapping between class codes and curriculum progr
 CLASS_CODE_CURRICULUM_MAPPING = {
     # CORE Program - Phonics
     'PS1': 'CORE Phonics Level 1',
-    'P1': 'CORE Phonics Level 2',
     'P2': 'CORE Phonics Level 3',
     
     # CORE Program - Sigma
@@ -82,7 +81,7 @@ for class_code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
 
 # Class code categories for grouping
 CLASS_CODE_CATEGORIES = {
-    'CORE_PHONICS': ['PS1', 'P1', 'P2'],
+    'CORE_PHONICS': ['PS1', 'P2'],
     'CORE_SIGMA': ['A2', 'B2', 'B3', 'S3', 'H1', 'H2', 'C3', 'C4'],
     'CORE_ELITE': ['B4', 'B5', 'S2', 'C2', 'C5', 'H3', 'H4'],
     'EDGE_RISE': ['Young-cho2', 'Chung-cho4', 'Chung-cho1'],

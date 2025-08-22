@@ -458,11 +458,16 @@ class ExamService:
                     all_classes[class_code] = 'FULL'
             return all_classes
         
-        # Get teacher assignments
+        # Get teacher assignments (excluding expired ones)
         if hasattr(user, 'teacher_profile'):
+            from django.db.models import Q
+            from django.utils import timezone
+            
             assignments = TeacherClassAssignment.objects.filter(
                 teacher=user.teacher_profile,
                 is_active=True
+            ).filter(
+                Q(expires_on__isnull=True) | Q(expires_on__gt=timezone.now())
             ).values_list('class_code', 'access_level')
             return dict(assignments)
         
@@ -1581,6 +1586,84 @@ class ExamService:
         return curriculum_levels
     
     @staticmethod
+    def get_routinetest_curriculum_hierarchy():
+        """
+        Get curriculum hierarchy specifically structured for copy modal JavaScript.
+        Returns a hierarchical dictionary optimized for frontend dropdown population.
+        
+        Returns:
+            Dict: Hierarchical curriculum structure {Program: {subprograms: {SubProgram: {levels: [...]}}}}
+        """
+        from ..constants import ROUTINETEST_CURRICULUM_WHITELIST
+        from core.models import CurriculumLevel
+        import json
+        
+        logger.info("[ROUTINETEST_CURRICULUM_HIERARCHY] Building hierarchy for copy modal")
+        print("[ROUTINETEST_CURRICULUM_HIERARCHY] Building hierarchy for copy modal")
+        
+        curriculum_hierarchy = {}
+        levels_processed = 0
+        
+        # Loop through whitelist and build hierarchy
+        for program_name, subprogram_name, level_number in ROUTINETEST_CURRICULUM_WHITELIST:
+            try:
+                # Find the curriculum level in database
+                curriculum_level = CurriculumLevel.objects.select_related(
+                    'subprogram__program'
+                ).get(
+                    subprogram__program__name=program_name,
+                    subprogram__name__icontains=subprogram_name,
+                    level_number=level_number
+                )
+                
+                # Initialize program if not exists
+                if program_name not in curriculum_hierarchy:
+                    curriculum_hierarchy[program_name] = {'subprograms': {}}
+                
+                # Initialize subprogram if not exists
+                if subprogram_name not in curriculum_hierarchy[program_name]['subprograms']:
+                    curriculum_hierarchy[program_name]['subprograms'][subprogram_name] = {'levels': []}
+                
+                # Add level data
+                level_data = {
+                    'id': curriculum_level.id,
+                    'number': level_number
+                }
+                
+                curriculum_hierarchy[program_name]['subprograms'][subprogram_name]['levels'].append(level_data)
+                levels_processed += 1
+                
+            except CurriculumLevel.DoesNotExist:
+                console_log = {
+                    "service": "ExamService", 
+                    "action": "hierarchy_level_not_found",
+                    "program": program_name,
+                    "subprogram": subprogram_name,
+                    "level": level_number
+                }
+                logger.warning(f"[ROUTINETEST_CURRICULUM_HIERARCHY_MISSING] {json.dumps(console_log)}")
+                print(f"[ROUTINETEST_CURRICULUM_HIERARCHY_MISSING] {json.dumps(console_log)}")
+                continue
+        
+        # Sort levels within each subprogram by level number
+        for program_name, program_data in curriculum_hierarchy.items():
+            for subprogram_name, subprogram_data in program_data['subprograms'].items():
+                subprogram_data['levels'].sort(key=lambda x: x['number'])
+        
+        # Log results
+        console_log = {
+            "service": "ExamService",
+            "action": "get_routinetest_curriculum_hierarchy",
+            "total_programs": len(curriculum_hierarchy),
+            "total_levels": levels_processed,
+            "program_names": list(curriculum_hierarchy.keys())
+        }
+        logger.info(f"[ROUTINETEST_CURRICULUM_HIERARCHY_RESULT] {json.dumps(console_log)}")
+        print(f"[ROUTINETEST_CURRICULUM_HIERARCHY_RESULT] {json.dumps(console_log)}")
+        
+        return curriculum_hierarchy
+    
+    @staticmethod
     def generate_routinetest_exam_name(
         exam_type: str,
         time_period_month: str = None,
@@ -1822,10 +1905,15 @@ class ExamPermissionService:
         if not hasattr(user, 'teacher_profile'):
             return {}
         
+        from django.db.models import Q
+        from django.utils import timezone
         from ..models import TeacherClassAssignment
+        
         assignments = TeacherClassAssignment.objects.filter(
             teacher=user.teacher_profile,
             is_active=True
+        ).filter(
+            Q(expires_on__isnull=True) | Q(expires_on__gt=timezone.now())
         ).values_list('class_code', 'access_level')
         
         return dict(assignments)
