@@ -643,38 +643,81 @@ class ExamService:
                 except:
                     pass
             
-            # Skip if filtering and no assigned classes (BUT keep owned exams)
-            if filter_assigned_only and not is_admin and not is_owner:
-                # CORRECTED FIX (Aug 21, 2025): "Show Assigned Classes Only" means show exams from 
+            # Skip if filtering and no assigned classes
+            # CRITICAL FIX: Don't automatically include owned exams - they must also meet filter criteria
+            if filter_assigned_only and not is_admin:
+                # UPDATED (Aug 22, 2025): "Show Assigned Classes Only" means show exams from 
                 # classes where teacher has EDITING rights (FULL or CO_TEACHER), NOT VIEW ONLY.
-                # This hides VIEW ONLY exams when the toggle is checked.
+                # This HIDES VIEW ONLY exams when the toggle is checked.
+                # ABSOLUTELY NO EXCEPTIONS - VIEW ONLY MUST BE FILTERED OUT
                 has_editable_class = False
-                for cls in exam_classes:
-                    # Skip program-level exams when filtering by assigned only
-                    if cls.startswith('PROGRAM_'):
-                        logger.debug(f"[EXAM_FILTER] Skipping program-level exam {exam.name}")
-                        continue
-                    
-                    # Check if teacher has EDITING access to this class (FULL or CO_TEACHER only)
-                    # VIEW access is excluded when "Show Assigned Classes Only" is checked
-                    if cls in assignments and assignments[cls] in ['FULL', 'CO_TEACHER']:
-                        has_editable_class = True
-                        logger.debug(f"[EXAM_FILTER] Including exam {exam.name} - teacher has {assignments[cls]} access to class {cls}")
-                        break
                 
+                # ENHANCED DEBUG LOGGING
+                logger.info(f"[FILTER_COMPREHENSIVE] ====== FILTERING EXAM: {exam.name} ======")
+                logger.info(f"[FILTER_COMPREHENSIVE] Exam ID: {exam.id}")
+                logger.info(f"[FILTER_COMPREHENSIVE] Exam classes: {exam_classes}")
+                logger.info(f"[FILTER_COMPREHENSIVE] Teacher assignments: {assignments}")
+                logger.info(f"[FILTER_COMPREHENSIVE] Is owner: {is_owner}")
+                logger.info(f"[FILTER_COMPREHENSIVE] Filter enabled: {filter_assigned_only}")
+                
+                # Track why exam is included/excluded
+                inclusion_reasons = []
+                exclusion_reasons = []
+                
+                # CRITICAL: Handle exams with no class codes
+                if not exam_classes or exam_classes == []:
+                    # Special case: Owners can see their own unassigned exams
+                    if is_owner:
+                        has_editable_class = True
+                        inclusion_reasons.append("Owner of unassigned exam")
+                        logger.info(f"[FILTER_COMPREHENSIVE] ✅ Owner can see their own unassigned exam")
+                    else:
+                        exclusion_reasons.append("No class codes assigned to exam")
+                        logger.info(f"[FILTER_COMPREHENSIVE] ❌ Exam has no class codes - EXCLUDING")
+                        has_editable_class = False
+                else:
+                    # Check each class for editable access
+                    for cls in exam_classes:
+                        # Skip program-level exams when filtering by assigned only
+                        if cls.startswith('PROGRAM_'):
+                            exclusion_reasons.append(f"Program-level exam ({cls}) - no specific class")
+                            logger.info(f"[FILTER_COMPREHENSIVE] ❌ {cls}: Program-level, skipping")
+                            continue
+                        
+                        # Check if teacher has access to this class
+                        if cls not in assignments:
+                            exclusion_reasons.append(f"Class {cls} not in teacher assignments")
+                            logger.info(f"[FILTER_COMPREHENSIVE] ❌ {cls}: Not in teacher assignments")
+                        else:
+                            access_level = assignments[cls]
+                            logger.info(f"[FILTER_COMPREHENSIVE] 🔍 {cls}: Teacher has {access_level} access")
+                            
+                            # Check if teacher has EDITING access (FULL or CO_TEACHER only)
+                            if access_level in ['FULL', 'CO_TEACHER']:
+                                has_editable_class = True
+                                inclusion_reasons.append(f"Has {access_level} access to {cls}")
+                                logger.info(f"[FILTER_COMPREHENSIVE] ✅ {cls}: EDITABLE access ({access_level}) - INCLUDING EXAM")
+                                break  # Found editable access, include the exam
+                            elif access_level == 'VIEW':
+                                exclusion_reasons.append(f"Only VIEW access to {cls}")
+                                logger.info(f"[FILTER_COMPREHENSIVE] ⚠️ {cls}: VIEW ONLY access - NOT sufficient for filter")
+                            else:
+                                exclusion_reasons.append(f"Unknown access level {access_level} for {cls}")
+                                logger.info(f"[FILTER_COMPREHENSIVE] ❓ {cls}: Unknown access level: {access_level}")
+                
+                # Final decision logging
                 if not has_editable_class:
-                    logger.debug(f"[EXAM_FILTER] Skipping exam {exam.name} - not owned and no editing access to its classes")
-                    continue
+                    logger.info(f"[FILTER_COMPREHENSIVE] ❌❌❌ EXCLUDING EXAM: {exam.name}")
+                    logger.info(f"[FILTER_COMPREHENSIVE] Exclusion reasons: {exclusion_reasons}")
+                    logger.info(f"[FILTER_COMPREHENSIVE] ====== END FILTERING (EXCLUDED) ======")
+                    continue  # Skip this exam
+                else:
+                    logger.info(f"[FILTER_COMPREHENSIVE] ✅✅✅ INCLUDING EXAM: {exam.name}")
+                    logger.info(f"[FILTER_COMPREHENSIVE] Inclusion reasons: {inclusion_reasons}")
+                    logger.info(f"[FILTER_COMPREHENSIVE] ====== END FILTERING (INCLUDED) ======")
             
             # Add permissions to exam with ownership priority
-            if is_owner:
-                # OWNER ALWAYS HAS FULL PERMISSIONS
-                exam.can_edit = True
-                exam.can_copy = True
-                exam.can_delete = True
-                exam.is_owner = True
-                exam.access_badge = 'OWNER'
-            elif is_admin:
+            if is_admin:
                 # ADMIN ALWAYS HAS FULL PERMISSIONS
                 exam.can_edit = True
                 exam.can_copy = True
@@ -682,33 +725,92 @@ class ExamService:
                 exam.is_owner = False
                 exam.access_badge = 'ADMIN'
             elif not filter_assigned_only:
-                # SHOWING ALL EXAMS (toggle = All Exams) - Default to VIEW ONLY
+                # SHOWING ALL EXAMS (toggle = All Exams) - Set initial permissions
+                logger.debug(f"[PERMISSION_DEBUG] Setting permissions for exam '{exam.name}' in 'Show All' mode")
+                logger.debug(f"[PERMISSION_DEBUG] is_owner={is_owner}, user={user.username}")
+                
+                # Initialize with VIEW ONLY permissions
                 exam.can_edit = False
                 exam.can_copy = True  # Can copy to their classes
                 exam.can_delete = False
-                exam.is_owner = False
+                exam.is_owner = is_owner  # CRITICAL FIX: Preserve ownership status
                 exam.access_badge = 'VIEW ONLY'
                 
-                # But check if they have edit access through class assignments
-                if ExamService.can_teacher_edit_exam(user, exam):
+                # Check if this is actually an owned exam (ownership takes precedence)
+                if is_owner:
+                    # OWNER gets full permissions and proper badge
                     exam.can_edit = True
-                    exam.access_badge = 'EDIT'
-                if ExamPermissionService.can_teacher_delete_exam(user, exam):
                     exam.can_delete = True
-            else:
-                # ASSIGNED ONLY MODE - standard class-based permissions
-                exam.can_edit = ExamService.can_teacher_edit_exam(user, exam)
-                exam.can_copy = len(assignments) > 0 or is_admin
-                exam.can_delete = ExamPermissionService.can_teacher_delete_exam(user, exam)
-                exam.is_owner = is_owner
-                
-                # Determine proper access badge based on permissions
-                if exam.can_edit and exam.can_delete:
-                    exam.access_badge = 'FULL ACCESS'
-                elif exam.can_edit:
-                    exam.access_badge = 'EDIT'
+                    exam.access_badge = 'OWNER'
+                    logger.info(f"[PERMISSION_DEBUG] ✅ Exam '{exam.name}' marked as OWNER for {user.username}")
                 else:
-                    exam.access_badge = 'VIEW ONLY'
+                    # Check edit/delete permissions through class assignments
+                    if ExamService.can_teacher_edit_exam(user, exam):
+                        exam.can_edit = True
+                        # Determine if FULL ACCESS or just EDIT
+                        has_full_access = False
+                        for cls in (exam.class_codes or []):
+                            if cls in assignments and assignments[cls] == 'FULL':
+                                has_full_access = True
+                                break
+                        exam.access_badge = 'FULL ACCESS' if has_full_access else 'EDIT'
+                        logger.debug(f"[PERMISSION_DEBUG] Exam '{exam.name}' has edit access, badge: {exam.access_badge}")
+                    
+                    if ExamPermissionService.can_teacher_delete_exam(user, exam):
+                        exam.can_delete = True
+                        logger.debug(f"[PERMISSION_DEBUG] Exam '{exam.name}' has delete permission")
+            else:
+                # ASSIGNED ONLY MODE - Set permissions based on actual access level
+                logger.debug(f"[PERMISSION_DEBUG] Setting permissions for exam '{exam.name}' in 'Assigned Only' mode")
+                logger.debug(f"[PERMISSION_DEBUG] is_owner={is_owner}, user={user.username}")
+                
+                # For owned exams in assigned mode
+                if is_owner:
+                    # Owner gets full permissions on their own exams
+                    exam.can_edit = True
+                    exam.can_copy = True
+                    exam.can_delete = True
+                    exam.is_owner = True
+                    exam.access_badge = 'OWNER'
+                    logger.info(f"[PERMISSION_DEBUG] ✅ Exam '{exam.name}' marked as OWNER in assigned mode")
+                else:
+                    # Non-owner: set permissions based on actual access
+                    exam.can_edit = ExamService.can_teacher_edit_exam(user, exam)
+                    exam.can_copy = len(assignments) > 0
+                    exam.can_delete = ExamPermissionService.can_teacher_delete_exam(user, exam)
+                    exam.is_owner = False
+                    
+                    # Check the highest access level for this exam's classes
+                    highest_access = 'VIEW'
+                    for cls in (exam.class_codes or []):
+                        if cls in assignments:
+                            access = assignments[cls]
+                            if access == 'FULL':
+                                highest_access = 'FULL'
+                                break
+                            elif access == 'CO_TEACHER' and highest_access == 'VIEW':
+                                highest_access = 'CO_TEACHER'
+                    
+                    # Set badge based on highest access level
+                    if highest_access == 'FULL':
+                        exam.access_badge = 'FULL ACCESS'
+                    elif highest_access == 'CO_TEACHER':
+                        exam.access_badge = 'EDIT'
+                    else:
+                        # This should NEVER happen in assigned mode - exam should have been filtered out
+                        logger.error(f"[FILTER_BUG] ❌❌❌ CRITICAL BUG: Exam '{exam.name}' has VIEW ONLY access in ASSIGNED mode!")
+                        logger.error(f"[FILTER_BUG] This exam should have been filtered out earlier!")
+                        logger.error(f"[FILTER_BUG] SKIPPING THIS EXAM - not adding to results")
+                        # CRITICAL FIX: Don't add VIEW ONLY exams in assigned mode
+                        # Skip to next exam completely - don't add to organized dict
+                        continue
+                    
+                    logger.debug(f"[PERMISSION_DEBUG] Exam '{exam.name}' access badge: {exam.access_badge} (highest: {highest_access})")
+            
+            # CRITICAL CHECK: If we're in filter mode and somehow got here with a VIEW ONLY exam, skip it
+            if filter_assigned_only and not is_admin and hasattr(exam, 'access_badge') and exam.access_badge == 'VIEW ONLY':
+                logger.error(f"[FILTER_CRITICAL] ❌❌❌ CAUGHT VIEW ONLY exam '{exam.name}' about to be added - SKIPPING!")
+                continue
             
             # Organize by class code
             if exam_classes:
@@ -765,6 +867,36 @@ class ExamService:
             logger.warning(f"[EXAM_HIERARCHY] No exams were organized into any programs!")
         else:
             logger.info(f"[EXAM_HIERARCHY] Final result: {list(result.keys())} programs")
+        
+        # FINAL SAFETY CHECK: If filter is on, ensure NO VIEW ONLY exams in result
+        if filter_assigned_only and not is_admin:
+            logger.info(f"[FILTER_FINAL_CHECK] Running final safety check for VIEW ONLY exams...")
+            view_only_found = []
+            cleaned_result = {}
+            
+            for program, classes in result.items():
+                cleaned_classes = {}
+                for class_code, exams in classes.items():
+                    cleaned_exams = []
+                    for exam in exams:
+                        if hasattr(exam, 'access_badge') and exam.access_badge == 'VIEW ONLY':
+                            view_only_found.append(f"{exam.name} (ID: {exam.id})")
+                            logger.error(f"[FILTER_FINAL_CHECK] ❌❌❌ FOUND VIEW ONLY exam that should be filtered: {exam.name}")
+                        else:
+                            cleaned_exams.append(exam)
+                    
+                    if cleaned_exams:  # Only add class if it has exams after cleaning
+                        cleaned_classes[class_code] = cleaned_exams
+                
+                if cleaned_classes:  # Only add program if it has classes with exams
+                    cleaned_result[program] = cleaned_classes
+            
+            if view_only_found:
+                logger.error(f"[FILTER_FINAL_CHECK] ❌ CRITICAL: Found and removed {len(view_only_found)} VIEW ONLY exams!")
+                logger.error(f"[FILTER_FINAL_CHECK] Removed exams: {', '.join(view_only_found)}")
+                result = cleaned_result
+            else:
+                logger.info(f"[FILTER_FINAL_CHECK] ✅ PASSED: No VIEW ONLY exams found in final result")
         
         return result
     
@@ -1688,7 +1820,7 @@ class ExamPermissionService:
     @classmethod
     def can_teacher_delete_exam(cls, user, exam):
         """
-        Check if teacher can delete an exam - ENHANCED WITH OWNERSHIP RECOGNITION.
+        Check if teacher can delete an exam - ENHANCED WITH ROBUST OWNERSHIP RECOGNITION.
         
         Teacher can delete if:
         1. They are admin (superuser or staff)
@@ -1696,55 +1828,125 @@ class ExamPermissionService:
         3. They have FULL access to at least one of the exam's assigned classes
         """
         import logging
+        import json
+        from django.utils import timezone
         logger = logging.getLogger(__name__)
         
+        # COMPREHENSIVE DEBUG LOGGING
+        debug_info = {
+            "method": "can_teacher_delete_exam",
+            "user": str(user.username) if user else "None",
+            "user_id": user.id if user else None,
+            "exam_id": str(exam.id) if exam else "None",
+            "exam_name": exam.name if exam else "None",
+            "timestamp": timezone.now().isoformat()
+        }
+        
         # Check if user is authenticated
-        if not user.is_authenticated:
-            logger.info(f"[DELETE_PERMISSION] User not authenticated")
+        if not user or not user.is_authenticated:
+            debug_info["result"] = "DENIED"
+            debug_info["reason"] = "User not authenticated"
+            logger.warning(f"[DELETE_PERMISSION] {json.dumps(debug_info)}")
+            print(f"[DELETE_PERMISSION_CHECK] {json.dumps(debug_info)}")
             return False
         
         # Admins can delete everything
         if user.is_superuser or user.is_staff:
-            logger.info(f"[DELETE_PERMISSION] User {user.username} is admin, granting delete permission")
-            print(f"[DELETE_PERMISSION] Admin {user.username} can DELETE exam {exam.id}")
+            debug_info["result"] = "ALLOWED"
+            debug_info["reason"] = "User is admin"
+            debug_info["is_superuser"] = user.is_superuser
+            debug_info["is_staff"] = user.is_staff
+            logger.info(f"[DELETE_PERMISSION] {json.dumps(debug_info)}")
+            print(f"[DELETE_PERMISSION_CHECK] {json.dumps(debug_info)}")
             return True
         
-        # Check if user has teacher profile
-        if not hasattr(user, 'teacher_profile'):
-            logger.info(f"[DELETE_PERMISSION] User {user.username} has no teacher profile")
+        # Get teacher profile - try multiple ways
+        teacher = None
+        if hasattr(user, 'teacher_profile'):
+            teacher = user.teacher_profile
+        else:
+            # Try to get teacher profile directly from database
+            try:
+                from core.models import Teacher
+                teacher = Teacher.objects.filter(user=user).first()
+                if teacher:
+                    debug_info["teacher_lookup"] = "Found via database query"
+            except Exception as e:
+                debug_info["teacher_lookup_error"] = str(e)
+        
+        if not teacher:
+            debug_info["result"] = "DENIED"
+            debug_info["reason"] = "No teacher profile found"
+            logger.warning(f"[DELETE_PERMISSION] {json.dumps(debug_info)}")
+            print(f"[DELETE_PERMISSION_CHECK] {json.dumps(debug_info)}")
             return False
         
-        teacher = user.teacher_profile
+        debug_info["teacher_id"] = teacher.id
+        debug_info["teacher_name"] = teacher.name
         
         # CRITICAL FIX: Check if teacher created the exam - OWNER HAS FULL RIGHTS
+        # Enhanced ownership check with multiple verification methods
         if exam.created_by:
-            logger.debug(f"[DELETE_PERMISSION] Exam created_by ID: {exam.created_by.id}, Teacher ID: {teacher.id}")
-            print(f"[DELETE_PERMISSION_DEBUG] Comparing exam.created_by.id={exam.created_by.id} with teacher.id={teacher.id}")
+            debug_info["exam_created_by_id"] = exam.created_by.id
+            debug_info["exam_created_by_name"] = exam.created_by.name if hasattr(exam.created_by, 'name') else str(exam.created_by)
+            debug_info["ownership_check"] = {
+                "method1_direct_id": exam.created_by.id == teacher.id,
+                "method2_user_match": exam.created_by.user_id == user.id if hasattr(exam.created_by, 'user_id') else False,
+                "exam_created_by_type": type(exam.created_by).__name__,
+                "teacher_type": type(teacher).__name__
+            }
             
+            # Primary ownership check - direct ID comparison
             if exam.created_by.id == teacher.id:
-                logger.info(f"[DELETE_PERMISSION] Teacher {teacher.name} is the OWNER of exam {exam.name}, granting FULL delete permission")
-                print(f"[DELETE_PERMISSION] Teacher {teacher.name} OWNS exam {exam.id} - CAN DELETE")
+                debug_info["result"] = "ALLOWED"
+                debug_info["reason"] = "User is exam owner (created_by)"
+                logger.info(f"[DELETE_PERMISSION] {json.dumps(debug_info)}")
+                print(f"[DELETE_PERMISSION_CHECK] ✅ OWNER ACCESS GRANTED: {json.dumps(debug_info)}")
                 return True
-            else:
-                logger.debug(f"[DELETE_PERMISSION] Teacher {teacher.name} is NOT the owner (owner ID: {exam.created_by.id})")
+            
+            # Secondary ownership check - via user relationship
+            if hasattr(exam.created_by, 'user_id') and exam.created_by.user_id == user.id:
+                debug_info["result"] = "ALLOWED"
+                debug_info["reason"] = "User is exam owner (via user_id match)"
+                logger.info(f"[DELETE_PERMISSION] {json.dumps(debug_info)}")
+                print(f"[DELETE_PERMISSION_CHECK] ✅ OWNER ACCESS GRANTED (secondary check): {json.dumps(debug_info)}")
+                return True
         else:
-            logger.warning(f"[DELETE_PERMISSION] Exam {exam.name} has no created_by field set")
+            debug_info["exam_created_by"] = "None"
+            debug_info["warning"] = "Exam has no created_by field set"
+            logger.warning(f"[DELETE_PERMISSION] Exam {exam.name} has no created_by: {json.dumps(debug_info)}")
         
         # Check if teacher has FULL access to any of the exam's classes
-        assignments = ExamService.get_teacher_assignments(user)
-        exam_classes = exam.class_codes if exam.class_codes else []
+        assignments = cls.get_teacher_assignments(user)
+        exam_classes = exam.class_codes if hasattr(exam, 'class_codes') and exam.class_codes else []
         
-        logger.debug(f"[DELETE_PERMISSION] Teacher {teacher.name} assignments: {list(assignments.keys())}")
-        logger.debug(f"[DELETE_PERMISSION] Exam {exam.name} classes: {exam_classes}")
+        debug_info["teacher_assignments"] = list(assignments.keys())
+        debug_info["teacher_access_levels"] = assignments
+        debug_info["exam_classes"] = exam_classes
         
         for class_code in exam_classes:
-            if class_code in assignments and assignments[class_code] == 'FULL':
-                logger.info(f"[DELETE_PERMISSION] Teacher {teacher.name} has FULL access to class {class_code}, granting delete permission")
-                print(f"[DELETE_PERMISSION] Teacher {teacher.name} has FULL access to class {class_code} - CAN DELETE")
-                return True
+            if class_code in assignments:
+                access_level = assignments[class_code]
+                debug_info[f"class_{class_code}_access"] = access_level
+                
+                if access_level == 'FULL':
+                    debug_info["result"] = "ALLOWED"
+                    debug_info["reason"] = f"Teacher has FULL access to class {class_code}"
+                    logger.info(f"[DELETE_PERMISSION] {json.dumps(debug_info)}")
+                    print(f"[DELETE_PERMISSION_CHECK] ✅ CLASS ACCESS GRANTED: {json.dumps(debug_info)}")
+                    return True
         
-        logger.info(f"[DELETE_PERMISSION] Teacher {teacher.name} does NOT have delete permission for exam {exam.name}")
-        print(f"[DELETE_PERMISSION] Teacher {teacher.name} CANNOT delete exam {exam.id}")
+        # Final denial with comprehensive reason
+        debug_info["result"] = "DENIED"
+        debug_info["reason"] = "No ownership or FULL class access"
+        debug_info["denial_details"] = {
+            "is_owner": False,
+            "has_full_class_access": False,
+            "teacher_classes_with_access": list(assignments.keys()),
+            "exam_requires_classes": exam_classes
+        }
+        logger.info(f"[DELETE_PERMISSION] {json.dumps(debug_info)}")
+        print(f"[DELETE_PERMISSION_CHECK] ❌ ACCESS DENIED: {json.dumps(debug_info)}")
         return False
     
     @classmethod

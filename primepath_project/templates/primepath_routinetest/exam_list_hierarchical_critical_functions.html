@@ -48,14 +48,22 @@
     };
     
     window.deleteExam = async function(examId) {
-        console.log('%c[DELETE] Starting exam deletion', 'color: #e74c3c', {
+        // ENHANCED COMPREHENSIVE DEBUGGING
+        const deleteDebugInfo = {
             examId: examId,
-            timestamp: new Date().toISOString()
-        });
+            timestamp: new Date().toISOString(),
+            user: document.querySelector('meta[name="user-name"]')?.content || 'Unknown',
+            userId: document.querySelector('meta[name="user-id"]')?.content || 'Unknown',
+            isAdmin: document.querySelector('meta[name="user-is-admin"]')?.content === 'true',
+            currentUrl: window.location.href,
+            examCard: document.querySelector(`[data-exam-id="${examId}"]`) ? 'Found' : 'Not Found'
+        };
+        
+        console.log('%c[DELETE] 🚨 Starting exam deletion', 'color: #e74c3c; font-weight: bold', deleteDebugInfo);
         
         // Prevent multiple simultaneous deletions
         if (window.DELETION_IN_PROGRESS[examId]) {
-            console.warn('[DELETE] Already processing deletion for exam:', examId);
+            console.warn('[DELETE] ⚠️ Already processing deletion for exam:', examId);
             return;
         }
         
@@ -90,12 +98,22 @@
                 console.warn('[DELETE] No CSRF token found, request may fail');
             }
             
+            // ENHANCED REQUEST WITH DEBUGGING
+            console.log('[DELETE] 📡 Sending DELETE request with:', {
+                url: deleteUrl,
+                method: 'DELETE',
+                hasCSRFToken: !!csrfToken,
+                csrfTokenLength: csrfToken ? csrfToken.length : 0
+            });
+            
             const response = await fetch(deleteUrl, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'  // Ensure cookies are sent
             });
             
             // Only log non-permission responses
@@ -115,16 +133,31 @@
                     errorData = { error: `HTTP error! status: ${response.status}` };
                 }
                 
-                // Handle permission errors specifically
+                // Handle permission errors with enhanced debugging
                 if (response.status === 403) {
+                    // COMPREHENSIVE PERMISSION DENIAL DEBUGGING
+                    const permissionDebug = {
+                        status: 'Access Denied (403)',
+                        examId: examId,
+                        errorResponse: errorData,
+                        userInfo: deleteDebugInfo,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    console.group('%c[DELETE] ❌ PERMISSION DENIED', 'color: #e74c3c; font-weight: bold');
+                    console.log('Debug Info:', permissionDebug);
+                    console.log('Server Response:', errorData);
+                    console.log('Detailed Error:', errorData.details || 'No details provided');
+                    console.groupEnd();
+                    
                     // Clean up the error message for better user experience
                     let permissionMessage = errorData.error || 
                         "You do not have permission to delete this exam.";
                     
-                    // Log permission denial as info, not error (expected behavior)
-                    console.info('%c[DELETE] Permission check:', 'color: #f39c12', {
+                    // Log permission denial with full context
+                    console.info('%c[DELETE] Permission check result:', 'color: #f39c12', {
                         status: 'Access Denied',
-                        reason: 'Insufficient permissions',
+                        reason: errorData.details?.reason || 'Insufficient permissions',
                         required: 'FULL access',
                         message: 'This is expected behavior - user needs FULL access to delete'
                     });

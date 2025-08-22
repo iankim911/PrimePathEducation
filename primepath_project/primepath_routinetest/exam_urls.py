@@ -5,8 +5,12 @@ URLs for exam creation, editing, and management
 from django.urls import path
 from . import views
 from .views import exam
+from .views.test_filter_view import test_filter
 
 urlpatterns = [
+    # Test filter page
+    path('test-filter/', test_filter, name='test_filter'),
+    
     # Exam management
     path('exams/', views.exam_list, name='exam_list'),
     path('exams/create/', views.create_exam, name='create_exam'),

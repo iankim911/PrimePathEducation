@@ -28,7 +28,16 @@ def exam_list(request):
     
     # Get filters from request
     exam_type_filter = request.GET.get('exam_type', 'ALL')
-    show_assigned_only = request.GET.get('assigned_only', 'false').lower() == 'true'
+    assigned_only_param = request.GET.get('assigned_only', 'false')
+    show_assigned_only = assigned_only_param.lower() == 'true'
+    
+    # DEBUG: Log the filter state
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"[FILTER_VIEW_DEBUG] URL: {request.get_full_path()}")
+    logger.info(f"[FILTER_VIEW_DEBUG] assigned_only parameter: '{assigned_only_param}'")
+    logger.info(f"[FILTER_VIEW_DEBUG] show_assigned_only boolean: {show_assigned_only}")
+    logger.info(f"[FILTER_VIEW_DEBUG] All GET params: {dict(request.GET)}")
     
     # Validate exam type filter
     valid_exam_types = ['REVIEW', 'QUARTERLY', 'ALL']
@@ -126,9 +135,52 @@ def exam_list(request):
         exam.answer_mapping_status = exam.get_answer_mapping_status()
     
     # Organize exams hierarchically with permission info
+    logger.info(f"[FILTER_VIEW_DEBUG] About to call organize_exams_hierarchically with filter_assigned_only={show_assigned_only}")
+    logger.info(f"[FILTER_VIEW_DEBUG] Number of exams before filtering: {exams.count()}")
+    
     hierarchical_exams = ExamService.organize_exams_hierarchically(
         exams, request.user, filter_assigned_only=show_assigned_only
     )
+    
+    # CRITICAL FIX: Double-check filtering at view level
+    # If filter is ON, ensure NO VIEW ONLY exams are in the result
+    if show_assigned_only and not is_admin:
+        logger.info(f"[FILTER_DOUBLE_CHECK] Filter is ON - removing any VIEW ONLY exams that slipped through")
+        filtered_hierarchical = {}
+        view_only_removed = 0
+        
+        for program, program_classes in hierarchical_exams.items():
+            filtered_program = {}
+            for class_code, class_exams in program_classes.items():
+                filtered_exams = []
+                for exam in class_exams:
+                    # Check if exam has VIEW ONLY badge
+                    if hasattr(exam, 'access_badge'):
+                        if exam.access_badge == 'VIEW ONLY':
+                            logger.warning(f"[FILTER_DOUBLE_CHECK] ❌ REMOVING VIEW ONLY exam: {exam.name} (ID: {exam.id})")
+                            view_only_removed += 1
+                            continue  # Skip this exam
+                        else:
+                            logger.info(f"[FILTER_DOUBLE_CHECK] ✅ Keeping exam: {exam.name} with badge: {exam.access_badge}")
+                            filtered_exams.append(exam)
+                    else:
+                        # Exam doesn't have access_badge attribute - keep it
+                        filtered_exams.append(exam)
+                
+                # Only add class if it has exams after filtering
+                if filtered_exams:
+                    filtered_program[class_code] = filtered_exams
+            
+            # Only add program if it has classes with exams
+            if filtered_program:
+                filtered_hierarchical[program] = filtered_program
+        
+        logger.info(f"[FILTER_DOUBLE_CHECK] Removed {view_only_removed} VIEW ONLY exams from final result")
+        hierarchical_exams = filtered_hierarchical
+    
+    # Count exams after filtering
+    total_after = sum(len(exam_list) for program in hierarchical_exams.values() for exam_list in program.values())
+    logger.info(f"[FILTER_VIEW_DEBUG] Number of exams after filtering: {total_after}")
     
     # Debug logging
     logger.info(f"[EXAM_LIST_DEBUG] Total exams before hierarchical: {exams.count()}")
@@ -256,7 +308,15 @@ def exam_list(request):
     response = render(request, 'primepath_routinetest/exam_list_hierarchical.html', context)
     
     # Add cache control headers
-    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    # AGGRESSIVE cache prevention - browser must NEVER cache this response
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate, private'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    response['Vary'] = 'Cookie, Accept-Encoding'
+    # Add timestamp to force browser to treat as unique response
+    import time
+    response['X-Response-Time'] = str(time.time())
+    response['X-Filter-State'] = 'on' if show_assigned_only else 'off'
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
     response['X-Template-Version'] = '6.0-answer-keys-library'
@@ -840,41 +900,128 @@ def manage_questions(request, exam_id):
 @require_http_methods(["POST", "DELETE"])
 @login_required
 def delete_exam(request, exam_id):
+    """Delete an exam with comprehensive permission checking and debugging"""
     from django.http import JsonResponse
     from primepath_routinetest.models import TeacherClassAssignment
     from primepath_routinetest.services.exam_service import ExamPermissionService
+    import json
+    
+    # CRITICAL: Log to file for persistence
+    import os
+    log_file = '/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/delete_debug.log'
+    with open(log_file, 'a') as f:
+        f.write(f"\n{'='*80}\n")
+        f.write(f"[{timezone.now().isoformat()}] DELETE EXAM VIEW CALLED\n")
+        f.write(f"Method: {request.method}\n")
+        f.write(f"User: {request.user.username if request.user else 'anonymous'}\n")
+        f.write(f"User ID: {request.user.id if request.user else None}\n")
+        f.write(f"Is Authenticated: {request.user.is_authenticated}\n")
+        f.write(f"Is Staff: {request.user.is_staff}\n")
+        f.write(f"Is Superuser: {request.user.is_superuser}\n")
+        f.write(f"Exam ID: {exam_id}\n")
+        f.write(f"Is AJAX: {request.headers.get('X-Requested-With') == 'XMLHttpRequest'}\n")
+        f.write(f"Headers: {dict(request.headers)}\n")
+    
+    # IMMEDIATE DEBUG OUTPUT
+    print(f"\n{'='*80}")
+    print(f"DELETE EXAM CALLED - DEBUGGING")
+    print(f"{'='*80}")
+    print(f"Request User: {request.user}")
+    print(f"User ID: {request.user.id}")
+    print(f"Is Authenticated: {request.user.is_authenticated}")
+    print(f"Is Staff: {request.user.is_staff}")
+    print(f"Is Superuser: {request.user.is_superuser}")
+    print(f"Exam ID: {exam_id}")
+    print(f"Method: {request.method}")
+    print(f"{'='*80}\n")
+    
+    # COMPREHENSIVE DEBUG LOGGING - REQUEST INFO
+    debug_info = {
+        "view": "delete_exam",
+        "action": "delete_attempt_start",
+        "user": request.user.username,
+        "user_id": request.user.id,
+        "exam_id": str(exam_id),
+        "method": request.method,
+        "is_ajax": request.headers.get('X-Requested-With') == 'XMLHttpRequest',
+        "timestamp": timezone.now().isoformat()
+    }
+    logger.info(f"[DELETE_EXAM_VIEW] {json.dumps(debug_info)}")
+    print(f"[DELETE_EXAM_VIEW] 🚨 DELETE ATTEMPT: {json.dumps(debug_info)}")
     
     exam = get_object_or_404(Exam, id=exam_id)
     exam_name = exam.name
     
+    # COMPREHENSIVE DEBUG - EXAM INFO
+    debug_info["exam_name"] = exam_name
+    debug_info["exam_created_by_id"] = exam.created_by.id if exam.created_by else None
+    debug_info["exam_created_by_name"] = exam.created_by.name if exam.created_by else None
+    debug_info["exam_classes"] = exam.class_codes if hasattr(exam, 'class_codes') else []
+    
     # Check permissions
     is_admin = request.user.is_superuser or request.user.is_staff
+    debug_info["is_admin"] = is_admin
     
     if not is_admin:
-        # Get teacher profile
-        teacher_profile = getattr(request.user, 'teacher_profile', None)
+        # Get teacher profile - try multiple methods
+        teacher_profile = None
+        
+        # Method 1: Direct attribute
+        if hasattr(request.user, 'teacher_profile'):
+            teacher_profile = request.user.teacher_profile
+            debug_info["teacher_profile_method"] = "direct_attribute"
+        
+        # Method 2: Database query if needed
+        if not teacher_profile:
+            try:
+                from core.models import Teacher
+                teacher_profile = Teacher.objects.filter(user=request.user).first()
+                if teacher_profile:
+                    debug_info["teacher_profile_method"] = "database_query"
+            except Exception as e:
+                debug_info["teacher_profile_error"] = str(e)
+        
         if not teacher_profile:
             error_msg = "You do not have permission to delete this exam. No teacher profile found."
+            debug_info["error"] = "No teacher profile"
+            logger.error(f"[DELETE_EXAM_VIEW] {json.dumps(debug_info)}")
+            print(f"[DELETE_EXAM_VIEW] ❌ NO TEACHER PROFILE: {json.dumps(debug_info)}")
+            
             if request.method == 'DELETE' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': False, 'error': error_msg}, status=403)
             else:
                 messages.error(request, error_msg)
                 return redirect('RoutineTest:exam_list')
         
-        # Check if teacher can delete this exam (pass user, not teacher_profile)
-        can_delete = ExamPermissionService.can_teacher_delete_exam(request.user, exam)
+        debug_info["teacher_id"] = teacher_profile.id
+        debug_info["teacher_name"] = teacher_profile.name
         
-        # Debug logging
-        logger.info(f"[DELETE_VIEW] User {request.user.username} attempting to delete exam {exam_id}")
-        logger.info(f"[DELETE_VIEW] Exam: {exam.name}, Created by: {exam.created_by.id if exam.created_by else 'None'}")
-        logger.info(f"[DELETE_VIEW] Teacher profile ID: {teacher_profile.id if teacher_profile else 'None'}")
-        logger.info(f"[DELETE_VIEW] can_delete result: {can_delete}")
+        # CRITICAL OWNERSHIP CHECK
+        if exam.created_by:
+            is_owner = exam.created_by.id == teacher_profile.id
+            debug_info["ownership_check"] = {
+                "is_owner": is_owner,
+                "exam_created_by_id": exam.created_by.id,
+                "teacher_id": teacher_profile.id,
+                "match": is_owner
+            }
+            if is_owner:
+                print(f"[DELETE_EXAM_VIEW] 👑 OWNER DETECTED: Teacher {teacher_profile.name} owns exam {exam_name}")
+        
+        # Check if teacher can delete this exam
+        can_delete = ExamPermissionService.can_teacher_delete_exam(request.user, exam)
+        debug_info["can_delete"] = can_delete
+        
+        # LOG TO FILE
+        with open(log_file, 'a') as f:
+            f.write(f"Permission check result: {can_delete}\n")
+            f.write(f"Debug info: {json.dumps(debug_info)}\n")
+        
+        logger.info(f"[DELETE_EXAM_VIEW] Permission check complete: {json.dumps(debug_info)}")
         
         if not can_delete:
             # Get the exam's classes and teacher's access levels for a detailed message
-            exam_classes = []
-            if hasattr(exam, 'class_codes') and exam.class_codes:
-                exam_classes = exam.class_codes
+            exam_classes = exam.class_codes if hasattr(exam, 'class_codes') and exam.class_codes else []
             
             # Get teacher's access levels for these classes
             teacher_assignments = TeacherClassAssignment.objects.filter(
@@ -894,9 +1041,9 @@ def delete_exam(request, exam_id):
             if access_details:
                 error_msg = (
                     f"Access Denied: You cannot delete this exam.\n\n"
-                    f"Required: FULL access level\n"
+                    f"Required: FULL access level or ownership\n"
                     f"Your access: {', '.join(access_details)}\n\n"
-                    f"Only teachers with FULL access can delete exams."
+                    f"Only exam owners or teachers with FULL access can delete exams."
                 )
             else:
                 error_msg = (
@@ -905,11 +1052,21 @@ def delete_exam(request, exam_id):
                     f"You do not have access to these classes."
                 )
             
-            # Log the permission denial for debugging
-            logger.error(f"[DELETE_DENIED] User {request.user.username} cannot delete exam {exam_id}")
-            logger.error(f"[DELETE_DENIED] Exam created by: {exam.created_by.id if exam.created_by else 'None'}")
-            logger.error(f"[DELETE_DENIED] Teacher profile ID: {teacher_profile.id}")
-            logger.error(f"[DELETE_DENIED] Error message: {error_msg}")
+            # Enhanced debug info for permission denial
+            debug_info["permission_denied"] = {
+                "reason": "Insufficient permissions",
+                "is_owner": exam.created_by.id == teacher_profile.id if exam.created_by else False,
+                "access_details": access_details,
+                "error_message": error_msg
+            }
+            
+            logger.warning(f"[DELETE_EXAM_VIEW] Permission denied: {json.dumps(debug_info)}")
+            print(f"[DELETE_EXAM_VIEW] ❌ PERMISSION DENIED: {json.dumps(debug_info)}")
+            
+            # LOG TO FILE
+            with open(log_file, 'a') as f:
+                f.write(f"PERMISSION DENIED\n")
+                f.write(f"Returning 403 error\n")
             
             if request.method == 'DELETE' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 # Return simple error message that won't be replaced by JavaScript
@@ -918,6 +1075,20 @@ def delete_exam(request, exam_id):
             else:
                 messages.error(request, error_msg)
                 return redirect('RoutineTest:exam_list')
+    
+    # CRITICAL FIX: This code should run for BOTH admins AND non-admins who pass permission check
+    # The permission check above already verified if the user can delete
+    # If we reach here, the user has permission to delete (either admin or owner/FULL access)
+    
+    debug_info["proceeding_to_delete"] = True
+    logger.info(f"[DELETE_EXAM_VIEW] User has permission, proceeding to delete: {json.dumps(debug_info)}")
+    print(f"[DELETE_EXAM_VIEW] ✅ PROCEEDING TO DELETE: User {request.user.username} deleting exam {exam_name}")
+    
+    # LOG TO FILE
+    with open(log_file, 'a') as f:
+        f.write(f"PERMISSION GRANTED - Proceeding to delete\n")
+        f.write(f"User: {request.user.username}\n")
+        f.write(f"Exam: {exam_name}\n")
     
     try:
         # Delete associated files

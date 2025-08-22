@@ -1,20 +1,1120 @@
-{% extends "routinetest_base.html" %}
-{% load custom_filters %}
-{% load access_display %}
-{# Template Version 6.0 - Hierarchical Library View with Permissions #}
 
-{% block title %}Exam Library - RoutineTest{% endblock %}
 
-{% block header %}Exam Library{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Library - RoutineTest</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    
+    <!-- Mobile Responsive CSS -->
+    <link rel="stylesheet" href="/static/css/mobile-responsive.css">
+    
+    <!-- Mode Toggle Position Fix - MUST LOAD LAST TO OVERRIDE -->
+    <link rel="stylesheet" href="/static/css/mode-toggle-position-fix.css?v=1755845820">
+    
+    <!-- Console Debugging for RoutineTest -->
+    <script>
+        console.log('%c[RoutineTest] Page Loading...', 'color: #00A65E; font-weight: bold;');
+        console.log('[RoutineTest] Navigation: Tab-based horizontal layout');
+        console.log('[RoutineTest] Theme: BCG Green (#00A65E)');
+        console.log('[RoutineTest] Module: Continuous Assessment Platform');
+        window.ROUTINETEST_DEBUG = true;
+        window.MATRIX_TAB_VERSION = '3.0';
+        window.NAVIGATION_TIMESTAMP = new Date().toISOString();
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header Section - Darker Muted Green Theme (Matching PlacementTest weight) */
+        .header {
+            background-color: #1B5E20;  /* Darker, more muted green */
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .header {
+            position: relative; /* For mode toggle positioning */
+        }
+        
+        /* Navigation Tabs - Darker Muted Green Theme (Matching PlacementTest style) */
+        .nav-tabs {
+            background-color: #0D4F1F;  /* Very dark, muted green */
+            padding: 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;  /* Allow horizontal scroll for many tabs */
+            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
+        }
+        
+        /* Custom scrollbar for nav tabs */
+        .nav-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-track {
+            background: #0A3D15;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-thumb {
+            background: #2E7D32;
+            border-radius: 2px;
+        }
+        
+        /* Matrix Tab Pulse Animation */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 10px 5px rgba(255, 152, 0, 0.3);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+            }
+        }
+        
+        /* Ensure Matrix Tab is ALWAYS visible */
+        #matrix-tab-item {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        #matrix-tab-item a {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        .nav-tabs * {
+            box-sizing: border-box;
+        }
+        
+        .nav-tabs ul {
+            list-style: none;
+            display: flex;
+            margin: 0 auto;
+            max-width: none;  /* Remove width restriction */
+            padding: 0 10px;  /* Minimal padding */
+            overflow-x: visible;  /* Show all tabs */
+            width: 100%;
+        }
+        
+        .nav-tabs li {
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        
+        .nav-tabs a {
+            display: block;
+            padding: 12px 12px;  /* Even more compact */
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            font-weight: 500;
+            position: relative;
+            height: 100%;
+            white-space: nowrap;
+            font-size: 13px;  /* Smaller font to fit more */
+        }
+        
+        .nav-tabs a:hover {
+            background-color: #1B5E20;  /* Darker muted green on hover */
+        }
+        
+        .nav-tabs a.active {
+            background-color: #2E7D32 !important;  /* Darker green for active */
+            color: white;
+            font-weight: 600;
+            box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Profile Link Styling */
+        .nav-tabs .profile-link {
+            display: flex !important;
+            align-items: center;
+            white-space: nowrap !important;
+            min-width: fit-content;
+        }
+        
+        .nav-tabs .profile-link span {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Logout Button - Red */
+        #logout-link {
+            background-color: #e74c3c !important;
+            color: white !important;
+        }
+        
+        #logout-link:hover {
+            background-color: #c0392b !important;
+        }
+        
+        /* Container - Full width for navigation */
+        .container {
+            max-width: 100%;  /* Full width */
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Content container with max width */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Content Area */
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+        
+        /* Messages/Alerts - BCG Green Theme */
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .alert-success {
+            background-color: #F1F8E9;
+            border: 1px solid #689F38;  /* Muted olive green border */
+            color: #33691E;  /* Dark olive green text */
+        }
+        
+        .alert-info {
+            background-color: #E0F2F1;
+            border: 1px solid #00ACC1;
+            color: #004D40;
+        }
+        
+        .alert-warning {
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            color: #E65100;
+        }
+        
+        .alert-danger {
+            background-color: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #B71C1C;
+        }
+        
+        .close-alert {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: inherit;
+            margin-left: 20px;
+        }
+        
+        /* Buttons - Darker Muted Green Theme */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #2E7D32;  /* Darker muted green */
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: #1B5E20;  /* Even darker on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+        }
+        
+        .btn-secondary {
+            background-color: #558B57;  /* Muted sage green */
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3D6F3F;  /* Darker sage green */
+        }
+        
+        /* Danger button - MUST stay red for destructive actions */
+        .btn-danger,
+        button.btn-danger,
+        .btn.btn-danger,
+        button[onclick*="confirmDelete"] {
+            background-color: #dc3545 !important;
+            background-image: none !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .btn-danger:hover,
+        button.btn-danger:hover,
+        .btn.btn-danger:hover,
+        button[onclick*="confirmDelete"]:hover {
+            background-color: #c82333 !important;
+            background-image: none !important;
+            border-color: #bd2130 !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        /* NUCLEAR OVERRIDE - Ensure delete buttons are NEVER green */
+        .routinetest-theme .btn-danger,
+        .routinetest-theme button.btn-danger,
+        .routinetest-theme .btn.btn-danger,
+        .routinetest-theme button[onclick*="confirmDelete"],
+        body.routinetest-theme .btn-danger,
+        body.routinetest-theme button.btn-danger,
+        body.routinetest-theme button[onclick*="confirmDelete"] {
+            background-color: #dc3545 !important;
+            background-image: none !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        /* Form Controls - Softer Green Theme */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #90A4AE;  /* Muted gray-green border */
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #2E7D32;  /* Darker green on focus */
+            box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.20);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #263238;  /* Dark gray for better readability */
+        }
+    </style>
+    
+    
+    
+    <!-- Mode Toggle Fix Scripts -->
+    <script src="/static/js/routinetest/mode-toggle-fix.js?v=1755845820" defer></script>
+    <script src="/static/js/routinetest/aggressive-mode-fix.js?v=1755845820"></script>
+    
+    <!-- Inline Mode Toggle Fix (Immediate Execution) -->
+    <script>
+    // Immediate fix for "function:" text issue
+    (function() {
+        function fixModeToggleText() {
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                if (el.childNodes.length === 1 && el.firstChild && el.firstChild.nodeType === 3) {
+                    const text = el.firstChild.nodeValue;
+                    if (text && text.includes('function:')) {
+                        console.warn('[IMMEDIATE_FIX] Found and fixing "function:" text:', text);
+                        el.firstChild.nodeValue = text.replace(/function\s*:\s*/gi, '');
+                    }
+                }
+            });
+            
+            // Remove any toggles from stats areas
+            const statsAreas = document.querySelectorAll('.class-stats, .class-stat, .stats-box, .stat-box');
+            statsAreas.forEach(area => {
+                const toggles = area.querySelectorAll('[class*="toggle"]');
+                if (toggles.length > 0) {
+                    console.warn('[IMMEDIATE_FIX] Removing toggles from stats area');
+                    toggles.forEach(t => t.remove());
+                }
+            });
+        }
+        
+        // Run multiple times to catch dynamic content
+        fixModeToggleText();
+        setTimeout(fixModeToggleText, 0);
+        setTimeout(fixModeToggleText, 100);
+        setTimeout(fixModeToggleText, 500);
+        
+        // Also run on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fixModeToggleText);
+        } else {
+            fixModeToggleText();
+        }
+    })();
+    </script>
+</head>
+<body class="routinetest-theme">
+    <!-- Immediate theme application -->
+    <script>
+        // Apply theme class immediately to prevent FOUC
+        document.documentElement.classList.add('routinetest-theme');
+        if (document.body) {
+            document.body.classList.add('routinetest-theme');
+        }
+    </script>
+    <!-- Debug Console Logger -->
+    <script>
+        console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #00A65E; color: white; padding: 5px; border-radius: 3px;');
+        console.log('Theme: BCG Green (#00A65E)');
+        console.log('Navigation: Horizontal Tab Layout');
+        console.log('Module: RoutineTest - Exam Management System');
+        console.log('User: teacher1');
+        console.groupEnd();
+    </script>
+    
+    <!-- Header Section -->
+    <div class="header">
+        <div class="container">
+            <h1>Exam Library</h1>
+        </div>
+    </div>
+    
+    <!-- Navigation Tabs - Version 8.0 with Complete Cache Busting -->
+    <!-- UNIFIED CLASSES & EXAMS ONLY - NO OLD TABS -->
+    <!-- RoutineTest Navigation - VERSION 8.0 UNIFIED COMPLETE -->
+<!-- Cache Bust: 1755845820 -->
+<!-- NO OLD TABS - UNIFIED CLASSES & EXAMS ONLY -->
+<nav class="nav-tabs" id="routinetest-nav-v8-5" data-version="8.0" data-timestamp="2025-08-22T15:57:00.175858+09:00">
+    <ul style="display: flex; justify-content: space-between; width: 100%;">
+        <div style="display: flex; flex: 1;">
+            <!-- Dashboard -->
+            <li>
+                <a href="/RoutineTest/" 
+                   data-nav="dashboard"
+                   class="">
+                   Dashboard
+                </a>
+            </li>
+            
+            <!-- Upload Exam -->
+            <li>
+                <a href="/RoutineTest/exams/create/" 
+                   data-nav="upload"
+                   class="">
+                   Upload Exam
+                </a>
+            </li>
+            
+            <!-- Exam Library -->
+            <li>
+                <a href="/RoutineTest/exams/" 
+                   data-nav="keys"
+                   class="active">
+                   Exam Library
+                </a>
+            </li>
+            
+            <!-- UNIFIED CLASSES & EXAMS TAB (VERSION 8) -->
+            <li id="unified-tab-v8">
+                <a href="/RoutineTest/classes-exams/" 
+                   data-nav="classes-exams"
+                   class="">
+                   Classes & Exams
+                </a>
+            </li>
+            
+            <!-- Results & Analytics -->
+            <li>
+                <a href="/RoutineTest/sessions/" 
+                   data-nav="results"
+                   class="">
+                   Results & Analytics
+                </a>
+            </li>
+            
+            <!-- Admin Only: Curriculum Mapping - Only show in Admin mode -->
+            
+        </div>
+        
+        <!-- User Section -->
+        <div style="display: flex; margin-left: auto;">
+            
+                <li><a href="#" class="profile-link">👤 teacher1</a></li>
+                <li><a href="/logout/" style="background: #e74c3c;">Logout</a></li>
+            
+        </div>
+    </ul>
+</nav>
 
-{% block content %}
+<!-- Aggressive Cache Busting and Verification Script -->
+<script>
+(function() {
+    const navVersion = 8.0;
+    const timestamp = new Date().getTime();
+    const userId = '5';
+    
+    console.group('%c[NAV_V8_UNIFIED] RoutineTest Navigation Version 8.0', 
+        'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 5px; font-weight: bold;');
+    
+    console.log('📌 Version:', navVersion);
+    console.log('⏱️ Timestamp:', new Date(timestamp).toISOString());
+    console.log('👤 User:', userId);
+    console.log('🔄 Cache Bust ID:', timestamp);
+    
+    // Log URL resolution from Django templates
+    console.group('🔗 URL Resolution from Django:');
+    console.log('Dashboard URL: /RoutineTest/');
+    console.log('Create Exam URL: /RoutineTest/exams/create/');
+    console.log('Exam List URL: /RoutineTest/exams/');
+    console.log('Classes & Exams URL: /RoutineTest/classes-exams/');
+    console.log('Session List URL: /RoutineTest/sessions/');
+    
+    console.groupEnd();
+    
+    // Verify navigation structure
+    const nav = document.getElementById('routinetest-nav-v8-' + userId);
+    if (nav) {
+        console.log('✅ Navigation V8 element found');
+        
+        // Count and log all tabs
+        const allTabs = nav.querySelectorAll('a[data-nav]');
+        console.log('📊 Total navigation tabs:', allTabs.length);
+        
+        const tabStructure = [];
+        allTabs.forEach((tab, index) => {
+            const text = tab.textContent.trim();
+            const dataNav = tab.getAttribute('data-nav');
+            const href = tab.getAttribute('href');
+            
+            tabStructure.push({
+                index: index + 1,
+                text: text,
+                dataNav: dataNav,
+                href: href
+            });
+            
+            // Log each tab
+            const isUnified = dataNav === 'classes-exams';
+            const marker = isUnified ? '🎯' : '  ';
+            console.log(`${marker} Tab ${index + 1}: "${text}" [${dataNav}] → ${href}`);
+        });
+        
+        // Check for unified tab
+        const unifiedTab = nav.querySelector('a[data-nav="classes-exams"]');
+        if (unifiedTab) {
+            console.log('✅ UNIFIED TAB FOUND:', unifiedTab.textContent.trim());
+            
+            // Force visibility
+            const unifiedLi = document.getElementById('unified-tab-v8');
+            if (unifiedLi) {
+                unifiedLi.style.display = 'flex';
+                unifiedLi.style.visibility = 'visible';
+                unifiedLi.style.opacity = '1';
+                console.log('✅ Unified tab visibility enforced (consistent styling applied)');
+            }
+        } else {
+            console.error('❌ UNIFIED TAB NOT FOUND!');
+        }
+        
+        // Check for OLD tabs (should not exist)
+        const oldTabsCheck = Array.from(allTabs).filter(tab => {
+            const text = tab.textContent;
+            const dataNav = tab.getAttribute('data-nav');
+            return (text.includes('My Classes') && text.includes('Access')) || 
+                   text.includes('Exam Assignments') ||
+                   dataNav === 'my-classes' ||
+                   dataNav === 'exam-assignments';
+        });
+        
+        if (oldTabsCheck.length > 0) {
+            console.error('❌ OLD TABS DETECTED:', oldTabsCheck.map(t => t.textContent.trim()));
+            console.error('These tabs should be removed!');
+            
+            // Remove old tabs dynamically
+            oldTabsCheck.forEach(tab => {
+                const li = tab.closest('li');
+                if (li) {
+                    li.style.display = 'none';
+                    console.log('🗑️ Hiding old tab:', tab.textContent.trim());
+                }
+            });
+        } else {
+            console.log('✅ No old tabs found - navigation is clean');
+        }
+        
+        // Store navigation state
+        window.ROUTINETEST_NAV_V8 = {
+            version: navVersion,
+            timestamp: timestamp,
+            tabs: tabStructure,
+            unified: unifiedTab ? true : false
+        };
+        
+    } else {
+        console.error('❌ Navigation V8 element not found!');
+    }
+    
+    console.groupEnd();
+    
+    // Track any URL modifications
+    const originalUrls = {};
+    document.querySelectorAll('.nav-tabs a').forEach(link => {
+        const dataNav = link.getAttribute('data-nav');
+        if (dataNav) {
+            originalUrls[dataNav] = link.href;
+        }
+    });
+    
+    // Periodic check to ensure navigation stays correct and URLs aren't modified
+    let checkCount = 0;
+    const checkInterval = setInterval(function() {
+        checkCount++;
+        
+        const tabs = document.querySelectorAll('.nav-tabs a[data-nav]');
+        
+        // Check for URL modifications
+        tabs.forEach(tab => {
+            const dataNav = tab.getAttribute('data-nav');
+            if (dataNav && originalUrls[dataNav] && tab.href !== originalUrls[dataNav]) {
+                console.error(`[URL_MODIFIED] ${dataNav}: ${originalUrls[dataNav]} → ${tab.href}`);
+            }
+        });
+        
+        const hasOldTabs = Array.from(tabs).some(tab => 
+            tab.getAttribute('data-nav') === 'my-classes' || 
+            tab.getAttribute('data-nav') === 'exam-assignments'
+        );
+        
+        if (hasOldTabs) {
+            console.warn(`[NAV_V8_CHECK_${checkCount}] Old tabs detected at ${new Date().toISOString()}`);
+            // Hide them
+            tabs.forEach(tab => {
+                if (tab.getAttribute('data-nav') === 'my-classes' || 
+                    tab.getAttribute('data-nav') === 'exam-assignments') {
+                    tab.closest('li').style.display = 'none';
+                }
+            });
+        }
+        
+        if (checkCount >= 5) {
+            clearInterval(checkInterval);
+            console.log('[NAV_V8_MONITORING] Completed 5 checks, navigation stable');
+        }
+    }, 1000);
+})();
+
+// Simple navigation debouncing to prevent rapid clicking
+(function() {
+    let lastClickTime = 0;
+    const clickDelay = 300; // 300ms debounce
+    
+    document.addEventListener('click', function(e) {
+        const navLink = e.target.closest('.nav-tabs a');
+        if (navLink) {
+            const now = Date.now();
+            if (now - lastClickTime < clickDelay) {
+                e.preventDefault();
+                return false;
+            }
+            lastClickTime = now;
+        }
+    });
+})();
+</script>
+
+<style>
+/* Navigation V8 Specific Styles */
+#routinetest-nav-v8-5 {
+    position: relative;
+    z-index: 1000;
+}
+
+#unified-tab-v8 {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Hide any old tabs if they somehow appear */
+li:has(a[data-nav="my-classes"]),
+li:has(a[data-nav="exam-assignments"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+</style>
+    
+    <!-- Mode Toggle - Positioned below navigation -->
+    
+    
+    <!-- Additional Navigation Verification -->
+    <script>
+        console.log('[ROUTINETEST_BASE] Loading Navigation V8 at', new Date().toISOString());
+        console.log('[ROUTINETEST_BASE] User: teacher1');
+        console.log('[ROUTINETEST_BASE] Cache Bust: 1755845820');
+    </script>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Messages/Alerts -->
+        
+        
+        <!-- Page Content -->
+        <div class="content">
+            
 <!-- CSRF Token for AJAX requests -->
-{% csrf_token %}
+<input type="hidden" name="csrfmiddlewaretoken" value="WvSPiluS3pPX74VYXr7E2yEIKalleXmtnRKKjdZ0FJANNeMRPWWQkK32i9e2A7y8">
 
 <!-- ============================================================================ -->
 <!-- CRITICAL: Global Functions - MUST load before any buttons are rendered      -->
 <!-- ============================================================================ -->
-{% include 'primepath_routinetest/exam_list_hierarchical_critical_functions.html' %}
+<!-- CRITICAL FUNCTIONS - Must be loaded IMMEDIATELY in global scope -->
+<!-- This script MUST be included right after <body> tag or in <head> -->
+<script>
+(function() {
+    'use strict';
+    
+    console.log('%c[CRITICAL_FUNCTIONS] Initializing global exam functions...', 'color: #FF6B6B; font-weight: bold');
+    
+    // ============================================================================
+    // GLOBAL FUNCTION DEFINITIONS - MUST BE AVAILABLE BEFORE ANY ONCLICK
+    // ============================================================================
+    
+    // Track initialization
+    window.EXAM_FUNCTIONS_READY = false;
+    window.EXAM_FUNCTIONS_INIT_TIME = Date.now();
+    
+    // Track deletion state to prevent multiple requests
+    window.DELETION_IN_PROGRESS = {};
+    
+    // Delete functionality
+    window.confirmDelete = function(examId, examName) {
+        console.log('%c[DELETE] confirmDelete called', 'color: #e74c3c; font-weight: bold', {
+            examId: examId,
+            examName: examName,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (!examId) {
+            console.warn('[DELETE] No exam ID provided');
+            alert('Error: No exam ID provided for deletion');
+            return;
+        }
+        
+        // Check if deletion is already in progress for this exam
+        if (window.DELETION_IN_PROGRESS[examId]) {
+            console.warn('[DELETE] Deletion already in progress for exam:', examId);
+            return;
+        }
+        
+        const confirmMessage = `Are you sure you want to delete "${examName || 'this exam'}"?\n\nThis action cannot be undone.`;
+        
+        if (confirm(confirmMessage)) {
+            console.log('[DELETE] User confirmed deletion');
+            window.deleteExam(examId);
+        } else {
+            console.log('[DELETE] User cancelled deletion');
+        }
+    };
+    
+    window.deleteExam = async function(examId) {
+        // ENHANCED COMPREHENSIVE DEBUGGING
+        const deleteDebugInfo = {
+            examId: examId,
+            timestamp: new Date().toISOString(),
+            user: document.querySelector('meta[name="user-name"]')?.content || 'Unknown',
+            userId: document.querySelector('meta[name="user-id"]')?.content || 'Unknown',
+            isAdmin: document.querySelector('meta[name="user-is-admin"]')?.content === 'true',
+            currentUrl: window.location.href,
+            examCard: document.querySelector(`[data-exam-id="${examId}"]`) ? 'Found' : 'Not Found'
+        };
+        
+        console.log('%c[DELETE] 🚨 Starting exam deletion', 'color: #e74c3c; font-weight: bold', deleteDebugInfo);
+        
+        // Prevent multiple simultaneous deletions
+        if (window.DELETION_IN_PROGRESS[examId]) {
+            console.warn('[DELETE] ⚠️ Already processing deletion for exam:', examId);
+            return;
+        }
+        
+        // Mark as in progress
+        window.DELETION_IN_PROGRESS[examId] = true;
+        
+        // Disable all delete buttons temporarily
+        const deleteButtons = document.querySelectorAll('button[onclick*="confirmDelete"]');
+        deleteButtons.forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes(examId)) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        });
+        
+        // Track if this is a permission denial
+        let isPermissionDenied = false;
+        let result = null;  // Initialize result variable in outer scope
+        
+        console.log('[DELETE] Starting deletion process for exam:', examId);
+        
+        try {
+            const deleteUrl = `/RoutineTest/exams/${examId}/delete/`;
+            console.log('[DELETE] Sending DELETE request to:', deleteUrl);
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.querySelector('meta[name="csrf-token"]')?.content || '';
+            
+            if (!csrfToken) {
+                console.warn('[DELETE] No CSRF token found, request may fail');
+            }
+            
+            // ENHANCED REQUEST WITH DEBUGGING
+            console.log('[DELETE] 📡 Sending DELETE request with:', {
+                url: deleteUrl,
+                method: 'DELETE',
+                hasCSRFToken: !!csrfToken,
+                csrfTokenLength: csrfToken ? csrfToken.length : 0
+            });
+            
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'  // Ensure cookies are sent
+            });
+            
+            // Only log non-permission responses
+            if (response.status !== 403) {
+                console.log('[DELETE] Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok
+                });
+            }
+            
+            if (!response.ok) {
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (jsonError) {
+                    errorData = { error: `HTTP error! status: ${response.status}` };
+                }
+                
+                // Handle permission errors with enhanced debugging
+                if (response.status === 403) {
+                    // COMPREHENSIVE PERMISSION DENIAL DEBUGGING
+                    const permissionDebug = {
+                        status: 'Access Denied (403)',
+                        examId: examId,
+                        errorResponse: errorData,
+                        userInfo: deleteDebugInfo,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    console.group('%c[DELETE] ❌ PERMISSION DENIED', 'color: #e74c3c; font-weight: bold');
+                    console.log('Debug Info:', permissionDebug);
+                    console.log('Server Response:', errorData);
+                    console.log('Detailed Error:', errorData.details || 'No details provided');
+                    console.groupEnd();
+                    
+                    // Clean up the error message for better user experience
+                    let permissionMessage = errorData.error || 
+                        "You do not have permission to delete this exam.";
+                    
+                    // Log permission denial with full context
+                    console.info('%c[DELETE] Permission check result:', 'color: #f39c12', {
+                        status: 'Access Denied',
+                        reason: errorData.details?.reason || 'Insufficient permissions',
+                        required: 'FULL access',
+                        message: 'This is expected behavior - user needs FULL access to delete'
+                    });
+                    
+                    // Clean up message if needed
+                    if (!permissionMessage.includes('Access Denied') && !permissionMessage.includes('FULL access')) {
+                        permissionMessage = "You do not have the required access level to delete this exam. Only teachers with FULL access can delete exams.";
+                    }
+                    
+                    // Show user-friendly notification
+                    if (window.showErrorNotification) {
+                        window.showErrorNotification(permissionMessage);
+                    } else {
+                        alert('Access Denied\n\n' + permissionMessage);
+                    }
+                    
+                    // Mark as permission denied - DON'T throw error, DON'T return early
+                    isPermissionDenied = true;
+                    console.log('[DELETE] Permission denied flag set, skipping further processing');
+                } else {
+                    // Only log non-permission errors
+                    console.error('[DELETE] Server error (non-403):', {
+                        status: response.status,
+                        error: errorData,
+                        examId: examId
+                    });
+                    
+                    // For other errors, throw to be caught by catch block
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+            }
+            
+            // Only process success response if not a permission denial
+            if (!isPermissionDenied && response.ok) {
+                const result = await response.json();
+                console.log('[DELETE] Processing success response:', {
+                    success: result.success,
+                    message: result.message,
+                    examId: examId
+                });
+                
+                if (result.success) {
+                    // Find and remove the exam card from DOM
+                    const examCard = document.querySelector(`button[onclick*="${examId}"]`)?.closest('.exam-card');
+                    if (examCard) {
+                        console.log('[DELETE] Removing exam card from DOM');
+                        const classExams = examCard.closest('.class-exams');
+                        
+                        // Animate removal
+                        examCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                        examCard.style.opacity = '0';
+                        examCard.style.transform = 'scale(0.95)';
+                        
+                        setTimeout(() => {
+                            examCard.remove();
+                            
+                            // Check if this was the last exam
+                            if (classExams && classExams.querySelectorAll('.exam-card').length === 0) {
+                                classExams.innerHTML = '<div class="no-exams">No exams in this class</div>';
+                            }
+                            
+                            // Show success notification
+                            if (window.showSuccessNotification) {
+                                window.showSuccessNotification('Exam deleted successfully');
+                            } else {
+                                alert('Exam deleted successfully');
+                            }
+                        }, 300);
+                    } else {
+                        console.log('[DELETE] Exam card not found, reloading page');
+                        alert('Exam deleted successfully');
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+                } else if (!isPermissionDenied && result) {
+                    // Log as warning, not error, since this is a controlled response
+                    console.warn('[DELETE] Server returned success:false', result);
+                    alert(result.message || result.error || 'Failed to delete exam');
+                }
+            }
+        } catch (error) {
+            // Don't log or handle if permission was already denied
+            if (isPermissionDenied) {
+                console.log('[DELETE] Skipping error handling - permission already denied');
+                return;
+            }
+            
+            // Only log actual errors, not permission denials
+            if (error && error.message && !error.message.includes('permission') && !error.message.includes('Access Denied')) {
+                console.error('[DELETE] Exception caught:', error);
+            }
+            
+            // Only show error if it's not a permission error (already handled above)
+            if (error && error.message && !error.message.includes('permission') && !error.message.includes('Access Denied')) {
+                if (window.showErrorNotification) {
+                    window.showErrorNotification('Error deleting exam: ' + error.message);
+                } else {
+                    alert('Error deleting exam: ' + error.message);
+                }
+            }
+        } finally {
+            // Always clean up state
+            delete window.DELETION_IN_PROGRESS[examId];
+            
+            // Re-enable delete buttons
+            const deleteButtons = document.querySelectorAll('button[onclick*="confirmDelete"]');
+            deleteButtons.forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes(examId)) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+            
+            console.log('[DELETE] Cleanup complete for exam:', examId);
+        }
+    };
+    
+    // Copy functionality
+    window.openCopyModal = function(examId, examName) {
+        console.log('%c[COPY] openCopyModal called', 'color: #3498db; font-weight: bold', {
+            examId: examId,
+            examName: examName,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (!examId) {
+            console.error('[COPY] No exam ID provided');
+            alert('Error: No exam ID provided for copying');
+            return;
+        }
+        
+        // Check if modal manager is available
+        if (window.CopyModalManager && window.CopyModalManager.open) {
+            console.log('[COPY] Using CopyModalManager');
+            window.CopyModalManager.open(examId, examName);
+        } else if (window.openCopyModalInternal) {
+            console.log('[COPY] Using openCopyModalInternal');
+            window.openCopyModalInternal(examId, examName);
+        } else {
+            console.error('[COPY] No copy modal handler available yet');
+            // Store for later execution
+            window.pendingCopyModal = { examId, examName };
+            alert('Copy modal is still loading. Please try again in a moment.');
+        }
+    };
+    
+    window.closeCopyModal = function() {
+        console.log('%c[COPY] closeCopyModal called', 'color: #3498db; font-weight: bold');
+        
+        if (window.CopyModalManager && window.CopyModalManager.close) {
+            window.CopyModalManager.close();
+        } else if (window.closeCopyModalInternal) {
+            window.closeCopyModalInternal();
+        } else {
+            // Fallback: try to hide modal directly
+            const modal = document.getElementById('copyExamModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+    };
+    
+    // Notification functions
+    window.showSuccessNotification = function(message) {
+        console.log('[NOTIFICATION] Success:', message);
+        if (window.showNotification) {
+            window.showNotification(message, 'success');
+        } else {
+            alert('✓ ' + message);
+        }
+    };
+    
+    window.showErrorNotification = function(message) {
+        console.log('[NOTIFICATION] Error:', message);
+        if (window.showNotification) {
+            window.showNotification(message, 'error');
+        } else {
+            alert('✗ ' + message);
+        }
+    };
+    
+    window.showNotification = function(message, type) {
+        type = type || 'info';
+        console.log(`[NOTIFICATION] ${type}:`, message);
+        
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.exam-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `exam-notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10001;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+        
+        // Set colors based on type
+        if (type === 'success') {
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+        } else if (type === 'error') {
+            notification.style.backgroundColor = '#f44336';
+            notification.style.color = 'white';
+        } else {
+            notification.style.backgroundColor = '#2196F3';
+            notification.style.color = 'white';
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    };
+    
+    // Mark as ready
+    window.EXAM_FUNCTIONS_READY = true;
+    
+    // Log initialization complete
+    const initTime = Date.now() - window.EXAM_FUNCTIONS_INIT_TIME;
+    console.log('%c[CRITICAL_FUNCTIONS] Global functions ready!', 'color: #27ae60; font-weight: bold', {
+        initTime: initTime + 'ms',
+        functions: ['confirmDelete', 'deleteExam', 'openCopyModal', 'closeCopyModal'],
+        ready: window.EXAM_FUNCTIONS_READY
+    });
+    
+    // Verify functions are available
+    console.log('[CRITICAL_FUNCTIONS] Function availability check:', {
+        confirmDelete: typeof window.confirmDelete,
+        deleteExam: typeof window.deleteExam,
+        openCopyModal: typeof window.openCopyModal,
+        closeCopyModal: typeof window.closeCopyModal
+    });
+    
+})();
+
+// Double-check functions are in global scope
+console.log('[GLOBAL_CHECK] Functions in window:', {
+    confirmDelete: typeof window.confirmDelete === 'function',
+    deleteExam: typeof window.deleteExam === 'function',
+    openCopyModal: typeof window.openCopyModal === 'function',
+    closeCopyModal: typeof window.closeCopyModal === 'function'
+});
+</script>
 
 <style>
     /* Main Layout */
@@ -725,298 +1825,334 @@
         <div class="header-controls">
             <!-- Filter Toggle -->
             <div class="filter-toggle">
-                <input type="checkbox" id="assignedOnlyFilter" {% if show_assigned_only %}checked{% endif %}>
+                <input type="checkbox" id="assignedOnlyFilter" checked>
                 <label for="assignedOnlyFilter">Show Assigned Classes Only</label>
             </div>
             
             <!-- Upload Button (Admin or Full Access Teachers) -->
-            {% if is_admin or can_manage_exams %}
-            <a href="{% url 'RoutineTest:create_exam' %}" class="btn btn-edit">
+            
+            <a href="/RoutineTest/exams/create/" class="btn btn-edit">
                 📤 Upload New Exam
             </a>
-            {% endif %}
+            
         </div>
     </div>
     
     <!-- Global Access Level Indicator -->
-    {% if not is_admin %}
-    <div class="global-access-indicator {% if is_view_only_teacher %}view-only{% else %}full-access{% endif %}">
-        {% if is_view_only_teacher %}
-            👁️ View Only Access - You can view exams but cannot edit or delete them
-        {% else %}
+    
+    <div class="global-access-indicator full-access">
+        
             ✅ Full Access - You can create, edit, and delete exams in your assigned classes
-        {% endif %}
+        
     </div>
-    {% endif %}
+    
     
     <!-- Summary Stats -->
     <div class="summary-stats">
         <div class="stat-item">
             <span class="stat-label">Total Exams:</span>
-            <span class="stat-value">{{ mapping_summary.total }}</span>
+            <span class="stat-value">2</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Complete:</span>
-            <span class="stat-value" style="color: #28a745;">{{ mapping_summary.complete }}</span>
+            <span class="stat-value" style="color: #28a745;">0</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Partial:</span>
-            <span class="stat-value" style="color: #ffc107;">{{ mapping_summary.partial }}</span>
+            <span class="stat-value" style="color: #ffc107;">0</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Not Started:</span>
-            <span class="stat-value" style="color: #dc3545;">{{ mapping_summary.not_started }}</span>
+            <span class="stat-value" style="color: #dc3545;">2</span>
         </div>
-        {% if not is_admin %}
+        
         <div class="stat-item">
             <span class="stat-label">Editable:</span>
-            <span class="stat-value" style="color: #4CAF50;">{{ mapping_summary.editable }}</span>
+            <span class="stat-value" style="color: #4CAF50;">2</span>
         </div>
-        {% endif %}
+        
     </div>
     
     <!-- Exam Type Tabs -->
     <div class="exam-type-tabs">
-        <a href="?exam_type=REVIEW{% if show_assigned_only %}&assigned_only=true{% endif %}" 
-           class="exam-type-tab {% if exam_type_filter == 'REVIEW' %}active{% endif %}">
+        <a href="?exam_type=REVIEW&assigned_only=true" 
+           class="exam-type-tab ">
             <span>📚 Review / Monthly</span>
-            <span class="tab-badge">{{ exam_type_counts.review }}</span>
+            <span class="tab-badge">9</span>
         </a>
         
-        <a href="?exam_type=QUARTERLY{% if show_assigned_only %}&assigned_only=true{% endif %}" 
-           class="exam-type-tab {% if exam_type_filter == 'QUARTERLY' %}active{% endif %}">
+        <a href="?exam_type=QUARTERLY&assigned_only=true" 
+           class="exam-type-tab ">
             <span>📊 Quarterly</span>
-            <span class="tab-badge">{{ exam_type_counts.quarterly }}</span>
+            <span class="tab-badge">6</span>
         </a>
         
-        <a href="?exam_type=ALL{% if show_assigned_only %}&assigned_only=true{% endif %}" 
-           class="exam-type-tab {% if exam_type_filter == 'ALL' %}active{% endif %}">
+        <a href="?exam_type=ALL&assigned_only=true" 
+           class="exam-type-tab active">
             <span>📋 All Exams</span>
-            <span class="tab-badge">{{ exam_type_counts.all }}</span>
+            <span class="tab-badge">15</span>
         </a>
     </div>
     
     <!-- Hierarchical Exam Display -->
-    <!-- DEBUG SECTION - Server Data Analysis -->
-    {% if show_assigned_only %}
-    <script>
-        console.log('========================================');
-        console.log('[SERVER_DATA_DEBUG] FILTER IS ON - Analyzing server data');
-        console.log('[SERVER_DATA_DEBUG] Filter state from Django: {{ show_assigned_only }}');
-        
-        // Count VIEW ONLY exams in server data
-        let serverViewOnlyCount = 0;
-        let serverTotalExams = 0;
-        
-        {% for program in program_order %}
-            {% with program_exams=hierarchical_exams|get_item:program %}
-            {% if program_exams and program_exams|length > 0 %}
-                {% for class_code, class_exams in program_exams.items %}
-                    {% for exam in class_exams %}
-                        serverTotalExams++;
-                        {% if exam.access_badge == 'VIEW ONLY' %}
-                            serverViewOnlyCount++;
-                            console.log('[SERVER_DATA_DEBUG] ❌ VIEW ONLY exam in server data: {{ exam.name|escapejs }} (ID: {{ exam.id }})');
-                        {% endif %}
-                    {% endfor %}
-                {% endfor %}
-            {% endif %}
-            {% endwith %}
-        {% endfor %}
-        
-        console.log('[SERVER_DATA_DEBUG] Total exams from server:', serverTotalExams);
-        console.log('[SERVER_DATA_DEBUG] VIEW ONLY exams from server:', serverViewOnlyCount);
-        
-        if (serverViewOnlyCount > 0) {
-            console.log('[SERVER_DATA_DEBUG] ❌❌❌ CRITICAL: Server sent VIEW ONLY exams when filter is ON!');
-        } else {
-            console.log('[SERVER_DATA_DEBUG] ✅ Server data is correct - no VIEW ONLY exams');
-        }
-        console.log('========================================');
-    </script>
-    {% endif %}
-    
-    <!-- Debug: hierarchical_exams = {{ hierarchical_exams }} -->
+    <!-- Debug: hierarchical_exams = {&#x27;CORE&#x27;: {&#x27;PRIMARY_2A&#x27;: [&lt;Exam: [Review / Monthly Exam] Test Ownership Exam - AUGUST 2025&gt;, &lt;Exam: [Review / Monthly Exam] Test Ownership Exam&gt;]}} -->
     <div class="exam-hierarchy">
-        {% for program in program_order %}
-            {% with program_exams=hierarchical_exams|get_item:program %}
-            {% if program_exams and program_exams|length > 0 %}
-            <div class="program-section" data-program="{{ program }}">
-                <div class="program-header" onclick="toggleProgram('{{ program }}')">
-                    <span>{{ program }} Program</span>
+        
+            
+            
+            <div class="program-section" data-program="CORE">
+                <div class="program-header" onclick="toggleProgram('CORE')">
+                    <span>CORE Program</span>
                     <span class="program-toggle">▼</span>
                 </div>
                 
                 <div class="program-content">
-                    <!-- Debug: {{ program_exams|length }} classes in {{ program }} -->
-                    {% for class_code, class_exams in program_exams.items %}
-                        {% with access_level=teacher_assignments|get_item:class_code %}
-                        <div class="class-section {% if access_level and access_level != 'VIEW' %}accessible{% endif %}" 
-                             data-class="{{ class_code }}">
-                            <div class="class-header" onclick="toggleClass('{{ class_code }}')">
+                    <!-- Debug: 1 classes in CORE -->
+                    
+                        
+                        <div class="class-section accessible" 
+                             data-class="PRIMARY_2A">
+                            <div class="class-header" onclick="toggleClass('PRIMARY_2A')">
                                 <div class="class-name">
-                                    <span>{{ get_class_display_name|get_item:class_code|default:class_code }}</span>
-                                    {% if access_level %}
-                                        {% if access_level == 'FULL' %}
+                                    <span>Grade 2A</span>
+                                    
+                                        
                                             <span class="access-badge full">Full Access</span>
-                                        {% elif access_level == 'CO_TEACHER' %}
-                                            <span class="access-badge co-teacher">Co-Teacher</span>
-                                        {% elif access_level == 'VIEW' %}
-                                            <span class="access-badge view">View Only</span>
-                                        {% endif %}
-                                    {% elif not is_admin %}
-                                        <span class="access-badge view">View Only</span>
-                                    {% endif %}
-                                    <span style="color: #6c757d;">({{ class_exams|length }} exam{{ class_exams|length|pluralize }})</span>
+                                        
+                                    
+                                    <span style="color: #6c757d;">(2 exams)</span>
                                 </div>
                                 <span class="class-toggle">▼</span>
                             </div>
                             
                             <div class="class-exams">
-                                {% for exam in class_exams %}
+                                
                                 <!-- COMPREHENSIVE DEBUG START -->
                                 <!-- 
                                     DELETE BUTTON DEBUG:
-                                    - is_admin = {{ is_admin }}
-                                    - exam.can_edit = {{ exam.can_edit }}
-                                    - exam.id = {{ exam.id }}
-                                    - exam.name = {{ exam.name }}
-                                    - User: {{ user.username }}
-                                    - User.is_superuser = {{ user.is_superuser }}
-                                    - User.is_staff = {{ user.is_staff }}
-                                    - Condition (is_admin or exam.can_edit) = {% if is_admin or exam.can_edit %}TRUE{% else %}FALSE{% endif %}
+                                    - is_admin = False
+                                    - exam.can_edit = True
+                                    - exam.id = 3108788b-3046-494d-9c8a-01620d69f898
+                                    - exam.name = Test Ownership Exam
+                                    - User: teacher1
+                                    - User.is_superuser = False
+                                    - User.is_staff = False
+                                    - Condition (is_admin or exam.can_edit) = TRUE
                                 -->
                                 <script>
-                                    console.log('[DELETE_BUTTON_DEBUG] Exam: {{ exam.name|escapejs }}', {
-                                        is_admin: {{ is_admin|lower }},
-                                        exam_can_edit: {{ exam.can_edit|lower }},
-                                        user_is_superuser: {{ user.is_superuser|lower }},
-                                        user_is_staff: {{ user.is_staff|lower }},
-                                        should_show_delete: {% if is_admin or exam.can_edit %}true{% else %}false{% endif %}
+                                    console.log('[DELETE_BUTTON_DEBUG] Exam: Test Ownership Exam', {
+                                        is_admin: false,
+                                        exam_can_edit: true,
+                                        user_is_superuser: false,
+                                        user_is_staff: false,
+                                        should_show_delete: true
                                     });
                                 </script>
                                 <!-- COMPREHENSIVE DEBUG END -->
-                                <div class="exam-card {% if exam.can_edit %}editable{% endif %}">
+                                <div class="exam-card editable">
                                     <div style="display: flex; justify-content: space-between; align-items: start;">
                                         <div>
-                                            <div class="exam-title">{{ exam.name }}</div>
+                                            <div class="exam-title">Test Ownership Exam</div>
                                             <!-- Year and Month/Quarter Display -->
                                             <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center;">
-                                                {% if exam.academic_year %}
+                                                
                                                 <span style="background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
-                                                    {{ exam.academic_year|slice:":4" }}
+                                                    2025
                                                 </span>
-                                                {% endif %}
-                                                {% if exam.exam_type == 'REVIEW' and exam.time_period_month %}
+                                                
+                                                
                                                 <span style="background: #f3e5f5; color: #6a1b9a; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
-                                                    {{ exam.get_time_period_month_display }}
+                                                    AUGUST
                                                 </span>
-                                                {% elif exam.exam_type == 'QUARTERLY' and exam.time_period_quarter %}
-                                                <span style="background: #fff3e0; color: #e65100; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
-                                                    {{ exam.get_time_period_quarter_display }}
-                                                </span>
-                                                {% endif %}
+                                                
                                             </div>
                                         </div>
-                                        {% if exam.access_badge %}
-                                        {% comment %}CRITICAL FIX: Never show VIEW ONLY badge when filter is active{% endcomment %}
-                                        {% if not show_assigned_only or exam.access_badge != 'VIEW ONLY' %}
-                                        <span class="badge" style="background: {% if exam.access_badge == 'OWNER' %}#4CAF50{% elif exam.access_badge == 'ADMIN' %}#2196F3{% elif exam.access_badge == 'FULL ACCESS' %}#4CAF50{% elif exam.access_badge == 'EDIT' %}#FF9800{% else %}#9E9E9E{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
-                                            {{ exam.access_badge|display_access_level }}
+                                        
+                                        <span class="badge" style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                            OWNER
                                         </span>
-                                        {% endif %}
-                                        {% endif %}
+                                        
                                     </div>
                                     
                                     <!-- Display Assigned Class Codes -->
-                                    {% if exam.class_codes %}
+                                    
                                     <div class="exam-classes" style="margin: 8px 0; padding: 8px 12px; background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 3px solid #4CAF50; border-radius: 4px; font-size: 0.85rem;">
                                         <strong style="color: #2e7d32; margin-right: 6px;">📚 Assigned Classes:</strong>
                                         <span style="color: #1b5e20; font-weight: 500;">
-                                            {% for code in exam.class_codes %}
-                                                <span style="background: white; padding: 2px 6px; border-radius: 3px; margin: 0 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">{{ code }}</span>{% if not forloop.last %} {% endif %}
-                                            {% endfor %}
+                                            
+                                                <span style="background: white; padding: 2px 6px; border-radius: 3px; margin: 0 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">PRIMARY_2A</span>
+                                            
                                         </span>
                                     </div>
-                                    {% elif not exam.class_codes %}
-                                    <div class="exam-classes" style="margin: 8px 0; padding: 8px 12px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 4px; font-size: 0.85rem;">
-                                        <strong style="color: #e65100;">⚠️ No classes assigned</strong>
-                                    </div>
-                                    {% endif %}
+                                    
                                     
                                     <div class="exam-meta">
                                         <div class="exam-meta-item">
-                                            📄 {{ exam.routine_questions.count }} Questions
+                                            📄 10 Questions
                                         </div>
                                         <div class="exam-meta-item">
-                                            🎵 {{ exam.routine_audio_files.count }} Audio
+                                            🎵 0 Audio
                                         </div>
                                     </div>
                                     
                                     <!-- Answer Mapping Status -->
-                                    <div class="answer-status {{ exam.answer_mapping_status.status_class }}">
+                                    <div class="answer-status not-started">
                                         <div style="display: flex; justify-content: space-between;">
-                                            <span>Answer Keys: {{ exam.answer_mapping_status.status_label }}</span>
-                                            <span>{{ exam.answer_mapping_status.percentage_complete }}%</span>
+                                            <span>Answer Keys: Not Started</span>
+                                            <span>0.0%</span>
                                         </div>
                                         <div class="answer-progress-bar">
-                                            <div class="answer-progress-fill {{ exam.answer_mapping_status.status_class }}"
-                                                 style="width: {{ exam.answer_mapping_status.percentage_complete }}%"></div>
+                                            <div class="answer-progress-fill not-started"
+                                                 style="width: 0.0%"></div>
                                         </div>
                                     </div>
                                     
                                     <!-- Action Buttons -->
                                     <div class="exam-actions">
-                                        {% if exam.can_edit %}
-                                            <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-edit">
+                                        
+                                            <a href="/RoutineTest/exams/3108788b-3046-494d-9c8a-01620d69f898/preview/" class="btn btn-edit">
                                                 Edit Answers
                                             </a>
-                                        {% else %}
-                                            <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-view">
-                                                View Answers
-                                            </a>
-                                        {% endif %}
                                         
-                                        {% if exam.can_copy %}
-                                            <button onclick="openCopyModal('{{ exam.id }}', '{{ exam.name|escapejs }}')" class="btn btn-copy">
+                                        
+                                        
+                                            <button onclick="openCopyModal('3108788b-3046-494d-9c8a-01620d69f898', 'Test Ownership Exam')" class="btn btn-copy">
                                                 Copy Exam
                                             </button>
-                                        {% endif %}
                                         
-                                        {% if exam.can_delete %}
-                                            <button onclick="confirmDelete('{{ exam.id }}', '{{ exam.name|escapejs }}')" 
+                                        
+                                        
+                                            <button onclick="confirmDelete('3108788b-3046-494d-9c8a-01620d69f898', 'Test Ownership Exam')" 
                                                     class="btn btn-danger delete-exam-btn">
                                                 Delete
                                             </button>
-                                        {% endif %}
+                                        
                                     </div>
                                 </div>
-                                {% empty %}
-                                <div class="no-exams">No exams in this class</div>
-                                {% endfor %}
+                                
+                                <!-- COMPREHENSIVE DEBUG START -->
+                                <!-- 
+                                    DELETE BUTTON DEBUG:
+                                    - is_admin = False
+                                    - exam.can_edit = True
+                                    - exam.id = 6e9b1d51-038e-4d93-9ae0-2b56f6a8816d
+                                    - exam.name = Test Ownership Exam
+                                    - User: teacher1
+                                    - User.is_superuser = False
+                                    - User.is_staff = False
+                                    - Condition (is_admin or exam.can_edit) = TRUE
+                                -->
+                                <script>
+                                    console.log('[DELETE_BUTTON_DEBUG] Exam: Test Ownership Exam', {
+                                        is_admin: false,
+                                        exam_can_edit: true,
+                                        user_is_superuser: false,
+                                        user_is_staff: false,
+                                        should_show_delete: true
+                                    });
+                                </script>
+                                <!-- COMPREHENSIVE DEBUG END -->
+                                <div class="exam-card editable">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <div class="exam-title">Test Ownership Exam</div>
+                                            <!-- Year and Month/Quarter Display -->
+                                            <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center;">
+                                                
+                                                <span style="background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
+                                                    2025
+                                                </span>
+                                                
+                                                
+                                            </div>
+                                        </div>
+                                        
+                                        <span class="badge" style="background: #4CAF50; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+                                            OWNER
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                    <!-- Display Assigned Class Codes -->
+                                    
+                                    <div class="exam-classes" style="margin: 8px 0; padding: 8px 12px; background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 3px solid #4CAF50; border-radius: 4px; font-size: 0.85rem;">
+                                        <strong style="color: #2e7d32; margin-right: 6px;">📚 Assigned Classes:</strong>
+                                        <span style="color: #1b5e20; font-weight: 500;">
+                                            
+                                                <span style="background: white; padding: 2px 6px; border-radius: 3px; margin: 0 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">PRIMARY_2A</span>
+                                            
+                                        </span>
+                                    </div>
+                                    
+                                    
+                                    <div class="exam-meta">
+                                        <div class="exam-meta-item">
+                                            📄 10 Questions
+                                        </div>
+                                        <div class="exam-meta-item">
+                                            🎵 0 Audio
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Answer Mapping Status -->
+                                    <div class="answer-status not-started">
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <span>Answer Keys: Not Started</span>
+                                            <span>0.0%</span>
+                                        </div>
+                                        <div class="answer-progress-bar">
+                                            <div class="answer-progress-fill not-started"
+                                                 style="width: 0.0%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="exam-actions">
+                                        
+                                            <a href="/RoutineTest/exams/6e9b1d51-038e-4d93-9ae0-2b56f6a8816d/preview/" class="btn btn-edit">
+                                                Edit Answers
+                                            </a>
+                                        
+                                        
+                                        
+                                            <button onclick="openCopyModal('6e9b1d51-038e-4d93-9ae0-2b56f6a8816d', 'Test Ownership Exam')" class="btn btn-copy">
+                                                Copy Exam
+                                            </button>
+                                        
+                                        
+                                        
+                                            <button onclick="confirmDelete('6e9b1d51-038e-4d93-9ae0-2b56f6a8816d', 'Test Ownership Exam')" 
+                                                    class="btn btn-danger delete-exam-btn">
+                                                Delete
+                                            </button>
+                                        
+                                    </div>
+                                </div>
+                                
                             </div>
                         </div>
-                        {% endwith %}
-                    {% endfor %}
+                        
+                    
                 </div>
             </div>
-            {% endif %}
-            {% endwith %}
-        {% endfor %}
+            
+            
         
-        {% comment %}Show empty state if no exams in any program{% endcomment %}
-        {% if mapping_summary.total == 0 and exam_type_counts.all > 0 %}
-        <div class="empty-state">
-            <h3>Exams not organized</h3>
-            <p>{{ exam_type_counts.all }} exam(s) found in database but could not be organized into programs. This typically means exams are missing class assignments.</p>
-            <p><small>Debug: hierarchical_exams has {{ hierarchical_exams|length }} programs</small></p>
-        </div>
-        {% elif mapping_summary.total == 0 %}
-        <div class="empty-state">
-            <h3>No exams found</h3>
-            <p>{% if show_assigned_only %}No exams in your assigned classes. Try turning off the filter.{% else %}No exams available in the library.{% endif %}</p>
-        </div>
-        {% endif %}
+            
+            
+            
+        
+            
+            
+            
+        
+            
+            
+            
+        
+        
+        
+        
     </div>
 </div>
 
@@ -1037,21 +2173,48 @@
                 <label for="targetClass">Target Class:</label>
                 <select id="targetClass" name="target_class" required>
                     <option value="">Select a class...</option>
-                    {% for class_code, access_level in teacher_assignments.items %}
-                        {% if access_level == 'FULL' or access_level == 'CO_TEACHER' %}
-                        <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }}</option>
-                        {% endif %}
-                    {% endfor %}
-                    {% if is_admin %}
-                        <!-- Admin can copy to any class -->
-                        {% for program, classes in hierarchical_exams.items %}
-                            {% for class_code, exams in classes.items %}
-                                {% if class_code not in teacher_assignments %}
-                                <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }} (Admin)</option>
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                    {% endif %}
+                    
+                        
+                        <option value="C5">C5</option>
+                        
+                    
+                        
+                    
+                        
+                        <option value="HIGH_10E">HIGH_10E</option>
+                        
+                    
+                        
+                        <option value="HIGH_10F">HIGH_10F</option>
+                        
+                    
+                        
+                        <option value="HIGH_11D">HIGH_11D</option>
+                        
+                    
+                        
+                        <option value="MIDDLE_7A">MIDDLE_7A</option>
+                        
+                    
+                        
+                        <option value="PRIMARY_1D">Grade 1D</option>
+                        
+                    
+                        
+                        <option value="PRIMARY_2A">Grade 2A</option>
+                        
+                    
+                        
+                        <option value="SejongM">SejongM</option>
+                        
+                    
+                        
+                        <option value="Sungjong4">Sungjong4</option>
+                        
+                    
+                        
+                    
+                    
                 </select>
             </div>
             
@@ -1107,7 +2270,7 @@
 <script>
 // ============================================================================
 // COPY EXAM MODAL - COMPREHENSIVE FIX V2.0
-// Date: {{ 'now'|date:'Y-m-d H:i:s' }}
+// Date: 
 // ============================================================================
 
 console.log('%c[COPY MODAL FIX] Initializing comprehensive copy modal system...', 'color: #00A65E; font-weight: bold;');
@@ -1270,12 +2433,11 @@ console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
 console.log('  - openCopyModal (alias):', typeof openCopyModal);
 console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
 
-// PAGE LOAD DEBUGGING - Track exams and filter state - ENHANCED VERSION
+// PAGE LOAD DEBUGGING - Track exams and filter state
 (function() {
     console.log('========================================');
-    console.log('[PAGE_LOAD_DEBUG] Exam Library Page Loaded - ENHANCED DEBUGGING v2');
+    console.log('[PAGE_LOAD_DEBUG] Exam Library Page Loaded');
     console.log('[PAGE_LOAD_DEBUG] Current URL:', window.location.href);
-    console.log('[PAGE_LOAD_DEBUG] Timestamp:', new Date().toISOString());
     
     // Check filter state
     const urlParams = new URLSearchParams(window.location.search);
@@ -1284,9 +2446,6 @@ console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
     
     console.log('[PAGE_LOAD_DEBUG] Filter URL parameter:', filterState || 'not set (showing all)');
     console.log('[PAGE_LOAD_DEBUG] Filter checkbox state:', filterCheckbox?.checked ? 'CHECKED ✅' : 'UNCHECKED ❌');
-    
-    // Log server-side filter state from Django context
-    console.log('[PAGE_LOAD_DEBUG] Server-side filter state: {{ show_assigned_only|lower }}');
     
     // Count and log exam cards with their badges
     const examCards = document.querySelectorAll('.exam-card');
@@ -1535,7 +2694,7 @@ function initializeCopyFormSubmission() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
+                'X-CSRFToken': 'WvSPiluS3pPX74VYXr7E2yEIKalleXmtnRKKjdZ0FJANNeMRPWWQkK32i9e2A7y8'
             },
             body: JSON.stringify(data)
         });
@@ -2055,6 +3214,131 @@ console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
 </script>
 
 <!-- Load the comprehensive copy modal module -->
-<script src="{% load static %}{% static 'js/routinetest/copy-exam-modal.js' %}?v={% now 'U' %}" defer></script>
+<script src="/static/js/routinetest/copy-exam-modal.js?v=1755845820" defer></script>
 
-{% endblock %}
+
+        </div>
+    </div>
+    
+    <!-- Load RoutineTest Theme CSS IMMEDIATELY after base styles -->
+    <link rel="stylesheet" href="/static/css/routinetest-theme.css?v=1755845820">
+    
+    <!-- Pre-apply theme class to prevent FOUC and ensure CSS rules work -->
+    <script>
+    (function() {
+        // Apply theme class immediately to prevent flash of unstyled content
+        document.documentElement.classList.add('routinetest-theme');
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!document.body.classList.contains('routinetest-theme')) {
+                document.body.classList.add('routinetest-theme');
+                console.log('[Theme Pre-apply] Added routinetest-theme class to body');
+            }
+        });
+    })();
+    </script>
+    
+    <!-- Load RoutineTest Theme JS -->
+    <script src="/static/js/routinetest-theme.js?v=1755845820"></script>
+    
+    <!-- Removed redundant matrix tab JavaScript files - Navigation V8 handles this -->
+    
+    <!-- Navigation JavaScript with Console Debugging -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.group('%c[RoutineTest Navigation] Initialization', 'color: #00A65E; font-weight: bold;');
+            
+            // Log navigation state
+            const navTabs = document.querySelectorAll('.nav-tabs a');
+            console.log(`Found ${navTabs.length} navigation tabs`);
+            
+            // Log active tab
+            const activeTab = document.querySelector('.nav-tabs a.active');
+            if (activeTab) {
+                console.log('Active Tab:', activeTab.getAttribute('data-nav') || activeTab.textContent.trim());
+                console.log('Active URL:', activeTab.href);
+            }
+            
+            // Add click tracking to all nav items
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    const navName = this.getAttribute('data-nav') || this.textContent.trim();
+                    console.log(`%c[RoutineTest Nav Click] ${navName}`, 'color: #00A65E;');
+                    console.log('Target URL:', this.href);
+                    console.log('Timestamp:', new Date().toISOString());
+                    
+                    // Track navigation in sessionStorage
+                    const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+                    navHistory.push({
+                        tab: navName,
+                        url: this.href,
+                        timestamp: new Date().toISOString()
+                    });
+                    sessionStorage.setItem('routinetest_nav_history', JSON.stringify(navHistory.slice(-10))); // Keep last 10
+                });
+            });
+            
+            // Log authentication state
+            const authState = {
+                authenticated: true,
+                username: 'teacher1',
+                fullName: 'Taehyun Kim',
+                is_staff: false,
+                page: 'exam_list',
+                path: '/RoutineTest/exams/',
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('[RoutineTest Auth State]', authState);
+            
+            // Log theme confirmation
+            console.log('[RoutineTest Theme Check]', {
+                primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--color-primary') || '#00A65E',
+                headerBg: getComputedStyle(document.querySelector('.header')).background,
+                navBg: getComputedStyle(document.querySelector('.nav-tabs')).backgroundColor
+            });
+            
+            // Performance metrics
+            if (window.performance) {
+                const perfData = window.performance.timing;
+                const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                console.log(`[RoutineTest Performance] Page load time: ${pageLoadTime}ms`);
+            }
+            
+            console.groupEnd();
+            
+            // Navigation history display
+            const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+            if (navHistory.length > 0) {
+                console.group('%c[RoutineTest Navigation History]', 'color: #007C3F;');
+                console.table(navHistory);
+                console.groupEnd();
+            }
+        });
+        
+        // Logout confirmation
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                console.log('[RoutineTest] Logout initiated');
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                    console.log('[RoutineTest] Logout cancelled');
+                }
+            });
+        }
+        
+        // Global error handler for debugging
+        window.addEventListener('error', function(e) {
+            console.error('[RoutineTest Error]', {
+                message: e.message,
+                filename: e.filename,
+                line: e.lineno,
+                column: e.colno,
+                error: e.error
+            });
+        });
+    </script>
+    
+    
+</body>
+</html>
