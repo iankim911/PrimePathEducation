@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from core.models.user_profile import UserProfile
+from core.utils.phone_utils import get_phone_placeholder, get_phone_example
 import re
 from datetime import date
 
@@ -95,7 +96,7 @@ class PersonalInfoForm(forms.ModelForm):
             }),
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': '+82 10-XXXX-XXXX'
+                'placeholder': get_phone_placeholder()
             }),
             'alternate_phone': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -317,7 +318,7 @@ class SocialAuthCompleteProfileForm(forms.ModelForm):
         widgets = {
             'phone_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Phone Number',
+                'placeholder': get_phone_placeholder(),
                 'required': True
             }),
             'date_of_birth': forms.DateInput(attrs={

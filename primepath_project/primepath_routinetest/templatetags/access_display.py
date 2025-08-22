@@ -11,7 +11,7 @@ def display_access_level(access_level):
     Convert access level codes to user-friendly display text
     
     Args:
-        access_level: The access level code (FULL, VIEW, CO_TEACHER, etc.)
+        access_level: The access level code (FULL, VIEW, etc.)
     
     Returns:
         User-friendly display text
@@ -21,8 +21,6 @@ def display_access_level(access_level):
         'FULL ACCESS': 'FULL ACCESS',
         'VIEW': 'VIEW ONLY',
         'VIEW ONLY': 'VIEW ONLY',
-        'CO_TEACHER': 'CO-TEACHER',
-        'SUBSTITUTE': 'SUBSTITUTE',
         'OWNER': 'OWNER',
         'ADMIN': 'ADMIN',
         'EDIT': 'EDIT',

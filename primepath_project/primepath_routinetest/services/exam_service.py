@@ -575,13 +575,13 @@ class ExamService:
         # This allows teachers with edit permissions to manage program-level exams
         if not exam_classes:
             # Teacher can edit program-level exams if they have edit access to any class
-            can_edit = any(access in ['FULL', 'CO_TEACHER'] for access in assignments.values())
+            can_edit = any(access == 'FULL' for access in assignments.values())
             logger.debug(f"[PERMISSION_EDIT] Program-level exam, teacher {teacher.name} can_edit: {can_edit}")
             return can_edit
         
         # Check specific class codes
         for class_code in exam_classes:
-            if class_code in assignments and assignments[class_code] in ['FULL', 'CO_TEACHER']:
+            if class_code in assignments and assignments[class_code] == 'FULL':
                 logger.info(f"[PERMISSION_EDIT] Teacher {teacher.name} has {assignments[class_code]} access to class {class_code}, granting edit permission")
                 print(f"[PERMISSION_EDIT] Teacher {teacher.name} has EDIT access via class {class_code}")
                 return True
@@ -622,12 +622,12 @@ class ExamService:
         logger.info(f"[EXAM_HIERARCHY_ENHANCED] Teacher assignments: {assignments}")
         
         # CRITICAL FIX: Proper filtering for ownership-based system
-        # ownership='my' → Show ONLY exams where user has FULL/CO_TEACHER/OWNER access
+        # ownership='my' → Show ONLY exams where user has FULL/OWNER access
         # ownership='others' → Show ONLY exams where user has VIEW ONLY access
         if ownership_filter == 'my':
             filter_mode = 'MY_EXAMS'  # Show only editable exams
             effective_filter_assigned = True  # Keep for backward compat
-            filter_description = "My Test Files (FULL/CO_TEACHER/OWNER access only)"
+            filter_description = "My Test Files (FULL/OWNER access only)"
         elif ownership_filter == 'others':
             filter_mode = 'OTHERS_EXAMS'  # Show only VIEW ONLY exams
             effective_filter_assigned = True  # CHANGED: Must filter, not show all!
@@ -724,8 +724,6 @@ class ExamService:
                             if access == 'FULL':
                                 highest_access = 'FULL'
                                 break  # FULL is highest, no need to check more
-                            elif access == 'CO_TEACHER' and highest_access in ['NONE', 'VIEW']:
-                                highest_access = 'CO_TEACHER'
                             elif access == 'VIEW' and highest_access == 'NONE':
                                 highest_access = 'VIEW'
                     
@@ -734,17 +732,17 @@ class ExamService:
                 
                 # Apply filter based on mode
                 if filter_mode == 'MY_EXAMS':
-                    # Show ONLY exams where user has FULL/CO_TEACHER/OWNER access
-                    if user_access_level in ['OWNER', 'FULL', 'CO_TEACHER']:
+                    # Show ONLY exams where user has FULL/OWNER access
+                    if user_access_level in ['OWNER', 'FULL']:
                         should_include = True
                         inclusion_reasons.append(f"User has {user_access_level} access (MY_EXAMS mode)")
                         logger.info(f"[FILTER_FIX] ✅ INCLUDING: User has editable access ({user_access_level})")
                     else:
-                        exclusion_reasons.append(f"User has {user_access_level} access, need FULL/CO_TEACHER/OWNER for MY_EXAMS")
+                        exclusion_reasons.append(f"User has {user_access_level} access, need FULL/OWNER for MY_EXAMS")
                         logger.info(f"[FILTER_FIX] ❌ EXCLUDING: User only has {user_access_level} access")
                 
                 elif filter_mode == 'OTHERS_EXAMS':
-                    # Show ONLY exams where user has VIEW ONLY access (not FULL/CO_TEACHER/OWNER)
+                    # Show ONLY exams where user has VIEW ONLY access (not FULL/OWNER)
                     if user_access_level == 'VIEW':
                         should_include = True
                         inclusion_reasons.append(f"User has VIEW ONLY access (OTHERS_EXAMS mode)")
@@ -755,7 +753,7 @@ class ExamService:
                 
                 else:  # LEGACY mode
                     # Original behavior: show exams from editable classes
-                    if user_access_level in ['OWNER', 'FULL', 'CO_TEACHER']:
+                    if user_access_level in ['OWNER', 'FULL']:
                         should_include = True
                         inclusion_reasons.append(f"User has editable access (LEGACY mode)")
                     else:
@@ -844,8 +842,6 @@ class ExamService:
                             if access == 'FULL':
                                 highest_access = 'FULL'
                                 break
-                            elif access == 'CO_TEACHER' and highest_access == 'VIEW':
-                                highest_access = 'CO_TEACHER'
                     
                     # Set badge based on highest access level
                     if highest_access == 'FULL':
@@ -1664,6 +1660,146 @@ class ExamService:
         return curriculum_hierarchy
     
     @staticmethod
+    def get_routinetest_curriculum_hierarchy_for_frontend():
+        """
+        COMPREHENSIVE FIX: Enhanced curriculum hierarchy method specifically optimized 
+        for frontend Copy Exam modal integration with robust error handling and validation.
+        
+        Returns:
+            Dict: Enhanced curriculum structure with frontend-specific optimizations
+        """
+        import json
+        import traceback
+        from django.utils import timezone
+        from ..constants import ROUTINETEST_CURRICULUM_WHITELIST
+        from core.models import CurriculumLevel
+        
+        logger.info("[COPY_MODAL_FIX] Building enhanced curriculum hierarchy for frontend")
+        print("[COPY_MODAL_FIX] Building enhanced curriculum hierarchy for frontend")
+        
+        try:
+            # Start with the existing hierarchy method
+            base_hierarchy = ExamService.get_routinetest_curriculum_hierarchy()
+            
+            # Enhance with frontend-specific features
+            enhanced_hierarchy = {}
+            total_levels_processed = 0
+            
+            for program, program_data in base_hierarchy.items():
+                enhanced_hierarchy[program] = {
+                    'subprograms': {},
+                    'meta': {
+                        'total_subprograms': len(program_data.get('subprograms', {})),
+                        'total_levels': 0
+                    }
+                }
+                
+                for subprogram, subprogram_data in program_data.get('subprograms', {}).items():
+                    levels = subprogram_data.get('levels', [])
+                    
+                    # Sort levels by number for consistent frontend display
+                    sorted_levels = sorted(levels, key=lambda x: x.get('number', 0))
+                    
+                    enhanced_hierarchy[program]['subprograms'][subprogram] = {
+                        'levels': sorted_levels,
+                        'meta': {
+                            'level_count': len(sorted_levels),
+                            'level_range': f"{min(l['number'] for l in sorted_levels)}-{max(l['number'] for l in sorted_levels)}" if sorted_levels else "0"
+                        }
+                    }
+                    
+                    enhanced_hierarchy[program]['meta']['total_levels'] += len(sorted_levels)
+                    total_levels_processed += len(sorted_levels)
+            
+            # Add comprehensive validation and metadata
+            validation_result = {
+                'is_valid': True,
+                'validation_errors': [],
+                'programs_count': len(enhanced_hierarchy),
+                'total_levels': total_levels_processed,
+                'expected_programs': ['CORE', 'ASCENT', 'EDGE', 'PINNACLE'],
+                'structure_check': {}
+            }
+            
+            # Validate expected programs
+            expected_programs = validation_result['expected_programs']
+            for program in expected_programs:
+                if program not in enhanced_hierarchy:
+                    validation_result['validation_errors'].append(f"Missing expected program: {program}")
+                    validation_result['is_valid'] = False
+                else:
+                    subprogram_count = len(enhanced_hierarchy[program]['subprograms'])
+                    validation_result['structure_check'][program] = {
+                        'present': True,
+                        'subprograms_count': subprogram_count,
+                        'levels_count': enhanced_hierarchy[program]['meta']['total_levels']
+                    }
+            
+            # Create final response with comprehensive debugging
+            final_response = {
+                'curriculum_data': enhanced_hierarchy,
+                'metadata': {
+                    'generated_at': timezone.now().isoformat(),
+                    'method': 'get_routinetest_curriculum_hierarchy_for_frontend',
+                    'version': '2.0_comprehensive_fix',
+                    'frontend_optimized': True
+                },
+                'validation': validation_result,
+                'debug_info': {
+                    'whitelist_count': len(ROUTINETEST_CURRICULUM_WHITELIST),
+                    'database_levels_found': total_levels_processed,
+                    'json_serializable': True,
+                    'structure_valid': validation_result['is_valid']
+                }
+            }
+            
+            # Test JSON serialization
+            try:
+                json.dumps(final_response)
+                final_response['debug_info']['json_serializable'] = True
+            except (TypeError, ValueError) as e:
+                final_response['debug_info']['json_serializable'] = False
+                final_response['debug_info']['json_error'] = str(e)
+                logger.error(f"[COPY_MODAL_FIX] JSON serialization failed: {e}")
+            
+            logger.info(f"[COPY_MODAL_FIX] Enhanced hierarchy built successfully")
+            logger.info(f"[COPY_MODAL_FIX] Programs: {list(enhanced_hierarchy.keys())}")
+            logger.info(f"[COPY_MODAL_FIX] Total levels: {total_levels_processed}")
+            logger.info(f"[COPY_MODAL_FIX] Validation: {'✅ PASSED' if validation_result['is_valid'] else '❌ FAILED'}")
+            
+            print(f"[COPY_MODAL_FIX] ✅ Enhanced hierarchy completed: {len(enhanced_hierarchy)} programs, {total_levels_processed} levels")
+            
+            return final_response
+            
+        except Exception as e:
+            logger.error(f"[COPY_MODAL_FIX] Critical error building enhanced hierarchy: {e}")
+            logger.error(f"[COPY_MODAL_FIX] Stack trace: {traceback.format_exc()}")
+            
+            # Return fallback structure
+            fallback_response = {
+                'curriculum_data': {
+                    'CORE': {'subprograms': {'Phonics': {'levels': [{'id': 1, 'number': 1}]}}},
+                    'ASCENT': {'subprograms': {'Nova': {'levels': [{'id': 2, 'number': 1}]}}},
+                    'EDGE': {'subprograms': {'Spark': {'levels': [{'id': 3, 'number': 1}]}}},
+                    'PINNACLE': {'subprograms': {'Vision': {'levels': [{'id': 4, 'number': 1}]}}}
+                },
+                'metadata': {
+                    'generated_at': timezone.now().isoformat(),
+                    'method': 'get_routinetest_curriculum_hierarchy_for_frontend',
+                    'version': '2.0_fallback',
+                    'is_fallback': True,
+                    'error': str(e)
+                },
+                'validation': {
+                    'is_valid': False,
+                    'validation_errors': [f"Failed to generate hierarchy: {e}"],
+                    'is_fallback': True
+                }
+            }
+            
+            return fallback_response
+
+    @staticmethod
     def generate_routinetest_exam_name(
         exam_type: str,
         time_period_month: str = None,
@@ -1934,7 +2070,7 @@ class ExamPermissionService:
         
         assignments = ExamService.get_teacher_assignments(user)
         return [class_code for class_code, access_level in assignments.items() 
-                if access_level in ['FULL', 'CO_TEACHER']]
+                if access_level == 'FULL']
     
     # DUPLICATE METHOD REMOVED - Using primary version at line 469
     # The primary version has been fixed with proper admin check
@@ -2151,7 +2287,7 @@ class ExamPermissionService:
                 }
             elif class_code in teacher_assignments:
                 teacher_access = teacher_assignments[class_code]
-                can_edit = teacher_access in ['FULL', 'CO_TEACHER']
+                can_edit = teacher_access == 'FULL'
                 class_permissions[class_code] = {
                     'access_level': teacher_access,
                     'can_edit': can_edit,
@@ -2221,7 +2357,7 @@ class ExamPermissionService:
             # Only show exams teacher can edit
             editable_class_codes = [
                 code for code, access in teacher_assignments.items() 
-                if access in ['FULL', 'CO_TEACHER']
+                if access == 'FULL'
             ]
             filtered_exams = []
             for exam in exams:

@@ -140,7 +140,7 @@ def class_details(request, class_code):
                 'status_icon': schedule.get_status_icon(),
                 'scheduled_date': schedule.scheduled_date,
                 'scheduled_time': f"{schedule.scheduled_start_time} - {schedule.scheduled_end_time}" if schedule.scheduled_start_time else None,
-                'can_edit': access_level in ['FULL', 'CO_TEACHER'] or is_admin
+                'can_edit': access_level == 'FULL' or is_admin
             }
             monthly_data.append(schedule_data)
             
@@ -177,7 +177,7 @@ def class_details(request, class_code):
                 'status_icon': schedule.get_status_icon(),
                 'scheduled_date': schedule.scheduled_date,
                 'scheduled_time': f"{schedule.scheduled_start_time} - {schedule.scheduled_end_time}" if schedule.scheduled_start_time else None,
-                'can_edit': access_level in ['FULL', 'CO_TEACHER'] or is_admin
+                'can_edit': access_level == 'FULL' or is_admin
             }
             quarterly_data.append(schedule_data)
             
@@ -219,7 +219,7 @@ def class_details(request, class_code):
         'class_obj': class_obj,
         'is_admin': is_admin,
         'access_level': access_level,
-        'can_edit': access_level in ['FULL', 'CO_TEACHER'] or is_admin,
+        'can_edit': access_level == 'FULL' or is_admin,
         
         # Student Management Tab
         'enrolled_students': enrolled_students,
@@ -291,7 +291,7 @@ def add_student_to_class(request, class_code):
                 teacher=teacher_profile,
                 class_code=class_code,
                 is_active=True,
-                access_level__in=['FULL', 'CO_TEACHER']
+                access_level='FULL'
             ).first()
             
             if not assignment:
@@ -366,7 +366,7 @@ def remove_student_from_class(request, class_code):
                 teacher=teacher_profile,
                 class_code=class_code,
                 is_active=True,
-                access_level__in=['FULL', 'CO_TEACHER']
+                access_level='FULL'
             ).first()
             
             if not assignment:

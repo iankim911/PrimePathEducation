@@ -23,8 +23,6 @@ class TeacherClassAssignment(models.Model):
     ACCESS_LEVEL_CHOICES = [
         ('FULL', 'Full Access'),  # Can create/edit exams, grade, manage everything
         ('VIEW', 'View Only'),    # Can only view class data, no modifications
-        ('CO_TEACHER', 'Co-Teacher'),  # Shared responsibility with another teacher
-        ('SUBSTITUTE', 'Substitute'),  # Temporary substitute access
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

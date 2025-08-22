@@ -18,7 +18,7 @@ class PrimepathRoutinetestConfig(AppConfig):
         
         # Import template tags to ensure they're registered
         try:
-            from primepath_routinetest.templatetags import matrix_filters, grade_tags
+            from primepath_routinetest.templatetags import matrix_filters, routinetest_grade_tags
             logger.info("[ROUTINETEST_APP] Template tags imported in ready()")
             print("[ROUTINETEST_APP] Template tags imported in ready()")
         except ImportError as e:

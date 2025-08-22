@@ -2363,9 +2363,6 @@ document.addEventListener('DOMContentLoaded', function() {
         populateCopyProgramDropdown();
     }
 });
-{% else %}
-console.error('[COPY_CURRICULUM] No curriculum data available from Django context');
-{% endif %}
 
 function initializeCopyCurriculumCascading() {
     console.log('[COPY_CURRICULUM] Initializing curriculum cascading...');
@@ -2442,13 +2439,14 @@ async function loadCopyCurriculumData() {
     }
 }
 
-function populateCopyProgramDropdown() {
-    console.group('[COPY_CURRICULUM] populateCopyProgramDropdown() - COMPREHENSIVE FIX');
+function populateCopyProgramDropdown(retryCount = 0) {
+    console.group('[COPY_CURRICULUM] populateCopyProgramDropdown() - ENHANCED FIX v2');
     
     const programSelect = document.getElementById('copyProgramSelect');
     
     // Enhanced debugging information
     console.log('[COPY_CURRICULUM] Function called at:', new Date().toISOString());
+    console.log('[COPY_CURRICULUM] Retry count:', retryCount);
     console.log('[COPY_CURRICULUM] Call stack:', new Error().stack.split('\n')[1].trim());
     console.log('[COPY_CURRICULUM] DOM ready state:', document.readyState);
     console.log('[COPY_CURRICULUM] programSelect element:', !!programSelect);
@@ -2470,6 +2468,17 @@ function populateCopyProgramDropdown() {
         console.error('[COPY_CURRICULUM] ❌ No curriculum data available!');
         console.log('[COPY_CURRICULUM] Checking for alternative data sources...');
         console.log('[COPY_CURRICULUM] window.curriculumData exists:', !!window.curriculumData);
+        
+        // Retry logic - wait for data to load
+        if (retryCount < 5) {
+            console.log(`[COPY_CURRICULUM] ⏳ Data not ready, retrying in 500ms (attempt ${retryCount + 1}/5)...`);
+            setTimeout(() => {
+                populateCopyProgramDropdown(retryCount + 1);
+            }, 500);
+            console.groupEnd();
+            return false;
+        }
+        
         console.log('[COPY_CURRICULUM] Attempting fallback data construction...');
         
         // Try fallback construction
@@ -2477,10 +2486,12 @@ function populateCopyProgramDropdown() {
             console.log('[COPY_CURRICULUM] Calling loadCopyCurriculumData fallback...');
             loadCopyCurriculumData().then(() => {
                 console.log('[COPY_CURRICULUM] Fallback completed, retrying population...');
-                populateCopyProgramDropdown();
+                populateCopyProgramDropdown(0); // Reset retry count for fallback
             }).catch(error => {
                 console.error('[COPY_CURRICULUM] Fallback failed:', error);
             });
+        } else {
+            console.error('[COPY_CURRICULUM] ❌ No fallback available - loadCopyCurriculumData not found');
         }
         console.groupEnd();
         return false;
@@ -2540,6 +2551,11 @@ function populateCopyProgramDropdown() {
         console.log('[COPY_CURRICULUM]   - computed visibility:', window.getComputedStyle(programSelect).visibility);
         
         console.log('[COPY_CURRICULUM] 🎉 Program dropdown populated successfully');
+        
+        // Force trigger change event to update dependent dropdowns
+        programSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        console.log('[COPY_CURRICULUM] Triggered change event on program dropdown');
+        
         console.groupEnd();
         return true;
         
@@ -2554,6 +2570,23 @@ function populateCopyProgramDropdown() {
         return false;
     }
 }
+
+// Global debug function for testing
+window.debugCopyModal = function() {
+    console.log('=== COPY MODAL DEBUG ===');
+    console.log('Modal element:', document.getElementById('copyExamModal'));
+    console.log('Program select:', document.getElementById('copyProgramSelect'));
+    console.log('Curriculum data available:', !!window.CopyCurriculumData);
+    console.log('Curriculum data ready:', window.CopyCurriculumDataReady);
+    if (window.CopyCurriculumData) {
+        console.log('Available programs:', Object.keys(window.CopyCurriculumData));
+    }
+    
+    console.log('\nForcing dropdown population...');
+    populateCopyProgramDropdown(0);
+};
+
+console.log('[DEBUG] window.debugCopyModal() available for manual testing');
 
 function setupCopyCurriculumEventListeners() {
     const programSelect = document.getElementById('copyProgramSelect');

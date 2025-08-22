@@ -8,17 +8,20 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 import uuid
 
-# Phone number validator
+# Import configurable phone utilities
+from core.utils.phone_utils import get_phone_validator, get_current_locale
+
+# Get the appropriate phone validator for current locale
+phone_validator = get_phone_validator()
+
+# Legacy validators for backward compatibility
 phone_regex = RegexValidator(
     regex=r'^\+?1?\d{9,15}$',
     message="Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
 )
 
-# Korean phone validator
-korean_phone_regex = RegexValidator(
-    regex=r'^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$',
-    message="Korean phone format: 010-XXXX-XXXX"
-)
+# Korean phone validator (legacy)
+korean_phone_regex = get_phone_validator('KR')
 
 class UserProfile(models.Model):
     """Extended user profile for comprehensive registration"""

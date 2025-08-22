@@ -507,7 +507,7 @@ class ExamScheduleMatrix(models.Model):
             teacher=teacher,
             class_code=self.class_code,
             is_active=True,
-            access_level__in=['FULL', 'CO_TEACHER']
+            access_level='FULL'
         ).exists()
         
         return has_access

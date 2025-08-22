@@ -287,7 +287,7 @@ def exam_list(request):
     # Get editable classes for the current user
     editable_classes = [
         class_code for class_code, access_level in teacher_assignments.items()
-        if access_level in ['FULL', 'CO_TEACHER']
+        if access_level == 'FULL'
     ]
     
     # Create class display name dictionary
@@ -299,9 +299,9 @@ def exam_list(request):
     # Debug: Log what we're passing to template
     logger.info(f"[EXAM_LIST_CONTEXT] Passing is_admin={is_admin} to template")
     
-    # Get curriculum data for copy modal - use hierarchy for better frontend integration
-    curriculum_data_for_copy_modal = ExamService.get_routinetest_curriculum_levels()
-    curriculum_hierarchy_for_copy = ExamService.get_routinetest_curriculum_hierarchy()
+    # COMPREHENSIVE FIX: Get enhanced curriculum data for copy modal with robust frontend integration
+    curriculum_data_for_copy_modal = ExamService.get_routinetest_curriculum_levels()  # Keep for backward compatibility
+    curriculum_hierarchy_for_copy = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()  # ENHANCED VERSION
     
     # Prepare context for template
     context = {

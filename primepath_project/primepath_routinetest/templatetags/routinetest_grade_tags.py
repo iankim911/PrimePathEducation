@@ -1,5 +1,7 @@
 from django import template
 
+# Renamed to avoid conflict with placement_test.templatetags.grade_tags
+# This module provides routine test specific template tags
 register = template.Library()
 
 @register.filter

@@ -1,9 +1,5 @@
 {
-  "timestamp": "2025-08-22T19:32:49.027397",
-  "agents_involved": [],
-  "actions_to_take": [],
-  "code_changes": [],
-  "warnings": [],
-  "testing_required": [],
-  "command_processed": true
+  "action": "manual",
+  "reason": "No agent keywords detected",
+  "command": "Copy Exam modal Program dropdown not populating with curriculum programs - shows only '-- Select Program --' placeholder"
 }
