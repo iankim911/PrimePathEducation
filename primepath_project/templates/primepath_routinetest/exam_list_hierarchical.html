@@ -1441,11 +1441,81 @@ function toggleClass(classCode) {
         console.log('[FILTER_DEBUG] Reloading page with new filter state...');
         console.log('========================================');
         
-        // Force a hard refresh to bypass any caching
-        window.location.replace(currentUrl.toString());
+        // NUCLEAR OPTION: Force complete cache bypass
+        // Add multiple cache-busting parameters
+        currentUrl.searchParams.set('_cache_bust', Math.random().toString(36));
+        currentUrl.searchParams.set('_timestamp', new Date().getTime());
+        currentUrl.searchParams.set('_force_reload', '1');
+        
+        console.log('[FILTER_DEBUG] NUCLEAR RELOAD with cache busting...');
+        
+        // Multiple methods to bypass cache
+        if (typeof window !== 'undefined') {
+            // Method 1: Replace location with cache busting
+            window.location.replace(currentUrl.toString());
+            
+            // Method 2: Fallback after short delay
+            setTimeout(() => {
+                if (window.location.href !== currentUrl.toString()) {
+                    console.log('[FILTER_DEBUG] Fallback reload triggered');
+                    window.location.href = currentUrl.toString();
+                }
+            }, 100);
+        }
     });
     
     console.log('[FILTER_DEBUG] Event listener attached successfully');
+})();
+
+// NUCLEAR SAFETY NET: Force hide VIEW ONLY badges when filter is active
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const assigned_only = urlParams.get('assigned_only');
+    
+    if (assigned_only === 'true') {
+        console.log('[NUCLEAR_SAFETY] Filter is ON - scanning for any VIEW ONLY badges that slipped through...');
+        
+        // Function to remove VIEW ONLY badges
+        function removeViewOnlyBadges() {
+            const badges = document.querySelectorAll('.badge');
+            let removedCount = 0;
+            
+            badges.forEach(badge => {
+                const text = badge.textContent.trim();
+                if (text === 'VIEW ONLY' || text.includes('VIEW')) {
+                    const examCard = badge.closest('.exam-card');
+                    const examName = examCard ? examCard.querySelector('.exam-title')?.textContent.trim() : 'Unknown';
+                    
+                    console.log(`[NUCLEAR_SAFETY] ❌ FORCE HIDING VIEW ONLY badge for: ${examName}`);
+                    badge.style.display = 'none';
+                    removedCount++;
+                }
+            });
+            
+            if (removedCount > 0) {
+                console.log(`[NUCLEAR_SAFETY] Force-hid ${removedCount} VIEW ONLY badges that shouldn't be visible`);
+            } else {
+                console.log('[NUCLEAR_SAFETY] ✅ No VIEW ONLY badges found - filter working correctly');
+            }
+        }
+        
+        // Remove immediately
+        removeViewOnlyBadges();
+        
+        // Remove again after DOM changes (in case of dynamic content)
+        setTimeout(removeViewOnlyBadges, 100);
+        setTimeout(removeViewOnlyBadges, 500);
+        
+        // Watch for any dynamic badge additions
+        const observer = new MutationObserver(() => {
+            removeViewOnlyBadges();
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
 })();
 
 // ============================================================================

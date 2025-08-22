@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.utils import timezone
+import time
 from ..models import Exam, AudioFile, Question
 from core.models import CurriculumLevel
 from core.exceptions import ValidationException, ExamConfigurationException
@@ -307,18 +308,19 @@ def exam_list(request):
     
     response = render(request, 'primepath_routinetest/exam_list_hierarchical.html', context)
     
-    # Add cache control headers
-    # AGGRESSIVE cache prevention - browser must NEVER cache this response
-    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate, private'
+    # NUCLEAR CACHE PREVENTION - absolutely no caching allowed
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0, proxy-revalidate, private, no-transform'
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
-    response['Vary'] = 'Cookie, Accept-Encoding'
-    # Add timestamp to force browser to treat as unique response
-    import time
-    response['X-Response-Time'] = str(time.time())
+    response['Last-Modified'] = 'Wed, 22 Aug 2025 00:00:00 GMT'
+    response['ETag'] = f'"{hash(str(request.GET) + str(request.user.id) + str(timezone.now().timestamp()))}"'
+    response['Vary'] = 'Cookie, User-Agent, Accept-Encoding'
+    
+    # Additional debugging headers
+    response['X-Cache-Control'] = 'no-cache'
+    response['X-No-Cache'] = '1'
     response['X-Filter-State'] = 'on' if show_assigned_only else 'off'
-    response['Pragma'] = 'no-cache'
-    response['Expires'] = '0'
+    response['X-Response-Time'] = str(time.time())
     response['X-Template-Version'] = '6.0-answer-keys-library'
     response['X-Feature'] = 'ANSWER-KEYS-LIBRARY'
     

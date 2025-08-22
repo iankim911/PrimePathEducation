@@ -259,7 +259,8 @@
       "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_toggle_filter_comprehensive_check.py)",
       "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_toggle_filter_results_summary.py)",
       "Bash(../venv/bin/pip install:*)",
-      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python test_filter_fix_absolute_final.py)"
+      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python test_filter_fix_absolute_final.py)",
+      "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_real_browser_issue.py)"
     ],
     "deny": []
   }
