@@ -1,6 +1,5 @@
 {% extends "routinetest_base.html" %}
 {% load static %}
-{% load matrix_filters %}
 {% load access_display %}
 
 {% block title %}Classes & Exams - RoutineTest{% endblock %}
@@ -416,89 +415,7 @@
     .status-indicator.incomplete { background: #ff9800; }
     .status-indicator.not-started { background: #f44336; }
     
-    /* Matrix Preview Section */
-    .matrix-preview {
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        margin-bottom: 30px;
-    }
-    
-    .matrix-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-    }
-    
-    .matrix-table th,
-    .matrix-table td {
-        padding: 8px;
-        text-align: center;
-        border: 1px solid #ddd;
-    }
-    
-    .matrix-table th {
-        background: #2E7D32;
-        color: white;
-        font-weight: bold;
-    }
-    
-    .matrix-table th:nth-child(2) {
-        min-width: 120px;
-        max-width: 140px;
-        width: 140px;
-        background: #266B2A;
-    }
-    
-    /* Quarter columns (Q1-Q4) - make them wider */
-    .matrix-table th:nth-child(3),
-    .matrix-table th:nth-child(4),
-    .matrix-table th:nth-child(5),
-    .matrix-table th:nth-child(6) {
-        min-width: 100px;
-        width: 100px;
-    }
-    
-    .matrix-table td:nth-child(3),
-    .matrix-table td:nth-child(4),
-    .matrix-table td:nth-child(5),
-    .matrix-table td:nth-child(6) {
-        min-width: 100px;
-        width: 100px;
-    }
-    
-    .matrix-cell {
-        position: relative;
-        min-height: 50px;
-        padding: 8px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 2px solid transparent;
-    }
-    
-    /* Color coding for different states */
-    .matrix-cell.empty {
-        background: #FFEBEE;  /* Light red for empty */
-        border-color: #FFCDD2;
-    }
-    
-    .matrix-cell.has-single-exam {
-        background: #E8F5E9;  /* Light green for single exam */
-        border-color: #C8E6C9;
-    }
-    
-    .matrix-cell.has-multiple-exams {
-        background: #E3F2FD;  /* Light blue for multiple exams */
-        border-color: #90CAF9;
-    }
-    
-    .matrix-cell:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        z-index: 10;
-    }
+    /* Matrix Preview CSS removed - visual component eliminated */
     
     /* Exam count display */
     .exam-count {
@@ -701,15 +618,7 @@
         background: rgba(255, 255, 255, 0.2);
     }
     
-    /* Matrix content based on active tab */
-    .matrix-content {
-        transition: opacity 0.3s ease;
-    }
-    
-    .matrix-content.loading {
-        opacity: 0.5;
-        pointer-events: none;
-    }
+    /* Matrix content CSS removed - visual component eliminated */
     
     /* Admin Section Styles */
     .admin-section {
@@ -803,16 +712,7 @@
         font-size: 12px;
     }
     
-    /* Hide cells based on active filter */
-    .matrix-filter-active .exam-indicator {
-        display: none;
-    }
-    
-    .matrix-filter-review .exam-indicator.exam-review,
-    .matrix-filter-quarterly .exam-indicator.exam-quarterly,
-    .matrix-filter-all .exam-indicator {
-        display: inline-block;
-    }
+    /* Matrix filter CSS removed - visual component eliminated */
 </style>
 {% endblock %}
 
@@ -833,129 +733,8 @@ console.log('📋 Total Classes:', {{ classes_info|length }});
 
 console.groupEnd();
 
-// MATRIX RESTORATION DEBUGGING - Comprehensive Matrix Data Analysis
-console.group('%c[MATRIX_DEBUG] Schedule Matrix Data Analysis', 'background: #FF6B6B; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;');
-
-// Matrix basic info
-const matrixData = {{ matrix_data|default:'{}'|safe }};
-const timeslots = {{ timeslots|default:'[]'|safe }};
-console.log('🗓️ Timeslots Available:', timeslots);
-console.log('📊 Matrix Classes:', Object.keys(matrixData));
-console.log('🎯 Total Matrix Cells:', Object.keys(matrixData).length * timeslots.length);
-
-// Analyze matrix cell population
-let totalCells = 0;
-let populatedCells = 0;
-let reviewExams = 0;
-let quarterlyExams = 0;
-let emptyCells = 0;
-let errorCells = 0;
-
-for (const [className, classData] of Object.entries(matrixData)) {
-    console.group(`📚 Class: ${className}`);
-    
-    for (const timeslot of timeslots) {
-        const cell = classData[timeslot];
-        totalCells++;
-        
-        if (cell) {
-            if (cell.status === 'ERROR') {
-                errorCells++;
-                console.warn(`  ❌ ${timeslot}: ERROR - ${cell.error || 'Unknown error'}`);
-            } else if (cell.has_exam) {
-                populatedCells++;
-                let examTypes = [];
-                if (cell.review) {
-                    reviewExams++;
-                    examTypes.push(`Review: "${cell.review.name}"`);
-                }
-                if (cell.quarterly) {
-                    quarterlyExams++;
-                    examTypes.push(`Quarterly: "${cell.quarterly.name}"`);
-                }
-                console.log(`  ✅ ${timeslot}: ${examTypes.join(', ')} (${cell.exam_count} total)`);
-            } else {
-                emptyCells++;
-                console.log(`  ⬜ ${timeslot}: Empty (${cell.status})`);
-            }
-        } else {
-            emptyCells++;
-            console.warn(`  ❓ ${timeslot}: No cell data`);
-        }
-    }
-    console.groupEnd();
-}
-
-// Matrix statistics
-console.group('📊 Matrix Population Statistics');
-console.table({
-    'Total Cells': totalCells,
-    'Populated Cells': populatedCells,
-    'Empty Cells': emptyCells,
-    'Error Cells': errorCells,
-    'Review Exams': reviewExams,
-    'Quarterly Exams': quarterlyExams,
-    'Population Rate': totalCells > 0 ? `${Math.round((populatedCells / totalCells) * 100)}%` : '0%'
-});
-console.groupEnd();
-
-// Matrix health check
-if (totalCells === 0) {
-    console.error('🚨 MATRIX CRITICAL: No matrix cells found! Matrix data may not be loading.');
-} else if (populatedCells === 0) {
-    console.warn('⚠️ MATRIX WARNING: No populated cells found. Check if exams are assigned to matrix.');
-} else if (errorCells > 0) {
-    console.warn(`⚠️ MATRIX WARNING: ${errorCells} cells have errors. Check server logs.`);
-} else {
-    console.log('✅ MATRIX HEALTHY: Matrix data loaded successfully with populated cells.');
-}
-
-// Timeslot validation
-const expectedMonths = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-const expectedQuarters = ['Q1', 'Q2', 'Q3', 'Q4'];
-const expectedTimeslots = [...expectedMonths, ...expectedQuarters];
-
-const missingTimeslots = expectedTimeslots.filter(slot => !timeslots.includes(slot));
-const extraTimeslots = timeslots.filter(slot => !expectedTimeslots.includes(slot));
-
-if (missingTimeslots.length > 0) {
-    console.warn('⚠️ TIMESLOT WARNING: Missing expected timeslots:', missingTimeslots);
-}
-if (extraTimeslots.length > 0) {
-    console.warn('⚠️ TIMESLOT WARNING: Unexpected timeslots found:', extraTimeslots);
-}
-
-// Matrix rendering validation
-setTimeout(() => {
-    const matrixTable = document.querySelector('.matrix-table');
-    if (matrixTable) {
-        const cells = matrixTable.querySelectorAll('.matrix-cell');
-        const indicatorCells = matrixTable.querySelectorAll('.matrix-cell .exam-indicator');
-        
-        console.group('🖼️ Matrix DOM Rendering Validation');
-        console.log(`Total matrix cells rendered: ${cells.length}`);
-        console.log(`Cells with exam indicators: ${indicatorCells.length}`);
-        
-        // Check for rendering issues
-        const emptyCellsRendered = Array.from(cells).filter(cell => 
-            cell.textContent.trim() === '' && !cell.querySelector('.exam-indicator')
-        ).length;
-        
-        console.log(`Empty cells rendered: ${emptyCellsRendered}`);
-        console.log(`Expected total cells: ${Object.keys(matrixData).length * timeslots.length}`);
-        
-        if (cells.length !== Object.keys(matrixData).length * timeslots.length) {
-            console.error('🚨 DOM RENDERING ERROR: Cell count mismatch!');
-        } else {
-            console.log('✅ DOM RENDERING: Cell count matches expected.');
-        }
-        console.groupEnd();
-    } else {
-        console.error('🚨 DOM ERROR: Matrix table not found! Template rendering may have failed.');
-    }
-}, 100);
-
-console.groupEnd();
+// Matrix debugging JavaScript removed - visual component eliminated
+console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from template');
 </script>
 
 
@@ -1037,6 +816,21 @@ console.groupEnd();
                         </div>
                     </div>
                     {% endif %}
+                    
+                    <!-- NEW: Teacher Management Dashboard Link for Admins -->
+                    <div style="margin-top: 20px; text-align: center;">
+                        <a href="{% url 'RoutineTest:admin_teacher_management_dashboard' %}" 
+                           class="btn btn-primary" 
+                           style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); border: none; color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s;"
+                           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)'" 
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'">
+                            <span style="font-size: 18px;">🎓</span>
+                            <span>Teacher Access Management Dashboard</span>
+                        </a>
+                        <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                            Comprehensive teacher-class assignment management with multi-teacher support
+                        </div>
+                    </div>
                 </div>
             {% else %}
                 <!-- NEW SIMPLIFIED TEACHER ACCESS SECTION -->
@@ -1255,150 +1049,27 @@ console.groupEnd();
     </div>
     {% endif %}
     
-    <!-- SECTION 3: Matrix Preview with Exam Type Toggle -->
-    <div class="matrix-preview">
-        <div class="section-header">
-            <div class="section-title">📅 Exam Assignments Matrix</div>
-            <div>
-                <a href="{% url 'RoutineTest:schedule_matrix' %}" class="btn btn-primary">
-                    View Full Matrix →
-                </a>
-            </div>
-        </div>
-        
-        <!-- EXAM TYPE TAB TOGGLE -->
-        <div class="exam-type-tabs" role="tablist" aria-label="Exam Type Filter">
-            <button type="button" 
-                    class="exam-type-tab active" 
-                    id="matrix-review-tab"
-                    role="tab"
-                    aria-selected="true"
-                    data-exam-type="review">
-                <span class="tab-icon">📚</span>
-                <span>Review</span>
-                <span class="tab-badge" id="review-count">0</span>
-            </button>
-            
-            <button type="button" 
-                    class="exam-type-tab" 
-                    id="matrix-quarterly-tab"
-                    role="tab"
-                    aria-selected="false"
-                    data-exam-type="quarterly">
-                <span class="tab-icon">📊</span>
-                <span>Quarterly</span>
-                <span class="tab-badge" id="quarterly-count">0</span>
-            </button>
-            
-            <button type="button" 
-                    class="exam-type-tab" 
-                    id="matrix-all-tab"
-                    role="tab"
-                    aria-selected="false"
-                    data-exam-type="all">
-                <span class="tab-icon">📋</span>
-                <span>All Exams</span>
-                <span class="tab-badge" id="all-count">0</span>
-            </button>
-        </div>
-        
-        <div class="matrix-content matrix-filter-review" id="matrix-content" style="overflow-x: auto;">
-            <table class="matrix-table" id="matrix-table">
-                <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Curriculum</th>
-                        {% for timeslot in timeslots %}
-                        <th data-timeslot="{{ timeslot }}" 
-                            data-column-type="{% if 'Q' in timeslot %}quarterly{% else %}monthly{% endif %}"
-                            class="timeslot-column {% if 'Q' in timeslot %}quarterly-column{% else %}monthly-column{% endif %}">
-                            {{ timeslot }}
-                        </th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for class_code, slots in matrix_data.items %}
-                    <tr>
-                        <td><strong>{{ class_code }}</strong></td>
-                        <td class="curriculum-mapping">
-                            {% if slots.curriculum_mapping.combined != 'Not Assigned' %}
-                            <span class="curriculum-badge">{{ slots.curriculum_mapping.combined }}</span>
-                            {% else %}
-                            <span class="curriculum-badge not-assigned">Not Assigned</span>
-                            {% endif %}
-                        </td>
-                        {% for timeslot in timeslots %}
-                            {% with cell=slots|dict_get:timeslot %}
-                            {% with exam_count=cell|count_exams %}
-                            <td class="matrix-cell {{ exam_count|exam_count_class }} {% if 'Q' in timeslot %}quarterly-column{% else %}monthly-column{% endif %}"
-                                data-timeslot="{{ timeslot }}"
-                                data-column-type="{% if 'Q' in timeslot %}quarterly{% else %}monthly{% endif %}"
-                                data-exam-count="{{ exam_count }}"
-                                onclick="openExamModal('{{ class_code }}', '{{ timeslot }}', 'FULL')"
-                                style="cursor: pointer;">
-                                
-                                <!-- Exam count display -->
-                                <span class="exam-count {{ exam_count|exam_count_label_class }}">
-                                    {{ exam_count }}
-                                </span>
-                                
-                                <!-- Exam indicators -->
-                                <div class="exam-indicators">
-                                    {% if cell.review %}
-                                        <span class="exam-indicator exam-review" title="{{ cell.review.name }}">R</span>
-                                    {% endif %}
-                                    {% if cell.quarterly %}
-                                        <span class="exam-indicator exam-quarterly" title="{{ cell.quarterly.name }}">Q</span>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            {% endwith %}
-                            {% endwith %}
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Legend for color coding and exam types -->
-        <div style="margin-top: 20px; padding: 15px; background: #F5F5F5; border-radius: 8px;">
-            <div style="margin-bottom: 10px; font-weight: bold; color: #333;">Legend:</div>
-            <div style="display: flex; gap: 30px; flex-wrap: wrap; font-size: 13px; align-items: center;">
-                <!-- Color coding legend -->
-                <div style="display: flex; gap: 15px;">
-                    <span style="display: flex; align-items: center; gap: 5px;">
-                        <span style="display: inline-block; width: 20px; height: 20px; background: #FFEBEE; border: 2px solid #FFCDD2; border-radius: 4px;"></span>
-                        Empty (0 exams)
-                    </span>
-                    <span style="display: flex; align-items: center; gap: 5px;">
-                        <span style="display: inline-block; width: 20px; height: 20px; background: #E8F5E9; border: 2px solid #C8E6C9; border-radius: 4px;"></span>
-                        Single Exam (1)
-                    </span>
-                    <span style="display: flex; align-items: center; gap: 5px;">
-                        <span style="display: inline-block; width: 20px; height: 20px; background: #E3F2FD; border: 2px solid #90CAF9; border-radius: 4px;"></span>
-                        Multiple Exams (2+)
-                    </span>
-                </div>
-                
-                <!-- Separator -->
-                <div style="width: 1px; height: 20px; background: #CCC;"></div>
-                
-                <!-- Exam type legend with better styling -->
-                <div style="display: flex; gap: 20px;">
-                    <span style="display: flex; align-items: center; gap: 5px;">
-                        <span style="display: inline-block; padding: 2px 6px; background: #4CAF50; color: white; border-radius: 3px; font-weight: bold; font-size: 11px;">R</span>
-                        = Review Exam
-                    </span>
-                    <span style="display: flex; align-items: center; gap: 5px;">
-                        <span style="display: inline-block; padding: 2px 6px; background: #FF9800; color: white; border-radius: 3px; font-weight: bold; font-size: 11px;">Q</span>
-                        = Quarterly Exam
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- 
+    MATRIX COMPONENT REMOVED (COMPREHENSIVE REMOVAL):
+    The Exam Assignments Matrix visual display has been completely removed as requested.
+    
+    Removed components:
+    - Matrix preview table showing class × timeslot grid
+    - Exam type toggle tabs (Review/Quarterly/All Exams)
+    - Matrix legend and visual indicators
+    - Interactive matrix cell functionality
+    
+    IMPORTANT: The underlying exam assignment functionality via ExamScheduleMatrix model
+    remains intact for API operations (copying, deleting, assigning exams).
+    Only the visual matrix display has been removed.
+    
+    Console logging added for removal tracking.
+    -->
+    <script>
+    console.log('[MATRIX_REMOVAL] Exam Assignments Matrix display has been removed from UI');
+    console.log('[MATRIX_REMOVAL] Underlying exam functionality preserved for API operations');
+    console.log('[MATRIX_REMOVAL] Timestamp:', new Date().toISOString());
+    </script>
     
     {% endif %}
     
@@ -1576,290 +1247,8 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('[UNIFIED_VIEW] DOM loaded, initializing dynamic features...');
     
     // ===== EXAM TYPE TAB TOGGLE SYSTEM =====
-    (function initializeMatrixTabToggle() {
-        console.group('%c[MATRIX_TAB_TOGGLE] Initializing Enhanced Column Visibility System v2.0', 'background: #2E7D32; color: white; padding: 4px 8px; border-radius: 3px; font-weight: bold;');
-        console.log('Timestamp:', new Date().toISOString());
-        console.log('Feature: Column hiding based on tab selection');
-        
-        const tabs = document.querySelectorAll('.exam-type-tabs .exam-type-tab');
-        const matrixContent = document.getElementById('matrix-content');
-        const matrixTable = document.getElementById('matrix-table');
-        
-        // COLUMN DETECTION AND ANALYSIS
-        console.group('[COLUMN_DETECTION] Analyzing Table Structure');
-        const allColumns = document.querySelectorAll('.timeslot-column');
-        const monthlyColumns = document.querySelectorAll('.monthly-column');
-        const quarterlyColumns = document.querySelectorAll('.quarterly-column');
-        
-        console.log('📊 Column Detection Results:');
-        console.log('  Total columns with timeslot class:', allColumns.length);
-        console.log('  Monthly columns detected:', monthlyColumns.length);
-        console.log('  Quarterly columns detected:', quarterlyColumns.length);
-        
-        // Verify column headers
-        const monthlyHeaders = Array.from(document.querySelectorAll('th.monthly-column')).map(th => th.textContent.trim());
-        const quarterlyHeaders = Array.from(document.querySelectorAll('th.quarterly-column')).map(th => th.textContent.trim());
-        
-        console.log('📅 Monthly column headers:', monthlyHeaders);
-        console.log('📊 Quarterly column headers:', quarterlyHeaders);
-        
-        // Verify column cells
-        const monthlyCells = document.querySelectorAll('td.monthly-column');
-        const quarterlyCells = document.querySelectorAll('td.quarterly-column');
-        
-        console.log('📋 Table cell counts:');
-        console.log('  Monthly cells:', monthlyCells.length);
-        console.log('  Quarterly cells:', quarterlyCells.length);
-        
-        if (monthlyColumns.length === 0 && quarterlyColumns.length === 0) {
-            console.error('⚠️ WARNING: No columns detected with monthly-column or quarterly-column classes!');
-            console.log('Attempting fallback detection by data attributes...');
-            
-            const fallbackMonthly = document.querySelectorAll('[data-column-type="monthly"]');
-            const fallbackQuarterly = document.querySelectorAll('[data-column-type="quarterly"]');
-            console.log('Fallback monthly:', fallbackMonthly.length);
-            console.log('Fallback quarterly:', fallbackQuarterly.length);
-        }
-        
-        console.groupEnd();
-        
-        if (!tabs.length || !matrixContent) {
-            console.warn('[MATRIX_TAB_TOGGLE] Required elements not found');
-            console.groupEnd();
-            return;
-        }
-        
-        // Count exams by type
-        function countExamsByType() {
-            let reviewCount = 0;
-            let quarterlyCount = 0;
-            
-            const examIndicators = matrixTable.querySelectorAll('.exam-indicator');
-            examIndicators.forEach(indicator => {
-                if (indicator.classList.contains('exam-review')) {
-                    reviewCount++;
-                } else if (indicator.classList.contains('exam-quarterly')) {
-                    quarterlyCount++;
-                }
-            });
-            
-            // Update badge counts
-            const reviewBadge = document.getElementById('review-count');
-            const quarterlyBadge = document.getElementById('quarterly-count');
-            const allBadge = document.getElementById('all-count');
-            
-            if (reviewBadge) reviewBadge.textContent = reviewCount;
-            if (quarterlyBadge) quarterlyBadge.textContent = quarterlyCount;
-            if (allBadge) allBadge.textContent = reviewCount + quarterlyCount;
-            
-            console.log('[MATRIX_TAB_TOGGLE] Exam counts updated:', {
-                review: reviewCount,
-                quarterly: quarterlyCount,
-                total: reviewCount + quarterlyCount
-            });
-            
-            return { review: reviewCount, quarterly: quarterlyCount };
-        }
-        
-        // Apply filter based on active tab - ENHANCED WITH COLUMN VISIBILITY
-        function applyMatrixFilter(examType) {
-            console.group('[MATRIX_TAB_TOGGLE] Applying Column Visibility Filter');
-            console.log('Filter Type:', examType);
-            console.log('Timestamp:', new Date().toISOString());
-            
-            // Get all monthly and quarterly columns
-            const monthlyColumns = document.querySelectorAll('.monthly-column');
-            const quarterlyColumns = document.querySelectorAll('.quarterly-column');
-            
-            console.log('Monthly columns found:', monthlyColumns.length);
-            console.log('Quarterly columns found:', quarterlyColumns.length);
-            
-            // Remove all filter classes
-            matrixContent.classList.remove('matrix-filter-review', 'matrix-filter-quarterly', 'matrix-filter-all');
-            
-            // Apply column visibility based on selected tab
-            let visibleColumns = 0;
-            let hiddenColumns = 0;
-            
-            switch(examType) {
-                case 'review':
-                    matrixContent.classList.add('matrix-filter-review');
-                    console.log('[COLUMN_VISIBILITY] Showing Review tab - hiding quarterly columns');
-                    
-                    // Show monthly columns, hide quarterly columns
-                    monthlyColumns.forEach(col => {
-                        col.style.display = '';
-                        visibleColumns++;
-                    });
-                    quarterlyColumns.forEach(col => {
-                        col.style.display = 'none';
-                        hiddenColumns++;
-                    });
-                    
-                    console.log('✅ Monthly columns SHOWN:', monthlyColumns.length);
-                    console.log('❌ Quarterly columns HIDDEN:', quarterlyColumns.length);
-                    break;
-                    
-                case 'quarterly':
-                    matrixContent.classList.add('matrix-filter-quarterly');
-                    console.log('[COLUMN_VISIBILITY] Showing Quarterly tab - hiding monthly columns');
-                    
-                    // Hide monthly columns, show quarterly columns
-                    monthlyColumns.forEach(col => {
-                        col.style.display = 'none';
-                        hiddenColumns++;
-                    });
-                    quarterlyColumns.forEach(col => {
-                        col.style.display = '';
-                        visibleColumns++;
-                    });
-                    
-                    console.log('❌ Monthly columns HIDDEN:', monthlyColumns.length);
-                    console.log('✅ Quarterly columns SHOWN:', quarterlyColumns.length);
-                    break;
-                    
-                case 'all':
-                    matrixContent.classList.add('matrix-filter-all');
-                    console.log('[COLUMN_VISIBILITY] Showing ALL tab - displaying all columns');
-                    
-                    // Show all columns
-                    monthlyColumns.forEach(col => {
-                        col.style.display = '';
-                        visibleColumns++;
-                    });
-                    quarterlyColumns.forEach(col => {
-                        col.style.display = '';
-                        visibleColumns++;
-                    });
-                    
-                    console.log('✅ ALL columns SHOWN:', monthlyColumns.length + quarterlyColumns.length);
-                    break;
-            }
-            
-            console.log('[COLUMN_VISIBILITY] Summary:', {
-                'Visible Columns': visibleColumns,
-                'Hidden Columns': hiddenColumns,
-                'Total Columns': visibleColumns + hiddenColumns,
-                'Filter Applied': examType
-            });
-            
-            // Update cell visibility for highlighting
-            updateCellVisibility(examType);
-            
-            console.groupEnd();
-        }
-        
-        // Update cell background colors based on filter
-        function updateCellVisibility(examType) {
-            const cells = matrixTable.querySelectorAll('.matrix-cell');
-            let visibleCells = 0;
-            let hiddenCells = 0;
-            
-            cells.forEach(cell => {
-                const hasReview = cell.querySelector('.exam-review');
-                const hasQuarterly = cell.querySelector('.exam-quarterly');
-                
-                let shouldHighlight = false;
-                
-                if (examType === 'review' && hasReview) {
-                    shouldHighlight = true;
-                } else if (examType === 'quarterly' && hasQuarterly) {
-                    shouldHighlight = true;
-                } else if (examType === 'all' && (hasReview || hasQuarterly)) {
-                    shouldHighlight = true;
-                }
-                
-                if (shouldHighlight) {
-                    cell.classList.add('has-exam');
-                    visibleCells++;
-                } else {
-                    cell.classList.remove('has-exam');
-                    hiddenCells++;
-                }
-            });
-            
-            console.log('[MATRIX_TAB_TOGGLE] Cell visibility updated:', {
-                visible: visibleCells,
-                hidden: hiddenCells,
-                total: cells.length
-            });
-        }
-        
-        // Handle tab clicks
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const examType = this.dataset.examType;
-                
-                console.log('[MATRIX_TAB_TOGGLE] Tab clicked:', examType);
-                
-                // Update active states
-                tabs.forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                this.classList.add('active');
-                this.setAttribute('aria-selected', 'true');
-                
-                // Apply filter
-                applyMatrixFilter(examType);
-                
-                // Store preference
-                try {
-                    sessionStorage.setItem('matrixExamTypeFilter', examType);
-                    console.log('[MATRIX_TAB_TOGGLE] Filter preference saved:', examType);
-                } catch(e) {
-                    console.warn('[MATRIX_TAB_TOGGLE] Could not save preference:', e);
-                }
-            });
-        });
-        
-        // Initialize counts
-        const counts = countExamsByType();
-        
-        // Restore saved filter preference
-        try {
-            const savedFilter = sessionStorage.getItem('matrixExamTypeFilter');
-            if (savedFilter && ['review', 'quarterly', 'all'].includes(savedFilter)) {
-                console.log('[MATRIX_TAB_TOGGLE] Restoring saved filter:', savedFilter);
-                const savedTab = document.querySelector(`[data-exam-type="${savedFilter}"]`);
-                if (savedTab) {
-                    savedTab.click();
-                }
-            } else {
-                // Apply default filter
-                applyMatrixFilter('review');
-            }
-        } catch(e) {
-            console.warn('[MATRIX_TAB_TOGGLE] Could not restore preference:', e);
-            applyMatrixFilter('review');
-        }
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.altKey) {
-                switch(e.key) {
-                    case '1':
-                        document.getElementById('matrix-review-tab')?.click();
-                        e.preventDefault();
-                        break;
-                    case '2':
-                        document.getElementById('matrix-quarterly-tab')?.click();
-                        e.preventDefault();
-                        break;
-                    case '3':
-                        document.getElementById('matrix-all-tab')?.click();
-                        e.preventDefault();
-                        break;
-                }
-            }
-        });
-        
-        console.log('[MATRIX_TAB_TOGGLE] System ready with keyboard shortcuts:');
-        console.log('  Alt+1: Review');
-        console.log('  Alt+2: Quarterly');
-        console.log('  Alt+3: All Exams');
-        console.groupEnd();
-    })();
+    // Matrix tab toggle JavaScript removed - visual component eliminated
+    console.log('[MATRIX_REMOVAL] Matrix tab toggle functionality removed from template');
     
     // Auto-refresh stats every 5 minutes
     setInterval(function() {

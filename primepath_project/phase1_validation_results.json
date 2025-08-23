@@ -1,0 +1,117 @@
+{
+  "backend_service": {
+    "structure_checks": {
+      "is_dict": true,
+      "has_curriculum_data": true,
+      "has_metadata": true,
+      "has_validation": true,
+      "has_debug_info": true,
+      "validation_passed": true,
+      "correct_version": true,
+      "frontend_optimized": true
+    },
+    "program_checks": {
+      "has_all_programs": true,
+      "correct_program_count": true,
+      "no_extra_programs": true
+    },
+    "program_structure": {
+      "CORE": {
+        "has_subprograms": true,
+        "subprograms_is_dict": true,
+        "has_meta": true,
+        "subprogram_count": 4,
+        "subprogram_names": [
+          "Phonics",
+          "Sigma",
+          "Elite",
+          "Pro"
+        ]
+      },
+      "EDGE": {
+        "has_subprograms": true,
+        "subprograms_is_dict": true,
+        "has_meta": true,
+        "subprogram_count": 4,
+        "subprogram_names": [
+          "Spark",
+          "Rise",
+          "Pursuit",
+          "Pro"
+        ]
+      },
+      "ASCENT": {
+        "has_subprograms": true,
+        "subprograms_is_dict": true,
+        "has_meta": true,
+        "subprogram_count": 3,
+        "subprogram_names": [
+          "Nova",
+          "Drive",
+          "Pro"
+        ]
+      },
+      "PINNACLE": {
+        "has_subprograms": true,
+        "subprograms_is_dict": true,
+        "has_meta": true,
+        "subprogram_count": 4,
+        "subprogram_names": [
+          "Vision",
+          "Endeavor",
+          "Success",
+          "Pro"
+        ]
+      }
+    },
+    "total_levels": 41,
+    "service_response_size": 3252,
+    "legacy_checks": {
+      "is_list": true,
+      "has_items": true,
+      "item_structure_valid": true,
+      "sample_item_fields": [
+        "id",
+        "program_name",
+        "subprogram_name",
+        "level_number",
+        "full_name",
+        "existing_count",
+        "routinetest_display_preview",
+        "curriculum_level"
+      ]
+    },
+    "consistency_checks": {
+      "level_count_match": true,
+      "enhanced_count": 41,
+      "legacy_count": 41,
+      "count_difference": 0
+    }
+  },
+  "template_context": {},
+  "template_rendering": {},
+  "javascript_structure": {},
+  "error_handling": {},
+  "user_experience": {},
+  "cross_feature_impact": {},
+  "view_integration": {
+    "curriculum_levels_available": true,
+    "curriculum_hierarchy_available": true,
+    "levels_count": 41,
+    "hierarchy_programs": 4
+  },
+  "url_routing": {
+    "/routinetest/exam/exam_library/": {
+      "status_code": 404,
+      "success": false,
+      "has_context": false,
+      "template_name": null
+    },
+    "/RoutineTest/exam/exam_library/": {
+      "status_code": 404,
+      "success": false,
+      "has_context": false,
+      "template_name": null
+    }
+  }
+}

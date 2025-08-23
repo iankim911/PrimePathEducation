@@ -20,7 +20,7 @@ from .api_urls import urlpatterns as api_patterns
 from .legacy_urls import urlpatterns as legacy_patterns  # Legacy URL patterns for backward compatibility
 # Roster management removed - not needed for Answer Keys functionality
 from .access_urls import urlpatterns as access_patterns  # Teacher class access management
-from .matrix_urls import urlpatterns as matrix_patterns  # Schedule Matrix URLs
+# Matrix URLs removed - visual component eliminated
 from .curriculum_urls import urlpatterns as curriculum_patterns  # Admin curriculum mapping
 from .unified_urls import urlpatterns as unified_patterns  # NEW: Unified Classes & Exams
 from .assessment_urls import urlpatterns as assessment_patterns  # NEW: Teacher Assessment Module (Admin Only)
@@ -50,7 +50,7 @@ urlpatterns.extend(session_patterns)
 urlpatterns.extend(api_patterns)
 # Roster patterns removed - not needed for Answer Keys functionality
 urlpatterns.extend(access_patterns)  # Teacher class access management URLs (kept for backward compatibility)
-urlpatterns.extend(matrix_patterns)  # Schedule Matrix URLs (kept for backward compatibility)
+# Matrix patterns removed - visual component eliminated
 urlpatterns.extend(curriculum_patterns)  # Admin curriculum mapping URLs
 urlpatterns.extend(class_code_patterns)  # Class Code Management URLs
 urlpatterns.extend(assessment_patterns)  # Teacher Assessment Module URLs (Admin Only)
@@ -69,7 +69,6 @@ url_debug_info = {
         "session": len(session_patterns),
         "api": len(api_patterns),
         "access": len(access_patterns),
-        "matrix": len(matrix_patterns),
         "curriculum": len(curriculum_patterns),
         "assessment": len(assessment_patterns),
         "legacy": len(legacy_patterns)

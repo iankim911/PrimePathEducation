@@ -490,13 +490,13 @@ class ExamScheduleMatrix(models.Model):
     def get_status_icon(self):
         """Get the appropriate icon for the current status"""
         status_icons = {
-            'EMPTY': '⬜',
+            'EMPTY': '📚',
             'SCHEDULED': '📅',
             'IN_PROGRESS': '⏳',
             'COMPLETED': '✅',
             'DRAFT': '📝',
         }
-        return status_icons.get(self.status, '❓')
+        return status_icons.get(self.status, '📚')  # Use book icon instead of question mark
     
     def can_teacher_edit(self, teacher):
         """Check if a teacher can edit this matrix cell"""

@@ -524,6 +524,51 @@
         });
     </script>
     
+    <!-- Navigation Error Handler - Prevents Matrix tab errors -->
+    <script src="{% static 'js/routinetest/navigation-error-handler.js' %}"></script>
+    
+    <!-- Enhanced Navigation Debugging -->
+    <script>
+        console.log('%c[ROUTINETEST_BASE] Navigation error handler loaded', 
+            'background: #4CAF50; color: white; padding: 3px 6px; border-radius: 3px;');
+        
+        // Final verification of navigation state
+        document.addEventListener('DOMContentLoaded', function() {
+            console.group('%c[NAV_FINAL_CHECK] RoutineTest Navigation Status', 
+                'background: #2196F3; color: white; padding: 5px; border-radius: 3px; font-weight: bold;');
+            
+            // Check for Matrix-related elements that shouldn't exist
+            const matrixElements = document.querySelectorAll('[href*="matrix"], [data-nav*="matrix"], #matrix-tab-injected');
+            if (matrixElements.length > 0) {
+                console.error(`Found ${matrixElements.length} Matrix elements that should not exist:`, matrixElements);
+                matrixElements.forEach(elem => {
+                    console.log('Removing element:', elem);
+                    const parent = elem.closest('li') || elem;
+                    parent.remove();
+                });
+            } else {
+                console.log('✅ No Matrix elements found (correct)');
+            }
+            
+            // Verify Classes & Exams tab
+            const classesExamsTab = document.querySelector('[data-nav="classes-exams"]');
+            if (classesExamsTab) {
+                console.log('✅ Classes & Exams tab present');
+            } else {
+                console.error('❌ Classes & Exams tab missing!');
+            }
+            
+            // Log final navigation structure
+            const allTabs = document.querySelectorAll('.nav-tabs a[data-nav]');
+            console.log('Final Navigation Structure:');
+            allTabs.forEach((tab, i) => {
+                console.log(`  ${i+1}. ${tab.textContent.trim()} [${tab.getAttribute('data-nav')}]`);
+            });
+            
+            console.groupEnd();
+        });
+    </script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "core/base_clean.html" %}
 {% load static %}
 
 {% block title %}Teacher Login - PrimePath{% endblock %}
@@ -303,15 +303,43 @@
 </div>
 
 <script>
-// Login form handler with logging
+// Login form handler with comprehensive logging
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('loginForm');
     const button = document.getElementById('loginButton');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     
+    // Template validation and navigation check
+    const navigationCheck = {
+        hasNavTabs: document.querySelector('.nav-tabs') !== null,
+        hasNavMenu: document.querySelector('nav') !== null,
+        hasPlacementTestLinks: document.querySelectorAll('a[href*="PlacementTest"]').length > 0,
+        hasRoutineTestLinks: document.querySelectorAll('a[href*="RoutineTest"]').length > 0,
+        baseTemplate: 'core/base_clean.html',  // Expected base template
+        actualNavElements: [],
+        timestamp: new Date().toISOString()
+    };
+    
+    // Collect any navigation elements that shouldn't be here
+    document.querySelectorAll('nav, .nav-tabs, .navigation, .menu').forEach(el => {
+        navigationCheck.actualNavElements.push({
+            tag: el.tagName,
+            className: el.className,
+            id: el.id || 'no-id',
+            childCount: el.children.length
+        });
+    });
+    
+    // Critical check: This should be FALSE for login page
+    if (navigationCheck.hasNavTabs || navigationCheck.hasPlacementTestLinks) {
+        console.error('[AUTH_LOGIN_NAV_ERROR] ⚠️ Navigation elements detected on login page!', navigationCheck);
+    } else {
+        console.log('[AUTH_LOGIN_NAV_OK] ✅ No navigation elements found - Login page is correctly neutral');
+    }
+    
     // Enhanced console logging
-    console.log('[AUTH_LOGIN_PAGE] Login page loaded');
+    console.log('[AUTH_LOGIN_PAGE] Login page loaded', navigationCheck);
     
     const loginPageData = {
         action: 'page_loaded',

@@ -595,7 +595,7 @@ def approve_request(request, request_id):
             defaults={
                 'access_level': 'VIEW',
                 'is_active': True,
-                'assigned_by': admin_teacher
+                'assigned_by': request.user
             }
         )
         
@@ -605,8 +605,8 @@ def approve_request(request, request_id):
         
         # Update request status
         access_request.status = 'APPROVED'
-        access_request.approved_by = admin_teacher
-        access_request.approved_at = timezone.now()
+        access_request.reviewed_by = request.user
+        access_request.reviewed_at = timezone.now()
         access_request.save()
         
         # Log the approval
@@ -614,7 +614,7 @@ def approve_request(request, request_id):
             teacher=access_request.teacher,
             action='ACCESS_APPROVED',
             details=f'Access to {access_request.class_code} approved by {request.user.username}',
-            performed_by=admin_teacher
+            performed_by=request.user
         )
         
         return JsonResponse({'success': True, 'message': 'Request approved'})
@@ -639,8 +639,8 @@ def deny_request(request, request_id):
         
         # Update request status
         access_request.status = 'DENIED'
-        access_request.approved_by = admin_teacher
-        access_request.approved_at = timezone.now()
+        access_request.reviewed_by = request.user
+        access_request.reviewed_at = timezone.now()
         access_request.admin_notes = data.get('reason', 'No reason provided')
         access_request.save()
         
@@ -649,7 +649,7 @@ def deny_request(request, request_id):
             teacher=access_request.teacher,
             action='ACCESS_DENIED',
             details=f'Access to {access_request.class_code} denied by {request.user.username}',
-            performed_by=admin_teacher
+            performed_by=request.user
         )
         
         return JsonResponse({'success': True, 'message': 'Request denied'})
@@ -684,7 +684,7 @@ def bulk_approve_requests(request):
                     defaults={
                         'access_level': 'VIEW',
                         'is_active': True,
-                        'assigned_by': admin_teacher
+                        'assigned_by': request.user
                     }
                 )
                 
@@ -694,8 +694,8 @@ def bulk_approve_requests(request):
                 
                 # Update request
                 access_request.status = 'APPROVED'
-                access_request.approved_by = admin_teacher
-                access_request.approved_at = timezone.now()
+                access_request.reviewed_by = request.user
+                access_request.reviewed_at = timezone.now()
                 access_request.save()
                 
                 approved_count += 1

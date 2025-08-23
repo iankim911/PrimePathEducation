@@ -267,7 +267,8 @@
       "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_django_view.py)",
       "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_actual_badges.py)",
       "Bash(git log:*)",
-      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/fix_vscode_ide_disconnect.sh)"
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/fix_vscode_ide_disconnect.sh)",
+      "Bash(DJANGO_LOG_LEVEL=ERROR /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_comprehensive_qa_auth_fix.py)"
     ],
     "deny": []
   }

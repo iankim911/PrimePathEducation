@@ -75,14 +75,7 @@ from .class_access import (
     admin_revoke_access
 )
 
-# Schedule Matrix views
-from .schedule_matrix import (
-    schedule_matrix_view,
-    matrix_cell_detail,
-    bulk_assign_exams,
-    get_matrix_data,
-    clone_schedule
-)
+# Schedule Matrix views removed - visual component eliminated
 
 # Export all views for backward compatibility
 __all__ = [
@@ -139,12 +132,7 @@ __all__ = [
     'admin_direct_assign',
     'admin_revoke_access',
     
-    # Schedule Matrix views
-    'schedule_matrix_view',
-    'matrix_cell_detail',
-    'bulk_assign_exams',
-    'get_matrix_data',
-    'clone_schedule'
+    # Schedule Matrix views removed - visual component eliminated
 ]
 
 # This ensures that the following imports continue to work:

@@ -37,16 +37,17 @@ def login_view(request):
     logger.info(f"[AUTH_LOGIN] {json.dumps(console_log)}")
     print(f"[AUTH_LOGIN] {json.dumps(console_log)}")
     
-    # If already logged in, redirect
+    # If already logged in, redirect to application chooser
     if request.user.is_authenticated:
         console_log = {
             "view": "login_view",
             "action": "already_authenticated",
             "user": request.user.username,
-            "redirect": "home"
+            "original_next": request.GET.get('next', ''),
+            "redirect": "app_chooser"
         }
         logger.info(f"[AUTH_REDIRECT] {json.dumps(console_log)}")
-        return redirect(request.GET.get('next', '/'))
+        return redirect('/')
     
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -102,10 +103,18 @@ def login_view(request):
                 
                 messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
                 
-                # Redirect to next or default (application chooser page)
-                next_url = request.POST.get('next', request.GET.get('next', '/'))
-                if next_url and next_url != '/accounts/login/':
-                    return redirect(next_url)
+                # Always redirect to application chooser page after login
+                # This ensures consistent behavior and prevents unwanted redirects
+                # to system-specific URLs like /exam-mapping/ or /PlacementTest/
+                console_log = {
+                    "view": "login_view",
+                    "action": "redirect_to_app_chooser",
+                    "user": user.username,
+                    "original_next": request.POST.get('next', request.GET.get('next', '')),
+                    "final_redirect": "/"
+                }
+                logger.info(f"[AUTH_REDIRECT_FIXED] {json.dumps(console_log)}")
+                print(f"[AUTH_REDIRECT_FIXED] {json.dumps(console_log)}")
                 return redirect('/')
             else:
                 # Account inactive
@@ -129,19 +138,26 @@ def login_view(request):
             print(f"[AUTH_FAILED] {json.dumps(console_log)}")
             messages.error(request, 'Invalid username or password. Please try again.')
     
-    # Render login template
+    # Render login template with enhanced context
     next_url = request.GET.get('next', '')
     context = {
         'next': next_url,
         'page_title': 'Teacher Login - PrimePath',
+        'template_base': 'core/base_clean.html',  # Explicitly set for template validation
+        'is_auth_page': True,  # Flag for authentication pages
+        'hide_navigation': True,  # Ensure no navigation is shown
     }
     
-    # Log template rendering
+    # Enhanced template rendering log
     console_log = {
         "view": "login_view",
         "action": "render_template",
+        "template": "core/auth/login.html",
+        "base_template": "core/base_clean.html",
         "next_url": next_url,
         "referred_from": request.META.get('HTTP_REFERER', 'direct'),
+        "user_agent": request.META.get('HTTP_USER_AGENT', 'unknown')[:100],
+        "session_exists": bool(request.session.session_key),
         "timestamp": datetime.now().isoformat()
     }
     logger.info(f"[AUTH_RENDER] {json.dumps(console_log)}")
@@ -214,7 +230,18 @@ def logout_view(request):
 def profile_view(request):
     """
     Display and edit teacher profile
+    Uses neutral base template since user hasn't chosen application yet
     """
+    # Log profile access
+    console_log = {
+        "view": "profile_view",
+        "action": "profile_accessed",
+        "user": request.user.username,
+        "method": request.method,
+        "timestamp": datetime.now().isoformat()
+    }
+    logger.info(f"[AUTH_PROFILE_ACCESS] {json.dumps(console_log)}")
+    print(f"[AUTH_PROFILE_ACCESS] {json.dumps(console_log)}")
     try:
         teacher = request.user.teacher_profile
     except Teacher.DoesNotExist:

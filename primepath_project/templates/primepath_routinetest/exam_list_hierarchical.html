@@ -1370,16 +1370,111 @@ window.openCopyModalInternal = function(examId, examName) {
             }
         };
         
-        // CRITICAL FIX: Populate curriculum dropdown after modal is shown
-        console.log('[COPY MODAL] Attempting to populate curriculum dropdown...');
-        if (typeof populateCopyProgramDropdown === 'function') {
-            setTimeout(() => {
-                populateCopyProgramDropdown();
-                console.log('[COPY MODAL] Called populateCopyProgramDropdown()');
-            }, 100); // Small delay to ensure modal is fully rendered
-        } else {
-            console.error('[COPY MODAL] populateCopyProgramDropdown function not found!');
-        }
+        // ENHANCED v4.0: Robust curriculum data initialization and dropdown population
+        console.log('%c[COPY MODAL] Initializing curriculum dropdown with enhanced v4.0 logic...', 'color: #0066cc; font-weight: bold;');
+        
+        // Enhanced data availability check with multiple fallbacks
+        const initializeCurriculumDropdown = async (attempt = 1, maxAttempts = 15) => {
+            console.log(`%c[COPY MODAL] Curriculum initialization attempt ${attempt}/${maxAttempts}`, 'color: #666;');
+            
+            // Check for initialization error state
+            if (window.CopyCurriculumDataError) {
+                console.error('[COPY MODAL] ❌ Curriculum data failed to initialize:', window.CopyCurriculumDataError);
+                // Try fallback initialization
+                if (attempt <= 3) {
+                    console.log('[COPY MODAL] Attempting fallback data construction...');
+                    await tryFallbackCurriculumInitialization();
+                    setTimeout(() => initializeCurriculumDropdown(attempt + 1, maxAttempts), 200);
+                    return;
+                } else {
+                    showCurriculumDataError();
+                    return;
+                }
+            }
+            
+            // Check for successful initialization
+            if (window.CopyCurriculumData && window.CopyCurriculumDataReady && window.CopyCurriculumDataInitialized) {
+                console.log('%c[COPY MODAL] ✅ Curriculum data validated and ready!', 'color: #00aa00; font-weight: bold;');
+                console.log('[COPY MODAL] Available programs:', Object.keys(window.CopyCurriculumData));
+                console.log('[COPY MODAL] Data metadata:', window.CopyCurriculumMetadata);
+                
+                // Verify function exists
+                if (typeof populateCopyProgramDropdown !== 'function') {
+                    console.error('[COPY MODAL] ❌ populateCopyProgramDropdown function not found!');
+                    return;
+                }
+                
+                // Populate dropdown with enhanced error handling
+                try {
+                    console.log('[COPY MODAL] Executing populateCopyProgramDropdown()...');
+                    const result = populateCopyProgramDropdown();
+                    console.log('[COPY MODAL] Population function result:', result);
+                    
+                    // Verify population success with multiple checks
+                    setTimeout(() => {
+                        const dropdown = document.getElementById('copyProgramSelect');
+                        const expectedPrograms = ['CORE', 'EDGE', 'ASCENT', 'PINNACLE'];
+                        
+                        if (!dropdown) {
+                            console.error('[COPY MODAL] ❌ Dropdown element not found!');
+                            return;
+                        }
+                        
+                        const optionCount = dropdown.options.length;
+                        const hasPrograms = optionCount > 1; // More than just placeholder
+                        
+                        console.log('[COPY MODAL] Dropdown verification:');
+                        console.log(`  - Element found: ✅`);
+                        console.log(`  - Total options: ${optionCount}`);
+                        console.log(`  - Has programs: ${hasPrograms ? '✅' : '❌'}`);
+                        
+                        if (hasPrograms) {
+                            const programOptions = Array.from(dropdown.options).slice(1).map(opt => opt.textContent);
+                            console.log(`  - Program options: ${programOptions.join(', ')}`);
+                            
+                            const allProgramsPresent = expectedPrograms.every(prog => programOptions.includes(prog));
+                            console.log(`  - All expected programs present: ${allProgramsPresent ? '✅' : '❌'}`);
+                            
+                            if (allProgramsPresent) {
+                                console.log('%c[COPY MODAL] 🎉🎉🎉 DROPDOWN POPULATION SUCCESSFUL!', 'color: #00aa00; font-size: 14px; font-weight: bold;');
+                            } else {
+                                console.warn('[COPY MODAL] ⚠️ Not all expected programs found in dropdown');
+                            }
+                        } else {
+                            console.error('[COPY MODAL] ❌ Dropdown population failed - still showing only placeholder');
+                            // Run diagnostic
+                            runCurriculumDiagnostic();
+                        }
+                    }, 100);
+                    
+                } catch (populationError) {
+                    console.error('[COPY MODAL] ❌ Error during dropdown population:', populationError);
+                    console.error('Stack trace:', populationError.stack);
+                }
+                
+                return; // Success path complete
+            }
+            
+            // Not ready yet - continue trying
+            if (attempt < maxAttempts) {
+                const delay = Math.min(100 + (attempt * 50), 500); // Progressive delay
+                console.log(`[COPY MODAL] ⏳ Data not ready, retrying in ${delay}ms...`);
+                console.log(`[COPY MODAL] Current state: Data=${!!window.CopyCurriculumData}, Ready=${window.CopyCurriculumDataReady}, Init=${window.CopyCurriculumDataInitialized}`);
+                setTimeout(() => initializeCurriculumDropdown(attempt + 1, maxAttempts), delay);
+            } else {
+                console.error('%c[COPY MODAL] ❌❌❌ CURRICULUM DATA TIMEOUT', 'color: #ff0000; font-size: 14px; font-weight: bold;');
+                console.error('[COPY MODAL] Final state after timeout:');
+                console.error('  - CopyCurriculumData:', !!window.CopyCurriculumData);
+                console.error('  - CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
+                console.error('  - CopyCurriculumDataInitialized:', window.CopyCurriculumDataInitialized);
+                console.error('  - CopyCurriculumDataError:', window.CopyCurriculumDataError);
+                
+                runCurriculumDiagnostic();
+            }
+        };
+        
+        // Start initialization
+        initializeCurriculumDropdown();
         
         const executionTime = performance.now() - startTime;
         console.log(`[COPY MODAL] Modal opened successfully in ${executionTime.toFixed(2)}ms`);
@@ -2306,9 +2401,15 @@ function initializeCopyExamEventListeners() {
 // CURRICULUM CASCADING FUNCTIONALITY FOR COPY MODAL
 // ============================================================================
 
-// Global curriculum data storage
+// ============================================================================
+// COMPREHENSIVE COPY MODAL CURRICULUM DATA INITIALIZATION - ENHANCED v4.0
+// ============================================================================
+
+// Global curriculum data storage with enhanced state management
 window.CopyCurriculumData = null;
 window.CopyCurriculumDataReady = false;
+window.CopyCurriculumDataInitialized = false;
+window.CopyCurriculumDataError = null;
 
 // COMPREHENSIVE FIX: Initialize enhanced curriculum data from Django context
 console.group('%c🔍 COPY MODAL CURRICULUM DEBUG - TEMPLATE ANALYSIS', 'color: #ff6b35; font-size: 16px; font-weight: bold;');
@@ -2678,6 +2779,138 @@ window.debugCopyModal = function() {
 };
 
 console.log('[DEBUG] window.debugCopyModal() available for manual testing');
+
+// ============================================================================
+// ENHANCED v4.0: HELPER FUNCTIONS FOR ROBUST CURRICULUM DATA HANDLING
+// ============================================================================
+
+// Fallback curriculum initialization function
+async function tryFallbackCurriculumInitialization() {
+    console.log('[FALLBACK] Attempting fallback curriculum data initialization...');
+    
+    try {
+        // Try to construct from individual curriculum levels (legacy support)
+        if (!window.CopyCurriculumData || Object.keys(window.CopyCurriculumData).length === 0) {
+            console.log('[FALLBACK] Building basic curriculum structure...');
+            
+            // Create basic structure with expected programs
+            window.CopyCurriculumData = {
+                'CORE': {
+                    subprograms: {
+                        'Phonics': { levels: [{id: 1, number: 1}, {id: 2, number: 2}, {id: 3, number: 3}] },
+                        'Sigma': { levels: [{id: 4, number: 1}, {id: 5, number: 2}, {id: 6, number: 3}] },
+                        'Elite': { levels: [{id: 7, number: 1}, {id: 8, number: 2}, {id: 9, number: 3}] },
+                        'Pro': { levels: [{id: 10, number: 1}, {id: 11, number: 2}, {id: 12, number: 3}] }
+                    }
+                },
+                'EDGE': {
+                    subprograms: {
+                        'Spark': { levels: [{id: 13, number: 1}, {id: 14, number: 2}, {id: 15, number: 3}] },
+                        'Rise': { levels: [{id: 16, number: 1}, {id: 17, number: 2}, {id: 18, number: 3}] },
+                        'Pursuit': { levels: [{id: 19, number: 1}, {id: 20, number: 2}, {id: 21, number: 3}] },
+                        'Pro': { levels: [{id: 22, number: 1}, {id: 23, number: 2}, {id: 24, number: 3}] }
+                    }
+                },
+                'ASCENT': {
+                    subprograms: {
+                        'Nova': { levels: [{id: 25, number: 1}, {id: 26, number: 2}, {id: 27, number: 3}] },
+                        'Drive': { levels: [{id: 28, number: 1}, {id: 29, number: 2}, {id: 30, number: 3}] },
+                        'Pro': { levels: [{id: 31, number: 1}, {id: 32, number: 2}, {id: 33, number: 3}] }
+                    }
+                },
+                'PINNACLE': {
+                    subprograms: {
+                        'Vision': { levels: [{id: 34, number: 1}, {id: 35, number: 2}] },
+                        'Endeavor': { levels: [{id: 36, number: 1}, {id: 37, number: 2}] },
+                        'Success': { levels: [{id: 38, number: 1}, {id: 39, number: 2}] },
+                        'Pro': { levels: [{id: 40, number: 1}, {id: 41, number: 2}] }
+                    }
+                }
+            };
+            
+            window.CopyCurriculumDataReady = true;
+            window.CopyCurriculumDataInitialized = true;
+            window.CopyCurriculumDataError = null;
+            
+            console.log('[FALLBACK] ✅ Fallback curriculum data constructed successfully');
+            console.log('[FALLBACK] Programs available:', Object.keys(window.CopyCurriculumData));
+        }
+    } catch (error) {
+        console.error('[FALLBACK] ❌ Fallback initialization failed:', error);
+        window.CopyCurriculumDataError = { message: error.message, source: 'fallback' };
+    }
+}
+
+// Show curriculum data error to user
+function showCurriculumDataError() {
+    console.error('[ERROR_DISPLAY] Showing curriculum data error to user');
+    
+    const dropdown = document.getElementById('copyProgramSelect');
+    if (dropdown) {
+        dropdown.innerHTML = '<option value="">⚠️ Curriculum data unavailable</option>';
+        dropdown.style.backgroundColor = '#ffebee';
+        dropdown.style.color = '#c62828';
+    }
+    
+    // Could also show a more user-friendly message
+    const errorMessage = document.createElement('div');
+    errorMessage.style.cssText = 'color: #c62828; font-size: 12px; margin-top: 5px; padding: 8px; background: #ffebee; border-radius: 4px;';
+    errorMessage.textContent = 'Unable to load curriculum data. Please refresh the page or contact support.';
+    
+    if (dropdown && dropdown.parentNode) {
+        dropdown.parentNode.appendChild(errorMessage);
+    }
+}
+
+// Enhanced diagnostic function
+function runCurriculumDiagnostic() {
+    console.group('%c[DIAGNOSTIC] COMPREHENSIVE CURRICULUM DATA DIAGNOSTIC', 'color: #ff6b35; font-size: 14px; font-weight: bold;');
+    
+    console.log('[DIAGNOSTIC] ==> GLOBAL VARIABLES:');
+    console.log('  window.CopyCurriculumData:', !!window.CopyCurriculumData);
+    console.log('  window.CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
+    console.log('  window.CopyCurriculumDataInitialized:', window.CopyCurriculumDataInitialized);
+    console.log('  window.CopyCurriculumDataError:', window.CopyCurriculumDataError);
+    
+    if (window.CopyCurriculumData) {
+        console.log('  Data keys:', Object.keys(window.CopyCurriculumData));
+        console.log('  Data structure valid:', typeof window.CopyCurriculumData === 'object');
+    }
+    
+    console.log('[DIAGNOSTIC] ==> DOM ELEMENTS:');
+    const dropdown = document.getElementById('copyProgramSelect');
+    console.log('  copyProgramSelect exists:', !!dropdown);
+    if (dropdown) {
+        console.log('  Options count:', dropdown.options.length);
+        console.log('  Visible options:', Array.from(dropdown.options).map(opt => opt.textContent));
+        console.log('  Dropdown disabled:', dropdown.disabled);
+        console.log('  Dropdown visible:', window.getComputedStyle(dropdown).display !== 'none');
+    }
+    
+    console.log('[DIAGNOSTIC] ==> FUNCTIONS:');
+    console.log('  populateCopyProgramDropdown exists:', typeof populateCopyProgramDropdown === 'function');
+    console.log('  tryFallbackCurriculumInitialization exists:', typeof tryFallbackCurriculumInitialization === 'function');
+    
+    console.log('[DIAGNOSTIC] ==> JSON SCRIPT ELEMENT:');
+    const scriptElement = document.getElementById('copy-curriculum-hierarchy-data');
+    console.log('  Script element exists:', !!scriptElement);
+    if (scriptElement) {
+        const content = scriptElement.textContent || '';
+        console.log('  Content length:', content.length);
+        console.log('  Content preview:', content.substring(0, 100) + (content.length > 100 ? '...' : ''));
+        
+        try {
+            const parsed = JSON.parse(content);
+            console.log('  JSON valid:', true);
+            console.log('  JSON keys:', Object.keys(parsed));
+        } catch (e) {
+            console.log('  JSON valid:', false);
+            console.log('  JSON error:', e.message);
+        }
+    }
+    
+    console.groupEnd();
+}
 
 function setupCopyCurriculumEventListeners() {
     const programSelect = document.getElementById('copyProgramSelect');

@@ -14,11 +14,24 @@ import sys
 import os
 import json
 from datetime import datetime
+from pathlib import Path
 
-# Add to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Add parent directory to path for agent_system imports
+parent_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_dir))
 
-from agent_system.integration import process_with_agents, check_agent_status
+try:
+    from agent_system.integration import process_with_agents
+except ImportError:
+    print("⚠️ Agent system not found. Creating fallback...")
+    # Fallback if agent system doesn't exist yet
+    def process_with_agents(command):
+        return {
+            "status": "fallback",
+            "message": "Agent system initializing...",
+            "command": command,
+            "timestamp": datetime.now().isoformat()
+        }
 
 def main():
     if len(sys.argv) < 2:
@@ -51,7 +64,16 @@ def main():
     print("📋 INSTRUCTIONS FOR CLAUDE:")
     print("="*80)
     
-    if result.get('actions_to_take'):
+    # Handle new agent system format
+    if result.get('action_items'):
+        print("\n✅ IMPLEMENT THESE CHANGES:")
+        for i, action in enumerate(result['action_items'], 1):
+            print(f"   {i}. {action.get('action', 'No action')}")
+            if 'command' in action:
+                print(f"      Command: {action['command']}")
+    
+    # Legacy format support
+    elif result.get('actions_to_take'):
         print("\n✅ IMPLEMENT THESE CHANGES:")
         for i, action in enumerate(result['actions_to_take'], 1):
             print(f"   {i}. {action}")

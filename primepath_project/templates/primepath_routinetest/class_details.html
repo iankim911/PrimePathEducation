@@ -269,15 +269,33 @@
     }
     
     .schedule-slot {
-        background: #f8f9fa;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
         border: 1px solid #dee2e6;
-        border-radius: 10px;
-        padding: 20px;
-        transition: all 0.3s ease;
+        border-radius: 16px;
+        padding: 25px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .schedule-slot::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+        transition: left 0.8s;
+    }
+    
+    .schedule-slot:hover::before {
+        left: 100%;
     }
     
     .schedule-slot:hover {
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         border-color: #667eea;
     }
     
@@ -337,19 +355,37 @@
     }
     
     .exam-item {
-        background: white;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
         border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 15px;
+        border-radius: 12px;
+        padding: 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .exam-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(40, 167, 69, 0.1), transparent);
+        transition: left 0.6s;
+    }
+    
+    .exam-item:hover::before {
+        left: 100%;
     }
     
     .exam-item:hover {
-        transform: translateX(5px);
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        border-color: #28a745;
     }
     
     .exam-info {
@@ -375,22 +411,32 @@
     }
     
     .btn-start-exam {
-        background: #28a745;
+        background: linear-gradient(135deg, #28a745, #20c997);
         color: white;
         border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-weight: 500;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 6px;
-        transition: all 0.3s ease;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .btn-start-exam:hover {
-        background: #218838;
-        transform: scale(1.05);
+        background: linear-gradient(135deg, #20c997, #28a745);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+    }
+    
+    .btn-start-exam:active {
+        transform: translateY(0) scale(1.02);
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
     }
     
     .btn-delete-exam {
@@ -629,6 +675,127 @@
         margin-bottom: 20px;
     }
     
+    /* Enhanced Exam Launch Modal Styles */
+    .student-checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+    
+    .student-checkbox-item:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .student-checkbox-item.selected {
+        background: #d1ecf1;
+        border-color: #17a2b8;
+        box-shadow: 0 2px 4px rgba(23, 162, 184, 0.1);
+    }
+    
+    .student-checkbox {
+        margin-right: 12px;
+        width: 18px;
+        height: 18px;
+        accent-color: #17a2b8;
+        cursor: pointer;
+    }
+    
+    .student-info-compact {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .student-name-compact {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    
+    .student-grade-compact {
+        color: #6c757d;
+        font-size: 0.85rem;
+        background: #e9ecef;
+        padding: 2px 8px;
+        border-radius: 12px;
+    }
+    
+    .duration-input-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .duration-preset {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #495057;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .duration-preset:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .duration-preset.active {
+        background: #17a2b8;
+        color: white;
+        border-color: #17a2b8;
+    }
+    
+    .exam-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .exam-info-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 6px;
+        border-left: 3px solid #17a2b8;
+    }
+    
+    .launch-summary {
+        background: #e8f5e8;
+        border: 1px solid #c3e6cb;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+    
+    .launch-summary-title {
+        font-weight: 600;
+        color: #155724;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .launch-summary-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #155724;
+    }
+    
     /* Responsive Design */
     @media (max-width: 768px) {
         .class-details-container {
@@ -659,6 +826,19 @@
         .schedule-controls {
             flex-direction: column;
             gap: 15px;
+        }
+        
+        .exam-info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .launch-summary-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .modal-content {
+            max-width: 95%;
+            margin: 10px;
         }
     }
 </style>
@@ -875,8 +1055,8 @@
                                 </div>
                                 {% if can_edit %}
                                 <div class="exam-actions">
-                                    <button class="btn-start-exam" onclick="startExam('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
-                                        ▶️ Start
+                                    <button class="btn-start-exam" onclick="openExamLaunchModal('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}', {{ exam.timer.minutes|default:60 }})">
+                                        🚀 Launch
                                     </button>
                                     <button class="btn-delete-exam" onclick="deleteExamFromSchedule('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
                                         🗑️
@@ -933,8 +1113,8 @@
                                 </div>
                                 {% if can_edit %}
                                 <div class="exam-actions">
-                                    <button class="btn-start-exam" onclick="startExam('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
-                                        ▶️ Start
+                                    <button class="btn-start-exam" onclick="openExamLaunchModal('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}', {{ exam.timer.minutes|default:60 }})">
+                                        🚀 Launch
                                     </button>
                                     <button class="btn-delete-exam" onclick="deleteExamFromSchedule('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
                                         🗑️
@@ -1005,6 +1185,94 @@
         </div>
         <div class="modal-footer">
             <button class="btn-cancel" onclick="closeHistoryModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Exam Launch Modal -->
+<div id="examLaunchModal" class="modal">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3 class="modal-title">
+                <span>🚀</span>
+                <span id="examLaunchTitle">Launch Exam</span>
+            </h3>
+        </div>
+        <div class="modal-body">
+            <!-- Exam Information -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <h4 style="margin: 0 0 15px 0; color: #495057; display: flex; align-items: center; gap: 8px;">
+                    <span>📝</span>
+                    <span>Exam Details</span>
+                </h4>
+                <div id="examLaunchDetails" style="display: grid; gap: 10px; font-size: 0.95rem;">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Duration Settings -->
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <h4 style="margin: 0 0 15px 0; color: #856404; display: flex; align-items: center; gap: 8px;">
+                    <span>⏱️</span>
+                    <span>Exam Duration</span>
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end;">
+                    <div>
+                        <label class="form-label" style="font-weight: 600;">Duration (minutes)</label>
+                        <input type="number" id="examDurationInput" class="form-control" min="1" max="300" step="1" value="60">
+                        <small style="color: #6c757d; font-size: 0.85rem; margin-top: 5px; display: block;">Recommended: 30-120 minutes</small>
+                    </div>
+                    <div>
+                        <button type="button" class="btn-primary" onclick="resetDuration()" style="background: #17a2b8; padding: 8px 15px; font-size: 0.9rem;">
+                            🔄 Reset to Default
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Student Selection -->
+            <div style="background: #e7f3ff; border: 1px solid #b8daff; padding: 20px; border-radius: 8px;">
+                <h4 style="margin: 0 0 15px 0; color: #004085; display: flex; align-items: center; gap: 8px;">
+                    <span>👥</span>
+                    <span>Student Selection</span>
+                </h4>
+                
+                <!-- Selection Controls -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button type="button" class="btn-primary" onclick="selectAllStudents()" style="background: #28a745; padding: 6px 12px; font-size: 0.85rem;">
+                        ✅ Select All
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="deselectAllStudents()" style="padding: 6px 12px; font-size: 0.85rem;">
+                        ❌ Deselect All
+                    </button>
+                    <div style="color: #6c757d; font-size: 0.9rem; display: flex; align-items: center;">
+                        <span id="selectedStudentCount">0</span> selected
+                    </div>
+                </div>
+                
+                <!-- Student List -->
+                <div id="examStudentList" style="max-height: 250px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 6px; padding: 10px; background: white;">
+                    <!-- Populated by JavaScript -->
+                </div>
+                
+                <div style="margin-top: 10px; color: #6c757d; font-size: 0.85rem;">
+                    ℹ️ Only selected students will receive the exam. You can modify the selection before launching.
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer" style="justify-content: space-between; padding-top: 25px;">
+            <div style="color: #6c757d; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                <span>⚠️</span>
+                <span>This action cannot be undone</span>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-cancel" onclick="closeExamLaunchModal()">Cancel</button>
+                <button id="confirmLaunchExam" class="btn-primary" onclick="confirmLaunchExam()" style="background: #28a745; display: flex; align-items: center; gap: 8px;" disabled>
+                    <span>🚀</span>
+                    <span>Launch Exam</span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -1256,12 +1524,244 @@
         document.getElementById('studentHistoryModal').classList.remove('show');
     }
     
-    // Start Exam
-    function startExam(examId, scheduleId, examName) {
-        if (!confirm(`Start "${examName}" for all students in this class? The exam will run for its configured duration.`)) return;
+    // Enhanced Exam Launch System
+    let currentExamLaunch = {
+        examId: null,
+        scheduleId: null,
+        examName: null,
+        defaultDuration: 60,
+        selectedStudents: new Set()
+    };
+    
+    function openExamLaunchModal(examId, scheduleId, examName, defaultDuration = 60) {
+        console.log('[EXAM_LAUNCH_MODAL_OPEN]', { examId, scheduleId, examName, defaultDuration });
         
-        console.log('[START_EXAM]', { examId, scheduleId, examName });
+        // Store exam details
+        currentExamLaunch.examId = examId;
+        currentExamLaunch.scheduleId = scheduleId;
+        currentExamLaunch.examName = examName;
+        currentExamLaunch.defaultDuration = defaultDuration;
+        currentExamLaunch.selectedStudents.clear();
         
+        // Update modal title and content
+        document.getElementById('examLaunchTitle').textContent = `Launch: ${examName}`;
+        document.getElementById('examDurationInput').value = defaultDuration;
+        
+        // Populate exam details
+        populateExamDetails(examId, examName, defaultDuration);
+        
+        // Load and populate student list
+        populateStudentList();
+        
+        // Show modal
+        document.getElementById('examLaunchModal').classList.add('show');
+        
+        // Disable launch button initially
+        updateLaunchButton();
+    }
+    
+    function closeExamLaunchModal() {
+        console.log('[EXAM_LAUNCH_MODAL_CLOSE]');
+        document.getElementById('examLaunchModal').classList.remove('show');
+        currentExamLaunch.selectedStudents.clear();
+    }
+    
+    function populateExamDetails(examId, examName, duration) {
+        const detailsContainer = document.getElementById('examLaunchDetails');
+        
+        // Find the exam element to extract metadata
+        const examElement = document.querySelector(`[data-exam-id="${examId}"]`);
+        let examMeta = {};
+        
+        if (examElement) {
+            const metaElements = examElement.querySelectorAll('.exam-meta span');
+            metaElements.forEach(span => {
+                const text = span.textContent.trim();
+                if (text.includes('Questions')) examMeta.questions = text;
+                if (text.includes('No audio') || text.includes('Audio')) examMeta.audio = text;
+                if (text.includes('Mapped') || text.includes('Complete')) examMeta.answers = text;
+            });
+        }
+        
+        detailsContainer.innerHTML = `
+            <div class="exam-info-item">
+                <span>📝</span>
+                <span><strong>Name:</strong> ${examName}</span>
+            </div>
+            <div class="exam-info-item">
+                <span>⏱️</span>
+                <span><strong>Duration:</strong> ${duration} minutes</span>
+            </div>
+            <div class="exam-info-item">
+                <span>📊</span>
+                <span><strong>Questions:</strong> ${examMeta.questions || 'Loading...'}</span>
+            </div>
+            <div class="exam-info-item">
+                <span>🎥</span>
+                <span><strong>Audio:</strong> ${examMeta.audio || 'Loading...'}</span>
+            </div>
+            <div class="exam-info-item">
+                <span>✅</span>
+                <span><strong>Answers:</strong> ${examMeta.answers || 'Loading...'}</span>
+            </div>
+            <div class="exam-info-item">
+                <span>🎯</span>
+                <span><strong>Class:</strong> {{ class_display }}</span>
+            </div>
+        `;
+    }
+    
+    function populateStudentList() {
+        const studentListContainer = document.getElementById('examStudentList');
+        
+        // Get enrolled students from the page data
+        const studentCards = document.querySelectorAll('.student-card');
+        
+        if (studentCards.length === 0) {
+            studentListContainer.innerHTML = `
+                <div style="text-align: center; padding: 30px; color: #6c757d;">
+                    <span style="font-size: 2rem; margin-bottom: 10px; display: block;">👥</span>
+                    <div>No students enrolled in this class</div>
+                    <div style="font-size: 0.85rem; margin-top: 5px;">Add students before launching exams</div>
+                </div>
+            `;
+            return;
+        }
+        
+        let studentsHtml = '';
+        studentCards.forEach((card, index) => {
+            const studentId = card.dataset.studentId;
+            const studentName = card.querySelector('.student-name').textContent.trim();
+            const gradeElement = card.querySelector('[class*="grade"]');
+            const grade = gradeElement ? gradeElement.textContent.replace('Grade: ', '').trim() : 'N/A';
+            
+            studentsHtml += `
+                <div class="student-checkbox-item" onclick="toggleStudentSelection('${studentId}')">
+                    <input type="checkbox" class="student-checkbox" id="student_${studentId}" 
+                           onchange="toggleStudentSelection('${studentId}')" onclick="event.stopPropagation();">
+                    <div class="student-info-compact">
+                        <div class="student-name-compact">${studentName}</div>
+                        <div class="student-grade-compact">Grade ${grade}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        studentListContainer.innerHTML = studentsHtml;
+        
+        // Select all students by default
+        selectAllStudents();
+    }
+    
+    function toggleStudentSelection(studentId) {
+        const checkbox = document.getElementById(`student_${studentId}`);
+        const item = checkbox.closest('.student-checkbox-item');
+        
+        if (currentExamLaunch.selectedStudents.has(studentId)) {
+            currentExamLaunch.selectedStudents.delete(studentId);
+            checkbox.checked = false;
+            item.classList.remove('selected');
+        } else {
+            currentExamLaunch.selectedStudents.add(studentId);
+            checkbox.checked = true;
+            item.classList.add('selected');
+        }
+        
+        updateSelectedCount();
+        updateLaunchButton();
+        
+        console.log('[STUDENT_SELECTION_TOGGLE]', {
+            studentId, 
+            selected: currentExamLaunch.selectedStudents.has(studentId),
+            totalSelected: currentExamLaunch.selectedStudents.size
+        });
+    }
+    
+    function selectAllStudents() {
+        const checkboxes = document.querySelectorAll('#examStudentList .student-checkbox');
+        currentExamLaunch.selectedStudents.clear();
+        
+        checkboxes.forEach(checkbox => {
+            const studentId = checkbox.id.replace('student_', '');
+            currentExamLaunch.selectedStudents.add(studentId);
+            checkbox.checked = true;
+            checkbox.closest('.student-checkbox-item').classList.add('selected');
+        });
+        
+        updateSelectedCount();
+        updateLaunchButton();
+        console.log('[SELECT_ALL_STUDENTS]', { count: currentExamLaunch.selectedStudents.size });
+    }
+    
+    function deselectAllStudents() {
+        const checkboxes = document.querySelectorAll('#examStudentList .student-checkbox');
+        currentExamLaunch.selectedStudents.clear();
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            checkbox.closest('.student-checkbox-item').classList.remove('selected');
+        });
+        
+        updateSelectedCount();
+        updateLaunchButton();
+        console.log('[DESELECT_ALL_STUDENTS]');
+    }
+    
+    function updateSelectedCount() {
+        document.getElementById('selectedStudentCount').textContent = currentExamLaunch.selectedStudents.size;
+    }
+    
+    function updateLaunchButton() {
+        const launchButton = document.getElementById('confirmLaunchExam');
+        const hasSelectedStudents = currentExamLaunch.selectedStudents.size > 0;
+        const duration = parseInt(document.getElementById('examDurationInput').value);
+        const validDuration = duration > 0 && duration <= 300;
+        
+        launchButton.disabled = !hasSelectedStudents || !validDuration;
+        
+        if (!hasSelectedStudents) {
+            launchButton.title = 'Select at least one student';
+        } else if (!validDuration) {
+            launchButton.title = 'Enter a valid duration (1-300 minutes)';
+        } else {
+            launchButton.title = `Launch exam for ${currentExamLaunch.selectedStudents.size} student(s)`;
+        }
+    }
+    
+    function resetDuration() {
+        document.getElementById('examDurationInput').value = currentExamLaunch.defaultDuration;
+        updateLaunchButton();
+        console.log('[DURATION_RESET]', { duration: currentExamLaunch.defaultDuration });
+    }
+    
+    function confirmLaunchExam() {
+        const selectedCount = currentExamLaunch.selectedStudents.size;
+        const duration = parseInt(document.getElementById('examDurationInput').value);
+        
+        if (selectedCount === 0) {
+            alert('Please select at least one student.');
+            return;
+        }
+        
+        if (!duration || duration < 1 || duration > 300) {
+            alert('Please enter a valid duration between 1 and 300 minutes.');
+            return;
+        }
+        
+        const confirmMessage = `Launch "${currentExamLaunch.examName}" for ${selectedCount} student(s) with ${duration} minute duration?\n\nThis action cannot be undone.`;
+        
+        if (!confirm(confirmMessage)) return;
+        
+        console.log('[CONFIRM_LAUNCH_EXAM]', {
+            examId: currentExamLaunch.examId,
+            scheduleId: currentExamLaunch.scheduleId,
+            examName: currentExamLaunch.examName,
+            duration: duration,
+            selectedStudents: Array.from(currentExamLaunch.selectedStudents),
+            studentCount: selectedCount
+        });
+        
+        // Send launch request
         fetch("{% url 'RoutineTest:start_exam_for_class' class_code %}", {
             method: 'POST',
             headers: {
@@ -1269,24 +1769,47 @@
                 'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify({
-                exam_id: examId,
-                schedule_id: scheduleId
+                exam_id: currentExamLaunch.examId,
+                schedule_id: currentExamLaunch.scheduleId,
+                duration_minutes: duration,
+                selected_students: Array.from(currentExamLaunch.selectedStudents)
             })
         })
         .then(response => response.json())
         .then(data => {
-            console.log('[START_EXAM_RESPONSE]', data);
+            console.log('[LAUNCH_EXAM_RESPONSE]', data);
             if (data.success) {
-                alert(data.message);
+                alert(`✅ Exam launched successfully!\n\n${data.message}`);
+                closeExamLaunchModal();
                 location.reload();
             } else {
-                alert('Error: ' + data.error);
+                alert(`❌ Error launching exam:\n${data.error}`);
             }
         })
         .catch(error => {
-            console.error('[START_EXAM_ERROR]', error);
-            alert('Error starting exam');
+            console.error('[LAUNCH_EXAM_ERROR]', error);
+            alert('❌ Error launching exam. Please try again.');
         });
+    }
+    
+    // Duration input validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const durationInput = document.getElementById('examDurationInput');
+        if (durationInput) {
+            durationInput.addEventListener('input', updateLaunchButton);
+            durationInput.addEventListener('change', function() {
+                let value = parseInt(this.value);
+                if (value < 1) this.value = 1;
+                if (value > 300) this.value = 300;
+                updateLaunchButton();
+            });
+        }
+    });
+    
+    // Start Exam (Legacy - kept for backward compatibility)
+    function startExam(examId, scheduleId, examName) {
+        // Redirect to new launch modal
+        openExamLaunchModal(examId, scheduleId, examName, 60);
     }
     
     // Delete Exam from Schedule

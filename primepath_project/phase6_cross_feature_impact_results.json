@@ -1,0 +1,117 @@
+{
+  "timestamp": "2025-08-22T21:14:18.787571",
+  "impact_analysis": {
+    "exam_library_features": {
+      "main_page": {
+        "loads_successfully": true,
+        "has_content": true,
+        "has_context": false,
+        "core_features": {
+          "exam_table": true,
+          "create_exam_button": true,
+          "edit_buttons": true,
+          "delete_functionality": true,
+          "exam_preview": true,
+          "search_filter": true,
+          "pagination": true
+        }
+      },
+      "creation": {
+        "create_page_loads": true,
+        "has_form": true
+      }
+    },
+    "exam_management_workflows": {
+      "exam_detail": {
+        "accessible": true,
+        "has_content": true
+      },
+      "exam_edit": {
+        "accessible": true,
+        "has_form": true
+      },
+      "question_management": {
+        "accessible": true,
+        "functional": true
+      }
+    },
+    "student_interface": {
+      "session_99071390-83ec-44c0-ada8-99d8274b403c": {
+        "accessible": false,
+        "has_interface": false
+      },
+      "session_51d7d2fe-bcbd-4a19-8f74-c980fe652caa": {
+        "accessible": false,
+        "has_interface": false
+      },
+      "session_a0f49088-715a-4dd0-b0c2-32cd66905706": {
+        "accessible": false,
+        "has_interface": false
+      }
+    },
+    "teacher_permissions": {
+      "admin_access": {
+        "can_access_exams": true,
+        "sees_copy_buttons": true
+      },
+      "teacher_access": {
+        "teacher_teacher_user": {
+          "can_access": true,
+          "appropriate_permissions": true
+        },
+        "teacher_testuser": {
+          "can_access": true,
+          "appropriate_permissions": true
+        }
+      },
+      "teacher_models": {
+        "teacher_models_exist": true,
+        "user_relationships_intact": true,
+        "permission_fields_present": true
+      }
+    },
+    "data_integrity": {
+      "exam_data": {
+        "exam_count": 11,
+        "question_count": 145,
+        "exams_have_questions": true,
+        "questions_have_exams": true
+      },
+      "relationship_queries": {
+        "exam_creator_accessible": true,
+        "exam_questions_accessible": true,
+        "no_query_errors": true
+      },
+      "curriculum_service": {
+        "service_functional": true,
+        "has_expected_structure": true,
+        "program_count": 4
+      }
+    },
+    "javascript_conflicts": {
+      "duplicate_function_names": [
+        "CopyCurriculumData: 84",
+        "openCopyModal: 54",
+        "populateCopyProgramDropdown: 16"
+      ],
+      "conflicting_global_vars": [],
+      "error_patterns": [],
+      "copy_modal_js_present": true,
+      "other_modals_intact": true,
+      "jquery_conflicts": false,
+      "console_logs_reasonable": false
+    }
+  },
+  "summary": {
+    "impact_score": 50.0,
+    "total_categories": 6,
+    "successful_categories": 3,
+    "warnings": [
+      "exam_library_features: main_page.has_context",
+      "student_interface: session_99071390-83ec-44c0-ada8-99d8274b403c.accessible, session_99071390-83ec-44c0-ada8-99d8274b403c.has_interface, session_51d7d2fe-bcbd-4a19-8f74-c980fe652caa.accessible, session_51d7d2fe-bcbd-4a19-8f74-c980fe652caa.has_interface, session_a0f49088-715a-4dd0-b0c2-32cd66905706.accessible, session_a0f49088-715a-4dd0-b0c2-32cd66905706.has_interface",
+      "javascript_conflicts: jquery_conflicts, console_logs_reasonable"
+    ],
+    "breaking_changes": [],
+    "recommendation": "DO NOT DEPLOY - FIX ISSUES"
+  }
+}

@@ -1,0 +1,192 @@
+{
+  "timestamp": "2025-08-22T21:09:04.989575",
+  "frontend_results": {
+    "functions": {
+      "populateCopyProgramDropdown": {
+        "found": true,
+        "definition_type": "function populateCopyProgramDropdown\\s*\\(",
+        "call_count": 16
+      },
+      "initializeCurriculumDropdown": {
+        "found": false,
+        "definition_type": null,
+        "call_count": 4
+      },
+      "tryFallbackCurriculumInitialization": {
+        "found": true,
+        "definition_type": "function tryFallbackCurriculumInitialization\\s*\\(",
+        "call_count": 4
+      },
+      "showCurriculumDataError": {
+        "found": true,
+        "definition_type": "function showCurriculumDataError\\s*\\(",
+        "call_count": 2
+      },
+      "runCurriculumDiagnostic": {
+        "found": true,
+        "definition_type": "function runCurriculumDiagnostic\\s*\\(",
+        "call_count": 3
+      },
+      "openCopyModalInternal": {
+        "found": true,
+        "definition_type": "openCopyModalInternal\\s*=\\s*function\\s*\\(",
+        "call_count": 6
+      },
+      "setupCopyCurriculumEventListeners": {
+        "found": true,
+        "definition_type": "function setupCopyCurriculumEventListeners\\s*\\(",
+        "call_count": 2
+      },
+      "debugCopyModal": {
+        "found": true,
+        "definition_type": "debugCopyModal\\s*=\\s*function\\s*\\(",
+        "call_count": 2
+      }
+    },
+    "initialization": {
+      "global_vars_declared": {
+        "found": true,
+        "count": 1
+      },
+      "data_ready_flag": {
+        "found": true,
+        "count": 14
+      },
+      "initialized_flag": {
+        "found": true,
+        "count": 7
+      },
+      "error_handling": {
+        "found": true,
+        "count": 8
+      },
+      "json_script_processing": {
+        "found": true,
+        "count": 4
+      },
+      "django_context_check": {
+        "found": true,
+        "count": 2
+      },
+      "enhanced_v4_logic": {
+        "found": true,
+        "count": 4
+      },
+      "fallback_data_structure": {
+        "found": true,
+        "count": 1
+      }
+    },
+    "modal_behavior": {
+      "modal_opening": {
+        "found": true,
+        "count": 1
+      },
+      "modal_display_setting": {
+        "found": true,
+        "count": 1
+      },
+      "curriculum_wait_logic": {
+        "found": true,
+        "count": 4
+      },
+      "retry_mechanism": {
+        "found": true,
+        "count": 1
+      },
+      "progressive_delay": {
+        "found": true,
+        "count": 1
+      },
+      "verification_logic": {
+        "found": true,
+        "count": 1
+      },
+      "success_feedback": {
+        "found": true,
+        "count": 1
+      },
+      "error_feedback": {
+        "found": true,
+        "count": 1
+      }
+    },
+    "dropdown_population": {
+      "program_select_element": {
+        "found": true,
+        "count": 11
+      },
+      "option_creation": {
+        "found": true,
+        "count": 5
+      },
+      "option_appending": {
+        "found": true,
+        "count": 5
+      },
+      "program_iteration": {
+        "found": true,
+        "count": 1
+      },
+      "structure_validation": {
+        "found": true,
+        "count": 1
+      },
+      "dropdown_clearing": {
+        "found": true,
+        "count": 1
+      },
+      "success_verification": {
+        "found": false,
+        "count": 0
+      },
+      "expected_programs_check": {
+        "found": true,
+        "count": 1
+      }
+    },
+    "error_handling": {
+      "try_catch_blocks": {
+        "found": true,
+        "count": 9
+      },
+      "error_logging": {
+        "found": true,
+        "count": 60
+      },
+      "fallback_triggers": {
+        "found": true,
+        "count": 4
+      },
+      "timeout_handling": {
+        "found": true,
+        "count": 29
+      },
+      "data_validation": {
+        "found": true,
+        "count": 1
+      },
+      "user_error_display": {
+        "found": true,
+        "count": 2
+      },
+      "diagnostic_tools": {
+        "found": true,
+        "count": 3
+      },
+      "graceful_degradation": {
+        "found": true,
+        "count": 1
+      }
+    },
+    "content_length": 335090
+  },
+  "success_rates": {
+    "function_success": 87.5,
+    "init_success": 100.0,
+    "modal_success": 100.0,
+    "dropdown_success": 87.5,
+    "error_success": 100.0,
+    "phase3_overall": 95.0
+  }
+}

@@ -73,9 +73,11 @@ def class_details(request, class_code):
         # Try to get or create an actual Class object
         class_obj = None
         try:
-            class_obj = Class.objects.get(name=class_code)
+            # Look for class by section (C5) rather than full name 
+            class_obj = Class.objects.get(section=class_code)
         except Class.DoesNotExist:
             # Create a virtual class object for display
+            logger.warning(f"Class with section {class_code} not found in database")
             pass
             
     except Exception as e:
@@ -297,10 +299,11 @@ def add_student_to_class(request, class_code):
             if not assignment:
                 return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
         
-        # Get or create class
+        # Get or create class (look by section, not name)
         class_obj, created = Class.objects.get_or_create(
-            name=class_code,
+            section=class_code,
             defaults={
+                'name': f'{class_code} - {ExamService.get_class_display_name(class_code)}',
                 'grade_level': ExamService.get_class_display_name(class_code),
                 'created_by': request.user
             }
@@ -392,7 +395,7 @@ def remove_student_from_class(request, class_code):
 @login_required
 @require_http_methods(["POST"])
 def start_exam_for_class(request, class_code):
-    """Start an exam for all students in a class"""
+    """Enhanced exam launch with student selection and duration modification"""
     console_log = {
         "view": "start_exam_for_class",
         "user": request.user.username,
@@ -405,18 +408,51 @@ def start_exam_for_class(request, class_code):
         exam_id = data.get('exam_id')
         schedule_id = data.get('schedule_id')
         
+        # Enhanced: Get duration and selected students from request
+        custom_duration = data.get('duration_minutes')
+        selected_student_ids = data.get('selected_students', [])
+        
+        logger.info(f"[START_EXAM_ENHANCED] Custom duration: {custom_duration}, Selected students: {len(selected_student_ids)}")
+        
+        # Check permissions
+        is_admin = request.user.is_superuser or request.user.is_staff
+        if not is_admin:
+            teacher_profile = getattr(request.user, 'teacher_profile', None)
+            if not teacher_profile:
+                return JsonResponse({'success': False, 'error': 'No teacher profile'}, status=403)
+            
+            assignment = TeacherClassAssignment.objects.filter(
+                teacher=teacher_profile,
+                class_code=class_code,
+                is_active=True,
+                access_level='FULL'
+            ).first()
+            
+            if not assignment:
+                return JsonResponse({'success': False, 'error': 'Only full access teachers can launch exams'}, status=403)
+        
         # Get exam
         exam = RoutineExam.objects.get(id=exam_id)
         
         # Get class and enrolled students
-        class_obj = Class.objects.get(name=class_code)
+        class_obj = Class.objects.get(section=class_code)
         enrollments = StudentEnrollment.objects.filter(
             class_assigned=class_obj,
             status='active'
         ).select_related('student')
         
-        # Create exam sessions for all students
+        # Filter enrollments based on selected students if provided
+        if selected_student_ids:
+            enrollments = enrollments.filter(student_id__in=selected_student_ids)
+            logger.info(f"[START_EXAM_FILTER] Filtered to {enrollments.count()} students")
+        
+        if not enrollments.exists():
+            return JsonResponse({'success': False, 'error': 'No students selected for exam'}, status=400)
+        
+        # Create exam sessions for selected students
         sessions_created = []
+        sessions_updated = []
+        
         with transaction.atomic():
             for enrollment in enrollments:
                 # StudentSession uses student_name, not a foreign key
@@ -432,24 +468,73 @@ def start_exam_for_class(request, class_code):
                     }
                 )
                 
+                # Update duration if custom duration provided
+                if custom_duration and custom_duration != exam.timer_minutes:
+                    # Store original duration for logging
+                    original_duration = exam.timer_minutes
+                    
+                    # Note: Duration modification would need to be handled based on your exam model structure
+                    # This could be stored in session metadata or exam instance
+                    session.metadata = session.metadata or {}
+                    session.metadata['custom_duration_minutes'] = custom_duration
+                    session.metadata['original_duration_minutes'] = original_duration
+                    session.save()
+                    
+                    logger.info(f"[CUSTOM_DURATION] Student {enrollment.student.name}: {original_duration}min → {custom_duration}min")
+                
                 if created:
                     sessions_created.append({
                         'student_name': enrollment.student.name,
-                        'session_id': str(session.id)
+                        'student_id': str(enrollment.student.id),
+                        'session_id': str(session.id),
+                        'duration': custom_duration or exam.timer_minutes
+                    })
+                else:
+                    # Session already exists, update it
+                    session.started_at = timezone.now()
+                    session.completed_at = None  # Reset completion
+                    session.save()
+                    sessions_updated.append({
+                        'student_name': enrollment.student.name,
+                        'student_id': str(enrollment.student.id),
+                        'session_id': str(session.id),
+                        'duration': custom_duration or exam.timer_minutes
                     })
             
             # Update schedule status
             if schedule_id:
                 schedule = ExamScheduleMatrix.objects.get(id=schedule_id)
                 schedule.status = 'IN_PROGRESS'
+                schedule.metadata = schedule.metadata or {}
+                schedule.metadata['last_launched'] = timezone.now().isoformat()
+                schedule.metadata['launched_by'] = request.user.username
+                if custom_duration:
+                    schedule.metadata['custom_duration'] = custom_duration
                 schedule.save()
+        
+        total_sessions = len(sessions_created) + len(sessions_updated)
+        response_message = f'Exam launched for {total_sessions} student(s)'
+        
+        if custom_duration:
+            response_message += f' with {custom_duration} minute duration'
+        
+        if sessions_updated:
+            response_message += f' ({len(sessions_created)} new, {len(sessions_updated)} restarted)'
         
         return JsonResponse({
             'success': True,
-            'message': f'Exam started for {len(sessions_created)} students',
-            'sessions': sessions_created
+            'message': response_message,
+            'sessions_created': sessions_created,
+            'sessions_updated': sessions_updated,
+            'total_students': total_sessions,
+            'custom_duration': custom_duration,
+            'exam_name': exam.name
         })
         
+    except RoutineExam.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Exam not found'}, status=404)
+    except Class.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Class not found'}, status=404)
     except Exception as e:
         logger.error(f"Error starting exam: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
