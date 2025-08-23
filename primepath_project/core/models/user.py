@@ -57,6 +57,11 @@ class Teacher(models.Model):
         help_text="Global access level that applies to ALL assigned classes. FULL = can manage everything, VIEW_ONLY = can only view data."
     )
     
+    # KakaoTalk OAuth fields
+    is_kakao_user = models.BooleanField(default=False, help_text='User authenticated via KakaoTalk')
+    profile_image_url = models.URLField(max_length=500, blank=True, null=True, help_text='Profile image from KakaoTalk')
+    kakao_id = models.CharField(max_length=100, blank=True, null=True, unique=True, help_text='KakaoTalk user ID')
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)

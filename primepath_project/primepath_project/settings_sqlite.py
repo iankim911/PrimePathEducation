@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',  # Required for allauth
     'placement_test',
     'primepath_routinetest',  # New separate routine test app
     'core',
@@ -51,6 +52,12 @@ INSTALLED_APPS = [
     'rest_framework',  # Django REST Framework
     'django_filters',  # Django Filter
     'corsheaders',  # CORS Headers
+    
+    # Django-allauth apps
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +69,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # Required for django-allauth
     'primepath_project.url_redirect_middleware.URLRedirectMiddleware',  # NEW: Handle /PlacementTest/ and /RoutineTest/ redirects
     'core.middleware.URLRedirectMiddleware',  # URL redirect handling (early in chain)
     'core.middleware.FeatureFlagMiddleware',  # Add feature flags
@@ -154,6 +162,35 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Django-allauth settings
+SITE_ID = 1
+
+# Allauth settings
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Set to 'mandatory' in production
+ACCOUNT_ADAPTER = 'core.adapters.AccountAdapter'  # Custom adapter
+SOCIALACCOUNT_ADAPTER = 'core.adapters.SocialAccountAdapter'  # Custom social adapter
+
+# Google OAuth2 settings
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
+
+# Redirect URLs after social login
+LOGIN_REDIRECT_URL = '/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
+
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  
 
@@ -179,6 +216,7 @@ CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default Django auth
+    'allauth.account.auth_backends.AuthenticationBackend',  # allauth backend
 ]
 
 # Logging for Authentication
@@ -284,6 +322,16 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSION': 'v1',
     'ALLOWED_VERSIONS': ['v1', 'v2'],
 }
+
+# KakaoTalk OAuth Configuration
+KAKAO_REST_API_KEY = 'your-rest-api-key-here'  # Replace with your actual key
+KAKAO_JAVASCRIPT_KEY = 'your-javascript-key-here'  # Replace with your actual key
+
+# Update AUTHENTICATION_BACKENDS (add Kakao backend)
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default Django auth
+    'core.kakao_auth.KakaoOAuth2Backend',  # KakaoTalk OAuth
+]
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [

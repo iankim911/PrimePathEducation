@@ -1,5 +1,5 @@
 {
-  "action": "manual",
-  "reason": "No agent keywords detected",
-  "command": "activate all sub agents"
+  "status": "no_agents",
+  "message": "No specialized agents matched this request",
+  "fallback": "manual_processing"
 }
