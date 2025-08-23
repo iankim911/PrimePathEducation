@@ -39,13 +39,19 @@ def exam_list(request):
     if 'assigned_only' in request.GET and 'ownership' not in request.GET:
         ownership_filter = 'my' if legacy_show_assigned_only else 'others'
     
-    # CRITICAL: Apply ownership logic to determine effective filtering
+    # CRITICAL FIX: Apply correct ownership logic to determine effective filtering
+    # IMPORTANT: Both 'my' and 'others' require filtering to be active!
+    # 'my' = show ONLY exams where user has FULL/OWNER access
+    # 'others' = show ONLY exams where user has VIEW ONLY access
     if ownership_filter == 'my':
-        show_assigned_only = True  # My Test Files = filter out VIEW ONLY
+        show_assigned_only = True  # My Test Files = filter to show FULL/OWNER only
+        filter_intent = "SHOW_EDITABLE"  # Show exams user can edit
     elif ownership_filter == 'others':
-        show_assigned_only = False  # Other Teachers' Test Files = show all including VIEW ONLY
+        show_assigned_only = True  # FIXED: Must be True to enable filtering for VIEW ONLY
+        filter_intent = "SHOW_VIEW_ONLY"  # Show exams user can only view
     else:
         show_assigned_only = legacy_show_assigned_only  # Fallback to legacy
+        filter_intent = "LEGACY"
     
     # DEBUG: Enhanced logging for new system
     import logging
@@ -54,7 +60,17 @@ def exam_list(request):
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] ownership parameter: '{ownership_filter}'")
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] exam_type parameter: '{exam_type_filter}'")
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Legacy assigned_only: '{assigned_only_param}' -> {show_assigned_only}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Filter intent: '{filter_intent}'")
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] All GET params: {dict(request.GET)}")
+    
+    # Console output for debugging
+    print(f"\n{'='*80}")
+    print(f"[OWNERSHIP_FIX] Filter Configuration:")
+    print(f"  ownership_filter: {ownership_filter}")
+    print(f"  filter_intent: {filter_intent}")
+    print(f"  show_assigned_only: {show_assigned_only}")
+    print(f"  exam_type_filter: {exam_type_filter}")
+    print(f"{'='*80}\n")
     
     # Validate filters
     valid_exam_types = ['REVIEW', 'QUARTERLY', 'ALL']
@@ -87,7 +103,9 @@ def exam_list(request):
             can_manage_exams = False
             logger.warning(f"[GLOBAL_ACCESS_EXAM_LIBRARY] User {request.user.username} has no teacher profile - defaulting to VIEW_ONLY")
     
-    teacher_assignments = ExamPermissionService.get_teacher_assignments(request.user)
+    # Get base teacher assignments (will be enhanced with ownership later)
+    base_teacher_assignments = ExamPermissionService.get_teacher_assignments(request.user)
+    teacher_assignments = base_teacher_assignments  # Will be updated after hierarchical_exams is computed
     
     # ENHANCED DEBUG LOGGING FOR GLOBAL ACCESS SYSTEM
     debug_info = {
@@ -98,7 +116,7 @@ def exam_list(request):
         "has_teacher_profile": hasattr(request.user, 'teacher_profile'),
         "global_access_level": global_access_level,
         "can_manage_exams": can_manage_exams,
-        "teacher_assignments_count": len(teacher_assignments),
+        "teacher_assignments_count": len(base_teacher_assignments),
         "view": "exam_list_global_access",
         "timestamp": timezone.now().isoformat()
     }
@@ -169,41 +187,69 @@ def exam_list(request):
     # UPDATED: Organize exams hierarchically with new ownership-based filtering
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] About to call organize_exams_hierarchically")
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Ownership filter: {ownership_filter}")
+    logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Filter intent: {filter_intent}")
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Legacy filter_assigned_only: {show_assigned_only}")
     logger.info(f"[OWNERSHIP_SYSTEM_DEBUG] Number of exams before filtering: {exams.count()}")
     
-    # NEW: Enhanced service call with ownership parameter
+    # NEW: Enhanced service call with ownership parameter and filter intent
     hierarchical_exams = ExamService.organize_exams_hierarchically(
         exams, 
         request.user, 
         filter_assigned_only=show_assigned_only,  # Backward compatibility 
-        ownership_filter=ownership_filter  # NEW: ownership-based filtering
+        ownership_filter=ownership_filter,  # NEW: ownership-based filtering
+        filter_intent=filter_intent  # CRITICAL: Pass the filter intent
     )
     
-    # CRITICAL FIX: Double-check filtering at view level
-    # If filter is ON, ensure NO VIEW ONLY exams are in the result
-    if show_assigned_only and not is_admin:
-        logger.info(f"[FILTER_DOUBLE_CHECK] Filter is ON - removing any VIEW ONLY exams that slipped through")
+    # CRITICAL FIX: Double-check filtering at view level based on filter intent
+    # Ensure the correct exams are shown based on the filter intent
+    if show_assigned_only and not is_admin and filter_intent in ['SHOW_EDITABLE', 'SHOW_VIEW_ONLY']:
+        logger.info(f"[FILTER_DOUBLE_CHECK] Running view-level filter verification for intent: {filter_intent}")
         filtered_hierarchical = {}
-        view_only_removed = 0
+        incorrect_exams_removed = 0
         
         for program, program_classes in hierarchical_exams.items():
             filtered_program = {}
             for class_code, class_exams in program_classes.items():
                 filtered_exams = []
                 for exam in class_exams:
-                    # Check if exam has VIEW ONLY badge
-                    if hasattr(exam, 'access_badge'):
-                        if exam.access_badge == 'VIEW ONLY':
-                            logger.warning(f"[FILTER_DOUBLE_CHECK] ❌ REMOVING VIEW ONLY exam: {exam.name} (ID: {exam.id})")
-                            view_only_removed += 1
-                            continue  # Skip this exam
+                    should_keep = False
+                    reason = ""
+                    
+                    # Check based on filter intent
+                    if filter_intent == 'SHOW_EDITABLE':
+                        # For "My Test Files" - keep only FULL/OWNER access
+                        if hasattr(exam, 'access_badge'):
+                            if exam.access_badge in ['FULL ACCESS', 'OWNER']:
+                                should_keep = True
+                                reason = f"Has {exam.access_badge}"
+                            else:
+                                reason = f"Only has {exam.access_badge}, need FULL/OWNER"
+                        elif hasattr(exam, 'can_edit') and exam.can_edit:
+                            should_keep = True
+                            reason = "Can edit"
                         else:
-                            logger.info(f"[FILTER_DOUBLE_CHECK] ✅ Keeping exam: {exam.name} with badge: {exam.access_badge}")
-                            filtered_exams.append(exam)
-                    else:
-                        # Exam doesn't have access_badge attribute - keep it
+                            reason = "Cannot edit"
+                            
+                    elif filter_intent == 'SHOW_VIEW_ONLY':
+                        # For "Other Teachers' Test Files" - keep only VIEW ONLY access
+                        if hasattr(exam, 'access_badge'):
+                            if exam.access_badge == 'VIEW ONLY':
+                                should_keep = True
+                                reason = "Has VIEW ONLY access"
+                            else:
+                                reason = f"Has {exam.access_badge}, need VIEW ONLY"
+                        elif hasattr(exam, 'can_edit') and not exam.can_edit:
+                            should_keep = True
+                            reason = "Cannot edit (view only)"
+                        else:
+                            reason = "Can edit (not view only)"
+                    
+                    if should_keep:
+                        logger.debug(f"[FILTER_DOUBLE_CHECK] ✅ Keeping exam: {exam.name} - {reason}")
                         filtered_exams.append(exam)
+                    else:
+                        logger.info(f"[FILTER_DOUBLE_CHECK] ❌ Removing exam: {exam.name} - {reason}")
+                        incorrect_exams_removed += 1
                 
                 # Only add class if it has exams after filtering
                 if filtered_exams:
@@ -213,7 +259,7 @@ def exam_list(request):
             if filtered_program:
                 filtered_hierarchical[program] = filtered_program
         
-        logger.info(f"[FILTER_DOUBLE_CHECK] Removed {view_only_removed} VIEW ONLY exams from final result")
+        logger.info(f"[FILTER_DOUBLE_CHECK] Filter intent: {filter_intent}, Removed {incorrect_exams_removed} incorrect exams")
         hierarchical_exams = filtered_hierarchical
     
     # Count exams after filtering
@@ -265,6 +311,31 @@ def exam_list(request):
     # Calculate assigned count
     assigned_count = accessible_count
     
+    # CRITICAL FIX: Get enhanced teacher assignments with ownership
+    logger.info(f"[OWNERSHIP_FIX] Computing enhanced assignments for {request.user.username}")
+    enhanced_assignments = ExamPermissionService.get_enhanced_teacher_assignments(
+        request.user, 
+        hierarchical_exams=hierarchical_exams
+    )
+    
+    # Use effective access for template display
+    teacher_assignments = enhanced_assignments['effective_access']
+    ownership_overrides = enhanced_assignments['ownership_overrides']
+    
+    # Log the enhancement results
+    logger.info(f"[OWNERSHIP_FIX] Base assignments: {base_teacher_assignments}")
+    logger.info(f"[OWNERSHIP_FIX] Ownership overrides: {ownership_overrides}")
+    logger.info(f"[OWNERSHIP_FIX] Effective access: {teacher_assignments}")
+    
+    console_log = {
+        "action": "ownership_fix_applied",
+        "user": request.user.username,
+        "classes_with_ownership": list(ownership_overrides.keys()),
+        "classes_upgraded_to_full": [k for k, v in ownership_overrides.items() if base_teacher_assignments.get(k) != 'FULL'],
+        "total_owned_classes": len(ownership_overrides)
+    }
+    print(f"[OWNERSHIP_FIX] {json.dumps(console_log, indent=2)}")
+    
     # Log hierarchical organization results
     console_log = {
         "view": "exam_list", 
@@ -307,7 +378,9 @@ def exam_list(request):
     context = {
         'hierarchical_exams': hierarchical_exams,
         'program_order': ExamService.PROGRAM_CLASS_MAPPING.keys(),
-        'teacher_assignments': teacher_assignments,
+        'teacher_assignments': teacher_assignments,  # Now includes ownership-enhanced access
+        'ownership_overrides': ownership_overrides,  # Classes where teacher owns exams
+        'base_assignments': base_teacher_assignments,  # Original assignments for reference
         'editable_classes': editable_classes,
         'is_admin': is_admin,
         
@@ -332,6 +405,7 @@ def exam_list(request):
         
         # NEW: Ownership-based system variables
         'ownership_filter': ownership_filter,
+        'filter_intent': filter_intent,  # Pass filter intent to template
         'is_my_files_active': ownership_filter == 'my',
         'is_others_files_active': ownership_filter == 'others',
         

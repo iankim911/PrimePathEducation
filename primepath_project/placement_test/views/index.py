@@ -5,6 +5,7 @@ Enhanced with comprehensive logging for debugging
 """
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 from ..models import Exam, StudentSession
 import json
 import logging
@@ -13,6 +14,7 @@ from datetime import datetime
 logger = logging.getLogger('placement_test.index')
 
 
+@login_required(login_url='/PlacementTest/login/')
 @require_http_methods(["GET"])
 def index(request):
     """

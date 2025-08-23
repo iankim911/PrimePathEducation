@@ -4,6 +4,7 @@ Provides a landing page for the routine test module
 """
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 from ..models import Exam, StudentSession
 from ..error_handlers import handle_view_errors
 import logging
@@ -11,6 +12,7 @@ import logging
 logger = logging.getLogger('primepath_routinetest.index')
 
 
+@login_required(login_url='/RoutineTest/login/')
 @handle_view_errors
 @require_http_methods(["GET"])
 def index(request):

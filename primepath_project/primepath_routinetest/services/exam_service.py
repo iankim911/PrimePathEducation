@@ -10,6 +10,7 @@ from core.constants import DEFAULT_OPTIONS_COUNT, DEFAULT_QUESTION_POINTS
 from ..models import Exam, Question, AudioFile, TeacherClassAssignment
 from collections import defaultdict
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -595,7 +596,8 @@ class ExamService:
         exams, 
         user: User,
         filter_assigned_only: bool = False,  # Backward compatibility
-        ownership_filter: str = 'my'  # NEW: 'my' or 'others'
+        ownership_filter: str = 'my',  # NEW: 'my' or 'others'
+        filter_intent: str = None  # CRITICAL: Intent for filtering (SHOW_EDITABLE, SHOW_VIEW_ONLY)
     ) -> Dict[str, Dict[str, List]]:
         """Organize exams hierarchically by program and class with access info - ENHANCED with ownership filtering"""
         import logging
@@ -619,32 +621,61 @@ class ExamService:
         logger.info(f"[EXAM_HIERARCHY_ENHANCED] User: {user}, is_admin: {is_admin}")
         logger.info(f"[EXAM_HIERARCHY_ENHANCED] Legacy filter_assigned_only: {filter_assigned_only}")
         logger.info(f"[EXAM_HIERARCHY_ENHANCED] NEW ownership_filter: {ownership_filter}")
+        logger.info(f"[EXAM_HIERARCHY_ENHANCED] Filter intent: {filter_intent}")
         logger.info(f"[EXAM_HIERARCHY_ENHANCED] Teacher assignments: {assignments}")
         
-        # CRITICAL FIX: Proper filtering for ownership-based system
-        # ownership='my' → Show ONLY exams where user has FULL/OWNER access
-        # ownership='others' → Show ONLY exams where user has VIEW ONLY access
-        if ownership_filter == 'my':
-            filter_mode = 'MY_EXAMS'  # Show only editable exams
-            effective_filter_assigned = True  # Keep for backward compat
-            filter_description = "My Test Files (FULL/OWNER access only)"
-        elif ownership_filter == 'others':
-            filter_mode = 'OTHERS_EXAMS'  # Show only VIEW ONLY exams
-            effective_filter_assigned = True  # CHANGED: Must filter, not show all!
-            filter_description = "Other Teachers' Test Files (VIEW ONLY access only)"
+        # CRITICAL FIX: Use filter_intent for precise control
+        if filter_intent:
+            # Use explicit filter intent when provided
+            if filter_intent == 'SHOW_EDITABLE':
+                filter_mode = 'MY_EXAMS'  # Show only editable exams
+                effective_filter_assigned = True
+                filter_description = "My Test Files (FULL/OWNER access only)"
+            elif filter_intent == 'SHOW_VIEW_ONLY':
+                filter_mode = 'OTHERS_EXAMS'  # Show only VIEW ONLY exams
+                effective_filter_assigned = True
+                filter_description = "Other Teachers' Test Files (VIEW ONLY access only)"
+            else:
+                filter_mode = 'LEGACY'
+                effective_filter_assigned = filter_assigned_only
+                filter_description = f"Legacy filtering (assigned_only={filter_assigned_only})"
         else:
-            filter_mode = 'LEGACY'
-            effective_filter_assigned = filter_assigned_only  # Fallback to legacy
-            filter_description = f"Legacy filtering (assigned_only={filter_assigned_only})"
+            # Fallback to ownership_filter-based logic
+            if ownership_filter == 'my':
+                filter_mode = 'MY_EXAMS'  # Show only editable exams
+                effective_filter_assigned = True  # Keep for backward compat
+                filter_description = "My Test Files (FULL/OWNER access only)"
+            elif ownership_filter == 'others':
+                filter_mode = 'OTHERS_EXAMS'  # Show only VIEW ONLY exams
+                effective_filter_assigned = True  # CHANGED: Must filter, not show all!
+                filter_description = "Other Teachers' Test Files (VIEW ONLY access only)"
+            else:
+                filter_mode = 'LEGACY'
+                effective_filter_assigned = filter_assigned_only  # Fallback to legacy
+                filter_description = f"Legacy filtering (assigned_only={filter_assigned_only})"
             
         logger.info(f"[EXAM_HIERARCHY_FIX] Ownership filter: {ownership_filter}")
         logger.info(f"[EXAM_HIERARCHY_FIX] Filter mode: {filter_mode}")
         logger.info(f"[EXAM_HIERARCHY_FIX] Effective filtering: {filter_description}")
         logger.info(f"[EXAM_HIERARCHY_FIX] Will apply filtering: {effective_filter_assigned}")
         
-        # Process each exam
+        # Process each exam with error handling
         exam_count = 0
-        for exam in exams:
+        total_exams = 0
+        filtered_out_count = 0
+        included_count = 0
+        error_count = 0
+        
+        try:
+            exams_list = list(exams)  # Convert queryset to list for safer iteration
+            total_exams = len(exams_list)
+        except Exception as e:
+            logger.error(f"[EXAM_HIERARCHY_ERROR] Failed to convert exams to list: {e}")
+            exams_list = []
+            
+        logger.info(f"[EXAM_HIERARCHY_STATS] Starting to process {total_exams} exams")
+        
+        for exam in exams_list:
             exam_classes = exam.class_codes if exam.class_codes else []
             
             # Log exam details
@@ -764,11 +795,13 @@ class ExamService:
                     logger.info(f"[FILTER_FIX] ❌❌❌ EXCLUDING EXAM: {exam.name}")
                     logger.info(f"[FILTER_FIX] Exclusion reasons: {exclusion_reasons}")
                     logger.info(f"[FILTER_FIX] ====== END FILTERING (EXCLUDED) ======")
+                    filtered_out_count += 1
                     continue  # Skip this exam
                 else:
                     logger.info(f"[FILTER_FIX] ✅✅✅ INCLUDING EXAM: {exam.name}")
                     logger.info(f"[FILTER_FIX] Inclusion reasons: {inclusion_reasons}")
                     logger.info(f"[FILTER_FIX] ====== END FILTERING (INCLUDED) ======")
+                    included_count += 1
             
             # Add permissions to exam with ownership priority
             if is_admin:
@@ -949,6 +982,30 @@ class ExamService:
                 result = cleaned_result
             else:
                 logger.info(f"[FILTER_FINAL_CHECK] ✅ PASSED: No VIEW ONLY exams found in final result")
+        
+        # COMPREHENSIVE STATISTICS LOGGING
+        final_exam_count = sum(len(exams) for program in result.values() for exams in program.values())
+        
+        print(f"\n{'='*80}")
+        print(f"[OWNERSHIP_FIX_STATS] FILTER RESULTS:")
+        print(f"  Filter Mode: {filter_mode}")
+        print(f"  Filter Description: {filter_description}")
+        print(f"  Total Exams Processed: {total_exams}")
+        print(f"  Exams Included: {included_count}")
+        print(f"  Exams Filtered Out: {filtered_out_count}")
+        print(f"  Final Exams in Result: {final_exam_count}")
+        print(f"  Processing Errors: {error_count}")
+        
+        if filter_mode == 'OTHERS_EXAMS':
+            print(f"  [OTHERS MODE] Should show VIEW ONLY exams")
+            print(f"  [OTHERS MODE] Included {included_count} VIEW ONLY exams")
+        elif filter_mode == 'MY_EXAMS':
+            print(f"  [MY MODE] Should show FULL/OWNER access exams")
+            print(f"  [MY MODE] Included {included_count} editable exams")
+            
+        print(f"{'='*80}\n")
+        
+        logger.info(f"[OWNERSHIP_FIX_COMPLETE] Mode: {filter_mode}, Total: {total_exams}, Included: {included_count}, Filtered: {filtered_out_count}, Final: {final_exam_count}")
         
         return result
     
@@ -2053,6 +2110,107 @@ class ExamPermissionService:
         ).values_list('class_code', 'access_level')
         
         return dict(assignments)
+    
+    @classmethod
+    def get_enhanced_teacher_assignments(cls, user, hierarchical_exams=None):
+        """
+        Get teacher assignments enhanced with ownership information.
+        This method considers both class assignments AND exam ownership.
+        
+        CRITICAL: If a teacher owns an exam in a class, they get FULL access
+        to that class regardless of their TeacherClassAssignment level.
+        
+        Args:
+            user: The user to get assignments for
+            hierarchical_exams: Optional pre-computed hierarchical exam data
+            
+        Returns:
+            Dict with structure:
+            {
+                'assignments': {class_code: access_level},  # Base assignments
+                'ownership_overrides': {class_code: 'OWNER'},  # Classes where teacher owns exams
+                'effective_access': {class_code: access_level}  # Final computed access
+            }
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Start with base assignments
+        base_assignments = cls.get_teacher_assignments(user)
+        ownership_overrides = {}
+        
+        logger.info(f"[OWNERSHIP_ENHANCEMENT] Starting enhanced assignment calculation for {user.username}")
+        logger.info(f"[OWNERSHIP_ENHANCEMENT] Base assignments: {base_assignments}")
+        
+        # Check if user has teacher profile
+        if not hasattr(user, 'teacher_profile'):
+            logger.info(f"[OWNERSHIP_ENHANCEMENT] User has no teacher profile, returning base assignments only")
+            return {
+                'assignments': base_assignments,
+                'ownership_overrides': {},
+                'effective_access': base_assignments.copy()
+            }
+        
+        teacher_profile = user.teacher_profile
+        
+        # If hierarchical_exams provided, use it; otherwise fetch from database
+        if hierarchical_exams:
+            logger.info(f"[OWNERSHIP_ENHANCEMENT] Using provided hierarchical_exams data")
+            # Process hierarchical data to find owned exams
+            for program, program_classes in hierarchical_exams.items():
+                for class_code, class_exams in program_classes.items():
+                    for exam in class_exams:
+                        # Check if teacher owns this exam
+                        if hasattr(exam, 'created_by') and exam.created_by:
+                            if exam.created_by.id == teacher_profile.id:
+                                logger.info(f"[OWNERSHIP_ENHANCEMENT] Teacher OWNS exam '{exam.name}' in class {class_code}")
+                                ownership_overrides[class_code] = 'OWNER'
+                                # Also check exam's class_codes field for other classes
+                                if hasattr(exam, 'class_codes') and exam.class_codes:
+                                    for code in exam.class_codes:
+                                        if code != class_code:  # Don't duplicate
+                                            logger.info(f"[OWNERSHIP_ENHANCEMENT] Exam also applies to class {code}, marking as OWNER")
+                                            ownership_overrides[code] = 'OWNER'
+        else:
+            # Fetch from database
+            logger.info(f"[OWNERSHIP_ENHANCEMENT] Fetching owned exams from database")
+            from ..models import Exam
+            owned_exams = Exam.objects.filter(created_by=teacher_profile)
+            
+            for exam in owned_exams:
+                if hasattr(exam, 'class_codes') and exam.class_codes:
+                    for class_code in exam.class_codes:
+                        logger.info(f"[OWNERSHIP_ENHANCEMENT] Teacher owns exam '{exam.name}' in class {class_code}")
+                        ownership_overrides[class_code] = 'OWNER'
+        
+        # Compute effective access (ownership overrides base assignments)
+        effective_access = base_assignments.copy()
+        for class_code, override_level in ownership_overrides.items():
+            current_level = effective_access.get(class_code, 'NONE')
+            # OWNER always wins
+            if override_level == 'OWNER':
+                effective_access[class_code] = 'FULL'  # OWNER gets FULL access
+                logger.info(f"[OWNERSHIP_ENHANCEMENT] Class {class_code}: {current_level} -> FULL (via ownership)")
+        
+        logger.info(f"[OWNERSHIP_ENHANCEMENT] Final effective access: {effective_access}")
+        logger.info(f"[OWNERSHIP_ENHANCEMENT] Ownership overrides: {ownership_overrides}")
+        
+        # Console logging for debugging
+        console_log = {
+            "action": "enhanced_assignments_computed",
+            "user": user.username,
+            "base_assignments": base_assignments,
+            "ownership_overrides": ownership_overrides,
+            "effective_access": effective_access,
+            "classes_upgraded": list(ownership_overrides.keys())
+        }
+        print(f"[OWNERSHIP_ENHANCEMENT] {json.dumps(console_log, indent=2)}")
+        
+        return {
+            'assignments': base_assignments,
+            'ownership_overrides': ownership_overrides,
+            'effective_access': effective_access
+        }
     
     @classmethod
     def get_teacher_accessible_classes(cls, user):

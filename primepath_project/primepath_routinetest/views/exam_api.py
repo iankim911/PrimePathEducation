@@ -48,9 +48,8 @@ def get_class_overview(request, class_code):
         class_obj = Class.objects.filter(name=class_code).first()
         class_display_name = class_obj.name if class_obj else assignment.get_class_code_display()
         
-        # Get curriculum mapping
-        from ..views.schedule_matrix_optimized import get_class_curriculum_mapping_cached
-        curriculum = get_class_curriculum_mapping_cached(class_code, request.GET.get('year', 2024))
+        # Get curriculum mapping - schedule_matrix_optimized removed, using default
+        curriculum = None  # Matrix optimization removed, curriculum handled differently now
         
         # Get exams for this timeslot from multiple sources
         exams = []
@@ -973,10 +972,13 @@ def generate_exam_name(exam_type, time_period, academic_year, source_exam, custo
 def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time_period, academic_year, created_by=None):
     """
     Create a copy of an exam with a new name and metadata
+    UPDATED: Creates a new exam instance for ONE-TO-ONE relationship
     """
-    from primepath_routinetest.models import RoutineExam, Question, AudioFile
+    from primepath_routinetest.models import RoutineExam, Question, AudioFile, Exam
     from django.db import transaction
     import uuid
+    
+    logger.info(f"[ONE_TO_ONE_FIX] Creating new exam copy for class {target_class_code}")
     
     with transaction.atomic():
         # Create the new exam as RoutineExam (compatible with ExamScheduleMatrix)
@@ -1014,7 +1016,58 @@ def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time
             is_active=True
         )
         
-        # Note: RoutineExam doesn't have class_codes field - classes are managed through ExamScheduleMatrix
+        # CRITICAL ONE-TO-ONE FIX: Check if we should use Exam model instead
+        # If source exam is an Exam instance, create an Exam copy
+        if hasattr(source_exam, 'class_code') or hasattr(source_exam, 'class_codes'):
+            logger.info(f"[ONE_TO_ONE_FIX] Source is Exam model, creating Exam copy with single class")
+            # Create Exam instance instead of RoutineExam
+            from primepath_routinetest.models import Exam
+            
+            copied_exam = Exam.objects.create(
+                id=uuid.uuid4(),
+                name=new_name,
+                exam_type=exam_type,
+                time_period_month=time_period if exam_type == 'REVIEW' else None,
+                time_period_quarter=time_period if exam_type == 'QUARTERLY' else None,
+                academic_year=academic_year,
+                curriculum_level_id=source_exam.curriculum_level_id if hasattr(source_exam, 'curriculum_level_id') else None,
+                class_code=target_class_code,  # SINGLE CLASS - ONE-TO-ONE
+                class_codes=[target_class_code],  # Keep for backward compatibility temporarily
+                pdf_file=source_exam.pdf_file if hasattr(source_exam, 'pdf_file') else None,
+                timer_minutes=source_exam.timer_minutes if hasattr(source_exam, 'timer_minutes') else 60,
+                total_questions=source_exam.total_questions if hasattr(source_exam, 'total_questions') else 0,
+                default_options_count=source_exam.default_options_count if hasattr(source_exam, 'default_options_count') else 5,
+                passing_score=source_exam.passing_score if hasattr(source_exam, 'passing_score') else None,
+                pdf_rotation=source_exam.pdf_rotation if hasattr(source_exam, 'pdf_rotation') else 0,
+                instructions=source_exam.instructions if hasattr(source_exam, 'instructions') else '',
+                answer_key=source_exam.answer_key if hasattr(source_exam, 'answer_key') else {},
+                created_by=created_by,
+                owner=created_by,  # Set owner for permission system
+                is_active=True
+            )
+            
+            # Copy questions if they exist
+            try:
+                for question in source_exam.routine_questions.all():
+                    Question.objects.create(
+                        exam=copied_exam,
+                        question_number=question.question_number,
+                        question_type=question.question_type,
+                        question_text=question.question_text if hasattr(question, 'question_text') else '',
+                        points=question.points,
+                        correct_answer=question.correct_answer if hasattr(question, 'correct_answer') else '',
+                        options_count=question.options_count if hasattr(question, 'options_count') else 5
+                    )
+                logger.info(f"[ONE_TO_ONE_FIX] Copied {source_exam.routine_questions.count()} questions")
+            except Exception as e:
+                logger.warning(f"[ONE_TO_ONE_FIX] Could not copy questions: {e}")
+            
+            logger.info(f"[ONE_TO_ONE_FIX] Successfully created Exam copy {copied_exam.id} for class {target_class_code}")
+            return copied_exam
+        
+        # Otherwise continue with RoutineExam creation
+        logger.info(f"[ONE_TO_ONE_FIX] Creating RoutineExam copy (no class_code field)")
+        # Note: RoutineExam doesn't have class_code field - classes are managed through ExamScheduleMatrix
         
         # Note: Skipping questions and audio files for RoutineExam copy
         # because Question and AudioFile models expect primepath_routinetest.Exam, not RoutineExam

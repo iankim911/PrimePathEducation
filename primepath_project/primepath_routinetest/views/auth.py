@@ -102,7 +102,7 @@ def routinetest_login(request):
     
     # Render login template
     context = {
-        'page_title': 'RoutineTest Login - PrimePath',
+        'page_title': 'Login - PrimePath',
         'app_name': 'RoutineTest'
     }
     

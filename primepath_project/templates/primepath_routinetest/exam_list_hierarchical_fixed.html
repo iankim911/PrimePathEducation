@@ -1,0 +1,317 @@
+{% extends "primepath_routinetest/base.html" %}
+{% load static %}
+{% load matrix_filters %}
+
+{% block title %}RoutineTest Exam Library - Version 6.0{% endblock %}
+
+{% block content %}
+<!-- Copy of exam_list_hierarchical.html with comprehensive Copy Exam dropdown fix -->
+<!-- This is the key template section for Copy Exam modal -->
+
+<!-- Copy Exam Modal -->
+<div id="copyExamModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closeCopyModal()">&times;</span>
+        <h3>Copy Exam to Another Class</h3>
+        <form id="copyExamForm">
+            <input type="hidden" id="sourceExamId" name="source_exam_id">
+            
+            <div class="form-group">
+                <label>Source Exam:</label>
+                <p id="sourceExamName" style="font-weight: 600; color: #2c3e50;">Loading...</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="targetClass">Target Class:</label>
+                <select id="targetClass" name="target_class" required>
+                    <option value="">Select a class...</option>
+                    {% for class_code, access_level in teacher_assignments.items %}
+                        {% if access_level == 'FULL' or access_level == 'CO_TEACHER' %}
+                        <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }}</option>
+                        {% endif %}
+                    {% endfor %}
+                    {% if is_admin %}
+                        <!-- Admin can copy to any class -->
+                        {% for program, classes in hierarchical_exams.items %}
+                            {% for class_code, exams in classes.items %}
+                                {% if class_code not in teacher_assignments %}
+                                <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }} (Admin)</option>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="copyExamType">Exam Type:</label>
+                <select id="copyExamType" name="exam_type" required>
+                    <option value="">Select exam type...</option>
+                    <option value="REVIEW">Review / Monthly</option>
+                    <option value="QUARTERLY">Quarterly</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeslot">Time Period:</label>
+                <select id="timeslot" name="timeslot" required disabled>
+                    <option value="">First select exam type...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="academicYear">Academic Year:</label>
+                <select id="academicYear" name="academic_year" required>
+                    <option value="">Select year...</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                </select>
+            </div>
+            
+            <!-- Curriculum Selection Section -->
+            <div class="form-group">
+                <h5 style="margin-top: 20px; margin-bottom: 15px; color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+                    <i class="fas fa-graduation-cap"></i> Curriculum Selection
+                </h5>
+            </div>
+            
+            <div class="form-group">
+                <label for="copyProgramSelect">Program:</label>
+                <select id="copyProgramSelect" name="program_select" required>
+                    <option value="">-- Select Program --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="copySubprogramSelect">SubProgram:</label>
+                <select id="copySubprogramSelect" name="subprogram_select" required disabled>
+                    <option value="">-- First select a Program --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="copyLevelSelect">Level:</label>
+                <select id="copyLevelSelect" name="level_select" required disabled>
+                    <option value="">-- First select a SubProgram --</option>
+                </select>
+            </div>
+            
+            <!-- Hidden field to store the curriculum level ID -->
+            <input type="hidden" id="copyCurriculumLevel" name="curriculum_level" value="">
+            
+            <div class="form-group">
+                <label for="customSuffix">Custom Name Suffix (Optional):</label>
+                <input type="text" id="customSuffix" name="custom_suffix" class="form-control" 
+                       placeholder="e.g., 123 or version2" maxlength="50">
+                <small class="text-muted">This will be appended to the auto-generated exam name (e.g., _123)</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Preview of New Exam Name:</label>
+                <div id="examNamePreview" style="padding: 10px; background: #f0f0f0; border-radius: 4px; font-weight: 600;">
+                    <span id="previewText">Please complete all fields to see preview...</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" onclick="closeCopyModal()" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-copy">Copy Exam</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- COMPREHENSIVE FIX: Simplified curriculum data initialization -->
+<script>
+// ============================================================================
+// COMPREHENSIVE FIX: CURRICULUM DATA INITIALIZATION
+// Version: 3.0 - Simplified and Reliable
+// ============================================================================
+
+(function() {
+    'use strict';
+    
+    console.group('%c🔧 COPY EXAM MODAL - COMPREHENSIVE FIX INITIALIZATION', 'color: #00aa00; font-size: 16px; font-weight: bold;');
+    console.log('[INIT] Starting curriculum data initialization at:', new Date().toISOString());
+    
+    // Initialize global curriculum data container
+    window.CopyCurriculumData = null;
+    window.CopyCurriculumDataReady = false;
+    window.CopyCurriculumDataInitialized = false;
+    window.CopyCurriculumDataError = null;
+    
+    {% if curriculum_hierarchy_for_copy %}
+    // COMPREHENSIVE FIX: Process curriculum data from Django
+    console.log('[INIT] ✅ curriculum_hierarchy_for_copy available from Django backend');
+    
+    // Use Django's json_script filter for safe JSON encoding
+    {{ curriculum_hierarchy_for_copy|json_script:"copy-curriculum-hierarchy-data" }}
+    
+    // Process the curriculum data
+    function processCurriculumData() {
+        const scriptElement = document.getElementById('copy-curriculum-hierarchy-data');
+        if (!scriptElement) {
+            console.error('[INIT] ❌ Script element not found');
+            window.CopyCurriculumDataError = 'Script element not found';
+            return false;
+        }
+        
+        try {
+            const enhancedData = JSON.parse(scriptElement.textContent);
+            console.log('[INIT] Successfully parsed curriculum data');
+            
+            // Validate and extract curriculum data
+            if (enhancedData && enhancedData.curriculum_data) {
+                window.CopyCurriculumData = enhancedData.curriculum_data;
+                window.CopyCurriculumDataReady = true;
+                window.CopyCurriculumDataInitialized = true;
+                
+                // Store metadata for debugging
+                window.CopyCurriculumMetadata = enhancedData.metadata;
+                window.CopyCurriculumValidation = enhancedData.validation;
+                
+                console.log('[INIT] ✅ Curriculum data initialized successfully');
+                console.log('[INIT] Programs available:', Object.keys(window.CopyCurriculumData));
+                console.log('[INIT] Total programs:', Object.keys(window.CopyCurriculumData).length);
+                
+                // Validate expected programs
+                const expectedPrograms = ['CORE', 'ASCENT', 'EDGE', 'PINNACLE'];
+                const actualPrograms = Object.keys(window.CopyCurriculumData);
+                const missingPrograms = expectedPrograms.filter(p => !actualPrograms.includes(p));
+                
+                if (missingPrograms.length > 0) {
+                    console.warn('[INIT] ⚠️ Missing expected programs:', missingPrograms);
+                } else {
+                    console.log('[INIT] ✅ All expected programs present');
+                }
+                
+                // Log program structure
+                for (const [program, data] of Object.entries(window.CopyCurriculumData)) {
+                    const subprograms = Object.keys(data.subprograms || {});
+                    console.log(`[INIT]   ${program}: ${subprograms.length} subprograms (${subprograms.join(', ')})`);
+                }
+                
+                return true;
+            } else {
+                console.error('[INIT] ❌ Invalid data structure - missing curriculum_data');
+                window.CopyCurriculumDataError = 'Invalid data structure';
+                return false;
+            }
+        } catch (error) {
+            console.error('[INIT] ❌ Failed to parse curriculum data:', error);
+            window.CopyCurriculumDataError = error.message;
+            return false;
+        }
+    }
+    
+    // Process immediately if DOM is ready, otherwise wait
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', processCurriculumData);
+    } else {
+        processCurriculumData();
+    }
+    
+    {% else %}
+    // NO CURRICULUM DATA FROM DJANGO
+    console.error('[INIT] ❌ NO curriculum_hierarchy_for_copy data from Django backend!');
+    window.CopyCurriculumDataError = 'No curriculum data from backend';
+    {% endif %}
+    
+    console.log('[INIT] Initialization complete');
+    console.log('[INIT] Final state:', {
+        dataAvailable: !!window.CopyCurriculumData,
+        dataReady: window.CopyCurriculumDataReady,
+        initialized: window.CopyCurriculumDataInitialized,
+        error: window.CopyCurriculumDataError
+    });
+    console.groupEnd();
+})();
+
+// ============================================================================
+// DEBUG HELPER FUNCTION
+// ============================================================================
+window.debugCopyModalData = function() {
+    console.group('%c📊 COPY MODAL DATA DEBUG', 'color: #0066cc; font-size: 14px; font-weight: bold;');
+    console.log('Curriculum Data Available:', !!window.CopyCurriculumData);
+    console.log('Data Ready:', window.CopyCurriculumDataReady);
+    console.log('Initialized:', window.CopyCurriculumDataInitialized);
+    console.log('Error:', window.CopyCurriculumDataError);
+    
+    if (window.CopyCurriculumData) {
+        console.log('Programs:', Object.keys(window.CopyCurriculumData));
+        console.table(
+            Object.entries(window.CopyCurriculumData).map(([program, data]) => ({
+                Program: program,
+                Subprograms: Object.keys(data.subprograms || {}).length,
+                TotalLevels: data.meta?.total_levels || 'Unknown'
+            }))
+        );
+    }
+    
+    // Check DOM elements
+    console.log('DOM Elements:');
+    console.log('  Modal:', !!document.getElementById('copyExamModal'));
+    console.log('  Program Select:', !!document.getElementById('copyProgramSelect'));
+    console.log('  Subprogram Select:', !!document.getElementById('copySubprogramSelect'));
+    console.log('  Level Select:', !!document.getElementById('copyLevelSelect'));
+    
+    console.groupEnd();
+};
+</script>
+
+<!-- Load the comprehensive fix JavaScript module -->
+<script src="{% static 'js/routinetest/copy-exam-modal-comprehensive-fix.js' %}?v={% now 'U' %}" defer></script>
+
+<style>
+/* Modal styles for Copy Exam */
+#copyExamModal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#copyExamModal .modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 8px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#copyExamModal.show {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+    color: #000;
+    text-decoration: none;
+}
+</style>
+
+{% endblock %}

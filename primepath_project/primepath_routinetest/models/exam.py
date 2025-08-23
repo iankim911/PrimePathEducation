@@ -117,11 +117,22 @@ class Exam(models.Model):
     )
     
     
-    # Phase 3: Class codes (temporary implementation)
+    # Phase 3: Class codes (DEPRECATED - use class_code instead)
+    # Kept for backward compatibility during migration
     class_codes = models.JSONField(
         default=list,
         blank=True,
-        help_text="List of class codes this exam applies to (e.g., ['CLASS_7A', 'CLASS_8B'])"
+        help_text="DEPRECATED: List of class codes (migrate to class_code field)"
+    )
+    
+    # Phase 4: Single class code (ONE-TO-ONE relationship)
+    class_code = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        choices=CLASS_CODE_CHOICES,
+        help_text="Single class code this exam belongs to (one-to-one relationship)",
+        db_index=True  # Add index for performance
     )
     
     # Exam-level instructions (kept from Phase 4, but scheduling moved to ClassExamSchedule)
@@ -219,7 +230,13 @@ class Exam(models.Model):
         return ""
     
     def get_class_codes_display(self):
-        """Get formatted display of selected class codes"""
+        """Get formatted display of selected class codes - UPDATED for single class"""
+        # Use new single class_code field if available
+        if self.class_code:
+            class_dict = dict(self.CLASS_CODE_CHOICES)
+            return class_dict.get(self.class_code, self.class_code)
+        
+        # Fallback to old class_codes for backward compatibility
         if not self.class_codes:
             return ""
         
@@ -227,13 +244,24 @@ class Exam(models.Model):
         class_dict = dict(self.CLASS_CODE_CHOICES)
         display_names = [class_dict.get(code, code) for code in self.class_codes]
         
+        # Log warning if multiple classes detected
+        if len(display_names) > 1:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"[ONE_TO_ONE_FIX] Exam {self.id} still has multiple classes: {display_names}")
+        
         if len(display_names) <= 4:
             return ", ".join(display_names)
         else:
             return f"{', '.join(display_names[:3])}... (+{len(display_names)-3} more)"
     
     def get_class_codes_short(self):
-        """Get short display of class codes for compact views"""
+        """Get short display of class codes for compact views - UPDATED for single class"""
+        # Use new single class_code field if available
+        if self.class_code:
+            return self.class_code.replace('CLASS_', '')
+        
+        # Fallback to old class_codes
         if not self.class_codes:
             return ""
         
@@ -247,7 +275,13 @@ class Exam(models.Model):
             return f"{len(self.class_codes)} classes"
     
     def get_class_codes_list(self):
-        """Get list of class codes with their display names"""
+        """Get list of class codes with their display names - UPDATED for single class"""
+        # Use new single class_code field if available
+        if self.class_code:
+            class_dict = dict(self.CLASS_CODE_CHOICES)
+            return [{'code': self.class_code, 'name': class_dict.get(self.class_code, self.class_code)}]
+        
+        # Fallback to old class_codes
         if not self.class_codes:
             return []
         
@@ -256,6 +290,39 @@ class Exam(models.Model):
             {'code': code, 'name': class_dict.get(code, code)}
             for code in self.class_codes
         ]
+    
+    @property
+    def effective_class_codes(self):
+        """
+        Property to get effective class codes for backward compatibility.
+        Returns a list for compatibility, but should only have one item.
+        """
+        if self.class_code:
+            # New single class field - return as single-item list for compatibility
+            return [self.class_code]
+        elif self.class_codes:
+            # Old multi-class field - log warning if multiple
+            if isinstance(self.class_codes, list) and len(self.class_codes) > 1:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"[ONE_TO_ONE_WARNING] Exam {self.id} has {len(self.class_codes)} classes - should be migrated to single class")
+            return self.class_codes if isinstance(self.class_codes, list) else []
+        else:
+            return []
+    
+    @property
+    def effective_class_code(self):
+        """
+        Property to get the single effective class code.
+        This is the preferred method for new code.
+        """
+        if self.class_code:
+            return self.class_code
+        elif self.class_codes and isinstance(self.class_codes, list) and len(self.class_codes) > 0:
+            # Return first class from old field as fallback
+            return self.class_codes[0]
+        else:
+            return None
     
     def get_class_schedules(self):
         """Get all class schedules for this exam"""

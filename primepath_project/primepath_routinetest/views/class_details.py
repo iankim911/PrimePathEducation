@@ -248,10 +248,19 @@ def class_details(request, class_code):
 def get_student_exam_history(student, class_code):
     """Get exam history for a student in a specific class"""
     # StudentSession uses student_name, not a foreign key to Student
-    sessions = StudentSession.objects.filter(
-        student_name=student.name,
-        exam__class_codes__contains=[class_code]
-    ).select_related('exam').order_by('-started_at')[:5]
+    # SQLite doesn't support contains lookup on JSON fields, so we'll filter in Python
+    all_sessions = StudentSession.objects.filter(
+        student_name=student.name
+    ).select_related('exam').order_by('-started_at')
+    
+    # Filter sessions where class_code is in exam's class_codes
+    sessions = []
+    for session in all_sessions:
+        if session.exam and session.exam.class_codes:
+            if isinstance(session.exam.class_codes, list) and class_code in session.exam.class_codes:
+                sessions.append(session)
+                if len(sessions) >= 5:  # Only need top 5
+                    break
     
     history = []
     for session in sessions:

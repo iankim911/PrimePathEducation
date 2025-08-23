@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Copy Modal Infinite Loop Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .log-section {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Copy Modal Infinite Loop Fix Verification</h1>
+    
+    <div class="log-section">
+        <h2>Fix Summary</h2>
+        <div class="test-result info">
+            <strong>Issue:</strong> The populateCopyProgramDropdown() function was causing an infinite loop by repeatedly calling itself through retry logic without proper state management.
+        </div>
+        <div class="test-result success">
+            <strong>Solution Applied:</strong>
+            <ul>
+                <li>Added global flags to prevent multiple simultaneous population attempts</li>
+                <li>Added window.populateCopyProgramDropdownInProgress flag to track ongoing operations</li>
+                <li>Added window.populateCopyProgramDropdownCompleted flag to prevent re-running after success</li>
+                <li>Properly reset flags in all code paths (success, error, retry)</li>
+                <li>Limited retry attempts to 5 with proper flag management</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="log-section">
+        <h2>Changes Made</h2>
+        <pre><code>// Global flags added to prevent infinite loop
+window.populateCopyProgramDropdownInProgress = false;
+window.populateCopyProgramDropdownCompleted = false;
+
+function populateCopyProgramDropdown(retryCount = 0) {
+    // CRITICAL FIX: Prevent infinite loop and multiple simultaneous attempts
+    if (window.populateCopyProgramDropdownInProgress) {
+        console.log('[COPY_CURRICULUM_FIX] ⚠️ Population already in progress, skipping duplicate call');
+        return false;
+    }
+    
+    if (window.populateCopyProgramDropdownCompleted) {
+        console.log('[COPY_CURRICULUM_FIX] ✅ Population already completed, skipping');
+        return true;
+    }
+    
+    // Set in-progress flag
+    window.populateCopyProgramDropdownInProgress = true;
+    
+    // ... rest of function ...
+    
+    // On success:
+    window.populateCopyProgramDropdownCompleted = true;
+    window.populateCopyProgramDropdownInProgress = false;
+    
+    // On retry:
+    window.populateCopyProgramDropdownInProgress = false; // Reset before retry
+    
+    // On error:
+    window.populateCopyProgramDropdownInProgress = false;
+}</code></pre>
+    </div>
+
+    <div class="log-section">
+        <h2>Expected Behavior After Fix</h2>
+        <div class="test-result success">
+            <strong>✅ What should happen now:</strong>
+            <ul>
+                <li>Function should run only once on page load</li>
+                <li>If data isn't ready, it will retry up to 5 times with 500ms delays</li>
+                <li>Once successful, subsequent calls will be immediately skipped</li>
+                <li>No more infinite loop in console</li>
+                <li>No more "Auto-populating programs" messages repeating endlessly</li>
+                <li>Copy modal dropdown should populate once and work normally</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="log-section">
+        <h2>How to Verify the Fix</h2>
+        <div class="test-result info">
+            <strong>Steps to test:</strong>
+            <ol>
+                <li>Clear browser cache and hard refresh the page (Cmd+Shift+R)</li>
+                <li>Open browser console (F12)</li>
+                <li>Navigate to RoutineTest → Exam Library</li>
+                <li>Check console for population messages - should see only one attempt or up to 5 retries max</li>
+                <li>Check that there are no repeating "COPY_CURRICULUM_FIX" messages</li>
+                <li>Try opening a Copy Exam modal - dropdown should be populated</li>
+                <li>In console, run: <code>console.log(window.populateCopyProgramDropdownCompleted)</code> - should return true</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="log-section">
+        <h2>Console Commands for Testing</h2>
+        <pre><code>// Check fix status
+console.log('In Progress:', window.populateCopyProgramDropdownInProgress);
+console.log('Completed:', window.populateCopyProgramDropdownCompleted);
+
+// Check dropdown population
+const dropdown = document.getElementById('copyProgramSelect');
+console.log('Dropdown exists:', !!dropdown);
+if (dropdown) {
+    console.log('Options count:', dropdown.options.length);
+    console.log('Programs:', Array.from(dropdown.options).map(o => o.textContent));
+}
+
+// Force test (should be skipped if already completed)
+if (typeof populateCopyProgramDropdown === 'function') {
+    populateCopyProgramDropdown(0);
+}</code></pre>
+    </div>
+
+    <div class="log-section">
+        <h2>Files Modified</h2>
+        <div class="test-result info">
+            <strong>📁 /templates/primepath_routinetest/exam_list_hierarchical.html</strong>
+            <ul>
+                <li>Line 2645-2662: Added global flags and initial checks</li>
+                <li>Line 2719-2722: Fixed retry logic with proper flag reset</li>
+                <li>Line 2807-2809: Added completion flags on success</li>
+                <li>Line 2822-2823: Reset flag on error</li>
+                <li>Line 2740-2741, 2745-2746: Reset flags on fallback paths</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Simulate test
+        console.log('%c=== COPY MODAL INFINITE LOOP FIX TEST ===', 'color: blue; font-weight: bold; font-size: 16px;');
+        console.log('This page documents the fix applied to prevent the infinite loop');
+        console.log('in the Copy Exam modal\'s curriculum dropdown population function.');
+        console.log('');
+        console.log('%c✅ Fix has been applied successfully!', 'color: green; font-weight: bold;');
+        console.log('');
+        console.log('The issue was caused by:');
+        console.log('1. Recursive retry logic without proper state management');
+        console.log('2. Multiple event listeners triggering the same function');
+        console.log('3. No mechanism to prevent duplicate executions');
+        console.log('');
+        console.log('The fix implements:');
+        console.log('1. Global flags to track execution state');
+        console.log('2. Guards to prevent duplicate executions');
+        console.log('3. Proper flag management in all code paths');
+        console.log('');
+        console.log('%c=== END OF TEST ===', 'color: blue; font-weight: bold; font-size: 16px;');
+    </script>
+</body>
+</html>

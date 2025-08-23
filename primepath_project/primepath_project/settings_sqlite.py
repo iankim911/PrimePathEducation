@@ -5,6 +5,12 @@ Django settings for primepath_project - SQLite version for easy setup
 from pathlib import Path
 import os
 
+# Import StatReloader fix configuration
+try:
+    from . import statreloader_config  # noqa
+except ImportError:
+    pass  # Config file might not exist yet
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security Configuration - Use environment variables in production

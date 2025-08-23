@@ -22,6 +22,7 @@ from .session_urls import urlpatterns as session_patterns
 from .api_urls import urlpatterns as api_patterns
 from .teacher_urls import urlpatterns as teacher_patterns
 from .legacy_urls import urlpatterns as legacy_patterns
+from .auth_urls import urlpatterns as auth_patterns
 from .url_integration import integrate_url_patterns, URLIntegrationLogger
 
 # Initialize logger
@@ -35,6 +36,7 @@ console_log = {
     "event": "PLACEMENT_TEST_URLS_INIT",
     "app_name": app_name,
     "modules_loading": [
+        "auth_urls",
         "student_urls",
         "exam_urls",
         "session_urls",
@@ -48,6 +50,7 @@ print(f"[PLACEMENT_TEST_URLS] {json.dumps(console_log, indent=2)}")
 
 # Log pattern counts before integration
 pattern_counts = {
+    "auth": len(auth_patterns),
     "student": len(student_patterns),
     "exam": len(exam_patterns),
     "session": len(session_patterns),
@@ -65,8 +68,9 @@ try:
     urlpatterns = []
     
     # Define the order of pattern integration
-    # Legacy patterns go LAST to avoid conflicts with more specific patterns
+    # Auth patterns go FIRST for priority, Legacy patterns go LAST to avoid conflicts
     pattern_sources = {
+        "auth": auth_patterns,  # Authentication routes (login/logout)
         "student": student_patterns,
         "exam": exam_patterns,
         "session": session_patterns,
@@ -101,6 +105,7 @@ except Exception as e:
     
     # Fallback to simple extension if integration fails
     urlpatterns = []
+    urlpatterns.extend(auth_patterns)  # Auth first
     urlpatterns.extend(student_patterns)
     urlpatterns.extend(exam_patterns)
     urlpatterns.extend(session_patterns)

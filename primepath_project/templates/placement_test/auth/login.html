@@ -1,11 +1,11 @@
-{% extends "routinetest_base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* BUILDER: Simple login styles for Day 1 MVP */
+    /* Shared login styles matching RoutineTest */
     .login-container {
         max-width: 400px;
         margin: 100px auto;
@@ -21,7 +21,7 @@
     }
     
     .login-header h1 {
-        color: #2E7D32;
+        color: #1976D2;  /* Blue for PlacementTest */
         font-size: 28px;
     }
     
@@ -51,57 +51,68 @@
     
     .form-group input:focus {
         outline: none;
-        border-color: #2E7D32;
+        border-color: #2196F3;
+        box-shadow: 0 0 5px rgba(33,150,243,0.2);
     }
     
-    .remember-me {
+    .form-remember {
         display: flex;
         align-items: center;
         margin-bottom: 20px;
     }
     
-    .remember-me input {
+    .form-remember input {
         margin-right: 8px;
     }
     
-    .btn-login {
+    .login-button {
         width: 100%;
         padding: 12px;
-        background: #2E7D32;
+        background: linear-gradient(135deg, #2196F3, #1976D2);
         color: white;
         border: none;
         border-radius: 5px;
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: all 0.3s ease;
     }
     
-    .btn-login:hover {
-        background: #1B5E20;
+    .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(33,150,243,0.3);
     }
     
-    .role-info {
-        margin-top: 30px;
-        padding: 15px;
-        background: #F5F5F5;
+    .alert {
+        padding: 10px 15px;
         border-radius: 5px;
-        font-size: 14px;
+        margin-bottom: 20px;
     }
     
-    .role-info h3 {
-        margin-bottom: 10px;
-        color: #333;
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
     }
     
-    .role-list {
-        list-style: none;
-        padding: 0;
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
     }
     
-    .role-list li {
-        padding: 5px 0;
-        color: #666;
+    .back-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .back-link a {
+        color: #2196F3;
+        text-decoration: none;
+    }
+    
+    .back-link a:hover {
+        text-decoration: underline;
     }
 </style>
 {% endblock %}
@@ -109,20 +120,19 @@
 {% block content %}
 <div class="login-container">
     <div class="login-header">
-        <h1>🎓 Login</h1>
-        <p>Sign in to access your dashboard</p>
+        <h1>📋 Login</h1>
+        <p>Sign in to access Placement Test System</p>
     </div>
     
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" style="padding: 10px; margin-bottom: 20px; border-radius: 5px; 
-                {% if message.tags == 'error' %}background: #FFEBEE; color: #C62828;{% else %}background: #E8F5E9; color: #2E7D32;{% endif %}">
+            <div class="alert alert-{{ message.tags }}">
                 {{ message }}
             </div>
         {% endfor %}
     {% endif %}
     
-    <form method="post" action="{% url 'RoutineTest:login' %}">
+    <form method="post">
         {% csrf_token %}
         
         <div class="form-group">
@@ -135,22 +145,16 @@
             <input type="password" id="password" name="password" required>
         </div>
         
-        <div class="remember-me">
-            <input type="checkbox" id="remember_me" name="remember_me">
-            <label for="remember_me">Remember me for 2 weeks</label>
+        <div class="form-remember">
+            <input type="checkbox" id="remember" name="remember" value="1">
+            <label for="remember">Remember me for 2 weeks</label>
         </div>
         
-        <button type="submit" class="btn-login">Login</button>
+        <button type="submit" class="login-button">Login</button>
     </form>
     
-    <!-- BUILDER: Role information for Day 1 testing -->
-    <div class="role-info">
-        <h3>Test Accounts (Day 1)</h3>
-        <ul class="role-list">
-            <li><strong>Admin:</strong> Superuser account</li>
-            <li><strong>Teacher:</strong> User with Teacher profile</li>
-            <li><strong>Student:</strong> Regular user account</li>
-        </ul>
+    <div class="back-link">
+        <a href="/">← Back to Home</a>
     </div>
 </div>
 {% endblock %}

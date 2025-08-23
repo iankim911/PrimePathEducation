@@ -342,6 +342,19 @@
         color: white;
     }
     
+    .access-badge.owner {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(40,167,69,0.2);
+        animation: subtle-glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes subtle-glow {
+        0%, 100% { box-shadow: 0 2px 4px rgba(40,167,69,0.2); }
+        50% { box-shadow: 0 2px 8px rgba(40,167,69,0.4); }
+    }
+    
     .class-toggle {
         transition: transform 0.3s;
     }
@@ -959,7 +972,16 @@
                 <div class="program-content">
                     <!-- Debug: {{ program_exams|length }} classes in {{ program }} -->
                     {% for class_code, class_exams in program_exams.items %}
-                        {% with access_level=teacher_assignments|get_item:class_code %}
+                        {% with access_level=teacher_assignments|get_item:class_code is_owned_class=ownership_overrides|get_item:class_code base_access=base_assignments|get_item:class_code %}
+                        <!-- OWNERSHIP FIX DEBUG -->
+                        <script>
+                            console.log('[OWNERSHIP_FIX] Class {{ class_code }}', {
+                                'is_owned_class': '{{ is_owned_class }}',
+                                'base_access': '{{ base_access }}',
+                                'effective_access': '{{ access_level }}',
+                                'has_ownership_override': {{ is_owned_class|yesno:"true,false" }}
+                            });
+                        </script>
                         <div class="class-section {% if access_level and access_level != 'VIEW' %}accessible{% endif %}" 
                              data-class="{{ class_code }}">
                             <div class="class-header" onclick="toggleClass('{{ class_code }}')">
@@ -975,7 +997,11 @@
                                             </span>
                                         {% endif %}
                                     </span>
-                                    {% if access_level %}
+                                    <!-- OWNERSHIP FIX: Display correct badge based on ownership -->
+                                    {% if is_owned_class %}
+                                        <!-- Teacher owns exam(s) in this class -->
+                                        <span class="access-badge owner" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; font-weight: 600; padding: 4px 12px; border-radius: 4px; box-shadow: 0 2px 4px rgba(40,167,69,0.2);">👑 OWNER - Full Access</span>
+                                    {% elif access_level %}
                                         {% if access_level == 'FULL' %}
                                             <span class="access-badge full">Full Access</span>
                                         {% elif access_level == 'CO_TEACHER' %}
@@ -1005,7 +1031,17 @@
                                     - User.is_staff = {{ user.is_staff }}
                                     - Condition (is_admin or exam.can_edit) = {% if is_admin or exam.can_edit %}TRUE{% else %}FALSE{% endif %}
                                 -->
+                                <!-- EXAM-LEVEL OWNERSHIP DEBUG -->
                                 <script>
+                                    console.log('[EXAM_OWNERSHIP_DEBUG] Exam: {{ exam.name|escapejs }}', {
+                                        'exam_id': '{{ exam.id }}',
+                                        'exam_owner': '{{ exam.created_by.name|default:"Unknown" }}',
+                                        'is_owner': {{ exam.is_owner|yesno:"true,false" }},
+                                        'access_badge': '{{ exam.access_badge }}',
+                                        'class_is_owned': '{{ is_owned_class }}',
+                                        'can_edit': {{ exam.can_edit|yesno:"true,false" }},
+                                        'can_delete': {{ exam.can_delete|yesno:"true,false" }}
+                                    });
                                     console.log('[DELETE_BUTTON_DEBUG] Exam: {{ exam.name|escapejs }}', {
                                         is_admin: {{ is_admin|lower }},
                                         exam_can_edit: {{ exam.can_edit|lower }},
@@ -1055,33 +1091,6 @@
                                         {% endif %}
                                         {% endif %}
                                     </div>
-                                    
-                                    <!-- Display Assigned Class Codes with Better UX -->
-                                    {% if exam.class_codes %}
-                                    <div class="exam-classes" style="margin: 8px 0; padding: 10px 14px; background: linear-gradient(135deg, #f0f7ff 0%, #f8fbff 100%); border-left: 3px solid #2196F3; border-radius: 6px; font-size: 0.85rem;">
-                                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                                            <strong style="color: #1565C0; display: flex; align-items: center; gap: 4px;">
-                                                <i class="fas fa-chalkboard-teacher" style="font-size: 0.9rem;"></i>
-                                                Assigned to Classes:
-                                            </strong>
-                                            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                                                {% for code in exam.class_codes %}
-                                                    <span style="background: white; padding: 3px 10px; border-radius: 12px; border: 1px solid #e0e0e0; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-                                                        <span style="color: #6c757d; font-size: 0.75rem;">Class:</span>
-                                                        <strong style="color: #1976D2;">{{ code }}</strong>
-                                                    </span>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% elif not exam.class_codes %}
-                                    <div class="exam-classes" style="margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 3px solid #ff9800; border-radius: 6px; font-size: 0.85rem;">
-                                        <strong style="color: #e65100; display: flex; align-items: center; gap: 6px;">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            No classes assigned yet
-                                        </strong>
-                                    </div>
-                                    {% endif %}
                                     
                                     <div class="exam-meta">
                                         <div class="exam-meta-item">
@@ -1679,6 +1688,7 @@ function toggleClass(classCode) {
 (function() {
     console.log('[OWNERSHIP_SYSTEM] ✅ New tab-based navigation system active');
     console.log('[OWNERSHIP_SYSTEM] Current ownership filter: {{ ownership_filter }}');
+    console.log('[OWNERSHIP_SYSTEM] Filter intent: {{ filter_intent }}');
     console.log('[OWNERSHIP_SYSTEM] Current exam type filter: {{ exam_type_filter }}');
     console.log('[OWNERSHIP_SYSTEM] Navigation handled by server-side routing');
     
@@ -2422,7 +2432,7 @@ console.log('  - curriculum_levels_for_copy available: {{ curriculum_levels_for_
 // Use ENHANCED structured hierarchy data from Django backend
 console.log('%c[COPY_CURRICULUM_FIX] ✅ curriculum_hierarchy_for_copy IS AVAILABLE from Django backend', 'color: #00aa00; font-weight: bold;');
 console.log('[COPY_CURRICULUM_FIX] Loading ENHANCED hierarchical curriculum data from Django backend...');
-{{ curriculum_hierarchy_for_copy|json_script:"copy-curriculum-hierarchy-data" }}
+// Note: The json_script tag is placed outside this script block to avoid rendering issues
 const curriculumScriptElement = document.getElementById('copy-curriculum-hierarchy-data');
 if (curriculumScriptElement) {
     try {
@@ -2599,15 +2609,35 @@ async function loadCopyCurriculumData() {
             }
         };
         
-        populateCopyProgramDropdown();
+        // Don't auto-populate here, wait for modal open
+        console.log('[COPY_CURRICULUM] Curriculum data loaded, ready for modal');
         
     } catch (error) {
         console.error('[COPY_CURRICULUM] Error loading curriculum data:', error);
     }
 }
 
+// Global flag to prevent multiple simultaneous population attempts
+window.populateCopyProgramDropdownInProgress = false;
+window.populateCopyProgramDropdownCompleted = false;
+
 function populateCopyProgramDropdown(retryCount = 0) {
-    console.group('[COPY_CURRICULUM_FIX] populateCopyProgramDropdown() - COMPREHENSIVE FIX v3');
+    // CRITICAL FIX: Allow re-population when modal reopens
+    if (window.populateCopyProgramDropdownInProgress && retryCount > 0) {
+        console.log('[COPY_CURRICULUM_FIX] ⚠️ Population already in progress, skipping duplicate call');
+        return false;
+    }
+    
+    // Reset completed flag when modal reopens (retryCount = 0)
+    if (retryCount === 0) {
+        window.populateCopyProgramDropdownCompleted = false;
+        window.populateCopyProgramDropdownInProgress = false;
+    }
+    
+    // Set in-progress flag
+    window.populateCopyProgramDropdownInProgress = true;
+    
+    console.group('[COPY_CURRICULUM_FIX] populateCopyProgramDropdown() - COMPREHENSIVE FIX v4');
     
     const programSelect = document.getElementById('copyProgramSelect');
     
@@ -2661,9 +2691,11 @@ function populateCopyProgramDropdown(retryCount = 0) {
         console.log('[COPY_CURRICULUM_FIX] window.curriculumData exists:', !!window.curriculumData);
         console.log('[COPY_CURRICULUM_FIX] All window curriculum variables:', Object.keys(window).filter(key => key.toLowerCase().includes('curriculum')));
         
-        // Retry logic - wait for data to load
+        // Retry logic - wait for data to load (with proper flag reset)
         if (retryCount < 5) {
             console.log(`[COPY_CURRICULUM_FIX] ⏳ Data not ready, retrying in 500ms (attempt ${retryCount + 1}/5)...`);
+            // Reset in-progress flag before retry
+            window.populateCopyProgramDropdownInProgress = false;
             setTimeout(() => {
                 populateCopyProgramDropdown(retryCount + 1);
             }, 500);
@@ -2681,9 +2713,13 @@ function populateCopyProgramDropdown(retryCount = 0) {
                 populateCopyProgramDropdown(0); // Reset retry count for fallback
             }).catch(error => {
                 console.error('[COPY_CURRICULUM_FIX] Fallback failed:', error);
+                // Reset flag on fallback failure
+                window.populateCopyProgramDropdownInProgress = false;
             });
         } else {
             console.error('[COPY_CURRICULUM_FIX] ❌ No fallback available - loadCopyCurriculumData not found');
+            // Reset flag when no fallback available
+            window.populateCopyProgramDropdownInProgress = false;
         }
         console.groupEnd();
         return false;
@@ -2719,7 +2755,17 @@ function populateCopyProgramDropdown(retryCount = 0) {
     // Add programs with enhanced error handling
     let optionsAdded = 0;
     try {
-        Object.keys(window.CopyCurriculumData).forEach(program => {
+        // Define correct program order: CORE → ASCENT → EDGE → PINNACLE
+        const programOrder = ['CORE', 'ASCENT', 'EDGE', 'PINNACLE'];
+        
+        // Add programs in the correct hierarchical order
+        programOrder.forEach(program => {
+            // Check if this program exists in the data
+            if (!window.CopyCurriculumData[program]) {
+                console.warn(`[COPY_CURRICULUM] Program "${program}" not found in curriculum data, skipping`);
+                return;
+            }
+            
             const option = document.createElement('option');
             option.value = program;
             option.textContent = program;
@@ -2748,6 +2794,10 @@ function populateCopyProgramDropdown(retryCount = 0) {
         programSelect.dispatchEvent(new Event('change', { bubbles: true }));
         console.log('[COPY_CURRICULUM] Triggered change event on program dropdown');
         
+        // Mark as completed and reset in-progress flag
+        window.populateCopyProgramDropdownCompleted = true;
+        window.populateCopyProgramDropdownInProgress = false;
+        
         console.groupEnd();
         return true;
         
@@ -2758,6 +2808,10 @@ function populateCopyProgramDropdown(retryCount = 0) {
         // Restore initial state on error
         programSelect.innerHTML = initialHTML;
         console.log('[COPY_CURRICULUM] Restored initial state after error');
+        
+        // Reset flags on error
+        window.populateCopyProgramDropdownInProgress = false;
+        
         console.groupEnd();
         return false;
     }
@@ -2936,7 +2990,25 @@ function setupCopyCurriculumEventListeners() {
         
         if (program && window.CopyCurriculumData[program]) {
             const subprograms = window.CopyCurriculumData[program].subprograms;
-            Object.keys(subprograms).forEach(subprogram => {
+            
+            // Define correct subprogram order for each program
+            const subprogramOrder = {
+                'CORE': ['Phonics', 'Sigma', 'Elite', 'Pro'],
+                'ASCENT': ['Nova', 'Drive', 'Pro'],
+                'EDGE': ['Spark', 'Rise', 'Pursuit', 'Pro'],
+                'PINNACLE': ['Vision', 'Endeavor', 'Success', 'Pro']
+            };
+            
+            // Get the correct order for this program, or use alphabetical if not defined
+            const orderForProgram = subprogramOrder[program] || Object.keys(subprograms).sort();
+            
+            // Add subprograms in the correct order
+            orderForProgram.forEach(subprogram => {
+                // Check if this subprogram exists in the data
+                if (!subprograms[subprogram]) {
+                    return; // Skip if not found
+                }
+                
                 const option = document.createElement('option');
                 option.value = subprogram;
                 option.textContent = subprogram;
@@ -3032,18 +3104,33 @@ window.testCopyModal = function() {
 
 // CRITICAL: Ensure openCopyModal is always available
 (function() {
-    // Create a robust fallback function if not defined
+    // Create temporary placeholder functions that will be replaced by comprehensive fix
     if (typeof window.openCopyModal === 'undefined') {
-        console.warn('[FALLBACK] Creating fallback openCopyModal function');
+        console.log('[PLACEHOLDER] Creating placeholder openCopyModal function');
         window.openCopyModal = function(examId, examName) {
-            alert('Fallback function called. examId: ' + examId + ', examName: ' + examName);
+            console.log('[PLACEHOLDER] openCopyModal called, waiting for comprehensive fix to load');
+            console.log('Exam ID:', examId, 'Exam Name:', examName);
+            
+            // Try to load the modal after a short delay (in case script hasn't loaded yet)
+            setTimeout(function() {
+                if (window.openCopyModal !== arguments.callee) {
+                    // Function has been replaced, call it again
+                    window.openCopyModal(examId, examName);
+                } else {
+                    alert('Copy Exam feature is loading. Please try again in a moment.');
+                }
+            }, 500);
         };
     }
     
     if (typeof window.closeCopyModal === 'undefined') {
-        console.warn('[FALLBACK] Creating fallback closeCopyModal function');
+        console.log('[PLACEHOLDER] Creating placeholder closeCopyModal function');
         window.closeCopyModal = function() {
-            console.log('Fallback closeCopyModal called');
+            const modal = document.getElementById('copyExamModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+            }
         };
     }
     
@@ -3078,7 +3165,13 @@ console.log('  - window.openCopyModal:', typeof window.openCopyModal);
 console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
 </script>
 
-<!-- Load the comprehensive copy modal module -->
-<script src="{% load static %}{% static 'js/routinetest/copy-exam-modal.js' %}?v={% now 'U' %}" defer></script>
+<!-- Place the curriculum data JSON script tag here to avoid rendering issues -->
+{% if curriculum_hierarchy_for_copy %}
+{{ curriculum_hierarchy_for_copy|json_script:"copy-curriculum-hierarchy-data" }}
+{% endif %}
+
+<!-- Load the improved copy modal fix v2 -->
+<!-- IMPROVED FIX v5.0: More robust Copy Exam modal dropdown population -->
+<script src="{% load static %}{% static 'js/routinetest/copy-exam-modal-fix-v2.js' %}?v={% now 'U' %}" defer></script>
 
 {% endblock %}

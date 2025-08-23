@@ -1567,6 +1567,7 @@
     }
     
     function populateExamDetails(examId, examName, duration) {
+        // Updated: Removed redundant class display - v2
         const detailsContainer = document.getElementById('examLaunchDetails');
         
         // Find the exam element to extract metadata
@@ -1603,10 +1604,6 @@
             <div class="exam-info-item">
                 <span>✅</span>
                 <span><strong>Answers:</strong> ${examMeta.answers || 'Loading...'}</span>
-            </div>
-            <div class="exam-info-item">
-                <span>🎯</span>
-                <span><strong>Class:</strong> {{ class_display }}</span>
             </div>
         `;
     }

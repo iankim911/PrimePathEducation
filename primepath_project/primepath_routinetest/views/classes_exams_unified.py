@@ -323,9 +323,9 @@ def classes_exams_unified_view(request):
         
         for class_code in my_class_codes[:20]:  # Limit to 20 classes for performance
             try:
-                # Add curriculum mapping for this class
-                from primepath_routinetest.views.schedule_matrix_optimized import get_class_curriculum_mapping_cached
-                curriculum_mapping = get_class_curriculum_mapping_cached(class_code, current_year)
+                # Add curriculum mapping for this class - Matrix optimization removed
+                # from primepath_routinetest.views.schedule_matrix_optimized import get_class_curriculum_mapping_cached
+                curriculum_mapping = None  # Matrix optimization removed, handled via unified view now
                 
                 matrix_data[class_code] = {
                     'curriculum_mapping': curriculum_mapping

@@ -268,7 +268,11 @@
       "Bash(DJANGO_LOG_LEVEL=ERROR ../venv/bin/python debug_actual_badges.py)",
       "Bash(git log:*)",
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/fix_vscode_ide_disconnect.sh)",
-      "Bash(DJANGO_LOG_LEVEL=ERROR /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_comprehensive_qa_auth_fix.py)"
+      "Bash(DJANGO_LOG_LEVEL=ERROR /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_comprehensive_qa_auth_fix.py)",
+      "Bash(ulimit:*)",
+      "Bash(launchctl limit:*)",
+      "Bash(# Rename the conflicting migrations to proper sequence numbers\nmv primepath_routinetest/migrations/0003_fix_exam_class_relationship.py primepath_routinetest/migrations/0018_fix_exam_class_relationship.py\nmv primepath_routinetest/migrations/0004_migrate_class_codes_to_single.py primepath_routinetest/migrations/0019_migrate_class_codes_to_single.py)",
+      "Bash(# Rename to avoid conflicts with existing migrations\nmv primepath_routinetest/migrations/0018_fix_exam_class_relationship.py primepath_routinetest/migrations/0022_fix_exam_class_relationship.py\nmv primepath_routinetest/migrations/0019_migrate_class_codes_to_single.py primepath_routinetest/migrations/0023_migrate_class_codes_to_single.py)"
     ],
     "deny": []
   }

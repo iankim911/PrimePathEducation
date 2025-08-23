@@ -27,6 +27,7 @@ from primepath_routinetest.models import (
     # StudentRoster removed - not needed for Answer Keys functionality
 )
 from core.models import Teacher
+from ..class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
 
 logger = logging.getLogger(__name__)
 
@@ -167,8 +168,8 @@ def my_classes_view(request):
             # ADMIN VIEW: FULL ACCESS TO EVERYTHING
             print(f"[ADMIN_VIEW] 🔓 GRANTING FULL ACCESS TO {request.user.username}")
             
-            # Get ALL class codes from the system
-            all_class_codes = [choice[0] for choice in TeacherClassAssignment._meta.get_field('class_code').choices]
+            # Get ALL class codes from PrimePath curriculum mapping
+            all_class_codes = list(CLASS_CODE_CURRICULUM_MAPPING.keys())
             
             # Create virtual assignments for ALL classes (admin has implicit access)
             admin_classes = []
@@ -193,8 +194,8 @@ def my_classes_view(request):
                     all_exams = Exam.objects.filter(is_active=True)
                     active_exams = sum(1 for exam in all_exams if class_code in (exam.class_codes or []))
                 
-                # Get class display name
-                class_name = dict(TeacherClassAssignment._meta.get_field('class_code').choices).get(class_code, class_code)
+                # Get class display name from curriculum mapping
+                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
                 
                 admin_classes.append({
                     'class_code': class_code,
@@ -293,8 +294,8 @@ def my_classes_view(request):
                 })
                 my_class_codes.append(assignment.class_code)
             
-            # Get available classes
-            all_class_codes = [choice[0] for choice in TeacherClassAssignment._meta.get_field('class_code').choices]
+            # Get available classes from PrimePath curriculum mapping
+            all_class_codes = list(CLASS_CODE_CURRICULUM_MAPPING.keys())
             available_class_codes = [code for code in all_class_codes if code not in my_class_codes]
             
             # Check pending requests
@@ -311,7 +312,7 @@ def my_classes_view(request):
                     is_active=True
                 ).select_related('teacher')
                 
-                class_name = dict(TeacherClassAssignment._meta.get_field('class_code').choices).get(class_code, class_code)
+                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
                 is_pending = class_code in pending_class_codes
                 
                 available_classes.append({
@@ -722,14 +723,11 @@ def api_my_classes(request):
         is_admin, teacher = is_admin_or_head_teacher(request.user)
         
         if is_admin:
-            # Admin gets all classes
-            all_class_codes = [choice[0] for choice in 
-                              TeacherClassAssignment._meta.get_field('class_code').choices]
+            # Admin gets all classes from PrimePath curriculum mapping
+            all_class_codes = list(CLASS_CODE_CURRICULUM_MAPPING.keys())
             classes = []
             for class_code in all_class_codes:
-                class_name = dict(TeacherClassAssignment._meta.get_field('class_code').choices).get(
-                    class_code, class_code
-                )
+                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
                 classes.append({
                     'class_code': class_code,
                     'class_name': class_name,
@@ -787,22 +785,23 @@ def api_available_classes(request):
             is_active=True
         ).values_list('class_code', flat=True)
         
-        # Get all available classes
-        all_classes = TeacherClassAssignment._meta.get_field('class_code').choices
+        # Get all available classes from PrimePath curriculum mapping
+        all_class_codes = list(CLASS_CODE_CURRICULUM_MAPPING.keys())
         
         available = []
-        for code, name in all_classes:
-            if code not in my_classes:
+        for class_code in all_class_codes:
+            if class_code not in my_classes:
                 # Check if request pending
                 is_pending = ClassAccessRequest.objects.filter(
                     teacher=teacher,
-                    class_code=code,
+                    class_code=class_code,
                     status='PENDING'
                 ).exists()
                 
+                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
                 available.append({
-                    'class_code': code,
-                    'class_name': name,
+                    'class_code': class_code,
+                    'class_name': class_name,
                     'is_pending': is_pending
                 })
         
@@ -826,10 +825,12 @@ def api_my_requests(request):
             teacher=teacher
         ).order_by('-requested_at')
         
+        # Import curriculum mapping for proper class names
+        
         request_data = [{
             'id': r.id,
             'class_code': r.class_code,
-            'class_name': r.get_class_code_display(),
+            'class_name': f"{r.class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(r.class_code, r.class_code)}",
             'status': r.status,
             'status_display': r.get_status_display(),
             'requested_at': r.requested_at.isoformat(),
