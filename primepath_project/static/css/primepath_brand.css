@@ -5,27 +5,27 @@
 
 /* Brand Color Palette */
 :root {
-    /* Primary Brand Colors - Improved for better accessibility */
-    --primepath-navy: #2C5282;        /* Lighter navy blue for better contrast */
-    --primepath-navy-dark: #2A4365;   /* Moderately dark navy */
-    --primepath-navy-light: #3182CE;  /* Light navy with good contrast */
+    /* Primary Brand Colors - Green Theme */
+    --primepath-navy: #2E7D32;        /* Primary green */
+    --primepath-navy-dark: #1B5E20;   /* Dark green */
+    --primepath-navy-light: #43A047;  /* Light green with good contrast */
     
-    /* Program Colors (from brand roadmap) */
-    --program-core: #5EBEC4;        /* Teal/Turquoise */
-    --program-core-dark: #4A9FA5;
-    --program-core-light: #7FD4D9;
+    /* Program Colors - All Green Theme */
+    --program-core: #4CAF50;        /* Medium green */
+    --program-core-dark: #388E3C;
+    --program-core-light: #66BB6A;
     
-    --program-ascent: #5B7FDE;      /* Blue */
-    --program-ascent-dark: #4A67B8;
-    --program-ascent-light: #7A96E5;
+    --program-ascent: #43A047;      /* Light green */
+    --program-ascent-dark: #2E7D32;
+    --program-ascent-light: #66BB6A;
     
-    --program-edge: #8B5FDE;        /* Purple */
-    --program-edge-dark: #7249B8;
-    --program-edge-light: #A37FE5;
+    --program-edge: #388E3C;        /* Forest green */
+    --program-edge-dark: #2E7D32;
+    --program-edge-light: #4CAF50;
     
-    --program-pinnacle: #B84A6B;    /* Burgundy/Deep Red */
-    --program-pinnacle-dark: #973956;
-    --program-pinnacle-light: #CC6B87;
+    --program-pinnacle: #1B5E20;    /* Deep green */
+    --program-pinnacle-dark: #0D4F1F;
+    --program-pinnacle-light: #2E7D32;
     
     /* UI Colors */
     --brand-white: #FFFFFF;
@@ -39,7 +39,7 @@
     --brand-success: #28A745;
     --brand-warning: #FFC107;
     --brand-danger: #DC3545;
-    --brand-info: #17A2B8;
+    --brand-info: #43A047;  /* Green instead of cyan */
     
     /* Shadow and Effects */
     --brand-shadow-sm: 0 2px 4px rgba(27, 41, 81, 0.1);
@@ -410,9 +410,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn:focus, button:focus, .quick-action-btn:focus {
-    outline: 3px solid #007bff !important;
+    outline: 3px solid #2E7D32 !important;
     outline-offset: 2px !important;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3) !important;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.3) !important;
 }
 
 /* High contrast mode support */
@@ -450,6 +450,35 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3) !important;
     color: white !important;
     text-decoration: none !important;
+}
+
+/* Logout Button Fix - Ensure White Text */
+.btn-danger[href*="logout"],
+a[href*="logout"].btn,
+.logout-btn,
+.btn-logout,
+button:contains("Logout"),
+a:contains("Logout"),
+.nav-tabs a[href*="logout"],
+[onclick*="logout"] {
+    background: #DC3545 !important;
+    background-color: #DC3545 !important;
+    color: white !important;
+    color: #FFFFFF !important;
+    border-color: #DC3545 !important;
+    text-decoration: none !important;
+}
+
+.btn-danger[href*="logout"]:hover,
+a[href*="logout"].btn:hover,
+.logout-btn:hover,
+.btn-logout:hover,
+.nav-tabs a[href*="logout"]:hover {
+    background: #C82333 !important;
+    background-color: #C82333 !important;
+    color: white !important;
+    color: #FFFFFF !important;
+    border-color: #BD2130 !important;
 }
 
 /* Responsive Design */

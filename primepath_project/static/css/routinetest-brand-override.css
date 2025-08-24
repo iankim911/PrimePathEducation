@@ -22,7 +22,7 @@
 }
 
 .ownership-tab:hover {
-    background: rgba(27, 41, 81, 0.05) !important;
+    background: rgba(46, 125, 50, 0.05) !important;
     color: var(--primepath-navy) !important;
 }
 
@@ -148,50 +148,54 @@
     border: none !important;
 }
 
-/* View button */
+/* View button - Fixed white text for contrast */
 .btn-view {
     background: linear-gradient(135deg, var(--brand-dark-gray) 0%, #495057 100%) !important;
-    color: var(--brand-white) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
 }
 
 .btn-view:hover {
     background: linear-gradient(135deg, #495057 0%, var(--brand-dark-gray) 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
     transform: translateY(-2px) !important;
     box-shadow: var(--brand-shadow-sm) !important;
 }
 
-/* Edit button */
+/* Edit button - Green theme */
 .btn-edit {
-    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%) !important;
-    color: var(--brand-white) !important;
+    background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
 }
 
 .btn-edit:hover {
-    background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%) !important;
+    background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
     transform: translateY(-2px) !important;
-    box-shadow: var(--brand-shadow-md) !important;
+    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3) !important;
 }
 
-/* Copy button */
+/* Copy button - Green theme */
 .btn-copy {
-    background: linear-gradient(135deg, var(--brand-info) 0%, #138496 100%) !important;
-    color: var(--brand-white) !important;
+    background: linear-gradient(135deg, #43A047 0%, #388E3C 100%) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
 }
 
 .btn-copy:hover {
-    background: linear-gradient(135deg, #138496 0%, var(--brand-info) 100%) !important;
+    background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
     transform: translateY(-2px) !important;
-    box-shadow: var(--brand-shadow-sm) !important;
+    box-shadow: 0 4px 8px rgba(67, 160, 71, 0.3) !important;
 }
 
-/* Danger button remains red for safety */
+/* Danger button remains red for safety - Fixed white text for contrast */
 .btn-danger {
     background: linear-gradient(135deg, var(--brand-danger) 0%, #c82333 100%) !important;
-    color: var(--brand-white) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
 }
 
 .btn-danger:hover {
     background: linear-gradient(135deg, #c82333 0%, var(--brand-danger) 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
     transform: translateY(-2px) !important;
     box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3) !important;
 }
@@ -220,7 +224,7 @@
 
 .class-section.accessible {
     border: 2px solid var(--primepath-navy) !important;
-    background: linear-gradient(to right, rgba(27, 41, 81, 0.05) 0%, var(--brand-white) 5%) !important;
+    background: linear-gradient(to right, rgba(46, 125, 50, 0.05) 0%, var(--brand-white) 5%) !important;
 }
 
 .class-header {
@@ -339,12 +343,12 @@
 }
 
 /* ================================
-   CREATE EXAM BUTTON
+   CREATE EXAM BUTTON - Fixed white text for contrast
    ================================ */
 .btn-create-exam,
 .btn-primary {
     background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%) !important;
-    color: var(--brand-white) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
     border: none !important;
     border-radius: var(--border-radius-pill) !important;
     padding: 0.75rem 2rem !important;
@@ -355,6 +359,7 @@
 .btn-create-exam:hover,
 .btn-primary:hover {
     background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
     transform: translateY(-2px) !important;
     box-shadow: var(--brand-shadow-md) !important;
 }

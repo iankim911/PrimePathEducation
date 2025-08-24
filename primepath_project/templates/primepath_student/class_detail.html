@@ -61,15 +61,15 @@
                 </tr>
             </thead>
             <tbody>
-                {% for exam in past_exams %}
+                {% for session in past_exams %}
                 <tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ exam.name }}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ exam.completed_at|date:"M j, Y" }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ session.exam.name }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ session.completed_at|date:"M j, Y" }}</td>
                     <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">
-                        <strong>{{ exam.score }}%</strong>
+                        <strong>{{ session.score|floatformat:0 }}%</strong>
                     </td>
                     <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">
-                        <a href="#" class="btn btn-primary" style="padding: 5px 10px; font-size: 14px;">View Results</a>
+                        <a href="{% url 'primepath_student:exam_result' session.id %}" class="btn btn-primary" style="padding: 5px 10px; font-size: 14px;">View Results</a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -94,9 +94,7 @@
 <script>
 function startExam(launchId) {
     if (confirm('Are you ready to start the exam? Once started, you must complete it in one sitting.')) {
-        // This will be implemented when we create the exam-taking interface
-        alert('Exam interface will be implemented in Phase 3');
-        // window.location.href = '/student/exam/start/' + launchId + '/';
+        window.location.href = '/student/exam/start/' + launchId + '/';
     }
 }
 </script>

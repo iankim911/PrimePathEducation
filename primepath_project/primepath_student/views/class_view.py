@@ -1,12 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from primepath_student.models import StudentProfile, StudentClassAssignment
-# ExamLaunchSession might not exist yet, using StudentSession for now
-try:
-    from primepath_routinetest.models.exam_management import ExamLaunchSession
-except ImportError:
-    from primepath_routinetest.models.session import StudentSession as ExamLaunchSession
+from primepath_student.models import StudentProfile, StudentClassAssignment, StudentExamSession
+from primepath_routinetest.models.exam_management import ExamLaunchSession
 from primepath_routinetest.models.class_constants import CLASS_CODE_CHOICES
 from django.utils import timezone
 
@@ -42,8 +38,12 @@ def class_detail(request, class_code):
         expires_at__gt=timezone.now()
     ).select_related('exam').order_by('-launched_at')
     
-    # Get past exam sessions for this student in this class (placeholder for now)
-    past_exams = []  # Will be populated when StudentExamSession model is created
+    # Get past exam sessions for this student in this class
+    past_exams = StudentExamSession.objects.filter(
+        student=student_profile,
+        class_assignment=assignment,
+        status__in=['completed', 'expired']
+    ).select_related('exam').order_by('-completed_at')[:5]  # Show last 5
     
     context = {
         'student': student_profile,

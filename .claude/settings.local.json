@@ -279,7 +279,8 @@
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite venv/bin/python primepath_project/test_dropdown_filter_fix.py)",
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite venv/bin/python primepath_project/test_kakao_url_fix.py)",
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite venv/bin/python primepath_project/debug_registration_urls.py)",
-      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite venv/bin/python primepath_project/test_kakao_fix_final.py)"
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite venv/bin/python primepath_project/test_kakao_fix_final.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/pip install pandas)"
     ],
     "deny": []
   }

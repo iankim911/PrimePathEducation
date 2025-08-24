@@ -140,6 +140,35 @@
         margin-top: 30px;
     }
     
+    .back-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateX(-2px);
+    }
+    
+    .back-button svg {
+        width: 16px;
+        height: 16px;
+    }
+    
     .btn-save {
         padding: 12px 24px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -203,6 +232,7 @@
         
         .profile-header {
             padding: 30px 20px;
+            padding-top: 60px; /* Space for back button */
         }
         
         .profile-body {
@@ -217,6 +247,11 @@
         .btn-cancel {
             width: 100%;
         }
+        
+        .back-button {
+            top: 10px;
+            left: 10px;
+        }
     }
 </style>
 {% endblock %}
@@ -224,6 +259,12 @@
 {% block content %}
 <div class="profile-container">
     <div class="profile-header">
+        <a href="javascript:history.back()" class="back-button">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+        </a>
         <div class="profile-avatar">
             {{ teacher.name|first|upper }}
         </div>

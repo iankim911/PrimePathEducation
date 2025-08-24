@@ -219,20 +219,7 @@
         outline-offset: 2px;
     }
     
-    /* Button Contrast Improvements */
-    .btn-edit {
-        background: #E8F5E9 !important;
-        color: #0D4F1F !important;
-        border: 2px solid #2E7D32 !important;
-        font-weight: 600;
-    }
-    
-    .btn-edit:hover {
-        background: #2E7D32 !important;
-        color: white !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
-    }
+    /* Button Contrast Improvements - Removed duplicate .btn-edit styles */
     
     /* Hierarchical Display */
     .program-section {
@@ -397,24 +384,24 @@
     }
     
     .exam-card.editable {
-        border-left: 4px solid #5B7FDE;
+        border-left: 4px solid #2E7D32;  /* Green for editable */
     }
     
-    /* Program-specific exam card borders */
+    /* Program-specific exam card borders - All Green Theme */
     .program-section[data-program="CORE"] .exam-card {
-        border-left: 3px solid #5EBEC4;
+        border-left: 3px solid #4CAF50;  /* Primary green */
     }
     
     .program-section[data-program="ASCENT"] .exam-card {
-        border-left: 3px solid #5B7FDE;
+        border-left: 3px solid #2E7D32;  /* Dark green */
     }
     
     .program-section[data-program="EDGE"] .exam-card {
-        border-left: 3px solid #8B5FDE;
+        border-left: 3px solid #388E3C;  /* Medium green */
     }
     
     .program-section[data-program="PINNACLE"] .exam-card {
-        border-left: 3px solid #B84A6B;
+        border-left: 3px solid #1B5E20;  /* Deep green */
     }
     
     .exam-title {
@@ -512,50 +499,63 @@
     
     .btn-view {
         background: #6c757d;
-        color: white;
+        color: white !important;  /* Ensure white text */
         border-color: #6c757d;
+        font-weight: 500;
     }
     
     .btn-view:hover {
         background: #5a6268;
         border-color: #545b62;
-        color: white;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
     }
     
     .btn-edit {
-        background: #007bff;
-        color: white;
-        border-color: #007bff;
+        background: #28a745;  /* Green for edit/create actions */
+        color: white !important;  /* Ensure white text */
+        border-color: #28a745;
+        font-weight: 500;
     }
     
     .btn-edit:hover {
-        background: #0056b3;
-        border-color: #004085;
-        color: white;
+        background: #218838;
+        border-color: #1e7e34;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
     }
     
     .btn-copy {
-        background: #17a2b8;
-        color: white;
-        border-color: #17a2b8;
+        background: #43A047;  /* Medium green for copy */
+        color: white !important;  /* Ensure white text */
+        border-color: #43A047;
+        font-weight: 500;
     }
     
     .btn-copy:hover {
-        background: #138496;
-        border-color: #117a8b;
+        background: #388E3C;
+        border-color: #2E7D32;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(67, 160, 71, 0.3);
     }
     
     /* Delete Button - Clean Red Styling */
     .btn-danger {
         background: #dc3545;
-        color: white;
+        color: white !important;  /* Ensure white text */
         border-color: #dc3545;
+        font-weight: 500;
     }
     
     .btn-danger:hover {
         background: #c82333;
         border-color: #bd2130;
-        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
     }
     
     .btn-danger:active {
@@ -1344,190 +1344,10 @@ window.closeCopyModal = function() {
 };
 
 console.log('[COPY_EXAM_CLEAN] Placeholder functions ready. Main script will load shortly...');
-        if (!modal) {
-            console.error('[COPY MODAL] CRITICAL: Modal element #copyExamModal not found in DOM');
-            console.log('Available modal IDs:', Array.from(document.querySelectorAll('[id*="modal"]')).map(el => el.id));
-            alert('Error: Copy modal not found. Please refresh the page and try again.');
-            console.groupEnd();
-            return false;
-        }
-        
-        console.log('[COPY MODAL] Modal element found successfully');
-        
-        // Find and update source exam elements
-        const sourceExamIdInput = document.getElementById('sourceExamId');
-        const sourceExamNameDisplay = document.getElementById('sourceExamName');
-        
-        if (!sourceExamIdInput) {
-            console.error('[COPY MODAL] sourceExamId input not found');
-        } else {
-            sourceExamIdInput.value = examId;
-            console.log('[COPY MODAL] Set source exam ID:', examId);
-        }
-        
-        if (!sourceExamNameDisplay) {
-            console.error('[COPY MODAL] sourceExamName display element not found');
-        } else {
-            sourceExamNameDisplay.textContent = examName || 'Unknown Exam';
-            console.log('[COPY MODAL] Set source exam name:', examName);
-        }
-        
-        // Reset the form
-        const copyForm = document.getElementById('copyExamForm');
-        if (copyForm) {
-            copyForm.reset();
-            // Re-set the exam ID after reset
-            if (sourceExamIdInput) {
-                sourceExamIdInput.value = examId;
-            }
-            console.log('[COPY MODAL] Form reset completed');
-        } else {
-            console.warn('[COPY MODAL] Copy form not found for reset');
-        }
-        
-        // Reset timeslot dropdown
-        const timeslotSelect = document.getElementById('timeslot');
-        if (timeslotSelect) {
-            timeslotSelect.innerHTML = '<option value="">First select exam type...</option>';
-            timeslotSelect.disabled = true;
-            console.log('[COPY MODAL] Timeslot dropdown reset');
-        }
-        
-        // Show the modal
-        modal.style.display = 'block';
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
-        
-        // Set up close handlers
-        modal.onclick = function(e) {
-            if (e.target === modal) {
-                console.log('[COPY MODAL] Background clicked - closing modal');
-                window.closeCopyModal();
-            }
-        };
-        
-        // ENHANCED v4.0: Robust curriculum data initialization and dropdown population
-        console.log('%c[COPY MODAL] Initializing curriculum dropdown with enhanced v4.0 logic...', 'color: #0066cc; font-weight: bold;');
-        
-        // Enhanced data availability check with multiple fallbacks
-        const initializeCurriculumDropdown = async (attempt = 1, maxAttempts = 15) => {
-            console.log(`%c[COPY MODAL] Curriculum initialization attempt ${attempt}/${maxAttempts}`, 'color: #666;');
-            
-            // Check for initialization error state
-            if (window.CopyCurriculumDataError) {
-                console.error('[COPY MODAL] ❌ Curriculum data failed to initialize:', window.CopyCurriculumDataError);
-                // Try fallback initialization
-                if (attempt <= 3) {
-                    console.log('[COPY MODAL] Attempting fallback data construction...');
-                    await tryFallbackCurriculumInitialization();
-                    setTimeout(() => initializeCurriculumDropdown(attempt + 1, maxAttempts), 200);
-                    return;
-                } else {
-                    showCurriculumDataError();
-                    return;
-                }
-            }
-            
-            // Check for successful initialization
-            if (window.CopyCurriculumData && window.CopyCurriculumDataReady && window.CopyCurriculumDataInitialized) {
-                console.log('%c[COPY MODAL] ✅ Curriculum data validated and ready!', 'color: #00aa00; font-weight: bold;');
-                console.log('[COPY MODAL] Available programs:', Object.keys(window.CopyCurriculumData));
-                console.log('[COPY MODAL] Data metadata:', window.CopyCurriculumMetadata);
-                
-                // Verify function exists
-                if (typeof populateCopyProgramDropdown !== 'function') {
-                    console.error('[COPY MODAL] ❌ populateCopyProgramDropdown function not found!');
-                    return;
-                }
-                
-                // Populate dropdown with enhanced error handling
-                try {
-                    console.log('[COPY MODAL] Executing populateCopyProgramDropdown()...');
-                    const result = populateCopyProgramDropdown();
-                    console.log('[COPY MODAL] Population function result:', result);
-                    
-                    // Verify population success with multiple checks
-                    setTimeout(() => {
-                        const dropdown = document.getElementById('copyProgramSelect');
-                        const expectedPrograms = ['CORE', 'EDGE', 'ASCENT', 'PINNACLE'];
-                        
-                        if (!dropdown) {
-                            console.error('[COPY MODAL] ❌ Dropdown element not found!');
-                            return;
-                        }
-                        
-                        const optionCount = dropdown.options.length;
-                        const hasPrograms = optionCount > 1; // More than just placeholder
-                        
-                        console.log('[COPY MODAL] Dropdown verification:');
-                        console.log(`  - Element found: ✅`);
-                        console.log(`  - Total options: ${optionCount}`);
-                        console.log(`  - Has programs: ${hasPrograms ? '✅' : '❌'}`);
-                        
-                        if (hasPrograms) {
-                            const programOptions = Array.from(dropdown.options).slice(1).map(opt => opt.textContent);
-                            console.log(`  - Program options: ${programOptions.join(', ')}`);
-                            
-                            const allProgramsPresent = expectedPrograms.every(prog => programOptions.includes(prog));
-                            console.log(`  - All expected programs present: ${allProgramsPresent ? '✅' : '❌'}`);
-                            
-                            if (allProgramsPresent) {
-                                console.log('%c[COPY MODAL] 🎉🎉🎉 DROPDOWN POPULATION SUCCESSFUL!', 'color: #00aa00; font-size: 14px; font-weight: bold;');
-                            } else {
-                                console.warn('[COPY MODAL] ⚠️ Not all expected programs found in dropdown');
-                            }
-                        } else {
-                            console.error('[COPY MODAL] ❌ Dropdown population failed - still showing only placeholder');
-                            // Run diagnostic
-                            runCurriculumDiagnostic();
-                        }
-                    }, 100);
-                    
-                } catch (populationError) {
-                    console.error('[COPY MODAL] ❌ Error during dropdown population:', populationError);
-                    console.error('Stack trace:', populationError.stack);
-                }
-                
-                return; // Success path complete
-            }
-            
-            // Not ready yet - continue trying
-            if (attempt < maxAttempts) {
-                const delay = Math.min(100 + (attempt * 50), 500); // Progressive delay
-                console.log(`[COPY MODAL] ⏳ Data not ready, retrying in ${delay}ms...`);
-                console.log(`[COPY MODAL] Current state: Data=${!!window.CopyCurriculumData}, Ready=${window.CopyCurriculumDataReady}, Init=${window.CopyCurriculumDataInitialized}`);
-                setTimeout(() => initializeCurriculumDropdown(attempt + 1, maxAttempts), delay);
-            } else {
-                console.error('%c[COPY MODAL] ❌❌❌ CURRICULUM DATA TIMEOUT', 'color: #ff0000; font-size: 14px; font-weight: bold;');
-                console.error('[COPY MODAL] Final state after timeout:');
-                console.error('  - CopyCurriculumData:', !!window.CopyCurriculumData);
-                console.error('  - CopyCurriculumDataReady:', window.CopyCurriculumDataReady);
-                console.error('  - CopyCurriculumDataInitialized:', window.CopyCurriculumDataInitialized);
-                console.error('  - CopyCurriculumDataError:', window.CopyCurriculumDataError);
-                
-                runCurriculumDiagnostic();
-            }
-        };
-        
-        // Start initialization
-        initializeCurriculumDropdown();
-        
-        const executionTime = performance.now() - startTime;
-        console.log(`[COPY MODAL] Modal opened successfully in ${executionTime.toFixed(2)}ms`);
-        console.log('[COPY MODAL] Modal display:', window.getComputedStyle(modal).display);
-        console.log('[COPY MODAL] Modal visibility:', window.getComputedStyle(modal).visibility);
-        console.groupEnd();
-        
-        return true;
-        
-    } catch (error) {
-        console.error('[COPY MODAL] CRITICAL ERROR:', error);
-        console.error('Stack trace:', error.stack);
-        alert('An error occurred while opening the copy modal. Please try again.');
-        console.groupEnd();
-        return false;
-    }
-};
+</script>
+
+<script>
+// Main copy exam functionality script
 
 // ============================================================================
 // CLOSE MODAL FUNCTION - Internal implementation
@@ -1582,6 +1402,13 @@ console.log('  - openCopyModal (alias):', typeof openCopyModal);
 console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
 
 // Tab switching handlers - Clear all filters when switching tabs
+// Function to update filter badges (if needed)
+function updateFilterBadges() {
+    console.log('[FILTER_BADGES] Updating filter badges...');
+    // This function can be implemented later if badge updates are needed
+    // For now, it prevents the "undefined function" error
+}
+
 function handleOwnershipTabSwitch(ownership, examType) {
     console.log('[TAB_SWITCH] Switching ownership tab to:', ownership);
     console.log('[TAB_SWITCH] Exam type:', examType);
@@ -2382,7 +2209,11 @@ function initializeCopyExamEventListeners() {
         return;
     }
     
-    copyExamTypeSelect.addEventListener('change', function() {
+    // Remove any existing event listeners to prevent duplicates
+    const newCopyExamTypeSelect = copyExamTypeSelect.cloneNode(true);
+    copyExamTypeSelect.parentNode.replaceChild(newCopyExamTypeSelect, copyExamTypeSelect);
+    
+    newCopyExamTypeSelect.addEventListener('change', function() {
         console.log('[COPY_MODAL] Exam type changed to:', this.value);
         
         const timeslotSelect = document.getElementById('timeslot');
@@ -2425,6 +2256,9 @@ function initializeCopyExamEventListeners() {
             console.log('[COPY_MODAL] Setting up quarterly timeslots...');
             // Enable the select
             timeslotSelect.disabled = false;
+            timeslotSelect.style.color = '#333';
+            timeslotSelect.style.backgroundColor = '#fff';
+            console.log('[COPY_MODAL] Quarterly dropdown enabled, disabled state:', timeslotSelect.disabled);
             
             // Quarterly timeslots
             ['Q1', 'Q2', 'Q3', 'Q4'].forEach(quarter => {
@@ -2466,6 +2300,75 @@ function initializeCopyExamEventListeners() {
     
     console.log('Copy exam event listeners initialized successfully');
 }
+
+// Debug function to fix the timeslot dropdown manually
+function fixTimeslotDropdown() {
+    console.log('[DEBUG] Attempting to fix timeslot dropdown...');
+    
+    const examTypeSelect = document.getElementById('copyExamType');
+    const timeslotSelect = document.getElementById('timeslot');
+    
+    if (!examTypeSelect || !timeslotSelect) {
+        console.error('[DEBUG] Required elements not found');
+        return false;
+    }
+    
+    console.log('[DEBUG] Current exam type:', examTypeSelect.value);
+    console.log('[DEBUG] Current timeslot disabled state:', timeslotSelect.disabled);
+    
+    if (examTypeSelect.value === 'QUARTERLY') {
+        console.log('[DEBUG] Forcing quarterly dropdown to be enabled...');
+        
+        timeslotSelect.disabled = false;
+        timeslotSelect.style.color = '#333';
+        timeslotSelect.style.backgroundColor = '#fff';
+        timeslotSelect.style.cursor = 'pointer';
+        
+        // Clear and repopulate options
+        timeslotSelect.innerHTML = '<option value="">Select time period...</option>';
+        ['Q1', 'Q2', 'Q3', 'Q4'].forEach(quarter => {
+            const option = document.createElement('option');
+            option.value = quarter;
+            option.textContent = quarter;
+            timeslotSelect.appendChild(option);
+        });
+        
+        console.log('[DEBUG] Timeslot dropdown fixed. New disabled state:', timeslotSelect.disabled);
+        return true;
+    } else if (examTypeSelect.value === 'REVIEW') {
+        console.log('[DEBUG] Forcing monthly dropdown to be enabled...');
+        
+        timeslotSelect.disabled = false;
+        timeslotSelect.style.color = '#333';
+        timeslotSelect.style.backgroundColor = '#fff';
+        timeslotSelect.style.cursor = 'pointer';
+        
+        // Clear and repopulate options
+        timeslotSelect.innerHTML = '<option value="">Select time period...</option>';
+        const months = [
+            {value: 'JAN', text: 'January'}, {value: 'FEB', text: 'February'}, {value: 'MAR', text: 'March'},
+            {value: 'APR', text: 'April'}, {value: 'MAY', text: 'May'}, {value: 'JUN', text: 'June'},
+            {value: 'JUL', text: 'July'}, {value: 'AUG', text: 'August'}, {value: 'SEP', text: 'September'},
+            {value: 'OCT', text: 'October'}, {value: 'NOV', text: 'November'}, {value: 'DEC', text: 'December'}
+        ];
+        
+        months.forEach(month => {
+            const option = document.createElement('option');
+            option.value = month.value;
+            option.textContent = month.text;
+            timeslotSelect.appendChild(option);
+        });
+        
+        console.log('[DEBUG] Timeslot dropdown fixed. New disabled state:', timeslotSelect.disabled);
+        return true;
+    }
+    
+    console.log('[DEBUG] No exam type selected, no fix needed');
+    return false;
+}
+
+// Make the debug function globally available
+window.fixTimeslotDropdown = fixTimeslotDropdown;
 
 // ============================================================================
 // CURRICULUM CASCADING FUNCTIONALITY FOR COPY MODAL

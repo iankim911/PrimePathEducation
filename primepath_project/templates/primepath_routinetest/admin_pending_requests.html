@@ -1,4 +1,4 @@
-{% extends "primepath_routinetest/base.html" %}
+{% extends "routinetest_base.html" %}
 {% load static %}
 
 {% block title %}Pending Class Access Requests - RoutineTest Admin{% endblock %}
@@ -102,16 +102,16 @@
                 <div class="request-actions" style="display: flex; gap: 12px; justify-content: flex-end;">
                     <button onclick="denyRequest('{{ request.id }}')" 
                             class="btn-deny" 
-                            style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s;"
-                            onmouseover="this.style.background='#c0392b';" 
-                            onmouseout="this.style.background='#e74c3c';">
+                            style="background: #dc3545 !important; color: #FFFFFF !important; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: inline-block;"
+                            onmouseover="this.style.background='#c82333'" 
+                            onmouseout="this.style.background='#dc3545'">
                         Deny Request
                     </button>
                     <button onclick="approveRequest('{{ request.id }}')" 
                             class="btn-approve" 
-                            style="background: #27ae60; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s;"
-                            onmouseover="this.style.background='#229954';" 
-                            onmouseout="this.style.background='#27ae60';">
+                            style="background: #28a745 !important; color: #FFFFFF !important; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: inline-block;"
+                            onmouseover="this.style.background='#218838'" 
+                            onmouseout="this.style.background='#28a745'">
                         Approve Request
                     </button>
                 </div>

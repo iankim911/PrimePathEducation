@@ -26,14 +26,12 @@
             </li>
             <!-- NO SEPARATE MY CLASSES TAB -->
             <!-- NO SEPARATE EXAM ASSIGNMENTS TAB -->
-            
-            <li><a href="/RoutineTest/sessions/" data-nav="results">Results & Analytics</a></li>
         </div>
         
         <div style="display: flex; margin-left: auto;">
             {% if user.is_authenticated %}
                 <li><a href="#">👤 {{ user.username }}</a></li>
-                <li><a href="/logout/" style="background: #e74c3c;">Logout</a></li>
+                <li><a href="/logout/" style="background: #e74c3c; color: white !important;">Logout</a></li>
             {% else %}
                 <li><a href="/PlacementTest/teacher/login/">Login</a></li>
             {% endif %}

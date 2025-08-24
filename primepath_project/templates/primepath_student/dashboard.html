@@ -4,8 +4,18 @@
 
 {% block content %}
 <div class="card">
-    <h2>My Classes</h2>
-    <p style="color: #666; margin-bottom: 20px;">You are enrolled in {{ total_classes }} class{{ total_classes|pluralize:"es" }}</p>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2>My Classes</h2>
+            <p style="color: #666; margin-bottom: 0;">You are enrolled in {{ total_classes }} class{{ total_classes|pluralize:"es" }}</p>
+        </div>
+        <div>
+            <a href="{% url 'primepath_student:exam_history' %}" class="btn" 
+               style="background-color: #1976D2; color: white; padding: 10px 20px;">
+                📊 View Exam History
+            </a>
+        </div>
+    </div>
 </div>
 
 {% if classes %}

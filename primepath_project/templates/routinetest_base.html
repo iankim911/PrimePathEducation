@@ -18,6 +18,9 @@
     <!-- PrimePath Brand Design System -->
     <link rel="stylesheet" href="{% static 'css/primepath_brand.css' %}">
     
+    <!-- Unified Design System - UI Harmonization -->
+    <link rel="stylesheet" href="{% static 'css/unified-design-system.css' %}?v=2.0">
+    
     
     <!-- Console Debugging for RoutineTest -->
     <script>
@@ -61,15 +64,15 @@
             position: relative; /* For mode toggle positioning */
         }
         
-        /* Navigation Tabs - BCG Forest Green Theme */
+        /* Navigation Tabs - Using Unified Design System */
         .nav-tabs {
-            background-color: #0D4F1F;  /* Very dark, muted green */
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
             padding: 0;
             margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-md);
             overflow-x: auto;  /* Allow horizontal scroll for many tabs */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
-            border-bottom: 2px solid #2E7D32;  /* Visual separation */
+            border-bottom: 2px solid var(--primary-green-border);  /* Visual separation */
         }
         
         /* Custom scrollbar for nav tabs */
@@ -161,14 +164,27 @@
             vertical-align: middle;
         }
         
-        /* Logout Button - Red */
-        #logout-link {
+        /* Logout Button - Red with WHITE text */
+        #logout-link,
+        a[href="/logout/"],
+        a[href*="logout"],
+        .nav-tabs a[href="/logout/"],
+        .nav-tabs a[style*="background: #e74c3c"] {
             background-color: #e74c3c !important;
             color: white !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
         }
         
-        #logout-link:hover {
+        #logout-link:hover,
+        a[href="/logout/"]:hover,
+        a[href*="logout"]:hover,
+        .nav-tabs a[href="/logout/"]:hover,
+        .nav-tabs a[style*="background: #e74c3c"]:hover {
             background-color: #c0392b !important;
+            color: white !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
         }
         
         /* Container - Full width for navigation */

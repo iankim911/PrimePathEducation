@@ -20,7 +20,7 @@ from .exam_schedule_matrix import ExamScheduleMatrix  # Class × Timeslot Matrix
 from .exam_abstraction import ExamAbstraction  # Unified exam interface
 from .curriculum_mapping import ClassCurriculumMapping  # Admin curriculum mapping
 from .class_model import Class, StudentEnrollment  # BUILDER: Day 2 - Class management
-from .exam_management import RoutineExam, ExamAssignment, StudentExamAssignment, ExamAttempt  # BUILDER: Day 4 - Exam management
+from .exam_management import RoutineExam, ExamAssignment, StudentExamAssignment, ExamAttempt, ExamLaunchSession  # BUILDER: Day 4 - Exam management
 
 # Re-export all models for backward compatibility
 __all__ = [
@@ -43,4 +43,5 @@ __all__ = [
     'ExamAssignment',  # BUILDER: Day 4
     'StudentExamAssignment',  # BUILDER: Day 4
     'ExamAttempt',  # BUILDER: Day 4
+    'ExamLaunchSession',  # Exam launch bridge for student access
 ]

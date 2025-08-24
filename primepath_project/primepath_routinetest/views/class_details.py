@@ -20,7 +20,7 @@ from core.models import Teacher, Student
 from primepath_routinetest.models import (
     Class, StudentEnrollment, RoutineExam, 
     ExamScheduleMatrix, StudentSession,
-    TeacherClassAssignment
+    TeacherClassAssignment, ExamLaunchSession
 )
 from primepath_routinetest.services import ExamService
 
@@ -458,9 +458,38 @@ def start_exam_for_class(request, class_code):
         if not enrollments.exists():
             return JsonResponse({'success': False, 'error': 'No students selected for exam'}, status=400)
         
+        # Create ExamLaunchSession for student portal access
+        launch_session = ExamLaunchSession.objects.create(
+            exam=exam,
+            class_code=class_code,
+            launched_by=request.user,
+            duration_minutes=custom_duration or getattr(exam, 'timer_minutes', 60),
+            expires_at=timezone.now() + timedelta(hours=24),  # 24 hour expiry
+            selected_student_ids=[str(sid) for sid in selected_student_ids] if selected_student_ids else [],
+            metadata={
+                'schedule_id': str(schedule_id) if schedule_id else None,
+                'launched_from': 'teacher_interface',
+                'original_duration': getattr(exam, 'timer_minutes', 60)
+            }
+        )
+        
+        logger.info(f"[EXAM_LAUNCH] Created ExamLaunchSession {launch_session.id} for class {class_code}")
+        
+        # Send notifications to students
+        try:
+            from primepath_student.services import NotificationService
+            notifications = NotificationService.notify_exam_launch(launch_session, selected_student_ids)
+            NotificationService.schedule_exam_reminders(launch_session)
+            logger.info(f"[EXAM_LAUNCH] Sent notifications to students")
+        except Exception as e:
+            logger.warning(f"[EXAM_LAUNCH] Could not send notifications: {e}")
+        
         # Create exam sessions for selected students
         sessions_created = []
         sessions_updated = []
+        
+        # Also create StudentExamSession records for the new student portal
+        from primepath_student.models import StudentProfile, StudentClassAssignment, StudentExamSession
         
         with transaction.atomic():
             for enrollment in enrollments:
@@ -509,6 +538,44 @@ def start_exam_for_class(request, class_code):
                         'session_id': str(session.id),
                         'duration': custom_duration or exam.timer_minutes
                     })
+                
+                # Also create/update StudentExamSession for new student portal if student has profile
+                try:
+                    # Try to find student profile by phone number (from parent_phone)
+                    if enrollment.student.parent_phone:
+                        student_profile = StudentProfile.objects.filter(
+                            phone_number=enrollment.student.parent_phone
+                        ).first()
+                        
+                        if student_profile:
+                            # Check if student is assigned to this class
+                            class_assignment = StudentClassAssignment.objects.filter(
+                                student=student_profile,
+                                class_code=class_code,
+                                is_active=True
+                            ).first()
+                            
+                            if class_assignment:
+                                # Create or get StudentExamSession
+                                student_exam_session, created = StudentExamSession.get_or_create_session(
+                                    student=student_profile,
+                                    exam=exam,
+                                    class_assignment=class_assignment
+                                )
+                                
+                                if created:
+                                    logger.info(f"[STUDENT_PORTAL] Created StudentExamSession for {student_profile.name}")
+                                else:
+                                    # Reset if restarting
+                                    student_exam_session.status = 'not_started'
+                                    student_exam_session.started_at = None
+                                    student_exam_session.completed_at = None
+                                    student_exam_session.save()
+                                    logger.info(f"[STUDENT_PORTAL] Reset StudentExamSession for {student_profile.name}")
+                except Exception as e:
+                    logger.warning(f"[STUDENT_PORTAL] Could not create StudentExamSession: {e}")
+                    # Don't fail the whole launch if student portal integration fails
+                    pass
             
             # Update schedule status
             if schedule_id:
@@ -537,7 +604,9 @@ def start_exam_for_class(request, class_code):
             'sessions_updated': sessions_updated,
             'total_students': total_sessions,
             'custom_duration': custom_duration,
-            'exam_name': exam.name
+            'exam_name': exam.name,
+            'launch_session_id': str(launch_session.id),
+            'student_portal_accessible': True
         })
         
     except RoutineExam.DoesNotExist:

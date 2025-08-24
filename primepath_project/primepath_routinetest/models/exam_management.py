@@ -61,6 +61,8 @@ class RoutineExam(models.Model):
     # Content
     pdf_file = models.FileField(upload_to='routine_exams/', null=True, blank=True)
     answer_key = models.JSONField(default=dict, blank=True)
+    duration = models.IntegerField(default=60, help_text="Exam duration in minutes")
+    instructions = models.TextField(blank=True, help_text="Exam instructions for students")
     
     # Metadata
     version = models.IntegerField(default=1)
@@ -339,3 +341,117 @@ class ExamAttempt(models.Model):
             'timestamp': timezone.now().isoformat()
         })
         self.save()
+
+
+class ExamLaunchSession(models.Model):
+    """
+    Represents an exam launch by a teacher for a specific class.
+    Students can access the exam through this launch session.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Exam being launched
+    exam = models.ForeignKey(
+        RoutineExam,
+        on_delete=models.CASCADE,
+        related_name='launch_sessions'
+    )
+    
+    # Class this exam is launched for
+    class_code = models.CharField(
+        max_length=10,
+        help_text="Class code this exam is launched for"
+    )
+    
+    # Launch metadata
+    launched_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='exam_launches'
+    )
+    launched_at = models.DateTimeField(default=timezone.now)
+    
+    # Duration and expiry
+    duration_minutes = models.IntegerField(
+        help_text="Custom duration for this launch (overrides exam default)"
+    )
+    expires_at = models.DateTimeField(
+        help_text="When this exam launch expires and is no longer accessible"
+    )
+    
+    # Launch configuration
+    selected_student_ids = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="List of student IDs allowed to take this exam. Empty = all students"
+    )
+    
+    # Status
+    is_active = models.BooleanField(default=True)
+    
+    # Additional metadata
+    metadata = models.JSONField(default=dict, blank=True)
+    
+    class Meta:
+        db_table = 'routinetest_exam_launch_session'
+        ordering = ['-launched_at']
+        indexes = [
+            models.Index(fields=['class_code', 'is_active']),
+            models.Index(fields=['expires_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.exam.name} - {self.class_code} ({self.launched_at.date()})"
+    
+    def save(self, *args, **kwargs):
+        """Auto-calculate expiry if not set"""
+        from datetime import timedelta
+        
+        if not self.expires_at:
+            # Set expiry to 24 hours from launch by default
+            self.expires_at = self.launched_at + timedelta(hours=24)
+        
+        # If duration not set, use exam's default (60 minutes)
+        if not self.duration_minutes and self.exam:
+            self.duration_minutes = getattr(self.exam, 'timer_minutes', 60)
+        
+        super().save(*args, **kwargs)
+    
+    def is_expired(self):
+        """Check if this launch session has expired"""
+        return timezone.now() > self.expires_at
+    
+    def can_student_access(self, student_id):
+        """Check if a specific student can access this exam"""
+        if not self.is_active or self.is_expired():
+            return False
+        
+        # If no specific students selected, all can access
+        if not self.selected_student_ids:
+            return True
+        
+        # Check if student is in the selected list
+        return str(student_id) in [str(sid) for sid in self.selected_student_ids]
+    
+    def get_remaining_time(self):
+        """Get remaining time before expiry"""
+        from datetime import timedelta
+        
+        if self.is_expired():
+            return timedelta(0)
+        return self.expires_at - timezone.now()
+    
+    def deactivate(self):
+        """Deactivate this launch session"""
+        self.is_active = False
+        self.save()
+    
+    @classmethod
+    def get_active_for_class(cls, class_code):
+        """Get all active launch sessions for a class"""
+        return cls.objects.filter(
+            class_code=class_code,
+            is_active=True,
+            expires_at__gt=timezone.now()
+        )

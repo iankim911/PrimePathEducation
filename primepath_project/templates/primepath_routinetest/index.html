@@ -171,10 +171,10 @@
     console.groupEnd();
 </script>
 
-<!-- Welcome Section -->
-<div style="background: linear-gradient(135deg, #F1F8E9 0%, #E0E7DA 100%); border-left: 4px solid #2E7D32; padding: 25px; border-radius: 8px; margin-bottom: 30px;">
-    <h2 style="color: #1B5E20; margin-bottom: 10px;">Welcome to RoutineTest Dashboard</h2>
-    <p style="color: #263238; font-size: 1.1rem;">Comprehensive exam management system for organizing and tracking assessments</p>
+<!-- Welcome Section with Unified Design -->
+<div class="unified-welcome-card">
+    <h2>Welcome to RoutineTest Dashboard</h2>
+    <p>Comprehensive exam management system for organizing and tracking assessments</p>
 </div>
 
 <!-- Quick Actions with Better Accessibility -->
@@ -260,24 +260,28 @@
 }
 </style>
 
-<div style="margin-bottom: 30px;">
-    <h3 style="color: #263238; margin-bottom: 20px; font-size: 1.4rem; font-weight: 600;">Quick Actions</h3>
-    <div class="quick-actions-grid" id="quick-actions-container">
-        <a href="{% url 'RoutineTest:create_exam' %}" class="quick-action-btn upload" onclick="console.log('[RoutineTest] Quick action: Upload Exam')">
-            <i class="fas fa-upload"></i> Upload New Exam
+<div class="mb-lg">
+    <h3 class="unified-page-title">Quick Actions</h3>
+    <div class="unified-quick-actions" id="quick-actions-container">
+        <a href="{% url 'RoutineTest:create_exam' %}" class="unified-quick-action-btn" onclick="console.log('[RoutineTest] Quick action: Upload Exam')">
+            <i class="fas fa-upload"></i>
+            <span>Upload New Exam</span>
         </a>
-        <a href="{% url 'RoutineTest:exam_list' %}" class="quick-action-btn library" onclick="console.log('[RoutineTest] Quick action: Exam Library')">
-            <i class="fas fa-book"></i> Exam Library
+        <a href="{% url 'RoutineTest:exam_list' %}" class="unified-quick-action-btn" onclick="console.log('[RoutineTest] Quick action: Exam Library')">
+            <i class="fas fa-book"></i>
+            <span>Exam Library</span>
         </a>
-        <a href="{% url 'RoutineTest:start_test' %}" class="quick-action-btn test" onclick="console.log('[RoutineTest] Quick action: Start Test')">
-            <i class="fas fa-play"></i> Start Test Session
+        <a href="{% url 'RoutineTest:start_test' %}" class="unified-quick-action-btn" onclick="console.log('[RoutineTest] Quick action: Start Test')">
+            <i class="fas fa-play"></i>
+            <span>Start Test Session</span>
         </a>
         {% if user.is_authenticated %}
         <a href="{% url 'RoutineTest:my_classes' %}" 
-           class="quick-action-btn classes" 
+           class="unified-quick-action-btn" 
            id="my-classes-btn"
            onclick="console.log('[RoutineTest] Quick action: My Classes & Access clicked')">
-            <i class="fas fa-users-cog"></i> My Classes & Access
+            <i class="fas fa-users-cog"></i>
+            <span>My Classes & Access</span>
         </a>
         {% endif %}
     </div>
@@ -351,47 +355,31 @@ window.addEventListener('load', function() {
 });
 </script>
 
-<!-- Statistics Cards -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+<!-- Statistics Cards with Unified Design -->
+<div class="unified-stats-grid">
     <!-- Active Exams Card -->
-    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
-         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
-         onclick="console.log('[RoutineTest] Stat card clicked: Active Exams')">
-        <h3 style="color: #388E3C; font-size: 3rem; margin: 0;">{{ active_exams }}</h3>
-        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Active Exams</p>
-        <div style="width: 50px; height: 3px; background: #388E3C; margin: 10px auto 0;"></div>
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Active Exams')">
+        <div class="unified-stat-number">{{ active_exams }}</div>
+        <div class="unified-stat-label">Active Exams</div>
     </div>
     
     <!-- Total Sessions Card -->
-    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
-         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
-         onclick="console.log('[RoutineTest] Stat card clicked: Total Sessions')">
-        <h3 style="color: #2E7D32; font-size: 3rem; margin: 0;">{{ total_sessions }}</h3>
-        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Total Sessions</p>
-        <div style="width: 50px; height: 3px; background: #2E7D32; margin: 10px auto 0;"></div>
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Total Sessions')">
+        <div class="unified-stat-number">{{ total_sessions }}</div>
+        <div class="unified-stat-label">Total Sessions</div>
     </div>
     
     <!-- Recent Tests Card -->
-    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
-         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
-         onclick="console.log('[RoutineTest] Stat card clicked: Recent Tests')">
-        <h3 style="color: #66BB6A; font-size: 3rem; margin: 0;">{{ recent_sessions|length }}</h3>
-        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Recent Tests</p>
-        <div style="width: 50px; height: 3px; background: #66BB6A; margin: 10px auto 0;"></div>
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Recent Tests')">
+        <div class="unified-stat-number">{{ recent_sessions|length }}</div>
+        <div class="unified-stat-label">Recent Tests</div>
     </div>
     
     <!-- Pending Grading Card (if teacher) -->
     {% if is_teacher %}
-    <div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; padding: 20px; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-         onmouseover="this.style.boxShadow='0 4px 8px rgba(0,166,94,0.2)'; this.style.transform='translateY(-2px)';"
-         onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';"
-         onclick="console.log('[RoutineTest] Stat card clicked: Pending Grading')">
-        <h3 style="color: #FF9800; font-size: 3rem; margin: 0;">{{ pending_sessions|default:0 }}</h3>
-        <p style="color: #6c757d; font-size: 1.1rem; margin-top: 10px;">Pending Grading</p>
-        <div style="width: 50px; height: 3px; background: #FF9800; margin: 10px auto 0;"></div>
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Pending Grading')">
+        <div class="unified-stat-number" style="color: var(--accent-orange);">{{ pending_sessions|default:0 }}</div>
+        <div class="unified-stat-label">Pending Grading</div>
     </div>
     {% endif %}
 </div>

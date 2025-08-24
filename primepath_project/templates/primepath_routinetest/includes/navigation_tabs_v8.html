@@ -40,15 +40,6 @@
                 </a>
             </li>
             
-            <!-- Results & Analytics -->
-            <li>
-                <a href="{% url 'RoutineTest:session_list' %}" 
-                   data-nav="results"
-                   class="{% if request.resolver_match.url_name == 'session_list' %}active{% endif %}">
-                   Results & Analytics
-                </a>
-            </li>
-            
             <!-- Admin Only: Curriculum Mapping - Only show in Admin mode -->
             {% if request.session.view_mode == 'Admin' and user.is_staff %}
             <li id="curriculum-mapping-tab">
@@ -56,7 +47,7 @@
                    data-nav="curriculum"
                    style="background: linear-gradient(135deg, #FF6B00 0%, #FF9800 100%); position: relative;"
                    class="{% if request.resolver_match.url_name == 'curriculum_mapping' %}active{% endif %}">
-                   🎯 Curriculum Mapping
+                   <span class="nav-icon">🎯</span> Curriculum Mapping
                    <span style="position: absolute; top: 2px; right: 5px; background: #FFD700; color: #1B5E20; font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: bold;">ADMIN</span>
                 </a>
             </li>
@@ -67,7 +58,7 @@
                    data-nav="assessment"
                    style="background: linear-gradient(135deg, #FF6B00 0%, #FF9800 100%); position: relative;"
                    class="{% if request.resolver_match.url_name == 'teacher_assessment' %}active{% endif %}">
-                   👥 Teacher Assessment
+                   <span class="nav-icon">👥</span> Teacher Assessment
                    <span style="position: absolute; top: 2px; right: 5px; background: #FFD700; color: #1B5E20; font-size: 9px; padding: 1px 4px; border-radius: 3px; font-weight: bold;">ADMIN</span>
                 </a>
             </li>
@@ -77,8 +68,8 @@
         <!-- User Section -->
         <div style="display: flex; margin-left: auto;">
             {% if user.is_authenticated %}
-                <li><a href="#" class="profile-link">👤 {{ user.username }}</a></li>
-                <li><a href="/logout/" style="background: #e74c3c;">Logout</a></li>
+                <li><a href="#" class="profile-link"><span class="nav-icon">👤</span> {{ user.username }}</a></li>
+                <li><a href="/logout/" style="background: #e74c3c; color: white !important;">Logout</a></li>
             {% else %}
                 <li><a href="/PlacementTest/teacher/login/">Login</a></li>
             {% endif %}
@@ -275,6 +266,16 @@
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+}
+
+/* Navigation Icon Styling - Ensures emojis display properly */
+.nav-icon {
+    display: inline-block;
+    font-size: 1.1em;
+    margin-right: 6px;
+    vertical-align: middle;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "NotoColorEmoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols" !important;
+    line-height: 1;
 }
 
 /* Hide any old tabs if they somehow appear */

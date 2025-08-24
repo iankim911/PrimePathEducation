@@ -698,20 +698,18 @@ class ExamService:
             
             # CRITICAL: Check ownership FIRST - owners have FULL access regardless
             is_owner = False
-            if exam.created_by and hasattr(user, 'teacher_profile'):
+            if exam.created_by:
                 try:
-                    is_owner = exam.created_by.id == user.teacher_profile.id
+                    # FIXED: Compare created_by (User) with user (User) directly
+                    is_owner = exam.created_by.id == user.id
                     if is_owner:
                         logger.info(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} OWNS exam {exam.name} - FULL ACCESS")
                     else:
-                        logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} does not own exam {exam.name} (created_by={exam.created_by.id}, teacher={user.teacher_profile.id})")
+                        logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} does not own exam {exam.name} (created_by={exam.created_by.id}, user={user.id})")
                 except Exception as e:
                     logger.warning(f"[EXAM_PERMISSION_OWNERSHIP] Error checking ownership for exam {exam.name}: {e}")
             else:
-                if not exam.created_by:
-                    logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] Exam {exam.name} has no created_by field")
-                if not hasattr(user, 'teacher_profile'):
-                    logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} has no teacher_profile")
+                logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] Exam {exam.name} has no created_by field")
             
             # CRITICAL FIX: Apply proper filtering based on ownership mode
             if effective_filter_assigned and not is_admin:

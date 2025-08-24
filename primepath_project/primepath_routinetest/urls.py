@@ -29,6 +29,7 @@ from .class_code_urls import urlpatterns as class_code_patterns  # Class Code Ma
 from .class_urls import urlpatterns as class_patterns  # BUILDER: Day 2 - Class Management
 from .exam_management_urls import urlpatterns as exam_mgmt_patterns  # BUILDER: Day 4 - Exam Management
 from .student_management_urls import urlpatterns as student_mgmt_patterns  # Phase 2 - Student Management
+from .analytics_urls import urlpatterns as analytics_patterns  # Analytics and Reporting
 from .views import index
 
 app_name = 'RoutineTest'
@@ -56,6 +57,7 @@ urlpatterns.extend(access_patterns)  # Teacher class access management URLs (kep
 urlpatterns.extend(curriculum_patterns)  # Admin curriculum mapping URLs
 urlpatterns.extend(class_code_patterns)  # Class Code Management URLs
 urlpatterns.extend(assessment_patterns)  # Teacher Assessment Module URLs (Admin Only)
+urlpatterns.extend(analytics_patterns)  # Analytics and Reporting URLs
 urlpatterns.extend(legacy_patterns)  # Legacy URL patterns added last for backward compatibility
 
 # Console logging for debugging URL resolution
@@ -73,6 +75,7 @@ url_debug_info = {
         "access": len(access_patterns),
         "curriculum": len(curriculum_patterns),
         "assessment": len(assessment_patterns),
+        "analytics": len(analytics_patterns),
         "legacy": len(legacy_patterns)
     },
     "legacy_urls_included": True,
