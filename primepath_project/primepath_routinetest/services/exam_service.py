@@ -1745,22 +1745,25 @@ class ExamService:
         print("[COPY_MODAL_FIX] Building enhanced curriculum hierarchy for frontend")
         
         try:
-            # Start with the existing hierarchy method
+            # Start with the existing hierarchy method (which now returns OrderedDict)
             base_hierarchy = ExamService.get_routinetest_curriculum_hierarchy()
             
-            # Enhance with frontend-specific features
-            enhanced_hierarchy = {}
+            # Enhance with frontend-specific features (maintain order with OrderedDict)
+            from collections import OrderedDict
+            enhanced_hierarchy = OrderedDict()
             total_levels_processed = 0
             
+            # Process in the order returned by base_hierarchy (which maintains correct order)
             for program, program_data in base_hierarchy.items():
                 enhanced_hierarchy[program] = {
-                    'subprograms': {},
+                    'subprograms': OrderedDict(),  # Maintain subprogram order
                     'meta': {
                         'total_subprograms': len(program_data.get('subprograms', {})),
                         'total_levels': 0
                     }
                 }
                 
+                # Process subprograms in the order they appear in base_hierarchy
                 for subprogram, subprogram_data in program_data.get('subprograms', {}).items():
                     levels = subprogram_data.get('levels', [])
                     
