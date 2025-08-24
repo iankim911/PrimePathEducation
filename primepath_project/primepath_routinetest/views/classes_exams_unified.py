@@ -614,7 +614,7 @@ def classes_exams_unified_view(request):
                     class_data = {
                         'class_code': assignment.class_code,
                         'class_name': class_name,
-                        'access_level': assignment.access_level,
+                        'access_level': 'FULL ACCESS',  # CLASS ACCESS: You either have access or you don't - no "VIEW ONLY" for class access
                         'curriculum_level': curriculum_level,
                         'curriculum_full': curriculum_display,  # Full curriculum display
                         'student_count': 0,  # Simplified for now
@@ -711,7 +711,7 @@ def classes_exams_unified_view(request):
             class_info = {
                 'class_code': assignment.class_code,
                 'class_name': assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code,
-                'access_level': assignment.access_level,
+                'access_level': 'FULL ACCESS',  # CLASS ACCESS: Binary - you either can access/teach the class or you can't
                 'student_count': 0,  # Roster removed
                 'active_exams': 0,
                 'recent_activity': []

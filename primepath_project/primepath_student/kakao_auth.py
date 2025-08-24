@@ -45,7 +45,7 @@ class StudentKakaoOAuth2Backend(BaseBackend):
                     email=kakao_account.get('email'),
                     nickname=profile.get('nickname', f'student_{kakao_id[:8]}'),
                     profile_image=profile.get('profile_image_url'),
-                    phone_number=kakao_account.get('phone_number')
+                    phone_number=None  # No phone number in basic OAuth scope
                 )
                 
         except Exception as e:
@@ -63,7 +63,7 @@ class StudentKakaoOAuth2Backend(BaseBackend):
             'https://kapi.kakao.com/v2/user/me',
             headers=headers,
             params={
-                'property_keys': '["kakao_account.profile", "kakao_account.email", "kakao_account.phone_number"]'
+                'property_keys': '["kakao_account.profile", "kakao_account.email"]'
             }
         )
         
@@ -95,10 +95,10 @@ class StudentKakaoOAuth2Backend(BaseBackend):
                 user=user,
                 student_id=student_id,
                 kakao_id=kakao_id,
-                phone_number=phone_number or f'kakao_{kakao_id[:10]}',  # Placeholder if no phone
+                phone_number=f'kakao_{kakao_id[:10]}',  # Placeholder phone number
                 recovery_email=email,
                 email_verified=bool(email),
-                phone_verified=bool(phone_number)
+                phone_verified=False  # No phone verification from Kakao basic OAuth
             )
             
             logger.info(f"Created new student account from Kakao: {username}")

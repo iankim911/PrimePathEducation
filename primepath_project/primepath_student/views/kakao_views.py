@@ -33,7 +33,7 @@ def kakao_login(request):
         'client_id': settings.KAKAO_REST_API_KEY,
         'redirect_uri': callback_url,
         'response_type': 'code',
-        'scope': 'profile_nickname,profile_image,account_email,phone_number'  # Request necessary permissions
+        'scope': 'profile_nickname,profile_image,account_email'  # Remove phone_number - requires special approval
     }
     
     # Store the next URL in session if provided

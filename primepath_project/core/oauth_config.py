@@ -34,9 +34,7 @@ KAKAO_SCOPES = [
     'account_email',
     'profile_nickname',
     'profile_image',
-    'phone_number',
-    'age_range',
-    'gender',
+    # Removed: 'phone_number', 'age_range', 'gender' - require special approval from Kakao
 ]
 
 # OAuth Helper Functions
