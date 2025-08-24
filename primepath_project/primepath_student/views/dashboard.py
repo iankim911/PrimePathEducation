@@ -3,7 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from primepath_student.models import StudentProfile, StudentClassAssignment
 from primepath_routinetest.models.exam import Exam
-from primepath_routinetest.models.exam_management import ExamLaunchSession
+# ExamLaunchSession might not exist yet, using StudentSession for now
+try:
+    from primepath_routinetest.models.exam_management import ExamLaunchSession
+except ImportError:
+    from primepath_routinetest.models.session import StudentSession as ExamLaunchSession
 from django.utils import timezone
 
 

@@ -1,0 +1,240 @@
+{% extends 'routinetest_base.html' %}
+
+{% block title %}Manage Students - {{ class_display }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>{{ class_display }} - Student Management</h2>
+            <a href="{% url 'primepath_routinetest:classes_exams' %}" class="btn" 
+               style="background-color: #666; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
+                ← Back to Classes
+            </a>
+        </div>
+        
+        <div style="background-color: #E8F5E9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <p style="margin: 0;">
+                <strong>Total Students:</strong> {{ student_count }}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Add Student Section -->
+    <div class="card">
+        <h3 style="color: #00A65E; margin-bottom: 15px;">Add Student to Class</h3>
+        
+        <form method="post" style="display: flex; gap: 10px; align-items: flex-end;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_student">
+            
+            <div style="flex: 1;">
+                <label for="student_id" style="display: block; margin-bottom: 5px; font-weight: 500;">
+                    Select Student
+                </label>
+                <select name="student_id" id="student_id" 
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">-- Choose a student --</option>
+                    {% for student in available_students %}
+                    <option value="{{ student.id }}">
+                        {{ student.user.get_full_name }} (ID: {{ student.student_id }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" 
+                    style="background-color: #00A65E; border: none; color: white; padding: 10px 20px; 
+                           border-radius: 4px; cursor: pointer;">
+                Add Student
+            </button>
+        </form>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+            <a href="{% url 'primepath_routinetest:create_student' %}?class={{ class_code }}" 
+               class="btn" style="background-color: #1976D2; color: white; padding: 10px 20px; 
+                                text-decoration: none; border-radius: 4px; display: inline-block;">
+                + Create New Student Account
+            </a>
+            <button onclick="showBulkAssign()" class="btn" 
+                    style="background-color: #FF6B6B; color: white; padding: 10px 20px; 
+                           border-radius: 4px; cursor: pointer; margin-left: 10px;">
+                Bulk Add Students
+            </button>
+        </div>
+    </div>
+    
+    <!-- Current Students List -->
+    <div class="card">
+        <h3 style="color: #333; margin-bottom: 20px;">Current Students</h3>
+        
+        {% if current_students %}
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #f5f5f5;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Student Name</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Student ID</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Phone Number</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Enrolled Since</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in current_students %}
+                <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {{ assignment.student.user.get_full_name }}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {{ assignment.student.student_id }}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {{ assignment.student.phone_number }}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {{ assignment.assigned_at|date:"M j, Y" }}
+                    </td>
+                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee;">
+                        <form method="post" style="display: inline;" 
+                              onsubmit="return confirm('Remove {{ assignment.student.user.get_full_name }} from this class?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="remove_student">
+                            <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                            <button type="submit" class="btn" 
+                                    style="background-color: #E53935; color: white; padding: 5px 10px; 
+                                           border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                Remove
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 40px; background-color: #f5f5f5; border-radius: 4px;">
+            <p style="color: #999; margin: 0;">No students enrolled in this class yet</p>
+            <p style="color: #666; margin-top: 10px;">Add students using the form above</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Bulk Assign Modal (hidden by default) -->
+<div id="bulkAssignModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                                 background-color: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; margin: 50px auto; max-width: 600px; padding: 20px; border-radius: 8px;">
+        <h3>Bulk Add Students</h3>
+        <p>Search and select multiple students to add to this class:</p>
+        
+        <input type="text" id="studentSearch" placeholder="Search by name, ID, or phone..." 
+               style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        
+        <div id="searchResults" style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; 
+                                       padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+            <!-- Search results will appear here -->
+        </div>
+        
+        <div style="text-align: right;">
+            <button onclick="closeBulkAssign()" class="btn" 
+                    style="background-color: #666; color: white; padding: 10px 20px; 
+                           border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                Cancel
+            </button>
+            <button onclick="submitBulkAssign()" class="btn" 
+                    style="background-color: #00A65E; color: white; padding: 10px 20px; 
+                           border: none; border-radius: 4px; cursor: pointer;">
+                Add Selected Students
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedStudents = [];
+
+function showBulkAssign() {
+    document.getElementById('bulkAssignModal').style.display = 'block';
+    searchStudents();
+}
+
+function closeBulkAssign() {
+    document.getElementById('bulkAssignModal').style.display = 'none';
+    selectedStudents = [];
+}
+
+function searchStudents() {
+    const query = document.getElementById('studentSearch').value;
+    
+    fetch(`{% url 'primepath_routinetest:search_students' %}?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '';
+            
+            if (data.students.length === 0) {
+                resultsDiv.innerHTML = '<p style="color: #999;">No students found</p>';
+                return;
+            }
+            
+            data.students.forEach(student => {
+                const div = document.createElement('div');
+                div.style.padding = '10px';
+                div.style.borderBottom = '1px solid #eee';
+                div.innerHTML = `
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" value="${student.id}" 
+                               onchange="toggleStudent(${student.id})"
+                               style="margin-right: 10px;">
+                        <div>
+                            <strong>${student.name}</strong> (ID: ${student.student_id})<br>
+                            <small style="color: #666;">Phone: ${student.phone}</small>
+                            ${student.classes.length > 0 ? `<br><small style="color: #999;">Classes: ${student.classes.join(', ')}</small>` : ''}
+                        </div>
+                    </label>
+                `;
+                resultsDiv.appendChild(div);
+            });
+        });
+}
+
+function toggleStudent(studentId) {
+    const index = selectedStudents.indexOf(studentId);
+    if (index === -1) {
+        selectedStudents.push(studentId);
+    } else {
+        selectedStudents.splice(index, 1);
+    }
+}
+
+function submitBulkAssign() {
+    if (selectedStudents.length === 0) {
+        alert('Please select at least one student');
+        return;
+    }
+    
+    fetch(`{% url 'primepath_routinetest:bulk_assign_students' class_code %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            student_ids: selectedStudents
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    });
+}
+
+// Search on input
+document.getElementById('studentSearch')?.addEventListener('input', searchStudents);
+</script>
+{% endblock %}

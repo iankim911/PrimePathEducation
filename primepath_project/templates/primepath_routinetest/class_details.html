@@ -994,10 +994,17 @@
             <div class="student-management-header">
                 <h2>Students Enrolled in {{ class_display }}</h2>
                 {% if can_edit %}
-                <button class="add-student-btn" onclick="openAddStudentModal()">
-                    <span>👥</span>
-                    <span>Add Student</span>
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <a href="{% url 'primepath_routinetest:manage_class_students' class_code %}" 
+                       class="add-student-btn" style="text-decoration: none; display: inline-flex; align-items: center;">
+                        <span>⚙️</span>
+                        <span>Manage Students</span>
+                    </a>
+                    <button class="add-student-btn" onclick="openAddStudentModal()">
+                        <span>👥</span>
+                        <span>Add Student</span>
+                    </button>
+                </div>
                 {% endif %}
             </div>
             

@@ -28,6 +28,7 @@ from .auth_urls import urlpatterns as auth_patterns  # BUILDER: Day 1 - Authenti
 from .class_code_urls import urlpatterns as class_code_patterns  # Class Code Management
 from .class_urls import urlpatterns as class_patterns  # BUILDER: Day 2 - Class Management
 from .exam_management_urls import urlpatterns as exam_mgmt_patterns  # BUILDER: Day 4 - Exam Management
+from .student_management_urls import urlpatterns as student_mgmt_patterns  # Phase 2 - Student Management
 from .views import index
 
 app_name = 'RoutineTest'
@@ -43,6 +44,7 @@ urlpatterns.extend(index_patterns)  # Index must come first
 urlpatterns.extend(auth_patterns)  # BUILDER: Authentication routes (Day 1)
 urlpatterns.extend(class_patterns)  # BUILDER: Class Management (Day 2)
 urlpatterns.extend(exam_mgmt_patterns)  # BUILDER: Exam Management (Day 4)
+urlpatterns.extend(student_mgmt_patterns)  # Phase 2: Student Management
 urlpatterns.extend(unified_patterns)  # NEW: Unified Classes & Exams (should come early for priority)
 urlpatterns.extend(student_patterns)
 urlpatterns.extend(exam_patterns)
