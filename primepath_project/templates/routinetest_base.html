@@ -15,12 +15,15 @@
     <!-- Mobile Responsive CSS -->
     <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}">
     
+    <!-- PrimePath Brand Design System -->
+    <link rel="stylesheet" href="{% static 'css/primepath_brand.css' %}">
+    
     
     <!-- Console Debugging for RoutineTest -->
     <script>
-        console.log('%c[RoutineTest] Page Loading...', 'color: #00A65E; font-weight: bold;');
+        console.log('%c[RoutineTest] Page Loading...', 'color: #1B2951; font-weight: bold;');
         console.log('[RoutineTest] Navigation: Tab-based horizontal layout');
-        console.log('[RoutineTest] Theme: BCG Green (#00A65E)');
+        console.log('[RoutineTest] Theme: PrimePath Navy (#1B2951)');
         console.log('[RoutineTest] Module: Continuous Assessment Platform');
         window.ROUTINETEST_DEBUG = true;
         window.MATRIX_TAB_VERSION = '3.0';
@@ -40,12 +43,13 @@
             color: #333;
         }
         
-        /* Header Section - Darker Muted Green Theme (Matching PlacementTest weight) */
+        /* Header Section - PrimePath Navy Theme */
         .header {
-            background-color: #1B5E20;  /* Darker, more muted green */
+            background: linear-gradient(135deg, #1B2951 0%, #0F1B3C 100%);  /* PrimePath Navy gradient */
             color: white;
             padding: 20px 0;
             margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(27, 41, 81, 0.15);
         }
         
         .header h1 {
@@ -57,15 +61,15 @@
             position: relative; /* For mode toggle positioning */
         }
         
-        /* Navigation Tabs - Darker Muted Green Theme (Matching PlacementTest style) */
+        /* Navigation Tabs - PrimePath Navy Theme */
         .nav-tabs {
-            background-color: #0D4F1F;  /* Very dark, muted green */
+            background-color: #0F1B3C;  /* Dark PrimePath Navy */
             padding: 0;
             margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(27, 41, 81, 0.2);
             overflow-x: auto;  /* Allow horizontal scroll for many tabs */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
-            border-bottom: 2px solid #2E7D32;  /* Visual separation */
+            border-bottom: 2px solid #2A3F6B;  /* Visual separation */
         }
         
         /* Custom scrollbar for nav tabs */
@@ -74,11 +78,11 @@
         }
         
         .nav-tabs::-webkit-scrollbar-track {
-            background: #0A3D15;
+            background: #0F1B3C;
         }
         
         .nav-tabs::-webkit-scrollbar-thumb {
-            background: #2E7D32;
+            background: #2A3F6B;
             border-radius: 2px;
         }
         

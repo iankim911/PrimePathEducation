@@ -977,6 +977,8 @@
                 <div class="program-content">
                     <!-- Debug: {{ program_exams|length }} classes in {{ program }} -->
                     {% for class_code, class_exams in program_exams.items %}
+                        {# CRITICAL FIX: Only show class sections that have exams after filtering #}
+                        {% if class_exams|length > 0 %}
                         {% with access_level=teacher_assignments|get_item:class_code is_owned_class=ownership_overrides|get_item:class_code base_access=base_assignments|get_item:class_code %}
                         <!-- OWNERSHIP FIX DEBUG -->
                         <script>
@@ -984,7 +986,8 @@
                                 'is_owned_class': '{{ is_owned_class }}',
                                 'base_access': '{{ base_access }}',
                                 'effective_access': '{{ access_level }}',
-                                'has_ownership_override': {{ is_owned_class|yesno:"true,false" }}
+                                'has_ownership_override': {{ is_owned_class|yesno:"true,false" }},
+                                'exam_count': {{ class_exams|length }}
                             });
                         </script>
                         <div class="class-section {% if access_level and access_level != 'VIEW' %}accessible{% endif %}" 
@@ -1150,6 +1153,7 @@
                             </div>
                         </div>
                         {% endwith %}
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -3223,6 +3227,6 @@ console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
 
 <!-- Load the improved copy modal fix v2 -->
 <!-- IMPROVED FIX v5.0: More robust Copy Exam modal dropdown population -->
-<script src="{% load static %}{% static 'js/routinetest/copy-exam-modal-fix-v2.js' %}?v={% now 'U' %}" defer></script>
+<script src="{% load static %}{% static 'js/routinetest/copy-exam-modal-final.js' %}?v={% now 'U' %}" defer></script>
 
 {% endblock %}

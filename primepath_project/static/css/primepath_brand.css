@@ -1,0 +1,389 @@
+/* ========================================
+   PrimePath Brand Design System
+   Based on official brand guidelines
+   ======================================== */
+
+/* Brand Color Palette */
+:root {
+    /* Primary Brand Colors */
+    --primepath-navy: #1B2951;
+    --primepath-navy-dark: #0F1B3C;
+    --primepath-navy-light: #2A3F6B;
+    
+    /* Program Colors (from brand roadmap) */
+    --program-core: #5EBEC4;        /* Teal/Turquoise */
+    --program-core-dark: #4A9FA5;
+    --program-core-light: #7FD4D9;
+    
+    --program-ascent: #5B7FDE;      /* Blue */
+    --program-ascent-dark: #4A67B8;
+    --program-ascent-light: #7A96E5;
+    
+    --program-edge: #8B5FDE;        /* Purple */
+    --program-edge-dark: #7249B8;
+    --program-edge-light: #A37FE5;
+    
+    --program-pinnacle: #B84A6B;    /* Burgundy/Deep Red */
+    --program-pinnacle-dark: #973956;
+    --program-pinnacle-light: #CC6B87;
+    
+    /* UI Colors */
+    --brand-white: #FFFFFF;
+    --brand-light-gray: #F8F9FA;
+    --brand-gray: #E9ECEF;
+    --brand-dark-gray: #6C757D;
+    --brand-text: #212529;
+    --brand-text-light: #495057;
+    
+    /* Functional Colors */
+    --brand-success: #28A745;
+    --brand-warning: #FFC107;
+    --brand-danger: #DC3545;
+    --brand-info: #17A2B8;
+    
+    /* Shadow and Effects */
+    --brand-shadow-sm: 0 2px 4px rgba(27, 41, 81, 0.1);
+    --brand-shadow-md: 0 4px 8px rgba(27, 41, 81, 0.15);
+    --brand-shadow-lg: 0 8px 16px rgba(27, 41, 81, 0.2);
+    
+    /* Border Radius */
+    --border-radius-sm: 8px;
+    --border-radius-md: 12px;
+    --border-radius-lg: 16px;
+    --border-radius-pill: 50px;
+}
+
+/* Typography */
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--brand-text);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: var(--primepath-navy);
+    margin-bottom: 1rem;
+}
+
+/* Navigation Header */
+.brand-navbar {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
+    padding: 1rem 0;
+    box-shadow: var(--brand-shadow-md);
+}
+
+.brand-navbar .navbar-brand {
+    color: var(--brand-white) !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.brand-navbar .navbar-brand img {
+    height: 40px;
+    margin-right: 12px;
+}
+
+.brand-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--border-radius-sm);
+}
+
+.brand-navbar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--brand-white) !important;
+}
+
+/* Page Container */
+.brand-page-container {
+    background: linear-gradient(180deg, var(--brand-light-gray) 0%, var(--brand-white) 100%);
+    min-height: 100vh;
+    padding-top: 2rem;
+}
+
+/* Cards */
+.brand-card {
+    background: var(--brand-white);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--brand-shadow-sm);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.brand-card:hover {
+    box-shadow: var(--brand-shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Program Cards with Color Coding */
+.program-card-core {
+    border-left: 4px solid var(--program-core);
+}
+
+.program-card-core .program-header {
+    background: linear-gradient(135deg, var(--program-core) 0%, var(--program-core-dark) 100%);
+    color: var(--brand-white);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+}
+
+.program-card-ascent {
+    border-left: 4px solid var(--program-ascent);
+}
+
+.program-card-ascent .program-header {
+    background: linear-gradient(135deg, var(--program-ascent) 0%, var(--program-ascent-dark) 100%);
+    color: var(--brand-white);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+}
+
+.program-card-edge {
+    border-left: 4px solid var(--program-edge);
+}
+
+.program-card-edge .program-header {
+    background: linear-gradient(135deg, var(--program-edge) 0%, var(--program-edge-dark) 100%);
+    color: var(--brand-white);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+}
+
+.program-card-pinnacle {
+    border-left: 4px solid var(--program-pinnacle);
+}
+
+.program-card-pinnacle .program-header {
+    background: linear-gradient(135deg, var(--program-pinnacle) 0%, var(--program-pinnacle-dark) 100%);
+    color: var(--brand-white);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+}
+
+/* Buttons */
+.btn-brand-primary {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
+    color: var(--brand-white);
+    border: none;
+    border-radius: var(--border-radius-pill);
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--brand-shadow-sm);
+}
+
+.btn-brand-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--brand-shadow-md);
+    background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%);
+    color: var(--brand-white);
+}
+
+/* Program Specific Buttons */
+.btn-core {
+    background: linear-gradient(135deg, var(--program-core) 0%, var(--program-core-dark) 100%);
+    color: var(--brand-white);
+    border: none;
+    border-radius: var(--border-radius-pill);
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-ascent {
+    background: linear-gradient(135deg, var(--program-ascent) 0%, var(--program-ascent-dark) 100%);
+    color: var(--brand-white);
+    border: none;
+    border-radius: var(--border-radius-pill);
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-edge {
+    background: linear-gradient(135deg, var(--program-edge) 0%, var(--program-edge-dark) 100%);
+    color: var(--brand-white);
+    border: none;
+    border-radius: var(--border-radius-pill);
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-pinnacle {
+    background: linear-gradient(135deg, var(--program-pinnacle) 0%, var(--program-pinnacle-dark) 100%);
+    color: var(--brand-white);
+    border: none;
+    border-radius: var(--border-radius-pill);
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+/* Badges and Pills */
+.badge-core {
+    background: var(--program-core);
+    color: var(--brand-white);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--border-radius-pill);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-ascent {
+    background: var(--program-ascent);
+    color: var(--brand-white);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--border-radius-pill);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-edge {
+    background: var(--program-edge);
+    color: var(--brand-white);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--border-radius-pill);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.badge-pinnacle {
+    background: var(--program-pinnacle);
+    color: var(--brand-white);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--border-radius-pill);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Tab Navigation (for exam types) */
+.brand-tabs {
+    background: var(--brand-white);
+    border-radius: var(--border-radius-md);
+    padding: 0.5rem;
+    box-shadow: var(--brand-shadow-sm);
+    margin-bottom: 2rem;
+}
+
+.brand-tabs .nav-link {
+    color: var(--brand-text-light);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1.5rem;
+    margin: 0 0.25rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.brand-tabs .nav-link:hover {
+    background: var(--brand-light-gray);
+}
+
+.brand-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
+    color: var(--brand-white);
+    box-shadow: var(--brand-shadow-sm);
+}
+
+/* Exam Cards */
+.exam-card {
+    background: var(--brand-white);
+    border-radius: var(--border-radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--brand-shadow-sm);
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.exam-card:hover {
+    transform: translateX(4px);
+    box-shadow: var(--brand-shadow-md);
+}
+
+/* Class code style */
+.class-code-badge {
+    background: var(--primepath-navy);
+    color: var(--brand-white);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius-pill);
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+/* Login Page Specific */
+.login-container {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    background: var(--brand-white);
+    border-radius: var(--border-radius-lg);
+    padding: 3rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    width: 100%;
+}
+
+.login-logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-light) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem auto;
+    color: var(--brand-white);
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Form Controls */
+.form-control-brand {
+    border: 2px solid var(--brand-gray);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control-brand:focus {
+    border-color: var(--primepath-navy);
+    box-shadow: 0 0 0 0.2rem rgba(27, 41, 81, 0.1);
+    outline: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .brand-navbar .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    .login-card {
+        padding: 2rem;
+    }
+    
+    .brand-tabs .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}

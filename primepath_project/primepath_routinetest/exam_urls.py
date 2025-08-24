@@ -6,6 +6,7 @@ from django.urls import path
 from . import views
 from .views import exam
 from .views.test_filter_view import test_filter
+from .views.copy_exam_curriculum import copy_exam_with_curriculum
 
 urlpatterns = [
     # Test filter page
@@ -14,6 +15,7 @@ urlpatterns = [
     # Exam management
     path('exams/', views.exam_list, name='exam_list'),
     path('exams/create/', views.create_exam, name='create_exam'),
+    path('exams/copy/', copy_exam_with_curriculum, name='copy_exam_curriculum'),  # NEW: Copy with curriculum selection
     path('exams/check-version/', views.check_exam_version, name='check_exam_version'),
     path('exams/<uuid:exam_id>/', views.exam_detail, name='exam_detail'),
     path('exams/<uuid:exam_id>/edit/', views.edit_exam, name='edit_exam'),
