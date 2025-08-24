@@ -12,6 +12,31 @@ import json
 
 class StudentProfile(models.Model):
     """Student profile extending Django User model"""
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+        ('P', 'Prefer not to say'),
+    ]
+    
+    GRADE_CHOICES = [
+        ('K', 'Kindergarten'),
+        ('1', 'Grade 1'),
+        ('2', 'Grade 2'),
+        ('3', 'Grade 3'),
+        ('4', 'Grade 4'),
+        ('5', 'Grade 5'),
+        ('6', 'Grade 6'),
+        ('7', 'Grade 7'),
+        ('8', 'Grade 8'),
+        ('9', 'Grade 9'),
+        ('10', 'Grade 10'),
+        ('11', 'Grade 11'),
+        ('12', 'Grade 12'),
+        ('UNI', 'University'),
+        ('ADULT', 'Adult Student'),
+    ]
+    
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='primepath_student_profile')
     student_id = models.CharField(
         max_length=20, 
@@ -24,7 +49,54 @@ class StudentProfile(models.Model):
         validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be valid")],
         help_text="Student's phone number for authentication"
     )
+    
+    # Personal Information
+    date_of_birth = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    grade = models.CharField(max_length=5, choices=GRADE_CHOICES, blank=True)
+    
+    # Contact Information
+    address = models.TextField(blank=True, help_text="Student's home address")
+    emergency_contact_phone = models.CharField(
+        max_length=15,
+        blank=True,
+        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be valid")],
+        help_text="Emergency contact phone number"
+    )
+    
+    # School Information
+    school_name = models.CharField(max_length=200, blank=True, help_text="Name of school student attends")
+    school_address = models.TextField(blank=True, help_text="School address")
+    
+    # Parent/Guardian Information
+    parent1_name = models.CharField(max_length=100, blank=True, help_text="First parent/guardian name")
+    parent1_phone = models.CharField(
+        max_length=15,
+        blank=True,
+        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be valid")],
+        help_text="First parent/guardian phone"
+    )
+    parent1_email = models.EmailField(blank=True, help_text="First parent/guardian email")
+    
+    parent2_name = models.CharField(max_length=100, blank=True, help_text="Second parent/guardian name")
+    parent2_phone = models.CharField(
+        max_length=15,
+        blank=True,
+        validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be valid")],
+        help_text="Second parent/guardian phone"
+    )
+    parent2_email = models.EmailField(blank=True, help_text="Second parent/guardian email")
+    
+    # Account Recovery
+    recovery_email = models.EmailField(
+        blank=True,
+        help_text="Alternative email for password recovery (can be parent's email)"
+    )
+    
+    # System fields
     kakao_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    email_verified = models.BooleanField(default=False)
+    phone_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

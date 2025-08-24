@@ -1,14 +1,22 @@
 from django.urls import path
 from . import views
+from .views import registration
 
 app_name = 'primepath_student'
 
 urlpatterns = [
-    # Authentication
-    path('register/', views.student_register, name='register'),
-    path('login/', views.student_login, name='login'),
+    # Enhanced Authentication
+    path('register/', registration.student_register, name='register'),
+    path('login/', registration.student_login, name='login'),
     path('logout/', views.student_logout, name='logout'),
     path('kakao-login/', views.kakao_login, name='kakao_login'),
+    
+    # Password Reset
+    path('password-reset/', registration.password_reset_request, name='password_reset'),
+    path('password-reset-confirm/<uidb64>/<token>/', registration.password_reset_confirm, name='password_reset_confirm'),
+    
+    # AJAX Endpoints
+    path('api/check-availability/', registration.check_availability, name='check_availability'),
     
     # Dashboard
     path('', views.student_dashboard, name='dashboard'),

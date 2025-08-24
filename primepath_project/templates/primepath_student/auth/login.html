@@ -27,8 +27,19 @@
         <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
     </form>
     
+    <div style="margin-top: 20px; text-align: center;">
+        <a href="{% url 'primepath_student:password_reset' %}" style="color: #1565C0; text-decoration: none;">
+            Forgot your password?
+        </a>
+    </div>
+    
     <div style="margin-top: 20px; text-align: center; padding-top: 20px; border-top: 1px solid #eee;">
-        <p>Don't have an account? <a href="{% url 'primepath_student:register' %}" style="color: #1565C0;">Register here</a></p>
+        <p style="margin-bottom: 15px;">Don't have an account?</p>
+        
+        <a href="{% url 'primepath_student:register' %}" class="btn" 
+           style="background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%); color: white; width: 100%; display: block; padding: 12px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-bottom: 15px;">
+            Create Student Account
+        </a>
         
         <div style="margin-top: 15px;">
             <a href="{% url 'primepath_student:kakao_login' %}" class="btn" 
