@@ -22,7 +22,18 @@ def kakao_login(request):
     Redirect to Kakao authorization page
     """
     client_id = settings.KAKAO_REST_API_KEY
-    redirect_uri = request.build_absolute_uri(reverse('kakao_callback'))
+    
+    # Force localhost redirect URI to match what's registered in Kakao
+    # This avoids issues with 127.0.0.1 vs localhost mismatch
+    if request.get_host().startswith('127.0.0.1'):
+        redirect_uri = 'http://127.0.0.1:8000/auth/kakao/callback/'
+    elif request.get_host().startswith('localhost'):
+        redirect_uri = 'http://localhost:8000/auth/kakao/callback/'
+    else:
+        redirect_uri = request.build_absolute_uri('/auth/kakao/callback/')
+        # Remove double slashes if present
+        if redirect_uri.endswith('//'):
+            redirect_uri = redirect_uri[:-1]
     
     kakao_auth_url = (
         f"https://kauth.kakao.com/oauth/authorize"
@@ -30,6 +41,9 @@ def kakao_login(request):
         f"&redirect_uri={redirect_uri}"
         f"&response_type=code"
     )
+    
+    logger.info(f"[KAKAO_LOGIN] Redirecting to: {kakao_auth_url}")
+    logger.info(f"[KAKAO_LOGIN] Using redirect_uri: {redirect_uri}")
     
     return redirect(kakao_auth_url)
 
@@ -43,11 +57,11 @@ def kakao_callback(request):
     
     if error:
         messages.error(request, f'KakaoTalk login failed: {error}')
-        return redirect('login')
+        return redirect('/login/')
     
     if not code:
         messages.error(request, 'No authorization code received')
-        return redirect('login')
+        return redirect('/login/')
     
     try:
         # Exchange code for access token
@@ -55,7 +69,7 @@ def kakao_callback(request):
         
         if not access_token:
             messages.error(request, 'Failed to get access token')
-            return redirect('login')
+            return redirect('/login/')
         
         # Authenticate user with access token
         backend = KakaoOAuth2Backend()
@@ -64,7 +78,7 @@ def kakao_callback(request):
         if user:
             # Login user
             login(request, user, backend='core.kakao_auth.KakaoOAuth2Backend')
-            messages.success(request, f'Welcome {user.first_name}!')
+            messages.success(request, f'Welcome {user.first_name or user.username}!')
             
             # Store access token in session for future API calls
             request.session['kakao_access_token'] = access_token
@@ -74,12 +88,12 @@ def kakao_callback(request):
             return redirect(next_url)
         else:
             messages.error(request, 'Authentication failed')
-            return redirect('login')
+            return redirect('/login/')  # Use absolute path instead of named URL
             
     except Exception as e:
         logger.error(f"Kakao callback error: {e}")
         messages.error(request, 'An error occurred during login')
-        return redirect('login')
+        return redirect('/login/')
 
 
 def get_kakao_access_token(request, code):
@@ -87,7 +101,17 @@ def get_kakao_access_token(request, code):
     Exchange authorization code for access token
     """
     token_url = 'https://kauth.kakao.com/oauth/token'
-    redirect_uri = request.build_absolute_uri(reverse('kakao_callback'))
+    
+    # Use same redirect URI logic as login to ensure consistency
+    if request.get_host().startswith('127.0.0.1'):
+        redirect_uri = 'http://127.0.0.1:8000/auth/kakao/callback/'
+    elif request.get_host().startswith('localhost'):
+        redirect_uri = 'http://localhost:8000/auth/kakao/callback/'
+    else:
+        redirect_uri = request.build_absolute_uri('/auth/kakao/callback/')
+        # Remove trailing slash if present
+        if redirect_uri.endswith('//'):
+            redirect_uri = redirect_uri[:-1]
     
     data = {
         'grant_type': 'authorization_code',
@@ -96,17 +120,25 @@ def get_kakao_access_token(request, code):
         'code': code,
     }
     
-    # Add client secret if configured
+    # Add client secret if configured (not needed for REST API)
     if hasattr(settings, 'KAKAO_CLIENT_SECRET'):
         data['client_secret'] = settings.KAKAO_CLIENT_SECRET
+    
+    # Log the request details for debugging
+    logger.info(f"[KAKAO_TOKEN] Requesting token with redirect_uri: {redirect_uri}")
+    logger.info(f"[KAKAO_TOKEN] Client ID: {settings.KAKAO_REST_API_KEY[:10]}...")
     
     response = requests.post(token_url, data=data)
     
     if response.status_code == 200:
         token_data = response.json()
-        return token_data.get('access_token')
+        access_token = token_data.get('access_token')
+        logger.info(f"[KAKAO_TOKEN] Successfully got access token")
+        return access_token
     else:
-        logger.error(f"Failed to get access token: {response.text}")
+        logger.error(f"[KAKAO_TOKEN] Failed to get access token: Status {response.status_code}")
+        logger.error(f"[KAKAO_TOKEN] Response: {response.text}")
+        logger.error(f"[KAKAO_TOKEN] Request data: redirect_uri={redirect_uri}, code={code[:10]}...")
         return None
 
 
@@ -130,7 +162,7 @@ def kakao_logout(request):
     
     # Clear session
     request.session.flush()
-    return redirect('login')
+    return redirect('/login/')
 
 
 @csrf_exempt

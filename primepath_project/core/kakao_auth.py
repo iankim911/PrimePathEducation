@@ -93,8 +93,10 @@ class KakaoOAuth2Backend(BaseBackend):
             Teacher.objects.create(
                 user=user,
                 name=nickname,
+                email=email or f'{username}@kakao.local',
                 profile_image_url=profile_image,
-                is_kakao_user=True  # You'll need to add this field
+                is_kakao_user=True,
+                kakao_id=str(kakao_id)
             )
             
         return user
