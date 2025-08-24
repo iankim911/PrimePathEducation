@@ -1649,15 +1649,33 @@ class ExamService:
         """
         from ..constants import ROUTINETEST_CURRICULUM_WHITELIST
         from core.models import CurriculumLevel
+        from collections import OrderedDict
         import json
         
         logger.info("[ROUTINETEST_CURRICULUM_HIERARCHY] Building hierarchy for copy modal")
         print("[ROUTINETEST_CURRICULUM_HIERARCHY] Building hierarchy for copy modal")
         
-        curriculum_hierarchy = {}
+        # Use OrderedDict to maintain program order: CORE → ASCENT → EDGE → PINNACLE
+        curriculum_hierarchy = OrderedDict()
         levels_processed = 0
         
-        # Loop through whitelist and build hierarchy
+        # Define correct order for programs and subprograms
+        program_order = ['CORE', 'ASCENT', 'EDGE', 'PINNACLE']
+        subprogram_order = {
+            'CORE': ['Phonics', 'Sigma', 'Elite', 'Pro'],
+            'ASCENT': ['Nova', 'Drive', 'Pro'],
+            'EDGE': ['Spark', 'Rise', 'Pursuit', 'Pro'],
+            'PINNACLE': ['Vision', 'Endeavor', 'Success', 'Pro']
+        }
+        
+        # Initialize hierarchy in correct order
+        for program in program_order:
+            curriculum_hierarchy[program] = {'subprograms': OrderedDict()}
+            if program in subprogram_order:
+                for subprogram in subprogram_order[program]:
+                    curriculum_hierarchy[program]['subprograms'][subprogram] = {'levels': []}
+        
+        # Loop through whitelist and populate hierarchy
         for program_name, subprogram_name, level_number in ROUTINETEST_CURRICULUM_WHITELIST:
             try:
                 # Find the curriculum level in database
@@ -1669,22 +1687,14 @@ class ExamService:
                     level_number=level_number
                 )
                 
-                # Initialize program if not exists
-                if program_name not in curriculum_hierarchy:
-                    curriculum_hierarchy[program_name] = {'subprograms': {}}
-                
-                # Initialize subprogram if not exists
-                if subprogram_name not in curriculum_hierarchy[program_name]['subprograms']:
-                    curriculum_hierarchy[program_name]['subprograms'][subprogram_name] = {'levels': []}
-                
-                # Add level data
-                level_data = {
-                    'id': curriculum_level.id,
-                    'number': level_number
-                }
-                
-                curriculum_hierarchy[program_name]['subprograms'][subprogram_name]['levels'].append(level_data)
-                levels_processed += 1
+                # Add level data to already initialized structure
+                if program_name in curriculum_hierarchy and subprogram_name in curriculum_hierarchy[program_name]['subprograms']:
+                    level_data = {
+                        'id': curriculum_level.id,
+                        'number': level_number
+                    }
+                    curriculum_hierarchy[program_name]['subprograms'][subprogram_name]['levels'].append(level_data)
+                    levels_processed += 1
                 
             except CurriculumLevel.DoesNotExist:
                 console_log = {

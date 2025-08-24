@@ -861,12 +861,14 @@
     <!-- NEW: Ownership-based Tab Layer -->
     <div class="ownership-tabs">
         <a href="?ownership=my&exam_type={{ exam_type_filter }}" 
-           class="ownership-tab {% if is_my_files_active %}active{% endif %}">
+           class="ownership-tab {% if is_my_files_active %}active{% endif %}"
+           onclick="return handleOwnershipTabSwitch('my', '{{ exam_type_filter }}')">
             <span>📁 My Test Files</span>
         </a>
         
         <a href="?ownership=others&exam_type={{ exam_type_filter }}" 
-           class="ownership-tab {% if is_others_files_active %}active{% endif %}">
+           class="ownership-tab {% if is_others_files_active %}active{% endif %}"
+           onclick="return handleOwnershipTabSwitch('others', '{{ exam_type_filter }}')">
             <span>👥 Other Teachers' Test Files</span>
         </a>
     </div>
@@ -900,19 +902,22 @@
     <!-- UPDATED: Exam Type Tabs with New Ownership System -->
     <div class="exam-type-tabs">
         <a href="?ownership={{ ownership_filter }}&exam_type=REVIEW" 
-           class="exam-type-tab {% if exam_type_filter == 'REVIEW' %}active{% endif %}">
+           class="exam-type-tab {% if exam_type_filter == 'REVIEW' %}active{% endif %}"
+           onclick="return handleExamTypeTabSwitch('{{ ownership_filter }}', 'REVIEW')">
             <span>📚 Review / Monthly</span>
             <span class="tab-badge">{{ exam_type_counts.review }}</span>
         </a>
         
         <a href="?ownership={{ ownership_filter }}&exam_type=QUARTERLY" 
-           class="exam-type-tab {% if exam_type_filter == 'QUARTERLY' %}active{% endif %}">
+           class="exam-type-tab {% if exam_type_filter == 'QUARTERLY' %}active{% endif %}"
+           onclick="return handleExamTypeTabSwitch('{{ ownership_filter }}', 'QUARTERLY')">
             <span>📊 Quarterly</span>
             <span class="tab-badge">{{ exam_type_counts.quarterly }}</span>
         </a>
         
         <a href="?ownership={{ ownership_filter }}&exam_type=ALL" 
-           class="exam-type-tab {% if exam_type_filter == 'ALL' %}active{% endif %}">
+           class="exam-type-tab {% if exam_type_filter == 'ALL' %}active{% endif %}"
+           onclick="return handleExamTypeTabSwitch('{{ ownership_filter }}', 'ALL')">
             <span>📋 All Exams</span>
             <span class="tab-badge">{{ exam_type_counts.all }}</span>
         </a>
@@ -1553,6 +1558,39 @@ console.log('  - window.openCopyModal:', typeof window.openCopyModal);
 console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
 console.log('  - openCopyModal (alias):', typeof openCopyModal);
 console.log('  - closeCopyModal (alias):', typeof closeCopyModal);
+
+// Tab switching handlers - Clear all filters when switching tabs
+function handleOwnershipTabSwitch(ownership, examType) {
+    console.log('[TAB_SWITCH] Switching ownership tab to:', ownership);
+    console.log('[TAB_SWITCH] Exam type:', examType);
+    
+    // Build clean URL with only ownership and exam_type parameters
+    const newUrl = `?ownership=${ownership}&exam_type=${examType}`;
+    
+    console.log('[TAB_SWITCH] Navigating to clean URL:', newUrl);
+    window.location.href = newUrl;
+    
+    // Prevent default link behavior
+    return false;
+}
+
+function handleExamTypeTabSwitch(ownership, examType) {
+    console.log('[TAB_SWITCH] Switching exam type tab to:', examType);
+    console.log('[TAB_SWITCH] Ownership:', ownership);
+    
+    // Build clean URL with only ownership and exam_type parameters
+    const newUrl = `?ownership=${ownership}&exam_type=${examType}`;
+    
+    console.log('[TAB_SWITCH] Navigating to clean URL:', newUrl);
+    window.location.href = newUrl;
+    
+    // Prevent default link behavior
+    return false;
+}
+
+// Make tab switching functions globally available
+window.handleOwnershipTabSwitch = handleOwnershipTabSwitch;
+window.handleExamTypeTabSwitch = handleExamTypeTabSwitch;
 
 // PAGE LOAD DEBUGGING - Track exams and filter state - ENHANCED VERSION
 (function() {
@@ -2999,21 +3037,34 @@ function setupCopyCurriculumEventListeners() {
                 'PINNACLE': ['Vision', 'Endeavor', 'Success', 'Pro']
             };
             
-            // Get the correct order for this program, or use alphabetical if not defined
-            const orderForProgram = subprogramOrder[program] || Object.keys(subprograms).sort();
+            // Get the correct order for this program
+            const orderForProgram = subprogramOrder[program];
             
-            // Add subprograms in the correct order
-            orderForProgram.forEach(subprogram => {
-                // Check if this subprogram exists in the data
-                if (!subprograms[subprogram]) {
-                    return; // Skip if not found
-                }
-                
-                const option = document.createElement('option');
-                option.value = subprogram;
-                option.textContent = subprogram;
-                subprogramSelect.appendChild(option);
-            });
+            if (orderForProgram) {
+                // Add subprograms in the defined correct order
+                console.log('[COPY_CURRICULUM] Using predefined order for', program, ':', orderForProgram);
+                orderForProgram.forEach(subprogram => {
+                    // Check if this subprogram exists in the data
+                    if (!subprograms[subprogram]) {
+                        console.log('[COPY_CURRICULUM] Subprogram not found in data:', subprogram);
+                        return; // Skip if not found
+                    }
+                    
+                    const option = document.createElement('option');
+                    option.value = subprogram;
+                    option.textContent = subprogram;
+                    subprogramSelect.appendChild(option);
+                });
+            } else {
+                // Fallback: Use the order from the data (should already be correct from backend)
+                console.log('[COPY_CURRICULUM] No predefined order for', program, ', using data order');
+                Object.keys(subprograms).forEach(subprogram => {
+                    const option = document.createElement('option');
+                    option.value = subprogram;
+                    option.textContent = subprogram;
+                    subprogramSelect.appendChild(option);
+                });
+            }
         }
         
         updateCopyExamNamePreview();
