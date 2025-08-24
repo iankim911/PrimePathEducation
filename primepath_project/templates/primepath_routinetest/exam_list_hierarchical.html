@@ -2081,31 +2081,29 @@ observer.observe(document.body, {
 });
 
 // Function to update the exam name preview
-function updateCopyExamNamePreview() {
+window.updateCopyExamNamePreview = function() {
     console.log('[COPY_MODAL_PREVIEW] Updating exam name preview...');
     
-    const examTypeSelect = document.getElementById('copyExamType');
-    const timeslotSelect = document.getElementById('timeslot');
-    const programSelect = document.getElementById('copyProgramSelect');
-    const subprogramSelect = document.getElementById('copySubprogramSelect');
-    const levelSelect = document.getElementById('copyLevelSelect');
-    const customSuffixInput = document.getElementById('customSuffix');
-    const previewText = document.getElementById('previewText');
+    try {
+        const examTypeSelect = document.getElementById('copyExamType');
+        const timeslotSelect = document.getElementById('timeslot');
+        const programSelect = document.getElementById('copyProgramSelect');
+        const subprogramSelect = document.getElementById('copySubprogramSelect');
+        const levelSelect = document.getElementById('copyLevelSelect');
+        const customSuffixInput = document.getElementById('customSuffix');
+        const previewText = document.getElementById('previewText');
+        
+        if (!previewText) {
+            console.error('[COPY_MODAL_PREVIEW] Preview text element not found');
+            return;
+        }
     
-    if (!previewText) {
-        console.error('[COPY_MODAL_PREVIEW] Preview text element not found');
-        return;
-    }
-    
-    // Check if all required fields are filled
-    if (!examTypeSelect?.value || !timeslotSelect?.value || !programSelect?.value || !subprogramSelect?.value || !levelSelect?.value) {
-        previewText.textContent = 'Please complete all fields to see preview...';
-        console.log('[COPY_MODAL_PREVIEW] Missing required fields:', {
+    // Check if basic required fields are filled (allow partial preview)
+    if (!examTypeSelect?.value || !timeslotSelect?.value) {
+        previewText.textContent = 'Please select exam type and time period to see preview...';
+        console.log('[COPY_MODAL_PREVIEW] Missing basic required fields:', {
             examType: examTypeSelect?.value,
-            timeslot: timeslotSelect?.value,
-            program: programSelect?.value,
-            subprogram: subprogramSelect?.value,
-            level: levelSelect?.value
+            timeslot: timeslotSelect?.value
         });
         return;
     }
@@ -2143,22 +2141,27 @@ function updateCopyExamNamePreview() {
         console.log('[COPY_MODAL_PREVIEW] Using selected curriculum:', curriculum);
     } else {
         // Fallback to extracting from source exam name
-        const curriculumMatch = sourceExamName.match(/(CORE|ASCENT|EDGE|PINNACLE)\s+(\w+)\s+Lv(\d+)/);
-        if (curriculumMatch) {
-            const curriculum = `${curriculumMatch[1]} ${curriculumMatch[2]} Lv${curriculumMatch[3]}`;
-            nameParts.push(curriculum);
-            console.log('[COPY_MODAL_PREVIEW] Using source curriculum (fallback):', curriculum);
-        } else {
-            // Try to extract any curriculum-like pattern
-            const levelMatch = sourceExamName.match(/Lv\d+/);
-            if (levelMatch) {
-                const beforeLevel = sourceExamName.substring(
-                    sourceExamName.lastIndexOf('-') + 1,
-                    sourceExamName.indexOf(levelMatch[0])
-                ).trim();
-                if (beforeLevel) {
-                    nameParts.push(`${beforeLevel}${levelMatch[0]}`);
-                    console.log('[COPY_MODAL_PREVIEW] Using extracted curriculum pattern:', `${beforeLevel}${levelMatch[0]}`);
+        const sourceExamNameElement = document.getElementById('sourceExamName');
+        const sourceExamNameText = sourceExamNameElement?.textContent || '';
+        
+        if (sourceExamNameText && sourceExamNameText !== 'Loading...') {
+            const curriculumMatch = sourceExamNameText.match(/(CORE|ASCENT|EDGE|PINNACLE)\s+(\w+)\s+Lv(\d+)/);
+            if (curriculumMatch) {
+                const curriculum = `${curriculumMatch[1]} ${curriculumMatch[2]} Lv${curriculumMatch[3]}`;
+                nameParts.push(curriculum);
+                console.log('[COPY_MODAL_PREVIEW] Using source curriculum (fallback):', curriculum);
+            } else {
+                // Try to extract any curriculum-like pattern
+                const levelMatch = sourceExamNameText.match(/Lv\d+/);
+                if (levelMatch) {
+                    const beforeLevel = sourceExamNameText.substring(
+                        sourceExamNameText.lastIndexOf('-') + 1,
+                        sourceExamNameText.indexOf(levelMatch[0])
+                    ).trim();
+                    if (beforeLevel) {
+                        nameParts.push(`${beforeLevel}${levelMatch[0]}`);
+                        console.log('[COPY_MODAL_PREVIEW] Using extracted curriculum pattern:', `${beforeLevel}${levelMatch[0]}`);
+                    }
                 }
             }
         }
@@ -2173,9 +2176,16 @@ function updateCopyExamNamePreview() {
         previewName += customSuffix.startsWith('_') ? customSuffix : `_${customSuffix}`;
     }
     
-    previewText.textContent = previewName;
-    console.log('[COPY_MODAL_PREVIEW] Generated preview:', previewName);
-}
+        previewText.textContent = previewName;
+        console.log('[COPY_MODAL_PREVIEW] Generated preview:', previewName);
+    } catch (error) {
+        console.error('[COPY_MODAL_PREVIEW] Error updating preview:', error);
+        const previewText = document.getElementById('previewText');
+        if (previewText) {
+            previewText.textContent = 'Error generating preview';
+        }
+    }
+};
 
 // Populate timeslots based on exam type
 function initializeCopyExamEventListeners() {
