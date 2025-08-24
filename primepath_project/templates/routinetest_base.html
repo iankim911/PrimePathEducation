@@ -21,9 +21,9 @@
     
     <!-- Console Debugging for RoutineTest -->
     <script>
-        console.log('%c[RoutineTest] Page Loading...', 'color: #1B2951; font-weight: bold;');
+        console.log('%c[RoutineTest] Page Loading...', 'color: #00A65E; font-weight: bold;');
         console.log('[RoutineTest] Navigation: Tab-based horizontal layout');
-        console.log('[RoutineTest] Theme: PrimePath Navy (#1B2951)');
+        console.log('[RoutineTest] Theme: BCG Green (#00A65E)');
         console.log('[RoutineTest] Module: Continuous Assessment Platform');
         window.ROUTINETEST_DEBUG = true;
         window.MATRIX_TAB_VERSION = '3.0';
@@ -43,33 +43,33 @@
             color: #333;
         }
         
-        /* Header Section - PrimePath Navy Theme */
+        /* Header Section - BCG Forest Green Theme */
         .header {
-            background: linear-gradient(135deg, #1B2951 0%, #0F1B3C 100%);  /* PrimePath Navy gradient */
+            background-color: #1B5E20;  /* Darker, more muted green */
             color: white;
             padding: 20px 0;
             margin-bottom: 30px;
-            box-shadow: 0 4px 8px rgba(27, 41, 81, 0.15);
         }
         
         .header h1 {
             text-align: center;
             font-size: 2rem;
+            color: white; /* Ensure header text is white for readability */
         }
         
         .header {
             position: relative; /* For mode toggle positioning */
         }
         
-        /* Navigation Tabs - PrimePath Navy Theme */
+        /* Navigation Tabs - BCG Forest Green Theme */
         .nav-tabs {
-            background-color: #0F1B3C;  /* Dark PrimePath Navy */
+            background-color: #0D4F1F;  /* Very dark, muted green */
             padding: 0;
             margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(27, 41, 81, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             overflow-x: auto;  /* Allow horizontal scroll for many tabs */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
-            border-bottom: 2px solid #2A3F6B;  /* Visual separation */
+            border-bottom: 2px solid #2E7D32;  /* Visual separation */
         }
         
         /* Custom scrollbar for nav tabs */
@@ -78,11 +78,11 @@
         }
         
         .nav-tabs::-webkit-scrollbar-track {
-            background: #0F1B3C;
+            background: #0A3D15;
         }
         
         .nav-tabs::-webkit-scrollbar-thumb {
-            background: #2A3F6B;
+            background: #2E7D32;
             border-radius: 2px;
         }
         
@@ -132,13 +132,13 @@
             color: #0D4F1F !important;  /* Very dark green text - contrast ratio > 7:1 */
             font-weight: 700;
             box-shadow: inset 0 -3px 0 #2E7D32;
-            border-top: 2px solid #2E7D32;  /* Top accent for better visibility */
+            border-top: 2px solid #2E7D32;  /* Green accent for better visibility */
             position: relative;
         }
         
         /* Focus styles for keyboard navigation */
         .nav-tabs a:focus {
-            outline: 2px solid #81C784;
+            outline: 2px solid #2E7D32;
             outline-offset: 2px;
             background-color: #1B5E20;
         }
@@ -239,32 +239,34 @@
             margin-left: 20px;
         }
         
-        /* Buttons - Darker Muted Green Theme */
+        /* Buttons - PrimePath Navy Theme */
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #2E7D32;  /* Darker muted green */
+            background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
             color: white;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: var(--border-radius-pill);
             border: none;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: var(--brand-shadow-sm);
         }
         
         .btn:hover {
-            background-color: #1B5E20;  /* Even darker on hover */
+            background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+            box-shadow: var(--brand-shadow-md);
         }
         
         .btn-secondary {
-            background-color: #558B57;  /* Muted sage green */
+            background: linear-gradient(135deg, var(--brand-dark-gray) 0%, #495057 100%);
         }
         
         .btn-secondary:hover {
-            background-color: #3D6F3F;  /* Darker sage green */
+            background: linear-gradient(135deg, #495057 0%, var(--brand-dark-gray) 100%);
         }
         
         /* Danger button - MUST stay red for destructive actions */
@@ -302,7 +304,7 @@
             color: white !important;
         }
         
-        /* Form Controls - Softer Green Theme */
+        /* Form Controls - PrimePath Brand Theme */
         .form-group {
             margin-bottom: 20px;
         }
@@ -310,23 +312,23 @@
         .form-control {
             width: 100%;
             padding: 10px;
-            border: 1px solid #90A4AE;  /* Muted gray-green border */
-            border-radius: 4px;
+            border: 2px solid var(--brand-gray);
+            border-radius: var(--border-radius-sm);
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
         }
         
         .form-control:focus {
             outline: none;
-            border-color: #2E7D32;  /* Darker green on focus */
-            box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.20);
+            border-color: var(--primepath-navy);
+            box-shadow: 0 0 0 0.2rem rgba(27, 41, 81, 0.1);
         }
         
         label {
             display: block;
             margin-bottom: 5px;
-            font-weight: 500;
-            color: #263238;  /* Dark gray for better readability */
+            font-weight: 600;
+            color: var(--primepath-navy);
         }
     </style>
     
@@ -344,8 +346,8 @@
     </script>
     <!-- Debug Console Logger -->
     <script>
-        console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #00A65E; color: white; padding: 5px; border-radius: 3px;');
-        console.log('Theme: BCG Green (#00A65E)');
+        console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #1B2951; color: white; padding: 5px; border-radius: 3px;');
+        console.log('Theme: PrimePath Navy (#1B2951)');
         console.log('Navigation: Horizontal Tab Layout');
         console.log('Module: Exam Management System');
         console.log('User: {% if user.is_authenticated %}{{ user.username }}{% else %}Anonymous{% endif %}');
@@ -434,7 +436,7 @@
     <!-- Navigation JavaScript with Console Debugging -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.group('%c[RoutineTest Navigation] Initialization', 'color: #00A65E; font-weight: bold;');
+            console.group('%c[RoutineTest Navigation] Initialization', 'color: #1B2951; font-weight: bold;');
             
             // Log navigation state
             const navTabs = document.querySelectorAll('.nav-tabs a');
@@ -451,7 +453,7 @@
             navTabs.forEach(tab => {
                 tab.addEventListener('click', function(e) {
                     const navName = this.getAttribute('data-nav') || this.textContent.trim();
-                    console.log(`%c[RoutineTest Nav Click] ${navName}`, 'color: #00A65E;');
+                    console.log(`%c[RoutineTest Nav Click] ${navName}`, 'color: #1B2951;');
                     console.log('Target URL:', this.href);
                     console.log('Timestamp:', new Date().toISOString());
                     
@@ -481,7 +483,7 @@
             
             // Log theme confirmation
             console.log('[RoutineTest Theme Check]', {
-                primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--color-primary') || '#00A65E',
+                primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primepath-navy') || '#1B2951',
                 headerBg: getComputedStyle(document.querySelector('.header')).background,
                 navBg: getComputedStyle(document.querySelector('.nav-tabs')).backgroundColor
             });

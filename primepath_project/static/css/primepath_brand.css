@@ -5,10 +5,10 @@
 
 /* Brand Color Palette */
 :root {
-    /* Primary Brand Colors */
-    --primepath-navy: #1B2951;
-    --primepath-navy-dark: #0F1B3C;
-    --primepath-navy-light: #2A3F6B;
+    /* Primary Brand Colors - Improved for better accessibility */
+    --primepath-navy: #2C5282;        /* Lighter navy blue for better contrast */
+    --primepath-navy-dark: #2A4365;   /* Moderately dark navy */
+    --primepath-navy-light: #3182CE;  /* Light navy with good contrast */
     
     /* Program Colors (from brand roadmap) */
     --program-core: #5EBEC4;        /* Teal/Turquoise */
@@ -372,6 +372,86 @@ h1, h2, h3, h4, h5, h6 {
     outline: none;
 }
 
+/* Additional UI Improvements for Better Accessibility */
+.ownership-tabs .ownership-tab {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    color: #495057 !important;
+}
+
+.ownership-tabs .ownership-tab.active {
+    background: linear-gradient(135deg, #E8F5E9, #F1F8F4) !important;
+    color: #0D4F1F !important;
+    font-weight: 700 !important;
+}
+
+.exam-type-tabs .exam-type-tab {
+    background: #f8f9fa !important;
+    color: #6c757d !important;
+}
+
+.exam-type-tabs .exam-type-tab.active {
+    background: #E8F5E9 !important;
+    color: #0D4F1F !important;
+    font-weight: 600 !important;
+}
+
+/* Fix any remaining dark navy sections with WCAG AA compliance */
+.dark-section, [style*="background: var(--primepath-navy)"], [style*="background-color: var(--primepath-navy)"] {
+    background: linear-gradient(135deg, #2C5282 0%, #2A4365 100%) !important;
+    color: white !important;
+    /* Ensure minimum contrast ratio of 4.5:1 for WCAG AA */
+}
+
+/* WCAG Accessibility Improvements */
+.btn, button, .quick-action-btn {
+    /* Ensure focus indicators are visible */
+    outline: none;
+    position: relative;
+}
+
+.btn:focus, button:focus, .quick-action-btn:focus {
+    outline: 3px solid #007bff !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3) !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .quick-action-btn, .btn-quick-action {
+        border-width: 3px !important;
+        font-weight: 700 !important;
+    }
+    
+    .ownership-tabs .ownership-tab.active,
+    .exam-type-tabs .exam-type-tab.active {
+        border: 3px solid #000 !important;
+        font-weight: 700 !important;
+    }
+}
+
+/* Quick action buttons improved styling */
+.quick-action-btn, .btn-quick-action {
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%) !important;
+    color: white !important;
+    border: 2px solid #1B5E20 !important;
+    font-weight: 600 !important;
+    padding: 16px 24px !important;
+    border-radius: 8px !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.quick-action-btn:hover, .btn-quick-action:hover {
+    background: linear-gradient(135deg, #388E3C 0%, #43A047 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3) !important;
+    color: white !important;
+    text-decoration: none !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .brand-navbar .navbar-brand {
@@ -385,5 +465,10 @@ h1, h2, h3, h4, h5, h6 {
     .brand-tabs .nav-link {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
+    }
+    
+    .quick-action-btn, .btn-quick-action {
+        padding: 14px 20px !important;
+        font-size: 0.95rem !important;
     }
 }

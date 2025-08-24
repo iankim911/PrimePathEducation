@@ -175,6 +175,10 @@ def classes_exams_unified_view(request):
             'cache_bust': timezone.now().timestamp()
         }
         
+        # Add available classes for the class access request modal - will be populated later after we know user's assignments
+        # We need to wait until we get my_class_codes to filter properly
+        context['available_classes'] = []  # Initialize empty, populate after getting assignments
+        
         # SECTION 1: Get teacher's class assignments
         if is_admin:
             # Admin has access to all classes - get from actual Class model
@@ -299,6 +303,34 @@ def classes_exams_unified_view(request):
             "completed_sessions": exam_stats['completed_sessions'],
             "pending_sessions": exam_stats['pending_sessions']
         }
+        
+        # SECTION 2.5: Populate available classes for Request Access modal (excluding classes user already has access to)
+        from primepath_routinetest.class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
+        available_classes = []
+        
+        # Get existing pending/approved requests to also exclude them
+        existing_requests = set()
+        if teacher and not is_admin:
+            existing_request_codes = ClassAccessRequest.objects.filter(
+                teacher=teacher,
+                status__in=['PENDING', 'APPROVED']
+            ).values_list('class_code', flat=True)
+            existing_requests = set(existing_request_codes)
+        
+        # Filter out classes user already has access to + pending/approved requests
+        for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
+            # Skip if user already has access to this class
+            if code not in my_class_codes and code not in existing_requests:
+                available_classes.append({
+                    'class_code': code,
+                    'class_name': f"{code} - {curriculum}"
+                })
+        
+        # Update context with filtered available classes
+        context['available_classes'] = available_classes
+        
+        logger.info(f"[REQUEST_ACCESS_FILTER] User has access to {len(my_class_codes)} classes, {len(existing_requests)} pending/approved requests, showing {len(available_classes)} available classes for request")
+        print(f"[REQUEST_ACCESS_FILTER] Filtered dropdown: User classes: {len(my_class_codes)}, Available for request: {len(available_classes)}")
         
         # SECTION 3: Build schedule matrix data (RESTORED FULL FUNCTIONALITY)
         # Matrix uses months (JAN-DEC) for Review exams and quarters (Q1-Q4) for Quarterly exams

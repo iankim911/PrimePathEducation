@@ -34,6 +34,10 @@ urlpatterns = [
     path('RoutineTest/', include('primepath_routinetest.urls')),
     path('api/RoutineTest/', include('primepath_routinetest.api_urls')),
     
+    # ============= STUDENT INTERFACE URLs =============
+    # Student portal for accessing exams and classes
+    path('student/', include('primepath_student.urls')),
+    
     # ============= BACKWARD COMPATIBILITY REDIRECTS =============
     # These ensure old URLs still work by redirecting to new structure
     path('placement/', RedirectView.as_view(url='/PlacementTest/', permanent=False)),

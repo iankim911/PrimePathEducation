@@ -1,0 +1,103 @@
+{% extends 'student_base.html' %}
+
+{% block title %}{{ class_display }} - PrimePath Student Portal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>{{ class_display }}</h2>
+        <a href="{% url 'primepath_student:dashboard' %}" class="btn" 
+           style="background-color: #666; color: white;">
+            ← Back to My Classes
+        </a>
+    </div>
+</div>
+
+<!-- Active Exams Section -->
+<div class="card">
+    <h3 style="color: #E53935; margin-bottom: 15px;">📝 Take Exam</h3>
+    
+    {% if active_exams %}
+        {% for launch in active_exams %}
+        <div style="background-color: #FFF3E0; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #FF6B6B;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="color: #333; margin-bottom: 10px;">{{ launch.exam.name }}</h4>
+                    <p style="color: #666; margin-bottom: 5px;">
+                        Duration: {{ launch.exam.duration }} minutes
+                    </p>
+                    <p style="color: #E53935; font-weight: 500;">
+                        Expires: {{ launch.expires_at|date:"F j, Y g:i A" }}
+                    </p>
+                </div>
+                <div>
+                    <button class="btn btn-danger" onclick="startExam('{{ launch.id }}')">
+                        Start Exam
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 30px; background-color: #F5F5F5; border-radius: 8px;">
+            <p style="color: #999;">No exams available at this time</p>
+            <p style="color: #666; margin-top: 10px;">Check back later or wait for your teacher to launch an exam</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Past Exams Section -->
+<div class="card">
+    <h3 style="color: #1565C0; margin-bottom: 15px;">📊 Past Exams</h3>
+    
+    {% if past_exams %}
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #F5F5F5;">
+                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Exam Name</th>
+                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Date Taken</th>
+                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">Score</th>
+                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exam in past_exams %}
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ exam.name }}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">{{ exam.completed_at|date:"M j, Y" }}</td>
+                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">
+                        <strong>{{ exam.score }}%</strong>
+                    </td>
+                    <td style="padding: 10px; text-align: center; border-bottom: 1px solid #eee;">
+                        <a href="#" class="btn btn-primary" style="padding: 5px 10px; font-size: 14px;">View Results</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div style="text-align: center; padding: 30px; background-color: #F5F5F5; border-radius: 8px;">
+            <p style="color: #999;">No exam history yet</p>
+            <p style="color: #666; margin-top: 10px;">Your completed exams will appear here</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Class Information -->
+<div class="card" style="background-color: #F5F5F5;">
+    <h3 style="color: #666; margin-bottom: 10px;">Class Information</h3>
+    <p><strong>Class Code:</strong> {{ class_code }}</p>
+    <p><strong>Enrolled Since:</strong> {{ assignment.assigned_at|date:"F j, Y" }}</p>
+    <p><strong>Status:</strong> <span style="color: #43A047;">Active</span></p>
+</div>
+
+<script>
+function startExam(launchId) {
+    if (confirm('Are you ready to start the exam? Once started, you must complete it in one sitting.')) {
+        // This will be implemented when we create the exam-taking interface
+        alert('Exam interface will be implemented in Phase 3');
+        // window.location.href = '/student/exam/start/' + launchId + '/';
+    }
+}
+</script>
+{% endblock %}

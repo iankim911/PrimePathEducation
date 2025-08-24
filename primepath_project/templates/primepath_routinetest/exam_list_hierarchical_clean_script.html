@@ -1,0 +1,40 @@
+<!-- Copy Exam Modal JavaScript - Clean Implementation -->
+<script>
+// Minimal placeholder functions to prevent errors until the comprehensive script loads
+console.log('[COPY_EXAM_CLEAN] Initializing clean copy exam modal system...');
+
+// Placeholder functions to prevent errors until the main script loads
+window.openCopyModal = function(examId, examName) {
+    console.log('[COPY_EXAM_PLACEHOLDER] Copy modal function called, waiting for main script...');
+    if (typeof window.openCopyModal.originalFunction === 'function') {
+        // Main script has loaded, use the real function
+        window.openCopyModal.originalFunction(examId, examName);
+    } else {
+        // Main script not loaded yet, show loading message
+        setTimeout(function() {
+            if (typeof window.openCopyModal.originalFunction === 'function') {
+                window.openCopyModal.originalFunction(examId, examName);
+            } else {
+                alert('Copy Exam feature is still loading. Please try again in a moment.');
+            }
+        }, 500);
+    }
+};
+
+window.closeCopyModal = function() {
+    console.log('[COPY_EXAM_PLACEHOLDER] Close modal function called');
+    if (typeof window.closeCopyModal.originalFunction === 'function') {
+        window.closeCopyModal.originalFunction();
+    } else {
+        // Fallback close functionality
+        const modal = document.getElementById('copyExamModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    }
+};
+
+console.log('[COPY_EXAM_CLEAN] Placeholder functions ready. Comprehensive script will replace these...');
+</script>

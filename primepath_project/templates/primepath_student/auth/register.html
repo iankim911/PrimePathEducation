@@ -1,0 +1,86 @@
+{% extends 'student_base.html' %}
+
+{% block title %}Student Registration - PrimePath{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <h2>Student Registration</h2>
+    
+    {% if errors %}
+    <div style="background-color: #FFCDD2; color: #C62828; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+        <ul style="margin: 0; padding-left: 20px;">
+            {% for error in errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label for="phone_number" style="display: block; margin-bottom: 5px; font-weight: 500;">Phone Number *</label>
+            <input type="tel" id="phone_number" name="phone_number" 
+                   value="{{ form_data.phone_number|default:'' }}"
+                   placeholder="e.g., 01012345678"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                   required>
+            <small style="color: #666;">This will be your primary login credential</small>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="student_id" style="display: block; margin-bottom: 5px; font-weight: 500;">Student ID (Optional)</label>
+            <input type="text" id="student_id" name="student_id" 
+                   value="{{ form_data.student_id|default:'' }}"
+                   placeholder="Leave blank to auto-generate"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <small style="color: #666;">Create your own or we'll generate one for you</small>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="first_name" style="display: block; margin-bottom: 5px; font-weight: 500;">First Name *</label>
+            <input type="text" id="first_name" name="first_name" 
+                   value="{{ form_data.first_name|default:'' }}"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                   required>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="last_name" style="display: block; margin-bottom: 5px; font-weight: 500;">Last Name *</label>
+            <input type="text" id="last_name" name="last_name" 
+                   value="{{ form_data.last_name|default:'' }}"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                   required>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="password" style="display: block; margin-bottom: 5px; font-weight: 500;">Password *</label>
+            <input type="password" id="password" name="password" 
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                   required>
+            <small style="color: #666;">At least 8 characters</small>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="password_confirm" style="display: block; margin-bottom: 5px; font-weight: 500;">Confirm Password *</label>
+            <input type="password" id="password_confirm" name="password_confirm" 
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                   required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+    </form>
+    
+    <div style="margin-top: 20px; text-align: center; padding-top: 20px; border-top: 1px solid #eee;">
+        <p>Already have an account? <a href="{% url 'primepath_student:login' %}" style="color: #1565C0;">Login here</a></p>
+        
+        <div style="margin-top: 15px;">
+            <a href="{% url 'primepath_student:kakao_login' %}" class="btn" 
+               style="background-color: #FEE500; color: #000; width: 100%; display: block;">
+                Login with Kakao
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

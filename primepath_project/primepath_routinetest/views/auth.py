@@ -106,7 +106,7 @@ def routinetest_login(request):
         'app_name': 'RoutineTest'
     }
     
-    return render(request, 'primepath_routinetest/auth/login.html', context)
+    return render(request, 'primepath_routinetest/auth/login_brand.html', context)
 
 @login_required
 def routinetest_logout(request):

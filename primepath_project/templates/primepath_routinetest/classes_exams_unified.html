@@ -59,11 +59,11 @@
         gap: 10px;
         margin-bottom: 20px;
         padding: 10px 15px;
-        background: #e3f2fd;
-        border: 1px solid #2196f3;
+        background: #e8f5e9;
+        border: 1px solid #2e7d32;
         border-radius: 8px;
         width: fit-content;
-        color: #1976d2;
+        color: #1b5e20;
     }
     
     .badge-icon {
@@ -248,10 +248,16 @@
     /* Program-based Organization */
     .program-section {
         margin-bottom: 35px;
-        background: #f8f9fa;
+        background: #f8f9fa !important;
         border-radius: 12px;
         padding: 20px;
         border: 1px solid #dee2e6;
+    }
+    
+    /* Force proper colors for all program headers - override any cached styles */
+    .program-header {
+        background: #f8f9fa !important;
+        color: inherit !important;
     }
     
     .program-header {
@@ -265,10 +271,10 @@
         user-select: none;
     }
     
-    .program-header.core { border-bottom-color: #4CAF50; }
-    .program-header.ascent { border-bottom-color: #2196F3; }
-    .program-header.edge { border-bottom-color: #FF9800; }
-    .program-header.pinnacle { border-bottom-color: #9C27B0; }
+    .program-header.core { border-bottom-color: #2E7D32; }
+    .program-header.ascent { border-bottom-color: #1B5E20; }
+    .program-header.edge { border-bottom-color: #0D4F1F; }
+    .program-header.pinnacle { border-bottom-color: #00A65E; }
     
     .program-title {
         font-size: 20px;
@@ -278,10 +284,21 @@
         gap: 10px;
     }
     
-    .program-title.core { color: #4CAF50; }
-    .program-title.ascent { color: #2196F3; }
-    .program-title.edge { color: #FF9800; }
-    .program-title.pinnacle { color: #9C27B0; }
+    .program-title.core { color: #2E7D32 !important; background: transparent !important; }
+    .program-title.ascent { color: #1B5E20 !important; background: transparent !important; }
+    .program-title.edge { color: #0D4F1F !important; background: transparent !important; }
+    .program-title.pinnacle { color: #00A65E !important; background: transparent !important; }
+    
+    /* Ensure no teal/turquoise backgrounds anywhere */
+    .program-section, .program-header, .program-title, .program-classes {
+        background-color: #f8f9fa !important;
+    }
+    
+    /* Override any potential inline styles or cached CSS */
+    .program-header.core {
+        background-color: #f8f9fa !important;
+        border-bottom-color: #2E7D32 !important;
+    }
     
     .program-summary {
         display: flex;
@@ -342,7 +359,7 @@
     }
     
     .class-card.complete {
-        border-left: 4px solid #4CAF50;
+        border-left: 4px solid #2E7D32;
     }
     
     .class-header {
@@ -366,12 +383,12 @@
     }
     
     .badge-full {
-        background: #4CAF50;
+        background: #2E7D32;
         color: white;
     }
     
     .badge-limited {
-        background: #FF9800;
+        background: #1B5E20;
         color: white;
     }
     
@@ -411,7 +428,7 @@
         margin-right: 5px;
     }
     
-    .status-indicator.complete { background: #4CAF50; }
+    .status-indicator.complete { background: #2E7D32; }
     .status-indicator.incomplete { background: #ff9800; }
     .status-indicator.not-started { background: #f44336; }
     
@@ -434,7 +451,7 @@
     }
     
     .exam-count.count-multiple {
-        color: #1976D2;  /* Blue for 2+ */
+        color: #1B5E20;  /* Dark green for 2+ */
     }
     
     /* Legacy support */
@@ -457,8 +474,8 @@
     .curriculum-badge {
         display: inline-block;
         padding: 3px 6px;
-        background: #E3F2FD;
-        color: #1565C0;
+        background: #E8F5E9;
+        color: #1B5E20;
         border-radius: 4px;
         font-size: 10px;
         font-weight: 500;
@@ -493,7 +510,7 @@
     }
     
     .exam-indicator.exam-review {
-        background: #4CAF50;
+        background: #2E7D32;
     }
     
     .exam-indicator.exam-quarterly {
@@ -501,7 +518,7 @@
     }
     
     .exam-review {
-        background: #2196F3;
+        background: #2E7D32;
         color: white;
     }
     
@@ -692,7 +709,7 @@
     }
     
     .btn-edit {
-        background: #4CAF50;
+        background: #2E7D32;
         color: white;
         border: none;
         padding: 4px 12px;
@@ -898,7 +915,7 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
                     <!-- Request Access Button for Teachers -->
                     {% if not is_admin %}
                     <div class="request-access-section" style="margin-top: 20px; text-align: center;">
-                        <button type="button" class="btn btn-primary" id="requestAccessBtn" onclick="openRequestAccessModal()" style="background: #4CAF50; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin: 0 auto;">
+                        <button type="button" class="btn btn-primary" id="requestAccessBtn" onclick="openRequestAccessModal()" style="background: #2E7D32; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin: 0 auto;">
                             <span>➕</span>
                             <span>Request Access to Classes</span>
                         </button>
@@ -1383,30 +1400,41 @@ console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
                         <label for="requestedClass" style="font-weight: 500; color: #2c3e50; margin-bottom: 8px; display: block;">Class Code *</label>
                         <select id="requestedClass" name="class_code" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px;">
                             <option value="">-- Select a class --</option>
-                            <optgroup label="Primary School">
-                                <option value="PRIMARY_1A">Primary Grade 1A</option>
-                                <option value="PRIMARY_1B">Primary Grade 1B</option>
-                                <option value="PRIMARY_2A">Primary Grade 2A</option>
-                                <option value="PRIMARY_2B">Primary Grade 2B</option>
-                                <option value="PRIMARY_3A">Primary Grade 3A</option>
-                                <option value="PRIMARY_3B">Primary Grade 3B</option>
-                            </optgroup>
-                            <optgroup label="Middle School">
-                                <option value="MIDDLE_7A">Middle School Grade 7A</option>
-                                <option value="MIDDLE_7B">Middle School Grade 7B</option>
-                                <option value="MIDDLE_8A">Middle School Grade 8A</option>
-                                <option value="MIDDLE_8B">Middle School Grade 8B</option>
-                                <option value="MIDDLE_9A">Middle School Grade 9A</option>
-                                <option value="MIDDLE_9B">Middle School Grade 9B</option>
-                            </optgroup>
-                            <optgroup label="High School">
-                                <option value="HIGH_10A">High School Grade 10A</option>
-                                <option value="HIGH_10B">High School Grade 10B</option>
-                                <option value="HIGH_11A">High School Grade 11A</option>
-                                <option value="HIGH_11B">High School Grade 11B</option>
-                                <option value="HIGH_12A">High School Grade 12A</option>
-                                <option value="HIGH_12B">High School Grade 12B</option>
-                            </optgroup>
+                            {% if available_classes %}
+                                {% for class in available_classes %}
+                                    <option value="{{ class.class_code }}">{{ class.class_name }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <!-- Fallback if no dynamic classes available -->
+                                <optgroup label="CORE Program">
+                                    <option value="PS1">PS1 - CORE Phonics Level 1</option>
+                                    <option value="P2">P2 - CORE Phonics Level 3</option>
+                                    <option value="A2">A2 - CORE Sigma Level 1</option>
+                                    <option value="B2">B2 - CORE Sigma Level 2</option>
+                                    <option value="B3">B3 - CORE Sigma Level 3</option>
+                                    <option value="B4">B4 - CORE Elite Level 1</option>
+                                    <option value="B5">B5 - CORE Elite Level 2</option>
+                                    <option value="S2">S2 - CORE Elite Level 3</option>
+                                </optgroup>
+                                <optgroup label="EDGE Program">
+                                    <option value="Young-cho2">Young-cho2 - EDGE Rise Level 1</option>
+                                    <option value="Chung-cho4">Chung-cho4 - EDGE Rise Level 2</option>
+                                    <option value="Chung-cho1">Chung-cho1 - EDGE Rise Level 3</option>
+                                    <option value="SejongM">SejongM - EDGE Pursuit Level 3</option>
+                                    <option value="MAS">MAS - EDGE Pro Level 1</option>
+                                </optgroup>
+                                <optgroup label="ASCENT Program">
+                                    <option value="TaejoC">TaejoC - ASCENT Drive Level 1</option>
+                                    <option value="TaejoD">TaejoD - ASCENT Drive Level 2</option>
+                                    <option value="TaejoE">TaejoE - ASCENT Drive Level 3</option>
+                                    <option value="SungjongM">SungjongM - ASCENT Pro Level 1</option>
+                                    <option value="D2">D2 - ASCENT Nova Level 1</option>
+                                </optgroup>
+                                <optgroup label="PINNACLE Program">
+                                    <option value="High1.SatSun.3-5">High1.SatSun.3-5 - PINNACLE Vision Level 1</option>
+                                    <option value="High1/2.SatSun.11-1">High1/2.SatSun.11-1 - PINNACLE Endeavor Level 2</option>
+                                </optgroup>
+                            {% endif %}
                         </select>
                     </div>
                     
@@ -1442,7 +1470,7 @@ console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
                 <button type="button" class="btn btn-secondary" onclick="closeRequestAccessModal()" style="background: #6c757d; border: none; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
                     Cancel
                 </button>
-                <button type="button" class="btn btn-success" onclick="submitAccessRequest()" id="submitRequestBtn" style="background: #4CAF50; border: none; color: white; padding: 10px 24px; border-radius: 5px; cursor: pointer; font-weight: 500;">
+                <button type="button" class="btn btn-success" onclick="submitAccessRequest()" id="submitRequestBtn" style="background: #2E7D32; border: none; color: white; padding: 10px 24px; border-radius: 5px; cursor: pointer; font-weight: 500;">
                     <span id="submitBtnText">Submit Request</span>
                     <span id="submitBtnLoader" style="display: none;">
                         <span style="display: inline-block; width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; border-top-color: transparent; animation: spin 1s ease-in-out infinite;"></span>

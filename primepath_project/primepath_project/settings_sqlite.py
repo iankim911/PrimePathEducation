@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',  # Required for allauth
     'placement_test',
     'primepath_routinetest',  # New separate routine test app
+    'primepath_student',  # Student interface app
     'core',
     'api',  # API app
     'rest_framework',  # Django REST Framework

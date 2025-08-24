@@ -11,8 +11,12 @@ from django.utils import timezone
 import uuid
 import json
 import logging
+from ..class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
 
 logger = logging.getLogger(__name__)
+
+# Generate class code choices from the curriculum mapping
+CLASS_CODE_CHOICES = [(code, f"{code} - {curriculum}") for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items()]
 
 
 class TeacherClassAssignment(models.Model):
@@ -33,73 +37,7 @@ class TeacherClassAssignment(models.Model):
     )
     class_code = models.CharField(
         max_length=30,
-        choices=[
-            # PRIMARY SCHOOL
-            ('PRIMARY_1A', 'Primary Grade 1A'),
-            ('PRIMARY_1B', 'Primary Grade 1B'),
-            ('PRIMARY_1C', 'Primary Grade 1C'),
-            ('PRIMARY_1D', 'Primary Grade 1D'),
-            ('PRIMARY_2A', 'Primary Grade 2A'),
-            ('PRIMARY_2B', 'Primary Grade 2B'),
-            ('PRIMARY_2C', 'Primary Grade 2C'),
-            ('PRIMARY_2D', 'Primary Grade 2D'),
-            ('PRIMARY_3A', 'Primary Grade 3A'),
-            ('PRIMARY_3B', 'Primary Grade 3B'),
-            ('PRIMARY_3C', 'Primary Grade 3C'),
-            ('PRIMARY_3D', 'Primary Grade 3D'),
-            ('PRIMARY_4A', 'Primary Grade 4A'),
-            ('PRIMARY_4B', 'Primary Grade 4B'),
-            ('PRIMARY_4C', 'Primary Grade 4C'),
-            ('PRIMARY_4D', 'Primary Grade 4D'),
-            ('PRIMARY_5A', 'Primary Grade 5A'),
-            ('PRIMARY_5B', 'Primary Grade 5B'),
-            ('PRIMARY_5C', 'Primary Grade 5C'),
-            ('PRIMARY_5D', 'Primary Grade 5D'),
-            ('PRIMARY_6A', 'Primary Grade 6A'),
-            ('PRIMARY_6B', 'Primary Grade 6B'),
-            ('PRIMARY_6C', 'Primary Grade 6C'),
-            ('PRIMARY_6D', 'Primary Grade 6D'),
-
-            # MIDDLE SCHOOL
-            ('MIDDLE_7A', 'Middle School Grade 7A'),
-            ('MIDDLE_7B', 'Middle School Grade 7B'),
-            ('MIDDLE_7C', 'Middle School Grade 7C'),
-            ('MIDDLE_7D', 'Middle School Grade 7D'),
-            ('MIDDLE_7E', 'Middle School Grade 7E'),
-            ('MIDDLE_7F', 'Middle School Grade 7F'),
-            ('MIDDLE_8A', 'Middle School Grade 8A'),
-            ('MIDDLE_8B', 'Middle School Grade 8B'),
-            ('MIDDLE_8C', 'Middle School Grade 8C'),
-            ('MIDDLE_8D', 'Middle School Grade 8D'),
-            ('MIDDLE_8E', 'Middle School Grade 8E'),
-            ('MIDDLE_8F', 'Middle School Grade 8F'),
-            ('MIDDLE_9A', 'Middle School Grade 9A'),
-            ('MIDDLE_9B', 'Middle School Grade 9B'),
-            ('MIDDLE_9C', 'Middle School Grade 9C'),
-            ('MIDDLE_9D', 'Middle School Grade 9D'),
-            ('MIDDLE_9E', 'Middle School Grade 9E'),
-            ('MIDDLE_9F', 'Middle School Grade 9F'),
-
-            # HIGH SCHOOL
-            ('HIGH_10A', 'High School Grade 10A'),
-            ('HIGH_10B', 'High School Grade 10B'),
-            ('HIGH_10C', 'High School Grade 10C'),
-            ('HIGH_10D', 'High School Grade 10D'),
-            ('HIGH_10E', 'High School Grade 10E'),
-            ('HIGH_10F', 'High School Grade 10F'),
-            ('HIGH_11A', 'High School Grade 11A'),
-            ('HIGH_11B', 'High School Grade 11B'),
-            ('HIGH_11C', 'High School Grade 11C'),
-            ('HIGH_11D', 'High School Grade 11D'),
-            ('HIGH_11E', 'High School Grade 11E'),
-            ('HIGH_11F', 'High School Grade 11F'),
-            ('HIGH_12A', 'High School Grade 12A'),
-            ('HIGH_12B', 'High School Grade 12B'),
-            ('HIGH_12C', 'High School Grade 12C'),
-            ('HIGH_12D', 'High School Grade 12D'),
-            ('HIGH_12E', 'High School Grade 12E'),
-            ('HIGH_12F', 'High School Grade 12F'),
-        ]
+        choices=CLASS_CODE_CHOICES
     )
     access_level = models.CharField(
         max_length=20,
@@ -221,73 +159,7 @@ class ClassAccessRequest(models.Model):
     )
     class_code = models.CharField(
         max_length=30,
-        choices=[
-            # PRIMARY SCHOOL
-            ('PRIMARY_1A', 'Primary Grade 1A'),
-            ('PRIMARY_1B', 'Primary Grade 1B'),
-            ('PRIMARY_1C', 'Primary Grade 1C'),
-            ('PRIMARY_1D', 'Primary Grade 1D'),
-            ('PRIMARY_2A', 'Primary Grade 2A'),
-            ('PRIMARY_2B', 'Primary Grade 2B'),
-            ('PRIMARY_2C', 'Primary Grade 2C'),
-            ('PRIMARY_2D', 'Primary Grade 2D'),
-            ('PRIMARY_3A', 'Primary Grade 3A'),
-            ('PRIMARY_3B', 'Primary Grade 3B'),
-            ('PRIMARY_3C', 'Primary Grade 3C'),
-            ('PRIMARY_3D', 'Primary Grade 3D'),
-            ('PRIMARY_4A', 'Primary Grade 4A'),
-            ('PRIMARY_4B', 'Primary Grade 4B'),
-            ('PRIMARY_4C', 'Primary Grade 4C'),
-            ('PRIMARY_4D', 'Primary Grade 4D'),
-            ('PRIMARY_5A', 'Primary Grade 5A'),
-            ('PRIMARY_5B', 'Primary Grade 5B'),
-            ('PRIMARY_5C', 'Primary Grade 5C'),
-            ('PRIMARY_5D', 'Primary Grade 5D'),
-            ('PRIMARY_6A', 'Primary Grade 6A'),
-            ('PRIMARY_6B', 'Primary Grade 6B'),
-            ('PRIMARY_6C', 'Primary Grade 6C'),
-            ('PRIMARY_6D', 'Primary Grade 6D'),
-
-            # MIDDLE SCHOOL
-            ('MIDDLE_7A', 'Middle School Grade 7A'),
-            ('MIDDLE_7B', 'Middle School Grade 7B'),
-            ('MIDDLE_7C', 'Middle School Grade 7C'),
-            ('MIDDLE_7D', 'Middle School Grade 7D'),
-            ('MIDDLE_7E', 'Middle School Grade 7E'),
-            ('MIDDLE_7F', 'Middle School Grade 7F'),
-            ('MIDDLE_8A', 'Middle School Grade 8A'),
-            ('MIDDLE_8B', 'Middle School Grade 8B'),
-            ('MIDDLE_8C', 'Middle School Grade 8C'),
-            ('MIDDLE_8D', 'Middle School Grade 8D'),
-            ('MIDDLE_8E', 'Middle School Grade 8E'),
-            ('MIDDLE_8F', 'Middle School Grade 8F'),
-            ('MIDDLE_9A', 'Middle School Grade 9A'),
-            ('MIDDLE_9B', 'Middle School Grade 9B'),
-            ('MIDDLE_9C', 'Middle School Grade 9C'),
-            ('MIDDLE_9D', 'Middle School Grade 9D'),
-            ('MIDDLE_9E', 'Middle School Grade 9E'),
-            ('MIDDLE_9F', 'Middle School Grade 9F'),
-
-            # HIGH SCHOOL
-            ('HIGH_10A', 'High School Grade 10A'),
-            ('HIGH_10B', 'High School Grade 10B'),
-            ('HIGH_10C', 'High School Grade 10C'),
-            ('HIGH_10D', 'High School Grade 10D'),
-            ('HIGH_10E', 'High School Grade 10E'),
-            ('HIGH_10F', 'High School Grade 10F'),
-            ('HIGH_11A', 'High School Grade 11A'),
-            ('HIGH_11B', 'High School Grade 11B'),
-            ('HIGH_11C', 'High School Grade 11C'),
-            ('HIGH_11D', 'High School Grade 11D'),
-            ('HIGH_11E', 'High School Grade 11E'),
-            ('HIGH_11F', 'High School Grade 11F'),
-            ('HIGH_12A', 'High School Grade 12A'),
-            ('HIGH_12B', 'High School Grade 12B'),
-            ('HIGH_12C', 'High School Grade 12C'),
-            ('HIGH_12D', 'High School Grade 12D'),
-            ('HIGH_12E', 'High School Grade 12E'),
-            ('HIGH_12F', 'High School Grade 12F'),
-        ]
+        choices=CLASS_CODE_CHOICES
     )
     
     # Request details

@@ -1,5 +1,4 @@
 {% extends "routinetest_base.html" %}
-{% load static %}
 {% load custom_filters %}
 {% load access_display %}
 {# Template Version 6.0 - Hierarchical Library View with Permissions #}
@@ -7,11 +6,6 @@
 {% block title %}Exam Library - RoutineTest{% endblock %}
 
 {% block header %}Exam Library{% endblock %}
-
-{% block extra_css %}
-<!-- PrimePath Brand Override CSS -->
-<link rel="stylesheet" href="{% static 'css/routinetest-brand-override.css' %}?v={% now 'U' %}">
-{% endblock %}
 
 {% block content %}
 <!-- CSRF Token for AJAX requests -->
@@ -339,7 +333,7 @@
     }
     
     .access-badge.co-teacher {
-        background: #1B5E20;
+        background: #2196F3;
         color: white;
     }
     
@@ -1344,6 +1338,27 @@ window.closeCopyModal = function() {
 };
 
 console.log('[COPY_EXAM_CLEAN] Placeholder functions ready. Main script will load shortly...');
+    initTime: Date.now()
+};
+
+// ============================================================================
+// INTERNAL COPY MODAL FUNCTION - Called by the global openCopyModal
+// ============================================================================
+window.openCopyModalInternal = function(examId, examName) {
+    const startTime = performance.now();
+    
+    console.group('%c[COPY MODAL] Opening Modal', 'color: #00A65E; font-weight: bold;');
+    console.log('Exam ID:', examId);
+    console.log('Exam Name:', examName);
+    console.log('Call Stack:', new Error().stack.split('\n')[2].trim());
+    
+    try {
+        // Store current exam info
+        window.CopyModalState.currentExamId = examId;
+        window.CopyModalState.currentExamName = examName;
+        
+        // Find the modal element
+        const modal = document.getElementById('copyExamModal');
         if (!modal) {
             console.error('[COPY MODAL] CRITICAL: Modal element #copyExamModal not found in DOM');
             console.log('Available modal IDs:', Array.from(document.querySelectorAll('[id*="modal"]')).map(el => el.id));
@@ -3231,6 +3246,11 @@ if (document.readyState === 'loading') {
 }
 
 // ============================================================================
+// CLEANUP: Ensure no duplicate functions exist
+// ============================================================================
+console.log('[COPY MODAL] Final verification of functions:');
+console.log('  - window.openCopyModal:', typeof window.openCopyModal);
+console.log('  - window.closeCopyModal:', typeof window.closeCopyModal);
 </script>
 
 <!-- Place the curriculum data JSON script tag here to avoid rendering issues -->

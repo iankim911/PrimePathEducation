@@ -27,7 +27,7 @@ urlpatterns.extend(admin_patterns)
 urlpatterns.extend(api_patterns)
 urlpatterns.extend(auth_patterns)
 
-# Add registration URLs
+# Add registration URLs (namespace is defined by app_name in urls_registration.py)
 urlpatterns += [
     path('', include('core.urls_registration')),
 ]

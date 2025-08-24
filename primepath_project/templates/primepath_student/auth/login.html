@@ -1,0 +1,41 @@
+{% extends 'student_base.html' %}
+
+{% block title %}Student Login - PrimePath{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 400px; margin: 0 auto;">
+    <h2>Student Login</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label for="login_id" style="display: block; margin-bottom: 5px; font-weight: 500;">Phone Number or Student ID</label>
+            <input type="text" id="login_id" name="login_id" 
+                   placeholder="Enter phone number or student ID"
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                   required autofocus>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label for="password" style="display: block; margin-bottom: 5px; font-weight: 500;">Password</label>
+            <input type="password" id="password" name="password" 
+                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+                   required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+    </form>
+    
+    <div style="margin-top: 20px; text-align: center; padding-top: 20px; border-top: 1px solid #eee;">
+        <p>Don't have an account? <a href="{% url 'primepath_student:register' %}" style="color: #1565C0;">Register here</a></p>
+        
+        <div style="margin-top: 15px;">
+            <a href="{% url 'primepath_student:kakao_login' %}" class="btn" 
+               style="background-color: #FEE500; color: #000; width: 100%; display: block;">
+                Login with Kakao
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

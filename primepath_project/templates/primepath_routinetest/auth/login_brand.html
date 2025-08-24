@@ -1,0 +1,413 @@
+{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Login - PrimePath</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- PrimePath Brand CSS -->
+    <link rel="stylesheet" href="{% static 'css/primepath_brand.css' %}">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Gradient Background */
+        .login-wrapper {
+            background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--program-edge) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+        
+        /* Animated Background Pattern */
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        /* Login Card */
+        .login-card {
+            background: var(--brand-white);
+            border-radius: var(--border-radius-lg);
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Logo Circle */
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem auto;
+            box-shadow: 0 4px 12px rgba(27, 41, 81, 0.2);
+        }
+        
+        .logo-container .logo-text {
+            color: var(--brand-white);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        /* Title Section */
+        .login-title {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-title h1 {
+            color: var(--primepath-navy);
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-subtitle {
+            text-align: center;
+            color: var(--brand-text-light);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primepath-navy);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--brand-gray);
+            border-radius: var(--border-radius-sm);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--brand-white);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primepath-navy);
+            box-shadow: 0 0 0 0.2rem rgba(27, 41, 81, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: #adb5bd;
+        }
+        
+        /* Remember Me */
+        .remember-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .remember-section input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .remember-section label {
+            color: var(--brand-text-light);
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        /* Buttons */
+        .btn-login {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
+            color: var(--brand-white);
+            border: none;
+            border-radius: var(--border-radius-pill);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(27, 41, 81, 0.2);
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(27, 41, 81, 0.3);
+            background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%);
+        }
+        
+        /* Divider */
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: var(--brand-gray);
+        }
+        
+        .divider::before {
+            left: 0;
+        }
+        
+        .divider::after {
+            right: 0;
+        }
+        
+        .divider span {
+            background: var(--brand-white);
+            padding: 0 1rem;
+            color: var(--brand-text-light);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Kakao Button */
+        .btn-kakao {
+            width: 100%;
+            padding: 0.875rem;
+            background: #FEE500;
+            color: #000000;
+            border: none;
+            border-radius: var(--border-radius-pill);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(254, 229, 0, 0.3);
+        }
+        
+        .btn-kakao:hover {
+            background: #FDD835;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(254, 229, 0, 0.4);
+        }
+        
+        .btn-kakao svg {
+            margin-right: 0.5rem;
+        }
+        
+        /* Footer Links */
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--brand-gray);
+        }
+        
+        .login-footer p {
+            color: var(--brand-text-light);
+            font-size: 0.9rem;
+        }
+        
+        .login-footer a {
+            color: var(--primepath-navy);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+        
+        .login-footer a:hover {
+            color: var(--primepath-navy-light);
+            text-decoration: underline;
+        }
+        
+        /* Back to Home Link */
+        .back-home {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .back-home a {
+            color: var(--primepath-navy);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .back-home a:hover {
+            color: var(--primepath-navy-light);
+        }
+        
+        .back-home a::before {
+            content: '←';
+            margin-right: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef5350;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #66bb6a;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .login-title h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Loading State */
+        .btn-login:disabled,
+        .btn-kakao:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-card">
+            <!-- Logo -->
+            <div class="logo-container">
+                <span class="logo-text">P</span>
+            </div>
+            
+            <!-- Title -->
+            <div class="login-title">
+                <h1>Teacher Login</h1>
+            </div>
+            <p class="login-subtitle">Access your PrimePath dashboard</p>
+            
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Login Form -->
+            <form method="post" action="{% url 'RoutineTest:login' %}" id="loginForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="username">Username or Email</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                
+                <div class="remember-section">
+                    <input type="checkbox" id="remember_me" name="remember_me">
+                    <label for="remember_me">Remember me for 2 weeks</label>
+                </div>
+                
+                <button type="submit" class="btn-login" id="loginBtn">Sign In</button>
+            </form>
+            
+            <!-- Divider -->
+            <div class="divider">
+                <span>or</span>
+            </div>
+            
+            <!-- Kakao Login -->
+            <a href="{% url 'kakao_login' %}" class="btn-kakao">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path fill="#000000" d="M10 0C4.48 0 0 3.58 0 8c0 3.54 2.9 6.54 6.91 7.58.06-.78.11-1.98 0-2.83-.1-.73-.66-3.12-.66-3.12s-.17-.34-.17-.83c0-.78.45-1.36.99-1.36.47 0 .7.35.7.77 0 .47-.3 1.17-.45 1.82-.13.54.27.98.8.98 1 0 1.67-.97 1.67-2.38 0-1.24-.89-2.1-2.17-2.1-1.48 0-2.35 1.1-2.35 2.24 0 .44.17.92.39 1.18.04.05.05.1.04.15-.04.17-.13.54-.15.62-.02.1-.08.12-.19.07-.65-.3-1.06-1.24-1.06-2 0-1.63 1.18-3.13 3.42-3.13 1.8 0 3.19 1.28 3.19 2.99 0 1.78-1.12 3.22-2.68 3.22-.52 0-1.02-.27-1.18-.59 0 0-.26.99-.32 1.23-.12.44-.44 1-.66 1.34.5.15 1.02.23 1.57.23 5.52 0 10-3.58 10-8S15.52 0 10 0"/>
+                </svg>
+                Login with Kakao
+            </a>
+            
+            <!-- Footer -->
+            <div class="login-footer">
+                <p>Don't have an account? <a href="#">Contact Admin</a></p>
+            </div>
+            
+            <!-- Back to Home -->
+            <div class="back-home">
+                <a href="{% url 'core:index' %}">Back to Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add loading state to form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.textContent = 'Signing in...';
+            loginBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
