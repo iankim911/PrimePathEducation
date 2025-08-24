@@ -376,7 +376,7 @@
         <div class="section-header">
             <h2 class="section-title">Exam Performance Analysis</h2>
             <div class="export-buttons">
-                <a href="{% url 'primepath_routinetest:export_analytics' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&type=exams" 
+                <a href="{% url 'RoutineTest:export_analytics' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&type=exams" 
                    class="btn-export">
                     <span>📊</span> Export Excel
                 </a>
@@ -488,7 +488,7 @@
             <h2 class="section-title">Export Reports</h2>
         </div>
         <div class="export-buttons" style="justify-content: center; padding: 20px;">
-            <a href="{% url 'primepath_routinetest:export_analytics' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&type=full" 
+            <a href="{% url 'RoutineTest:export_analytics' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&type=full" 
                class="btn-export" style="font-size: 16px; padding: 12px 24px;">
                 <span>📊</span> Export Full Analytics Report
             </a>
@@ -587,7 +587,7 @@
         const params = new URLSearchParams(window.location.search);
         params.set('chart', chartType);
         
-        fetch(`{% url 'primepath_routinetest:chart_data' %}?${params.toString()}`)
+        fetch(`{% url 'RoutineTest:chart_data' %}?${params.toString()}`)
             .then(response => response.json())
             .then(data => {
                 // Update chart with new data

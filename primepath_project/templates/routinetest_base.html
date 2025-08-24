@@ -101,8 +101,9 @@
             margin: 0 auto;
             max-width: none;  /* Remove width restriction */
             padding: 0 10px;  /* Minimal padding */
-            overflow-x: visible;  /* Show all tabs */
+            overflow-x: auto;  /* Allow scroll if needed for 6+ tabs */
             width: 100%;
+            flex-wrap: nowrap;  /* Keep tabs in single row */
         }
         
         .nav-tabs li {
@@ -113,15 +114,17 @@
         
         .nav-tabs a {
             display: block;
-            padding: 12px 12px;  /* Even more compact */
+            padding: 16px 20px;  /* Bigger padding for larger tabs */
             color: #ecf0f1;
             text-decoration: none;
             transition: all 0.3s ease;
-            font-weight: 500;
+            font-weight: bold;  /* Make fonts bold */
             position: relative;
             height: 100%;
             white-space: nowrap;
-            font-size: 13px;  /* Smaller font to fit more */
+            font-size: 20px;  /* Much bigger font size (~2 sizes bigger) */
+            min-width: fit-content;  /* Ensure tabs can accommodate content */
+            flex-shrink: 0;  /* Prevent tabs from shrinking too much */
         }
         
         .nav-tabs a:hover {

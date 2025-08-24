@@ -386,6 +386,27 @@
         }, 5000);
     };
     
+    // Toggle functions for collapsible sections
+    window.toggleProgram = function(program) {
+        console.log('%c[TOGGLE] toggleProgram called', 'color: #9b59b6; font-weight: bold', { program });
+        const section = document.querySelector(`.program-section[data-program="${program}"]`);
+        if (section) {
+            section.classList.toggle('collapsed');
+        } else {
+            console.warn('[TOGGLE] Program section not found:', program);
+        }
+    };
+    
+    window.toggleClass = function(classCode) {
+        console.log('%c[TOGGLE] toggleClass called', 'color: #9b59b6; font-weight: bold', { classCode });
+        const section = document.querySelector(`.class-section[data-class="${classCode}"]`);
+        if (section) {
+            section.classList.toggle('collapsed');
+        } else {
+            console.warn('[TOGGLE] Class section not found:', classCode);
+        }
+    };
+    
     // Mark as ready
     window.EXAM_FUNCTIONS_READY = true;
     
@@ -393,7 +414,7 @@
     const initTime = Date.now() - window.EXAM_FUNCTIONS_INIT_TIME;
     console.log('%c[CRITICAL_FUNCTIONS] Global functions ready!', 'color: #27ae60; font-weight: bold', {
         initTime: initTime + 'ms',
-        functions: ['confirmDelete', 'deleteExam', 'openCopyModal', 'closeCopyModal'],
+        functions: ['confirmDelete', 'deleteExam', 'openCopyModal', 'closeCopyModal', 'toggleProgram', 'toggleClass'],
         ready: window.EXAM_FUNCTIONS_READY
     });
     
@@ -402,7 +423,9 @@
         confirmDelete: typeof window.confirmDelete,
         deleteExam: typeof window.deleteExam,
         openCopyModal: typeof window.openCopyModal,
-        closeCopyModal: typeof window.closeCopyModal
+        closeCopyModal: typeof window.closeCopyModal,
+        toggleProgram: typeof window.toggleProgram,
+        toggleClass: typeof window.toggleClass
     });
     
 })();
@@ -412,6 +435,8 @@ console.log('[GLOBAL_CHECK] Functions in window:', {
     confirmDelete: typeof window.confirmDelete === 'function',
     deleteExam: typeof window.deleteExam === 'function',
     openCopyModal: typeof window.openCopyModal === 'function',
-    closeCopyModal: typeof window.closeCopyModal === 'function'
+    closeCopyModal: typeof window.closeCopyModal === 'function',
+    toggleProgram: typeof window.toggleProgram === 'function',
+    toggleClass: typeof window.toggleClass === 'function'
 });
 </script>

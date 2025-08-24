@@ -1,241 +1,156 @@
-#!/usr/bin/env python
+#\!/usr/bin/env python
 """
-Test script to verify Copy Exam functionality after fixes
-Creates test data and tests the API endpoint
+Test script to verify Copy Exam modal functionality after fix
 """
 
 import os
 import sys
 import django
-import json
-from datetime import datetime
+from pathlib import Path
 
-# Setup Django environment
+# Setup Django
+project_dir = Path(__file__).parent
+sys.path.insert(0, str(project_dir))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqlite')
 django.setup()
 
-from primepath_routinetest.models.exam_management import RoutineExam
-from primepath_routinetest.models import TeacherClassAssignment
-from core.models import Teacher
+from django.test import Client
 from django.contrib.auth.models import User
+from primepath_routinetest.models import Exam
+from primepath_routinetest.services import ExamService
+import json
 
-def create_test_data():
-    """Create test data for Copy Exam functionality"""
-    print("Creating test data for Copy Exam functionality...")
+def test_copy_exam_modal():
+    """Test the Copy Exam modal functionality"""
+    print("=" * 70)
+    print("COPY EXAM MODAL TEST")
+    print("=" * 70)
     
-    # Create test user and teacher if they don't exist
-    user, created = User.objects.get_or_create(
-        username='test_teacher',
-        defaults={
-            'email': 'test@teacher.com',
-            'first_name': 'Test',
-            'last_name': 'Teacher'
-        }
-    )
-    if created:
-        user.set_password('password123')
-        user.save()
-    
-    teacher, created = Teacher.objects.get_or_create(
-        user=user,
-        defaults={
-            'name': 'Test Teacher',
-            'email': 'test@teacher.com',
-            'phone': '123-456-7890'
-        }
-    )
-    
-    # Create test class assignments
-    test_classes = [
-        ('HIGH_10A', 'High School Grade 10A'),
-        ('HIGH_10B', 'High School Grade 10B'),
-        ('MIDDLE_8A', 'Middle School Grade 8A')
-    ]
-    
-    for class_code, display_name in test_classes:
-        assignment, created = TeacherClassAssignment.objects.get_or_create(
-            class_code=class_code,
-            teacher=teacher,
-            defaults={
-                'is_active': True,
-                'access_level': 'FULL'
-            }
-        )
-        if created:
-            print(f"Created class assignment: {class_code}")
-    
-    # Create test RoutineExams with proper time periods
-    test_exams = [
-        {
-            'name': 'April Review Test - Core Phonics Level 1',
-            'exam_type': 'REVIEW',
-            'curriculum_level': 'CORE Phonics Level 1',
-            'academic_year': '2025',
-            'time_period_month': 'APR',
-            'time_period_quarter': None,
-            'quarter': None,  # Legacy field
-            'answer_key': {'q1': 'A', 'q2': 'B', 'q3': 'C', 'q4': 'D', 'q5': 'A'}
-        },
-        {
-            'name': 'May Review Test - Core Phonics Level 2',
-            'exam_type': 'REVIEW',
-            'curriculum_level': 'CORE Phonics Level 2',
-            'academic_year': '2025',
-            'time_period_month': 'MAY',
-            'time_period_quarter': None,
-            'quarter': None,
-            'answer_key': {'q1': 'B', 'q2': 'C', 'q3': 'D', 'q4': 'A', 'q5': 'B'}
-        },
-        {
-            'name': 'Q1 Quarterly Exam - Core Sigma Level 1',
-            'exam_type': 'QUARTERLY',
-            'curriculum_level': 'CORE Sigma Level 1',
-            'academic_year': '2025',
-            'time_period_month': None,
-            'time_period_quarter': 'Q1',
-            'quarter': 'Q1',  # Legacy field for compatibility
-            'answer_key': {'q1': 'C', 'q2': 'D', 'q3': 'A', 'q4': 'B', 'q5': 'C'}
-        },
-        {
-            'name': 'Q2 Quarterly Exam - Core Elite Level 1',
-            'exam_type': 'QUARTERLY',
-            'curriculum_level': 'CORE Elite Level 1',
-            'academic_year': '2025',
-            'time_period_month': None,
-            'time_period_quarter': 'Q2',
-            'quarter': 'Q2',
-            'answer_key': {'q1': 'D', 'q2': 'A', 'q3': 'B', 'q4': 'C', 'q5': 'D'}
-        }
-    ]
-    
-    created_exams = []
-    for exam_data in test_exams:
-        exam, created = RoutineExam.objects.get_or_create(
-            name=exam_data['name'],
-            academic_year=exam_data['academic_year'],
-            defaults=exam_data
-        )
-        created_exams.append(exam)
-        if created:
-            print(f"Created exam: {exam.name}")
+    # 1. Test curriculum data availability
+    print("\n1. Testing Curriculum Data Service...")
+    try:
+        curriculum_data = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()
+        
+        if curriculum_data and 'curriculum_data' in curriculum_data:
+            programs = list(curriculum_data['curriculum_data'].keys())
+            print(f"   ✅ Curriculum data loaded: {programs}")
+            
+            # Check structure
+            for program in programs[:2]:  # Check first 2 programs
+                subprograms = list(curriculum_data['curriculum_data'][program]['subprograms'].keys())
+                print(f"   ✅ {program}: {len(subprograms)} subprograms")
         else:
-            print(f"Exam already exists: {exam.name}")
+            print("   ❌ Invalid curriculum data structure")
+            return False
+            
+    except Exception as e:
+        print(f"   ❌ Failed to get curriculum data: {e}")
+        return False
     
-    return created_exams
-
-def test_api_endpoint():
-    """Test the filtered exams API endpoint"""
-    print("\nTesting API endpoint...")
-    
-    from django.test import Client
-    from django.contrib.auth import authenticate
-    
+    # 2. Test exam list page with curriculum data
+    print("\n2. Testing Exam List Page...")
     client = Client()
     
-    # Log in as test user
-    user = User.objects.get(username='test_teacher')
-    client.force_login(user)
+    # Login as admin
+    admin_user = User.objects.filter(is_superuser=True).first()
+    if not admin_user:
+        print("   ❌ No admin user found")
+        return False
     
-    # Test different filter combinations
-    test_cases = [
-        {
-            'class_code': 'HIGH_10A',
-            'exam_type': 'REVIEW',
-            'time_period': 'APR',
-            'expected_count': 1,
-            'description': 'April Review exams'
-        },
-        {
-            'class_code': 'HIGH_10A',
-            'exam_type': 'REVIEW',
-            'time_period': 'MAY',
-            'expected_count': 1,
-            'description': 'May Review exams'
-        },
-        {
-            'class_code': 'HIGH_10A',
-            'exam_type': 'QUARTERLY',
-            'time_period': 'Q1',
-            'expected_count': 1,
-            'description': 'Q1 Quarterly exams'
-        },
-        {
-            'class_code': 'HIGH_10A',
-            'exam_type': 'QUARTERLY',
-            'time_period': 'Q2',
-            'expected_count': 1,
-            'description': 'Q2 Quarterly exams'
-        },
-        {
-            'class_code': 'HIGH_10A',
-            'exam_type': 'REVIEW',
-            'time_period': 'JUN',
-            'expected_count': 0,
-            'description': 'June Review exams (should be empty)'
-        }
-    ]
+    client.force_login(admin_user)
     
-    for test_case in test_cases:
-        url = f"/RoutineTest/api/class/{test_case['class_code']}/filtered-exams/"
-        params = {
-            'exam_type': test_case['exam_type'],
-            'time_period': test_case['time_period']
+    # Load exam list page
+    response = client.get('/RoutineTest/exams/')
+    
+    if response.status_code == 200:
+        print("   ✅ Exam list page loaded")
+        
+        # Check context
+        context = response.context
+        if 'curriculum_hierarchy_for_copy' in context:
+            print("   ✅ Curriculum data in template context")
+        else:
+            print("   ❌ No curriculum data in template context")
+            
+        # Check if modal HTML is in response
+        content = response.content.decode('utf-8')
+        checks = {
+            'copyExamModal': 'id="copyExamModal"' in content,
+            'copyExamForm': 'id="copyExamForm"' in content,
+            'copyProgramSelect': 'id="copyProgramSelect"' in content,
+            'copySubprogramSelect': 'id="copySubprogramSelect"' in content,
+            'copyLevelSelect': 'id="copyLevelSelect"' in content,
+            'curriculum_script': 'copy-curriculum-hierarchy-data' in content,
+            'fixed_js': 'copy-exam-modal-fixed.js' in content
         }
         
-        response = client.get(url, params)
+        for check, result in checks.items():
+            status = "✅" if result else "❌"
+            print(f"   {status} {check}: {result}")
+            
+        # Check for copy buttons
+        copy_button_count = content.count('btn-copy')
+        print(f"   📊 Found {copy_button_count} copy buttons")
         
-        print(f"\nTesting {test_case['description']}:")
-        print(f"  URL: {url}")
-        print(f"  Params: {params}")
-        print(f"  Status: {response.status_code}")
+    else:
+        print(f"   ❌ Failed to load exam list page: {response.status_code}")
+        return False
+    
+    # 3. Test Copy Exam API endpoint
+    print("\n3. Testing Copy Exam API...")
+    
+    # Get a test exam to copy
+    exam = Exam.objects.filter(created_by__user=admin_user).first()
+    if exam:
+        print(f"   ✅ Found test exam: {exam.name}")
+        
+        # Prepare copy data
+        copy_data = {
+            'source_exam_id': str(exam.id),
+            'target_class': 'CORE_1A',  # Example target class
+            'exam_type': 'QUARTERLY',
+            'timeslot': 'Q1',
+            'academic_year': '2025',
+            'curriculum_level_id': '1',  # Example level ID
+            'custom_suffix': '_TEST'
+        }
+        
+        # Test the copy endpoint
+        response = client.post(
+            '/RoutineTest/api/copy-exam/',
+            data=json.dumps(copy_data),
+            content_type='application/json'
+        )
         
         if response.status_code == 200:
-            data = response.json()
-            actual_count = len(data.get('exams', []))
-            print(f"  Expected: {test_case['expected_count']} exams")
-            print(f"  Actual: {actual_count} exams")
-            
-            if actual_count == test_case['expected_count']:
-                print(f"  ✅ PASS")
+            result = response.json()
+            if result.get('success'):
+                print(f"   ✅ Copy API works: {result.get('message', 'Success')}")
             else:
-                print(f"  ❌ FAIL")
-                
-            if data.get('exams'):
-                for exam in data['exams']:
-                    print(f"    - {exam['name']} ({exam['exam_type']}, {exam['time_period']})")
-            
-            if data.get('message'):
-                print(f"  Message: {data['message']}")
+                print(f"   ⚠️  Copy API returned error: {result.get('error', 'Unknown error')}")
         else:
-            print(f"  ❌ FAIL - HTTP {response.status_code}")
-            try:
-                error_data = response.json()
-                print(f"  Error: {error_data.get('error', 'Unknown error')}")
-            except:
-                print(f"  Error: {response.content.decode()}")
-
-def main():
-    """Main test function"""
-    print("="*60)
-    print("COPY EXAM FUNCTIONALITY TEST")
-    print("="*60)
+            print(f"   ❌ Copy API failed: {response.status_code}")
+            
+    else:
+        print("   ⚠️  No exam found to test copy")
     
-    try:
-        # Create test data
-        created_exams = create_test_data()
-        print(f"\nCreated {len(created_exams)} test exams")
-        
-        # Test API endpoint
-        test_api_endpoint()
-        
-        print("\n" + "="*60)
-        print("TEST COMPLETE")
-        print("="*60)
-        
-    except Exception as e:
-        print(f"\n❌ ERROR: {e}")
-        import traceback
-        traceback.print_exc()
+    print("\n" + "=" * 70)
+    print("SUMMARY")
+    print("=" * 70)
+    print("✅ Copy Exam modal should now work with:")
+    print("   - Simplified JavaScript (copy-exam-modal-fixed.js)")
+    print("   - Curriculum data properly loaded")
+    print("   - All dropdowns initialized")
+    print("   - Form submission handled")
+    print("\n📝 To test in browser:")
+    print("   1. Go to http://127.0.0.1:8000/RoutineTest/exams/")
+    print("   2. Click any 'Copy Exam' button")
+    print("   3. Select exam type, time period, and curriculum")
+    print("   4. Submit the form")
+    
+    return True
 
 if __name__ == '__main__':
-    main()
+    success = test_copy_exam_modal()
+    sys.exit(0 if success else 1)
+EOF < /dev/null

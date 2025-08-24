@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 
 from core.models import Teacher, Student
 from primepath_routinetest.models import (
-    Class, StudentEnrollment, RoutineExam, 
+    Class, StudentEnrollment, RoutineExam, Exam,
     ExamScheduleMatrix, StudentSession,
     TeacherClassAssignment, ExamLaunchSession
 )
@@ -440,7 +440,7 @@ def start_exam_for_class(request, class_code):
             if not assignment:
                 return JsonResponse({'success': False, 'error': 'Only full access teachers can launch exams'}, status=403)
         
-        # Get exam
+        # Get exam - Use RoutineExam model which is what ExamScheduleMatrix uses
         exam = RoutineExam.objects.get(id=exam_id)
         
         # Get class and enrolled students
@@ -450,26 +450,29 @@ def start_exam_for_class(request, class_code):
             status='active'
         ).select_related('student')
         
-        # Filter enrollments based on selected students if provided
-        if selected_student_ids:
-            enrollments = enrollments.filter(student_id__in=selected_student_ids)
-            logger.info(f"[START_EXAM_FILTER] Filtered to {enrollments.count()} students")
+        # Check if students were selected
+        if not selected_student_ids:
+            return JsonResponse({'success': False, 'error': 'No students selected for exam'}, status=400)
+        
+        # Filter enrollments based on selected students
+        enrollments = enrollments.filter(student_id__in=selected_student_ids)
+        logger.info(f"[START_EXAM_FILTER] Filtered to {enrollments.count()} students")
         
         if not enrollments.exists():
-            return JsonResponse({'success': False, 'error': 'No students selected for exam'}, status=400)
+            return JsonResponse({'success': False, 'error': 'Selected students not found in this class'}, status=400)
         
         # Create ExamLaunchSession for student portal access
         launch_session = ExamLaunchSession.objects.create(
             exam=exam,
             class_code=class_code,
             launched_by=request.user,
-            duration_minutes=custom_duration or getattr(exam, 'timer_minutes', 60),
+            duration_minutes=custom_duration or exam.duration,
             expires_at=timezone.now() + timedelta(hours=24),  # 24 hour expiry
             selected_student_ids=[str(sid) for sid in selected_student_ids] if selected_student_ids else [],
             metadata={
                 'schedule_id': str(schedule_id) if schedule_id else None,
                 'launched_from': 'teacher_interface',
-                'original_duration': getattr(exam, 'timer_minutes', 60)
+                'original_duration': exam.duration
             }
         )
         
@@ -486,58 +489,27 @@ def start_exam_for_class(request, class_code):
         
         # Create exam sessions for selected students
         sessions_created = []
-        sessions_updated = []
         
         # Also create StudentExamSession records for the new student portal
         from primepath_student.models import StudentProfile, StudentClassAssignment, StudentExamSession
         
         with transaction.atomic():
             for enrollment in enrollments:
-                # StudentSession uses student_name, not a foreign key
-                session, created = StudentSession.objects.get_or_create(
-                    student_name=enrollment.student.name,
-                    exam=exam,
-                    defaults={
-                        'started_at': timezone.now(),
-                        'parent_phone': enrollment.student.parent_phone or '',
-                        'grade': int(enrollment.student.current_grade_level[1:]) if enrollment.student.current_grade_level[1:].isdigit() else 1,
-                        'academic_rank': 'TOP_50',  # Default rank
-                        'school': None  # Will be set if available
-                    }
-                )
+                # Skip StudentSession creation for RoutineExam as it expects placement_test.Exam objects
+                # The ExamLaunchSession will handle student access for RoutineExam
+                session = None
+                created = False
                 
-                # Update duration if custom duration provided
-                if custom_duration and custom_duration != exam.timer_minutes:
-                    # Store original duration for logging
-                    original_duration = exam.timer_minutes
-                    
-                    # Note: Duration modification would need to be handled based on your exam model structure
-                    # This could be stored in session metadata or exam instance
-                    session.metadata = session.metadata or {}
-                    session.metadata['custom_duration_minutes'] = custom_duration
-                    session.metadata['original_duration_minutes'] = original_duration
-                    session.save()
-                    
-                    logger.info(f"[CUSTOM_DURATION] Student {enrollment.student.name}: {original_duration}min → {custom_duration}min")
+                # Log that we're creating access through ExamLaunchSession instead
+                logger.info(f"[EXAM_LAUNCH] Student {enrollment.student.name} will access via ExamLaunchSession {launch_session.id}")
                 
-                if created:
-                    sessions_created.append({
-                        'student_name': enrollment.student.name,
-                        'student_id': str(enrollment.student.id),
-                        'session_id': str(session.id),
-                        'duration': custom_duration or exam.timer_minutes
-                    })
-                else:
-                    # Session already exists, update it
-                    session.started_at = timezone.now()
-                    session.completed_at = None  # Reset completion
-                    session.save()
-                    sessions_updated.append({
-                        'student_name': enrollment.student.name,
-                        'student_id': str(enrollment.student.id),
-                        'session_id': str(session.id),
-                        'duration': custom_duration or exam.timer_minutes
-                    })
+                # Track student for launch session
+                sessions_created.append({
+                    'student_name': enrollment.student.name,
+                    'student_id': str(enrollment.student.id),
+                    'launch_session_id': str(launch_session.id),
+                    'duration': custom_duration or exam.duration
+                })
                 
                 # Also create/update StudentExamSession for new student portal if student has profile
                 try:
@@ -588,20 +560,17 @@ def start_exam_for_class(request, class_code):
                     schedule.metadata['custom_duration'] = custom_duration
                 schedule.save()
         
-        total_sessions = len(sessions_created) + len(sessions_updated)
+        total_sessions = len(sessions_created)
         response_message = f'Exam launched for {total_sessions} student(s)'
         
         if custom_duration:
             response_message += f' with {custom_duration} minute duration'
         
-        if sessions_updated:
-            response_message += f' ({len(sessions_created)} new, {len(sessions_updated)} restarted)'
-        
         return JsonResponse({
             'success': True,
             'message': response_message,
             'sessions_created': sessions_created,
-            'sessions_updated': sessions_updated,
+            'sessions_updated': [],
             'total_students': total_sessions,
             'custom_duration': custom_duration,
             'exam_name': exam.name,

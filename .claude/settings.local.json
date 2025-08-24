@@ -282,7 +282,10 @@
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite venv/bin/python primepath_project/test_kakao_fix_final.py)",
       "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/pip install pandas)",
       "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_student_portal_flow.py)",
-      "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_rate_limiting.py)"
+      "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_rate_limiting.py)",
+      "Bash(venv/bin/pip install:*)",
+      "Bash(../venv/bin/pip list:*)",
+      "Bash(venv/bin/pip list:*)"
     ],
     "deny": []
   }

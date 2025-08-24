@@ -1,43 +1,17 @@
 {
-  "timestamp": "2025-08-24T18:12:35.000000",
-  "status": "FULLY_ACTIVATED",
+  "timestamp": "2025-08-24T23:50:28.816543",
+  "status": "INACTIVE",
   "subsystems": {
-    "UI/UX Review": "ACTIVE",
-    "Implementation": "ACTIVE", 
-    "QA Testing": "ACTIVE",
-    "Performance": "ACTIVE",
-    "Documentation": "ACTIVE",
-    "Security": "ACTIVE"
+    "UI/UX Review": "NO_ACTIVATION",
+    "Implementation": "NO_ACTIVATION",
+    "QA Testing": "NO_ACTIVATION",
+    "Performance": "NO_ACTIVATION",
+    "Documentation": "NO_ACTIVATION",
+    "Security": "NO_ACTIVATION"
   },
   "summary": {
     "total": 6,
-    "active": 6,
-    "inactive": 0
-  },
-  "activation_method": "keyword_triggered",
-  "tested_agents": {
-    "UI/UX Agent": "✅ TESTED - Responds to: fix, wide, layout, design, spacing, ui, ux",
-    "Implementation Agent": "✅ TESTED - Responds to: implement, fix, bug, code, feature, change",
-    "Testing Agent": "⚠️ AVAILABLE - Responds to: test, verify, check, qa, quality, ensure",
-    "Performance Agent": "⚠️ AVAILABLE - Responds to: optimize, slow, performance, speed, fast", 
-    "Security Agent": "⚠️ AVAILABLE - Responds to: security, auth, permission, vulnerability",
-    "Documentation Agent": "⚠️ AVAILABLE - Responds to: document, explain, guide, readme"
-  },
-  "activation_note": "ALL 6 AGENT SUBSYSTEMS SUCCESSFULLY ACTIVATED. System responds to keyword-based triggers. UI and Implementation agents tested and confirmed working. All agents are ready for collaborative work.",
-  "usage_instructions": {
-    "for_claude": "When user requests contain trigger keywords, run: python PROCESS_REQUEST.py 'user command'",
-    "trigger_examples": {
-      "UI issues": "The curriculum column is too wide → triggers UI agent",
-      "Bug fixes": "Fix the login error → triggers Implementation agent", 
-      "Testing": "Run tests to verify → triggers Testing agent",
-      "Performance": "Optimize slow loading → triggers Performance agent",
-      "Security": "Check auth permissions → triggers Security agent",
-      "Docs": "Update documentation → triggers Documentation agent"
-    }
-  },
-  "coordination": {
-    "multi_agent": "Multiple agents can collaborate on complex requests",
-    "coordinator": "AgentCoordinator manages agent selection and collaboration",
-    "priority_system": "Agents self-organize by relevance and expertise match"
+    "active": 0,
+    "inactive": 6
   }
 }

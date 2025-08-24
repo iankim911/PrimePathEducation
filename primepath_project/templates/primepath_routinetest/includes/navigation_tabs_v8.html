@@ -1,9 +1,10 @@
 <!-- RoutineTest Navigation - VERSION 8.0 UNIFIED COMPLETE -->
 <!-- Cache Bust: {% now "U" %} -->
 <!-- NO OLD TABS - UNIFIED CLASSES & EXAMS ONLY -->
+<!-- SUPPORTS UP TO 6 TABS: 4 main tabs + 2 additional tabs with overflow scrolling -->
 <nav class="nav-tabs" id="routinetest-nav-v8-{{ request.user.id|default:'anon' }}" data-version="8.0" data-timestamp="{% now 'c' %}">
-    <ul style="display: flex; justify-content: space-between; width: 100%;">
-        <div style="display: flex; flex: 1;">
+    <ul style="display: flex; justify-content: flex-start; width: 100%; gap: 5px;">
+        <div style="display: flex; flex: 1; gap: 5px;">
             <!-- Dashboard -->
             <li>
                 <a href="{% url 'RoutineTest:index' %}" 
@@ -69,7 +70,7 @@
         <div style="display: flex; margin-left: auto;">
             {% if user.is_authenticated %}
                 <li><a href="#" class="profile-link"><span class="nav-icon">👤</span> {{ user.username }}</a></li>
-                <li><a href="/logout/" style="background: #e74c3c; color: white !important;">Logout</a></li>
+                <li><a href="/logout/" style="background: #e74c3c; color: white !important; display: flex; align-items: center; justify-content: center; text-align: center;">Logout</a></li>
             {% else %}
                 <li><a href="/PlacementTest/teacher/login/">Login</a></li>
             {% endif %}

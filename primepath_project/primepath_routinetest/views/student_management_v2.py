@@ -97,7 +97,7 @@ def manage_class_students(request, class_code):
             except StudentClassAssignment.DoesNotExist:
                 messages.error(request, "Assignment not found")
         
-        return redirect('primepath_routinetest:manage_class_students', class_code=class_code)
+        return redirect('RoutineTest:manage_class_students', class_code=class_code)
     
     context = {
         'teacher': teacher,
@@ -286,9 +286,9 @@ def create_student_account(request):
                 
                 # Redirect based on context
                 if len(class_codes) == 1:
-                    return redirect('primepath_routinetest:manage_class_students', class_code=class_codes[0])
+                    return redirect('RoutineTest:manage_class_students', class_code=class_codes[0])
                 else:
-                    return redirect('primepath_routinetest:student_list')
+                    return redirect('RoutineTest:student_list')
                     
         except Exception as e:
             messages.error(request, f"Error creating student: {str(e)}")

@@ -1091,7 +1091,7 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
     {% endif %}
     
     <!-- Admin-Only Curriculum Management Section -->
-    {% if user.is_superuser or user.is_staff %}
+    {% if user.is_superuser %}
     <div class="admin-section">
         <div class="section-header">
             <div class="section-title">🔐 Admin: Curriculum Management</div>
@@ -1438,14 +1438,8 @@ console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
                         </select>
                     </div>
                     
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label for="requestedAccessLevel" style="font-weight: 500; color: #2c3e50; margin-bottom: 8px; display: block;">Requested Access Level *</label>
-                        <select id="requestedAccessLevel" name="requested_access_level" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px;">
-                            <option value="">-- Select access level --</option>
-                            <option value="FULL">Full Access - Can create, edit, and manage exams</option>
-                            <option value="VIEW">View Access - Can view and copy exams only</option>
-                        </select>
-                    </div>
+                    <!-- Access level hidden since only Full Access is available for requests -->
+                    <input type="hidden" name="requested_access_level" value="FULL">
                     
                     <div class="form-group" style="margin-bottom: 20px;">
                         <label for="requestReason" style="font-weight: 500; color: #2c3e50; margin-bottom: 8px; display: block;">Reason for Request *</label>
@@ -1582,7 +1576,7 @@ document.head.appendChild(style);
 <script src="{% static 'js/routinetest/exam-management.js' %}?v={{ cache_bust }}"></script>
 
 <!-- Curriculum Management Script (Admin Only) -->
-{% if user.is_superuser or user.is_staff %}
+{% if user.is_superuser %}
 <script src="{% static 'js/routinetest/curriculum-management.js' %}"></script>
 {% endif %}
 

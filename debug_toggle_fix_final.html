@@ -1,26 +1,1122 @@
-{% extends "routinetest_base.html" %}
-{% load static %}
-{% load custom_filters %}
-{% load access_display %}
-{# Template Version 6.0 - Hierarchical Library View with Permissions #}
 
-{% block title %}Exam Library - RoutineTest{% endblock %}
 
-{% block header %}Exam Library{% endblock %}
-
-{% block extra_css %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Library - RoutineTest</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    
+    <!-- Mobile Responsive CSS -->
+    <link rel="stylesheet" href="/static/css/mobile-responsive.css">
+    
+    <!-- PrimePath Brand Design System -->
+    <link rel="stylesheet" href="/static/css/primepath_brand.css">
+    
+    <!-- Unified Design System - UI Harmonization -->
+    <link rel="stylesheet" href="/static/css/unified-design-system.css?v=2.0">
+    
+    
+    <!-- Console Debugging for RoutineTest -->
+    <script>
+        console.log('%c[RoutineTest] Page Loading...', 'color: #00A65E; font-weight: bold;');
+        console.log('[RoutineTest] Navigation: Tab-based horizontal layout');
+        console.log('[RoutineTest] Theme: BCG Green (#00A65E)');
+        console.log('[RoutineTest] Module: Continuous Assessment Platform');
+        window.ROUTINETEST_DEBUG = true;
+        window.MATRIX_TAB_VERSION = '3.0';
+        window.NAVIGATION_TIMESTAMP = new Date().toISOString();
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header Section - BCG Forest Green Theme */
+        .header {
+            background-color: #1B5E20;  /* Darker, more muted green */
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: white; /* Ensure header text is white for readability */
+        }
+        
+        .header {
+            position: relative; /* For mode toggle positioning */
+        }
+        
+        /* Navigation Tabs - Using Unified Design System */
+        .nav-tabs {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            padding: 0;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+            overflow-x: auto;  /* Allow horizontal scroll for many tabs */
+            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
+            border-bottom: 2px solid var(--primary-green-border);  /* Visual separation */
+        }
+        
+        /* Custom scrollbar for nav tabs */
+        .nav-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-track {
+            background: #0A3D15;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-thumb {
+            background: #2E7D32;
+            border-radius: 2px;
+        }
+        
+        /* Removed Matrix tab styles - no longer part of V8 navigation */
+        
+        .nav-tabs * {
+            box-sizing: border-box;
+        }
+        
+        .nav-tabs ul {
+            list-style: none;
+            display: flex;
+            margin: 0 auto;
+            max-width: none;  /* Remove width restriction */
+            padding: 0 10px;  /* Minimal padding */
+            overflow-x: auto;  /* Allow scroll if needed for 6+ tabs */
+            width: 100%;
+            flex-wrap: nowrap;  /* Keep tabs in single row */
+        }
+        
+        .nav-tabs li {
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        
+        .nav-tabs a {
+            display: block;
+            padding: 16px 20px;  /* Bigger padding for larger tabs */
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: bold;  /* Make fonts bold */
+            position: relative;
+            height: 100%;
+            white-space: nowrap;
+            font-size: 20px;  /* Much bigger font size (~2 sizes bigger) */
+            min-width: fit-content;  /* Ensure tabs can accommodate content */
+            flex-shrink: 0;  /* Prevent tabs from shrinking too much */
+        }
+        
+        .nav-tabs a:hover {
+            background-color: #1B5E20;  /* Darker muted green on hover */
+            color: white;
+        }
+        
+        /* WCAG AAA Compliant - High Contrast Active Tab */
+        .nav-tabs a.active {
+            background-color: #E8F5E9 !important;  /* Light green background */
+            color: #0D4F1F !important;  /* Very dark green text - contrast ratio > 7:1 */
+            font-weight: 700;
+            box-shadow: inset 0 -3px 0 #2E7D32;
+            border-top: 2px solid #2E7D32;  /* Green accent for better visibility */
+            position: relative;
+        }
+        
+        /* Focus styles for keyboard navigation */
+        .nav-tabs a:focus {
+            outline: 2px solid #2E7D32;
+            outline-offset: 2px;
+            background-color: #1B5E20;
+        }
+        
+        .nav-tabs a.active:focus {
+            outline: 2px solid #2E7D32;
+            outline-offset: 2px;
+        }
+        
+        /* Profile Link Styling */
+        .nav-tabs .profile-link {
+            display: flex !important;
+            align-items: center;
+            white-space: nowrap !important;
+            min-width: fit-content;
+        }
+        
+        .nav-tabs .profile-link span {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Logout Button - Red with WHITE text */
+        #logout-link,
+        a[href="/logout/"],
+        a[href*="logout"],
+        .nav-tabs a[href="/logout/"],
+        .nav-tabs a[style*="background: #e74c3c"] {
+            background-color: #e74c3c !important;
+            color: white !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
+        }
+        
+        #logout-link:hover,
+        a[href="/logout/"]:hover,
+        a[href*="logout"]:hover,
+        .nav-tabs a[href="/logout/"]:hover,
+        .nav-tabs a[style*="background: #e74c3c"]:hover {
+            background-color: #c0392b !important;
+            color: white !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
+        }
+        
+        /* Container - Full width for navigation */
+        .container {
+            max-width: 100%;  /* Full width */
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Content container with max width */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Content Area */
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+        
+        /* Messages/Alerts - BCG Green Theme */
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .alert-success {
+            background-color: #F1F8E9;
+            border: 1px solid #689F38;  /* Muted olive green border */
+            color: #33691E;  /* Dark olive green text */
+        }
+        
+        .alert-info {
+            background-color: #E0F2F1;
+            border: 1px solid #00ACC1;
+            color: #004D40;
+        }
+        
+        .alert-warning {
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            color: #E65100;
+        }
+        
+        .alert-danger {
+            background-color: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #B71C1C;
+        }
+        
+        .close-alert {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: inherit;
+            margin-left: 20px;
+        }
+        
+        /* Buttons - PrimePath Navy Theme */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius-pill);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--brand-shadow-sm);
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--brand-shadow-md);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--brand-dark-gray) 0%, #495057 100%);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #495057 0%, var(--brand-dark-gray) 100%);
+        }
+        
+        /* Danger button - MUST stay red for destructive actions */
+        .btn-danger,
+        button.btn-danger,
+        .btn.btn-danger,
+        button[onclick*="confirmDelete"] {
+            background-color: #dc3545 !important;
+            background-image: none !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .btn-danger:hover,
+        button.btn-danger:hover,
+        .btn.btn-danger:hover,
+        button[onclick*="confirmDelete"]:hover {
+            background-color: #c82333 !important;
+            background-image: none !important;
+            border-color: #bd2130 !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        /* NUCLEAR OVERRIDE - Ensure delete buttons are NEVER green */
+        .routinetest-theme .btn-danger,
+        .routinetest-theme button.btn-danger,
+        .routinetest-theme .btn.btn-danger,
+        .routinetest-theme button[onclick*="confirmDelete"],
+        body.routinetest-theme .btn-danger,
+        body.routinetest-theme button.btn-danger,
+        body.routinetest-theme button[onclick*="confirmDelete"] {
+            background-color: #dc3545 !important;
+            background-image: none !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        /* Form Controls - PrimePath Brand Theme */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--brand-gray);
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primepath-navy);
+            box-shadow: 0 0 0 0.2rem rgba(27, 41, 81, 0.1);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primepath-navy);
+        }
+    </style>
+    
+    
 <!-- PrimePath Brand Override CSS -->
-<link rel="stylesheet" href="{% static 'css/routinetest-brand-override.css' %}?v={% now 'U' %}">
-{% endblock %}
+<link rel="stylesheet" href="/static/css/routinetest-brand-override.css?v=1756041114">
 
-{% block content %}
+    
+</head>
+<body class="routinetest-theme">
+    <!-- Immediate theme application -->
+    <script>
+        // Apply theme class immediately to prevent FOUC
+        document.documentElement.classList.add('routinetest-theme');
+        if (document.body) {
+            document.body.classList.add('routinetest-theme');
+        }
+    </script>
+    <!-- Debug Console Logger -->
+    <script>
+        console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #1B2951; color: white; padding: 5px; border-radius: 3px;');
+        console.log('Theme: PrimePath Navy (#1B2951)');
+        console.log('Navigation: Horizontal Tab Layout');
+        console.log('Module: Exam Management System');
+        console.log('User: admin');
+        console.groupEnd();
+    </script>
+    
+    <!-- Header Section -->
+    <div class="header">
+        <div class="container">
+            <h1>Exam Library</h1>
+        </div>
+    </div>
+    
+    <!-- Navigation Tabs - Version 8.0 with Complete Cache Busting -->
+    <!-- UNIFIED CLASSES & EXAMS ONLY - NO OLD TABS -->
+    <!-- RoutineTest Navigation - VERSION 8.0 UNIFIED COMPLETE -->
+<!-- Cache Bust: 1756041114 -->
+<!-- NO OLD TABS - UNIFIED CLASSES & EXAMS ONLY -->
+<!-- SUPPORTS UP TO 6 TABS: 4 main tabs + 2 additional tabs with overflow scrolling -->
+<nav class="nav-tabs" id="routinetest-nav-v8-762" data-version="8.0" data-timestamp="2025-08-24T22:11:54.964251+09:00">
+    <ul style="display: flex; justify-content: flex-start; width: 100%; gap: 5px;">
+        <div style="display: flex; flex: 1; gap: 5px;">
+            <!-- Dashboard -->
+            <li>
+                <a href="/RoutineTest/" 
+                   data-nav="dashboard"
+                   class="">
+                   Dashboard
+                </a>
+            </li>
+            
+            <!-- Upload Exam -->
+            <li>
+                <a href="/RoutineTest/exams/create/" 
+                   data-nav="upload"
+                   class="">
+                   Upload Exam
+                </a>
+            </li>
+            
+            <!-- Exam Library -->
+            <li>
+                <a href="/RoutineTest/exams/" 
+                   data-nav="keys"
+                   class="active">
+                   Exam Library
+                </a>
+            </li>
+            
+            <!-- UNIFIED CLASSES & EXAMS TAB (VERSION 8) -->
+            <li id="unified-tab-v8">
+                <a href="/RoutineTest/classes-exams/" 
+                   data-nav="classes-exams"
+                   class="">
+                   Classes & Exams
+                </a>
+            </li>
+            
+            <!-- Admin Only: Curriculum Mapping - Only show in Admin mode -->
+            
+        </div>
+        
+        <!-- User Section -->
+        <div style="display: flex; margin-left: auto;">
+            
+                <li><a href="#" class="profile-link"><span class="nav-icon">👤</span> admin</a></li>
+                <li><a href="/logout/" style="background: #e74c3c; color: white !important; display: flex; align-items: center; justify-content: center; text-align: center;">Logout</a></li>
+            
+        </div>
+    </ul>
+</nav>
+
+<!-- Aggressive Cache Busting and Verification Script -->
+<script>
+(function() {
+    const navVersion = 8.0;
+    const timestamp = new Date().getTime();
+    const userId = '762';
+    
+    console.group('%c[NAV_V8_UNIFIED] RoutineTest Navigation Version 8.0', 
+        'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px; border-radius: 5px; font-weight: bold;');
+    
+    console.log('📌 Version:', navVersion);
+    console.log('⏱️ Timestamp:', new Date(timestamp).toISOString());
+    console.log('👤 User:', userId);
+    console.log('🔄 Cache Bust ID:', timestamp);
+    
+    // Log URL resolution from Django templates
+    console.group('🔗 URL Resolution from Django:');
+    console.log('Dashboard URL: /RoutineTest/');
+    console.log('Create Exam URL: /RoutineTest/exams/create/');
+    console.log('Exam List URL: /RoutineTest/exams/');
+    console.log('Classes & Exams URL: /RoutineTest/classes-exams/');
+    console.log('Session List URL: /RoutineTest/sessions/');
+    
+    console.log('Curriculum Mapping URL: /RoutineTest/curriculum-mapping/');
+    
+    console.groupEnd();
+    
+    // Verify navigation structure
+    const nav = document.getElementById('routinetest-nav-v8-' + userId);
+    if (nav) {
+        console.log('✅ Navigation V8 element found');
+        
+        // Count and log all tabs
+        const allTabs = nav.querySelectorAll('a[data-nav]');
+        console.log('📊 Total navigation tabs:', allTabs.length);
+        
+        const tabStructure = [];
+        allTabs.forEach((tab, index) => {
+            const text = tab.textContent.trim();
+            const dataNav = tab.getAttribute('data-nav');
+            const href = tab.getAttribute('href');
+            
+            tabStructure.push({
+                index: index + 1,
+                text: text,
+                dataNav: dataNav,
+                href: href
+            });
+            
+            // Log each tab
+            const isUnified = dataNav === 'classes-exams';
+            const marker = isUnified ? '🎯' : '  ';
+            console.log(`${marker} Tab ${index + 1}: "${text}" [${dataNav}] → ${href}`);
+        });
+        
+        // Check for unified tab
+        const unifiedTab = nav.querySelector('a[data-nav="classes-exams"]');
+        if (unifiedTab) {
+            console.log('✅ UNIFIED TAB FOUND:', unifiedTab.textContent.trim());
+            
+            // Force visibility
+            const unifiedLi = document.getElementById('unified-tab-v8');
+            if (unifiedLi) {
+                unifiedLi.style.display = 'flex';
+                unifiedLi.style.visibility = 'visible';
+                unifiedLi.style.opacity = '1';
+                console.log('✅ Unified tab visibility enforced (consistent styling applied)');
+            }
+        } else {
+            console.error('❌ UNIFIED TAB NOT FOUND!');
+        }
+        
+        // Check for OLD tabs (should not exist)
+        const oldTabsCheck = Array.from(allTabs).filter(tab => {
+            const text = tab.textContent;
+            const dataNav = tab.getAttribute('data-nav');
+            return (text.includes('My Classes') && text.includes('Access')) || 
+                   text.includes('Exam Assignments') ||
+                   dataNav === 'my-classes' ||
+                   dataNav === 'exam-assignments';
+        });
+        
+        if (oldTabsCheck.length > 0) {
+            console.error('❌ OLD TABS DETECTED:', oldTabsCheck.map(t => t.textContent.trim()));
+            console.error('These tabs should be removed!');
+            
+            // Remove old tabs dynamically
+            oldTabsCheck.forEach(tab => {
+                const li = tab.closest('li');
+                if (li) {
+                    li.style.display = 'none';
+                    console.log('🗑️ Hiding old tab:', tab.textContent.trim());
+                }
+            });
+        } else {
+            console.log('✅ No old tabs found - navigation is clean');
+        }
+        
+        // Store navigation state
+        window.ROUTINETEST_NAV_V8 = {
+            version: navVersion,
+            timestamp: timestamp,
+            tabs: tabStructure,
+            unified: unifiedTab ? true : false
+        };
+        
+    } else {
+        console.error('❌ Navigation V8 element not found!');
+    }
+    
+    console.groupEnd();
+    
+    // Track any URL modifications
+    const originalUrls = {};
+    document.querySelectorAll('.nav-tabs a').forEach(link => {
+        const dataNav = link.getAttribute('data-nav');
+        if (dataNav) {
+            originalUrls[dataNav] = link.href;
+        }
+    });
+    
+    // Periodic check to ensure navigation stays correct and URLs aren't modified
+    let checkCount = 0;
+    const checkInterval = setInterval(function() {
+        checkCount++;
+        
+        const tabs = document.querySelectorAll('.nav-tabs a[data-nav]');
+        
+        // Check for URL modifications
+        tabs.forEach(tab => {
+            const dataNav = tab.getAttribute('data-nav');
+            if (dataNav && originalUrls[dataNav] && tab.href !== originalUrls[dataNav]) {
+                console.error(`[URL_MODIFIED] ${dataNav}: ${originalUrls[dataNav]} → ${tab.href}`);
+            }
+        });
+        
+        const hasOldTabs = Array.from(tabs).some(tab => 
+            tab.getAttribute('data-nav') === 'my-classes' || 
+            tab.getAttribute('data-nav') === 'exam-assignments'
+        );
+        
+        if (hasOldTabs) {
+            console.warn(`[NAV_V8_CHECK_${checkCount}] Old tabs detected at ${new Date().toISOString()}`);
+            // Hide them
+            tabs.forEach(tab => {
+                if (tab.getAttribute('data-nav') === 'my-classes' || 
+                    tab.getAttribute('data-nav') === 'exam-assignments') {
+                    tab.closest('li').style.display = 'none';
+                }
+            });
+        }
+        
+        if (checkCount >= 5) {
+            clearInterval(checkInterval);
+            console.log('[NAV_V8_MONITORING] Completed 5 checks, navigation stable');
+        }
+    }, 1000);
+})();
+
+// Simple navigation debouncing to prevent rapid clicking
+(function() {
+    let lastClickTime = 0;
+    const clickDelay = 300; // 300ms debounce
+    
+    document.addEventListener('click', function(e) {
+        const navLink = e.target.closest('.nav-tabs a');
+        if (navLink) {
+            const now = Date.now();
+            if (now - lastClickTime < clickDelay) {
+                e.preventDefault();
+                return false;
+            }
+            lastClickTime = now;
+        }
+    });
+})();
+</script>
+
+<style>
+/* Navigation V8 Specific Styles */
+#routinetest-nav-v8-762 {
+    position: relative;
+    z-index: 1000;
+}
+
+#unified-tab-v8 {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Navigation Icon Styling - Ensures emojis display properly */
+.nav-icon {
+    display: inline-block;
+    font-size: 1.1em;
+    margin-right: 6px;
+    vertical-align: middle;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "NotoColorEmoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols" !important;
+    line-height: 1;
+}
+
+/* Hide any old tabs if they somehow appear */
+li:has(a[data-nav="my-classes"]),
+li:has(a[data-nav="exam-assignments"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+</style>
+    
+    
+    <!-- Additional Navigation Verification -->
+    <script>
+        console.log('[ROUTINETEST_BASE] Loading Navigation V8 at', new Date().toISOString());
+        console.log('[ROUTINETEST_BASE] User: admin');
+        console.log('[ROUTINETEST_BASE] Cache Bust: 1756041114');
+    </script>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Messages/Alerts -->
+        
+        
+        <!-- Page Content -->
+        <div class="content">
+            
 <!-- CSRF Token for AJAX requests -->
-{% csrf_token %}
+<input type="hidden" name="csrfmiddlewaretoken" value="oiWKaBAqJZ1OE85Q2wr3vC38hWjAeM8NShaHqh4EypS4ijCFiRR7yKZXgghxIPlk">
 
 <!-- ============================================================================ -->
 <!-- CRITICAL: Global Functions - MUST load before any buttons are rendered      -->
 <!-- ============================================================================ -->
-{% include 'primepath_routinetest/exam_list_hierarchical_critical_functions.html' %}
+<!-- CRITICAL FUNCTIONS - Must be loaded IMMEDIATELY in global scope -->
+<!-- This script MUST be included right after <body> tag or in <head> -->
+<script>
+(function() {
+    'use strict';
+    
+    console.log('%c[CRITICAL_FUNCTIONS] Initializing global exam functions...', 'color: #FF6B6B; font-weight: bold');
+    
+    // ============================================================================
+    // GLOBAL FUNCTION DEFINITIONS - MUST BE AVAILABLE BEFORE ANY ONCLICK
+    // ============================================================================
+    
+    // Track initialization
+    window.EXAM_FUNCTIONS_READY = false;
+    window.EXAM_FUNCTIONS_INIT_TIME = Date.now();
+    
+    // Track deletion state to prevent multiple requests
+    window.DELETION_IN_PROGRESS = {};
+    
+    // Delete functionality
+    window.confirmDelete = function(examId, examName) {
+        console.log('%c[DELETE] confirmDelete called', 'color: #e74c3c; font-weight: bold', {
+            examId: examId,
+            examName: examName,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (!examId) {
+            console.warn('[DELETE] No exam ID provided');
+            alert('Error: No exam ID provided for deletion');
+            return;
+        }
+        
+        // Check if deletion is already in progress for this exam
+        if (window.DELETION_IN_PROGRESS[examId]) {
+            console.warn('[DELETE] Deletion already in progress for exam:', examId);
+            return;
+        }
+        
+        const confirmMessage = `Are you sure you want to delete "${examName || 'this exam'}"?\n\nThis action cannot be undone.`;
+        
+        if (confirm(confirmMessage)) {
+            console.log('[DELETE] User confirmed deletion');
+            window.deleteExam(examId);
+        } else {
+            console.log('[DELETE] User cancelled deletion');
+        }
+    };
+    
+    window.deleteExam = async function(examId) {
+        // ENHANCED COMPREHENSIVE DEBUGGING
+        const deleteDebugInfo = {
+            examId: examId,
+            timestamp: new Date().toISOString(),
+            user: document.querySelector('meta[name="user-name"]')?.content || 'Unknown',
+            userId: document.querySelector('meta[name="user-id"]')?.content || 'Unknown',
+            isAdmin: document.querySelector('meta[name="user-is-admin"]')?.content === 'true',
+            currentUrl: window.location.href,
+            examCard: document.querySelector(`[data-exam-id="${examId}"]`) ? 'Found' : 'Not Found'
+        };
+        
+        console.log('%c[DELETE] 🚨 Starting exam deletion', 'color: #e74c3c; font-weight: bold', deleteDebugInfo);
+        
+        // Prevent multiple simultaneous deletions
+        if (window.DELETION_IN_PROGRESS[examId]) {
+            console.warn('[DELETE] ⚠️ Already processing deletion for exam:', examId);
+            return;
+        }
+        
+        // Mark as in progress
+        window.DELETION_IN_PROGRESS[examId] = true;
+        
+        // Disable all delete buttons temporarily
+        const deleteButtons = document.querySelectorAll('button[onclick*="confirmDelete"]');
+        deleteButtons.forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes(examId)) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        });
+        
+        // Track if this is a permission denial
+        let isPermissionDenied = false;
+        let result = null;  // Initialize result variable in outer scope
+        
+        console.log('[DELETE] Starting deletion process for exam:', examId);
+        
+        try {
+            const deleteUrl = `/RoutineTest/exams/${examId}/delete/`;
+            console.log('[DELETE] Sending DELETE request to:', deleteUrl);
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.querySelector('meta[name="csrf-token"]')?.content || '';
+            
+            if (!csrfToken) {
+                console.warn('[DELETE] No CSRF token found, request may fail');
+            }
+            
+            // ENHANCED REQUEST WITH DEBUGGING
+            console.log('[DELETE] 📡 Sending DELETE request with:', {
+                url: deleteUrl,
+                method: 'DELETE',
+                hasCSRFToken: !!csrfToken,
+                csrfTokenLength: csrfToken ? csrfToken.length : 0
+            });
+            
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'  // Ensure cookies are sent
+            });
+            
+            // Only log non-permission responses
+            if (response.status !== 403) {
+                console.log('[DELETE] Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok
+                });
+            }
+            
+            if (!response.ok) {
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (jsonError) {
+                    errorData = { error: `HTTP error! status: ${response.status}` };
+                }
+                
+                // Handle permission errors with enhanced debugging
+                if (response.status === 403) {
+                    // COMPREHENSIVE PERMISSION DENIAL DEBUGGING
+                    const permissionDebug = {
+                        status: 'Access Denied (403)',
+                        examId: examId,
+                        errorResponse: errorData,
+                        userInfo: deleteDebugInfo,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    console.group('%c[DELETE] ❌ PERMISSION DENIED', 'color: #e74c3c; font-weight: bold');
+                    console.log('Debug Info:', permissionDebug);
+                    console.log('Server Response:', errorData);
+                    console.log('Detailed Error:', errorData.details || 'No details provided');
+                    console.groupEnd();
+                    
+                    // Clean up the error message for better user experience
+                    let permissionMessage = errorData.error || 
+                        "You do not have permission to delete this exam.";
+                    
+                    // Log permission denial with full context
+                    console.info('%c[DELETE] Permission check result:', 'color: #f39c12', {
+                        status: 'Access Denied',
+                        reason: errorData.details?.reason || 'Insufficient permissions',
+                        required: 'FULL access',
+                        message: 'This is expected behavior - user needs FULL access to delete'
+                    });
+                    
+                    // Clean up message if needed
+                    if (!permissionMessage.includes('Access Denied') && !permissionMessage.includes('FULL access')) {
+                        permissionMessage = "You do not have the required access level to delete this exam. Only teachers with FULL access can delete exams.";
+                    }
+                    
+                    // Show user-friendly notification
+                    if (window.showErrorNotification) {
+                        window.showErrorNotification(permissionMessage);
+                    } else {
+                        alert('Access Denied\n\n' + permissionMessage);
+                    }
+                    
+                    // Mark as permission denied - DON'T throw error, DON'T return early
+                    isPermissionDenied = true;
+                    console.log('[DELETE] Permission denied flag set, skipping further processing');
+                } else {
+                    // Only log non-permission errors
+                    console.error('[DELETE] Server error (non-403):', {
+                        status: response.status,
+                        error: errorData,
+                        examId: examId
+                    });
+                    
+                    // For other errors, throw to be caught by catch block
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+            }
+            
+            // Only process success response if not a permission denial
+            if (!isPermissionDenied && response.ok) {
+                const result = await response.json();
+                console.log('[DELETE] Processing success response:', {
+                    success: result.success,
+                    message: result.message,
+                    examId: examId
+                });
+                
+                if (result.success) {
+                    // Find and remove the exam card from DOM
+                    const examCard = document.querySelector(`button[onclick*="${examId}"]`)?.closest('.exam-card');
+                    if (examCard) {
+                        console.log('[DELETE] Removing exam card from DOM');
+                        const classExams = examCard.closest('.class-exams');
+                        
+                        // Animate removal
+                        examCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                        examCard.style.opacity = '0';
+                        examCard.style.transform = 'scale(0.95)';
+                        
+                        setTimeout(() => {
+                            examCard.remove();
+                            
+                            // Check if this was the last exam
+                            if (classExams && classExams.querySelectorAll('.exam-card').length === 0) {
+                                classExams.innerHTML = '<div class="no-exams">No exams in this class</div>';
+                            }
+                            
+                            // Show success notification
+                            if (window.showSuccessNotification) {
+                                window.showSuccessNotification('Exam deleted successfully');
+                            } else {
+                                alert('Exam deleted successfully');
+                            }
+                        }, 300);
+                    } else {
+                        console.log('[DELETE] Exam card not found, reloading page');
+                        alert('Exam deleted successfully');
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+                } else if (!isPermissionDenied && result) {
+                    // Log as warning, not error, since this is a controlled response
+                    console.warn('[DELETE] Server returned success:false', result);
+                    alert(result.message || result.error || 'Failed to delete exam');
+                }
+            }
+        } catch (error) {
+            // Don't log or handle if permission was already denied
+            if (isPermissionDenied) {
+                console.log('[DELETE] Skipping error handling - permission already denied');
+                return;
+            }
+            
+            // Only log actual errors, not permission denials
+            if (error && error.message && !error.message.includes('permission') && !error.message.includes('Access Denied')) {
+                console.error('[DELETE] Exception caught:', error);
+            }
+            
+            // Only show error if it's not a permission error (already handled above)
+            if (error && error.message && !error.message.includes('permission') && !error.message.includes('Access Denied')) {
+                if (window.showErrorNotification) {
+                    window.showErrorNotification('Error deleting exam: ' + error.message);
+                } else {
+                    alert('Error deleting exam: ' + error.message);
+                }
+            }
+        } finally {
+            // Always clean up state
+            delete window.DELETION_IN_PROGRESS[examId];
+            
+            // Re-enable delete buttons
+            const deleteButtons = document.querySelectorAll('button[onclick*="confirmDelete"]');
+            deleteButtons.forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes(examId)) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+            
+            console.log('[DELETE] Cleanup complete for exam:', examId);
+        }
+    };
+    
+    // Copy functionality
+    window.openCopyModal = function(examId, examName) {
+        console.log('%c[COPY] openCopyModal called', 'color: #3498db; font-weight: bold', {
+            examId: examId,
+            examName: examName,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (!examId) {
+            console.error('[COPY] No exam ID provided');
+            alert('Error: No exam ID provided for copying');
+            return;
+        }
+        
+        // Check if modal manager is available
+        if (window.CopyModalManager && window.CopyModalManager.open) {
+            console.log('[COPY] Using CopyModalManager');
+            window.CopyModalManager.open(examId, examName);
+        } else if (window.openCopyModalInternal) {
+            console.log('[COPY] Using openCopyModalInternal');
+            window.openCopyModalInternal(examId, examName);
+        } else {
+            console.error('[COPY] No copy modal handler available yet');
+            // Store for later execution
+            window.pendingCopyModal = { examId, examName };
+            alert('Copy modal is still loading. Please try again in a moment.');
+        }
+    };
+    
+    window.closeCopyModal = function() {
+        console.log('%c[COPY] closeCopyModal called', 'color: #3498db; font-weight: bold');
+        
+        if (window.CopyModalManager && window.CopyModalManager.close) {
+            window.CopyModalManager.close();
+        } else if (window.closeCopyModalInternal) {
+            window.closeCopyModalInternal();
+        } else {
+            // Fallback: try to hide modal directly
+            const modal = document.getElementById('copyExamModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+    };
+    
+    // Notification functions
+    window.showSuccessNotification = function(message) {
+        console.log('[NOTIFICATION] Success:', message);
+        if (window.showNotification) {
+            window.showNotification(message, 'success');
+        } else {
+            alert('✓ ' + message);
+        }
+    };
+    
+    window.showErrorNotification = function(message) {
+        console.log('[NOTIFICATION] Error:', message);
+        if (window.showNotification) {
+            window.showNotification(message, 'error');
+        } else {
+            alert('✗ ' + message);
+        }
+    };
+    
+    window.showNotification = function(message, type) {
+        type = type || 'info';
+        console.log(`[NOTIFICATION] ${type}:`, message);
+        
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.exam-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `exam-notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10001;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+        
+        // Set colors based on type
+        if (type === 'success') {
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+        } else if (type === 'error') {
+            notification.style.backgroundColor = '#f44336';
+            notification.style.color = 'white';
+        } else {
+            notification.style.backgroundColor = '#2196F3';
+            notification.style.color = 'white';
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    };
+    
+    // Toggle functions for collapsible sections
+    window.toggleProgram = function(program) {
+        console.log('%c[TOGGLE] toggleProgram called', 'color: #9b59b6; font-weight: bold', { program });
+        const section = document.querySelector(`.program-section[data-program="${program}"]`);
+        if (section) {
+            section.classList.toggle('collapsed');
+        } else {
+            console.warn('[TOGGLE] Program section not found:', program);
+        }
+    };
+    
+    window.toggleClass = function(classCode) {
+        console.log('%c[TOGGLE] toggleClass called', 'color: #9b59b6; font-weight: bold', { classCode });
+        const section = document.querySelector(`.class-section[data-class="${classCode}"]`);
+        if (section) {
+            section.classList.toggle('collapsed');
+        } else {
+            console.warn('[TOGGLE] Class section not found:', classCode);
+        }
+    };
+    
+    // Mark as ready
+    window.EXAM_FUNCTIONS_READY = true;
+    
+    // Log initialization complete
+    const initTime = Date.now() - window.EXAM_FUNCTIONS_INIT_TIME;
+    console.log('%c[CRITICAL_FUNCTIONS] Global functions ready!', 'color: #27ae60; font-weight: bold', {
+        initTime: initTime + 'ms',
+        functions: ['confirmDelete', 'deleteExam', 'openCopyModal', 'closeCopyModal', 'toggleProgram', 'toggleClass'],
+        ready: window.EXAM_FUNCTIONS_READY
+    });
+    
+    // Verify functions are available
+    console.log('[CRITICAL_FUNCTIONS] Function availability check:', {
+        confirmDelete: typeof window.confirmDelete,
+        deleteExam: typeof window.deleteExam,
+        openCopyModal: typeof window.openCopyModal,
+        closeCopyModal: typeof window.closeCopyModal,
+        toggleProgram: typeof window.toggleProgram,
+        toggleClass: typeof window.toggleClass
+    });
+    
+})();
+
+// Double-check functions are in global scope
+console.log('[GLOBAL_CHECK] Functions in window:', {
+    confirmDelete: typeof window.confirmDelete === 'function',
+    deleteExam: typeof window.deleteExam === 'function',
+    openCopyModal: typeof window.openCopyModal === 'function',
+    closeCopyModal: typeof window.closeCopyModal === 'function',
+    toggleProgram: typeof window.toggleProgram === 'function',
+    toggleClass: typeof window.toggleClass === 'function'
+});
+</script>
 
 <style>
     /* Main Layout */
@@ -864,36 +1960,28 @@
         <h1 class="library-title">Exam Library</h1>
         <div class="header-controls">
             <!-- Upload Button (Admin or Full Access Teachers) -->
-            {% if is_admin or can_manage_exams %}
-            <a href="{% url 'RoutineTest:create_exam' %}" class="btn btn-edit">
+            
+            <a href="/RoutineTest/exams/create/" class="btn btn-edit">
                 📤 Upload New Exam
             </a>
-            {% endif %}
+            
         </div>
     </div>
     
     <!-- Global Access Level Indicator -->
-    {% if not is_admin %}
-    <div class="global-access-indicator {% if is_view_only_teacher %}view-only{% else %}full-access{% endif %}">
-        {% if is_view_only_teacher %}
-            👁️ View Only Access - You can view exams but cannot edit or delete them
-        {% else %}
-            ✅ Full Access - You can create, edit, and delete exams in your assigned classes
-        {% endif %}
-    </div>
-    {% endif %}
+    
     
     <!-- NEW: Ownership-based Tab Layer -->
     <div class="ownership-tabs">
-        <a href="?ownership=my&exam_type={{ exam_type_filter }}" 
-           class="ownership-tab {% if is_my_files_active %}active{% endif %}"
-           onclick="return handleOwnershipTabSwitch('my', '{{ exam_type_filter }}')">
+        <a href="?ownership=my&exam_type=ALL" 
+           class="ownership-tab active"
+           onclick="return handleOwnershipTabSwitch('my', 'ALL')">
             <span>📁 My Test Files</span>
         </a>
         
-        <a href="?ownership=others&exam_type={{ exam_type_filter }}" 
-           class="ownership-tab {% if is_others_files_active %}active{% endif %}"
-           onclick="return handleOwnershipTabSwitch('others', '{{ exam_type_filter }}')">
+        <a href="?ownership=others&exam_type=ALL" 
+           class="ownership-tab "
+           onclick="return handleOwnershipTabSwitch('others', 'ALL')">
             <span>👥 Other Teachers' Test Files</span>
         </a>
     </div>
@@ -902,79 +1990,76 @@
     <div class="summary-stats">
         <div class="stat-item">
             <span class="stat-label">Total Exams:</span>
-            <span class="stat-value">{{ mapping_summary.total }}</span>
+            <span class="stat-value">0</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Complete:</span>
-            <span class="stat-value" style="color: #28a745;">{{ mapping_summary.complete }}</span>
+            <span class="stat-value" style="color: #28a745;">0</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Partial:</span>
-            <span class="stat-value" style="color: #ffc107;">{{ mapping_summary.partial }}</span>
+            <span class="stat-value" style="color: #ffc107;">0</span>
         </div>
         <div class="stat-item">
             <span class="stat-label">Not Started:</span>
-            <span class="stat-value" style="color: #dc3545;">{{ mapping_summary.not_started }}</span>
+            <span class="stat-value" style="color: #dc3545;">0</span>
         </div>
-        {% if not is_admin %}
-        <div class="stat-item">
-            <span class="stat-label">Editable:</span>
-            <span class="stat-value" style="color: #4CAF50;">{{ mapping_summary.editable }}</span>
-        </div>
-        {% endif %}
+        
     </div>
     
     <!-- UPDATED: Exam Type Tabs with New Ownership System -->
     <div class="exam-type-tabs">
-        <a href="?ownership={{ ownership_filter }}&exam_type=REVIEW" 
-           class="exam-type-tab {% if exam_type_filter == 'REVIEW' %}active{% endif %}"
-           onclick="return handleExamTypeTabSwitch('{{ ownership_filter }}', 'REVIEW')">
+        <a href="?ownership=my&exam_type=REVIEW" 
+           class="exam-type-tab "
+           onclick="return handleExamTypeTabSwitch('my', 'REVIEW')">
             <span>📚 Review / Monthly</span>
-            <span class="tab-badge">{{ exam_type_counts.review }}</span>
+            <span class="tab-badge">4</span>
         </a>
         
-        <a href="?ownership={{ ownership_filter }}&exam_type=QUARTERLY" 
-           class="exam-type-tab {% if exam_type_filter == 'QUARTERLY' %}active{% endif %}"
-           onclick="return handleExamTypeTabSwitch('{{ ownership_filter }}', 'QUARTERLY')">
+        <a href="?ownership=my&exam_type=QUARTERLY" 
+           class="exam-type-tab "
+           onclick="return handleExamTypeTabSwitch('my', 'QUARTERLY')">
             <span>📊 Quarterly</span>
-            <span class="tab-badge">{{ exam_type_counts.quarterly }}</span>
+            <span class="tab-badge">8</span>
         </a>
         
-        <a href="?ownership={{ ownership_filter }}&exam_type=ALL" 
-           class="exam-type-tab {% if exam_type_filter == 'ALL' %}active{% endif %}"
-           onclick="return handleExamTypeTabSwitch('{{ ownership_filter }}', 'ALL')">
+        <a href="?ownership=my&exam_type=ALL" 
+           class="exam-type-tab active"
+           onclick="return handleExamTypeTabSwitch('my', 'ALL')">
             <span>📋 All Exams</span>
-            <span class="tab-badge">{{ exam_type_counts.all }}</span>
+            <span class="tab-badge">12</span>
         </a>
     </div>
     
     <!-- Hierarchical Exam Display -->
     <!-- DEBUG SECTION - Server Data Analysis -->
-    {% if show_assigned_only %}
+    
     <script>
         console.log('========================================');
         console.log('[SERVER_DATA_DEBUG] FILTER IS ON - Analyzing server data');
-        console.log('[SERVER_DATA_DEBUG] Filter state from Django: {{ show_assigned_only }}');
+        console.log('[SERVER_DATA_DEBUG] Filter state from Django: True');
         
         // Count VIEW ONLY exams in server data
         let serverViewOnlyCount = 0;
         let serverTotalExams = 0;
         
-        {% for program in program_order %}
-            {% with program_exams=hierarchical_exams|get_item:program %}
-            {% if program_exams and program_exams|length > 0 %}
-                {% for class_code, class_exams in program_exams.items %}
-                    {% for exam in class_exams %}
-                        serverTotalExams++;
-                        {% if exam.access_badge == 'VIEW ONLY' %}
-                            serverViewOnlyCount++;
-                            console.log('[SERVER_DATA_DEBUG] ❌ VIEW ONLY exam in server data: {{ exam.name|escapejs }} (ID: {{ exam.id }})');
-                        {% endif %}
-                    {% endfor %}
-                {% endfor %}
-            {% endif %}
-            {% endwith %}
-        {% endfor %}
+        
+            
+            
+            
+        
+            
+            
+            
+        
+            
+            
+            
+        
+            
+            
+            
+        
         
         console.log('[SERVER_DATA_DEBUG] Total exams from server:', serverTotalExams);
         console.log('[SERVER_DATA_DEBUG] VIEW ONLY exams from server:', serverViewOnlyCount);
@@ -986,205 +2071,36 @@
         }
         console.log('========================================');
     </script>
-    {% endif %}
     
-    <!-- Debug: hierarchical_exams = {{ hierarchical_exams }} -->
+    
+    <!-- Debug: hierarchical_exams = {} -->
     <div class="exam-hierarchy">
-        {% for program in program_order %}
-            {% with program_exams=hierarchical_exams|get_item:program %}
-            {% if program_exams and program_exams|length > 0 %}
-            <div class="program-section" data-program="{{ program }}">
-                <div class="program-header" onclick="toggleProgram('{{ program }}')">
-                    <span>{{ program }} Program</span>
-                    <span class="program-toggle">▼</span>
-                </div>
-                
-                <div class="program-content">
-                    <!-- Debug: {{ program_exams|length }} classes in {{ program }} -->
-                    {% for class_code, class_exams in program_exams.items %}
-                        {# CRITICAL FIX: Only show class sections that have exams after filtering #}
-                        {% if class_exams|length > 0 %}
-                        {% with access_level=teacher_assignments|get_item:class_code is_owned_class=ownership_overrides|get_item:class_code base_access=base_assignments|get_item:class_code %}
-                        <!-- OWNERSHIP FIX DEBUG -->
-                        <script>
-                            console.log('[OWNERSHIP_FIX] Class {{ class_code }}', {
-                                'is_owned_class': '{{ is_owned_class }}',
-                                'base_access': '{{ base_access }}',
-                                'effective_access': '{{ access_level }}',
-                                'has_ownership_override': {{ is_owned_class|yesno:"true,false" }},
-                                'exam_count': {{ class_exams|length }}
-                            });
-                        </script>
-                        <div class="class-section {% if access_level and access_level != 'VIEW' %}accessible{% endif %}" 
-                             data-class="{{ class_code }}">
-                            <div class="class-header" onclick="toggleClass('{{ class_code }}')">
-                                <div class="class-name">
-                                    <span style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="background: #f0f4f8; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; color: #495057; font-weight: 500;">
-                                            <i class="fas fa-chalkboard" style="margin-right: 4px; color: #6c757d;"></i>
-                                            Class Code: <strong style="color: #2c3e50;">{{ class_code }}</strong>
-                                        </span>
-                                        {% if get_class_display_name|get_item:class_code and get_class_display_name|get_item:class_code != class_code %}
-                                            <span style="color: #495057; font-style: italic;">
-                                                ({{ get_class_display_name|get_item:class_code }})
-                                            </span>
-                                        {% endif %}
-                                    </span>
-                                    <!-- OWNERSHIP FIX: Display correct badge based on ownership -->
-                                    {% if is_owned_class %}
-                                        <!-- Teacher owns exam(s) in this class -->
-                                        <span class="access-badge owner" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; font-weight: 600; padding: 4px 12px; border-radius: 4px; box-shadow: 0 2px 4px rgba(40,167,69,0.2);">👑 OWNER - Full Access</span>
-                                    {% elif access_level %}
-                                        {% if access_level == 'FULL' %}
-                                            <span class="access-badge full">Full Access</span>
-                                        {% elif access_level == 'CO_TEACHER' %}
-                                            <span class="access-badge co-teacher">Co-Teacher</span>
-                                        {% elif access_level == 'VIEW' %}
-                                            <span class="access-badge view">View Only</span>
-                                        {% endif %}
-                                    {% elif not is_admin %}
-                                        <span class="access-badge view">View Only</span>
-                                    {% endif %}
-                                    <span style="color: #6c757d;">({{ class_exams|length }} exam{{ class_exams|length|pluralize }})</span>
-                                </div>
-                                <span class="class-toggle">▼</span>
-                            </div>
-                            
-                            <div class="class-exams">
-                                {% for exam in class_exams %}
-                                <!-- COMPREHENSIVE DEBUG START -->
-                                <!-- 
-                                    DELETE BUTTON DEBUG:
-                                    - is_admin = {{ is_admin }}
-                                    - exam.can_edit = {{ exam.can_edit }}
-                                    - exam.id = {{ exam.id }}
-                                    - exam.name = {{ exam.name }}
-                                    - User: {{ user.username }}
-                                    - User.is_superuser = {{ user.is_superuser }}
-                                    - User.is_staff = {{ user.is_staff }}
-                                    - Condition (is_admin or exam.can_edit) = {% if is_admin or exam.can_edit %}TRUE{% else %}FALSE{% endif %}
-                                -->
-                                <!-- EXAM-LEVEL OWNERSHIP DEBUG -->
-                                <script>
-                                    console.log('[EXAM_OWNERSHIP_DEBUG] Exam: {{ exam.name|escapejs }}', {
-                                        'exam_id': '{{ exam.id }}',
-                                        'exam_owner': '{{ exam.created_by.name|default:"Unknown" }}',
-                                        'is_owner': {{ exam.is_owner|yesno:"true,false" }},
-                                        'access_badge': '{{ exam.access_badge }}',
-                                        'class_is_owned': '{{ is_owned_class }}',
-                                        'can_edit': {{ exam.can_edit|yesno:"true,false" }},
-                                        'can_delete': {{ exam.can_delete|yesno:"true,false" }}
-                                    });
-                                    console.log('[DELETE_BUTTON_DEBUG] Exam: {{ exam.name|escapejs }}', {
-                                        is_admin: {{ is_admin|lower }},
-                                        exam_can_edit: {{ exam.can_edit|lower }},
-                                        user_is_superuser: {{ user.is_superuser|lower }},
-                                        user_is_staff: {{ user.is_staff|lower }},
-                                        should_show_delete: {% if is_admin or exam.can_edit %}true{% else %}false{% endif %}
-                                    });
-                                </script>
-                                <!-- COMPREHENSIVE DEBUG END -->
-                                <div class="exam-card {% if exam.can_edit %}editable{% endif %}">
-                                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                                        <div>
-                                            <div class="exam-title">{{ exam.name }}</div>
-                                            <!-- Year and Month/Quarter Display -->
-                                            <div style="margin-top: 4px; display: flex; gap: 8px; align-items: center;">
-                                                {% if exam.academic_year %}
-                                                <span style="background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
-                                                    {{ exam.academic_year|slice:":4" }}
-                                                </span>
-                                                {% endif %}
-                                                {% if exam.exam_type == 'REVIEW' and exam.time_period_month %}
-                                                <span style="background: #f3e5f5; color: #6a1b9a; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
-                                                    {{ exam.get_time_period_month_display }}
-                                                </span>
-                                                {% elif exam.exam_type == 'QUARTERLY' and exam.time_period_quarter %}
-                                                <span style="background: #fff3e0; color: #e65100; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">
-                                                    {{ exam.get_time_period_quarter_display }}
-                                                </span>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        {% if exam.access_badge %}
-                                        {% comment %}ADMIN badge removed - was misleading and not useful{% endcomment %}
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="exam-meta">
-                                        <div class="exam-meta-item">
-                                            📄 {{ exam.routine_questions.count }} Questions
-                                        </div>
-                                        <div class="exam-meta-item">
-                                            🎵 {{ exam.routine_audio_files.count }} Audio
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Answer Mapping Status -->
-                                    <div class="answer-status {{ exam.answer_mapping_status.status_class }}">
-                                        <div style="display: flex; justify-content: space-between;">
-                                            <span>Answer Keys: {{ exam.answer_mapping_status.status_label }}</span>
-                                            <span>{{ exam.answer_mapping_status.percentage_complete }}%</span>
-                                        </div>
-                                        <div class="answer-progress-bar">
-                                            <div class="answer-progress-fill {{ exam.answer_mapping_status.status_class }}"
-                                                 style="width: {{ exam.answer_mapping_status.percentage_complete }}%"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Action Buttons -->
-                                    <div class="exam-actions">
-                                        {% if exam.can_edit %}
-                                            <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-edit">
-                                                Edit Answers
-                                            </a>
-                                        {% else %}
-                                            <a href="{% url 'RoutineTest:preview_exam' exam.id %}" class="btn btn-view">
-                                                View Answers
-                                            </a>
-                                        {% endif %}
-                                        
-                                        {% if exam.can_copy %}
-                                            <button onclick="openCopyModal('{{ exam.id }}', '{{ exam.name|escapejs }}')" class="btn btn-copy">
-                                                Copy Exam
-                                            </button>
-                                        {% endif %}
-                                        
-                                        {% if exam.can_delete %}
-                                            <button onclick="confirmDelete('{{ exam.id }}', '{{ exam.name|escapejs }}')" 
-                                                    class="btn btn-danger delete-exam-btn">
-                                                Delete
-                                            </button>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                {% empty %}
-                                <div class="no-exams">No exams in this class</div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endwith %}
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            {% endwith %}
-        {% endfor %}
         
-        {% comment %}Show empty state if no exams in any program{% endcomment %}
-        {% if mapping_summary.total == 0 and exam_type_counts.all > 0 %}
+            
+            
+            
+        
+            
+            
+            
+        
+            
+            
+            
+        
+            
+            
+            
+        
+        
+        
+        
         <div class="empty-state">
             <h3>Exams not organized</h3>
-            <p>{{ exam_type_counts.all }} exam(s) found in database but could not be organized into programs. This typically means exams are missing class assignments.</p>
-            <p><small>Debug: hierarchical_exams has {{ hierarchical_exams|length }} programs</small></p>
+            <p>12 exam(s) found in database but could not be organized into programs. This typically means exams are missing class assignments.</p>
+            <p><small>Debug: hierarchical_exams has 0 programs</small></p>
         </div>
-        {% elif mapping_summary.total == 0 %}
-        <div class="empty-state">
-            <h3>No exams found</h3>
-            <p>{% if show_assigned_only %}No exams in your assigned classes. Try turning off the filter.{% else %}No exams available in the library.{% endif %}</p>
-        </div>
-        {% endif %}
+        
     </div>
 </div>
 
@@ -1205,21 +2121,19 @@
                 <label for="targetClass">Target Class:</label>
                 <select id="targetClass" name="target_class" required>
                     <option value="">Select a class...</option>
-                    {% for class_code, access_level in teacher_assignments.items %}
-                        {% if access_level == 'FULL' or access_level == 'CO_TEACHER' %}
-                        <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }}</option>
-                        {% endif %}
-                    {% endfor %}
-                    {% if is_admin %}
+                    
+                        
+                        <option value="B2">B2</option>
+                        
+                    
+                        
+                        <option value="B3">B3</option>
+                        
+                    
+                    
                         <!-- Admin can copy to any class -->
-                        {% for program, classes in hierarchical_exams.items %}
-                            {% for class_code, exams in classes.items %}
-                                {% if class_code not in teacher_assignments %}
-                                <option value="{{ class_code }}">{{ get_class_display_name|get_item:class_code|default:class_code }} (Admin)</option>
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
-                    {% endif %}
+                        
+                    
                 </select>
             </div>
             
@@ -1444,8 +2358,8 @@ window.handleExamTypeTabSwitch = handleExamTypeTabSwitch;
     
     console.log('[PAGE_LOAD_DEBUG] NEW Ownership parameter:', ownershipState);
     console.log('[PAGE_LOAD_DEBUG] NEW Exam type parameter:', examTypeState);
-    console.log('[PAGE_LOAD_DEBUG] Server-side ownership filter: {{ ownership_filter }}');
-    console.log('[PAGE_LOAD_DEBUG] Legacy show_assigned_only: {{ show_assigned_only|lower }}');
+    console.log('[PAGE_LOAD_DEBUG] Server-side ownership filter: my');
+    console.log('[PAGE_LOAD_DEBUG] Legacy show_assigned_only: true');
     
     // Count and log exam cards with their badges
     const examCards = document.querySelectorAll('.exam-card');
@@ -1553,9 +2467,9 @@ window.handleExamTypeTabSwitch = handleExamTypeTabSwitch;
 // NEW: Ownership Tab Navigation Logging (No JavaScript needed - handled by server)
 (function() {
     console.log('[OWNERSHIP_SYSTEM] ✅ New tab-based navigation system active');
-    console.log('[OWNERSHIP_SYSTEM] Current ownership filter: {{ ownership_filter }}');
-    console.log('[OWNERSHIP_SYSTEM] Filter intent: {{ filter_intent }}');
-    console.log('[OWNERSHIP_SYSTEM] Current exam type filter: {{ exam_type_filter }}');
+    console.log('[OWNERSHIP_SYSTEM] Current ownership filter: my');
+    console.log('[OWNERSHIP_SYSTEM] Filter intent: SHOW_EDITABLE');
+    console.log('[OWNERSHIP_SYSTEM] Current exam type filter: ALL');
     console.log('[OWNERSHIP_SYSTEM] Navigation handled by server-side routing');
     
     // Log tab state for debugging
@@ -1824,7 +2738,7 @@ function initializeCopyFormSubmission() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
+                'X-CSRFToken': 'oiWKaBAqJZ1OE85Q2wr3vC38hWjAeM8NShaHqh4EypS4ijCFiRR7yKZXgghxIPlk'
             },
             body: JSON.stringify(data)
         });
@@ -2086,9 +3000,7 @@ function updateCopyExamNamePreview() {
     
     const examTypeSelect = document.getElementById('copyExamType');
     const timeslotSelect = document.getElementById('timeslot');
-    const programSelect = document.getElementById('copyProgramSelect');
-    const subprogramSelect = document.getElementById('copySubprogramSelect');
-    const levelSelect = document.getElementById('copyLevelSelect');
+    const academicYearSelect = document.getElementById('academicYear');
     const customSuffixInput = document.getElementById('customSuffix');
     const previewText = document.getElementById('previewText');
     
@@ -2098,41 +3010,41 @@ function updateCopyExamNamePreview() {
     }
     
     // Check if all required fields are filled
-    if (!examTypeSelect?.value || !timeslotSelect?.value || !programSelect?.value || !subprogramSelect?.value || !levelSelect?.value) {
+    if (!examTypeSelect?.value || !timeslotSelect?.value || !academicYearSelect?.value) {
         previewText.textContent = 'Please complete all fields to see preview...';
-        console.log('[COPY_MODAL_PREVIEW] Missing required fields:', {
-            examType: examTypeSelect?.value,
-            timeslot: timeslotSelect?.value,
-            program: programSelect?.value,
-            subprogram: subprogramSelect?.value,
-            level: levelSelect?.value
-        });
+        console.log('[COPY_MODAL_PREVIEW] Missing required fields');
         return;
     }
     
-    // Build the name preview with curriculum selection
+    // Get the source exam name from the display
+    const sourceExamName = document.getElementById('sourceExamName')?.textContent || '';
+    
+    // Build the name preview
     let nameParts = [];
     
-    // Add exam type prefix based on selection
-    if (examTypeSelect.value === 'QUARTERLY') {
-        nameParts.push('[QTR]');
-    } else if (examTypeSelect.value === 'REVIEW') {
-        nameParts.push('[RVW]');
+    // Add exam type prefix
+    const prefix = examTypeSelect.value === 'QUARTERLY' ? '[QTR]' : '[RT]';
+    nameParts.push(prefix);
+    
+    // Add time period with year
+    if (examTypeSelect.value === 'REVIEW') {
+        // Convert month code to abbreviated name
+        const monthAbbrev = {
+            'JAN': 'Jan', 'FEB': 'Feb', 'MAR': 'Mar', 'APR': 'Apr',
+            'MAY': 'May', 'JUN': 'Jun', 'JUL': 'Jul', 'AUG': 'Aug',
+            'SEP': 'Sep', 'OCT': 'Oct', 'NOV': 'Nov', 'DEC': 'Dec'
+        };
+        const monthName = monthAbbrev[timeslotSelect.value] || timeslotSelect.value;
+        nameParts.push(`${monthName} ${academicYearSelect.value}`);
+    } else {
+        nameParts.push(`${timeslotSelect.value} ${academicYearSelect.value}`);
     }
     
-    // Add time period based on exam type
-    const year = new Date().getFullYear();
-    if (examTypeSelect.value === 'QUARTERLY') {
-        // For quarterly exams, use the selected quarter
-        const quarterValue = timeslotSelect.value; // e.g., 'Q1', 'Q2', etc.
-        nameParts.push(`${quarterValue} ${year}`);
-    } else if (examTypeSelect.value === 'REVIEW') {
-        // For review/monthly exams, use the selected month
-        const monthText = timeslotSelect.options[timeslotSelect.selectedIndex]?.text || timeslotSelect.value;
-        nameParts.push(`${monthText} ${year}`);
-    }
+    // Get curriculum from selected dropdowns (preferred) or source exam name (fallback)
+    const programSelect = document.getElementById('copyProgramSelect');
+    const subprogramSelect = document.getElementById('copySubprogramSelect');
+    const levelSelect = document.getElementById('copyLevelSelect');
     
-    // Add curriculum information
     if (programSelect?.value && subprogramSelect?.value && levelSelect?.value) {
         // Use selected curriculum
         const program = programSelect.value;
@@ -2383,10 +3295,10 @@ window.CopyCurriculumDataError = null;
 console.group('%c🔍 COPY MODAL CURRICULUM DEBUG - TEMPLATE ANALYSIS', 'color: #ff6b35; font-size: 16px; font-weight: bold;');
 console.log('%c[TEMPLATE_DEBUG] Template rendering started at:', 'color: #0066cc;', new Date().toISOString());
 console.log('%c[TEMPLATE_DEBUG] Django template context evaluation:', 'color: #0066cc;');
-console.log('  - curriculum_hierarchy_for_copy available: {{ curriculum_hierarchy_for_copy|yesno:"YES,NO" }}');
-console.log('  - curriculum_levels_for_copy available: {{ curriculum_levels_for_copy|yesno:"YES,NO" }}');
+console.log('  - curriculum_hierarchy_for_copy available: YES');
+console.log('  - curriculum_levels_for_copy available: YES');
 
-{% if curriculum_hierarchy_for_copy %}
+
 // Use ENHANCED structured hierarchy data from Django backend
 console.log('%c[COPY_CURRICULUM_FIX] ✅ curriculum_hierarchy_for_copy IS AVAILABLE from Django backend', 'color: #00aa00; font-weight: bold;');
 console.log('[COPY_CURRICULUM_FIX] Loading ENHANCED hierarchical curriculum data from Django backend...');
@@ -2453,33 +3365,7 @@ if (curriculumScriptElement) {
     console.error('[COPY_CURRICULUM_FIX] ❌ Script element #copy-curriculum-hierarchy-data not found in DOM');
     console.log('[COPY_CURRICULUM_FIX] Available script elements:', Array.from(document.querySelectorAll('script[type="application/json"]')).map(s => s.id));
 }
-{% elif curriculum_levels_for_copy %}
-// Fallback: Build from individual level data (legacy support)
-console.log('%c[TEMPLATE_DEBUG] ⚠️ Using FALLBACK curriculum_levels_for_copy', 'color: #ff9900; font-weight: bold;');
-console.log('[COPY_CURRICULUM] Using fallback curriculum data construction...');
-window.CopyCurriculumData = {};
-{% for level_data in curriculum_levels_for_copy %}
-    {% with program=level_data.program_name subprogram=level_data.subprogram_name level=level_data.level_number %}
-        if (!window.CopyCurriculumData['{{ program }}']) {
-            window.CopyCurriculumData['{{ program }}'] = { subprograms: {} };
-        }
-        if (!window.CopyCurriculumData['{{ program }}']['subprograms']['{{ subprogram }}']) {
-            window.CopyCurriculumData['{{ program }}']['subprograms']['{{ subprogram }}'] = { levels: [] };
-        }
-        window.CopyCurriculumData['{{ program }}']['subprograms']['{{ subprogram }}']['levels'].push({
-            id: {{ level_data.curriculum_level.id }},
-            number: {{ level }}
-        });
-    {% endwith %}
-{% endfor %}
-window.CopyCurriculumDataReady = true;
-console.log('[COPY_CURRICULUM] ⚠️  Built curriculum data from individual levels (fallback)');
-console.log('[COPY_CURRICULUM] Total programs loaded:', Object.keys(window.CopyCurriculumData).length);
-{% else %}
-console.error('%c[TEMPLATE_DEBUG] ❌❌❌ NO CURRICULUM DATA AVAILABLE FROM DJANGO CONTEXT!', 'color: #ff0000; font-size: 18px; font-weight: bold;');
-console.error('[COPY_CURRICULUM] This means neither curriculum_hierarchy_for_copy nor curriculum_levels_for_copy were passed to template');
-console.log('[COPY_CURRICULUM] Available context variables:', Object.keys({{ curriculum_hierarchy_for_copy|default:"{}"|safe }}));
-{% endif %}
+
 
 // Close the debug group and provide summary
 console.log('%c[TEMPLATE_DEBUG] Django template processing completed', 'color: #0066cc;');
@@ -3025,15 +3911,6 @@ function setupCopyCurriculumEventListeners() {
         updateCopyExamNamePreview();
     });
     
-    // Custom suffix change handler
-    const customSuffixInput = document.getElementById('customSuffix');
-    if (customSuffixInput) {
-        customSuffixInput.addEventListener('input', function() {
-            console.log('[COPY_CURRICULUM] Custom suffix changed to:', this.value);
-            updateCopyExamNamePreview();
-        });
-    }
-    
     console.log('[COPY_CURRICULUM] Event listeners set up');
 }
 
@@ -3141,24 +4018,181 @@ if (document.readyState === 'loading') {
 </script>
 
 <!-- Place the curriculum data JSON script tag here to avoid rendering issues -->
-{% if curriculum_hierarchy_for_copy %}
-{{ curriculum_hierarchy_for_copy|json_script:"copy-curriculum-hierarchy-data" }}
-{% endif %}
 
-<!-- Load the fixed copy modal script -->
-<script src="{% static 'js/routinetest/copy-exam-modal-fixed.js' %}?v={% now 'U' %}"></script>
+<script id="copy-curriculum-hierarchy-data" type="application/json">{"curriculum_data": {"CORE": {"subprograms": {"Phonics": {"levels": [{"id": 47, "number": 1}, {"id": 48, "number": 2}, {"id": 49, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Sigma": {"levels": [{"id": 59, "number": 1}, {"id": 60, "number": 2}, {"id": 61, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Elite": {"levels": [{"id": 71, "number": 1}, {"id": 72, "number": 2}, {"id": 73, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Pro": {"levels": [{"id": 83, "number": 1}, {"id": 84, "number": 2}, {"id": 85, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}}, "meta": {"total_subprograms": 4, "total_levels": 12}}, "ASCENT": {"subprograms": {"Nova": {"levels": [{"id": 50, "number": 1}, {"id": 51, "number": 2}, {"id": 52, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Drive": {"levels": [{"id": 62, "number": 1}, {"id": 63, "number": 2}, {"id": 64, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Pro": {"levels": [{"id": 74, "number": 1}, {"id": 75, "number": 2}, {"id": 76, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}}, "meta": {"total_subprograms": 3, "total_levels": 9}}, "EDGE": {"subprograms": {"Spark": {"levels": [{"id": 53, "number": 1}, {"id": 54, "number": 2}, {"id": 55, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Rise": {"levels": [{"id": 65, "number": 1}, {"id": 66, "number": 2}, {"id": 67, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Pursuit": {"levels": [{"id": 77, "number": 1}, {"id": 78, "number": 2}, {"id": 79, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}, "Pro": {"levels": [{"id": 86, "number": 1}, {"id": 87, "number": 2}, {"id": 88, "number": 3}], "meta": {"level_count": 3, "level_range": "1-3"}}}, "meta": {"total_subprograms": 4, "total_levels": 12}}, "PINNACLE": {"subprograms": {"Vision": {"levels": [{"id": 56, "number": 1}, {"id": 57, "number": 2}], "meta": {"level_count": 2, "level_range": "1-2"}}, "Endeavor": {"levels": [{"id": 68, "number": 1}, {"id": 69, "number": 2}], "meta": {"level_count": 2, "level_range": "1-2"}}, "Success": {"levels": [{"id": 80, "number": 1}, {"id": 81, "number": 2}], "meta": {"level_count": 2, "level_range": "1-2"}}, "Pro": {"levels": [{"id": 89, "number": 1}, {"id": 90, "number": 2}], "meta": {"level_count": 2, "level_range": "1-2"}}}, "meta": {"total_subprograms": 4, "total_levels": 8}}}, "metadata": {"generated_at": "2025-08-24T13:11:54.963664+00:00", "method": "get_routinetest_curriculum_hierarchy_for_frontend", "version": "2.0_comprehensive_fix", "frontend_optimized": true}, "validation": {"is_valid": true, "validation_errors": [], "programs_count": 4, "total_levels": 41, "expected_programs": ["CORE", "ASCENT", "EDGE", "PINNACLE"], "structure_check": {"CORE": {"present": true, "subprograms_count": 4, "levels_count": 12}, "ASCENT": {"present": true, "subprograms_count": 3, "levels_count": 9}, "EDGE": {"present": true, "subprograms_count": 4, "levels_count": 12}, "PINNACLE": {"present": true, "subprograms_count": 4, "levels_count": 8}}}, "debug_info": {"whitelist_count": 41, "database_levels_found": 41, "json_serializable": true, "structure_valid": true}}</script>
 
-<!-- Override conflicting functions -->
-<script>
-// Override the inline functions that conflict with our fixed version
-window.initializeCopyCurriculumCascading = function() {
-    console.log('[OVERRIDE] initializeCopyCurriculumCascading disabled - handled by copy-exam-modal-fixed.js');
-};
-window.initializeCopyExamEventListeners = function() {
-    console.log('[OVERRIDE] initializeCopyExamEventListeners disabled - handled by copy-exam-modal-fixed.js');
-};
-// DO NOT OVERRIDE updateCopyExamNamePreview - it needs to work for the preview!
-// The copy-exam-modal-fixed.js doesn't implement preview functionality
-</script>
 
-{% endblock %}
+<!-- Load the comprehensive copy modal fix -->
+<script src="/static/js/routinetest/copy-exam-modal-comprehensive-final.js?v=1756041114" defer></script>
+
+
+        </div>
+    </div>
+    
+    <!-- Load RoutineTest Theme CSS IMMEDIATELY after base styles -->
+    <link rel="stylesheet" href="/static/css/routinetest-theme.css?v=1756041114">
+    
+    <!-- Pre-apply theme class to prevent FOUC and ensure CSS rules work -->
+    <script>
+    (function() {
+        // Apply theme class immediately to prevent flash of unstyled content
+        document.documentElement.classList.add('routinetest-theme');
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!document.body.classList.contains('routinetest-theme')) {
+                document.body.classList.add('routinetest-theme');
+                console.log('[Theme Pre-apply] Added routinetest-theme class to body');
+            }
+        });
+    })();
+    </script>
+    
+    <!-- Load RoutineTest Theme JS -->
+    <script src="/static/js/routinetest-theme.js?v=1756041114"></script>
+    
+    <!-- Removed redundant matrix tab JavaScript files - Navigation V8 handles this -->
+    
+    <!-- Navigation JavaScript with Console Debugging -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.group('%c[RoutineTest Navigation] Initialization', 'color: #1B2951; font-weight: bold;');
+            
+            // Log navigation state
+            const navTabs = document.querySelectorAll('.nav-tabs a');
+            console.log(`Found ${navTabs.length} navigation tabs`);
+            
+            // Log active tab
+            const activeTab = document.querySelector('.nav-tabs a.active');
+            if (activeTab) {
+                console.log('Active Tab:', activeTab.getAttribute('data-nav') || activeTab.textContent.trim());
+                console.log('Active URL:', activeTab.href);
+            }
+            
+            // Add click tracking to all nav items
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    const navName = this.getAttribute('data-nav') || this.textContent.trim();
+                    console.log(`%c[RoutineTest Nav Click] ${navName}`, 'color: #1B2951;');
+                    console.log('Target URL:', this.href);
+                    console.log('Timestamp:', new Date().toISOString());
+                    
+                    // Track navigation in sessionStorage
+                    const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+                    navHistory.push({
+                        tab: navName,
+                        url: this.href,
+                        timestamp: new Date().toISOString()
+                    });
+                    sessionStorage.setItem('routinetest_nav_history', JSON.stringify(navHistory.slice(-10))); // Keep last 10
+                });
+            });
+            
+            // Log authentication state
+            const authState = {
+                authenticated: true,
+                username: 'admin',
+                fullName: 'admin',
+                is_staff: true,
+                page: 'exam_list',
+                path: '/RoutineTest/exams/',
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('[RoutineTest Auth State]', authState);
+            
+            // Log theme confirmation
+            console.log('[RoutineTest Theme Check]', {
+                primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primepath-navy') || '#1B2951',
+                headerBg: getComputedStyle(document.querySelector('.header')).background,
+                navBg: getComputedStyle(document.querySelector('.nav-tabs')).backgroundColor
+            });
+            
+            // Performance metrics
+            if (window.performance) {
+                const perfData = window.performance.timing;
+                const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                console.log(`[RoutineTest Performance] Page load time: ${pageLoadTime}ms`);
+            }
+            
+            console.groupEnd();
+            
+            // Navigation history display
+            const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+            if (navHistory.length > 0) {
+                console.group('%c[RoutineTest Navigation History]', 'color: #007C3F;');
+                console.table(navHistory);
+                console.groupEnd();
+            }
+        });
+        
+        // Logout confirmation
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                console.log('[RoutineTest] Logout initiated');
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                    console.log('[RoutineTest] Logout cancelled');
+                }
+            });
+        }
+        
+        // Global error handler for debugging
+        window.addEventListener('error', function(e) {
+            console.error('[RoutineTest Error]', {
+                message: e.message,
+                filename: e.filename,
+                line: e.lineno,
+                column: e.colno,
+                error: e.error
+            });
+        });
+    </script>
+    
+    <!-- Navigation Error Handler - Prevents Matrix tab errors -->
+    <script src="/static/js/routinetest/navigation-error-handler.js"></script>
+    
+    <!-- Enhanced Navigation Debugging -->
+    <script>
+        console.log('%c[ROUTINETEST_BASE] Navigation error handler loaded', 
+            'background: #4CAF50; color: white; padding: 3px 6px; border-radius: 3px;');
+        
+        // Final verification of navigation state
+        document.addEventListener('DOMContentLoaded', function() {
+            console.group('%c[NAV_FINAL_CHECK] RoutineTest Navigation Status', 
+                'background: #2196F3; color: white; padding: 5px; border-radius: 3px; font-weight: bold;');
+            
+            // Check for Matrix-related elements that shouldn't exist
+            const matrixElements = document.querySelectorAll('[href*="matrix"], [data-nav*="matrix"], #matrix-tab-injected');
+            if (matrixElements.length > 0) {
+                console.error(`Found ${matrixElements.length} Matrix elements that should not exist:`, matrixElements);
+                matrixElements.forEach(elem => {
+                    console.log('Removing element:', elem);
+                    const parent = elem.closest('li') || elem;
+                    parent.remove();
+                });
+            } else {
+                console.log('✅ No Matrix elements found (correct)');
+            }
+            
+            // Verify Classes & Exams tab
+            const classesExamsTab = document.querySelector('[data-nav="classes-exams"]');
+            if (classesExamsTab) {
+                console.log('✅ Classes & Exams tab present');
+            } else {
+                console.error('❌ Classes & Exams tab missing!');
+            }
+            
+            // Log final navigation structure
+            const allTabs = document.querySelectorAll('.nav-tabs a[data-nav]');
+            console.log('Final Navigation Structure:');
+            allTabs.forEach((tab, i) => {
+                console.log(`  ${i+1}. ${tab.textContent.trim()} [${tab.getAttribute('data-nav')}]`);
+            });
+            
+            console.groupEnd();
+        });
+    </script>
+    
+    
+</body>
+</html>

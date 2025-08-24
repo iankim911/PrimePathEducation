@@ -498,8 +498,8 @@ def request_access(request):
             teacher=teacher,
             class_code=class_code,
             requested_access_level=access_level,
-            reason=reason,
-            notes=notes,
+            reason_code=reason,  # Changed from 'reason' to 'reason_code'
+            reason_text=notes if notes else reason,  # Use notes as detailed text, or reason as fallback
             status='PENDING'
         )
         

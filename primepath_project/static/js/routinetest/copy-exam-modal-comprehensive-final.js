@@ -221,6 +221,60 @@
     }
     
     // Event handlers
+    function handleExamTypeChange(event) {
+        const examType = event.target.value;
+        log(`Exam type changed to: ${examType}`);
+        
+        const timeslotSelect = document.getElementById('timeslot');
+        if (!timeslotSelect) {
+            logError('Timeslot select element not found');
+            return;
+        }
+        
+        // Clear and enable the timeslot dropdown
+        timeslotSelect.innerHTML = '<option value="">Select time period...</option>';
+        timeslotSelect.disabled = false;
+        
+        if (examType === 'QUARTERLY') {
+            // Add quarterly options
+            const quarters = [
+                { value: 'Q1', text: 'Quarter 1' },
+                { value: 'Q2', text: 'Quarter 2' },
+                { value: 'Q3', text: 'Quarter 3' },
+                { value: 'Q4', text: 'Quarter 4' }
+            ];
+            
+            quarters.forEach(q => {
+                const option = document.createElement('option');
+                option.value = q.value;
+                option.textContent = q.text;
+                timeslotSelect.appendChild(option);
+            });
+            
+            log('Added quarterly timeslot options');
+            
+        } else if (examType === 'REVIEW') {
+            // Add monthly options
+            const months = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = month.substring(0, 3).toUpperCase();
+                option.textContent = month;
+                timeslotSelect.appendChild(option);
+            });
+            
+            log('Added monthly timeslot options');
+        } else {
+            // No valid exam type selected, disable timeslot
+            timeslotSelect.disabled = true;
+            log('No valid exam type selected, timeslot disabled');
+        }
+    }
+    
     function handleProgramChange(event) {
         const selectedProgram = event.target.value;
         log(`Program changed to: ${selectedProgram}`);
@@ -333,6 +387,13 @@
         // Reset form
         resetCopyForm();
         
+        // Reset the preview text to initial state
+        const previewText = document.getElementById('previewText');
+        if (previewText) {
+            previewText.textContent = 'Please complete all fields to see preview...';
+            log('Reset preview text');
+        }
+        
         // Populate program dropdown
         populateProgramDropdown();
         
@@ -363,7 +424,15 @@
             form.reset();
         }
         
-        // Reset dropdowns
+        // Reset timeslot dropdown
+        const timeslotSelect = document.getElementById('timeslot');
+        if (timeslotSelect) {
+            timeslotSelect.innerHTML = '<option value="">First select exam type...</option>';
+            timeslotSelect.disabled = true;
+            log('Reset timeslot dropdown');
+        }
+        
+        // Reset curriculum dropdowns
         const subprogramSelect = document.getElementById('copySubprogramSelect');
         const levelSelect = document.getElementById('copyLevelSelect');
         
@@ -474,6 +543,15 @@
     // Attach event listeners
     function attachEventListeners() {
         log('Attaching event listeners...');
+        
+        // Exam type select (for Time Period functionality)
+        const examTypeSelect = document.getElementById('copyExamType');
+        if (examTypeSelect) {
+            examTypeSelect.addEventListener('change', handleExamTypeChange);
+            log('Attached listener to exam type select');
+        } else {
+            logError('Exam type select element not found - Time Period won\'t work!');
+        }
         
         // Program select
         const programSelect = document.getElementById('copyProgramSelect');

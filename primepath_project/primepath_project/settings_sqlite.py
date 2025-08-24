@@ -218,7 +218,8 @@ CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default Django auth
     'allauth.account.auth_backends.AuthenticationBackend',  # allauth backend
-    'core.kakao_auth.KakaoOAuth2Backend',  # KakaoTalk OAuth
+    'core.kakao_auth.KakaoOAuth2Backend',  # KakaoTalk OAuth for teachers
+    'primepath_student.kakao_auth.StudentKakaoOAuth2Backend',  # KakaoTalk OAuth for students
 ]
 
 # Logging for Authentication

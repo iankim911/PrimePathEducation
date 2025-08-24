@@ -7,7 +7,7 @@
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2>{{ class_display }} - Student Management</h2>
-            <a href="{% url 'primepath_routinetest:classes_exams' %}" class="btn" 
+            <a href="{% url 'RoutineTest:classes_exams_unified' %}" class="btn" 
                style="background-color: #666; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">
                 ← Back to Classes
             </a>
@@ -51,7 +51,7 @@
         </form>
         
         <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
-            <a href="{% url 'primepath_routinetest:create_student' %}?class={{ class_code }}" 
+            <a href="{% url 'RoutineTest:create_student' %}?class={{ class_code }}" 
                class="btn" style="background-color: #1976D2; color: white; padding: 10px 20px; 
                                 text-decoration: none; border-radius: 4px; display: inline-block;">
                 + Create New Student Account
@@ -166,7 +166,7 @@ function closeBulkAssign() {
 function searchStudents() {
     const query = document.getElementById('studentSearch').value;
     
-    fetch(`{% url 'primepath_routinetest:search_students' %}?q=${encodeURIComponent(query)}`)
+    fetch(`{% url 'RoutineTest:search_students' %}?q=${encodeURIComponent(query)}`)
         .then(response => response.json())
         .then(data => {
             const resultsDiv = document.getElementById('searchResults');
@@ -213,7 +213,7 @@ function submitBulkAssign() {
         return;
     }
     
-    fetch(`{% url 'primepath_routinetest:bulk_assign_students' class_code %}`, {
+    fetch(`{% url 'RoutineTest:bulk_assign_students' class_code %}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

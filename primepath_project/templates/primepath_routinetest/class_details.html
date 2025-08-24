@@ -24,99 +24,101 @@
         }
     }
     
-    /* Header Section - Updated to Green Theme */
+    /* Header Section - Clean White Background */
     .class-header {
-        background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
-        color: white;
+        background: white;
         padding: 30px;
-        border-radius: 12px;
+        border-radius: 8px;
         margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(27, 94, 32, 0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e9ecef;
     }
     
     .class-header h1 {
         font-size: 2rem;
-        margin: 0 0 10px 0;
+        margin: 0 0 15px 0;
         display: flex;
         align-items: center;
         gap: 15px;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        color: #2E7D32;
+        font-weight: 600;
     }
     
     .class-meta {
         display: flex;
         gap: 30px;
         margin-top: 15px;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
     
     .class-meta-item {
         display: flex;
         align-items: center;
         gap: 8px;
+        color: #6c757d;
     }
     
     .access-badge {
-        background: rgba(255,255,255,0.2);
-        padding: 4px 12px;
+        background: #2E7D32;
+        color: white;
+        padding: 6px 14px;
         border-radius: 20px;
-        font-size: 0.9rem;
-        border: 1px solid rgba(255,255,255,0.3);
-        backdrop-filter: blur(5px);
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
     
-    /* Tab Navigation - Enhanced */
+    /* Tab Navigation - Clean Style like Exam Library */
     .tab-navigation {
-        background: white;
-        border-radius: 12px;
-        padding: 5px;
+        background: transparent;
         margin-bottom: 25px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         display: flex;
-        gap: 5px;
-        border: 1px solid rgba(46, 125, 50, 0.1);
+        gap: 30px;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0;
     }
     
     .tab-btn {
-        flex: 1;
-        padding: 15px 20px;
+        padding: 15px 5px;
         border: none;
         background: transparent;
         color: #6c757d;
         font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
-        border-radius: 8px;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 10px;
+        gap: 8px;
+        position: relative;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
     }
     
     .tab-btn:hover {
-        background: rgba(46, 125, 50, 0.1);
-        color: #1B5E20;
+        color: #2E7D32;
     }
     
     .tab-btn.active {
-        background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+        color: #2E7D32;
+        font-weight: 600;
+        border-bottom-color: #2E7D32;
     }
     
     .tab-icon {
         font-size: 1.2rem;
     }
     
-    /* Tab Content - Enhanced */
+    /* Tab Content - Clean Style */
     .tab-content {
         background: white;
-        border-radius: 12px;
+        border-radius: 8px;
         padding: 30px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         min-height: 500px;
-        border: 1px solid rgba(46, 125, 50, 0.1);
+        border: 1px solid #e9ecef;
     }
     
     .tab-pane {
@@ -144,8 +146,9 @@
     }
     
     .student-management-header h2 {
-        color: #1B5E20;
+        color: #2E7D32;
         font-weight: 600;
+        font-size: 1.5rem;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -155,26 +158,82 @@
         content: '🎯';
         font-size: 1.2em;
     }
+
+    /* Additional button container styling to prevent inheritance issues */
+    .student-management-header div[style*="display: flex"] {
+        align-items: center;
+    }
+
+    .student-management-header div[style*="display: flex"] > * {
+        flex-shrink: 0;
+    }
     
     .add-student-btn {
-        background: #2E7D32;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: 500;
+        background: white !important;
+        color: #2E7D32 !important;
+        border: 2px solid #2E7D32 !important;
+        padding: 12px 24px !important;
+        border-radius: 8px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.2);
+        text-decoration: none !important;
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.1);
+        height: auto !important;
+        line-height: normal !important;
     }
     
     .add-student-btn:hover {
-        background: #1B5E20;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+        background: #2E7D32 !important;
+        color: white !important;
+        border-color: #2E7D32 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Special style for Manage Students button - matches Add Student button */
+    .manage-students-btn,
+    a.manage-students-btn,
+    .manage-students-btn:link,
+    .manage-students-btn:visited {
+        background: white !important;
+        color: #2E7D32 !important;
+        border: 2px solid #2E7D32 !important;
+        padding: 12px 24px !important;
+        border-radius: 8px !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        cursor: pointer;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        transition: all 0.3s ease;
+        text-decoration: none !important;
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.1);
+        height: auto !important;
+        line-height: normal !important;
+    }
+    
+    .manage-students-btn:hover,
+    a.manage-students-btn:hover,
+    .manage-students-btn:focus,
+    .manage-students-btn:active {
+        background: #2E7D32 !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        border-color: #2E7D32 !important;
+        text-decoration: none !important;
+    }
+
+    /* Additional accessibility and visibility enhancements */
+    .manage-students-btn span {
+        color: inherit !important;
+        font-weight: inherit !important;
     }
     
     .student-grid {
@@ -194,8 +253,8 @@
     }
     
     .student-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
         border-color: #2E7D32;
     }
     
@@ -270,8 +329,9 @@
     }
     
     .schedule-controls h2 {
-        color: #1B5E20;
+        color: #2E7D32;
         font-weight: 600;
+        font-size: 1.5rem;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -303,8 +363,9 @@
     
     .toggle-btn.active {
         background: white;
-        color: #1B5E20;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        color: #2E7D32;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .schedule-grid {
@@ -314,13 +375,12 @@
     }
     
     .schedule-slot {
-        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        background: white;
         border: 1px solid #dee2e6;
-        border-radius: 16px;
-        padding: 25px;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-radius: 8px;
+        padding: 20px;
+        transition: all 0.3s ease;
         position: relative;
-        overflow: hidden;
     }
     
     .schedule-slot::before {
@@ -330,7 +390,7 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(27, 94, 32, 0.05), transparent);
+        background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.05), transparent);
         transition: left 0.8s;
     }
     
@@ -339,8 +399,8 @@
     }
     
     .schedule-slot:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         border-color: #2E7D32;
     }
     
@@ -400,16 +460,15 @@
     }
     
     .exam-item {
-        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        background: #f8f9fa;
         border: 1px solid #dee2e6;
-        border-radius: 12px;
-        padding: 20px;
+        border-radius: 8px;
+        padding: 15px 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.3s ease;
         position: relative;
-        overflow: hidden;
     }
     
     .exam-item::before {
@@ -428,8 +487,8 @@
     }
     
     .exam-item:hover {
-        transform: translateY(-5px) scale(1.02);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
         border-color: #2E7D32;
     }
     
@@ -456,27 +515,24 @@
     }
     
     .btn-start-exam {
-        background: linear-gradient(135deg, #2E7D32, #388E3C);
+        background: #2E7D32;
         color: white;
         border: none;
-        padding: 10px 18px;
-        border-radius: 8px;
+        padding: 8px 16px;
+        border-radius: 6px;
         font-weight: 600;
         font-size: 0.9rem;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 8px;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        gap: 6px;
+        transition: all 0.3s ease;
     }
     
     .btn-start-exam:hover {
-        background: linear-gradient(135deg, #388E3C, #2E7D32);
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
+        background: #1B5E20;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
     
     .btn-start-exam:active {
@@ -488,19 +544,30 @@
         background: #dc3545;
         color: white;
         border: none;
-        padding: 8px 16px;
+        padding: 10px 18px;
         border-radius: 6px;
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 0.9rem;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 6px;
+        justify-content: center;
+        gap: 8px;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .btn-delete-exam:hover {
         background: #c82333;
-        transform: scale(1.05);
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-delete-exam:active {
+        transform: translateY(0) scale(1.02);
+        box-shadow: 0 2px 6px rgba(200, 35, 51, 0.3);
     }
     
     .empty-slot {
@@ -629,8 +696,8 @@
     
     .btn-primary:hover {
         background: #1B5E20;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
     
     /* Student Search in Modal */
@@ -995,8 +1062,8 @@
                 <h2>Students Enrolled in {{ class_display }}</h2>
                 {% if can_edit %}
                 <div style="display: flex; gap: 10px;">
-                    <a href="{% url 'primepath_routinetest:manage_class_students' class_code %}" 
-                       class="add-student-btn" style="text-decoration: none; display: inline-flex; align-items: center;">
+                    <a href="{% url 'RoutineTest:manage_class_students' class_code %}" 
+                       class="manage-students-btn">
                         <span>⚙️</span>
                         <span>Manage Students</span>
                     </a>
@@ -1116,7 +1183,8 @@
                                         🚀 Launch
                                     </button>
                                     <button class="btn-delete-exam" onclick="deleteExamFromSchedule('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
-                                        🗑️
+                                        <span style="font-size: 1.1rem; margin-right: 2px;">×</span>
+                                        DELETE
                                     </button>
                                 </div>
                                 {% endif %}
@@ -1174,7 +1242,8 @@
                                         🚀 Launch
                                     </button>
                                     <button class="btn-delete-exam" onclick="deleteExamFromSchedule('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
-                                        🗑️
+                                        <span style="font-size: 1.1rem; margin-right: 2px;">×</span>
+                                        DELETE
                                     </button>
                                 </div>
                                 {% endif %}

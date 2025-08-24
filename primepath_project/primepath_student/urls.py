@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import registration
+from .views import registration, kakao_views
 
 app_name = 'primepath_student'
 
@@ -9,7 +9,12 @@ urlpatterns = [
     path('register/', registration.student_register, name='register'),
     path('login/', registration.student_login, name='login'),
     path('logout/', views.student_logout, name='logout'),
-    path('kakao-login/', views.kakao_login, name='kakao_login'),
+    
+    # Kakao OAuth
+    path('kakao/login/', kakao_views.kakao_login, name='kakao_login'),
+    path('kakao/callback/', kakao_views.kakao_callback, name='kakao_callback'),
+    path('kakao/link/', kakao_views.kakao_link_account, name='kakao_link'),
+    path('kakao/unlink/', kakao_views.kakao_unlink_account, name='kakao_unlink'),
     
     # Password Reset
     path('password-reset/', registration.password_reset_request, name='password_reset'),

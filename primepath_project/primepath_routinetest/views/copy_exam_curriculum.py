@@ -119,18 +119,18 @@ def copy_exam_with_curriculum(request):
             if exam_model_used == "RoutineExam":
                 # Create RoutineExam copy
                 from ..models.exam_management import RoutineExam as ExamModel
+                # Get curriculum level string representation
+                curriculum_level_str = f"{program_name} {subprogram_name} Level {curriculum_level.level_number}"
+                
                 new_exam = ExamModel.objects.create(
                     id=uuid.uuid4(),
                     name=new_exam_name,
-                    exam_type=source_exam.exam_type if hasattr(source_exam, 'exam_type') else 'monthly_review',
+                    exam_type='REVIEW' if exam_type == 'Review' else 'QUARTERLY',
                     academic_year=str(timezone.now().year),
-                    time_period='',  # Will be set when assigned to class
                     created_by=request.user,
-                    created_at=timezone.now(),
-                    curriculum_level=curriculum_level,
-                    # Copy other fields
-                    total_questions=source_exam.total_questions if hasattr(source_exam, 'total_questions') else 0,
-                    duration_minutes=source_exam.duration_minutes if hasattr(source_exam, 'duration_minutes') else 60,
+                    curriculum_level=curriculum_level_str,  # Pass as string, not object
+                    # Copy other fields if they exist
+                    duration=source_exam.duration if hasattr(source_exam, 'duration') else 60,
                 )
             else:
                 # Create regular Exam copy
