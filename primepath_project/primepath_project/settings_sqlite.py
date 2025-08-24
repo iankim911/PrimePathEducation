@@ -324,8 +324,8 @@ REST_FRAMEWORK = {
 }
 
 # KakaoTalk OAuth Configuration
-KAKAO_REST_API_KEY = 'your-rest-api-key-here'  # Replace with your actual key
-KAKAO_JAVASCRIPT_KEY = 'your-javascript-key-here'  # Replace with your actual key
+KAKAO_REST_API_KEY = 'c2464d8e5c01f41b75b1657a5c8411ef'  # Your REST API key
+KAKAO_JAVASCRIPT_KEY = 'da17030ca378a5042180c427a60b183a'  # Your JavaScript key
 
 # Update AUTHENTICATION_BACKENDS (add Kakao backend)
 AUTHENTICATION_BACKENDS = [
