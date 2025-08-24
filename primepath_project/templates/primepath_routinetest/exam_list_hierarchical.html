@@ -1107,21 +1107,7 @@
                                             </div>
                                         </div>
                                         {% if exam.access_badge %}
-                                        {% comment %}BULLETPROOF FIX: Never show VIEW ONLY badge when filter is active{% endcomment %}
-                                        {% comment %}Check if filter is active via context variable OR URL parameter{% endcomment %}
-                                        {% if show_assigned_only or 'assigned_only=true' in request.get_full_path %}
-                                            {% comment %}FILTER IS ACTIVE: Only show non-VIEW ONLY badges{% endcomment %}
-                                            {% if exam.access_badge != 'VIEW ONLY' %}
-                                            <span class="badge" style="background: {% if exam.access_badge == 'OWNER' %}#4CAF50{% elif exam.access_badge == 'ADMIN' %}#1B5E20{% elif exam.access_badge == 'FULL ACCESS' %}#4CAF50{% elif exam.access_badge == 'EDIT' %}#FF9800{% else %}#9E9E9E{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
-                                                {{ exam.access_badge|display_access_level }}
-                                            </span>
-                                            {% endif %}
-                                        {% else %}
-                                            {% comment %}FILTER IS OFF: Show all badges including VIEW ONLY{% endcomment %}
-                                            <span class="badge" style="background: {% if exam.access_badge == 'OWNER' %}#4CAF50{% elif exam.access_badge == 'ADMIN' %}#1B5E20{% elif exam.access_badge == 'FULL ACCESS' %}#4CAF50{% elif exam.access_badge == 'EDIT' %}#FF9800{% else %}#9E9E9E{% endif %}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">
-                                                {{ exam.access_badge|display_access_level }}
-                                            </span>
-                                        {% endif %}
+                                        {% comment %}ADMIN badge removed - was misleading and not useful{% endcomment %}
                                         {% endif %}
                                     </div>
                                     
@@ -1251,6 +1237,9 @@
                 <select id="timeslot" name="timeslot" required disabled>
                     <option value="">First select exam type...</option>
                 </select>
+                <small class="form-text text-muted" id="timeslotDebugInfo" style="display: none;">
+                    If dropdown remains disabled: Open browser console and run <code>fixTimeslotDropdown()</code>
+                </small>
             </div>
             
             <div class="form-group">
@@ -1465,7 +1454,6 @@ window.handleExamTypeTabSwitch = handleExamTypeTabSwitch;
     // Analyze access badges
     const badgeCounts = {
         'OWNER': 0,
-        'ADMIN': 0,
         'FULL ACCESS': 0,
         'EDIT': 0,
         'VIEW ONLY': 0
@@ -1491,7 +1479,7 @@ window.handleExamTypeTabSwitch = handleExamTypeTabSwitch;
     // NEW: Check if we're in "My Test Files" mode (equivalent to old filter)
     if (ownershipState === 'my') {
         console.log('[PAGE_LOAD_DEBUG] ⚠️ OWNERSHIP: My Test Files - Should show exams from EDITABLE classes only');
-        console.log('[PAGE_LOAD_DEBUG] Expected: Exams with OWNER, ADMIN, FULL ACCESS and EDIT badges only');
+        console.log('[PAGE_LOAD_DEBUG] Expected: Exams with OWNER, FULL ACCESS and EDIT badges only');
         console.log('[PAGE_LOAD_DEBUG] NOT Expected: VIEW ONLY badges (should be filtered out)');
         if (badgeCounts['VIEW ONLY'] > 0) {
             console.log('[PAGE_LOAD_DEBUG] ❌❌❌ CRITICAL BUG DETECTED ❌❌❌');
@@ -1611,7 +1599,6 @@ function toggleClass(classCode) {
             'VIEW ONLY': [],
             'FULL ACCESS': [],
             'OWNER': [],
-            'ADMIN': [],
             'EDIT': [],
             'CO_TEACHER': [],
             'OTHER': []
@@ -1629,8 +1616,6 @@ function toggleClass(classCode) {
                 analysis['FULL ACCESS'].push(examName);
             } else if (text.includes('OWNER')) {
                 analysis['OWNER'].push(examName);
-            } else if (text.includes('ADMIN')) {
-                analysis['ADMIN'].push(examName);
             } else if (text.includes('EDIT')) {
                 analysis['EDIT'].push(examName);
             } else if (text.includes('CO_TEACHER')) {
@@ -1647,8 +1632,8 @@ function toggleClass(classCode) {
         let hasError = false;
         
         if (ownership === 'my') {
-            // MY TEST FILES: Should ONLY have FULL/OWNER/ADMIN/EDIT badges
-            console.log('✅ EXPECTED: FULL ACCESS, OWNER, ADMIN, EDIT, CO_TEACHER badges');
+            // MY TEST FILES: Should ONLY have FULL/OWNER/EDIT badges
+            console.log('✅ EXPECTED: FULL ACCESS, OWNER, EDIT, CO_TEACHER badges');
             console.log('❌ NOT EXPECTED: VIEW ONLY badges\n');
             
             if (analysis['VIEW ONLY'].length > 0) {
@@ -1674,7 +1659,7 @@ function toggleClass(classCode) {
             
             // Show what IS correctly displayed
             console.log('\n✅ Correctly displayed exams:');
-            ['OWNER', 'FULL ACCESS', 'ADMIN', 'EDIT', 'CO_TEACHER'].forEach(type => {
+            ['OWNER', 'FULL ACCESS', 'EDIT', 'CO_TEACHER'].forEach(type => {
                 if (analysis[type].length > 0) {
                     console.log(`  ${type}: ${analysis[type].length} exam(s)`);
                     if (analysis[type].length <= 3) {
@@ -1686,9 +1671,9 @@ function toggleClass(classCode) {
         } else if (ownership === 'others') {
             // OTHER TEACHERS' TEST FILES: Should ONLY have VIEW ONLY badges
             console.log('✅ EXPECTED: VIEW ONLY badges');
-            console.log('❌ NOT EXPECTED: FULL ACCESS, OWNER, ADMIN, EDIT badges\n');
+            console.log('❌ NOT EXPECTED: FULL ACCESS, OWNER, EDIT badges\n');
             
-            const wrongBadges = ['FULL ACCESS', 'OWNER', 'ADMIN', 'EDIT', 'CO_TEACHER'];
+            const wrongBadges = ['FULL ACCESS', 'OWNER', 'EDIT', 'CO_TEACHER'];
             wrongBadges.forEach(type => {
                 if (analysis[type].length > 0) {
                     hasError = true;
@@ -2272,7 +2257,24 @@ function initializeCopyExamEventListeners() {
             // No exam type selected, disable timeslot
             timeslotSelect.disabled = true;
             timeslotSelect.innerHTML = '<option value="">First select exam type...</option>';
+            
+            // Hide debug info when no exam type is selected
+            const debugInfo = document.getElementById('timeslotDebugInfo');
+            if (debugInfo) {
+                debugInfo.style.display = 'none';
+            }
         }
+        
+        // Show debug info if the dropdown is still disabled when it should be enabled
+        setTimeout(() => {
+            const debugInfo = document.getElementById('timeslotDebugInfo');
+            if (debugInfo && this.value && timeslotSelect.disabled) {
+                console.log('[DEBUG] Timeslot dropdown should be enabled but is still disabled');
+                debugInfo.style.display = 'block';
+            } else if (debugInfo && !timeslotSelect.disabled) {
+                debugInfo.style.display = 'none';
+            }
+        }, 100);
         
         // Update name preview
         updateCopyExamNamePreview();

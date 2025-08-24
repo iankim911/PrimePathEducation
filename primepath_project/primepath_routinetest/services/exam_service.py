@@ -698,21 +698,30 @@ class ExamService:
             
             # CRITICAL: Check ownership FIRST - owners have FULL access regardless
             is_owner = False
-            if exam.created_by:
+            if exam.created_by and hasattr(user, 'teacher_profile'):
                 try:
-                    # FIXED: Compare created_by (User) with user (User) directly
-                    is_owner = exam.created_by.id == user.id
+                    # FIXED: Compare created_by (Teacher) with user's teacher_profile (Teacher)
+                    is_owner = exam.created_by.id == user.teacher_profile.id
                     if is_owner:
                         logger.info(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} OWNS exam {exam.name} - FULL ACCESS")
                     else:
-                        logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} does not own exam {exam.name} (created_by={exam.created_by.id}, user={user.id})")
+                        logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} does not own exam {exam.name} (created_by={exam.created_by.id}, teacher={user.teacher_profile.id})")
                 except Exception as e:
                     logger.warning(f"[EXAM_PERMISSION_OWNERSHIP] Error checking ownership for exam {exam.name}: {e}")
             else:
-                logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] Exam {exam.name} has no created_by field")
+                if not exam.created_by:
+                    logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] Exam {exam.name} has no created_by field")
+                if not hasattr(user, 'teacher_profile'):
+                    logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} has no teacher_profile")
             
             # CRITICAL FIX: Apply proper filtering based on ownership mode
-            if effective_filter_assigned and not is_admin:
+            # ADMIN FIX: Apply filtering for admins when using specific ownership filters
+            should_apply_filtering = effective_filter_assigned and (
+                not is_admin or 
+                filter_mode in ['MY_EXAMS', 'OTHERS_EXAMS']  # Always filter for ownership-based modes
+            )
+            
+            if should_apply_filtering:
                 should_include = False
                 
                 # ENHANCED DEBUG LOGGING
@@ -802,13 +811,26 @@ class ExamService:
                     included_count += 1
             
             # Add permissions to exam with ownership priority
-            if is_admin:
-                # ADMIN ALWAYS HAS FULL PERMISSIONS
+            if is_admin and filter_mode not in ['MY_EXAMS', 'OTHERS_EXAMS']:
+                # ADMIN ALWAYS HAS FULL PERMISSIONS (unless using ownership filters)
                 exam.can_edit = True
                 exam.can_copy = True
                 exam.can_delete = True
                 exam.is_owner = False
                 exam.access_badge = 'ADMIN'
+            elif is_admin and filter_mode in ['MY_EXAMS', 'OTHERS_EXAMS']:
+                # ADMIN using ownership filters - treat like regular user for badges
+                exam.can_edit = True  # Admin can always edit
+                exam.can_copy = True
+                exam.can_delete = True
+                exam.is_owner = is_owner
+                
+                if is_owner:
+                    exam.access_badge = 'OWNER'
+                elif filter_mode == 'OTHERS_EXAMS':
+                    exam.access_badge = 'VIEW ONLY'  # Show as VIEW ONLY in Other Teachers filter
+                else:
+                    exam.access_badge = 'FULL ACCESS'  # Default for My Test Files
             elif not effective_filter_assigned:
                 # SHOWING ALL EXAMS (toggle = All Exams) - Set initial permissions
                 logger.debug(f"[PERMISSION_DEBUG] Setting permissions for exam '{exam.name}' in 'Show All' mode")

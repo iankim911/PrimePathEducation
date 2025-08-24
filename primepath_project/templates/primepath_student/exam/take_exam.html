@@ -282,11 +282,30 @@
     </div>
 </div>
 
+<!-- Secure data injection -->
+<script id="exam-data" type="application/json">{{ exam|escapejs }}</script>
+<script id="session-data" type="application/json">{{ session_data|escapejs }}</script>
+<script id="questions-data" type="application/json">{{ questions|escapejs }}</script>
+
 <script>
-// Exam data from Django
-const examData = {{ exam|safe }};
-const sessionData = {{ session_data|safe }};
-const questions = {{ questions|safe }};
+// Secure data loading with validation
+let examData, sessionData, questions;
+
+try {
+    examData = JSON.parse(document.getElementById('exam-data').textContent);
+    sessionData = JSON.parse(document.getElementById('session-data').textContent);
+    questions = JSON.parse(document.getElementById('questions-data').textContent);
+    
+    // Validate essential data
+    if (!examData?.id || !sessionData?.id || !Array.isArray(questions)) {
+        throw new Error('Invalid exam data structure');
+    }
+} catch (error) {
+    console.error('Failed to load exam data:', error);
+    alert('Failed to load exam data. Please refresh the page.');
+    throw error;
+}
+
 let currentQuestionIndex = 0;
 let answers = sessionData.answers || {};
 let autoSaveTimer = null;

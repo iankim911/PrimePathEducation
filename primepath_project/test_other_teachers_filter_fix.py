@@ -38,9 +38,16 @@ def test_ownership_filter():
         print("❌ No exams found for testing")
         return
     
-    # Check ownership
-    owned_exams = all_exams.filter(created_by=admin_user)
-    other_exams = all_exams.exclude(created_by=admin_user)
+    # Check ownership (created_by is Teacher, not User)
+    admin_teacher = None
+    if hasattr(admin_user, 'teacher_profile'):
+        admin_teacher = admin_user.teacher_profile
+        owned_exams = all_exams.filter(created_by=admin_teacher)
+        other_exams = all_exams.exclude(created_by=admin_teacher)
+    else:
+        print(f"❌ User {admin_user.username} has no teacher profile")
+        owned_exams = all_exams.none()  # Empty queryset
+        other_exams = all_exams
     
     print(f"📋 Exams owned by {admin_user.username}: {owned_exams.count()}")
     print(f"📋 Exams owned by others: {other_exams.count()}")

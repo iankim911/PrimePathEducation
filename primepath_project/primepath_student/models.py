@@ -48,12 +48,12 @@ class StudentProfile(models.Model):
     @property
     def active_classes(self):
         """Get all active class assignments for this student"""
-        return self.class_assignments.filter(is_active=True).select_related('class_code')
+        return self.class_assignments.filter(is_active=True)
     
     @property
     def all_classes(self):
         """Get all class assignments (active and inactive) for this student"""
-        return self.class_assignments.all().select_related('class_code').order_by('-is_active', '-assigned_at')
+        return self.class_assignments.all().order_by('-is_active', '-assigned_at')
 
 
 class StudentClassAssignment(models.Model):
@@ -187,9 +187,11 @@ class StudentExamSession(models.Model):
         verbose_name_plural = 'Student Exam Sessions'
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['student', 'status']),
+            models.Index(fields=['student', 'status', 'created_at']),
             models.Index(fields=['exam', 'status']),
             models.Index(fields=['class_assignment', 'created_at']),
+            models.Index(fields=['status', 'expires_at']),  # For cleanup queries
+            models.Index(fields=['student', 'exam']),  # For duplicate session checks
         ]
     
     def __str__(self):

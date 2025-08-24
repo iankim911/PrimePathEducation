@@ -9,9 +9,51 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from primepath_student.models import StudentProfile, StudentClassAssignment, StudentExamSession
 from primepath_routinetest.models.exam_management import RoutineExam, ExamLaunchSession
+from primepath_student.decorators import rate_limit, student_required
 import json
+
+
+def validate_json_request(request):
+    """Safely parse and validate JSON request data"""
+    try:
+        if not request.body:
+            raise ValidationError("Empty request body")
+            
+        data = json.loads(request.body)
+        
+        if not isinstance(data, dict):
+            raise ValidationError("Request body must be a JSON object")
+            
+        return data
+        
+    except json.JSONDecodeError:
+        raise ValidationError("Invalid JSON format")
+
+
+def validate_answer_data(data):
+    """Validate answer submission data"""
+    question_number = data.get('question_number')
+    answer = data.get('answer')
+    
+    if not isinstance(question_number, int) or question_number < 1:
+        raise ValidationError("Invalid question number")
+        
+    if not answer:
+        raise ValidationError("Answer cannot be empty")
+        
+    if len(str(answer)) > 1000:  # Reasonable limit
+        raise ValidationError("Answer too long")
+        
+    # Validate answer format (A, B, C, D for multiple choice)
+    if isinstance(answer, str) and len(answer) == 1:
+        if answer not in ['A', 'B', 'C', 'D']:
+            # Could be short answer text, allow it
+            pass
+    
+    return question_number, answer
 
 
 @login_required
@@ -155,12 +197,12 @@ def take_exam(request, session_id):
 @login_required
 @csrf_protect
 @require_http_methods(["POST"])
+@rate_limit(max_requests=50, time_window=60)  # 50 answer saves per minute
+@student_required
 def save_answer(request, session_id):
     """Save a single answer (AJAX endpoint)"""
-    try:
-        student_profile = request.user.primepath_student_profile
-    except StudentProfile.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Student profile not found'})
+    # student_profile is now available via @student_required decorator
+    student_profile = request.student_profile
     
     session = get_object_or_404(
         StudentExamSession,
@@ -176,12 +218,8 @@ def save_answer(request, session_id):
         return JsonResponse({'success': False, 'error': 'Exam has expired', 'redirect': True})
     
     try:
-        data = json.loads(request.body)
-        question_number = data.get('question_number')
-        answer = data.get('answer')
-        
-        if not question_number:
-            return JsonResponse({'success': False, 'error': 'Question number required'})
+        data = validate_json_request(request)
+        question_number, answer = validate_answer_data(data)
         
         session.save_answer(question_number, answer)
         
@@ -191,19 +229,21 @@ def save_answer(request, session_id):
             'time_remaining': session.get_time_remaining()
         })
         
-    except Exception as e:
+    except ValidationError as e:
         return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'An unexpected error occurred'})
 
 
 @login_required
 @csrf_protect
 @require_http_methods(["POST"])
+@rate_limit(max_requests=30, time_window=60)  # 30 auto-saves per minute
+@student_required
 def auto_save(request, session_id):
     """Auto-save multiple answers (AJAX endpoint)"""
-    try:
-        student_profile = request.user.primepath_student_profile
-    except StudentProfile.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Student profile not found'})
+    # student_profile is now available via @student_required decorator
+    student_profile = request.student_profile
     
     session = get_object_or_404(
         StudentExamSession,
@@ -219,8 +259,19 @@ def auto_save(request, session_id):
         return JsonResponse({'success': False, 'error': 'Exam has expired', 'expired': True})
     
     try:
-        data = json.loads(request.body)
+        data = validate_json_request(request)
         answers = data.get('answers', {})
+        
+        # Validate answers format
+        if not isinstance(answers, dict):
+            raise ValidationError("Answers must be a dictionary")
+        
+        # Validate each answer
+        for question_num, answer in answers.items():
+            if not str(question_num).isdigit():
+                raise ValidationError(f"Invalid question number: {question_num}")
+            if not answer or len(str(answer)) > 1000:
+                raise ValidationError(f"Invalid answer for question {question_num}")
         
         success = session.save_answers_batch(answers)
         
@@ -233,8 +284,10 @@ def auto_save(request, session_id):
         else:
             return JsonResponse({'success': False, 'error': 'Could not save answers'})
             
-    except Exception as e:
+    except ValidationError as e:
         return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': 'An unexpected error occurred'})
 
 
 @login_required
