@@ -24,8 +24,9 @@ def kakao_login(request):
     # Kakao OAuth URL
     kakao_auth_url = "https://kauth.kakao.com/oauth/authorize"
     
-    # Build callback URL
-    callback_url = request.build_absolute_uri(reverse('primepath_student:kakao_callback'))
+    # Build callback URL - use the exact URL that's registered in Kakao app
+    # The Kakao app is configured with http://127.0.0.1:8000/student/kakao/callback/
+    callback_url = 'http://127.0.0.1:8000/student/kakao/callback/'
     
     # OAuth parameters
     params = {
@@ -64,7 +65,8 @@ def kakao_callback(request):
     try:
         # Exchange code for access token
         token_url = "https://kauth.kakao.com/oauth/token"
-        callback_url = request.build_absolute_uri(reverse('primepath_student:kakao_callback'))
+        # Use the exact callback URL registered in Kakao app
+        callback_url = 'http://127.0.0.1:8000/student/kakao/callback/'
         
         token_data = {
             'grant_type': 'authorization_code',
