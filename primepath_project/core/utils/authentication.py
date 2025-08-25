@@ -40,6 +40,10 @@ class AuthenticationLogger:
                   request: Optional[HttpRequest] = None, **kwargs):
         """Log authentication events with comprehensive context"""
         
+        # Extract specific kwargs to avoid conflicts
+        user_type = kwargs.pop('user_type', None)
+        source = kwargs.pop('source', None)
+        
         log_data = {
             'timestamp': datetime.now().isoformat(),
             'event_type': event_type,
@@ -48,8 +52,18 @@ class AuthenticationLogger:
             'session_key': request.session.session_key if request and hasattr(request, 'session') else None,
             'ip_address': get_client_ip(request) if request else None,
             'user_agent': request.META.get('HTTP_USER_AGENT', '')[:255] if request else None,
-            **kwargs
         }
+        
+        # Add user_type if provided
+        if user_type:
+            log_data['user_type'] = user_type
+            
+        # Add source if provided  
+        if source:
+            log_data['source'] = source
+            
+        # Add remaining kwargs
+        log_data.update(kwargs)
         
         # Console logging with color coding
         if event_type.startswith('SUCCESS'):
@@ -96,7 +110,7 @@ class UserTypeDetector:
                     'teacher_id': user.teacher_profile.id,
                     'is_head_teacher': user.teacher_profile.is_head_teacher,
                 })
-                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, **context)
+                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, detection_context=context)
                 return context
                 
         except AttributeError:
@@ -113,7 +127,7 @@ class UserTypeDetector:
                     'student_id': user.primepath_student_profile.student_id,
                     'student_profile_id': user.primepath_student_profile.id,
                 })
-                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, **context)
+                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, detection_context=context)
                 return context
                 
         except AttributeError:
@@ -130,7 +144,7 @@ class UserTypeDetector:
                     'is_social_auth': True,
                     'account_type': user.profile.account_type if hasattr(user.profile, 'account_type') else 'UNKNOWN',
                 })
-                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, **context)
+                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, detection_context=context)
                 return context
                 
         except AttributeError:
@@ -147,7 +161,7 @@ class UserTypeDetector:
                     'is_social_auth': True,
                     'detection_method': 'SOCIAL_ACCOUNT_LOOKUP'
                 })
-                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, **context)
+                AuthenticationLogger.log_event('INFO_USER_TYPE_DETECTED', user=user, detection_context=context)
                 return context
         except ImportError:
             pass
@@ -194,16 +208,20 @@ def safe_login(request: HttpRequest, user: User, source: str = 'UNKNOWN', **kwar
     user_context = UserTypeDetector.detect_user_type(user)
     backend = user_context['backend']
     
-    # Log login attempt
+    # Log login attempt (avoid parameter conflicts)
+    login_attempt_data = {
+        'backend': backend,
+        'user_type': user_context['user_type'],
+        'source': source,
+        **kwargs
+    }
+    login_attempt_data.update(user_context)
+    
     AuthenticationLogger.log_event(
         'INFO_LOGIN_ATTEMPT_START',
         user=user,
         request=request,
-        source=source,
-        backend=backend,
-        user_type=user_context['user_type'],
-        **user_context,
-        **kwargs
+        **login_attempt_data
     )
     
     try:
@@ -217,17 +235,21 @@ def safe_login(request: HttpRequest, user: User, source: str = 'UNKNOWN', **kwar
         end_time = timezone.now()
         duration_ms = (end_time - start_time).total_seconds() * 1000
         
-        # Log successful login
+        # Log successful login (avoid parameter conflicts)
+        success_data = {
+            'backend': backend,
+            'duration_ms': duration_ms,
+            'session_key': request.session.session_key,
+            'source': source,
+            **kwargs
+        }
+        success_data.update(user_context)
+        
         AuthenticationLogger.log_event(
             'SUCCESS_LOGIN_COMPLETE',
             user=user,
             request=request,
-            source=source,
-            backend=backend,
-            duration_ms=duration_ms,
-            session_key=request.session.session_key,
-            **user_context,
-            **kwargs
+            **success_data
         )
         
         return True
@@ -237,18 +259,22 @@ def safe_login(request: HttpRequest, user: User, source: str = 'UNKNOWN', **kwar
         end_time = timezone.now()
         duration_ms = (end_time - start_time).total_seconds() * 1000
         
-        # Log login failure
+        # Log login failure (avoid parameter conflicts)
+        error_data = {
+            'backend': backend,
+            'error_type': type(e).__name__,
+            'error_message': str(e),
+            'duration_ms': duration_ms,
+            'source': source,
+            **kwargs
+        }
+        error_data.update(user_context)
+        
         AuthenticationLogger.log_event(
             'ERROR_LOGIN_FAILED',
             user=user,
             request=request,
-            source=source,
-            backend=backend,
-            error_type=type(e).__name__,
-            error_message=str(e),
-            duration_ms=duration_ms,
-            **user_context,
-            **kwargs
+            **error_data
         )
         
         return False

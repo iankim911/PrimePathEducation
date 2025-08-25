@@ -86,30 +86,34 @@ def login_view(request):
                     else:
                         request.session.set_expiry(1209600)  # 2 weeks
                 
-                # Check for Teacher profile
-                try:
-                    teacher = user.teacher_profile
-                    teacher_info = {
-                        "id": teacher.id,
-                        "name": teacher.name,
-                        "is_head": teacher.is_head_teacher
+                    # Check for Teacher profile
+                    try:
+                        teacher = user.teacher_profile
+                        teacher_info = {
+                            "id": teacher.id,
+                            "name": teacher.name,
+                            "is_head": teacher.is_head_teacher
+                        }
+                    except Teacher.DoesNotExist:
+                        teacher_info = None
+                    
+                    # Log successful login
+                    console_log = {
+                        "view": "login_view",
+                        "action": "login_success",
+                        "user_id": user.id,
+                        "username": user.username,
+                        "teacher": teacher_info,
+                        "session_expiry": "2_weeks" if remember_me else "browser_close"
                     }
-                except Teacher.DoesNotExist:
-                    teacher_info = None
-                
-                # Log successful login
-                console_log = {
-                    "view": "login_view",
-                    "action": "login_success",
-                    "user_id": user.id,
-                    "username": user.username,
-                    "teacher": teacher_info,
-                    "session_expiry": "2_weeks" if remember_me else "browser_close"
-                }
-                logger.info(f"[AUTH_SUCCESS] {json.dumps(console_log)}")
-                print(f"[AUTH_SUCCESS] {json.dumps(console_log)}")
-                
-                messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+                    logger.info(f"[AUTH_SUCCESS] {json.dumps(console_log)}")
+                    print(f"[AUTH_SUCCESS] {json.dumps(console_log)}")
+                    
+                    messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+                else:
+                    # Login failed due to backend issues
+                    messages.error(request, 'Login failed due to system error. Please try again.')
+                    return render(request, 'core/auth/login.html', context)
                 
                 # Always redirect to application chooser page after login
                 # This ensures consistent behavior and prevents unwanted redirects

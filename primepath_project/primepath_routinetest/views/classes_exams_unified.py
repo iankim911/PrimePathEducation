@@ -323,22 +323,44 @@ def classes_exams_unified_view(request):
         for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
             # Skip if user already has access to this class
             if code not in my_class_codes and code not in existing_requests:
-                # FIX: Avoid duplication when curriculum maps to itself (PS1 -> PS1)
-                # Show just the class code if curriculum is identical to the code
+                # ENHANCED FIX: Smart deduplication for various redundancy patterns
+                class_display_name = None
+                
+                # Case 1: Exact match (PS1 -> PS1)
                 if curriculum == code:
                     class_display_name = code
+                    dedup_reason = "EXACT_MATCH"
+                
+                # Case 2: Curriculum is just reformatted version of code
+                # e.g., "High1_SaiSun_3-5" -> "High1 SaiSun 3-5" (underscores to spaces)
+                elif curriculum.replace(' ', '_').replace('-', '_') == code.replace(' ', '_').replace('-', '_'):
+                    # Show the more readable curriculum version
+                    class_display_name = curriculum
+                    dedup_reason = "REFORMATTED"
+                
+                # Case 3: Code is substring of curriculum with formatting (redundant info)
+                # e.g., "High1_SaiSun_3-5" in "High1 SaiSun 3-5" 
+                elif code.replace('_', ' ') in curriculum or curriculum.replace(' ', '_') == code:
+                    class_display_name = curriculum
+                    dedup_reason = "SUBSTRING_MATCH"
+                
+                # Case 4: Different content - show both
                 else:
                     class_display_name = f"{code} - {curriculum}"
+                    dedup_reason = "DIFFERENT_CONTENT"
                     
                 available_classes.append({
                     'class_code': code,
                     'class_name': class_display_name
                 })
                 
-                # DEBUG: Log the class code processing for troubleshooting
-                logger.debug(f"[CLASS_CODE_DROPDOWN] Code: {code}, Curriculum: {curriculum}, Display: {class_display_name}")
-                if code in ['PS1', 'P1', 'P2']:  # Debug specific codes we see in the screenshot
-                    print(f"[CLASS_CODE_DEBUG] {code} -> curriculum: '{curriculum}' -> display: '{class_display_name}'")
+                # ENHANCED DEBUG: Log the class code processing with reasoning
+                logger.debug(f"[CLASS_CODE_DROPDOWN] Code: {code}, Curriculum: {curriculum}, Display: {class_display_name}, Reason: {dedup_reason}")
+                
+                # Debug specific high school codes and original codes
+                debug_codes = ['PS1', 'P1', 'P2', 'High1_SaiSun_3-5', 'High1_SaiSun_5-7', 'High1V2_SaiSun_11-1', 'High1V2_SaiSun_1-3']
+                if code in debug_codes:
+                    print(f"[CLASS_CODE_DEBUG] {code} -> curriculum: '{curriculum}' -> display: '{class_display_name}' ({dedup_reason})")
         
         # Update context with filtered available classes
         context['available_classes'] = available_classes

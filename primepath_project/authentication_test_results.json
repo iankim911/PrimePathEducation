@@ -1,0 +1,151 @@
+{
+  "timestamp": "2025-08-25T18:46:14.974849",
+  "tests_run": 14,
+  "tests_passed": 14,
+  "tests_failed": 0,
+  "results": [
+    {
+      "test": "Multiple Authentication Backends Configured",
+      "passed": true,
+      "details": {
+        "backends_count": 2
+      }
+    },
+    {
+      "test": "Allauth Backend Configured",
+      "passed": true,
+      "details": {
+        "AUTHENTICATION_BACKENDS": [
+          "django.contrib.auth.backends.ModelBackend",
+          "allauth.account.auth_backends.AuthenticationBackend"
+        ],
+        "allauth_enabled": true,
+        "LOGIN_URL": "/login/",
+        "LOGIN_REDIRECT_URL": "/",
+        "LOGOUT_REDIRECT_URL": "/login/"
+      }
+    },
+    {
+      "test": "Admin User Type Detection",
+      "passed": true,
+      "details": {
+        "user_id": 10,
+        "username": "points_test_user",
+        "user_type": "TEACHER",
+        "backend": "django.contrib.auth.backends.ModelBackend",
+        "profile_type": "Teacher",
+        "has_teacher_profile": true,
+        "has_student_profile": false,
+        "has_user_profile": false,
+        "is_social_auth": false,
+        "detection_method": "PROFILE_ANALYSIS",
+        "teacher_id": 134,
+        "is_head_teacher": false
+      }
+    },
+    {
+      "test": "Teacher User Type Detection",
+      "passed": true,
+      "details": {
+        "user_id": 5,
+        "username": "teacher1",
+        "user_type": "TEACHER",
+        "backend": "django.contrib.auth.backends.ModelBackend",
+        "profile_type": "Teacher",
+        "has_teacher_profile": true,
+        "has_student_profile": false,
+        "has_user_profile": false,
+        "is_social_auth": false,
+        "detection_method": "PROFILE_ANALYSIS",
+        "teacher_id": 1,
+        "is_head_teacher": false
+      }
+    },
+    {
+      "test": "Student User Type Detection",
+      "passed": true,
+      "details": {
+        "user_id": 90,
+        "username": "student1",
+        "user_type": "STUDENT",
+        "backend": "django.contrib.auth.backends.ModelBackend",
+        "profile_type": "StudentProfile",
+        "has_teacher_profile": false,
+        "has_student_profile": true,
+        "has_user_profile": false,
+        "is_social_auth": false,
+        "detection_method": "PROFILE_ANALYSIS",
+        "student_id": "STU001",
+        "student_profile_id": 3
+      }
+    },
+    {
+      "test": "Student Safe Login Function",
+      "passed": true,
+      "details": {
+        "result": true,
+        "user": "student1"
+      }
+    },
+    {
+      "test": "Teacher Safe Login Function",
+      "passed": true,
+      "details": {
+        "result": true,
+        "user": "teacher1"
+      }
+    },
+    {
+      "test": "Student Registration HTTP Response",
+      "passed": true,
+      "details": {
+        "status_code": 200,
+        "note": "Success with 200 status"
+      }
+    },
+    {
+      "test": "Student User Account Created",
+      "passed": true,
+      "details": {
+        "username": "test_auth_fix_001",
+        "user_id": 778
+      }
+    },
+    {
+      "test": "Student Profile Created",
+      "passed": true,
+      "details": {
+        "student_id": "test_auth_fix_001",
+        "profile_id": 15
+      }
+    },
+    {
+      "test": "Student Login HTTP Response",
+      "passed": true,
+      "details": {
+        "status_code": 302
+      }
+    },
+    {
+      "test": "Student User Session Created",
+      "passed": true,
+      "details": {
+        "user_id": "779"
+      }
+    },
+    {
+      "test": "Teacher Login HTTP Response",
+      "passed": true,
+      "details": {
+        "status_code": 302
+      }
+    },
+    {
+      "test": "Test Data Cleanup",
+      "passed": true,
+      "details": {
+        "cleaned_users": 2
+      }
+    }
+  ]
+}

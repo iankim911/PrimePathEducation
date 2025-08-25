@@ -27,7 +27,23 @@ def student_register(request):
         form = StudentRegistrationForm(request.POST)
         if form.is_valid():
             try:
+                # Debug: Check what username will be set
+                student_id = form.cleaned_data.get('student_id')
+                print(f"[REGISTRATION_DEBUG] Attempting to create user with student_id: {student_id}")
+                
+                # Check if user already exists
+                from django.contrib.auth.models import User
+                if User.objects.filter(username=student_id).exists():
+                    print(f"[REGISTRATION_DEBUG] ERROR: User with username '{student_id}' already exists!")
+                    messages.error(request, f'Student ID "{student_id}" is already taken. Please choose another.')
+                    return render(request, 'primepath_student/auth/register.html', {
+                        'form': form,
+                        'title': 'Create Student Account'
+                    })
+                
+                print(f"[REGISTRATION_DEBUG] Username '{student_id}' is available, proceeding with form.save()")
                 user = form.save()
+                print(f"[REGISTRATION_DEBUG] User created successfully: {user.username} (ID: {user.id})")
                 messages.success(request, f'Account created successfully! Welcome, {user.first_name}!')
                 
                 # Auto-login the user with comprehensive authentication handling
@@ -49,12 +65,23 @@ def student_register(request):
                     return redirect('primepath_student:login')
                     
             except Exception as e:
+                print(f"[REGISTRATION_DEBUG] Exception during registration: {str(e)}")
+                print(f"[REGISTRATION_DEBUG] Exception type: {type(e)}")
+                import traceback
+                print(f"[REGISTRATION_DEBUG] Full traceback:")
+                traceback.print_exc()
                 messages.error(request, f'Error creating account: {str(e)}')
         else:
             # Extract form errors for better display
+            print(f"[REGISTRATION_DEBUG] Form is invalid!")
+            print(f"[REGISTRATION_DEBUG] Form errors: {form.errors}")
+            print(f"[REGISTRATION_DEBUG] Non-field errors: {form.non_field_errors()}")
+            
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f'{field}: {error}')
+                    error_msg = f'{field}: {error}'
+                    print(f"[REGISTRATION_DEBUG] Adding error message: {error_msg}")
+                    messages.error(request, error_msg)
     else:
         form = StudentRegistrationForm()
     

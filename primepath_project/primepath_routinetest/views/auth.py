@@ -4,7 +4,8 @@ Handles Admin, Teacher, and Student login with role-based redirects
 BUILDER: Day 1 - Authentication System
 """
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
+from core.utils.authentication import teacher_login as safe_teacher_login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
@@ -72,29 +73,40 @@ def routinetest_login(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None and user.is_active:
-            # Login successful
-            login(request, user)
+            # Login successful with comprehensive authentication handling
+            login_successful = safe_teacher_login(
+                request, 
+                user, 
+                source='ROUTINETEST_LOGIN',
+                remember_me=remember_me,
+                username_provided=username
+            )
             
-            # Set session expiry
-            if not remember_me:
-                request.session.set_expiry(0)
+            if login_successful:
+                # Set session expiry
+                if not remember_me:
+                    request.session.set_expiry(0)
+                else:
+                    request.session.set_expiry(1209600)  # 2 weeks
+            
+                # Get role and redirect accordingly
+                role = get_user_role(user)
+                
+                # Log success
+                logger.info(f"[ROUTINETEST_LOGIN] Success: {username} as {role}")
+                messages.success(request, f'Welcome to RoutineTest, {user.get_full_name() or user.username}!')
+                
+                # Role-based redirect
+                if role == USER_ROLES['ADMIN']:
+                    return redirect('RoutineTest:admin_dashboard')
+                elif role == USER_ROLES['TEACHER']:
+                    return redirect('RoutineTest:teacher_dashboard')
+                else:
+                    return redirect('RoutineTest:teacher_dashboard')  # Default fallback
             else:
-                request.session.set_expiry(1209600)  # 2 weeks
-            
-            # Get role and redirect accordingly
-            role = get_user_role(user)
-            
-            # Log success
-            logger.info(f"[ROUTINETEST_LOGIN] Success: {username} as {role}")
-            messages.success(request, f'Welcome to RoutineTest, {user.get_full_name() or user.username}!')
-            
-            # Role-based redirect
-            if role == USER_ROLES['ADMIN']:
-                return redirect('RoutineTest:admin_dashboard')
-            elif role == USER_ROLES['TEACHER']:
-                return redirect('RoutineTest:teacher_dashboard')
-            else:
-                return redirect('RoutineTest:student_dashboard')
+                # Login failed due to backend issues
+                messages.error(request, 'Login failed due to system error. Please try again.')
+                return render(request, 'primepath_routinetest/auth/login_brand.html', context)
         else:
             # Login failed
             logger.warning(f"[ROUTINETEST_LOGIN] Failed: {username}")
