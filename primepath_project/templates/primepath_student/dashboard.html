@@ -64,34 +64,17 @@
 <div class="card" style="margin-top: 30px;">
     <h3 style="color: #1565C0; margin-bottom: 15px;">Account Settings</h3>
     
+    <!-- Kakao integration temporarily disabled -->
+    <!--
     <div style="padding: 15px; background-color: #F8F9FA; border-radius: 8px; margin-bottom: 15px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <p style="margin: 0; font-weight: 500;">Kakao Account</p>
-                {% if student.kakao_id %}
-                <p style="margin: 5px 0 0 0; color: #00C896; font-size: 14px;">✓ Connected</p>
-                {% else %}
-                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Not connected</p>
-                {% endif %}
-            </div>
-            <div>
-                {% if student.kakao_id %}
-                <button onclick="unlinkKakao()" class="btn" 
-                        style="background-color: #F5F5F5; color: #333; padding: 8px 16px; font-size: 14px;">
-                    Disconnect
-                </button>
-                {% else %}
-                <a href="{% url 'primepath_student:kakao_login' %}?next={% url 'primepath_student:dashboard' %}" 
-                   class="btn" style="background-color: #FEE500; color: #000; padding: 8px 16px; font-size: 14px; display: inline-flex; align-items: center;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" style="margin-right: 6px;">
-                        <path fill="#000000" d="M12 3C6.48 3 2 6.21 2 10.2c0 2.52 1.78 4.74 4.47 6.02-.15 1.02-.38 2.58-.47 3.18-.09.6.22.81.5.59.28-.22 3.41-2.34 4.72-3.24.58.05 1.17.08 1.78.08 5.52 0 10-3.21 10-7.2S17.52 3 12 3z"/>
-                    </svg>
-                    Connect Kakao
-                </a>
-                {% endif %}
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Integration coming soon</p>
             </div>
         </div>
     </div>
+    -->
     
     <p style="color: #666; margin-top: 10px;">
         Your Student ID: <strong>{{ student.student_id }}</strong>

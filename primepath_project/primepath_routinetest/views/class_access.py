@@ -282,7 +282,7 @@ def my_classes_view(request):
                 
                 my_classes.append({
                     'class_code': assignment.class_code,
-                    'class_name': assignment.get_class_code_display(),
+                    'class_name': assignment.class_code,  # Just the class code, not the full curriculum name
                     'student_count': student_count,
                     'active_exams': active_exams,
                     'access_level': assignment.get_access_level_display(),
@@ -741,7 +741,7 @@ def api_my_classes(request):
             
             classes = [{
                 'class_code': a.class_code,
-                'class_name': a.get_class_code_display(),
+                'class_name': a.class_code,  # Just the class code, not the full curriculum name
                 'access_level': a.get_access_level_display(),
                 'assigned_date': a.assigned_date.isoformat() if a.assigned_date else None
             } for a in assignments]

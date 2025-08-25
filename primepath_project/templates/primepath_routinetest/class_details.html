@@ -1931,6 +1931,11 @@
     
     // Launch Teacher Preview - Teacher experiences same interface as students
     function launchTeacherPreview(examId, examName, duration = 60) {
+        // Close any open modals first
+        document.querySelectorAll('.modal.show').forEach(modal => {
+            modal.classList.remove('show');
+        });
+        
         console.group('%c[TEACHER_PREVIEW_LAUNCH]', 'background: #4CAF50; color: white; padding: 5px; border-radius: 3px;');
         console.log('🚀 Launching teacher preview for exam:', {
             examId: examId,
@@ -1958,11 +1963,14 @@
         
         console.log('[TEACHER_PREVIEW] User confirmed, creating preview session...');
         
-        // Show loading indicator
-        const button = event.target;
-        const originalText = button.textContent;
-        button.disabled = true;
-        button.textContent = '🔄 Launching...';
+        // Show loading indicator on all launch buttons
+        const buttons = document.querySelectorAll('.btn-start-exam');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.textContent.includes('Launch')) {
+                btn.textContent = '🔄 Launching...';
+            }
+        });
         
         // Call the teacher preview endpoint
         fetch("{% url 'RoutineTest:launch_teacher_preview' class_code %}", {
@@ -2005,18 +2013,24 @@
                 console.error('❌ Failed to create preview session:', data.error);
                 alert('Failed to launch exam preview:\n' + (data.error || 'Unknown error'));
                 
-                // Restore button
-                button.disabled = false;
-                button.textContent = originalText;
+                // Restore all buttons
+                const buttons = document.querySelectorAll('.btn-start-exam');
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Launch Exam';
+                });
             }
         })
         .catch(error => {
             console.error('%c[TEACHER_PREVIEW_ERROR]', 'background: #F44336; color: white; padding: 5px; border-radius: 3px;', error);
             alert('Error launching exam preview. Please try again.');
             
-            // Restore button
-            button.disabled = false;
-            button.textContent = originalText;
+            // Restore all buttons
+            const buttons = document.querySelectorAll('.btn-start-exam');
+            buttons.forEach(btn => {
+                btn.disabled = false;
+                btn.textContent = '🚀 Launch Exam';
+            });
         });
     }
     

@@ -196,7 +196,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  
 
 SESSION_COOKIE_AGE = 86400  
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_SAVE_EVERY_REQUEST = False  # Disable to prevent session conflicts during registration
 
 # Security Settings
 X_FRAME_OPTIONS = 'SAMEORIGIN'  # Allow PDFs in iframes from same origin
@@ -213,6 +213,8 @@ SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token for AJAX
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF tokens
+CSRF_COOKIE_AGE = None  # Use session length
 
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [
