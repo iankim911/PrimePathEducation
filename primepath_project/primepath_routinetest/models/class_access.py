@@ -16,7 +16,7 @@ from ..class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
 logger = logging.getLogger(__name__)
 
 # Generate class code choices from the curriculum mapping
-CLASS_CODE_CHOICES = [(code, f"{code} - {curriculum}") for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items()]
+CLASS_CODE_CHOICES = [(code, code) for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items()]
 
 
 class TeacherClassAssignment(models.Model):
