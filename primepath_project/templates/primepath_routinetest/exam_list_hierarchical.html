@@ -2080,116 +2080,13 @@ observer.observe(document.body, {
     // Removed attributes watching to prevent infinite loop
 });
 
-// Function to update the exam name preview
-window.updateCopyExamNamePreview = function() {
-    console.log('[COPY_MODAL_PREVIEW] Updating exam name preview...');
-    
-    try {
-        const examTypeSelect = document.getElementById('copyExamType');
-        const timeslotSelect = document.getElementById('timeslot');
-        const programSelect = document.getElementById('copyProgramSelect');
-        const subprogramSelect = document.getElementById('copySubprogramSelect');
-        const levelSelect = document.getElementById('copyLevelSelect');
-        const customSuffixInput = document.getElementById('customSuffix');
-        const previewText = document.getElementById('previewText');
-        
-        if (!previewText) {
-            console.error('[COPY_MODAL_PREVIEW] Preview text element not found');
-            return;
-        }
-    
-    // Check if basic required fields are filled (allow partial preview)
-    if (!examTypeSelect?.value || !timeslotSelect?.value) {
-        previewText.textContent = 'Please select exam type and time period to see preview...';
-        console.log('[COPY_MODAL_PREVIEW] Missing basic required fields:', {
-            examType: examTypeSelect?.value,
-            timeslot: timeslotSelect?.value
-        });
-        return;
-    }
-    
-    // Build the name preview with curriculum selection
-    let nameParts = [];
-    
-    // Add exam type prefix based on selection
-    if (examTypeSelect.value === 'QUARTERLY') {
-        nameParts.push('[QTR]');
-    } else if (examTypeSelect.value === 'REVIEW') {
-        nameParts.push('[RVW]');
-    }
-    
-    // Add time period based on exam type
-    const year = new Date().getFullYear();
-    if (examTypeSelect.value === 'QUARTERLY') {
-        // For quarterly exams, use the selected quarter
-        const quarterValue = timeslotSelect.value; // e.g., 'Q1', 'Q2', etc.
-        nameParts.push(`${quarterValue} ${year}`);
-    } else if (examTypeSelect.value === 'REVIEW') {
-        // For review/monthly exams, use the selected month
-        const monthText = timeslotSelect.options[timeslotSelect.selectedIndex]?.text || timeslotSelect.value;
-        nameParts.push(`${monthText} ${year}`);
-    }
-    
-    // Add curriculum information
-    if (programSelect?.value && subprogramSelect?.value && levelSelect?.value) {
-        // Use selected curriculum
-        const program = programSelect.value;
-        const subprogram = subprogramSelect.value;
-        const levelNumber = levelSelect.options[levelSelect.selectedIndex].text.replace('Level ', '');
-        const curriculum = `${program} ${subprogram} Lv${levelNumber}`;
-        nameParts.push(curriculum);
-        console.log('[COPY_MODAL_PREVIEW] Using selected curriculum:', curriculum);
-    } else {
-        // Fallback to extracting from source exam name
-        const sourceExamNameElement = document.getElementById('sourceExamName');
-        const sourceExamNameText = sourceExamNameElement?.textContent || '';
-        
-        if (sourceExamNameText && sourceExamNameText !== 'Loading...') {
-            const curriculumMatch = sourceExamNameText.match(/(CORE|ASCENT|EDGE|PINNACLE)\s+(\w+)\s+Lv(\d+)/);
-            if (curriculumMatch) {
-                const curriculum = `${curriculumMatch[1]} ${curriculumMatch[2]} Lv${curriculumMatch[3]}`;
-                nameParts.push(curriculum);
-                console.log('[COPY_MODAL_PREVIEW] Using source curriculum (fallback):', curriculum);
-            } else {
-                // Try to extract any curriculum-like pattern
-                const levelMatch = sourceExamNameText.match(/Lv\d+/);
-                if (levelMatch) {
-                    const beforeLevel = sourceExamNameText.substring(
-                        sourceExamNameText.lastIndexOf('-') + 1,
-                        sourceExamNameText.indexOf(levelMatch[0])
-                    ).trim();
-                    if (beforeLevel) {
-                        nameParts.push(`${beforeLevel}${levelMatch[0]}`);
-                        console.log('[COPY_MODAL_PREVIEW] Using extracted curriculum pattern:', `${beforeLevel}${levelMatch[0]}`);
-                    }
-                }
-            }
-        }
-    }
-    
-    // Join parts
-    let previewName = nameParts.join(' - ');
-    
-    // Add custom suffix if provided
-    const customSuffix = customSuffixInput?.value?.trim();
-    if (customSuffix) {
-        previewName += customSuffix.startsWith('_') ? customSuffix : `_${customSuffix}`;
-    }
-    
-        previewText.textContent = previewName;
-        console.log('[COPY_MODAL_PREVIEW] Generated preview:', previewName);
-    } catch (error) {
-        console.error('[COPY_MODAL_PREVIEW] Error updating preview:', error);
-        const previewText = document.getElementById('previewText');
-        if (previewText) {
-            previewText.textContent = 'Error generating preview';
-        }
-    }
-};
+// Preview function is now handled by copy-exam-modal-complete.js
+// The new implementation will override this placeholder
 
-// Populate timeslots based on exam type
+// Legacy functions - now handled by copy-exam-modal-complete.js
+// These are kept as stubs for backward compatibility
 function initializeCopyExamEventListeners() {
-    console.log('Initializing copy exam event listeners...');
+    console.log('[LEGACY] initializeCopyExamEventListeners - handled by new implementation');
     
     const copyExamTypeSelect = document.getElementById('copyExamType');
     if (!copyExamTypeSelect) {
@@ -3155,20 +3052,12 @@ if (document.readyState === 'loading') {
 {{ curriculum_hierarchy_for_copy|json_script:"copy-curriculum-hierarchy-data" }}
 {% endif %}
 
-<!-- Load the fixed copy modal script -->
-<script src="{% static 'js/routinetest/copy-exam-modal-fixed.js' %}?v={% now 'U' %}"></script>
+<!-- Load the COMPLETE copy modal script with full preview functionality -->
+<script src="{% static 'js/routinetest/copy-exam-modal-complete.js' %}?v={% now 'U' %}"></script>
 
-<!-- Override conflicting functions -->
+<!-- Debug helper for development -->
 <script>
-// Override the inline functions that conflict with our fixed version
-window.initializeCopyCurriculumCascading = function() {
-    console.log('[OVERRIDE] initializeCopyCurriculumCascading disabled - handled by copy-exam-modal-fixed.js');
-};
-window.initializeCopyExamEventListeners = function() {
-    console.log('[OVERRIDE] initializeCopyExamEventListeners disabled - handled by copy-exam-modal-fixed.js');
-};
-// DO NOT OVERRIDE updateCopyExamNamePreview - it needs to work for the preview!
-// The copy-exam-modal-fixed.js doesn't implement preview functionality
+console.log('[EXAM_LIST] Copy modal script loaded. Use copyModalDebug() to check status.');
 </script>
 
 {% endblock %}

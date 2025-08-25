@@ -453,7 +453,7 @@
     function handleFormSubmit(event) {
         event.preventDefault();
         log('=====================================');
-        log('FORM SUBMISSION');
+        log('FORM SUBMISSION - ENHANCED VERSION');
         log('=====================================');
         
         const form = event.target;
@@ -464,7 +464,17 @@
         for (let [key, value] of formData.entries()) {
             formDataObj[key] = value;
         }
-        log('Form data:', formDataObj);
+        log('Form data collected:', formDataObj);
+        
+        // Enhanced console output for debugging
+        console.group('[COPY_EXAM_DEBUG] Form Submission Details');
+        console.log('Source Exam ID:', formDataObj.source_exam_id);
+        console.log('Curriculum Level ID:', formDataObj.curriculum_level);
+        console.log('Exam Type:', formDataObj.exam_type);
+        console.log('Time Slot:', formDataObj.timeslot);
+        console.log('Academic Year:', formDataObj.academicYear);
+        console.log('Custom Suffix:', formDataObj.customSuffix);
+        console.groupEnd();
         
         // Validate required fields
         const requiredFields = ['source_exam_id', 'curriculum_level'];
@@ -472,6 +482,7 @@
         
         if (missingFields.length > 0) {
             logError('Missing required fields:', missingFields);
+            console.error('[COPY_EXAM_ERROR] Missing fields:', missingFields);
             alert('Please fill in all required fields: ' + missingFields.join(', '));
             return;
         }
@@ -480,63 +491,122 @@
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         if (!csrfToken) {
             logError('CSRF token not found');
+            console.error('[COPY_EXAM_ERROR] CSRF token missing');
             alert('Security token missing. Please refresh the page.');
             return;
         }
         
-        // Prepare submission data
+        // Prepare submission data with enhanced structure
         const submitData = {
             source_exam_id: formDataObj.source_exam_id,
             curriculum_level_id: formDataObj.curriculum_level,
-            exam_type: formDataObj.exam_type,
-            timeslot: formDataObj.timeslot,
-            academic_year: formDataObj.academicYear,
+            exam_type: formDataObj.exam_type || 'REVIEW',
+            timeslot: formDataObj.timeslot || '',
+            academic_year: formDataObj.academicYear || new Date().getFullYear().toString(),
             custom_suffix: formDataObj.customSuffix || ''
         };
         
-        log('Submitting data:', submitData);
+        log('Final submission data:', submitData);
+        console.log('[COPY_EXAM_SUBMIT] Sending data to server:', JSON.stringify(submitData, null, 2));
         
-        // Show loading state
+        // Show loading state with animation
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Copying...';
+        submitBtn.textContent = 'Copying exam...';
         submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
         
-        // Submit via AJAX
+        // Track request timing
+        const startTime = performance.now();
+        
+        // Submit via AJAX with enhanced error handling
         fetch('/RoutineTest/exams/copy/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify(submitData)
         })
         .then(response => {
-            log(`Response status: ${response.status}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
+            const elapsed = Math.round(performance.now() - startTime);
+            log(`Response received in ${elapsed}ms - Status: ${response.status}`);
+            console.log(`[COPY_EXAM_RESPONSE] Status: ${response.status} (${elapsed}ms)`);
+            
+            // Parse response regardless of status to get error details
+            return response.json().then(data => {
+                if (!response.ok) {
+                    // Server returned an error status
+                    console.error('[COPY_EXAM_ERROR] Server error response:', data);
+                    throw new Error(data.error || data.details || `Server error: ${response.status}`);
+                }
+                return data;
+            });
         })
         .then(data => {
+            console.group('[COPY_EXAM_SUCCESS] Copy operation completed');
+            console.log('Success:', data.success);
+            console.log('New Exam ID:', data.new_exam_id);
+            console.log('New Exam Name:', data.new_exam_name);
+            console.log('Details:', data.details);
+            console.groupEnd();
+            
             logSuccess('Copy successful!', data);
+            
             if (data.success) {
-                alert(`Exam copied successfully! New exam: ${data.new_exam_name || 'Created'}`);
+                // Show detailed success message
+                const successMsg = `✅ Exam copied successfully!\n\nNew exam: ${data.new_exam_name}\nID: ${data.new_exam_id}\n\nThe page will now reload to show your new exam.`;
+                alert(successMsg);
+                
+                // Close modal and reload
                 closeCopyModal();
-                // Reload page to show new exam
-                window.location.reload();
+                
+                // Slight delay before reload for user to see the message
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
             } else {
-                throw new Error(data.error || 'Copy failed');
+                // Handle case where success=false but no error thrown
+                throw new Error(data.error || data.details || 'Copy operation failed');
             }
         })
         .catch(error => {
+            console.group('[COPY_EXAM_ERROR] Copy operation failed');
+            console.error('Error object:', error);
+            console.error('Error message:', error.message);
+            console.error('Stack trace:', error.stack);
+            console.groupEnd();
+            
             logError('Copy failed:', error);
-            alert(`Failed to copy exam: ${error.message}`);
+            
+            // Provide detailed error message to user
+            let errorMessage = 'Failed to copy exam:\n\n';
+            
+            // Check for specific error types
+            if (error.message.includes('default_options_count')) {
+                errorMessage += '❌ Data integrity issue: The source exam is missing required configuration fields.\n\n';
+                errorMessage += 'This is a database issue that needs to be fixed by an administrator.';
+            } else if (error.message.includes('not found')) {
+                errorMessage += '❌ The exam or curriculum level was not found.\n\n';
+                errorMessage += 'The exam may have been deleted or you may not have permission to copy it.';
+            } else if (error.message.includes('curriculum')) {
+                errorMessage += '❌ Curriculum selection issue.\n\n';
+                errorMessage += 'Please ensure you have selected a valid Program, SubProgram, and Level.';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            alert(errorMessage);
         })
         .finally(() => {
             // Restore button state
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            
+            const totalTime = Math.round(performance.now() - startTime);
+            log(`Total operation time: ${totalTime}ms`);
         });
     }
     
