@@ -3,38 +3,183 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
-{% block content %}
-<div style="padding: 20px;">
-    <h1>👑 Admin Dashboard</h1>
-    <p>Welcome, <strong>{{ username }}</strong>!</p>
+{% block extra_css %}
+<style>
+/* Admin Dashboard Theme Fixes */
+.admin-dashboard {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #212529;
+}
+
+.admin-header {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.admin-header p {
+    margin: 0;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    color: white;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.admin-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 4px solid #1B5E20;
+}
+
+.admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.admin-card h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1B5E20;
+}
+
+.admin-card p {
+    margin: 0 0 16px 0;
+    color: #6C757D;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Unified Button Styling */
+.btn-admin-primary {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #1B5E20;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+}
+
+.btn-admin-primary:hover {
+    background: #2E7D32;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+}
+
+.btn-admin-logout {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #2E7D32;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid #1B5E20;
+    cursor: pointer;
+}
+
+.btn-admin-logout:hover {
+    background: #1B5E20;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(27, 94, 32, 0.3);
+}
+
+/* Status indicators */
+.status-coming-soon {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #FFF9C4;
+    color: #F57C00;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .admin-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
     
-    <!-- BUILDER: Day 1 Shell - Features coming Day 2 -->
-    <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-        
-        <div style="padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+    .admin-header h1 {
+        font-size: 2rem;
+    }
+    
+    .admin-card {
+        padding: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard" style="padding: 20px;">
+    <!-- Admin Header with proper theming -->
+    <div class="admin-header">
+        <h1>👑 Admin Dashboard</h1>
+        <p>Welcome, <strong>{{ username }}</strong>! Manage your PrimePath system efficiently.</p>
+    </div>
+    
+    <!-- Admin Feature Cards -->
+    <div class="admin-grid">
+        <div class="admin-card">
             <h3>🏫 Manage Classes</h3>
-            <p style="color: #666;">Create and manage classes</p>
-            <a href="{% url 'RoutineTest:manage_classes' %}" style="display: inline-block; margin-top: 10px; padding: 8px 15px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+            <p>Create, configure, and manage all class structures in the system. Assign teachers and organize curriculum.</p>
+            <a href="{% url 'RoutineTest:manage_classes' %}" class="btn-admin-primary">
                 Manage Classes →
             </a>
         </div>
         
-        <div style="padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div class="admin-card">
             <h3>👥 Teachers</h3>
-            <p style="color: #666;">View all teachers</p>
-            <p style="font-size: 14px; color: #666;">Assign teachers via Classes</p>
+            <p>View all registered teachers and their assignments. Manage teacher permissions and access levels.</p>
+            <div class="status-coming-soon">Assign via Classes</div>
         </div>
         
-        <div style="padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <div class="admin-card">
             <h3>🎓 Students</h3>
-            <p style="color: #666;">Student management</p>
-            <p style="font-size: 24px; font-weight: bold; color: #FFC107;">Coming Day 3</p>
+            <p>Complete student management system including registration, progress tracking, and performance analytics.</p>
+            <div class="status-coming-soon">Coming Day 3</div>
         </div>
-        
     </div>
     
-    <div style="margin-top: 30px;">
-        <a href="{% url 'RoutineTest:logout' %}" style="padding: 10px 20px; background: #DC3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
+    <!-- Logout Section -->
+    <div style="margin-top: 40px;">
+        <a href="{% url 'RoutineTest:logout' %}" class="btn-admin-logout">
+            🔓 Logout
+        </a>
     </div>
 </div>
 {% endblock %}

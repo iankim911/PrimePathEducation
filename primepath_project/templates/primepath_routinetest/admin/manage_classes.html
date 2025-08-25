@@ -70,7 +70,7 @@
                         {{ class.student_count }}
                     </td>
                     <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center;">
-                        <button onclick="showAssignTeacherModal('{{ class.id }}', '{{ class.name }}')" style="padding: 5px 10px; background: #007BFF; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 2px;">
+                        <button onclick="showAssignTeacherModal('{{ class.id }}', '{{ class.name }}')" style="padding: 5px 10px; background: #1B5E20; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 2px; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#2E7D32'" onmouseout="this.style.backgroundColor='#1B5E20'">
                             Add Teacher
                         </button>
                         <button onclick="deleteClass('{{ class.id }}', '{{ class.name }}')" style="padding: 5px 10px; background: #DC3545; color: white; border: none; border-radius: 3px; cursor: pointer; margin: 2px;">
