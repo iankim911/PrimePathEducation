@@ -338,16 +338,52 @@ def classes_exams_unified_view(request):
                     class_display_name = curriculum
                     dedup_reason = "REFORMATTED"
                 
-                # Case 3: Code is substring of curriculum with formatting (redundant info)
+                # Case 3: Advanced formatting similarity check
+                # Handle cases like "Hight1_SaiSun_3-5" vs "Hight SaiSun 3-5"
+                # Check if they're essentially the same with just formatting differences
+                elif (code.replace('_', ' ').replace('-', '') in curriculum.replace('-', '') and 
+                      curriculum.replace(' ', '').replace('-', '') in code.replace('_', '').replace('-', '')):
+                    class_display_name = curriculum  # Show the more readable version
+                    dedup_reason = "FORMATTING_SIMILARITY"
+                
+                # Case 4: Code is substring of curriculum with formatting (redundant info)
                 # e.g., "High1_SaiSun_3-5" in "High1 SaiSun 3-5" 
                 elif code.replace('_', ' ') in curriculum or curriculum.replace(' ', '_') == code:
                     class_display_name = curriculum
                     dedup_reason = "SUBSTRING_MATCH"
                 
-                # Case 4: Different content - show both
+                # Case 5: Character-based similarity check for tricky cases
+                # Handle cases like "Hight1_SaiSun_3-5" vs "Hight SaiSun 3-5" (high similarity, minor differences)
                 else:
-                    class_display_name = f"{code} - {curriculum}"
-                    dedup_reason = "DIFFERENT_CONTENT"
+                    # Calculate character-based similarity
+                    code_chars = set(code.replace('_', '').replace('-', '').replace(' ', '').lower())
+                    curriculum_chars = set(curriculum.replace('_', '').replace('-', '').replace(' ', '').lower())
+                    
+                    if code_chars and curriculum_chars:  # Avoid division by zero
+                        intersection = code_chars & curriculum_chars
+                        union = code_chars | curriculum_chars
+                        similarity = len(intersection) / len(union) if union else 0
+                        
+                        # Also check length difference
+                        code_clean = code.replace('_', '').replace('-', '').replace(' ', '').lower()
+                        curriculum_clean = curriculum.replace('_', '').replace('-', '').replace(' ', '').lower()
+                        length_diff = abs(len(code_clean) - len(curriculum_clean))
+                        
+                        # High similarity + small length difference = probably the same thing formatted differently
+                        if similarity > 0.85 and length_diff <= 3:
+                            class_display_name = curriculum  # Show the more readable version
+                            dedup_reason = "HIGH_SIMILARITY"
+                            
+                            # DEBUG: Log similarity matches for troubleshooting
+                            logger.debug(f"[HIGH_SIMILARITY] {code} vs {curriculum}: similarity={similarity:.2f}, length_diff={length_diff}")
+                            if code in debug_codes:
+                                print(f"[SIMILARITY_DEBUG] {code} -> {curriculum} (similarity: {similarity:.2f}, length_diff: {length_diff})")
+                        else:
+                            class_display_name = f"{code} - {curriculum}"
+                            dedup_reason = "DIFFERENT_CONTENT"
+                    else:
+                        class_display_name = f"{code} - {curriculum}"
+                        dedup_reason = "DIFFERENT_CONTENT"
                     
                 available_classes.append({
                     'class_code': code,
