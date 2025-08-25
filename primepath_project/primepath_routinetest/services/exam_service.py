@@ -748,9 +748,14 @@ class ExamService:
                     user_access_level = 'OWNER'
                     logger.info(f"[FILTER_FIX] User is OWNER of this exam")
                 elif not exam_classes or exam_classes == []:
-                    # No class codes - user has no access unless owner
-                    user_access_level = 'NONE'
-                    logger.info(f"[FILTER_FIX] Exam has no class codes, user has NO access")
+                    # No class codes - teachers get VIEW access by default
+                    # (ALL teachers can view ALL exams)
+                    if not is_admin:
+                        user_access_level = 'VIEW'
+                        logger.info(f"[FILTER_FIX] Exam has no class codes, granting default VIEW access to teacher")
+                    else:
+                        user_access_level = 'FULL'  # Admin has full access
+                        logger.info(f"[FILTER_FIX] Exam has no class codes, admin gets FULL access")
                 else:
                     # Check access level from class assignments
                     highest_access = 'NONE'
@@ -769,8 +774,15 @@ class ExamService:
                             elif access == 'VIEW' and highest_access == 'NONE':
                                 highest_access = 'VIEW'
                     
+                    # CRITICAL FIX: All teachers get VIEW access by default to ALL exams
+                    # Even if they have no class assignments, they can view all exams
+                    if highest_access == 'NONE' and not is_admin:
+                        # Teacher with no assignments to this exam's classes gets VIEW access
+                        highest_access = 'VIEW'
+                        logger.info(f"[FILTER_FIX] Teacher has no assignments for this exam's classes, granting default VIEW access")
+                    
                     user_access_level = highest_access
-                    logger.info(f"[FILTER_FIX] User's highest access level: {user_access_level}")
+                    logger.info(f"[FILTER_FIX] User's final access level: {user_access_level}")
                 
                 # Apply filter based on mode
                 if filter_mode == 'MY_EXAMS':

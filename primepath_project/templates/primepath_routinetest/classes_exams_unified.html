@@ -248,33 +248,31 @@
     /* Program-based Organization */
     .program-section {
         margin-bottom: 35px;
-        background: #f8f9fa !important;
+        background: white !important;
         border-radius: 12px;
-        padding: 20px;
+        padding: 0;
         border: 1px solid #dee2e6;
+        overflow: hidden;
     }
     
-    /* Force proper colors for all program headers - override any cached styles */
+    /* Program headers with dark green background and white text */
     .program-header {
-        background: #f8f9fa !important;
-        color: inherit !important;
-    }
-    
-    .program-header {
+        background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
+        color: white !important;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 12px;
-        border-bottom: 2px solid;
+        padding: 18px 24px;
         cursor: pointer;
         user-select: none;
+        margin: 0;
+        border: none;
     }
     
-    .program-header.core { border-bottom-color: #2E7D32; }
-    .program-header.ascent { border-bottom-color: #1B5E20; }
-    .program-header.edge { border-bottom-color: #0D4F1F; }
-    .program-header.pinnacle { border-bottom-color: #00A65E; }
+    .program-header.core { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
+    .program-header.ascent { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
+    .program-header.edge { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
+    .program-header.pinnacle { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
     
     .program-title {
         font-size: 20px;
@@ -282,22 +280,18 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        color: white !important;
     }
     
-    .program-title.core { color: #2E7D32 !important; background: transparent !important; }
-    .program-title.ascent { color: #1B5E20 !important; background: transparent !important; }
-    .program-title.edge { color: #0D4F1F !important; background: transparent !important; }
-    .program-title.pinnacle { color: #00A65E !important; background: transparent !important; }
+    .program-title.core { color: white !important; background: transparent !important; }
+    .program-title.ascent { color: white !important; background: transparent !important; }
+    .program-title.edge { color: white !important; background: transparent !important; }
+    .program-title.pinnacle { color: white !important; background: transparent !important; }
     
-    /* Ensure no teal/turquoise backgrounds anywhere */
-    .program-section, .program-header, .program-title, .program-classes {
+    /* Program content area */
+    .program-classes {
+        padding: 20px;
         background-color: #f8f9fa !important;
-    }
-    
-    /* Override any potential inline styles or cached CSS */
-    .program-header.core {
-        background-color: #f8f9fa !important;
-        border-bottom-color: #2E7D32 !important;
     }
     
     .program-summary {
@@ -305,12 +299,14 @@
         gap: 15px;
         align-items: center;
         font-size: 14px;
-        color: #6c757d;
+        color: white;
+        opacity: 0.95;
     }
     
     .program-toggle {
         font-size: 18px;
         transition: transform 0.3s;
+        color: white;
     }
     
     .program-section.collapsed .program-toggle {

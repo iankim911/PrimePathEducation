@@ -327,7 +327,10 @@
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_pinnacle_qa.py)",
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_pinnacle_simple.py)",
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_pinnacle_view.py)",
-      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python assign_pinnacle_to_admin.py)"
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python assign_pinnacle_to_admin.py)",
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_program_mapping.py)",
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_admin_assignments.py)",
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python fix_admin_head_teacher.py)"
     ],
     "deny": []
   }
