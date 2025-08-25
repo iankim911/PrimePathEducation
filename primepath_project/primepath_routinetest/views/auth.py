@@ -77,7 +77,6 @@ def routinetest_login(request):
             login_successful = safe_teacher_login(
                 request, 
                 user, 
-                source='ROUTINETEST_LOGIN',
                 remember_me=remember_me,
                 username_provided=username
             )

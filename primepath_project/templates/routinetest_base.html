@@ -44,6 +44,53 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f5f5f5;
             color: #333;
+            font-size: 17px;  /* Optimal base size */
+            line-height: 1.5;  /* 150% for body text */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Global Typography Hierarchy */
+        h1 {
+            font-size: 32px;
+            line-height: 1.25;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #212529;
+        }
+        
+        h2 {
+            font-size: 24px;
+            line-height: 1.25;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+        
+        h3 {
+            font-size: 20px;
+            line-height: 1.3;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #212529;
+        }
+        
+        h4 {
+            font-size: 18px;
+            line-height: 1.3;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #212529;
+        }
+        
+        p {
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        /* Ensure consistent spacing between sections */
+        section {
+            margin-bottom: 48px;
         }
         
         /* Header Section - BCG Forest Green Theme */
@@ -51,7 +98,7 @@
             background-color: #1B5E20;  /* Darker, more muted green */
             color: white;
             padding: 20px 0;
-            margin-bottom: 30px;
+            margin-bottom: 0;  /* Remove margin - will use app-header spacing */
         }
         
         .header h1 {
@@ -68,8 +115,9 @@
         .app-header {
             background-color: #1B5E20;  /* Darker, more muted green */
             color: white;
-            padding: 20px;
-            margin-bottom: 0;
+            padding: 24px 20px;  /* Increased vertical padding */
+            margin-bottom: var(--header-spacing, 32px);  /* Proper spacing before navigation */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .header-content {
@@ -91,15 +139,19 @@
         
         .app-title {
             margin: 0;
-            font-size: 2rem;
-            font-weight: bold;
+            font-size: var(--font-size-xxl, 32px);
+            font-weight: var(--font-weight-bold, 700);
             color: white;
+            line-height: var(--line-height-tight, 1.25);
+            letter-spacing: -0.5px;
         }
         
         .app-subtitle {
-            margin: 0;
-            font-size: 0.9rem;
+            margin: 4px 0 0;
+            font-size: var(--font-size-md, 16px);
+            font-weight: var(--font-weight-normal, 400);
             color: rgba(255, 255, 255, 0.9);
+            line-height: var(--line-height-base, 1.5);
         }
         
         .user-welcome {
@@ -107,16 +159,18 @@
         }
         
         .welcome-text {
-            font-size: 1rem;
+            font-size: var(--font-size-base, 17px);
+            font-weight: var(--font-weight-medium, 500);
             color: white;
+            line-height: var(--line-height-base, 1.5);
         }
         
         .user-info {
             display: flex;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-top: 5px;
+            gap: 12px;
+            font-size: var(--font-size-sm, 14px);
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 6px;
         }
         
         .user-role {
@@ -129,11 +183,14 @@
         .nav-tabs {
             background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
             padding: 0;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow-md);
+            margin-top: 0;  /* No top margin - spacing handled by header */
+            margin-bottom: var(--section-spacing, 48px);  /* Consistent section spacing */
+            box-shadow: var(--shadow-md, 0 4px 8px rgba(0, 0, 0, 0.1));
             overflow-x: auto;  /* Allow horizontal scroll for many tabs */
             -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
-            border-bottom: 2px solid var(--primary-green-border);  /* Visual separation */
+            border-bottom: 2px solid var(--primary-green-border, #81C784);  /* Visual separation */
+            position: relative;
+            z-index: 100;
         }
         
         /* Custom scrollbar for nav tabs */
@@ -175,15 +232,16 @@
         
         .nav-tabs a {
             display: block;
-            padding: 16px 20px;  /* Bigger padding for larger tabs */
-            color: #ecf0f1;
+            padding: 14px 24px;  /* Balanced padding */
+            color: rgba(255, 255, 255, 0.95);
             text-decoration: none;
-            transition: all 0.3s ease;
-            font-weight: bold;  /* Make fonts bold */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: var(--font-weight-medium, 500);
             position: relative;
             height: 100%;
             white-space: nowrap;
-            font-size: 24px;  /* Even bigger font size */
+            font-size: var(--font-size-md, 16px);  /* Consistent with design system */
+            letter-spacing: 0.2px;
             min-width: fit-content;  /* Ensure tabs can accommodate content */
             flex-shrink: 0;  /* Prevent tabs from shrinking too much */
         }
@@ -237,13 +295,16 @@
         
         .profile-btn,
         .logout-btn {
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: var(--radius-md, 8px);
             text-decoration: none !important;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            font-weight: var(--font-weight-medium, 500);
+            font-size: var(--font-size-sm, 14px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             color: white !important;
-            color: #FFFFFF !important;
+            border: 1px solid transparent;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
         }
         
         .profile-btn {
@@ -287,7 +348,7 @@
         .container {
             max-width: 100%;  /* Full width */
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
         }
         
         /* Content container with max width */
@@ -299,10 +360,11 @@
         /* Content Area */
         .content {
             background-color: white;
-            padding: 30px;
+            padding: 32px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             min-height: 500px;
+            line-height: 1.5;  /* Ensure good readability */
         }
         
         /* Messages/Alerts - BCG Green Theme */
@@ -354,7 +416,7 @@
         /* Buttons - PrimePath Navy Theme */
         .btn {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
             color: white;
             text-decoration: none;
@@ -362,8 +424,10 @@
             border: none;
             cursor: pointer;
             font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            font-weight: 500;
+            line-height: 1.5;
+            letter-spacing: 0.3px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: var(--brand-shadow-sm);
         }
         

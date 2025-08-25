@@ -43,21 +43,41 @@
     --status-error: #F44336;
     --status-info: #2196F3;
     
-    /* Typography */
+    /* Typography - Following Best Practices */
     --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    --font-size-base: 20px;
-    --font-size-sm: 18px;
-    --font-size-lg: 22px;
-    --font-size-xl: 28px;
-    --font-size-xxl: 36px;
+    --font-size-base: 17px;  /* Optimal for body text readability */
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 20px;
+    --font-size-xl: 24px;
+    --font-size-xxl: 32px;
+    --font-size-hero: 40px;
     
-    /* Spacing */
+    /* Line Heights - 125% for headers, 150% for body */
+    --line-height-tight: 1.25;
+    --line-height-base: 1.5;
+    --line-height-relaxed: 1.75;
+    
+    /* Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Spacing - 8px Base System */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
     --spacing-lg: 24px;
     --spacing-xl: 32px;
     --spacing-xxl: 48px;
+    --spacing-3xl: 64px;
+    --spacing-4xl: 96px;
+    
+    /* Component Specific Spacing */
+    --header-spacing: 32px;  /* Space after header */
+    --section-spacing: 48px;  /* Between major sections */
+    --nav-spacing: 24px;  /* Navigation padding */
     
     /* Border Radius */
     --radius-sm: 4px;
@@ -89,15 +109,19 @@
 body {
     font-family: var(--font-primary);
     font-size: var(--font-size-base);
-    line-height: 1.6;
+    line-height: var(--line-height-base);
     color: var(--neutral-text);
     background-color: var(--neutral-lighter);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+/* Typography Hierarchy - Consistent Sizing */
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: var(--neutral-text);
     margin-bottom: var(--spacing-md);
+    line-height: var(--line-height-tight);
     line-height: 1.3;
 }
 
