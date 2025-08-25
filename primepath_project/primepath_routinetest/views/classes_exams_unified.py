@@ -854,8 +854,17 @@ def classes_exams_unified_view(request):
                 status='PENDING'
             ).count()
             context['admin_pending_requests_count'] = admin_pending_requests
+            
+            # Add teacher management statistics for the new Teachers Management section
+            total_teachers = Teacher.objects.filter(user__is_active=True).count()
+            total_assignments = TeacherClassAssignment.objects.filter(is_active=True).count()
+            
+            context['total_teachers'] = total_teachers
+            context['total_assignments'] = total_assignments
         else:
             context['admin_pending_requests_count'] = 0
+            context['total_teachers'] = 0
+            context['total_assignments'] = 0
         
         # Add view mode information to context
         view_mode = request.session.get('view_mode', 'Teacher')

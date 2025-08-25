@@ -833,21 +833,6 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
                         </div>
                     </div>
                     {% endif %}
-                    
-                    <!-- NEW: Teacher Management Dashboard Link for Admins -->
-                    <div style="margin-top: 20px; text-align: center;">
-                        <a href="{% url 'RoutineTest:admin_teacher_management_dashboard' %}" 
-                           class="btn btn-primary" 
-                           style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); border: none; color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.3s;"
-                           onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0,0,0,0.2)'" 
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'">
-                            <span style="font-size: 18px;">🎓</span>
-                            <span>Teacher Access Management Dashboard</span>
-                        </a>
-                        <div style="margin-top: 8px; font-size: 12px; color: #666;">
-                            Comprehensive teacher-class assignment management with multi-teacher support
-                        </div>
-                    </div>
                 </div>
             {% else %}
                 <!-- NEW SIMPLIFIED TEACHER ACCESS SECTION -->
@@ -1046,24 +1031,97 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
         </div>
     </div>
     
-    <!-- SECTION 2: Classes & Teachers Management (Admin Only) -->
+    <!-- SECTION 2: Teachers Management (Admin Only) - MOVED AND MERGED -->
     {% if is_admin %}
-    <div class="admin-section" style="margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 10px; border: 1px solid #dee2e6;">
-        <div class="section-header" style="margin-bottom: 15px;">
-            <div class="section-title" style="font-size: 20px; font-weight: 600; color: #2c3e50;">
-                Classes & Teachers Management
+    <div class="admin-section" style="margin: var(--spacing-xl) 0; padding: var(--spacing-xl); background: var(--green-bg-lightest); border: 3px solid var(--primary-dark-green); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg);">
+        <div class="section-header" style="margin-bottom: var(--spacing-lg); border-bottom: 3px solid var(--primary-dark-green); padding-bottom: var(--spacing-lg);">
+            <div class="section-title" style="font-size: var(--font-h2); font-weight: var(--font-weight-bold); color: var(--text-primary); display: flex; align-items: center; gap: var(--spacing-md);">
+                <span style="font-size: 28px;">🎓</span>
+                Teachers Management
+            </div>
+            <div style="color: var(--text-muted); font-size: var(--font-small); margin-top: var(--spacing-sm);">
+                Comprehensive teacher access control and class assignment management
             </div>
         </div>
-        <div style="text-align: center;">
-            <p style="color: #6c757d; margin-bottom: 15px;">
-                Manage classes, assign teachers, set curriculum recommendations, and handle access requests
-            </p>
-            <a href="{% url 'RoutineTest:admin_classes_teachers' %}" class="btn btn-warning" 
-               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);">
-                Open Classes & Teachers Management
+        
+        <!-- Quick Stats - Professional Dark Green Theme -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-bottom: var(--spacing-xl);">
+            <div style="background: var(--neutral-white); border: 2px solid var(--primary-medium-green); padding: var(--spacing-lg); border-radius: var(--radius-md); text-align: center; box-shadow: var(--shadow-sm);">
+                <div style="color: var(--primary-dark-green); font-size: var(--font-h1); font-weight: var(--font-weight-bold);">{{ admin_pending_requests_count|default:"0" }}</div>
+                <div style="color: var(--text-muted); font-size: var(--font-small); text-transform: uppercase; margin-top: var(--spacing-xs);">Pending Requests</div>
+            </div>
+            <div style="background: var(--neutral-white); border: 2px solid var(--primary-medium-green); padding: var(--spacing-lg); border-radius: var(--radius-md); text-align: center; box-shadow: var(--shadow-sm);">
+                <div style="color: var(--primary-dark-green); font-size: var(--font-h1); font-weight: var(--font-weight-bold);">{{ total_teachers|default:"0" }}</div>
+                <div style="color: var(--text-muted); font-size: var(--font-small); text-transform: uppercase; margin-top: var(--spacing-xs);">Active Teachers</div>
+            </div>
+            <div style="background: var(--neutral-white); border: 2px solid var(--primary-medium-green); padding: var(--spacing-lg); border-radius: var(--radius-md); text-align: center; box-shadow: var(--shadow-sm);">
+                <div style="color: var(--primary-dark-green); font-size: var(--font-h1); font-weight: var(--font-weight-bold);">{{ total_assignments|default:"0" }}</div>
+                <div style="color: var(--text-muted); font-size: var(--font-small); text-transform: uppercase; margin-top: var(--spacing-xs);">Class Assignments</div>
+            </div>
+        </div>
+        
+        <!-- Management Actions -->
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <!-- Teacher Access Management -->
+            <a href="{% url 'RoutineTest:admin_teacher_management_dashboard' %}" 
+               class="unified-btn unified-btn-primary" 
+               style="background: var(--primary-dark-green); border: 2px solid var(--primary-dark-green); color: var(--text-on-green); padding: 18px 24px; border-radius: var(--radius-md); text-decoration: none; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s; box-shadow: var(--shadow-md);"
+               onmouseover="this.style.background='var(--primary-medium-green)'; this.style.borderColor='var(--primary-medium-green)'" 
+               onmouseout="this.style.background='var(--primary-dark-green)'; this.style.borderColor='var(--primary-dark-green)'">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 24px;">👥</span>
+                    <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-body);">Teacher Access Dashboard</div>
+                        <div style="font-size: var(--font-small); opacity: 0.9; margin-top: 2px;">Manage teacher-class assignments and multi-teacher support</div>
+                    </div>
+                </div>
+                <span style="font-size: 20px;">→</span>
             </a>
+            
+            <!-- Classes & Teachers Configuration -->
+            <a href="{% url 'RoutineTest:admin_classes_teachers' %}" 
+               class="unified-btn unified-btn-secondary" 
+               style="background: var(--neutral-white); border: 2px solid var(--primary-dark-green); color: var(--text-primary); padding: 18px 24px; border-radius: var(--radius-md); text-decoration: none; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s; box-shadow: var(--shadow-sm);"
+               onmouseover="this.style.background='var(--green-bg-lightest)'; this.style.borderColor='var(--primary-medium-green)'" 
+               onmouseout="this.style.background='var(--neutral-white)'; this.style.borderColor='var(--primary-dark-green)'">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 24px;">⚙️</span>
+                    <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-body);">Classes & Curriculum Configuration</div>
+                        <div style="font-size: var(--font-small); opacity: 0.8; margin-top: 2px;">Set curriculum recommendations and manage class settings</div>
+                    </div>
+                </div>
+                <span style="font-size: 20px;">→</span>
+            </a>
+            
+            {% if admin_pending_requests_count > 0 %}
+            <!-- Pending Requests Alert - Special Dark Green Notification -->
+            <a href="{% url 'RoutineTest:admin_pending_requests' %}" 
+               class="unified-btn" 
+               style="background: var(--primary-dark-green); border: 3px solid var(--primary-medium-green); color: var(--text-on-green); padding: 18px 24px; border-radius: var(--radius-md); text-decoration: none; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-lg); transition: all 0.3s; position: relative; overflow: hidden;"
+               onmouseover="this.style.transform='translateY(-2px)'; this.style.background='var(--primary-medium-green)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.background='var(--primary-dark-green)'">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 24px; animation: pulse 2s infinite;">🔔</span>
+                    <div>
+                        <div style="font-weight: var(--font-weight-bold); font-size: var(--font-body);">{{ admin_pending_requests_count }} Pending Request{{ admin_pending_requests_count|pluralize }}</div>
+                        <div style="font-size: var(--font-small); opacity: 0.9; margin-top: 2px;">Teachers are waiting for your approval</div>
+                    </div>
+                </div>
+                <span style="font-size: 20px;">→</span>
+            </a>
+            {% endif %}
         </div>
     </div>
+    
+    <!-- Add pulse animation for notification bell -->
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
     {% endif %}
     
     <!-- 

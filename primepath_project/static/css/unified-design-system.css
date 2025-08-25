@@ -1,68 +1,69 @@
 /* =====================================================
-   PrimePath Unified Design System v2.0
-   Complete UI Harmonization Across All Modules
+   PrimePath Unified Design System v3.0 - STRICT GREEN PALETTE
+   Complete UI Harmonization - Professional Admin Interface
+   ZERO TOLERANCE for Color Chaos - Dark Green Only
    ===================================================== */
 
 /* ===================================================
-   1. CSS Variables - Unified Color Palette
+   1. CSS Variables - STRICT DARK GREEN PALETTE ONLY
    =================================================== */
 :root {
-    /* Primary Brand Colors */
-    --primary-green: #2E7D32;
-    --primary-green-light: #4CAF50;
-    --primary-green-dark: #1B5E20;
-    --primary-green-bg: #E8F5E9;
-    --primary-green-border: #81C784;
+    /* PRIMARY DARK GREEN PALETTE - ONLY THESE COLORS ALLOWED */
+    --primary-dark-green: #1B5E20;      /* Main brand color */
+    --primary-medium-green: #2E7D32;     /* Secondary green */
+    --primary-light-green: #388E3C;      /* Lightest green allowed */
     
-    /* Secondary Colors */
-    --secondary-blue: #1976D2;
-    --secondary-blue-light: #42A5F5;
-    --secondary-blue-dark: #0D47A1;
-    --secondary-blue-bg: #E3F2FD;
+    /* GREEN BACKGROUNDS - Subtle variations only */
+    --green-bg-lightest: #E8F5E9;        /* Very light green background */
+    --green-bg-light: #C8E6C9;           /* Light green background */
+    --green-bg-medium: #A5D6A7;          /* Medium green background */
     
-    /* Accent Colors */
-    --accent-orange: #FF9800;
-    --accent-orange-light: #FFB74D;
-    --accent-orange-dark: #F57C00;
-    --accent-purple: #7B1FA2;
-    --accent-teal: #00ACC1;
-    
-    /* Neutral Colors */
+    /* NEUTRAL COLORS - White and Light Gray ONLY */
     --neutral-white: #FFFFFF;
-    --neutral-light: #F8F9FA;
-    --neutral-lighter: #F5F5F5;
-    --neutral-gray: #E9ECEF;
-    --neutral-gray-dark: #6C757D;
-    --neutral-text: #212529;
-    --neutral-text-light: #495057;
-    --neutral-border: #DEE2E6;
+    --neutral-lightest: #FAFAFA;
+    --neutral-light: #F5F5F5;
+    --neutral-gray: #EEEEEE;
+    --neutral-border: #E0E0E0;
     
-    /* Status Colors */
-    --status-success: #4CAF50;
-    --status-warning: #FF9800;
-    --status-error: #F44336;
-    --status-info: #2196F3;
+    /* TEXT COLORS - Dark Green and Neutral only */
+    --text-primary: #1B5E20;             /* Primary text - dark green */
+    --text-secondary: #2E7D32;           /* Secondary text - medium green */
+    --text-muted: #616161;               /* Muted text - neutral gray */
+    --text-on-green: #FFFFFF;            /* White text on green backgrounds */
     
-    /* Typography - Following Best Practices */
+    /* DANGER COLOR - Red for delete only */
+    --danger-red: #D32F2F;               /* ONLY for delete actions */
+    --danger-bg: #FFEBEE;                /* Light red background */
+    
+    /* FORBIDDEN COLORS - DO NOT USE */
+    /* --secondary-blue: BANNED */
+    /* --accent-orange: BANNED */
+    /* --accent-purple: BANNED */
+    /* --accent-teal: BANNED */
+    /* --status-warning: BANNED */
+    /* --status-info: BANNED */
+    
+    
+    /* TYPOGRAPHY HIERARCHY - STRICT SYSTEM */
     --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    --font-size-base: 17px;  /* Optimal for body text readability */
-    --font-size-sm: 14px;
-    --font-size-md: 16px;
-    --font-size-lg: 20px;
-    --font-size-xl: 24px;
-    --font-size-xxl: 32px;
-    --font-size-hero: 40px;
     
-    /* Line Heights - 125% for headers, 150% for body */
-    --line-height-tight: 1.25;
-    --line-height-base: 1.5;
-    --line-height-relaxed: 1.75;
+    /* STRICT FONT SIZE HIERARCHY - NO DEVIATION ALLOWED */
+    --font-h1: 32px;          /* H1 Headers only */
+    --font-h2: 24px;          /* H2 Headers only */
+    --font-h3: 20px;          /* H3 Headers only */
+    --font-body: 16px;        /* Body text - main content */
+    --font-small: 14px;       /* Small text - labels, captions */
+    --font-tiny: 12px;        /* Tiny text - metadata only */
     
-    /* Font Weights */
+    /* Line Heights - Optimized for readability */
+    --line-height-headers: 1.2;   /* Tight for headers */
+    --line-height-body: 1.5;      /* Standard for body */
+    --line-height-small: 1.4;     /* Small text */
+    
+    /* Font Weights - Limited options */
     --font-weight-normal: 400;
     --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
+    --font-weight-bold: 600;
     
     /* Spacing - 8px Base System */
     --spacing-xs: 4px;
@@ -116,18 +117,34 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography Hierarchy - Consistent Sizing */
+/* TYPOGRAPHY HIERARCHY - STRICT ENFORCEMENT */
 h1, h2, h3, h4, h5, h6 {
-    font-weight: var(--font-weight-semibold);
-    color: var(--neutral-text);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
     margin-bottom: var(--spacing-md);
-    line-height: var(--line-height-tight);
-    line-height: 1.3;
+    line-height: var(--line-height-headers);
+    font-family: var(--font-primary);
 }
 
-h1 { font-size: var(--font-size-xxl); }
-h2 { font-size: var(--font-size-xl); }
-h3 { font-size: var(--font-size-lg); }
+/* STRICT FONT SIZE ENFORCEMENT */
+h1 { font-size: var(--font-h1); }      /* 32px - Main page titles */
+h2 { font-size: var(--font-h2); }      /* 24px - Section headers */
+h3 { font-size: var(--font-h3); }      /* 20px - Subsection headers */
+h4, h5, h6 { font-size: var(--font-h3); } /* 20px - No smaller headers */
+
+/* BODY TEXT - CONSISTENT SIZING */
+body, p, div, span, td, th, li {
+    font-size: var(--font-body);
+    line-height: var(--line-height-body);
+    color: var(--text-primary);
+}
+
+/* SMALL TEXT - LIMITED USE */
+small, .small-text, .text-small {
+    font-size: var(--font-small);
+    line-height: var(--line-height-small);
+    color: var(--text-muted);
+}
 
 /* ===================================================
    3. Navigation Bar - Unified Design
@@ -296,73 +313,122 @@ a[href*="logout"]:hover,
 }
 
 /* ===================================================
-   6. Buttons - Consistent Styling
+   6. BUTTONS - STRICT DARK GREEN SYSTEM ONLY
    =================================================== */
-.unified-btn {
+
+/* BASE BUTTON - ALL BUTTONS INHERIT FROM THIS */
+.unified-btn, 
+button, 
+.btn, 
+input[type="button"], 
+input[type="submit"],
+a.btn,
+.add-student-btn,
+.manage-students-btn,
+.btn-primary,
+.btn-secondary,
+.btn-start-exam,
+.btn-edit,
+.btn-save {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: 12px 24px;
     border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-body);
     border: 2px solid transparent;
     transition: var(--transition-base);
     cursor: pointer;
     text-decoration: none;
     outline: none;
     position: relative;
+    min-height: 44px; /* Accessibility - touch target */
+    font-family: var(--font-primary);
 }
 
-.unified-btn:focus {
-    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+/* PRIMARY BUTTON - DARK GREEN SOLID */
+.unified-btn-primary,
+.btn-primary,
+.add-student-btn,
+.manage-students-btn,
+.btn-start-exam,
+.btn-save {
+    background: var(--primary-dark-green) !important;
+    color: var(--text-on-green) !important;
+    border-color: var(--primary-dark-green) !important;
 }
 
-/* Primary Button */
-.unified-btn-primary {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
-    color: var(--neutral-white);
-    border-color: var(--primary-green-dark);
-}
-
-.unified-btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
+.unified-btn-primary:hover,
+.btn-primary:hover,
+.add-student-btn:hover,
+.manage-students-btn:hover,
+.btn-start-exam:hover,
+.btn-save:hover {
+    background: var(--primary-medium-green) !important;
+    border-color: var(--primary-medium-green) !important;
+    color: var(--text-on-green) !important;
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }
 
-/* Secondary Button */
-.unified-btn-secondary {
-    background: var(--neutral-white);
-    color: var(--primary-green);
-    border-color: var(--primary-green);
+/* SECONDARY BUTTON - WHITE WITH GREEN BORDER */
+.unified-btn-secondary,
+.btn-secondary,
+.btn-edit {
+    background: var(--neutral-white) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--primary-dark-green) !important;
 }
 
-.unified-btn-secondary:hover {
-    background: var(--primary-green-bg);
+.unified-btn-secondary:hover,
+.btn-secondary:hover,
+.btn-edit:hover {
+    background: var(--green-bg-lightest) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--primary-medium-green) !important;
     transform: translateY(-2px);
 }
 
-/* Action Button Variants */
-.unified-btn-upload {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
-    color: var(--neutral-white);
+/* DELETE BUTTON - ONLY RED BUTTON ALLOWED */
+.unified-btn-delete,
+.btn-delete,
+.btn-delete-exam,
+.btn-remove-student,
+.btn-delete-class {
+    background: var(--danger-red) !important;
+    color: var(--text-on-green) !important;
+    border-color: var(--danger-red) !important;
 }
 
-.unified-btn-library {
-    background: linear-gradient(135deg, var(--secondary-blue) 0%, var(--secondary-blue-light) 100%);
-    color: var(--neutral-white);
+.unified-btn-delete:hover,
+.btn-delete:hover,
+.btn-delete-exam:hover,
+.btn-remove-student:hover,
+.btn-delete-class:hover {
+    background: #B71C1C !important;
+    border-color: #B71C1C !important;
+    color: var(--text-on-green) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
 }
 
-.unified-btn-test {
-    background: linear-gradient(135deg, var(--accent-teal) 0%, #26C6DA 100%);
-    color: var(--neutral-white);
+/* BANNED BUTTON COLORS - OVERRIDE ANY EXISTING STYLES */
+.btn-info, .btn-warning, .btn-success, .btn-light, .btn-dark,
+.unified-btn-upload, .unified-btn-library, .unified-btn-test, .unified-btn-classes {
+    /* Force all non-conforming buttons to use primary style */
+    background: var(--primary-dark-green) !important;
+    color: var(--text-on-green) !important;
+    border-color: var(--primary-dark-green) !important;
 }
 
-.unified-btn-classes {
-    background: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-orange-light) 100%);
-    color: var(--neutral-white);
+/* Focus states for accessibility */
+.unified-btn:focus,
+button:focus,
+.btn:focus {
+    box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2) !important;
+    outline: none;
 }
 
 /* ===================================================
@@ -536,35 +602,102 @@ a[href*="logout"]:hover,
 }
 
 /* ===================================================
-   11. Tables - Unified Design
+   11. TABLES - PROFESSIONAL CLEAN DESIGN
    =================================================== */
-.unified-table {
+
+/* ALL TABLES - CONSISTENT STYLING */
+.unified-table,
+table,
+.admin-table,
+.data-table {
     width: 100%;
     background: var(--neutral-white);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: var(--spacing-lg);
 }
 
-.unified-table thead {
-    background: var(--neutral-light);
+/* TABLE HEADERS - DARK GREEN THEME */
+.unified-table thead,
+table thead,
+.admin-table thead,
+.data-table thead {
+    background: var(--primary-dark-green) !important;
 }
 
-.unified-table th {
-    padding: var(--spacing-md);
+.unified-table th,
+table th,
+.admin-table th,
+.data-table th {
+    padding: 16px 20px !important;
     text-align: left;
-    font-weight: 600;
-    color: var(--neutral-text);
-    border-bottom: 2px solid var(--neutral-border);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-body);
+    color: var(--text-on-green) !important;
+    border: none !important;
+    background: var(--primary-dark-green) !important;
+    position: relative;
 }
 
-.unified-table td {
-    padding: var(--spacing-md);
-    border-bottom: 1px solid var(--neutral-gray);
+/* TABLE CELLS - CLEAN AND READABLE */
+.unified-table td,
+table td,
+.admin-table td,
+.data-table td {
+    padding: 16px 20px !important;
+    border-bottom: 1px solid var(--neutral-border) !important;
+    font-size: var(--font-body);
+    color: var(--text-primary);
+    vertical-align: middle;
+    background: var(--neutral-white);
 }
 
-.unified-table tbody tr:hover {
-    background: var(--neutral-lighter);
+/* TABLE ROW HOVER - SUBTLE GREEN HIGHLIGHT */
+.unified-table tbody tr:hover,
+table tbody tr:hover,
+.admin-table tbody tr:hover,
+.data-table tbody tr:hover {
+    background: var(--green-bg-lightest) !important;
+    transition: background-color 0.2s ease;
+}
+
+/* ALTERNATING ROWS - VERY SUBTLE */
+.unified-table tbody tr:nth-child(even),
+table tbody tr:nth-child(even),
+.admin-table tbody tr:nth-child(even) {
+    background: var(--neutral-lightest);
+}
+
+.unified-table tbody tr:nth-child(even):hover,
+table tbody tr:nth-child(even):hover,
+.admin-table tbody tr:nth-child(even):hover {
+    background: var(--green-bg-lightest) !important;
+}
+
+/* TABLE ACTION BUTTONS - INLINE STYLING */
+.unified-table .btn,
+table .btn,
+.admin-table .btn {
+    padding: 6px 12px;
+    font-size: var(--font-small);
+    margin: 2px;
+    min-height: auto;
+}
+
+/* TABLE BORDERS - CLEAN LINES */
+.unified-table,
+table,
+.admin-table {
+    border: 1px solid var(--neutral-border);
+}
+
+.unified-table tr:last-child td,
+table tr:last-child td,
+.admin-table tr:last-child td {
+    border-bottom: none;
 }
 
 /* ===================================================

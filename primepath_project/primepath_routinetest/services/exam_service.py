@@ -784,14 +784,18 @@ class ExamService:
                         logger.info(f"[FILTER_FIX] ❌ EXCLUDING: User only has {user_access_level} access")
                 
                 elif filter_mode == 'OTHERS_EXAMS':
-                    # Show ONLY exams where user has VIEW ONLY access (not FULL/OWNER)
-                    if user_access_level == 'VIEW':
-                        should_include = True
-                        inclusion_reasons.append(f"User has VIEW ONLY access (OTHERS_EXAMS mode)")
-                        logger.info(f"[FILTER_FIX] ✅ INCLUDING: User has VIEW ONLY access")
+                    # Show ALL exams that the user doesn't own or have FULL access to
+                    # This includes exams from classes they're not assigned to (VIEW access)
+                    # and exams they explicitly have VIEW ONLY access to
+                    if user_access_level in ['OWNER', 'FULL']:
+                        # User has edit access - exclude from "Other Teachers' Test Files"
+                        exclusion_reasons.append(f"User has {user_access_level} access, excluding from OTHERS_EXAMS")
+                        logger.info(f"[FILTER_FIX] ❌ EXCLUDING: User has {user_access_level} access")
                     else:
-                        exclusion_reasons.append(f"User has {user_access_level} access, need VIEW ONLY for OTHERS_EXAMS")
-                        logger.info(f"[FILTER_FIX] ❌ EXCLUDING: User has {user_access_level} access, not VIEW ONLY")
+                        # User has VIEW access or no access - include in "Other Teachers' Test Files"
+                        should_include = True
+                        inclusion_reasons.append(f"User has {user_access_level} access (OTHERS_EXAMS mode)")
+                        logger.info(f"[FILTER_FIX] ✅ INCLUDING: User has {user_access_level} access")
                 
                 else:  # LEGACY mode
                     # Original behavior: show exams from editable classes
@@ -871,12 +875,22 @@ class ExamService:
                         exam.can_delete = True
                         logger.debug(f"[PERMISSION_DEBUG] Exam '{exam.name}' has delete permission")
             else:
-                # ASSIGNED ONLY MODE - Set permissions based on actual access level
+                # ASSIGNED ONLY MODE - Set permissions based on actual access level and filter mode
                 logger.debug(f"[PERMISSION_DEBUG] Setting permissions for exam '{exam.name}' in 'Assigned Only' mode")
-                logger.debug(f"[PERMISSION_DEBUG] is_owner={is_owner}, user={user.username}")
+                logger.debug(f"[PERMISSION_DEBUG] is_owner={is_owner}, user={user.username}, filter_mode={filter_mode}")
                 
-                # For owned exams in assigned mode
-                if is_owner:
+                # Special handling for OTHERS_EXAMS mode
+                if filter_mode == 'OTHERS_EXAMS':
+                    # In "Other Teachers' Test Files" mode, show with VIEW ONLY access
+                    exam.can_edit = False
+                    exam.can_copy = True  # Can copy to their own classes
+                    exam.can_delete = False
+                    exam.is_owner = is_owner
+                    exam.access_badge = 'VIEW ONLY'
+                    logger.info(f"[PERMISSION_DEBUG] Exam '{exam.name}' set to VIEW ONLY for OTHERS_EXAMS mode")
+                
+                # For owned exams in assigned mode (MY_EXAMS)
+                elif is_owner:
                     # Owner gets full permissions on their own exams
                     exam.can_edit = True
                     exam.can_copy = True
@@ -885,7 +899,7 @@ class ExamService:
                     exam.access_badge = 'OWNER'
                     logger.info(f"[PERMISSION_DEBUG] ✅ Exam '{exam.name}' marked as OWNER in assigned mode")
                 else:
-                    # Non-owner: set permissions based on actual access
+                    # Non-owner in MY_EXAMS mode: set permissions based on actual access
                     exam.can_edit = ExamService.can_teacher_edit_exam(user, exam)
                     exam.can_copy = len(assignments) > 0
                     exam.can_delete = ExamPermissionService.can_teacher_delete_exam(user, exam)
@@ -906,11 +920,11 @@ class ExamService:
                     elif highest_access == 'CO_TEACHER':
                         exam.access_badge = 'EDIT'
                     else:
-                        # This should NEVER happen in assigned mode - exam should have been filtered out
-                        logger.error(f"[FILTER_BUG] ❌❌❌ CRITICAL BUG: Exam '{exam.name}' has VIEW ONLY access in ASSIGNED mode!")
+                        # This should NEVER happen in MY_EXAMS mode - exam should have been filtered out
+                        logger.error(f"[FILTER_BUG] ❌❌❌ CRITICAL BUG: Exam '{exam.name}' has VIEW ONLY access in MY_EXAMS mode!")
                         logger.error(f"[FILTER_BUG] This exam should have been filtered out earlier!")
                         logger.error(f"[FILTER_BUG] SKIPPING THIS EXAM - not adding to results")
-                        # CRITICAL FIX: Don't add VIEW ONLY exams in assigned mode
+                        # CRITICAL FIX: Don't add VIEW ONLY exams in MY_EXAMS mode
                         # Skip to next exam completely - don't add to organized dict
                         continue
                     
