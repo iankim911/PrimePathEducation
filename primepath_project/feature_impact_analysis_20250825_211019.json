@@ -1,0 +1,91 @@
+{
+  "timestamp": "2025-08-25T21:10:19.176747",
+  "tests": {
+    "class_code_mapping": {
+      "status": "ERROR",
+      "error": "local variable 'get_class_codes_by_program' referenced before assignment"
+    },
+    "teacher_assignments": {
+      "stats": {
+        "total_teachers": 15,
+        "teachers_with_assignments": 1,
+        "total_assignments": 11,
+        "assignment_types": {
+          "FULL": 2,
+          "VIEW": 1
+        },
+        "sample_assignments": [
+          {
+            "teacher": "Taehyun Kim",
+            "class_code": "C5",
+            "display_name": "C5",
+            "access_level": "FULL",
+            "working": true
+          },
+          {
+            "teacher": "Taehyun Kim",
+            "class_code": "Chung-cho1",
+            "display_name": "Chung-cho1",
+            "access_level": "VIEW",
+            "working": true
+          },
+          {
+            "teacher": "Taehyun Kim",
+            "class_code": "HIGH_10E",
+            "display_name": "HIGH_10E",
+            "access_level": "FULL",
+            "working": true
+          }
+        ]
+      },
+      "assignment_system_working": true,
+      "display_functions_working": true,
+      "status": "PASS"
+    },
+    "class_model": {
+      "total_active_classes": 166,
+      "classes_with_teachers": 11,
+      "teacher1_assigned_classes": 11,
+      "class_model_methods_working": true,
+      "class_method_errors": [],
+      "relationships_working": true,
+      "status": "PASS"
+    },
+    "exam_system": {
+      "total_active_exams": 14,
+      "exams_tested": 5,
+      "exams_working": 5,
+      "matrix_cells_tested": 5,
+      "matrix_system_working": false,
+      "exam_class_integration_working": true,
+      "status": "WARNING"
+    },
+    "view_imports": {
+      "status": "ERROR",
+      "error": "cannot import name 'exam_list_view' from 'primepath_routinetest.views.exam_management' (/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/primepath_routinetest/views/exam_management.py)"
+    },
+    "access_requests": {
+      "total_requests": 1,
+      "pending_requests": 1,
+      "valid_request_classes": 1,
+      "total_request_classes": 1,
+      "class_validation_rate": 100.0,
+      "available_classes_for_new_requests": 44,
+      "request_system_functional": true,
+      "status": "PASS"
+    }
+  },
+  "overall_status": "FAIL",
+  "broken_features": [
+    "Class Code Mapping System: local variable 'get_class_codes_by_program' referenced before assignment",
+    "View Imports: cannot import name 'exam_list_view' from 'primepath_routinetest.views.exam_management' (/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/primepath_routinetest/views/exam_management.py)"
+  ],
+  "working_features": [
+    "Teacher Class Assignment System",
+    "Class Model & Assigned Teachers",
+    "Class Access Request System"
+  ],
+  "warnings": [
+    "Minor exam system integration issues"
+  ]
+}

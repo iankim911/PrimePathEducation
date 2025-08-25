@@ -12,11 +12,18 @@ from collections import defaultdict
 @login_required
 def student_dashboard(request):
     """Student dashboard showing My Classes"""
-    # Check if user has student profile
+    # Check if user has student profile with database refresh
     try:
+        # Force refresh to ensure we have the latest database state
+        request.user.refresh_from_db()
         student_profile = request.user.primepath_student_profile
     except StudentProfile.DoesNotExist:
         messages.error(request, "You don't have a student profile. Please contact support.")
+        return redirect('primepath_student:login')
+    except Exception as e:
+        # Log unexpected errors for debugging
+        print(f"DEBUG: Unexpected error accessing student profile for {request.user.username}: {e}")
+        messages.error(request, "Account verification failed. Please try logging in again.")
         return redirect('primepath_student:login')
     
     # Get active class assignments with optimized query

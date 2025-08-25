@@ -38,6 +38,46 @@ python -c "from agent_system.integration import process_with_agents; process_wit
 
 **IMPORTANT**: Do NOT manually implement fixes without running through agents first!
 
+## 🚨 CRITICAL: CREDENTIAL MONITORING SYSTEM - MANDATORY
+
+### MUST START AFTER EVERY SERVER RESTART
+The automated credential monitoring system MUST be started after server startup to prevent login issues.
+
+**Start Command** (run this after starting Django server):
+```bash
+cd primepath_project
+python start_credential_monitoring.py
+```
+
+### Why This Is Critical
+- **August 25, 2025**: User experienced repeated teacher1 login failures
+- **Root Cause**: Comprehensive monitoring system was built but NEVER STARTED
+- **Result**: Credential corruption went undetected, causing repeated authentication failures
+- **Solution**: Monitoring system immediately detected and auto-fixed issues when started
+
+### Monitoring System Features
+- ✅ Automatic credential validation every 60 minutes
+- ✅ Auto-fix capability for detected issues  
+- ✅ Real-time alerts for credential problems
+- ✅ Comprehensive logging and audit trail
+- ✅ Protection for critical accounts (teacher1, admin)
+
+### Status Check Commands
+```bash
+# Check if monitoring is running
+python automated_credential_monitor.py status
+
+# Get health dashboard
+python automated_credential_monitor.py dashboard
+
+# Stop monitoring (if needed)
+python automated_credential_monitor.py stop
+```
+
+### LESSON LEARNED
+**Building comprehensive systems means nothing if they're not ACTIVATED.** 
+Always verify monitoring systems are running, not just configured.
+
 ## 🔧 Chrome Control MCP - Working Setup
 
 ### Quick Setup (One Command!)

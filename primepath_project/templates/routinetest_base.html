@@ -56,12 +56,73 @@
         
         .header h1 {
             text-align: center;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: white; /* Ensure header text is white for readability */
         }
         
         .header {
             position: relative; /* For mode toggle positioning */
+        }
+        
+        /* Professional App Header */
+        .app-header {
+            background-color: #1B5E20;  /* Darker, more muted green */
+            color: white;
+            padding: 20px;
+            margin-bottom: 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 100%;
+        }
+        
+        .header-left {
+            flex: 0 0 auto;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .app-title {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .app-subtitle {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .user-welcome {
+            text-align: right;
+        }
+        
+        .welcome-text {
+            font-size: 1rem;
+            color: white;
+        }
+        
+        .user-info {
+            display: flex;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+        
+        .user-role {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 3px;
         }
         
         /* Navigation Tabs - Using Unified Design System */
@@ -122,7 +183,7 @@
             position: relative;
             height: 100%;
             white-space: nowrap;
-            font-size: 20px;  /* Much bigger font size (~2 sizes bigger) */
+            font-size: 24px;  /* Even bigger font size */
             min-width: fit-content;  /* Ensure tabs can accommodate content */
             flex-shrink: 0;  /* Prevent tabs from shrinking too much */
         }
@@ -167,12 +228,43 @@
             vertical-align: middle;
         }
         
+        /* Header Actions - Profile and Logout Buttons */
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .profile-btn,
+        .logout-btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none !important;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: white !important;
+            color: #FFFFFF !important;
+        }
+        
+        .profile-btn {
+            background-color: #2E7D32 !important;
+            color: white !important;
+            color: #FFFFFF !important;
+        }
+        
+        .profile-btn:hover {
+            background-color: #1B5E20 !important;
+            color: white !important;
+            color: #FFFFFF !important;
+        }
+        
         /* Logout Button - Red with WHITE text */
         #logout-link,
         a[href="/logout/"],
         a[href*="logout"],
         .nav-tabs a[href="/logout/"],
-        .nav-tabs a[style*="background: #e74c3c"] {
+        .nav-tabs a[style*="background: #e74c3c"],
+        .logout-btn {
             background-color: #e74c3c !important;
             color: white !important;
             color: #FFFFFF !important;
@@ -183,7 +275,8 @@
         a[href="/logout/"]:hover,
         a[href*="logout"]:hover,
         .nav-tabs a[href="/logout/"]:hover,
-        .nav-tabs a[style*="background: #e74c3c"]:hover {
+        .nav-tabs a[style*="background: #e74c3c"]:hover,
+        .logout-btn:hover {
             background-color: #c0392b !important;
             color: white !important;
             color: #FFFFFF !important;
@@ -372,13 +465,6 @@
         console.log('User: {% if user.is_authenticated %}{{ user.username }}{% else %}Anonymous{% endif %}');
         console.groupEnd();
     </script>
-    
-    <!-- Header Section -->
-    <div class="header">
-        <div class="container">
-            <h1>{% block header %}Exam Management{% endblock %}</h1>
-        </div>
-    </div>
     
     <!-- Navigation Tabs - Version 8.0 with Complete Cache Busting -->
     <!-- UNIFIED CLASSES & EXAMS ONLY - NO OLD TABS -->

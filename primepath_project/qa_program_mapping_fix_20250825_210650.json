@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-08-25T21:06:50.220273",
+  "test_results": {
+    "teacher1_fix": {
+      "status": "ERROR",
+      "error": "local variable 'get_class_codes_by_program' referenced before assignment"
+    },
+    "program_mapping_integrity": {
+      "status": "ERROR",
+      "error": "local variable 'get_class_codes_by_program' referenced before assignment"
+    },
+    "all_teachers_mapping": {
+      "status": "ERROR",
+      "error": "local variable 'get_class_codes_by_program' referenced before assignment"
+    },
+    "data_integrity": {
+      "tca_classes_count": 11,
+      "class_sections_count": 11,
+      "synchronization_intact": true,
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "PASS"
+    },
+    "view_imports": {
+      "get_class_codes_by_program_works": true,
+      "view_function_importable": true,
+      "core_classes_count": 11,
+      "status": "PASS"
+    }
+  },
+  "overall_status": "FAIL",
+  "critical_issues": [
+    "Error testing teacher1 fix: local variable 'get_class_codes_by_program' referenced before assignment",
+    "Error testing program mapping integrity: local variable 'get_class_codes_by_program' referenced before assignment",
+    "Error testing all teachers mapping: local variable 'get_class_codes_by_program' referenced before assignment"
+  ],
+  "warnings": [],
+  "summary": {
+    "total_tests": 5,
+    "passed_tests": 2,
+    "failed_tests": 0,
+    "error_tests": 3,
+    "warning_tests": 0,
+    "critical_issues_count": 3,
+    "warnings_count": 0
+  }
+}

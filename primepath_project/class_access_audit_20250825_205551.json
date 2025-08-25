@@ -1,0 +1,295 @@
+{
+  "timestamp": "2025-08-25T20:55:51.856594",
+  "audit_summary": {
+    "total_teachers": 15,
+    "teachers_with_tca": 2,
+    "teachers_with_class_assignments": 1,
+    "teachers_synchronized": 14,
+    "teachers_with_gaps": 1,
+    "critical_issues": []
+  },
+  "teacher_analysis": {
+    "teacher1": {
+      "name": "Taehyun Kim",
+      "username": "teacher1",
+      "teacher_id": 1,
+      "tca_count": 11,
+      "class_count": 11,
+      "synchronization_rate": 100.0,
+      "tca_class_codes": [
+        "HIGH_10E",
+        "HIGH_10F",
+        "MIDDLE_7A",
+        "TaejoE",
+        "Sungjong4",
+        "Chung-cho1",
+        "PRIMARY_1D",
+        "SejongM",
+        "PRIMARY_2A",
+        "HIGH_11D",
+        "C5"
+      ],
+      "class_sections": [
+        "HIGH_10E",
+        "HIGH_10F",
+        "MIDDLE_7A",
+        "TaejoE",
+        "Sungjong4",
+        "Chung-cho1",
+        "PRIMARY_1D",
+        "SejongM",
+        "PRIMARY_2A",
+        "HIGH_11D",
+        "C5"
+      ],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher10": {
+      "name": "Teacher 10",
+      "username": "teacher10",
+      "teacher_id": 10,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher2": {
+      "name": "Teacher 2",
+      "username": "teacher2",
+      "teacher_id": 2,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher3": {
+      "name": "Teacher 3",
+      "username": "teacher3",
+      "teacher_id": 3,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher4": {
+      "name": "Teacher 4",
+      "username": "teacher4",
+      "teacher_id": 4,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher5": {
+      "name": "Teacher 5",
+      "username": "teacher5",
+      "teacher_id": 5,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher6": {
+      "name": "Teacher 6",
+      "username": "teacher6",
+      "teacher_id": 6,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher7": {
+      "name": "Teacher 7",
+      "username": "teacher7",
+      "teacher_id": 7,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher8": {
+      "name": "Teacher 8",
+      "username": "teacher8",
+      "teacher_id": 8,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher9": {
+      "name": "Teacher 9",
+      "username": "teacher9",
+      "teacher_id": 9,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher123": {
+      "name": "Teacher Test",
+      "username": "teacher123",
+      "teacher_id": 135,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "admin": {
+      "name": "admin",
+      "username": "admin",
+      "teacher_id": 133,
+      "tca_count": 2,
+      "class_count": 0,
+      "synchronization_rate": 0.0,
+      "tca_class_codes": [
+        "B2",
+        "B3"
+      ],
+      "class_sections": [],
+      "missing_in_class_system": [
+        "B2",
+        "B3"
+      ],
+      "extra_in_class_system": [],
+      "status": "\u274c GAPS (2 missing, 0 extra)",
+      "needs_synchronization": true
+    },
+    "points_test_user": {
+      "name": "points_test_user",
+      "username": "points_test_user",
+      "teacher_id": 134,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "teacher_test": {
+      "name": "teacher_test",
+      "username": "teacher_test",
+      "teacher_id": 131,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    },
+    "kakao_4411764636": {
+      "name": "\ud0dc\ud604 - IAN",
+      "username": "kakao_4411764636",
+      "teacher_id": 132,
+      "tca_count": 0,
+      "class_count": 0,
+      "synchronization_rate": 0,
+      "tca_class_codes": [],
+      "class_sections": [],
+      "missing_in_class_system": [],
+      "extra_in_class_system": [],
+      "status": "\u2705 SYNCHRONIZED",
+      "needs_synchronization": false
+    }
+  },
+  "synchronization_gaps": [
+    {
+      "teacher": "admin",
+      "username": "admin",
+      "tca_count": 2,
+      "class_count": 0,
+      "missing_classes": [
+        "B2",
+        "B3"
+      ],
+      "extra_classes": [],
+      "priority": "MEDIUM"
+    }
+  ],
+  "class_analysis": {},
+  "system_integrity": {
+    "total_active_classes": 166,
+    "classes_with_teachers": 11,
+    "orphaned_classes": 155,
+    "total_tca_records": 13,
+    "total_class_assignments": 11,
+    "tca_to_class_ratio": 84.62
+  },
+  "root_cause_indicators": {
+    "affected_teachers_count": 1,
+    "affected_teachers": [
+      "admin"
+    ],
+    "gap_patterns": {
+      "2_tca_vs_0_class": 1
+    },
+    "most_affected_classes": {
+      "B2": 1,
+      "B3": 1
+    },
+    "systematic_issue": false,
+    "severity": "MEDIUM"
+  },
+  "recommended_actions": [
+    "URGENT: Synchronize 1 medium-priority teachers",
+    "CLEANUP: Review 155 orphaned classes"
+  ]
+}

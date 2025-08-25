@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, PasswordResetForm
+from django.contrib.auth.password_validation import validate_password
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from .models import StudentProfile
@@ -208,6 +209,50 @@ class StudentRegistrationForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise ValidationError("This email address is already registered.")
         return email
+    
+    def clean_password2(self):
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        student_id = self.cleaned_data.get("student_id")
+        
+        if password1 and password2:
+            if password1 != password2:
+                raise ValidationError("The two password fields didn't match.", code='password_mismatch')
+            
+            # Check Django password validation but provide user-friendly messages
+            try:
+                # Create a temporary user instance for validation
+                user = User(username=student_id or '')
+                validate_password(password2, user=user)
+            except ValidationError as e:
+                # Convert technical Django errors to user-friendly messages
+                friendly_errors = []
+                for error in e.messages:
+                    if "similar" in error.lower() or "too similar" in error.lower():
+                        friendly_errors.append(
+                            f"Password cannot be too similar to your Student ID '{student_id}'. "
+                            "Try using a completely different word or phrase."
+                        )
+                    elif "common" in error.lower() or "too common" in error.lower():
+                        friendly_errors.append(
+                            "This password is too common. Please choose a more unique password."
+                        )
+                    elif "numeric" in error.lower() or "entirely numeric" in error.lower():
+                        friendly_errors.append(
+                            "Password cannot be entirely numeric. Please include letters."
+                        )
+                    elif "short" in error.lower() or "at least" in error.lower():
+                        friendly_errors.append(
+                            "Password must be at least 8 characters long."
+                        )
+                    else:
+                        # Keep original message for any other errors
+                        friendly_errors.append(error)
+                        
+                if friendly_errors:
+                    raise ValidationError(friendly_errors, code='password_invalid')
+        
+        return password2
     
     def clean(self):
         cleaned_data = super().clean()

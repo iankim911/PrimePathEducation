@@ -70,18 +70,20 @@
         gap: 6px;
     }
     
-    /* Tab Navigation - Clean Style like Exam Library */
+    /* Tab Navigation - Enhanced Visual Distinction */
     .tab-navigation {
-        background: transparent;
+        background: #f8f9fa;
         margin-bottom: 25px;
         display: flex;
-        gap: 30px;
-        border-bottom: 2px solid #e9ecef;
-        padding-bottom: 0;
+        gap: 8px;
+        border-radius: 12px;
+        padding: 8px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
     
     .tab-btn {
-        padding: 15px 5px;
+        padding: 16px 24px;
         border: none;
         background: transparent;
         color: #6c757d;
@@ -91,24 +93,46 @@
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         position: relative;
-        border-bottom: 3px solid transparent;
-        margin-bottom: -2px;
+        border-radius: 8px;
+        flex: 1;
+        justify-content: center;
+        text-align: center;
+        min-height: 52px;
     }
     
     .tab-btn:hover {
         color: #2E7D32;
+        background: rgba(46, 125, 50, 0.08);
+        transform: translateY(-1px);
     }
     
     .tab-btn.active {
-        color: #2E7D32;
+        color: white;
+        background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
         font-weight: 600;
-        border-bottom-color: #2E7D32;
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        transform: translateY(-2px);
     }
     
     .tab-icon {
-        font-size: 1.2rem;
+        font-size: 1.4rem;
+        padding: 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    
+    .tab-btn.active .tab-icon {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     
     /* Tab Content - Clean Style */
@@ -1118,7 +1142,7 @@
             <span>Student Management</span>
         </button>
         <button class="tab-btn" data-tab="exam-schedule">
-            <span class="tab-icon">📚</span>
+            <span class="tab-icon">📅</span>
             <span>Exam Schedule</span>
         </button>
     </div>

@@ -40,7 +40,7 @@
         
         .header h1 {
             text-align: center;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: white;
         }
         
@@ -58,6 +58,8 @@
             margin: 0 auto;
             max-width: 1200px;
             padding: 0 20px;
+            align-items: center;  /* Align items vertically */
+            width: 100%;
         }
         
         .nav-bar li {
@@ -70,7 +72,7 @@
             color: white;
             text-decoration: none;
             transition: background-color 0.3s;
-            font-size: 16px;
+            font-size: 20px;
         }
         
         .nav-bar a:hover {
@@ -82,29 +84,37 @@
             border-bottom: 3px solid #81C784;  /* Light green accent */
         }
         
-        /* User Info Section */
-        .user-info {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-        }
-        
-        .user-info span {
-            margin-right: 15px;
-        }
-        
-        .user-info a {
-            color: white;
-            text-decoration: none;
-            padding: 5px 15px;
-            border: 1px solid white;
+        /* Navigation User Info */
+        .nav-user-info {
+            margin-left: auto;  /* Push to the right */
+            display: flex !important;
+            align-items: center;
+            gap: 15px;
+            padding: 0 20px;
+            background-color: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
+        }
+        
+        .nav-user-info span {
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .logout-nav-btn {
+            color: white !important;
+            text-decoration: none;
+            padding: 8px 16px;
+            background-color: #e74c3c;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 600;
             transition: background-color 0.3s;
         }
         
-        .user-info a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+        .logout-nav-btn:hover {
+            background-color: #c0392b;
+            color: white !important;
         }
         
         /* Container */
@@ -153,7 +163,7 @@
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 16px;
             margin-left: 10px;
         }
         
@@ -165,7 +175,7 @@
             border-radius: 4px;
             cursor: pointer;
             text-decoration: none;
-            font-size: 16px;
+            font-size: 20px;
             transition: background-color 0.3s;
         }
         
@@ -242,13 +252,6 @@
     <!-- Header -->
     <div class="header">
         <h1>PrimePath Student Portal</h1>
-        {% if user.is_authenticated %}
-        <div class="user-info">
-            <span>Welcome, {{ user.first_name }}!</span>
-            <span>ID: {{ user.primepath_student_profile.student_id }}</span>
-            <a href="{% url 'primepath_student:logout' %}">Logout</a>
-        </div>
-        {% endif %}
     </div>
     
     <!-- Navigation -->
@@ -258,6 +261,12 @@
             <li><a href="{% url 'primepath_student:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">My Classes</a></li>
             <li><a href="{% url 'primepath_student:exam_history' %}" class="{% if request.resolver_match.url_name == 'exam_history' %}active{% endif %}">Exam History</a></li>
             <li><a href="{% url 'primepath_student:profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Profile</a></li>
+            <!-- User Info relocated to navigation -->
+            <li class="nav-user-info">
+                <span>Welcome, {{ user.first_name }}!</span>
+                <span>ID: {{ user.primepath_student_profile.student_id }}</span>
+                <a href="{% url 'primepath_student:logout' %}" class="logout-nav-btn">Logout</a>
+            </li>
         </ul>
     </nav>
     {% endif %}

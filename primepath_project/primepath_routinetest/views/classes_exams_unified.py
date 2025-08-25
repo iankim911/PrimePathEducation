@@ -602,26 +602,21 @@ def classes_exams_unified_view(request):
         
         # SECTION 4: Organize classes by program for new Class Management section
         from collections import defaultdict
-        from primepath_routinetest.class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
+        from primepath_routinetest.class_code_mapping import get_class_codes_by_program
         
-        # Define program mapping
+        # FIXED: Use correct program mapping function instead of broken string matching
         PROGRAM_MAPPING = {
-            'CORE': [],
-            'ASCENT': [],
-            'EDGE': [],
-            'PINNACLE': []
+            'CORE': get_class_codes_by_program('CORE'),
+            'ASCENT': get_class_codes_by_program('ASCENT'), 
+            'EDGE': get_class_codes_by_program('EDGE'),
+            'PINNACLE': get_class_codes_by_program('PINNACLE')
         }
         
-        # Map class codes to programs based on curriculum mapping
-        for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
-            if 'CORE' in curriculum:
-                PROGRAM_MAPPING['CORE'].append(code)
-            elif 'ASCENT' in curriculum:
-                PROGRAM_MAPPING['ASCENT'].append(code)
-            elif 'EDGE' in curriculum:
-                PROGRAM_MAPPING['EDGE'].append(code)
-            elif 'PINNACLE' in curriculum:
-                PROGRAM_MAPPING['PINNACLE'].append(code)
+        # Log the program mapping for debugging
+        logger.info(f"[PROGRAM_MAPPING_FIX] CORE: {len(PROGRAM_MAPPING['CORE'])} classes, ASCENT: {len(PROGRAM_MAPPING['ASCENT'])} classes")
+        logger.info(f"[PROGRAM_MAPPING_FIX] EDGE: {len(PROGRAM_MAPPING['EDGE'])} classes, PINNACLE: {len(PROGRAM_MAPPING['PINNACLE'])} classes")
+        print(f"[PROGRAM_MAPPING_FIX] Fixed program mapping - CORE: {PROGRAM_MAPPING['CORE'][:3]}..., EDGE: {PROGRAM_MAPPING['EDGE'][:3]}...")
+        print(f"[PROGRAM_MAPPING_FIX] Total mapped classes: {sum(len(classes) for classes in PROGRAM_MAPPING.values())}")
         
         # Get all exams for counting
         all_class_exams = Exam.objects.filter(
@@ -639,8 +634,10 @@ def classes_exams_unified_view(request):
             incomplete_assignments = 0
             
             # Get classes for this program that the user has access to
+            program_mapping_debug = []
             for assignment in my_assignments[:20]:  # Limit for performance
                 if assignment.class_code in PROGRAM_MAPPING[program_name]:
+                    program_mapping_debug.append(assignment.class_code)
                     # Get class details
                     class_name = assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code
                     
@@ -725,6 +722,9 @@ def classes_exams_unified_view(request):
                     'total_exams': total_exams,
                     'incomplete_assignments': incomplete_assignments
                 })
+                print(f"[PROGRAM_MAPPING_FIX] {program_name}: {len(program_classes)} classes mapped: {program_mapping_debug}")
+            else:
+                print(f"[PROGRAM_MAPPING_FIX] {program_name}: SKIPPED - no classes found (available: {PROGRAM_MAPPING[program_name][:3] if PROGRAM_MAPPING[program_name] else 'none'})")
         
         context['programs_data'] = programs_data
         

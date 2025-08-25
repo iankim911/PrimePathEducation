@@ -125,6 +125,19 @@ def student_register(request):
                     recovery_email=email  # Use same email for recovery
                 )
                 
+                # Force refresh user from database to ensure profile relationship is available
+                user.refresh_from_db()
+                
+                # Verify the student profile was created and linked properly
+                try:
+                    # Test the relationship before attempting login
+                    test_profile = user.primepath_student_profile
+                    print(f"DEBUG: Profile verified for user {user.username}: {test_profile.student_id}")
+                except Exception as e:
+                    print(f"DEBUG: Profile check failed for user {user.username}: {e}")
+                    messages.error(request, "Account created but profile linking failed. Please try logging in manually.")
+                    return redirect('primepath_student:login')
+                
                 # Log the user in with comprehensive authentication handling
                 login_successful = safe_student_login(
                     request, 
@@ -168,13 +181,24 @@ def student_login(request):
         request.session.create()
     
     if request.user.is_authenticated:
-        # Check if user has student profile
-        if hasattr(request.user, 'primepath_student_profile'):
+        # Check if user has student profile - use try/except for more reliable checking
+        try:
+            # Force database refresh to ensure latest state
+            request.user.refresh_from_db()
+            student_profile = request.user.primepath_student_profile
+            # Profile exists, redirect to dashboard
             return redirect('primepath_student:dashboard')
-        else:
+        except StudentProfile.DoesNotExist:
+            # User exists but no student profile
             logout(request)
             messages.error(request, "You don't have a student account. Please register.")
             return redirect('primepath_student:register')
+        except Exception as e:
+            # Unexpected error - log it and logout for safety
+            print(f"DEBUG: Unexpected error checking student profile for {request.user.username}: {e}")
+            logout(request)
+            messages.error(request, "Account verification failed. Please try logging in again.")
+            return redirect('primepath_student:login')
     
     if request.method == 'POST':
         # Support both field names
@@ -187,9 +211,22 @@ def student_login(request):
         # Try to find student by phone or student ID
         student_profile = None
         try:
-            # First try phone number (cleaned)
-            if re.match(r'^\d{10,15}$', login_id_clean):
-                student_profile = StudentProfile.objects.get(phone_number=login_id_clean)
+            # First try phone number (cleaned) - support 7+ digits for test data
+            if re.match(r'^\d{7,15}$', login_id_clean):
+                # Try to find by comparing cleaned phone numbers from database
+                from django.db.models import Q
+                import re as regex
+                
+                # Get all students and check their cleaned phone numbers
+                for student in StudentProfile.objects.all():
+                    db_phone_clean = regex.sub(r'[^\d]', '', student.phone_number)
+                    if db_phone_clean == login_id_clean:
+                        student_profile = student
+                        break
+                        
+                # If not found, try exact match (fallback)
+                if not student_profile:
+                    student_profile = StudentProfile.objects.get(phone_number=login_id_clean)
             else:
                 # Try student ID (original input)
                 student_profile = StudentProfile.objects.get(student_id=login_id)
