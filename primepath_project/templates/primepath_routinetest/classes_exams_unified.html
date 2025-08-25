@@ -1382,15 +1382,15 @@ console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
 </script>
 
 <!-- Request Access Modal -->
-<div id="requestAccessModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 20px;">
-                <h5 class="modal-title" style="color: #2c3e50; font-weight: 600; margin: 0;">
+<div id="requestAccessModal" class="modal fade" tabindex="-1" role="dialog" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1050;">
+    <div class="modal-dialog modal-lg" role="document" style="position: relative; max-width: 600px; margin: 30px auto; pointer-events: none;">
+        <div class="modal-content" style="position: relative; background-color: white; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; box-shadow: 0 3px 9px rgba(0,0,0,0.5); pointer-events: auto;">
+            <div class="modal-header" style="background: #2E7D32; color: white; border-bottom: 1px solid #dee2e6; padding: 20px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <h5 class="modal-title" style="color: white; font-weight: 600; margin: 0; font-size: 18px;">
                     <span style="margin-right: 8px;">➕</span>
                     Request Access to Classes
                 </h5>
-                <button type="button" class="close" onclick="closeRequestAccessModal()" style="background: none; border: none; font-size: 24px; color: #6c757d; cursor: pointer;">&times;</button>
+                <button type="button" class="close" onclick="closeRequestAccessModal()" style="background: none; border: none; font-size: 28px; color: white; cursor: pointer; opacity: 0.8; line-height: 1;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">&times;</button>
             </div>
             <div class="modal-body" style="padding: 24px;">
                 <form id="requestAccessForm">
@@ -1460,11 +1460,11 @@ console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
                     </div>
                 </form>
             </div>
-            <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; display: flex; justify-content: flex-end; gap: 12px;">
-                <button type="button" class="btn btn-secondary" onclick="closeRequestAccessModal()" style="background: #6c757d; border: none; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            <div class="modal-footer" style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 20px; display: flex; justify-content: flex-end; gap: 12px; border-radius: 0 0 6px 6px;">
+                <button type="button" class="btn btn-secondary" onclick="closeRequestAccessModal()" style="background: #6c757d; border: none; color: white; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: 500;">
                     Cancel
                 </button>
-                <button type="button" class="btn btn-success" onclick="submitAccessRequest()" id="submitRequestBtn" style="background: #2E7D32; border: none; color: white; padding: 10px 24px; border-radius: 5px; cursor: pointer; font-weight: 500;">
+                <button type="button" class="btn btn-success" onclick="submitAccessRequest()" id="submitRequestBtn" style="background: #2E7D32; border: none; color: white; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: 500;">
                     <span id="submitBtnText">Submit Request</span>
                     <span id="submitBtnLoader" style="display: none;">
                         <span style="display: inline-block; width: 12px; height: 12px; border: 2px solid #ffffff; border-radius: 50%; border-top-color: transparent; animation: spin 1s ease-in-out infinite;"></span>

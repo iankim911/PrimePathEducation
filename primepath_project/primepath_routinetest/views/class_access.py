@@ -28,6 +28,7 @@ from primepath_routinetest.models import (
 )
 from core.models import Teacher
 from ..class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
+from ..decorators import teacher_required, admin_or_head_teacher_required
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +95,7 @@ def is_admin_or_head_teacher(user):
 
 
 @login_required
+@teacher_required
 def my_classes_view(request):
     """
     Enhanced view with PROPER ADMIN ACCESS
@@ -227,8 +229,17 @@ def my_classes_view(request):
             assignments_by_class = {}
             for assignment in all_assignments:
                 if assignment.class_code not in assignments_by_class:
-                    assignments_by_class[assignment.class_code] = []
-                assignments_by_class[assignment.class_code].append(assignment)
+                    assignments_by_class[assignment.class_code] = {
+                        'class_name': assignment.class_code,  # Just use class code
+                        'teachers': [],
+                        'student_count': 0  # Roster functionality removed
+                    }
+                assignments_by_class[assignment.class_code]['teachers'].append({
+                    'teacher': assignment.teacher,
+                    'access_level': assignment.get_access_level_display(),
+                    'assigned_date': assignment.assigned_date,
+                    'assignment_id': assignment.id
+                })
             
             context.update({
                 'my_classes': admin_classes,  # Admin has ALL classes

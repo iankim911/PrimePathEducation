@@ -28,6 +28,7 @@ from primepath_routinetest.models import (
     StudentSession
 )
 from core.models import Teacher
+from ..decorators import teacher_required
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +135,7 @@ def get_exam_statistics(class_codes, academic_year):
 
 
 @login_required
+@teacher_required
 def classes_exams_unified_view(request):
     """
     Unified view combining Classes & Exams functionality
@@ -840,6 +842,7 @@ def classes_exams_unified_view(request):
 
 # Redirect views for backward compatibility
 @login_required
+@teacher_required
 def redirect_my_classes(request):
     """Redirect old my-classes URL to unified view - Version 2"""
     logger.info(f"[REDIRECT_V2] my-classes -> classes-exams for user {request.user.username}")
@@ -853,6 +856,7 @@ def redirect_my_classes(request):
 
 
 @login_required
+@teacher_required
 def redirect_schedule_matrix(request):
     """Redirect old schedule-matrix URL to unified view - Version 2"""
     logger.info(f"[REDIRECT_V2] schedule-matrix -> classes-exams for user {request.user.username}")

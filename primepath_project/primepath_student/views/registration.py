@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse
 from django.core.mail import send_mail
@@ -55,7 +55,7 @@ def student_register(request):
     })
 
 
-@csrf_protect
+@csrf_exempt
 def check_availability(request):
     """AJAX endpoint to check if student ID, phone, or email is available"""
     if request.method != 'POST':

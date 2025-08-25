@@ -38,6 +38,9 @@ urlpatterns = [
     path('exam/<uuid:session_id>/result/', views.exam_result, name='exam_result'),
     path('exam-history/', views.exam_history, name='exam_history'),
     
+    # Profile
+    path('profile/', views.student_profile, name='profile'),
+    
     # Admin Dashboard
     path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin/monitor/<uuid:session_id>/', views.monitor_session, name='admin_monitor_session'),

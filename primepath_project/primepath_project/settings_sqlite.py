@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',  # Required for django-allauth
+    'primepath_routinetest.middleware.TeacherSystemProtectionMiddleware',  # Block students from teacher system
     'primepath_project.url_redirect_middleware.URLRedirectMiddleware',  # NEW: Handle /PlacementTest/ and /RoutineTest/ redirects
     'core.middleware.URLRedirectMiddleware',  # URL redirect handling (early in chain)
     'core.middleware.FeatureFlagMiddleware',  # Add feature flags

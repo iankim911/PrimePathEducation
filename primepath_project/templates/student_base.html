@@ -30,9 +30,9 @@
             color: #333;
         }
         
-        /* Header Section - Student Portal Blue Theme */
+        /* Header Section - Dark Green Theme (Matching Teacher Portal) */
         .header {
-            background-color: #1565C0;  /* Material Blue 800 */
+            background-color: #1B5E20;  /* Dark Forest Green */
             color: white;
             padding: 20px 0;
             margin-bottom: 30px;
@@ -46,7 +46,7 @@
         
         /* Navigation Bar */
         .nav-bar {
-            background-color: #0D47A1;  /* Material Blue 900 */
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);  /* Green gradient matching teacher portal */
             padding: 0;
             margin-bottom: 30px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -74,12 +74,12 @@
         }
         
         .nav-bar a:hover {
-            background-color: #1976D2;  /* Material Blue 700 */
+            background-color: rgba(255, 255, 255, 0.1);  /* Light hover effect */
         }
         
         .nav-bar a.active {
-            background-color: #1976D2;
-            border-bottom: 3px solid #64B5F6;  /* Material Blue 300 */
+            background-color: rgba(255, 255, 255, 0.15);
+            border-bottom: 3px solid #81C784;  /* Light green accent */
         }
         
         /* User Info Section */
@@ -124,7 +124,7 @@
         }
         
         .card h2 {
-            color: #1565C0;
+            color: #2E7D32;  /* Primary green */
             margin-bottom: 15px;
             font-size: 1.5rem;
         }
@@ -136,7 +136,7 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
             margin-bottom: 15px;
-            border-left: 4px solid #1565C0;
+            border-left: 4px solid #2E7D32;  /* Green border */
         }
         
         .class-card:hover {
@@ -144,7 +144,7 @@
         }
         
         .class-card h3 {
-            color: #1565C0;
+            color: #2E7D32;  /* Primary green */
             margin-bottom: 10px;
         }
         
@@ -170,12 +170,12 @@
         }
         
         .btn-primary {
-            background-color: #1565C0;
+            background-color: #2E7D32;  /* Primary green */
             color: white;
         }
         
         .btn-primary:hover {
-            background-color: #1976D2;
+            background-color: #388E3C;  /* Lighter green on hover */
         }
         
         .btn-success {
@@ -222,9 +222,9 @@
         }
         
         .message.info {
-            background-color: #BBDEFB;
-            color: #1565C0;
-            border-left: 4px solid #2196F3;
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border-left: 4px solid #4CAF50;
         }
         
         .message.warning {
@@ -256,9 +256,8 @@
     <nav class="nav-bar">
         <ul>
             <li><a href="{% url 'primepath_student:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">My Classes</a></li>
-            <li><a href="#" class="">Exam History</a></li>
-            <li><a href="#" class="">Study Materials</a></li>
-            <li><a href="#" class="">Profile</a></li>
+            <li><a href="{% url 'primepath_student:exam_history' %}" class="{% if request.resolver_match.url_name == 'exam_history' %}active{% endif %}">Exam History</a></li>
+            <li><a href="{% url 'primepath_student:profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">Profile</a></li>
         </ul>
     </nav>
     {% endif %}

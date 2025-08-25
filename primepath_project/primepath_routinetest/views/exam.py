@@ -16,6 +16,7 @@ from core.exceptions import ValidationException, ExamConfigurationException
 from core.decorators import handle_errors
 from ..services import ExamService
 from ..services.exam_service import ExamPermissionService
+from ..decorators import teacher_required
 import logging
 import json
 
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
+@teacher_required
 def exam_list(request):
     """List all exams hierarchically by Program and Class Code - Version 6.0 Library View"""
     from collections import defaultdict
@@ -485,6 +487,7 @@ def check_exam_version(request):
 
 
 @login_required
+@teacher_required
 @handle_errors(template_name='primepath_routinetest/create_exam.html')
 def create_exam(request):
     """Create a new exam (requires authentication)"""
@@ -856,6 +859,7 @@ def create_exam(request):
 
 
 @login_required
+@teacher_required
 def exam_detail(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     questions = exam.routine_questions.all()
@@ -870,12 +874,14 @@ def exam_detail(request, exam_id):
 
 
 @login_required
+@teacher_required
 def edit_exam(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     return render(request, 'primepath_routinetest/edit_exam.html', {'exam': exam})
 
 
 @login_required
+@teacher_required
 def preview_exam(request, exam_id):
     """Preview exam with answer key management - WITH PERMISSION CHECK"""
     # Comprehensive debugging
@@ -1026,6 +1032,7 @@ def manage_questions(request, exam_id):
 
 @require_http_methods(["POST", "DELETE"])
 @login_required
+@teacher_required
 def delete_exam(request, exam_id):
     """Delete an exam with comprehensive permission checking and debugging"""
     from django.http import JsonResponse

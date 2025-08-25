@@ -604,12 +604,14 @@
     .modal-content {
         background: white;
         border-radius: 12px;
-        padding: 30px;
+        padding: 0;
         max-width: 500px;
         width: 90%;
         max-height: 80vh;
-        overflow-y: auto;
+        overflow: hidden;
         animation: slideUp 0.3s ease;
+        display: flex;
+        flex-direction: column;
     }
     
     @keyframes slideUp {
@@ -618,19 +620,39 @@
     }
     
     .modal-header {
-        margin-bottom: 20px;
-        padding-bottom: 15px;
+        padding: 20px 30px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-bottom: 1px solid #dee2e6;
+        border-radius: 12px 12px 0 0;
     }
     
     .modal-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: #2c3e50;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .modal-title-icon {
+        width: 32px;
+        height: 32px;
+        background: #2E7D32;
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: bold;
     }
     
     .modal-body {
-        margin: 20px 0;
+        padding: 30px;
+        overflow-y: auto;
+        flex: 1;
     }
     
     .form-group {
@@ -662,42 +684,56 @@
     .modal-footer {
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
-        margin-top: 25px;
-        padding-top: 15px;
+        gap: 15px;
+        padding: 20px 30px;
+        background: #f8f9fa;
         border-top: 1px solid #dee2e6;
+        border-radius: 0 0 12px 12px;
     }
     
     .btn-cancel {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 500;
+        background: white;
+        color: #6c757d;
+        border: 2px solid #dee2e6;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }
     
     .btn-cancel:hover {
-        background: #5a6268;
+        background: #f8f9fa;
+        border-color: #6c757d;
+        color: #495057;
     }
     
     .btn-primary {
         background: #2E7D32;
         color: white;
         border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 500;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
     
-    .btn-primary:hover {
-        background: #1B5E20;
+    .btn-primary:hover:not(:disabled) {
+        background: #236027;
         transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+    }
+    
+    .btn-primary:disabled {
+        background: #c3e6cb;
+        cursor: not-allowed;
+        opacity: 0.6;
     }
     
     /* Student Search in Modal */
@@ -708,46 +744,79 @@
     
     .search-input {
         width: 100%;
-        padding: 10px 15px 10px 40px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
+        padding: 12px 15px 12px 45px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
         font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #2E7D32;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
     }
     
     .search-icon {
         position: absolute;
-        left: 12px;
+        left: 15px;
         top: 50%;
         transform: translateY(-50%);
         color: #6c757d;
+        pointer-events: none;
     }
     
     .student-list {
         max-height: 300px;
         overflow-y: auto;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
         padding: 10px;
+        background: #fafafa;
     }
     
     .student-option {
-        padding: 10px;
-        border-radius: 6px;
+        padding: 15px;
+        border-radius: 8px;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: all 0.2s ease;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
+        background: white;
+        border: 2px solid transparent;
     }
     
     .student-option:hover {
-        background: #f8f9fa;
+        background: #f0f4f8;
+        border-color: #dee2e6;
+        transform: translateX(4px);
     }
     
     .student-option.selected {
         background: #E8F5E9;
-        border: 1px solid #2E7D32;
+        border-color: #2E7D32;
+        box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
+    }
+    
+    .student-option .select-icon {
+        width: 24px;
+        height: 24px;
+        background: #2E7D32;
+        color: white;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .student-option.selected .select-icon {
+        display: flex;
     }
     
     /* Loading and Empty States */
@@ -1268,7 +1337,10 @@
 <div id="addStudentModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 class="modal-title">Add Student to {{ class_display }}</h3>
+            <h3 class="modal-title">
+                <span class="modal-title-icon">+</span>
+                <span>Add Student to {{ class_display }}</span>
+            </h3>
         </div>
         <div class="modal-body">
             <div class="student-search">
@@ -1282,7 +1354,7 @@
                         <strong>{{ student.name }}</strong>
                         <div style="font-size: 0.9rem; color: #6c757d;">Grade: {{ student.grade_level }}</div>
                     </div>
-                    <span class="select-icon" style="display: none;">✓</span>
+                    <span class="select-icon">✓</span>
                 </div>
                 {% empty %}
                 <div style="text-align: center; padding: 20px; color: #6c757d;">
@@ -1469,7 +1541,6 @@
         document.querySelectorAll('.student-option').forEach(opt => {
             opt.style.display = 'flex';
             opt.classList.remove('selected');
-            opt.querySelector('.select-icon').style.display = 'none';
         });
     }
     
@@ -1484,12 +1555,10 @@
         // Clear previous selection
         document.querySelectorAll('.student-option').forEach(opt => {
             opt.classList.remove('selected');
-            opt.querySelector('.select-icon').style.display = 'none';
         });
         
         // Mark as selected
         element.classList.add('selected');
-        element.querySelector('.select-icon').style.display = 'block';
         
         selectedStudentId = studentId;
         selectedStudentName = studentName;

@@ -252,7 +252,7 @@ class StudentRegistrationForm(UserCreationForm):
                 parent2_name=self.cleaned_data.get('parent2_name', ''),
                 parent2_phone=self.cleaned_data.get('parent2_phone', ''),
                 parent2_email=self.cleaned_data.get('parent2_email', ''),
-                recovery_email=self.cleaned_data.get('recovery_email', ''),
+                recovery_email=self.cleaned_data.get('recovery_email', '')
             )
         
         return user

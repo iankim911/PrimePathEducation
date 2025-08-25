@@ -50,35 +50,36 @@ class Exam(models.Model):
     ]
     
     
-    # Dynamic class code choices from PrimePath curriculum mapping
+    # Use actual class codes from class_constants
     @classmethod
     def get_class_code_choices(cls):
-        """Get class choices dynamically from the Class model and curriculum mapping"""
-        from primepath_routinetest.class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
-        from .class_model import Class
+        """Get class choices from the actual class constants"""
+        from ..models.class_constants import CLASS_CODE_CHOICES
+        import logging
         
-        choices = []
+        logger = logging.getLogger(__name__)
         
-        # First, add all class codes from the curriculum mapping
-        for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
-            choices.append((code, f"{code} - {curriculum}"))
+        # Log the method call for debugging
+        print(f"[EXAM_MODEL] get_class_code_choices() called")
+        logger.info(f"[EXAM_MODEL] get_class_code_choices() called")
         
-        # Also include any existing classes from the database
-        existing_classes = Class.objects.filter(is_active=True).values_list('section', 'name')
-        existing_codes = {code for code, _ in choices}
+        # Use the actual class codes from class_constants.py
+        choices = list(CLASS_CODE_CHOICES)
         
-        for section, name in existing_classes:
-            if section and section not in existing_codes:
-                display_name = name if name else section
-                choices.append((section, display_name))
+        # Log what we're returning
+        print(f"[EXAM_MODEL] Returning {len(choices)} class choices from class_constants")
+        logger.info(f"[EXAM_MODEL] Returning {len(choices)} class choices")
         
-        # Sort by code for consistent ordering
-        choices.sort(key=lambda x: x[0])
+        # Log first few for debugging
+        if choices:
+            sample = choices[:3]
+            print(f"[EXAM_MODEL] Sample choices: {sample}")
+            logger.debug(f"[EXAM_MODEL] Sample choices: {sample}")
         
         return choices
     
-    # For backward compatibility, maintain CLASS_CODE_CHOICES as a property
-    CLASS_CODE_CHOICES = []  # Will be populated dynamically
+    # For backward compatibility, use the actual CLASS_CODE_CHOICES
+    CLASS_CODE_CHOICES = []  # Will be populated from class_constants
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
@@ -130,7 +131,7 @@ class Exam(models.Model):
         max_length=50,
         blank=True,
         null=True,
-        choices=CLASS_CODE_CHOICES,
+        choices=[],  # Will be populated dynamically via get_class_code_choices()
         help_text="Single class code this exam belongs to (one-to-one relationship)",
         db_index=True  # Add index for performance
     )

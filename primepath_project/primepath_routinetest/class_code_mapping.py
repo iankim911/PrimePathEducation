@@ -1,171 +1,187 @@
 """
-Class Code Mapping for PrimePath Curriculum
-Updated: 2025-08-20
-This file contains the official mapping between class codes and curriculum programs
+Class Code Mapping for PrimePath
+Updated: 2025-08-25
+This file contains the actual class codes from the system
+NO CURRICULUM MAPPING - Classes are independent entities
 """
 
+# ACTUAL CLASS CODES FROM THE SYSTEM - NO FAKE CLASSES
 CLASS_CODE_CURRICULUM_MAPPING = {
-    # CORE Program - Phonics
-    'PS1': 'CORE Phonics Level 1',
-    'P2': 'CORE Phonics Level 3',
+    # Primary/Preschool Classes
+    'PS1': 'PS1',
+    'P1': 'P1', 
+    'P2': 'P2',
     
-    # CORE Program - Sigma
-    'A2': 'CORE Sigma Level 1',
-    'B2': 'CORE Sigma Level 2',
-    'B3': 'CORE Sigma Level 3',
+    # A-Series Classes
+    'A2': 'A2',
     
-    # CORE Program - Elite
-    'B4': 'CORE Elite Level 1',
-    'B5': 'CORE Elite Level 2',
-    'S2': 'CORE Elite Level 3',
+    # B-Series Classes  
+    'B2': 'B2',
+    'B3': 'B3',
+    'B4': 'B4',
+    'B5': 'B5',
     
-    # CORE Program - Additional Sigma
-    'S3': 'CORE Sigma Level 1',
-    'H1': 'CORE Sigma Level 3',
-    'H2': 'CORE Sigma Level 3',
+    # S-Series Classes
+    'S2': 'S2',
     
-    # CORE Program - Additional Elite
-    'C2': 'CORE Elite Level 1',
-    'C3': 'CORE Sigma Level 3',
-    'C4': 'CORE Sigma Level 3',
-    'C5': 'CORE Elite Level 1',
-    'H3': 'CORE Elite Level 2',
-    'H4': 'CORE Elite Level 3',
+    # H-Series Classes
+    'H1': 'H1',
+    'H2': 'H2',
+    'H4': 'H4',
     
-    # EDGE Program - Rise
-    'Young-cho2': 'EDGE Rise Level 1',
-    'Chung-cho4': 'EDGE Rise Level 2',
-    'Chung-cho1': 'EDGE Rise Level 3',
+    # C-Series Classes
+    'C2': 'C2',
+    'C3': 'C3',
+    'C4': 'C4',
+    'C5': 'C5',
     
-    # EDGE Program - Pursuit
-    'SejongM': 'EDGE Pursuit Level 3',
+    # Young-cho Classes
+    'Young-cho2': 'Young-cho2',
+    'Young-choM': 'Young-choM',
     
-    # EDGE Program - Pro
-    'MAS': 'EDGE Pro Level 1',
+    # Chung-cho Classes
+    'Chung-choM': 'Chung-choM',
+    'Chung-cho1': 'Chung-cho1',
     
-    # ASCENT Program - Drive
-    'TaejoC': 'ASCENT Drive Level 1',
-    'TaejoD': 'ASCENT Drive Level 2',
-    'TaejoE': 'ASCENT Drive Level 3',
-    'TaejoG': 'ASCENT Drive Level 3',
+    # Sejong Classes
+    'SejongM': 'SejongM',
     
-    # ASCENT Program - Pro
-    'SungjongM': 'ASCENT Pro Level 1',
-    'Sungjong2': 'ASCENT Pro Level 2',
+    # MAS Classes
+    'MAS': 'MAS',
     
-    # EDGE Program - Spark
-    'Sungjong3': 'EDGE Spark Level 1',
-    'Sungjong4': 'EDGE Spark Level 2',
-    'Young-choM': 'EDGE Spark Level 3',
+    # Taejo Classes
+    'TaejoG': 'TaejoG',
+    'TaejoD': 'TaejoD',
+    'TaejoDC': 'TaejoDC',
     
-    # ASCENT Program - Nova
-    'D2': 'ASCENT Nova Level 1',
-    'D3': 'ASCENT Nova Level 1',
-    'D4': 'ASCENT Nova Level 2',
+    # Sungjong Classes
+    'SungjongM': 'SungjongM',
+    'Sungjong2': 'Sungjong2',
+    'Sungjong3': 'Sungjong3',
+    'Sungjong4': 'Sungjong4',
+    'SungjongC': 'SungjongC',
     
-    # PINNACLE Program - Vision
-    'High1.SatSun.3-5': 'PINNACLE Vision Level 1',
-    'High1.SatSun.5-7': 'PINNACLE Vision Level 1',
+    # D-Series Classes
+    'D2': 'D2',
+    'D3': 'D3',
+    'D4': 'D4',
     
-    # PINNACLE Program - Endeavor
-    'High1/2.SatSun.11-1': 'PINNACLE Endeavor Level 2',
-    'High1/2.SatSun.1-3': 'PINNACLE Endeavor Level 2',
+    # High SaiSun Classes (using underscore for spaces in keys)
+    'High1_SaiSun_3-5': 'High1 SaiSun 3-5',
+    'High1_SaiSun_5-7': 'High1 SaiSun 5-7',
+    'High1V2_SaiSun_11-1': 'High1V2 SaiSun 11-1',
+    'High1V2_SaiSun_1-3': 'High1V2 SaiSun 1-3',
+    
+    # High School Classes
+    'HIGH_10E': 'HIGH 10E',
+    'HIGH_10F': 'HIGH 10F', 
+    'HIGH_11D': 'HIGH 11D',
+    
+    # Middle School Classes
+    'MIDDLE_7A': 'MIDDLE 7A',
+    
+    # Primary School Classes
+    'PRIMARY_1D': 'PRIMARY 1D',
+    'PRIMARY_2A': 'PRIMARY 2A',
+    
+    # Taejo Classes
+    'TaejoE': 'TaejoE',
 }
 
 # Reverse mapping for quick lookup
 CURRICULUM_TO_CLASS_CODES = {}
-for class_code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
-    if curriculum not in CURRICULUM_TO_CLASS_CODES:
-        CURRICULUM_TO_CLASS_CODES[curriculum] = []
-    CURRICULUM_TO_CLASS_CODES[curriculum].append(class_code)
+for class_code, display_name in CLASS_CODE_CURRICULUM_MAPPING.items():
+    if display_name not in CURRICULUM_TO_CLASS_CODES:
+        CURRICULUM_TO_CLASS_CODES[display_name] = []
+    CURRICULUM_TO_CLASS_CODES[display_name].append(class_code)
 
-# Class code categories for grouping
+# Class code categories for logical grouping (no curriculum association)
 CLASS_CODE_CATEGORIES = {
-    'CORE_PHONICS': ['PS1', 'P2'],
-    'CORE_SIGMA': ['A2', 'B2', 'B3', 'S3', 'H1', 'H2', 'C3', 'C4'],
-    'CORE_ELITE': ['B4', 'B5', 'S2', 'C2', 'C5', 'H3', 'H4'],
-    'EDGE_RISE': ['Young-cho2', 'Chung-cho4', 'Chung-cho1'],
-    'EDGE_PURSUIT': ['SejongM'],
-    'EDGE_PRO': ['MAS'],
-    'EDGE_SPARK': ['Sungjong3', 'Sungjong4', 'Young-choM'],
-    'ASCENT_DRIVE': ['TaejoC', 'TaejoD', 'TaejoE', 'TaejoG'],
-    'ASCENT_PRO': ['SungjongM', 'Sungjong2'],
-    'ASCENT_NOVA': ['D2', 'D3', 'D4'],
-    'PINNACLE_VISION': ['High1.SatSun.3-5', 'High1.SatSun.5-7'],
-    'PINNACLE_ENDEAVOR': ['High1/2.SatSun.11-1', 'High1/2.SatSun.1-3'],
+    'PRIMARY': ['PS1', 'P1', 'P2'],
+    'LETTER_SERIES_A': ['A2'],
+    'LETTER_SERIES_B': ['B2', 'B3', 'B4', 'B5'],
+    'LETTER_SERIES_S': ['S2'],
+    'LETTER_SERIES_H': ['H1', 'H2', 'H4'],
+    'LETTER_SERIES_C': ['C2', 'C3', 'C4', 'C5'],
+    'LETTER_SERIES_D': ['D2', 'D3', 'D4'],
+    'YOUNG_CHO': ['Young-cho2', 'Young-choM'],
+    'CHUNG_CHO': ['Chung-choM', 'Chung-cho1'],
+    'SEJONG': ['SejongM'],
+    'MAS': ['MAS'],
+    'TAEJO': ['TaejoG', 'TaejoD', 'TaejoDC', 'TaejoE'],
+    'SUNGJONG': ['SungjongM', 'Sungjong2', 'Sungjong3', 'Sungjong4', 'SungjongC'],
+    'HIGH_SAISUN': ['High1_SaiSun_3-5', 'High1_SaiSun_5-7', 'High1V2_SaiSun_11-1', 'High1V2_SaiSun_1-3'],
+    'HIGH_SCHOOL': ['HIGH_10E', 'HIGH_10F', 'HIGH_11D'],
+    'MIDDLE_SCHOOL': ['MIDDLE_7A'],
+    'PRIMARY_SCHOOL': ['PRIMARY_1D', 'PRIMARY_2A'],
 }
 
 def get_curriculum_for_class(class_code):
     """
-    Get the curriculum level for a given class code
+    Get the display name for a given class code
     
     Args:
         class_code (str): The class code (e.g., 'PS1', 'P1', etc.)
     
     Returns:
-        str: The curriculum level or None if not found
+        str: The display name or None if not found
     """
+    print(f"[CLASS_CODE_MAPPING] Getting display for class: {class_code}")
     return CLASS_CODE_CURRICULUM_MAPPING.get(class_code)
 
 def get_classes_for_curriculum(curriculum_level):
     """
-    Get all class codes that use a specific curriculum level
+    DEPRECATED: No curriculum levels - classes are independent
     
     Args:
-        curriculum_level (str): The curriculum level (e.g., 'CORE Phonics Level 1')
+        curriculum_level (str): Not used
     
     Returns:
-        list: List of class codes using this curriculum
+        list: Empty list
     """
-    return CURRICULUM_TO_CLASS_CODES.get(curriculum_level, [])
+    print(f"[CLASS_CODE_MAPPING] WARNING: get_classes_for_curriculum called - no curriculum mapping exists")
+    return []
 
 def get_program_from_class_code(class_code):
     """
-    Extract the program name from a class code
+    Get logical grouping for a class code
     
     Args:
         class_code (str): The class code
     
     Returns:
-        str: The program name (CORE, EDGE, ASCENT, or PINNACLE)
+        str: The category name or 'GENERAL'
     """
-    curriculum = get_curriculum_for_class(class_code)
-    if curriculum:
-        return curriculum.split()[0]
-    return None
+    print(f"[CLASS_CODE_MAPPING] Getting category for class: {class_code}")
+    for category, codes in CLASS_CODE_CATEGORIES.items():
+        if class_code in codes:
+            return category
+    return 'GENERAL'
 
 def get_subprogram_from_class_code(class_code):
     """
-    Extract the subprogram name from a class code
+    DEPRECATED: No subprograms - classes are independent
     
     Args:
         class_code (str): The class code
     
     Returns:
-        str: The subprogram name (Phonics, Sigma, Elite, etc.)
+        str: None
     """
-    curriculum = get_curriculum_for_class(class_code)
-    if curriculum:
-        parts = curriculum.split()
-        if len(parts) >= 2:
-            return parts[1]
+    print(f"[CLASS_CODE_MAPPING] WARNING: get_subprogram_from_class_code called - no subprograms exist")
     return None
 
 def get_level_from_class_code(class_code):
     """
-    Extract the level from a class code
+    DEPRECATED: No levels - classes are independent
     
     Args:
         class_code (str): The class code
     
     Returns:
-        str: The level (1, 2, or 3)
+        str: None
     """
-    curriculum = get_curriculum_for_class(class_code)
-    if curriculum:
-        parts = curriculum.split()
-        if len(parts) >= 4 and parts[2] == 'Level':
-            return parts[3]
+    print(f"[CLASS_CODE_MAPPING] WARNING: get_level_from_class_code called - no levels exist")
     return None
 
 def validate_class_code(class_code):
@@ -178,7 +194,9 @@ def validate_class_code(class_code):
     Returns:
         bool: True if valid, False otherwise
     """
-    return class_code in CLASS_CODE_CURRICULUM_MAPPING
+    is_valid = class_code in CLASS_CODE_CURRICULUM_MAPPING
+    print(f"[CLASS_CODE_MAPPING] Validating class {class_code}: {'VALID' if is_valid else 'INVALID'}")
+    return is_valid
 
 def get_all_class_codes():
     """
@@ -187,65 +205,81 @@ def get_all_class_codes():
     Returns:
         list: Sorted list of all class codes
     """
-    return sorted(CLASS_CODE_CURRICULUM_MAPPING.keys())
+    codes = sorted(CLASS_CODE_CURRICULUM_MAPPING.keys())
+    print(f"[CLASS_CODE_MAPPING] Returning {len(codes)} class codes")
+    return codes
 
 def get_class_codes_by_program(program_name):
     """
-    Get all class codes for a specific program
+    Get class codes by category (replaces program concept)
     
     Args:
-        program_name (str): The program name (CORE, EDGE, ASCENT, PINNACLE)
+        program_name (str): The category name
     
     Returns:
-        list: List of class codes for that program
+        list: List of class codes for that category
     """
+    print(f"[CLASS_CODE_MAPPING] Getting classes for category: {program_name}")
+    
+    # Map old program names to new categories for backward compatibility
+    program_to_category = {
+        'CORE': ['PRIMARY', 'LETTER_SERIES_A', 'LETTER_SERIES_B', 'LETTER_SERIES_S', 'PRIMARY_SCHOOL'],
+        'ASCENT': ['LETTER_SERIES_H', 'LETTER_SERIES_C', 'LETTER_SERIES_D', 'MIDDLE_SCHOOL'],
+        'EDGE': ['YOUNG_CHO', 'CHUNG_CHO', 'SEJONG', 'MAS'],
+        'PINNACLE': ['TAEJO', 'SUNGJONG', 'HIGH_SAISUN', 'HIGH_SCHOOL']
+    }
+    
     result = []
-    for class_code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
-        if curriculum.startswith(program_name):
-            result.append(class_code)
+    if program_name in program_to_category:
+        for category in program_to_category[program_name]:
+            result.extend(CLASS_CODE_CATEGORIES.get(category, []))
+    elif program_name in CLASS_CODE_CATEGORIES:
+        result = CLASS_CODE_CATEGORIES[program_name]
+    
+    print(f"[CLASS_CODE_MAPPING] Found {len(result)} classes for {program_name}")
     return sorted(result)
 
 # Statistics functions
 def get_curriculum_statistics():
     """
-    Get statistics about the curriculum mapping
+    Get statistics about the class codes
     
     Returns:
-        dict: Statistics including counts by program
+        dict: Statistics including counts by category
     """
     stats = {
         'total_class_codes': len(CLASS_CODE_CURRICULUM_MAPPING),
-        'total_unique_curricula': len(CURRICULUM_TO_CLASS_CODES),
-        'programs': {}
+        'total_categories': len(CLASS_CODE_CATEGORIES),
+        'categories': {}
     }
     
-    for program in ['CORE', 'EDGE', 'ASCENT', 'PINNACLE']:
-        class_codes = get_class_codes_by_program(program)
-        stats['programs'][program] = {
-            'class_codes': len(class_codes),
-            'codes': class_codes
+    for category, codes in CLASS_CODE_CATEGORIES.items():
+        stats['categories'][category] = {
+            'class_codes': len(codes),
+            'codes': codes
         }
     
+    print(f"[CLASS_CODE_MAPPING] Statistics: {stats['total_class_codes']} total codes in {stats['total_categories']} categories")
     return stats
 
 if __name__ == '__main__':
     # Test the mapping
-    print("Class Code to Curriculum Mapping")
+    print("Class Code Mapping - ACTUAL CLASSES")
     print("=" * 80)
     
-    for program in ['CORE', 'EDGE', 'ASCENT', 'PINNACLE']:
-        print(f"\n{program} Program:")
-        print("-" * 40)
-        codes = get_class_codes_by_program(program)
-        for code in codes:
-            curriculum = get_curriculum_for_class(code)
-            print(f"  {code:20} -> {curriculum}")
+    print("\nAll Class Codes:")
+    print("-" * 40)
+    all_codes = get_all_class_codes()
+    for code in all_codes:
+        display = get_curriculum_for_class(code)
+        print(f"  {code:25} -> {display}")
     
     print("\n" + "=" * 80)
     stats = get_curriculum_statistics()
     print(f"Total Class Codes: {stats['total_class_codes']}")
-    print(f"Unique Curricula: {stats['total_unique_curricula']}")
+    print(f"Total Categories: {stats['total_categories']}")
     
-    print("\nClass Codes per Program:")
-    for program, data in stats['programs'].items():
-        print(f"  {program}: {data['class_codes']} codes")
+    print("\nClass Codes per Category:")
+    for category, data in stats['categories'].items():
+        print(f"  {category}: {data['class_codes']} codes")
+        print(f"    Codes: {', '.join(data['codes'][:5])}{' ...' if len(data['codes']) > 5 else ''}")

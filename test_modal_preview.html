@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student Modal Preview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .btn {
+            background: #2E7D32;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background: #236027;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-title-icon {
+            width: 32px;
+            height: 32px;
+            background: #2E7D32;
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .student-search {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            box-sizing: border-box;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #2E7D32;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            pointer-events: none;
+        }
+        
+        .student-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        
+        .student-option {
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            background: white;
+            border: 2px solid transparent;
+        }
+        
+        .student-option:hover {
+            background: #f0f4f8;
+            border-color: #dee2e6;
+            transform: translateX(4px);
+        }
+        
+        .student-option.selected {
+            background: #E8F5E9;
+            border-color: #2E7D32;
+            box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
+        }
+        
+        .student-option .select-icon {
+            width: 24px;
+            height: 24px;
+            background: #2E7D32;
+            color: white;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .student-option.selected .select-icon {
+            display: flex;
+        }
+        
+        .btn-cancel {
+            background: white;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-cancel:hover {
+            background: #f8f9fa;
+            border-color: #6c757d;
+            color: #495057;
+        }
+        
+        .btn-primary {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #236027;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+        }
+        
+        .btn-primary:disabled {
+            background: #c3e6cb;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Student Modal UI Preview</h1>
+    <p>Click the button below to see the improved modal design:</p>
+    
+    <button class="btn" onclick="openModal()">
+        <span>+</span>
+        <span>Add Student</span>
+    </button>
+    
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <span class="modal-title-icon">+</span>
+                    <span>Add Student to C5</span>
+                </h3>
+            </div>
+            <div class="modal-body">
+                <div class="student-search">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="studentSearchInput" placeholder="Search students by name...">
+                </div>
+                <div class="student-list">
+                    <div class="student-option" onclick="selectStudent(this)">
+                        <div>
+                            <strong>Student10</strong>
+                            <div style="font-size: 0.9rem; color: #6c757d;">Grade: P6</div>
+                        </div>
+                        <span class="select-icon">✓</span>
+                    </div>
+                    <div class="student-option" onclick="selectStudent(this)">
+                        <div>
+                            <strong>Student11</strong>
+                            <div style="font-size: 0.9rem; color: #6c757d;">Grade: P4</div>
+                        </div>
+                        <span class="select-icon">✓</span>
+                    </div>
+                    <div class="student-option" onclick="selectStudent(this)">
+                        <div>
+                            <strong>Student12</strong>
+                            <div style="font-size: 0.9rem; color: #6c757d;">Grade: P3</div>
+                        </div>
+                        <span class="select-icon">✓</span>
+                    </div>
+                    <div class="student-option" onclick="selectStudent(this)">
+                        <div>
+                            <strong>Student13</strong>
+                            <div style="font-size: 0.9rem; color: #6c757d;">Grade: P6</div>
+                        </div>
+                        <span class="select-icon">✓</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" id="confirmAddStudent" disabled>Add Student</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function openModal() {
+            document.getElementById('addStudentModal').classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('addStudentModal').classList.remove('show');
+            // Reset selections
+            document.querySelectorAll('.student-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.getElementById('confirmAddStudent').disabled = true;
+        }
+        
+        function selectStudent(element) {
+            // Clear other selections
+            document.querySelectorAll('.student-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Mark as selected
+            element.classList.add('selected');
+            
+            // Enable confirm button
+            document.getElementById('confirmAddStudent').disabled = false;
+        }
+        
+        // Search functionality
+        document.getElementById('studentSearchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.student-option').forEach(opt => {
+                const studentName = opt.querySelector('strong').textContent.toLowerCase();
+                if (studentName.includes(searchTerm)) {
+                    opt.style.display = 'flex';
+                } else {
+                    opt.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -745,7 +745,7 @@
                 <div style="margin-bottom: 10px;">
                     <strong>{{ request.teacher.name }}</strong>
                     <i class="fas fa-arrow-right mx-2"></i>
-                    <strong>{{ request.get_class_code_display }}</strong>
+                    <strong>{{ request.class_code }}</strong>
                 </div>
                 
                 <div class="text-muted" style="font-size: 0.9em;">
@@ -965,7 +965,7 @@
                 {% for request in my_requests %}
                 <div class="request-card request-{{ request.status|lower }}">
                     <div style="margin-bottom: 5px;">
-                        <strong>{{ request.get_class_code_display }}</strong>
+                        <strong>{{ request.class_code }}</strong>
                         <span class="badge badge-{{ request.status|lower }}">
                             {{ request.get_status_display }}
                         </span>

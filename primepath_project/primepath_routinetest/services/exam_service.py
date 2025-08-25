@@ -421,27 +421,27 @@ class ExamService:
     
     # ============== PERMISSION METHODS ==============
     
-    # Program to class code mapping
+    # Program to class code mapping - Updated with actual classes
     PROGRAM_CLASS_MAPPING = {
         'CORE': [
-            'PRIMARY_1A', 'PRIMARY_1B', 'PRIMARY_1C', 'PRIMARY_1D',
-            'PRIMARY_2A', 'PRIMARY_2B', 'PRIMARY_2C', 'PRIMARY_2D',
-            'PRIMARY_3A', 'PRIMARY_3B', 'PRIMARY_3C', 'PRIMARY_3D',
+            'PS1', 'P1', 'P2',  # Primary/Preschool
+            'A2', 'B2', 'B3', 'B4', 'B5', 'S2',  # Elementary letter series
         ],
         'ASCENT': [
-            'PRIMARY_4A', 'PRIMARY_4B', 'PRIMARY_4C', 'PRIMARY_4D',
-            'PRIMARY_5A', 'PRIMARY_5B', 'PRIMARY_5C', 'PRIMARY_5D',
-            'PRIMARY_6A', 'PRIMARY_6B', 'PRIMARY_6C', 'PRIMARY_6D',
+            'H1', 'H2', 'H4',  # H-series 
+            'C2', 'C3', 'C4', 'C5',  # C-series
+            'D2', 'D3', 'D4',  # D-series
         ],
         'EDGE': [
-            'MIDDLE_1A', 'MIDDLE_1B', 'MIDDLE_1C', 'MIDDLE_1D',
-            'MIDDLE_2A', 'MIDDLE_2B', 'MIDDLE_2C', 'MIDDLE_2D',
-            'MIDDLE_3A', 'MIDDLE_3B', 'MIDDLE_3C', 'MIDDLE_3D',
+            'Young-cho2', 'Young-choM',  # Young-cho
+            'Chung-choM', 'Chung-cho1',  # Chung-cho
+            'SejongM', 'MAS',  # Sejong and MAS
         ],
         'PINNACLE': [
-            'HIGH_1A', 'HIGH_1B', 'HIGH_1C', 'HIGH_1D',
-            'HIGH_2A', 'HIGH_2B', 'HIGH_2C', 'HIGH_2D',
-            'HIGH_3A', 'HIGH_3B', 'HIGH_3C', 'HIGH_3D',
+            'TaejoG', 'TaejoD', 'TaejoDC',  # Taejo
+            'SungjongM', 'Sungjong2', 'Sungjong3', 'SungjongC',  # Sungjong
+            'High1_SaiSun_3-5', 'High1_SaiSun_5-7',  # High SaiSun
+            'High1V2_SaiSun_11-1', 'High1V2_SaiSun_1-3',  # High SaiSun V2
         ]
     }
     
@@ -494,6 +494,10 @@ class ExamService:
         # Get all available class choices
         from ..models import Exam
         all_choices = Exam.get_class_code_choices()
+        
+        print(f"[EXAM_SERVICE] get_filtered_class_choices_for_teacher called for user: {user.username}")
+        print(f"[EXAM_SERVICE] Retrieved {len(all_choices)} total class choices")
+        logger.info(f"[EXAM_SERVICE] Retrieved {len(all_choices)} total class choices for {user.username}")
         
         # For admins, return all choices
         if user.is_superuser or user.is_staff:
