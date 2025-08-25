@@ -331,7 +331,8 @@
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_program_mapping.py)",
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python test_admin_assignments.py)",
       "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python fix_admin_head_teacher.py)",
-      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python pinnacle_final_qa.py)"
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite /Users/ian/Desktop/VIBECODE/PrimePath/venv/bin/python pinnacle_final_qa.py)",
+      "Bash(DJANGO_SETTINGS_MODULE=primepath_project.settings_sqlite python3:*)"
     ],
     "deny": []
   }

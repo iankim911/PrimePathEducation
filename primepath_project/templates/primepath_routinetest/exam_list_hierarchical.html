@@ -479,27 +479,29 @@
         background: #ffc107;
     }
     
-    /* Action Buttons - Improved alignment */
+    /* Action Buttons - Optimized for horizontal layout */
     .exam-actions {
         display: flex;
-        gap: 10px;
-        flex-wrap: nowrap;  /* Keep buttons on same line */
-        margin-top: 10px;
+        gap: 8px;
+        flex-wrap: nowrap;  /* Always keep buttons on same line */
+        margin-top: 8px;
         align-items: center;
+        justify-content: flex-start;
     }
     
     .btn {
-        padding: 8px 16px;
+        padding: 6px 12px;  /* Reduced padding for more compact buttons */
         border-radius: 4px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;  /* Slightly smaller font */
         text-decoration: none;
         border: 1px solid transparent;
         cursor: pointer;
         transition: all 0.2s;
         white-space: nowrap;
         font-weight: 500;
-        min-width: 90px;
+        min-width: 70px;  /* Reduced minimum width */
         text-align: center;
+        flex-shrink: 0;  /* Prevent buttons from shrinking */
         display: inline-block;
     }
     
@@ -843,14 +845,18 @@
             grid-template-columns: 1fr;
         }
         
-        /* Responsive button layout for mobile */
+        /* Responsive button layout - KEEP HORIZONTAL */
         .exam-actions {
-            flex-wrap: wrap;  /* Allow wrapping on small screens */
+            flex-wrap: nowrap;  /* Always keep horizontal, even on mobile */
+            gap: 4px;  /* Smaller gap on mobile */
+            overflow-x: auto;  /* Allow horizontal scroll if needed */
         }
         
         .exam-actions .btn {
-            flex: 1;  /* Equal width buttons on mobile */
-            min-width: 80px;  /* Smaller minimum width on mobile */
+            min-width: 60px;  /* Even smaller minimum width on mobile */
+            padding: 5px 8px;  /* More compact padding */
+            font-size: 0.8rem;  /* Smaller text on mobile */
+            flex-shrink: 0;  /* Don't shrink buttons */
         }
         
         .summary-stats {

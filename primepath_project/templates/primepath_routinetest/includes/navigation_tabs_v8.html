@@ -23,8 +23,8 @@
                 </div>
             </div>
             <div class="header-actions">
-                <a href="#" class="profile-btn" style="color: white !important;">Profile</a>
-                <a href="/logout/" class="logout-btn" style="color: white !important;">Logout</a>
+                <a href="#" class="profile-btn" style="color: white !important;">Manage Classes</a>
+                <a href="/logout/" class="logout-btn" style="color: white !important; background: #e74c3c !important; border: none !important;">Logout</a>
             </div>
         </div>
         {% endif %}
@@ -366,34 +366,36 @@
 .profile-btn, .logout-btn {
     padding: 8px 16px;
     border-radius: 6px;
-    text-decoration: none;
+    text-decoration: none !important;
     font-weight: 500;
     font-size: 0.9rem;
     transition: all 0.3s ease;
-    border: 1px solid transparent;
+    border: none !important;
+    color: white !important;
 }
 
 .profile-btn {
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1) !important;
+    color: white !important;
+    border: none !important;
 }
 
 .profile-btn:hover {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    text-decoration: none;
+    background: rgba(255,255,255,0.2) !important;
+    color: white !important;
+    text-decoration: none !important;
 }
 
 .logout-btn {
-    background: #e74c3c;
-    color: white;
+    background: #e74c3c !important;
+    color: white !important;
+    border: none !important;
 }
 
 .logout-btn:hover {
-    background: #c0392b;
-    color: white;
-    text-decoration: none;
+    background: #c0392b !important;
+    color: white !important;
+    text-decoration: none !important;
     transform: translateY(-1px);
 }
 
@@ -462,6 +464,8 @@
     .profile-btn, .logout-btn {
         padding: 6px 12px;
         font-size: 0.8rem;
+        color: white !important;
+        border: none !important;
     }
 }
 
