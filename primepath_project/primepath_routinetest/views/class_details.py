@@ -589,6 +589,156 @@ def start_exam_for_class(request, class_code):
 
 @login_required
 @require_http_methods(["POST"])
+def launch_teacher_preview(request, class_code):
+    """
+    Launch Teacher Exam Preview - Teacher experiences the same interface as students
+    Creates a preview session and redirects teacher to the exam-taking interface
+    """
+    console_log = {
+        "view": "launch_teacher_preview",
+        "user": request.user.username,
+        "class_code": class_code,
+        "timestamp": timezone.now().isoformat()
+    }
+    logger.info(f"[TEACHER_PREVIEW_INIT] {json.dumps(console_log)}")
+    print(f"\n{'='*80}")
+    print(f"[TEACHER_PREVIEW] Launching exam preview for teacher: {request.user.username}")
+    print(f"{'='*80}\n")
+    
+    try:
+        data = json.loads(request.body)
+        exam_id = data.get('exam_id')
+        duration_minutes = data.get('duration_minutes', 60)
+        
+        logger.info(f"[TEACHER_PREVIEW] Exam ID: {exam_id}, Duration: {duration_minutes} minutes")
+        
+        # Verify teacher has permission
+        is_admin = request.user.is_superuser or request.user.is_staff
+        teacher_profile = getattr(request.user, 'teacher_profile', None)
+        
+        if not is_admin and not teacher_profile:
+            logger.error(f"[TEACHER_PREVIEW] No teacher profile for user {request.user.username}")
+            return JsonResponse({'success': False, 'error': 'Teacher profile not found'}, status=403)
+        
+        # Verify access to this class (if not admin)
+        if not is_admin:
+            assignment = TeacherClassAssignment.objects.filter(
+                teacher=teacher_profile,
+                class_code=class_code,
+                is_active=True
+            ).first()
+            
+            if not assignment:
+                logger.error(f"[TEACHER_PREVIEW] Teacher {teacher_profile.name} has no access to class {class_code}")
+                return JsonResponse({'success': False, 'error': 'No access to this class'}, status=403)
+        
+        # Get the exam (try both RoutineExam and Exam models)
+        exam = None
+        exam_model_type = None
+        
+        # First try RoutineExam (what the schedule uses)
+        try:
+            exam = RoutineExam.objects.get(id=exam_id)
+            exam_model_type = 'RoutineExam'
+            logger.info(f"[TEACHER_PREVIEW] Found RoutineExam: {exam.name}")
+        except RoutineExam.DoesNotExist:
+            # Try regular Exam model
+            try:
+                exam = Exam.objects.get(id=exam_id)
+                exam_model_type = 'Exam'
+                logger.info(f"[TEACHER_PREVIEW] Found Exam: {exam.name}")
+            except Exam.DoesNotExist:
+                logger.error(f"[TEACHER_PREVIEW] Exam {exam_id} not found in either model")
+                return JsonResponse({'success': False, 'error': 'Exam not found'}, status=404)
+        
+        # For RoutineExam, we need to use the related Exam model for StudentSession
+        if exam_model_type == 'RoutineExam':
+            # RoutineExam might not have all fields needed for StudentSession
+            # Create or find corresponding Exam object
+            try:
+                # Try to find existing Exam with same ID
+                actual_exam = Exam.objects.get(id=exam.id)
+            except Exam.DoesNotExist:
+                # Create a minimal Exam object for the preview
+                actual_exam = Exam.objects.create(
+                    id=exam.id,
+                    name=exam.name,
+                    curriculum_level=exam.curriculum_level,
+                    timer_minutes=duration_minutes,
+                    total_questions=getattr(exam, 'total_questions', 20),
+                    default_options_count=getattr(exam, 'default_options_count', 4),
+                    is_active=True,
+                    created_by=teacher_profile if teacher_profile else None
+                )
+                logger.info(f"[TEACHER_PREVIEW] Created Exam object for preview: {actual_exam.id}")
+        else:
+            actual_exam = exam
+        
+        # Create a teacher preview session
+        preview_session = StudentSession.objects.create(
+            # Basic info (use teacher's name)
+            student_name=f"TEACHER PREVIEW: {request.user.get_full_name() or request.user.username}",
+            parent_phone="N/A",
+            grade=1,  # Default grade for preview
+            academic_rank='TOP_10',  # Default rank for preview
+            
+            # Exam reference
+            exam=actual_exam,
+            
+            # Curriculum tracking (use exam's curriculum if available)
+            original_curriculum_level=actual_exam.curriculum_level if hasattr(actual_exam, 'curriculum_level') else None,
+            
+            # Mark as teacher preview
+            is_teacher_preview=True,
+            preview_teacher=teacher_profile,
+            
+            # Session metadata
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        
+        logger.info(f"[TEACHER_PREVIEW] Created preview session: {preview_session.id}")
+        print(f"[TEACHER_PREVIEW] ✅ Preview session created:")
+        print(f"  Session ID: {preview_session.id}")
+        print(f"  Exam: {actual_exam.name}")
+        print(f"  Duration: {duration_minutes} minutes")
+        print(f"  Teacher: {request.user.username}")
+        
+        # Return the session URL for redirect
+        test_url = f'/RoutineTest/session/{preview_session.id}/'
+        
+        logger.info(f"[TEACHER_PREVIEW] Redirecting teacher to: {test_url}")
+        print(f"[TEACHER_PREVIEW] 🚀 Redirecting to exam interface: {test_url}")
+        print(f"{'='*80}\n")
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Teacher preview session created',
+            'session_id': str(preview_session.id),
+            'redirect_url': test_url,
+            'exam_name': actual_exam.name,
+            'duration_minutes': duration_minutes,
+            'is_preview': True,
+            'debug_info': {
+                'exam_model_type': exam_model_type,
+                'exam_id': str(exam.id),
+                'actual_exam_id': str(actual_exam.id),
+                'teacher': request.user.username,
+                'timestamp': timezone.now().isoformat()
+            }
+        })
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"[TEACHER_PREVIEW] Invalid JSON: {e}")
+        return JsonResponse({'success': False, 'error': 'Invalid request data'}, status=400)
+    except Exception as e:
+        logger.error(f"[TEACHER_PREVIEW] Unexpected error: {e}", exc_info=True)
+        print(f"[TEACHER_PREVIEW] ❌ Error: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
 def delete_exam_from_schedule(request, class_code):
     """Delete an exam from the schedule"""
     console_log = {

@@ -1,24 +1,23 @@
 from django.urls import path
 from . import views
-from .views import registration, kakao_views
+from .views import registration, auth
 
 app_name = 'primepath_student'
 
 urlpatterns = [
-    # Enhanced Authentication
-    path('register/', registration.student_register, name='register'),
-    path('login/', registration.student_login, name='login'),
-    path('logout/', views.student_logout, name='logout'),
-    
-    # Kakao OAuth
-    path('kakao/login/', kakao_views.kakao_login, name='kakao_login'),
-    path('kakao/callback/', kakao_views.kakao_callback, name='kakao_callback'),
-    path('kakao/link/', kakao_views.kakao_link_account, name='kakao_link'),
-    path('kakao/unlink/', kakao_views.kakao_unlink_account, name='kakao_unlink'),
+    # Enhanced Authentication - Use modern auth views
+    path('register/', auth.student_register, name='register'),
+    path('login/', auth.student_login, name='login'),
+    path('logout/', auth.student_logout, name='logout'),
     
     # Password Reset
     path('password-reset/', registration.password_reset_request, name='password_reset'),
     path('password-reset-confirm/<uidb64>/<token>/', registration.password_reset_confirm, name='password_reset_confirm'),
+    
+    # Kakao Login
+    # Kakao login - disabled if module not available
+    # path('kakao/login/', views.kakao_views.kakao_login, name='kakao_login'),
+    # path('kakao/callback/', views.kakao_views.kakao_callback, name='kakao_callback'),
     
     # AJAX Endpoints
     path('api/check-availability/', registration.check_availability, name='check_availability'),

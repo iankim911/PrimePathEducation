@@ -285,7 +285,14 @@
       "Bash(./python /Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/test_rate_limiting.py)",
       "Bash(venv/bin/pip install:*)",
       "Bash(../venv/bin/pip list:*)",
-      "Bash(venv/bin/pip list:*)"
+      "Bash(venv/bin/pip list:*)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/core/kakao_urls.py )",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/core/kakao_views.py )",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/primepath_student/kakao_auth.py )",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/primepath_student/views/kakao_views.py )",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/kakao_settings.py )",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/*kakao*.py)",
+      "Bash(/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/KAKAO*.md)"
     ],
     "deny": []
   }

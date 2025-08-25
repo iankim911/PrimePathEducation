@@ -52,6 +52,20 @@ class StudentSession(models.Model):
     
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.TextField(blank=True)
+    
+    # Teacher preview tracking
+    is_teacher_preview = models.BooleanField(
+        default=False,
+        help_text="True if this is a teacher previewing the exam, not a real student session"
+    )
+    preview_teacher = models.ForeignKey(
+        'core.Teacher', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='preview_sessions',
+        help_text="The teacher who is previewing this exam"
+    )
 
     class Meta:
         ordering = ['-started_at']

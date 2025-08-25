@@ -98,7 +98,8 @@ def take_test(request, session_id):
     exam = session.exam
     questions = exam.routine_questions.select_related('audio_file').all()
     audio_files = exam.routine_audio_files.all()
-    student_answers = {sa.question_id: sa for sa in session.answers.all()}
+    # Fix: RoutineTest uses 'routine_answers' instead of 'answers'
+    student_answers = {sa.question_id: sa for sa in session.routine_answers.all()}
     
     # Prepare JavaScript configuration data (properly serialized)
     import json
@@ -142,8 +143,8 @@ def take_test(request, session_id):
         }
     }
     
-    # Use the standard V2 template (component-based)
-    template_name = 'primepath_routinetest/student_test_v2.html'
+    # Use the standard template (simpler, no complex components)
+    template_name = 'primepath_routinetest/student_test.html'
     
     return render(request, template_name, {
         'session': session,
@@ -259,7 +260,8 @@ def submit_answer(request, session_id):
         
         if student_answer:
             # Check if this completes the test
-            answered_count = session.answers.count()
+            # Fix: RoutineTest uses 'routine_answers' instead of 'answers'
+            answered_count = session.routine_answers.count()
             if answered_count >= session.exam.total_questions:
                 # All questions answered
                 return JsonResponse({

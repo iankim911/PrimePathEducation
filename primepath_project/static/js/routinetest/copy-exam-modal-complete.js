@@ -541,7 +541,7 @@
     function submitCopyExamRequest(data) {
         log('Submitting copy exam request...', data);
         
-        fetch('/RoutineTest/exams/copy-with-curriculum/', {
+        fetch('/RoutineTest/exams/copy/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

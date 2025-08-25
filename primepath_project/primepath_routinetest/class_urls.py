@@ -28,6 +28,7 @@ urlpatterns = [
     path('class/<str:class_code>/add-student/', class_details.add_student_to_class, name='add_student_to_class'),
     path('class/<str:class_code>/remove-student/', class_details.remove_student_from_class, name='remove_student_from_class'),
     path('class/<str:class_code>/start-exam/', class_details.start_exam_for_class, name='start_exam_for_class'),
+    path('class/<str:class_code>/launch-preview/', class_details.launch_teacher_preview, name='launch_teacher_preview'),
     path('class/<str:class_code>/delete-exam/', class_details.delete_exam_from_schedule, name='delete_exam_from_schedule'),
     path('student/<uuid:student_id>/details/', class_details.get_student_details, name='get_student_details'),
     

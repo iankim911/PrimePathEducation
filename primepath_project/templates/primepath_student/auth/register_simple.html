@@ -1,0 +1,526 @@
+{% extends "student_base.html" %}
+{% load static %}
+
+{% block title %}Create Account - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .registration-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .header p {
+        margin: 10px 0 0;
+        opacity: 0.9;
+        font-size: 14px;
+    }
+
+    .form-container {
+        padding: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .required {
+        color: #e53e3e;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-input.error {
+        border-color: #e53e3e;
+    }
+
+    .input-with-button {
+        display: flex;
+        gap: 10px;
+    }
+
+    .input-with-button .form-input {
+        flex: 1;
+    }
+
+    .check-btn {
+        padding: 12px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+
+    .check-btn:hover {
+        background: #5a67d8;
+    }
+
+    .check-btn:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+    }
+
+    .validation-message {
+        margin-top: 5px;
+        font-size: 12px;
+        display: none;
+    }
+
+    .validation-message.success {
+        color: #48bb78;
+        display: block;
+    }
+
+    .validation-message.error {
+        color: #e53e3e;
+        display: block;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 15px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .submit-btn:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .divider {
+        text-align: center;
+        margin: 30px 0 20px;
+        position: relative;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 1px;
+        background: #e2e8f0;
+    }
+
+    .divider span {
+        background: white;
+        padding: 0 15px;
+        position: relative;
+        color: #718096;
+        font-size: 14px;
+    }
+
+    .kakao-btn {
+        width: 100%;
+        padding: 12px;
+        background: #FEE500;
+        color: #000000;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .kakao-btn:hover {
+        background: #FDD835;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 20px;
+        border-top: 1px solid #e2e8f0;
+        background: #f7fafc;
+    }
+
+    .footer a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .footer a:hover {
+        text-decoration: underline;
+    }
+
+    .error-messages {
+        background: #fed7d7;
+        border: 1px solid #fc8181;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 20px;
+        color: #742a2a;
+        font-size: 14px;
+    }
+
+    .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #e2e8f0;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <div class="header">
+        <h1>Create Your Account</h1>
+        <p>Join PrimePath and start your learning journey</p>
+    </div>
+
+    <div class="form-container">
+        {% if form.errors %}
+        <div class="error-messages">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <form method="post" id="registrationForm">
+            {% csrf_token %}
+            
+            <!-- Full Name (single field) -->
+            <div class="form-group">
+                <label class="form-label" for="fullName">
+                    Full Name <span class="required">*</span>
+                </label>
+                <input type="text" id="fullName" name="full_name" class="form-input" 
+                       placeholder="Enter your full name" required>
+            </div>
+
+            <!-- Student ID with Check Button -->
+            <div class="form-group">
+                <label class="form-label" for="studentId">
+                    Student ID <span class="required">*</span>
+                </label>
+                <div class="input-with-button">
+                    <input type="text" id="studentId" name="student_id" class="form-input" 
+                           placeholder="Choose a unique ID" required>
+                    <button type="button" class="check-btn" id="checkIdBtn" onclick="checkStudentId()">
+                        Check ID
+                    </button>
+                </div>
+                <div class="validation-message" id="idValidation"></div>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label class="form-label" for="phone">
+                    Phone Number <span class="required">*</span>
+                </label>
+                <input type="tel" id="phone" name="phone_number" class="form-input" 
+                       placeholder="010-1234-5678" required>
+            </div>
+
+            <!-- Email (Optional) -->
+            <div class="form-group">
+                <label class="form-label" for="email">
+                    Email Address
+                </label>
+                <input type="email" id="email" name="email" class="form-input" 
+                       placeholder="email@example.com">
+            </div>
+
+            <!-- Grade (without Kindergarten) -->
+            <div class="form-group">
+                <label class="form-label" for="grade">
+                    Grade Level
+                </label>
+                <select id="grade" name="grade" class="form-select">
+                    <option value="">Select grade</option>
+                    <optgroup label="Elementary">
+                        <option value="1">Grade 1</option>
+                        <option value="2">Grade 2</option>
+                        <option value="3">Grade 3</option>
+                        <option value="4">Grade 4</option>
+                        <option value="5">Grade 5</option>
+                    </optgroup>
+                    <optgroup label="Middle School">
+                        <option value="6">Grade 6</option>
+                        <option value="7">Grade 7</option>
+                        <option value="8">Grade 8</option>
+                    </optgroup>
+                    <optgroup label="High School">
+                        <option value="9">Grade 9</option>
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </optgroup>
+                    <optgroup label="Other">
+                        <option value="UNI">University</option>
+                        <option value="ADULT">Adult Learner</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <!-- School Name (Optional) -->
+            <div class="form-group">
+                <label class="form-label" for="schoolName">
+                    School Name
+                </label>
+                <input type="text" id="schoolName" name="school_name" class="form-input" 
+                       placeholder="Your school name">
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label class="form-label" for="password">
+                    Password <span class="required">*</span>
+                </label>
+                <input type="password" id="password" name="password1" class="form-input" 
+                       placeholder="Choose a password" required minlength="8">
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">
+                    Confirm Password <span class="required">*</span>
+                </label>
+                <input type="password" id="confirmPassword" name="password2" class="form-input" 
+                       placeholder="Re-enter password" required minlength="8">
+                <div class="validation-message" id="passwordValidation"></div>
+            </div>
+
+            <!-- Hidden fields for backend compatibility -->
+            <input type="hidden" name="username" id="usernameField">
+            <input type="hidden" name="first_name" id="firstNameField">
+            <input type="hidden" name="last_name" id="lastNameField">
+            <input type="hidden" name="date_of_birth" value="">
+            <input type="hidden" name="gender" value="">
+            <input type="hidden" name="address" value="">
+            <input type="hidden" name="parent1_name" value="">
+            <input type="hidden" name="parent1_phone" value="">
+            <input type="hidden" name="parent1_email" value="">
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Create Account
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>or</span>
+        </div>
+
+        <a href="{% url 'primepath_student:kakao_login' %}" class="kakao-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="currentColor" d="M12 3C6.48 3 2 6.21 2 10.2c0 2.52 1.78 4.74 4.47 6.02-.15 1.02-.38 2.58-.47 3.18-.09.6.22.81.5.59.28-.22 3.41-2.34 4.72-3.24.58.05 1.17.08 1.78.08 5.52 0 10-3.21 10-7.2S17.52 3 12 3z"/>
+            </svg>
+            Login with Kakao
+        </a>
+    </div>
+
+    <div class="footer">
+        Already have an account? <a href="{% url 'primepath_student:login' %}">Sign in</a>
+    </div>
+</div>
+
+<script>
+// Simple registration form handler
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registrationForm');
+    const fullNameInput = document.getElementById('fullName');
+    const studentIdInput = document.getElementById('studentId');
+    const usernameField = document.getElementById('usernameField');
+    const firstNameField = document.getElementById('firstNameField');
+    const lastNameField = document.getElementById('lastNameField');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const passwordValidation = document.getElementById('passwordValidation');
+
+    // Check Student ID availability
+    window.checkStudentId = async function() {
+        const studentId = studentIdInput.value.trim();
+        const validation = document.getElementById('idValidation');
+        const checkBtn = document.getElementById('checkIdBtn');
+        
+        if (!studentId) {
+            validation.textContent = 'Please enter a Student ID';
+            validation.className = 'validation-message error';
+            return;
+        }
+
+        // Show loading state
+        checkBtn.disabled = true;
+        checkBtn.innerHTML = '<span class="loading"></span>';
+        
+        try {
+            const response = await fetch('{% url "primepath_student:check_availability" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    type: 'student_id',
+                    value: studentId
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.available) {
+                validation.textContent = '✓ This ID is available';
+                validation.className = 'validation-message success';
+                studentIdInput.classList.remove('error');
+            } else {
+                validation.textContent = '✗ This ID is already taken';
+                validation.className = 'validation-message error';
+                studentIdInput.classList.add('error');
+            }
+        } catch (error) {
+            validation.textContent = 'Error checking ID availability';
+            validation.className = 'validation-message error';
+        } finally {
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check ID';
+        }
+    };
+
+    // Password match validation
+    confirmPasswordInput.addEventListener('input', function() {
+        if (this.value && passwordInput.value !== this.value) {
+            passwordValidation.textContent = '✗ Passwords do not match';
+            passwordValidation.className = 'validation-message error';
+            this.classList.add('error');
+        } else if (this.value && passwordInput.value === this.value) {
+            passwordValidation.textContent = '✓ Passwords match';
+            passwordValidation.className = 'validation-message success';
+            this.classList.remove('error');
+        } else {
+            passwordValidation.className = 'validation-message';
+            this.classList.remove('error');
+        }
+    });
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Split full name into first and last name
+        const fullName = fullNameInput.value.trim();
+        const nameParts = fullName.split(' ');
+        
+        if (nameParts.length === 1) {
+            // If only one name, use it as both first and last
+            firstNameField.value = nameParts[0];
+            lastNameField.value = nameParts[0];
+        } else {
+            // First word is first name, rest is last name
+            firstNameField.value = nameParts[0];
+            lastNameField.value = nameParts.slice(1).join(' ');
+        }
+        
+        // Set username to student_id
+        usernameField.value = studentIdInput.value;
+        
+        // Check password match
+        if (passwordInput.value !== confirmPasswordInput.value) {
+            passwordValidation.textContent = '✗ Passwords do not match';
+            passwordValidation.className = 'validation-message error';
+            confirmPasswordInput.classList.add('error');
+            return;
+        }
+        
+        // Submit the form
+        form.submit();
+    });
+});
+</script>
+{% endblock %}

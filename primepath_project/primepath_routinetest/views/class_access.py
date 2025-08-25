@@ -194,12 +194,9 @@ def my_classes_view(request):
                     all_exams = Exam.objects.filter(is_active=True)
                     active_exams = sum(1 for exam in all_exams if class_code in (exam.class_codes or []))
                 
-                # Get class display name from curriculum mapping
-                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
-                
                 admin_classes.append({
                     'class_code': class_code,
-                    'class_name': class_name,
+                    'class_name': class_code,  # Just use class code, no curriculum
                     'student_count': student_count,
                     'active_exams': active_exams,
                     'access_level': 'ADMIN FULL ACCESS',
@@ -312,12 +309,11 @@ def my_classes_view(request):
                     is_active=True
                 ).select_related('teacher')
                 
-                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
                 is_pending = class_code in pending_class_codes
                 
                 available_classes.append({
                     'class_code': class_code,
-                    'class_name': class_name,
+                    'class_name': class_code,  # Just use class code, no curriculum
                     'current_teachers': current_assignments,
                     'teacher_count': current_assignments.count(),
                     'is_pending': is_pending,
@@ -727,10 +723,9 @@ def api_my_classes(request):
             all_class_codes = list(CLASS_CODE_CURRICULUM_MAPPING.keys())
             classes = []
             for class_code in all_class_codes:
-                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
                 classes.append({
                     'class_code': class_code,
-                    'class_name': class_name,
+                    'class_name': class_code,  # Just use class code, no curriculum
                     'access_level': 'ADMIN FULL ACCESS',
                     'is_admin': True
                 })
@@ -798,10 +793,9 @@ def api_available_classes(request):
                     status='PENDING'
                 ).exists()
                 
-                class_name = f"{class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(class_code, class_code)}"
                 available.append({
                     'class_code': class_code,
-                    'class_name': class_name,
+                    'class_name': class_code,  # Just use class code, no curriculum
                     'is_pending': is_pending
                 })
         
@@ -830,7 +824,7 @@ def api_my_requests(request):
         request_data = [{
             'id': r.id,
             'class_code': r.class_code,
-            'class_name': f"{r.class_code} - {CLASS_CODE_CURRICULUM_MAPPING.get(r.class_code, r.class_code)}",
+            'class_name': r.class_code,  # Just use class code, no curriculum
             'status': r.status,
             'status_display': r.get_status_display(),
             'requested_at': r.requested_at.isoformat(),

@@ -7,7 +7,6 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
-from core.kakao_urls import kakao_urlpatterns
 import json
 
 # Log URL configuration changes
@@ -64,7 +63,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     
     path('', include('core.urls')),
-] + kakao_urlpatterns  # Add Kakao OAuth URLs
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

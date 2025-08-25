@@ -1179,8 +1179,8 @@
                                 </div>
                                 {% if can_edit %}
                                 <div class="exam-actions">
-                                    <button class="btn-start-exam" onclick="openExamLaunchModal('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}', {{ exam.timer.minutes|default:60 }})">
-                                        🚀 Launch
+                                    <button class="btn-start-exam" onclick="launchTeacherPreview('{{ exam.id }}', '{{ exam.name|escapejs }}', {{ exam.timer.minutes|default:60 }})">
+                                        🚀 Launch Exam
                                     </button>
                                     <button class="btn-delete-exam" onclick="deleteExamFromSchedule('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
                                         <span style="font-size: 1.1rem; margin-right: 2px;">×</span>
@@ -1238,8 +1238,8 @@
                                 </div>
                                 {% if can_edit %}
                                 <div class="exam-actions">
-                                    <button class="btn-start-exam" onclick="openExamLaunchModal('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}', {{ exam.timer.minutes|default:60 }})">
-                                        🚀 Launch
+                                    <button class="btn-start-exam" onclick="launchTeacherPreview('{{ exam.id }}', '{{ exam.name|escapejs }}', {{ exam.timer.minutes|default:60 }})">
+                                        🚀 Launch Exam
                                     </button>
                                     <button class="btn-delete-exam" onclick="deleteExamFromSchedule('{{ exam.id }}', '{{ schedule.id }}', '{{ exam.name|escapejs }}')">
                                         <span style="font-size: 1.1rem; margin-right: 2px;">×</span>
@@ -1928,6 +1928,97 @@
             });
         }
     });
+    
+    // Launch Teacher Preview - Teacher experiences same interface as students
+    function launchTeacherPreview(examId, examName, duration = 60) {
+        console.group('%c[TEACHER_PREVIEW_LAUNCH]', 'background: #4CAF50; color: white; padding: 5px; border-radius: 3px;');
+        console.log('🚀 Launching teacher preview for exam:', {
+            examId: examId,
+            examName: examName,
+            duration: duration,
+            teacher: '{{ request.user.username }}',
+            timestamp: new Date().toISOString()
+        });
+        console.groupEnd();
+        
+        // Show confirmation with clear explanation
+        const confirmMessage = `🚀 Launch Exam Preview\n\n` +
+            `You will experience the exam "${examName}" exactly as students see it.\n\n` +
+            `This includes:\n` +
+            `• The same exam interface and questions\n` +
+            `• A live countdown timer (${duration} minutes)\n` +
+            `• All exam features and navigation\n\n` +
+            `Your preview data will not affect student records.\n\n` +
+            `Ready to launch?`;
+        
+        if (!confirm(confirmMessage)) {
+            console.log('[TEACHER_PREVIEW] Launch cancelled by user');
+            return;
+        }
+        
+        console.log('[TEACHER_PREVIEW] User confirmed, creating preview session...');
+        
+        // Show loading indicator
+        const button = event.target;
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = '🔄 Launching...';
+        
+        // Call the teacher preview endpoint
+        fetch("{% url 'RoutineTest:launch_teacher_preview' class_code %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                exam_id: examId,
+                duration_minutes: duration
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.group('%c[TEACHER_PREVIEW_RESPONSE]', 'background: #2196F3; color: white; padding: 5px; border-radius: 3px;');
+            console.log('📨 Server response:', data);
+            console.groupEnd();
+            
+            if (data.success && data.redirect_url) {
+                console.log('✅ Preview session created successfully');
+                console.log('🚀 Redirecting to:', data.redirect_url);
+                
+                // Show success message briefly
+                button.textContent = '✅ Launching...';
+                
+                // Add debug info to console
+                console.group('%c[TEACHER_PREVIEW_DEBUG]', 'background: #FF9800; color: white; padding: 5px; border-radius: 3px;');
+                console.log('Debug Information:', data.debug_info);
+                console.log('Session ID:', data.session_id);
+                console.log('Exam Name:', data.exam_name);
+                console.log('Duration:', data.duration_minutes, 'minutes');
+                console.groupEnd();
+                
+                // Redirect to the exam-taking interface
+                setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                }, 500);
+            } else {
+                console.error('❌ Failed to create preview session:', data.error);
+                alert('Failed to launch exam preview:\n' + (data.error || 'Unknown error'));
+                
+                // Restore button
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('%c[TEACHER_PREVIEW_ERROR]', 'background: #F44336; color: white; padding: 5px; border-radius: 3px;', error);
+            alert('Error launching exam preview. Please try again.');
+            
+            // Restore button
+            button.disabled = false;
+            button.textContent = originalText;
+        });
+    }
     
     // Start Exam (Legacy - kept for backward compatibility)
     function startExam(examId, scheduleId, examName) {

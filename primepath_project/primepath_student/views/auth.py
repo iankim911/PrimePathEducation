@@ -14,20 +14,36 @@ import re
 def student_register(request):
     """Student registration view"""
     if request.method == 'POST':
-        # Get form data
+        # Get form data - support both old and new field names
         phone_number = request.POST.get('phone_number', '').strip()
-        student_id = request.POST.get('student_id', '').strip()
-        password = request.POST.get('password', '')
-        password_confirm = request.POST.get('password_confirm', '')
+        student_id = request.POST.get('student_id', '').strip() or request.POST.get('username', '').strip()
+        
+        # Handle password fields
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+        password = request.POST.get('password', '') or password1
+        password_confirm = request.POST.get('password_confirm', '') or password2
+        
+        # Handle name fields
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
+        full_name = request.POST.get('full_name', '').strip()
+        
+        # If full_name provided but not first/last, split it
+        if full_name and not (first_name and last_name):
+            name_parts = full_name.split(' ', 1)
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else name_parts[0]
+        
+        # Get optional fields
+        grade = request.POST.get('grade', '')
         
         # Validation
         errors = []
         
-        # Phone number validation
-        phone_regex = re.compile(r'^\+?1?\d{9,15}$')
-        if not phone_regex.match(phone_number):
+        # Phone number validation - clean it first
+        phone_number = re.sub(r'[^\d]', '', phone_number)  # Remove non-digits
+        if not re.match(r'^\d{10,15}$', phone_number):
             errors.append("Please enter a valid phone number")
         
         # Check if phone number already exists
@@ -36,8 +52,7 @@ def student_register(request):
         
         # Student ID validation
         if not student_id:
-            # Generate one if not provided
-            student_id = StudentProfile.generate_student_id()
+            errors.append("Please provide a Student ID")
         elif StudentProfile.objects.filter(student_id=student_id).exists():
             errors.append("This student ID is already taken")
         
@@ -48,31 +63,33 @@ def student_register(request):
             errors.append("Passwords do not match")
         
         # Name validation
-        if not first_name or not last_name:
-            errors.append("Please provide both first and last name")
+        if not first_name:
+            errors.append("Please provide your name")
         
         if errors:
-            return render(request, 'primepath_student/auth/register.html', {
+            return render(request, 'primepath_student/auth/login_register_modern.html', {
                 'errors': errors,
-                'form_data': request.POST
+                'form_data': request.POST,
+                'mode': 'signup'
             })
         
         try:
             with transaction.atomic():
                 # Create user account
-                username = f"student_{phone_number}"  # Use phone as basis for username
+                username = student_id  # Use student_id as username
                 user = User.objects.create_user(
                     username=username,
                     password=password,
                     first_name=first_name,
-                    last_name=last_name
+                    last_name=last_name or first_name
                 )
                 
                 # Create student profile
                 student_profile = StudentProfile.objects.create(
                     user=user,
                     student_id=student_id,
-                    phone_number=phone_number
+                    phone_number=phone_number,
+                    grade=grade if grade else None
                 )
                 
                 # Log the user in
@@ -82,12 +99,16 @@ def student_register(request):
                 
         except Exception as e:
             messages.error(request, "Registration failed. Please try again.")
-            return render(request, 'primepath_student/auth/register.html', {
+            return render(request, 'primepath_student/auth/login_register_modern.html', {
                 'errors': [str(e)],
-                'form_data': request.POST
+                'form_data': request.POST,
+                'mode': 'signup'
             })
     
-    return render(request, 'primepath_student/auth/register.html')
+    # GET request - show modern form in signup mode
+    return render(request, 'primepath_student/auth/login_register_modern.html', {
+        'mode': 'signup'
+    })
 
 
 @csrf_protect
@@ -104,21 +125,28 @@ def student_login(request):
             return redirect('primepath_student:register')
     
     if request.method == 'POST':
-        login_id = request.POST.get('login_id', '').strip()  # Can be phone or student ID
+        # Support both field names
+        login_id = request.POST.get('phone_number', '').strip() or request.POST.get('login_id', '').strip()
         password = request.POST.get('password', '')
+        
+        # Clean phone number if it looks like one
+        login_id_clean = re.sub(r'[^\d]', '', login_id)  # Remove non-digits for comparison
         
         # Try to find student by phone or student ID
         student_profile = None
         try:
-            # First try phone number
-            if re.match(r'^\+?1?\d{9,15}$', login_id):
-                student_profile = StudentProfile.objects.get(phone_number=login_id)
+            # First try phone number (cleaned)
+            if re.match(r'^\d{10,15}$', login_id_clean):
+                student_profile = StudentProfile.objects.get(phone_number=login_id_clean)
             else:
-                # Try student ID
+                # Try student ID (original input)
                 student_profile = StudentProfile.objects.get(student_id=login_id)
         except StudentProfile.DoesNotExist:
             messages.error(request, "Invalid login credentials")
-            return render(request, 'primepath_student/auth/login.html')
+            return render(request, 'primepath_student/auth/login_register_modern.html', {
+                'mode': 'login',
+                'errors': ['Invalid phone number/student ID or password']
+            })
         
         if student_profile:
             # Authenticate user
@@ -132,10 +160,21 @@ def student_login(request):
                 return redirect(next_page)
             else:
                 messages.error(request, "Invalid password")
+                return render(request, 'primepath_student/auth/login_register_modern.html', {
+                    'mode': 'login',
+                    'errors': ['Invalid password']
+                })
         else:
             messages.error(request, "Invalid login credentials")
+            return render(request, 'primepath_student/auth/login_register_modern.html', {
+                'mode': 'login',
+                'errors': ['Invalid login credentials']
+            })
     
-    return render(request, 'primepath_student/auth/login.html')
+    # GET request - show modern form in login mode
+    return render(request, 'primepath_student/auth/login_register_modern.html', {
+        'mode': 'login'
+    })
 
 
 def student_logout(request):

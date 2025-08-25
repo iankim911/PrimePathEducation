@@ -218,8 +218,6 @@ CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default Django auth
     'allauth.account.auth_backends.AuthenticationBackend',  # allauth backend
-    'core.kakao_auth.KakaoOAuth2Backend',  # KakaoTalk OAuth for teachers
-    'primepath_student.kakao_auth.StudentKakaoOAuth2Backend',  # KakaoTalk OAuth for students
 ]
 
 # Logging for Authentication
@@ -326,12 +324,8 @@ REST_FRAMEWORK = {
     'ALLOWED_VERSIONS': ['v1', 'v2'],
 }
 
-# KakaoTalk OAuth Configuration
-KAKAO_REST_API_KEY = 'c2464d8e5c01f41b75b1657a5c8411ef'  # Your REST API key
-KAKAO_JAVASCRIPT_KEY = 'da17030ca378a5042180c427a60b183a'  # Your JavaScript key
-
-# NOTE: AUTHENTICATION_BACKENDS already defined above with allauth
-# This section is removed to prevent override
+# Social OAuth Configuration - Removed
+# This is an in-house tool, social login not needed
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = [

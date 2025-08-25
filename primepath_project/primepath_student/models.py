@@ -46,8 +46,10 @@ class StudentProfile(models.Model):
     phone_number = models.CharField(
         max_length=15,
         unique=True,
+        null=True,  # Allow null for Kakao users
+        blank=True,  # Allow blank for Kakao users
         validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone number must be valid")],
-        help_text="Student's phone number for authentication"
+        help_text="Student's phone number for authentication (optional for Kakao login)"
     )
     
     # Personal Information
@@ -94,7 +96,6 @@ class StudentProfile(models.Model):
     )
     
     # System fields
-    kakao_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

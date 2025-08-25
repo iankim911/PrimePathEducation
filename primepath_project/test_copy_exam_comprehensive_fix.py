@@ -1,281 +1,304 @@
 #!/usr/bin/env python
 """
-Comprehensive test for Copy Exam modal dropdown fix
-Tests backend data generation, frontend integration, and complete functionality
+Comprehensive Test Script for Copy Exam Fix
+Tests the complete copy exam functionality after fixing the model mismatch issue
 """
 
 import os
 import sys
-import django
 import json
+import django
 from datetime import datetime
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqlite')
 sys.path.append('/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqlite')
 django.setup()
 
 from django.test import Client
 from django.contrib.auth.models import User
-from primepath_routinetest.services import ExamService
 from primepath_routinetest.models import Exam
-from core.models import Teacher
+from primepath_routinetest.models.exam_management import RoutineExam
+from core.models import CurriculumLevel, SubProgram, Program
 
-def test_backend_curriculum_generation():
-    """Test that backend generates correct curriculum data"""
-    print("\n" + "="*80)
-    print("TEST 1: BACKEND CURRICULUM DATA GENERATION")
-    print("="*80)
+def print_header(text):
+    """Print a formatted header"""
+    print(f"\n{'='*80}")
+    print(f" {text}")
+    print(f"{'='*80}")
+
+def print_success(text):
+    """Print success message"""
+    print(f"✅ {text}")
+
+def print_error(text):
+    """Print error message"""
+    print(f"❌ {text}")
+
+def print_info(text):
+    """Print info message"""
+    print(f"ℹ️  {text}")
+
+def test_copy_exam_fix():
+    """Test the copy exam functionality after the fix"""
     
-    try:
-        # Call the service method
-        print("Calling ExamService.get_routinetest_curriculum_hierarchy_for_frontend()...")
-        curriculum_data = ExamService.get_routinetest_curriculum_hierarchy_for_frontend()
-        
-        # Validate structure
-        assert curriculum_data is not None, "Data is None"
-        assert 'curriculum_data' in curriculum_data, "Missing curriculum_data key"
-        assert 'metadata' in curriculum_data, "Missing metadata key"
-        assert 'validation' in curriculum_data, "Missing validation key"
-        
-        # Check programs
-        programs = curriculum_data['curriculum_data'].keys()
-        expected_programs = ['CORE', 'ASCENT', 'EDGE', 'PINNACLE']
-        
-        print(f"✅ Data structure valid")
-        print(f"✅ Programs found: {list(programs)}")
-        
-        # Validate each program
-        for program in expected_programs:
-            assert program in programs, f"Missing program: {program}"
-            program_data = curriculum_data['curriculum_data'][program]
-            assert 'subprograms' in program_data, f"Program {program} missing subprograms"
-            
-            subprogram_count = len(program_data['subprograms'])
-            print(f"✅ {program}: {subprogram_count} subprograms")
-            
-            # Check some subprograms
-            for subprogram, sub_data in list(program_data['subprograms'].items())[:2]:
-                assert 'levels' in sub_data, f"Subprogram {subprogram} missing levels"
-                level_count = len(sub_data['levels'])
-                print(f"   - {subprogram}: {level_count} levels")
-        
-        # Check validation
-        validation = curriculum_data['validation']
-        print(f"\n✅ Validation status: {'PASSED' if validation['is_valid'] else 'FAILED'}")
-        print(f"✅ Total levels: {validation['total_levels']}")
-        
-        # Test JSON serialization
-        json_str = json.dumps(curriculum_data)
-        print(f"✅ JSON serializable: Yes ({len(json_str)} characters)")
-        
-        print("\n✅✅✅ BACKEND TEST PASSED")
-        return True
-        
-    except Exception as e:
-        print(f"\n❌ BACKEND TEST FAILED: {e}")
-        import traceback
-        traceback.print_exc()
+    print_header("COPY EXAM COMPREHENSIVE TEST")
+    print(f"Test started at: {datetime.now()}")
+    
+    # Initialize test client
+    client = Client()
+    
+    # Step 1: Check database state
+    print_header("Step 1: Database State Check")
+    
+    exam_count = Exam.objects.count()
+    routine_exam_count = RoutineExam.objects.count()
+    
+    print_info(f"Exam objects in database: {exam_count}")
+    print_info(f"RoutineExam objects in database: {routine_exam_count}")
+    
+    if exam_count == 0:
+        print_error("No Exam objects found in database. Cannot test copy functionality.")
         return False
-
-def test_view_context():
-    """Test that view passes curriculum data to template"""
-    print("\n" + "="*80)
-    print("TEST 2: VIEW CONTEXT DATA")
-    print("="*80)
     
-    try:
-        client = Client()
-        
-        # Get or create admin user
-        admin_user = User.objects.filter(is_superuser=True).first()
-        if not admin_user:
-            admin_user = User.objects.create_superuser('admin', 'admin@test.com', 'admin123')
-            print("Created admin user for testing")
-        
-        # Ensure teacher profile exists
-        if not hasattr(admin_user, 'teacher_profile'):
-            Teacher.objects.create(
-                user=admin_user,
-                name="Admin Teacher",
-                email=admin_user.email,
-                is_head_teacher=True
-            )
-        
-        # Login
+    # Step 2: Get a test exam
+    print_header("Step 2: Select Test Exam")
+    
+    # Get an exam with curriculum level
+    test_exam = Exam.objects.filter(curriculum_level__isnull=False).first()
+    if not test_exam:
+        # If no exam with curriculum, get any exam
+        test_exam = Exam.objects.first()
+        print_info(f"Selected exam without curriculum level: {test_exam.name}")
+    else:
+        print_info(f"Selected exam with curriculum: {test_exam.name}")
+    
+    print_info(f"Exam ID: {test_exam.id}")
+    print_info(f"Exam Type: {test_exam.exam_type}")
+    print_info(f"Timer Minutes: {test_exam.timer_minutes}")
+    print_info(f"Total Questions: {test_exam.total_questions}")
+    print_info(f"Default Options Count: {test_exam.default_options_count}")
+    
+    # Step 3: Get or create curriculum level for copy
+    print_header("Step 3: Setup Curriculum Level")
+    
+    # Get or create a curriculum level
+    curriculum_level = CurriculumLevel.objects.first()
+    if not curriculum_level:
+        print_info("Creating test curriculum level...")
+        # Create program and subprogram
+        program, _ = Program.objects.get_or_create(
+            name="CORE",
+            defaults={'description': 'Core Program'}
+        )
+        subprogram, _ = SubProgram.objects.get_or_create(
+            program=program,
+            name="Phonics",
+            defaults={'description': 'Phonics SubProgram'}
+        )
+        curriculum_level, _ = CurriculumLevel.objects.get_or_create(
+            subprogram=subprogram,
+            level_number=1,
+            defaults={'description': 'Level 1'}
+        )
+    
+    print_info(f"Using curriculum level: {curriculum_level}")
+    print_info(f"Curriculum ID: {curriculum_level.id}")
+    
+    # Step 4: Setup authentication
+    print_header("Step 4: Authentication Setup")
+    
+    # Get or create admin user
+    admin_user = User.objects.filter(is_superuser=True).first()
+    if not admin_user:
+        admin_user = User.objects.filter(is_staff=True).first()
+    
+    if admin_user:
+        print_info(f"Using user: {admin_user.username}")
         client.force_login(admin_user)
-        print(f"✅ Logged in as: {admin_user.username}")
-        
-        # Request exam list page
-        print("Requesting exam list page...")
-        response = client.get('/RoutineTest/exams/')
-        
-        assert response.status_code == 200, f"Bad response: {response.status_code}"
-        print(f"✅ Page loaded successfully")
-        
-        # Check context
-        if hasattr(response, 'context'):
-            context = response.context
-            
-            # Check for curriculum data in context
-            has_hierarchy = 'curriculum_hierarchy_for_copy' in context
-            has_levels = 'curriculum_levels_for_copy' in context
-            
-            print(f"✅ curriculum_hierarchy_for_copy in context: {has_hierarchy}")
-            print(f"✅ curriculum_levels_for_copy in context: {has_levels}")
-            
-            if has_hierarchy:
-                hierarchy_data = context['curriculum_hierarchy_for_copy']
-                if hierarchy_data and 'curriculum_data' in hierarchy_data:
-                    programs = list(hierarchy_data['curriculum_data'].keys())
-                    print(f"✅ Programs in context: {programs}")
-                else:
-                    print("⚠️ Hierarchy data structure invalid")
-        else:
-            print("⚠️ No context available (might be normal in test environment)")
-        
-        # Check if template contains the json_script tag
-        content = response.content.decode('utf-8')
-        has_json_script = 'id="copy-curriculum-hierarchy-data"' in content
-        print(f"✅ JSON script tag in template: {has_json_script}")
-        
-        # Check for Copy modal HTML
-        has_modal = 'id="copyExamModal"' in content
-        has_program_select = 'id="copyProgramSelect"' in content
-        
-        print(f"✅ Copy modal in template: {has_modal}")
-        print(f"✅ Program select in template: {has_program_select}")
-        
-        print("\n✅✅✅ VIEW CONTEXT TEST PASSED")
-        return True
-        
-    except Exception as e:
-        print(f"\n❌ VIEW CONTEXT TEST FAILED: {e}")
-        import traceback
-        traceback.print_exc()
+        print_success("User authenticated")
+    else:
+        print_error("No admin/staff user found for authentication")
         return False
-
-def test_javascript_integration():
-    """Test JavaScript integration points"""
-    print("\n" + "="*80)
-    print("TEST 3: JAVASCRIPT INTEGRATION")
-    print("="*80)
     
-    try:
-        # Check if JavaScript files exist
-        js_files = [
-            '/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/static/js/routinetest/copy-exam-modal-comprehensive-fix.js',
-            '/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project/static/js/routinetest/copy-exam-modal.js'
-        ]
-        
-        for js_file in js_files:
-            if os.path.exists(js_file):
-                file_size = os.path.getsize(js_file)
-                print(f"✅ Found: {os.path.basename(js_file)} ({file_size} bytes)")
-                
-                # Check for key functions
-                with open(js_file, 'r') as f:
-                    content = f.read()
-                    has_open = 'openCopyModal' in content
-                    has_populate = 'populateProgram' in content or 'populateCopyProgram' in content
-                    has_init = 'initialize' in content or 'initializeCurriculum' in content
-                    
-                    print(f"   - Has openCopyModal: {has_open}")
-                    print(f"   - Has populate function: {has_populate}")
-                    print(f"   - Has initialize function: {has_init}")
-            else:
-                print(f"⚠️ Not found: {os.path.basename(js_file)}")
-        
-        print("\n✅✅✅ JAVASCRIPT INTEGRATION TEST PASSED")
-        return True
-        
-    except Exception as e:
-        print(f"\n❌ JAVASCRIPT INTEGRATION TEST FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-def test_exam_copy_functionality():
-    """Test actual exam copy functionality"""
-    print("\n" + "="*80)
-    print("TEST 4: EXAM COPY FUNCTIONALITY")
-    print("="*80)
+    # Step 5: Test the copy endpoint
+    print_header("Step 5: Test Copy Exam Endpoint")
     
-    try:
-        # Check if there are any exams to copy
-        exam_count = Exam.objects.count()
-        print(f"Total exams in database: {exam_count}")
-        
-        if exam_count > 0:
-            # Get first exam
-            exam = Exam.objects.first()
-            print(f"✅ Test exam: {exam.name} (ID: {exam.id})")
-            
-            # Check exam properties
-            print(f"   - Type: {exam.exam_type}")
-            print(f"   - Questions: {exam.total_questions}")
-            print(f"   - Has PDF: {bool(exam.pdf_file)}")
-            print(f"   - Curriculum Level: {exam.curriculum_level}")
-            
-            # Test permission check
-            admin_user = User.objects.filter(is_superuser=True).first()
-            if admin_user:
-                from primepath_routinetest.services.exam_service import ExamPermissionService
-                can_copy = ExamPermissionService.can_teacher_copy_exam(admin_user, exam)
-                print(f"✅ Admin can copy exam: {can_copy}")
-        else:
-            print("⚠️ No exams in database to test copy functionality")
-        
-        print("\n✅✅✅ EXAM COPY FUNCTIONALITY TEST PASSED")
-        return True
-        
-    except Exception as e:
-        print(f"\n❌ EXAM COPY FUNCTIONALITY TEST FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-def run_comprehensive_test():
-    """Run all tests and generate report"""
-    print("\n" + "="*80)
-    print("COMPREHENSIVE COPY EXAM MODAL FIX TEST")
-    print(f"Timestamp: {datetime.now().isoformat()}")
-    print("="*80)
-    
-    results = {
-        'backend_generation': False,
-        'view_context': False,
-        'javascript_integration': False,
-        'copy_functionality': False
+    # Prepare copy request data
+    copy_data = {
+        'source_exam_id': str(test_exam.id),
+        'curriculum_level_id': str(curriculum_level.id),
+        'exam_type': 'REVIEW',
+        'timeslot': 'JAN',
+        'academic_year': '2025',
+        'custom_suffix': 'TEST COPY'
     }
     
-    # Run tests
-    results['backend_generation'] = test_backend_curriculum_generation()
-    results['view_context'] = test_view_context()
-    results['javascript_integration'] = test_javascript_integration()
-    results['copy_functionality'] = test_exam_copy_functionality()
+    print_info("Request data:")
+    for key, value in copy_data.items():
+        print(f"  {key}: {value}")
     
-    # Summary
+    # Make the copy request
+    print_info("\nSending copy request to /RoutineTest/exams/copy/...")
+    
+    response = client.post(
+        '/RoutineTest/exams/copy/',
+        data=json.dumps(copy_data),
+        content_type='application/json'
+    )
+    
+    print_info(f"Response status: {response.status_code}")
+    
+    # Parse response
+    try:
+        response_data = response.json()
+        print_info("Response data:")
+        print(json.dumps(response_data, indent=2))
+    except:
+        print_error(f"Failed to parse response as JSON: {response.content[:200]}")
+        return False
+    
+    # Step 6: Verify the result
+    print_header("Step 6: Verify Copy Result")
+    
+    if response.status_code == 200 and response_data.get('success'):
+        print_success("Copy operation successful!")
+        
+        new_exam_id = response_data.get('new_exam_id')
+        new_exam_name = response_data.get('new_exam_name')
+        
+        print_info(f"New exam ID: {new_exam_id}")
+        print_info(f"New exam name: {new_exam_name}")
+        
+        # Verify the new exam exists
+        try:
+            new_exam = Exam.objects.get(id=new_exam_id)
+            print_success("New exam found in database")
+            
+            # Verify fields were copied correctly
+            print_info("\nVerifying copied fields:")
+            
+            # Check critical fields
+            checks = [
+                ('Name contains TEST COPY', 'TEST COPY' in new_exam.name),
+                ('Timer minutes copied', new_exam.timer_minutes == test_exam.timer_minutes),
+                ('Total questions copied', new_exam.total_questions == test_exam.total_questions),
+                ('Default options count copied', new_exam.default_options_count == test_exam.default_options_count),
+                ('Curriculum level set', new_exam.curriculum_level == curriculum_level),
+                ('Exam is active', new_exam.is_active)
+            ]
+            
+            all_passed = True
+            for check_name, check_result in checks:
+                if check_result:
+                    print_success(check_name)
+                else:
+                    print_error(check_name)
+                    all_passed = False
+            
+            if all_passed:
+                print_success("\n🎉 ALL TESTS PASSED! Copy exam functionality is working correctly.")
+                return True
+            else:
+                print_error("\n⚠️ Some checks failed. Review the fields above.")
+                return False
+            
+        except Exam.DoesNotExist:
+            print_error(f"New exam with ID {new_exam_id} not found in database!")
+            return False
+    else:
+        print_error("Copy operation failed!")
+        if response_data.get('error'):
+            print_error(f"Error: {response_data.get('error')}")
+        if response_data.get('details'):
+            print_error(f"Details: {response_data.get('details')}")
+        return False
+    
+    # Step 7: Test error handling
+    print_header("Step 7: Test Error Handling")
+    
+    # Test with invalid exam ID
+    print_info("Testing with invalid exam ID...")
+    invalid_data = copy_data.copy()
+    invalid_data['source_exam_id'] = 'invalid-uuid-12345'
+    
+    response = client.post(
+        '/RoutineTest/exams/copy/',
+        data=json.dumps(invalid_data),
+        content_type='application/json'
+    )
+    
+    if response.status_code == 404:
+        print_success("Correctly returned 404 for invalid exam ID")
+    else:
+        print_error(f"Unexpected status code for invalid exam: {response.status_code}")
+    
+    # Test with missing curriculum level
+    print_info("Testing with missing curriculum level...")
+    missing_data = copy_data.copy()
+    del missing_data['curriculum_level_id']
+    
+    response = client.post(
+        '/RoutineTest/exams/copy/',
+        data=json.dumps(missing_data),
+        content_type='application/json'
+    )
+    
+    if response.status_code == 400:
+        print_success("Correctly returned 400 for missing curriculum level")
+    else:
+        print_error(f"Unexpected status code for missing field: {response.status_code}")
+    
+    print_header("TEST COMPLETE")
+    return True
+
+def check_model_confusion():
+    """Check for any model confusion issues"""
+    print_header("Model Confusion Check")
+    
+    # Check if any exam IDs exist in both tables
+    exam_ids = set(str(e.id) for e in Exam.objects.all())
+    routine_exam_ids = set(str(re.id) for re in RoutineExam.objects.all())
+    
+    overlapping = exam_ids.intersection(routine_exam_ids)
+    
+    if overlapping:
+        print_error(f"Found {len(overlapping)} overlapping IDs between Exam and RoutineExam!")
+        for oid in list(overlapping)[:5]:
+            print(f"  - {oid}")
+        return False
+    else:
+        print_success("No overlapping IDs between Exam and RoutineExam tables")
+        return True
+
+def main():
+    """Main test runner"""
     print("\n" + "="*80)
-    print("TEST SUMMARY")
+    print(" COPY EXAM FIX - COMPREHENSIVE TEST SUITE")
     print("="*80)
     
-    passed = sum(1 for v in results.values() if v)
-    total = len(results)
-    
-    for test_name, passed in results.items():
-        status = "✅ PASSED" if passed else "❌ FAILED"
-        print(f"{test_name}: {status}")
-    
-    print(f"\nOverall: {passed}/{total} tests passed")
-    
-    if passed == total:
-        print("\n🎉🎉🎉 ALL TESTS PASSED - COPY EXAM MODAL FIX IS WORKING! 🎉🎉🎉")
-    else:
-        print("\n⚠️ Some tests failed - review the output above for details")
-    
-    return passed == total
+    try:
+        # Run model confusion check
+        model_check = check_model_confusion()
+        
+        # Run copy exam test
+        copy_test = test_copy_exam_fix()
+        
+        # Summary
+        print_header("TEST SUMMARY")
+        if model_check and copy_test:
+            print_success("✅ ALL TESTS PASSED!")
+            print_success("The copy exam feature is working correctly.")
+            print_success("The model mismatch issue has been resolved.")
+        else:
+            print_error("❌ SOME TESTS FAILED")
+            print_error("Please review the errors above.")
+        
+    except Exception as e:
+        print_error(f"Unexpected error during testing: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 if __name__ == "__main__":
-    success = run_comprehensive_test()
-    sys.exit(0 if success else 1)
+    main()

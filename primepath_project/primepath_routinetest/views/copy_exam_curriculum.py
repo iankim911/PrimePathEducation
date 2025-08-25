@@ -228,11 +228,21 @@ def copy_exam_with_curriculum(request):
                 # Copy questions
                 questions_copied = 0
                 for source_question in source_exam.routine_questions.all():
-                    # Create new question (don't modify the original)
-                    new_question = source_question
-                    new_question.pk = None  # Reset primary key
-                    new_question.id = uuid.uuid4()
-                    new_question.exam = new_exam
+                    # IMPORTANT: Create a new question instance, don't modify the original!
+                    # We need to properly copy the question to avoid SQLite integer overflow
+                    # NOTE: Question model uses auto-increment integer ID, not UUID
+                    from ..models import Question
+                    
+                    new_question = Question(
+                        # Do NOT set id - let Django auto-generate it (integer auto-increment)
+                        exam=new_exam,  # Link to new exam
+                        question_number=source_question.question_number,
+                        question_type=source_question.question_type,
+                        correct_answer=source_question.correct_answer,
+                        points=source_question.points,
+                        options_count=source_question.options_count,
+                        audio_file=source_question.audio_file  # Keep same audio file reference
+                    )
                     new_question.save()
                     questions_copied += 1
                 
@@ -242,10 +252,19 @@ def copy_exam_with_curriculum(request):
                 # Copy audio files
                 audio_files_copied = 0
                 for source_audio in source_exam.routine_audio_files.all():
-                    new_audio = source_audio
-                    new_audio.pk = None
-                    new_audio.id = uuid.uuid4()
-                    new_audio.exam = new_exam
+                    # IMPORTANT: Create a new audio file instance, don't modify the original!
+                    # NOTE: AudioFile model uses auto-increment integer ID, not UUID
+                    from ..models import AudioFile
+                    
+                    new_audio = AudioFile(
+                        # Do NOT set id - let Django auto-generate it (integer auto-increment)
+                        exam=new_exam,  # Link to new exam
+                        name=source_audio.name,
+                        audio_file=source_audio.audio_file,  # Keep same file reference
+                        start_question=source_audio.start_question,
+                        end_question=source_audio.end_question,
+                        order=source_audio.order
+                    )
                     new_audio.save()
                     audio_files_copied += 1
                 
