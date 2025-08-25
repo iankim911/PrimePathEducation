@@ -719,10 +719,10 @@ class ExamService:
                     logger.debug(f"[EXAM_PERMISSION_OWNERSHIP] User {user.username} has no teacher_profile")
             
             # CRITICAL FIX: Apply proper filtering based on ownership mode
-            # ADMIN FIX: Apply filtering for admins when using specific ownership filters
+            # ADMIN FIX: Admins should see ALL exams in "My Test Files" without filtering
             should_apply_filtering = effective_filter_assigned and (
                 not is_admin or 
-                filter_mode in ['MY_EXAMS', 'OTHERS_EXAMS']  # Always filter for ownership-based modes
+                filter_mode == 'OTHERS_EXAMS'  # Only filter for "Other Teachers' Test Files" 
             )
             
             if should_apply_filtering:
@@ -838,12 +838,14 @@ class ExamService:
                 exam.can_delete = True
                 exam.is_owner = False
                 exam.access_badge = 'ADMIN'
+                exam.is_accessible = True  # Ensure is_accessible is always set
             elif is_admin and filter_mode in ['MY_EXAMS', 'OTHERS_EXAMS']:
                 # ADMIN using ownership filters - treat like regular user for badges
                 exam.can_edit = True  # Admin can always edit
                 exam.can_copy = True
                 exam.can_delete = True
                 exam.is_owner = is_owner
+                exam.is_accessible = True  # Ensure is_accessible is always set
                 
                 if is_owner:
                     exam.access_badge = 'OWNER'
@@ -862,6 +864,7 @@ class ExamService:
                 exam.can_delete = False
                 exam.is_owner = is_owner  # CRITICAL FIX: Preserve ownership status
                 exam.access_badge = 'VIEW ONLY'
+                exam.is_accessible = True  # Ensure is_accessible is always set
                 
                 # Check if this is actually an owned exam (ownership takes precedence)
                 if is_owner:
