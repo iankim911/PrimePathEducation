@@ -635,7 +635,7 @@ def classes_exams_unified_view(request):
             
             # Get classes for this program that the user has access to
             program_mapping_debug = []
-            for assignment in my_assignments[:20]:  # Limit for performance
+            for assignment in my_assignments:  # Check all assignments, not just first 20
                 if assignment.class_code in PROGRAM_MAPPING[program_name]:
                     program_mapping_debug.append(assignment.class_code)
                     # Get class details
@@ -792,7 +792,7 @@ def classes_exams_unified_view(request):
         
         # SECTION 5: My Classes detailed information (keep for backward compatibility)
         classes_info = []
-        for assignment in my_assignments[:20]:  # Limit for performance
+        for assignment in my_assignments[:50]:  # Limit increased to include more classes
             class_info = {
                 'class_code': assignment.class_code,
                 'class_name': assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code,

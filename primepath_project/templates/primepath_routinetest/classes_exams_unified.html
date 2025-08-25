@@ -283,10 +283,23 @@
         color: white !important;
     }
     
-    .program-title.core { color: white !important; background: transparent !important; }
-    .program-title.ascent { color: white !important; background: transparent !important; }
-    .program-title.edge { color: white !important; background: transparent !important; }
-    .program-title.pinnacle { color: white !important; background: transparent !important; }
+    /* Force all text inside program-title to be white */
+    .program-title * {
+        color: white !important;
+    }
+    
+    .program-title.core,
+    .program-title.ascent,
+    .program-title.edge,
+    .program-title.pinnacle {
+        color: white !important;
+        background: transparent !important;
+    }
+    
+    /* Ensure program text specifically is white */
+    .program-header .program-title {
+        color: white !important;
+    }
     
     /* Program content area */
     .program-classes {

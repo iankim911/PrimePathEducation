@@ -233,7 +233,7 @@
     /* WCAG Compliant Program Headers - Dark Green with White Text */
     .program-header {
         background: linear-gradient(135deg, #1B5E20, #2E7D32);
-        color: white;
+        color: white !important;
         padding: 15px 20px;
         font-size: 1.3rem;
         font-weight: 600;
@@ -245,15 +245,20 @@
         border-bottom: 2px solid #1B5E20;
     }
     
+    /* Force all text in program header to be white */
+    .program-header * {
+        color: white !important;
+    }
+    
     .program-header:hover {
         background: linear-gradient(135deg, #2E7D32, #388E3C);
-        color: white;
+        color: white !important;
     }
     
     .program-toggle {
         font-size: 1.2rem;
         transition: transform 0.3s;
-        color: white;
+        color: white !important;
     }
     
     .program-section.collapsed .program-toggle {
