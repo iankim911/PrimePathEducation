@@ -177,8 +177,9 @@ class StudentRegistrationForm(UserCreationForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Set username field to use student_id
+        # Set username field to use student_id - make it not required since we'll set it programmatically
         self.fields['username'].widget = forms.HiddenInput()
+        self.fields['username'].required = False
         self.fields['password1'].widget.attrs.update({
             'class': 'form-control',
             'placeholder': 'Create a password'
@@ -211,6 +212,11 @@ class StudentRegistrationForm(UserCreationForm):
     def clean(self):
         cleaned_data = super().clean()
         
+        # Automatically set username to student_id
+        student_id = cleaned_data.get('student_id')
+        if student_id:
+            cleaned_data['username'] = student_id
+        
         # Ensure at least one parent contact if student is under 18
         grade = cleaned_data.get('grade')
         if grade and grade in ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']:
@@ -223,10 +229,18 @@ class StudentRegistrationForm(UserCreationForm):
         return cleaned_data
     
     def save(self, commit=True):
-        # Set username to student_id
-        self.cleaned_data['username'] = self.cleaned_data['student_id']
+        # Set username to student_id BEFORE calling parent save
+        student_id = self.cleaned_data['student_id']
+        
+        # Set the username field in the instance before parent save
+        if hasattr(self, 'instance'):
+            self.instance.username = student_id
+        
+        # Also set in cleaned_data for parent form
+        self.cleaned_data['username'] = student_id
+        
         user = super().save(commit=False)
-        user.username = self.cleaned_data['student_id']
+        user.username = student_id
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.email = self.cleaned_data['email']
