@@ -1,0 +1,79 @@
+{
+  "timestamp": "2025-08-25T18:31:34.235394",
+  "test_results": {
+    "teacher1_fix": {
+      "teacher_name": "Taehyun Kim",
+      "tca_assignments": 11,
+      "class_assignments": 11,
+      "synchronization_rate": 100.0,
+      "status": "PASS"
+    },
+    "system_integrity": {
+      "teachers_analyzed": 15,
+      "teachers_with_assignments": 2,
+      "teachers_synchronized": 1,
+      "total_tca_assignments": 13,
+      "total_class_assignments": 11,
+      "synchronization_issues": [
+        {
+          "teacher": "admin",
+          "tca_count": 2,
+          "class_count": 0,
+          "difference": 2
+        }
+      ]
+    },
+    "database_integrity": {
+      "total_teachers": 15,
+      "total_active_classes": 166,
+      "total_active_tca": 13,
+      "classes_with_teachers": 11,
+      "orphaned_classes": 155,
+      "duplicate_assignments": 0
+    },
+    "class_verification": {
+      "expected_classes": [
+        "TaejoE",
+        "PRIMARY_2A",
+        "HIGH_10E",
+        "C5",
+        "PRIMARY_1D",
+        "Sungjong4",
+        "HIGH_10F",
+        "Chung-cho1",
+        "HIGH_11D",
+        "SejongM",
+        "MIDDLE_7A"
+      ],
+      "found_classes": [
+        "TaejoE",
+        "PRIMARY_2A",
+        "HIGH_10E",
+        "C5",
+        "PRIMARY_1D",
+        "Sungjong4",
+        "HIGH_10F",
+        "Chung-cho1",
+        "HIGH_11D",
+        "SejongM",
+        "MIDDLE_7A"
+      ],
+      "missing_classes": [],
+      "status": "PASS"
+    }
+  },
+  "overall_status": "PASS",
+  "critical_issues": [],
+  "warnings": [
+    "1 teachers have synchronization issues",
+    "155 classes have no assigned teachers"
+  ],
+  "summary": {
+    "total_tests": 4,
+    "passed_tests": 2,
+    "failed_tests": 0,
+    "error_tests": 0,
+    "critical_issues_count": 0,
+    "warnings_count": 2
+  }
+}

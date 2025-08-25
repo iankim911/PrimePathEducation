@@ -323,16 +323,41 @@ def classes_exams_unified_view(request):
         for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
             # Skip if user already has access to this class
             if code not in my_class_codes and code not in existing_requests:
+                # FIX: Avoid duplication when curriculum maps to itself (PS1 -> PS1)
+                # Show just the class code if curriculum is identical to the code
+                if curriculum == code:
+                    class_display_name = code
+                else:
+                    class_display_name = f"{code} - {curriculum}"
+                    
                 available_classes.append({
                     'class_code': code,
-                    'class_name': f"{code} - {curriculum}"
+                    'class_name': class_display_name
                 })
+                
+                # DEBUG: Log the class code processing for troubleshooting
+                logger.debug(f"[CLASS_CODE_DROPDOWN] Code: {code}, Curriculum: {curriculum}, Display: {class_display_name}")
+                if code in ['PS1', 'P1', 'P2']:  # Debug specific codes we see in the screenshot
+                    print(f"[CLASS_CODE_DEBUG] {code} -> curriculum: '{curriculum}' -> display: '{class_display_name}'")
         
         # Update context with filtered available classes
         context['available_classes'] = available_classes
         
+        # COMPREHENSIVE DEBUG LOGGING for class dropdown issue
         logger.info(f"[REQUEST_ACCESS_FILTER] User has access to {len(my_class_codes)} classes, {len(existing_requests)} pending/approved requests, showing {len(available_classes)} available classes for request")
         print(f"[REQUEST_ACCESS_FILTER] Filtered dropdown: User classes: {len(my_class_codes)}, Available for request: {len(available_classes)}")
+        
+        # DEBUG: Log all available classes being sent to template
+        print(f"[CLASS_DROPDOWN_DEBUG] === AVAILABLE CLASSES FOR REQUEST ACCESS MODAL ===")
+        for i, class_item in enumerate(available_classes[:10], 1):  # Show first 10 for debugging
+            print(f"[CLASS_DROPDOWN_DEBUG] {i}. Code: '{class_item['class_code']}' | Display: '{class_item['class_name']}'")
+        if len(available_classes) > 10:
+            print(f"[CLASS_DROPDOWN_DEBUG] ... and {len(available_classes) - 10} more classes")
+        
+        # DEBUG: Also log user's current access for comparison
+        print(f"[USER_ACCESS_DEBUG] User {request.user.username} current classes: {my_class_codes[:5]}")
+        print(f"[USER_ACCESS_DEBUG] User pending requests: {list(existing_requests)[:5]}")
+        print(f"[CLASS_DROPDOWN_DEBUG] ===== END DEBUG =====")
         
         # SECTION 3: Build schedule matrix data (RESTORED FULL FUNCTIONALITY)
         # Matrix uses months (JAN-DEC) for Review exams and quarters (Q1-Q4) for Quarterly exams

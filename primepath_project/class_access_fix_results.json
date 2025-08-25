@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-08-25T18:30:00",
+  "teacher_name": "Taehyun Kim",
+  "teacher_username": "teacher1",
+  "created_classes": 0,
+  "synchronized_assignments": 11,
+  "errors": 0,
+  "actions_taken": [
+    {
+      "action": "added_to_existing_class",
+      "class_code": "TaejoE",
+      "class_name": "TaejoE - ASCENT Drive Level 3",
+      "class_id": "c9eae0e6-c988-47a1-a98e-96eb3946bf36"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "PRIMARY_2A",
+      "class_name": "Primary 2A",
+      "class_id": "1cffcd40-c0e8-4b60-a9b7-489517df5891"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "HIGH_10E",
+      "class_name": "High School 10E",
+      "class_id": "fd231c60-3b9b-4077-8130-efd7321639c8"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "C5",
+      "class_name": "C5 - CORE Elite Level 1",
+      "class_id": "d783a54b-2de4-41ac-b90d-793a431f413a"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "PRIMARY_1D",
+      "class_name": "Primary 1D",
+      "class_id": "3ba000ce-4959-4127-8b90-3c7c160b812a"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "Sungjong4",
+      "class_name": "Sungjong4 - EDGE Spark Level 2",
+      "class_id": "c0a34159-7868-4a67-a2ad-ccecabe3134f"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "HIGH_10F",
+      "class_name": "High School 10F",
+      "class_id": "c66b3421-8c96-4692-afef-6f85a33b673c"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "Chung-cho1",
+      "class_name": "Chung-cho1 - EDGE Rise Level 3",
+      "class_id": "87bc45a4-5b3d-4e3f-ac16-1b88a78360b1"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "HIGH_11D",
+      "class_name": "High School 11D",
+      "class_id": "723ddcb1-7382-4bbc-8bf1-e1ac0f301683"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "SejongM",
+      "class_name": "SejongM - EDGE Pursuit Level 3",
+      "class_id": "67c0bfdb-0295-4ab6-8d75-2850be969cc3"
+    },
+    {
+      "action": "added_to_existing_class",
+      "class_code": "MIDDLE_7A",
+      "class_name": "Middle School 7A",
+      "class_id": "45004b76-d654-4c8d-af59-7e7e4479fcc0"
+    }
+  ],
+  "error_details": [],
+  "verification": {
+    "original_tca_count": 11,
+    "final_class_count": 11,
+    "synchronization_rate": 100.0,
+    "success": true
+  }
+}

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
+from core.utils.authentication import student_login as safe_student_login
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.cache import never_cache
 from django.http import JsonResponse
@@ -29,13 +30,21 @@ def student_register(request):
                 user = form.save()
                 messages.success(request, f'Account created successfully! Welcome, {user.first_name}!')
                 
-                # Auto-login the user
+                # Auto-login the user with comprehensive authentication handling
                 username = form.cleaned_data['student_id']
                 password = form.cleaned_data['password1']
                 user = authenticate(username=username, password=password)
                 if user:
-                    login(request, user)
-                    return redirect('primepath_student:dashboard')
+                    login_successful = safe_student_login(
+                        request, 
+                        user, 
+                        registration_form_data=form.cleaned_data
+                    )
+                    if login_successful:
+                        return redirect('primepath_student:dashboard')
+                    else:
+                        messages.error(request, "Account created but login failed. Please try logging in manually.")
+                        return redirect('primepath_student:login')
                 else:
                     return redirect('primepath_student:login')
                     
@@ -109,14 +118,21 @@ def student_login(request):
             # Authenticate using username (which is student_id)
             auth_user = authenticate(username=user.username, password=password)
             if auth_user:
-                login(request, auth_user)
+                login_successful = safe_student_login(
+                    request, 
+                    auth_user, 
+                    login_form_data=form.cleaned_data
+                )
                 
-                # Set session expiry based on remember_me
-                if not form.cleaned_data.get('remember_me', False):
-                    request.session.set_expiry(0)  # Browser session only
-                
-                messages.success(request, f'Welcome back, {auth_user.first_name}!')
-                return redirect('primepath_student:dashboard')
+                if login_successful:
+                    # Set session expiry based on remember_me
+                    if not form.cleaned_data.get('remember_me', False):
+                        request.session.set_expiry(0)  # Browser session only
+                    
+                    messages.success(request, f'Welcome back, {auth_user.first_name}!')
+                    return redirect('primepath_student:dashboard')
+                else:
+                    messages.error(request, 'Login failed. Please try again.')
             else:
                 messages.error(request, 'Invalid login credentials.')
         else:

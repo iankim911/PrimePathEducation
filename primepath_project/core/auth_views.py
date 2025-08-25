@@ -3,7 +3,8 @@ Authentication views for teacher login/logout
 Handles user authentication with comprehensive logging
 """
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
+from core.utils.authentication import safe_login, debug_authentication_state
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.urls import reverse
@@ -69,14 +70,21 @@ def login_view(request):
         
         if user is not None:
             if user.is_active:
-                # Login successful
-                login(request, user)
+                # Login successful with comprehensive authentication handling
+                login_successful = safe_login(
+                    request, 
+                    user, 
+                    source='CORE_AUTH_VIEW',
+                    remember_me=remember_me,
+                    username_provided=username
+                )
                 
-                # Set session expiry based on remember me
-                if not remember_me:
-                    request.session.set_expiry(0)  # Browser close
-                else:
-                    request.session.set_expiry(1209600)  # 2 weeks
+                if login_successful:
+                    # Set session expiry based on remember me
+                    if not remember_me:
+                        request.session.set_expiry(0)  # Browser close
+                    else:
+                        request.session.set_expiry(1209600)  # 2 weeks
                 
                 # Check for Teacher profile
                 try:

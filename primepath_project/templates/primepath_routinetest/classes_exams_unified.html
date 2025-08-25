@@ -1401,9 +1401,12 @@ console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
                         <select id="requestedClass" name="class_code" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px;">
                             <option value="">-- Select a class --</option>
                             {% if available_classes %}
+                                {% comment %} DEBUG: Template-level debugging for class dropdown {% endcomment %}
                                 {% for class in available_classes %}
                                     <option value="{{ class.class_code }}">{{ class.class_name }}</option>
                                 {% endfor %}
+                                {% comment %} DEBUG: Log available classes count {% endcomment %}
+                                <!-- DEBUG: {{ available_classes|length }} classes available for request -->
                             {% else %}
                                 <!-- Fallback if no dynamic classes available -->
                                 <optgroup label="CORE Program">
@@ -1480,6 +1483,26 @@ console.log('[MODAL_DEBUG] To test the modal, run: testExamModal()');
 // Request Access Modal Functions
 function openRequestAccessModal() {
     console.log('[REQUEST_ACCESS] Opening modal...');
+    
+    // DEBUG: Log dropdown options to verify class codes
+    const classDropdown = document.getElementById('requestedClass');
+    if (classDropdown) {
+        console.log('[CLASS_DROPDOWN_DEBUG] === FRONTEND DROPDOWN OPTIONS ===');
+        console.log('[CLASS_DROPDOWN_DEBUG] Total options:', classDropdown.options.length);
+        
+        for (let i = 0; i < Math.min(classDropdown.options.length, 15); i++) {
+            const option = classDropdown.options[i];
+            console.log(`[CLASS_DROPDOWN_DEBUG] ${i}. Value: "${option.value}" | Text: "${option.text}"`);
+        }
+        
+        if (classDropdown.options.length > 15) {
+            console.log(`[CLASS_DROPDOWN_DEBUG] ... and ${classDropdown.options.length - 15} more options`);
+        }
+        console.log('[CLASS_DROPDOWN_DEBUG] === END FRONTEND DEBUG ===');
+    } else {
+        console.error('[CLASS_DROPDOWN_DEBUG] ERROR: requestedClass dropdown not found!');
+    }
+    
     document.getElementById('requestAccessModal').style.display = 'block';
     document.body.style.overflow = 'hidden'; // Prevent background scrolling
 }

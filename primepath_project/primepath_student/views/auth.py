@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
+from core.utils.authentication import student_login as safe_student_login, debug_authentication_state
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.http import require_http_methods
 from primepath_student.models import StudentProfile
@@ -124,10 +125,25 @@ def student_register(request):
                     recovery_email=email  # Use same email for recovery
                 )
                 
-                # Log the user in
-                login(request, user)
-                messages.success(request, f"Welcome {first_name}! Your Student ID is: {student_id}")
-                return redirect('primepath_student:dashboard')
+                # Log the user in with comprehensive authentication handling
+                login_successful = safe_student_login(
+                    request, 
+                    user, 
+                    registration_data={
+                        'first_name': first_name,
+                        'last_name': last_name,
+                        'student_id': student_id,
+                        'phone_number': phone_number,
+                        'email': email
+                    }
+                )
+                
+                if login_successful:
+                    messages.success(request, f"Welcome {first_name}! Your Student ID is: {student_id}")
+                    return redirect('primepath_student:dashboard')
+                else:
+                    messages.error(request, "Account created but login failed. Please try logging in manually.")
+                    return redirect('primepath_student:login')
                 
         except Exception as e:
             messages.error(request, "Registration failed. Please try again.")
@@ -188,10 +204,20 @@ def student_login(request):
             # Authenticate user
             user = authenticate(username=student_profile.user.username, password=password)
             if user:
-                login(request, user)
-                messages.success(request, f"Welcome back, {user.first_name}!")
+                login_successful = safe_student_login(
+                    request, 
+                    user, 
+                    login_data={
+                        'login_method': 'phone_or_student_id',
+                        'login_identifier': login_id,
+                        'student_profile_id': student_profile.id
+                    }
+                )
                 
-                # Redirect to next page if specified
+                if login_successful:
+                    messages.success(request, f"Welcome back, {user.first_name}!")
+                    
+                    # Redirect to next page if specified
                 next_page = request.GET.get('next', 'primepath_student:dashboard')
                 return redirect(next_page)
             else:
