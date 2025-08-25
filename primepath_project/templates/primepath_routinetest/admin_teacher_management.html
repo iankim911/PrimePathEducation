@@ -19,7 +19,7 @@
     
     /* Header Section */
     .mgmt-header {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
         color: white;
         padding: 30px;
         border-radius: 12px;
@@ -71,15 +71,15 @@
     }
     
     .view-mode-btn:hover {
-        border-color: #007bff;
-        background: #f8f9fa;
+        border-color: #2E7D32;
+        background: #E8F5E9;
         text-decoration: none;
-        color: #007bff;
+        color: #1B5E20;
     }
     
     .view-mode-btn.active {
-        background: #007bff;
-        border-color: #007bff;
+        background: #2E7D32;
+        border-color: #2E7D32;
         color: white;
     }
     
@@ -103,7 +103,7 @@
     .analytics-card .number {
         font-size: 32px;
         font-weight: 700;
-        color: #2c3e50;
+        color: #1B5E20;
         margin-bottom: 8px;
     }
     
@@ -115,15 +115,15 @@
     }
     
     .analytics-card.highlight .number {
-        color: #007bff;
+        color: #2E7D32;
     }
     
     .analytics-card.warning .number {
-        color: #dc3545;
+        color: #e74c3c;
     }
     
     .analytics-card.success .number {
-        color: #28a745;
+        color: #00A65E;
     }
     
     /* Content Sections */
@@ -149,7 +149,7 @@
         margin: 0;
         font-size: 22px;
         font-weight: 600;
-        color: #2c3e50;
+        color: #1B5E20;
     }
     
     /* Teacher Directory Styles */
@@ -182,7 +182,7 @@
     .teacher-name {
         font-size: 16px;
         font-weight: 600;
-        color: #2c3e50;
+        color: #1B5E20;
         margin: 0;
     }
     
@@ -281,7 +281,7 @@
     .class-name-display {
         font-size: 16px;
         font-weight: 600;
-        color: #2c3e50;
+        color: #1B5E20;
         margin: 0;
     }
     
@@ -293,7 +293,7 @@
     
     .teacher-count-badge {
         display: inline-block;
-        background: #007bff;
+        background: #2E7D32;
         color: white;
         padding: 4px 8px;
         border-radius: 12px;
@@ -303,11 +303,11 @@
     }
     
     .teacher-count-badge.zero {
-        background: #dc3545;
+        background: #e74c3c;
     }
     
     .teacher-count-badge.multi {
-        background: #28a745;
+        background: #00A65E;
     }
     
     .class-teachers {
@@ -400,7 +400,7 @@
     }
     
     .btn-primary-custom {
-        background: #007bff;
+        background: #2E7D32;
         color: white;
         border: none;
         padding: 12px 24px;
@@ -415,7 +415,7 @@
     }
     
     .btn-primary-custom:hover {
-        background: #0056b3;
+        background: #1B5E20;
         text-decoration: none;
         color: white;
     }
@@ -442,7 +442,7 @@
     }
     
     .btn-danger-custom {
-        background: #dc3545;
+        background: #e74c3c;
         color: white;
         border: none;
         padding: 8px 16px;
@@ -454,7 +454,7 @@
     }
     
     .btn-danger-custom:hover {
-        background: #c82333;
+        background: #c0392b;
     }
     
     /* Modal Styles */
@@ -493,7 +493,7 @@
         margin: 0;
         font-size: 20px;
         font-weight: 600;
-        color: #2c3e50;
+        color: #1B5E20;
     }
     
     .close {
@@ -533,8 +533,8 @@
     
     .form-control:focus {
         outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        border-color: #2E7D32;
+        box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
     }
     
     /* Empty State */
@@ -563,7 +563,7 @@
         height: 20px;
         border: 2px solid #e9ecef;
         border-radius: 50%;
-        border-top: 2px solid #007bff;
+        border-top: 2px solid #2E7D32;
         animation: spin 1s linear infinite;
         margin-left: 10px;
     }
@@ -612,7 +612,7 @@
         position: fixed;
         bottom: 20px;
         right: 20px;
-        background: #28a745;
+        background: #00A65E;
         color: white;
         padding: 8px 12px;
         border-radius: 20px;
@@ -897,7 +897,7 @@
                 <div class="empty-state" style="padding: 20px;">
                     <div style="color: #6c757d; font-size: 14px;">No teachers assigned</div>
                     <button onclick="openDirectAssignModalForClass('{{ class_data.class_code }}')" 
-                            style="margin-top: 8px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                            style="margin-top: 8px; padding: 8px 16px; background: #2E7D32; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">
                         Assign Teacher
                     </button>
                 </div>
@@ -1017,7 +1017,7 @@
                         </div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
+                        <div style="background: #FFF9C4; color: #F57C00; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
                             {{ req_data.days_pending }} day{{ req_data.days_pending|pluralize }} ago
                         </div>
                         <div style="font-size: 12px; color: #6c757d; margin-top: 4px;">
@@ -1035,7 +1035,7 @@
                         </div>
                         <div>
                             <div style="font-size: 12px; color: #6c757d; font-weight: 500; margin-bottom: 4px;">ACCESS LEVEL</div>
-                            <div style="font-weight: 600; color: {% if req_data.request.requested_access_level == 'FULL' %}#27ae60{% else %}#3498db{% endif %};">
+                            <div style="font-weight: 600; color: {% if req_data.request.requested_access_level == 'FULL' %}#00A65E{% else %}#2E7D32{% endif %};">
                                 {{ req_data.request.get_requested_access_level_display }}
                             </div>
                         </div>
@@ -1067,15 +1067,15 @@
                 
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
                     <button onclick="denyRequest('{{ req_data.request.id }}')" 
-                            style="background: #dc3545 !important; color: #FFFFFF !important; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; display: inline-block;"
-                            onmouseover="this.style.background='#c82333'" 
-                            onmouseout="this.style.background='#dc3545'">
+                            style="background: #e74c3c !important; color: #FFFFFF !important; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; display: inline-block;"
+                            onmouseover="this.style.background='#c0392b'" 
+                            onmouseout="this.style.background='#e74c3c'">
                         Deny Request
                     </button>
                     <button onclick="approveRequest('{{ req_data.request.id }}')" 
-                            style="background: #28a745 !important; color: #FFFFFF !important; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 500; cursor: pointer; display: inline-block;"
-                            onmouseover="this.style.background='#218838'" 
-                            onmouseout="this.style.background='#28a745'">
+                            style="background: #00A65E !important; color: #FFFFFF !important; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 500; cursor: pointer; display: inline-block;"
+                            onmouseover="this.style.background='#2E7D32'" 
+                            onmouseout="this.style.background='#00A65E'">
                         Approve Request
                     </button>
                 </div>

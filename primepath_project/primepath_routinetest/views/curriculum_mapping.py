@@ -81,13 +81,14 @@ def curriculum_mapping_view(request):
     # Get current academic year
     current_year = request.GET.get('year', str(timezone.now().year))
     
-    # Get all unique class codes from TeacherClassAssignment
-    all_class_codes = TeacherClassAssignment.objects.values_list(
-        'class_code', flat=True
-    ).distinct().order_by('class_code')
+    # Get all unique class codes from Class model (primary source of truth)
+    from primepath_routinetest.models import Class
+    all_class_codes = Class.objects.values_list(
+        'section', flat=True
+    ).distinct().order_by('section')
     
-    # Convert to list and ensure uppercase
-    class_codes = [code.upper() for code in all_class_codes]
+    # Convert to list, filter out empty, and ensure uppercase
+    class_codes = [code.upper() for code in all_class_codes if code and code.strip()]
     
     # Get existing mappings for current year
     existing_mappings = ClassCurriculumMapping.objects.filter(

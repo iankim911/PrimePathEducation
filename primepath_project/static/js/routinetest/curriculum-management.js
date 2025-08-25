@@ -75,9 +75,11 @@ async function loadAdminClasses() {
                         </select>
                     </td>
                     <td>
-                        <button class="btn-save" onclick="saveCurriculumMapping('${cls.code}')">Save</button>
-                        <button class="btn-edit" onclick="editClass('${cls.code}')">Edit</button>
-                        <button class="btn-delete" onclick="deleteClass('${cls.code}')">Delete</button>
+                        <div class="action-buttons">
+                            <button class="btn-save" onclick="saveCurriculumMapping('${cls.code}')">Save</button>
+                            <button class="btn-edit" onclick="editClass('${cls.code}')">Edit</button>
+                            <button class="btn-delete" onclick="deleteClass('${cls.code}')">Delete</button>
+                        </div>
                     </td>
                 </tr>
             `).join('');

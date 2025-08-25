@@ -813,17 +813,24 @@
         background: #2E7D32;
     }
     
-    /* Actions column styling */
+    /* Actions column styling - IMPROVED: Horizontal buttons in bottom-right */
     .admin-table td:last-child {
         width: 180px;
-        text-align: center;
+        text-align: right;
+        vertical-align: bottom;
+        padding: 12px 15px;
+        position: relative;
     }
     
     .admin-table .action-buttons {
         display: flex;
-        flex-direction: column;
-        gap: 4px;
+        flex-direction: row;
+        gap: 8px;
         align-items: center;
+        justify-content: flex-end;
+        position: absolute;
+        bottom: 12px;
+        right: 15px;
     }
     
     /* Matrix filter CSS removed - visual component eliminated */

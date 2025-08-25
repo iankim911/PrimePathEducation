@@ -10,13 +10,16 @@
 :root {
     /* PRIMARY DARK GREEN PALETTE - ONLY THESE COLORS ALLOWED */
     --primary-dark-green: #1B5E20;      /* Main brand color */
+    --primary-green: #2E7D32;           /* Alias for medium green */
     --primary-medium-green: #2E7D32;     /* Secondary green */
     --primary-light-green: #388E3C;      /* Lightest green allowed */
+    --primary-green-light: #388E3C;     /* Alias for light green */
     
     /* GREEN BACKGROUNDS - Subtle variations only */
     --green-bg-lightest: #E8F5E9;        /* Very light green background */
     --green-bg-light: #C8E6C9;           /* Light green background */
     --green-bg-medium: #A5D6A7;          /* Medium green background */
+    --primary-green-bg: #E8F5E9;         /* Primary green background */
     
     /* NEUTRAL COLORS - White and Light Gray ONLY */
     --neutral-white: #FFFFFF;
@@ -150,7 +153,7 @@ small, .small-text, .text-small {
    3. Navigation Bar - Unified Design
    =================================================== */
 .unified-nav-tabs {
-    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+    background: linear-gradient(135deg, var(--primary-dark-green) 0%, var(--primary-dark-green) 100%);
     padding: 0;
     margin: 0;
     box-shadow: var(--shadow-md);
@@ -303,7 +306,7 @@ a[href*="logout"]:hover,
 }
 
 .unified-welcome-card h2 {
-    color: var(--primary-green-dark);
+    color: var(--primary-dark-green);
     margin-bottom: var(--spacing-sm);
 }
 
@@ -553,7 +556,7 @@ button:focus,
 
 .unified-tab.active {
     background: var(--primary-green-bg);
-    color: var(--primary-green-dark);
+    color: var(--primary-dark-green);
     font-weight: 600;
 }
 
@@ -715,7 +718,7 @@ table tr:last-child td,
 .unified-alert-success {
     background: var(--primary-green-bg);
     border-left: 4px solid var(--status-success);
-    color: var(--primary-green-dark);
+    color: var(--primary-dark-green);
 }
 
 .unified-alert-info {
