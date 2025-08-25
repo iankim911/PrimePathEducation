@@ -1008,9 +1008,9 @@ class ExamService:
         else:
             logger.info(f"[EXAM_HIERARCHY] Final result: {list(result.keys())} programs")
         
-        # FINAL SAFETY CHECK: If filter is on, ensure NO VIEW ONLY exams in result
-        if effective_filter_assigned and not is_admin:
-            logger.info(f"[FILTER_FINAL_CHECK] Running final safety check for VIEW ONLY exams...")
+        # FINAL SAFETY CHECK: Only remove VIEW ONLY exams in MY_EXAMS mode (not OTHERS_EXAMS mode)
+        if effective_filter_assigned and not is_admin and filter_mode == 'MY_EXAMS':
+            logger.info(f"[FILTER_FINAL_CHECK] Running final safety check for VIEW ONLY exams in MY_EXAMS mode...")
             view_only_found = []
             cleaned_result = {}
             
@@ -1021,7 +1021,7 @@ class ExamService:
                     for exam in exams:
                         if hasattr(exam, 'access_badge') and exam.access_badge == 'VIEW ONLY':
                             view_only_found.append(f"{exam.name} (ID: {exam.id})")
-                            logger.error(f"[FILTER_FINAL_CHECK] ❌❌❌ FOUND VIEW ONLY exam that should be filtered: {exam.name}")
+                            logger.error(f"[FILTER_FINAL_CHECK] ❌❌❌ FOUND VIEW ONLY exam that should be filtered in MY_EXAMS: {exam.name}")
                         else:
                             cleaned_exams.append(exam)
                     
@@ -1032,11 +1032,13 @@ class ExamService:
                     cleaned_result[program] = cleaned_classes
             
             if view_only_found:
-                logger.error(f"[FILTER_FINAL_CHECK] ❌ CRITICAL: Found and removed {len(view_only_found)} VIEW ONLY exams!")
+                logger.error(f"[FILTER_FINAL_CHECK] ❌ CRITICAL: Found and removed {len(view_only_found)} VIEW ONLY exams from MY_EXAMS!")
                 logger.error(f"[FILTER_FINAL_CHECK] Removed exams: {', '.join(view_only_found)}")
                 result = cleaned_result
             else:
-                logger.info(f"[FILTER_FINAL_CHECK] ✅ PASSED: No VIEW ONLY exams found in final result")
+                logger.info(f"[FILTER_FINAL_CHECK] ✅ PASSED: No VIEW ONLY exams found in MY_EXAMS result")
+        elif effective_filter_assigned and not is_admin and filter_mode == 'OTHERS_EXAMS':
+            logger.info(f"[FILTER_FINAL_CHECK] ✅ SKIPPING safety check for OTHERS_EXAMS mode (VIEW ONLY exams are expected)")
         
         # COMPREHENSIVE STATISTICS LOGGING
         final_exam_count = sum(len(exams) for program in result.values() for exams in program.values())
