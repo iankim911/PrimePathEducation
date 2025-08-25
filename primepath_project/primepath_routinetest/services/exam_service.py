@@ -930,9 +930,11 @@ class ExamService:
                     
                     logger.debug(f"[PERMISSION_DEBUG] Exam '{exam.name}' access badge: {exam.access_badge} (highest: {highest_access})")
             
-            # CRITICAL CHECK: If we're in filter mode and somehow got here with a VIEW ONLY exam, skip it
-            if effective_filter_assigned and not is_admin and hasattr(exam, 'access_badge') and exam.access_badge == 'VIEW ONLY':
-                logger.error(f"[FILTER_CRITICAL] ❌❌❌ CAUGHT VIEW ONLY exam '{exam.name}' about to be added - SKIPPING!")
+            # CRITICAL CHECK: If we're in MY_EXAMS mode and somehow got here with a VIEW ONLY exam, skip it
+            # But don't skip VIEW ONLY exams in OTHERS_EXAMS mode - that's what we want to show!
+            if (effective_filter_assigned and not is_admin and hasattr(exam, 'access_badge') and 
+                exam.access_badge == 'VIEW ONLY' and filter_mode == 'MY_EXAMS'):
+                logger.error(f"[FILTER_CRITICAL] ❌❌❌ CAUGHT VIEW ONLY exam '{exam.name}' in MY_EXAMS mode - SKIPPING!")
                 continue
             
             # Organize by class code

@@ -86,6 +86,16 @@ CLASS_CODE_CURRICULUM_MAPPING = {
     
     # Taejo Classes
     'TaejoE': 'TaejoE',
+    
+    # PINNACLE Classes (Added August 25, 2025)
+    'PINNACLE_V1': 'PINNACLE Vision Level 1',
+    'PINNACLE_V2': 'PINNACLE Vision Level 2',
+    'PINNACLE_E1': 'PINNACLE Endeavor Level 1',
+    'PINNACLE_E2': 'PINNACLE Endeavor Level 2',
+    'PINNACLE_S1': 'PINNACLE Success Level 1',
+    'PINNACLE_S2': 'PINNACLE Success Level 2',
+    'PINNACLE_P1': 'PINNACLE Pro Level 1',
+    'PINNACLE_P2': 'PINNACLE Pro Level 2',
 }
 
 # Reverse mapping for quick lookup
@@ -114,6 +124,8 @@ CLASS_CODE_CATEGORIES = {
     'HIGH_SCHOOL': ['HIGH_10E', 'HIGH_10F', 'HIGH_11D'],
     'MIDDLE_SCHOOL': ['MIDDLE_7A'],
     'PRIMARY_SCHOOL': ['PRIMARY_1D', 'PRIMARY_2A'],
+    'PINNACLE': ['PINNACLE_V1', 'PINNACLE_V2', 'PINNACLE_E1', 'PINNACLE_E2', 
+                 'PINNACLE_S1', 'PINNACLE_S2', 'PINNACLE_P1', 'PINNACLE_P2'],
 }
 
 def get_curriculum_for_class(class_code):
@@ -226,7 +238,7 @@ def get_class_codes_by_program(program_name):
         'CORE': ['PRIMARY', 'LETTER_SERIES_A', 'LETTER_SERIES_B', 'LETTER_SERIES_S', 'PRIMARY_SCHOOL'],
         'ASCENT': ['LETTER_SERIES_H', 'LETTER_SERIES_C', 'LETTER_SERIES_D', 'MIDDLE_SCHOOL'],
         'EDGE': ['YOUNG_CHO', 'CHUNG_CHO', 'SEJONG', 'MAS'],
-        'PINNACLE': ['TAEJO', 'SUNGJONG', 'HIGH_SAISUN', 'HIGH_SCHOOL']
+        'PINNACLE': ['PINNACLE']  # Updated to use new PINNACLE category directly
     }
     
     result = []

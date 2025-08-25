@@ -24,7 +24,7 @@
                 <label for="section">Section</label>
                 <input type="text" id="section" name="section" placeholder="e.g., A, B, C" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
             </div>
-            <button type="submit" style="padding: 8px 20px; background: #28A745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            <button type="submit" style="padding: 8px 20px; background: #1B5E20; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: background 0.3s;" onmouseover="this.style.background='#2E7D32'" onmouseout="this.style.background='#1B5E20'">
                 ➕ Create Class
             </button>
         </form>
@@ -37,22 +37,22 @@
         {% if classes %}
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr style="background: #f8f9fa;">
-                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Class Name</th>
-                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Grade Level</th>
-                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Section</th>
-                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Assigned Teachers</th>
-                    <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Students</th>
-                    <th style="padding: 10px; text-align: center; border-bottom: 2px solid #dee2e6;">Actions</th>
+                <tr style="background: #1B5E20;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Class Name</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Grade Level</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Section</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Assigned Teachers</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Students</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for class in classes %}
-                <tr style="transition: background-color 0.2s ease;" onmouseover="this.style.background='var(--green-bg-lightest)'" onmouseout="this.style.background='var(--neutral-white)'">
-                    <td style="padding: var(--spacing-lg) var(--spacing-xl); border-bottom: 1px solid var(--neutral-border); font-size: var(--font-body); color: var(--text-primary);">{{ class.name }}</td>
-                    <td style="padding: var(--spacing-lg) var(--spacing-xl); border-bottom: 1px solid var(--neutral-border); font-size: var(--font-body); color: var(--text-primary);">{{ class.grade_level }}</td>
-                    <td style="padding: var(--spacing-lg) var(--spacing-xl); border-bottom: 1px solid var(--neutral-border); font-size: var(--font-body); color: var(--text-primary);">{{ class.section|default:"-" }}</td>
-                    <td style="padding: var(--spacing-lg) var(--spacing-xl); border-bottom: 1px solid var(--neutral-border);">
+                <tr style="transition: background-color 0.2s ease;" onmouseover="this.style.background='#E8F5E9'" onmouseout="this.style.background='white'">
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6; font-size: 14px; color: #333;">{{ class.name }}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6; font-size: 14px; color: #333;">{{ class.grade_level }}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6; font-size: 14px; color: #333;">{{ class.section|default:"-" }}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6;">
                         <div class="teacher-list" data-class-id="{{ class.id }}">
                             {% if class.assigned_teachers.all %}
                                 {% for teacher in class.assigned_teachers.all %}
