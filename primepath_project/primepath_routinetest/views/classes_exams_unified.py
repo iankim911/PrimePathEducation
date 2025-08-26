@@ -143,19 +143,23 @@ def classes_exams_unified_view(request):
     """
     start_time = datetime.now()
     
-    # Comprehensive logging
+    # Comprehensive logging with curriculum removal notification
     console_log = {
         "view": "classes_exams_unified",
         "user": request.user.username,
         "is_superuser": request.user.is_superuser,
         "timestamp": start_time.isoformat(),
-        "action": "view_start"
+        "action": "view_start",
+        "curriculum_section": "REMOVED",
+        "modification_date": "2025-08-26"
     }
     logger.info(f"[UNIFIED_VIEW_START] {json.dumps(console_log)}")
+    logger.info("[CURRICULUM_REMOVAL] Classes & Curriculum Configuration section has been removed")
     print(f"\n{'='*80}")
     print(f"[UNIFIED_VIEW] Classes & Exams - Unified View")
     print(f"[UNIFIED_VIEW] User: {request.user.username}")
     print(f"[UNIFIED_VIEW] Time: {start_time}")
+    print(f"[CURRICULUM_REMOVAL] Curriculum configuration section removed on 2025-08-26")
     print(f"{'='*80}\n")
     
     try:
