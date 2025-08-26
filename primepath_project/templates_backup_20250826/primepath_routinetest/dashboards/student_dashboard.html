@@ -1,0 +1,38 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h1>🎓 Student Dashboard</h1>
+    <p>Welcome, <strong>{{ student_name }}</strong>!</p>
+    
+    <!-- BUILDER: Day 1 Shell - Features coming Day 7 -->
+    <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        
+        <div style="padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <h3>🏫 My Class</h3>
+            <p style="color: #666;">Your enrolled class</p>
+            <p style="font-size: 24px; font-weight: bold; color: #2E7D32;">Coming Day 3</p>
+        </div>
+        
+        <div style="padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <h3>📝 Available Exams</h3>
+            <p style="color: #666;">Exams assigned to you</p>
+            <p style="font-size: 24px; font-weight: bold; color: #2E7D32;">Coming Day 7</p>
+        </div>
+        
+        <div style="padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <h3>📊 My Results</h3>
+            <p style="color: #666;">View your scores</p>
+            <p style="font-size: 24px; font-weight: bold; color: #2E7D32;">Coming Day 8</p>
+        </div>
+        
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <a href="{% url 'RoutineTest:logout' %}" style="padding: 10px 20px; background: #DC3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
+    </div>
+</div>
+{% endblock %}

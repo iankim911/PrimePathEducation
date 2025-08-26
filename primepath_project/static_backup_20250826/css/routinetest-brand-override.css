@@ -1,0 +1,385 @@
+/* ========================================
+   RoutineTest Brand Override CSS
+   Applies PrimePath brand design to RoutineTest pages
+   ======================================== */
+
+/* Import brand CSS variables */
+@import url('primepath_brand.css');
+
+/* ================================
+   OWNERSHIP TABS
+   ================================ */
+.ownership-tabs {
+    background: var(--brand-white) !important;
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0 !important;
+    box-shadow: var(--brand-shadow-sm) !important;
+    border-bottom: 3px solid var(--brand-gray) !important;
+}
+
+.ownership-tab {
+    color: var(--brand-text-light) !important;
+    transition: all 0.3s !important;
+}
+
+.ownership-tab:hover {
+    background: rgba(46, 125, 50, 0.05) !important;
+    color: var(--primepath-navy) !important;
+}
+
+.ownership-tab.active {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%) !important;
+    color: var(--brand-white) !important;
+    font-weight: 700 !important;
+    box-shadow: inset 0 3px 0 var(--primepath-navy-light), var(--brand-shadow-sm) !important;
+    border-top: 3px solid var(--primepath-navy-light) !important;
+}
+
+/* ================================
+   EXAM TYPE TABS
+   ================================ */
+.exam-type-tabs {
+    background: var(--brand-white) !important;
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0 !important;
+    overflow: hidden !important;
+}
+
+.exam-type-tab {
+    background: var(--brand-white) !important;
+    color: var(--brand-text-light) !important;
+}
+
+.exam-type-tab:hover {
+    background: var(--brand-light-gray) !important;
+    color: var(--primepath-navy) !important;
+}
+
+.exam-type-tab.active {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%) !important;
+    color: var(--brand-white) !important;
+    border-bottom: 3px solid var(--primepath-navy-light) !important;
+}
+
+.exam-type-tab.active .tab-badge {
+    background: var(--brand-white) !important;
+    color: var(--primepath-navy) !important;
+}
+
+/* ================================
+   PROGRAM SECTIONS & HEADERS
+   ================================ */
+.program-section {
+    background: var(--brand-white) !important;
+    border-radius: var(--border-radius-md) !important;
+    box-shadow: var(--brand-shadow-sm) !important;
+}
+
+/* Default program header */
+.program-header {
+    background: linear-gradient(135deg, var(--brand-light-gray), var(--brand-white)) !important;
+    color: var(--primepath-navy) !important;
+    font-weight: 700 !important;
+    border-left: 4px solid var(--primepath-navy) !important;
+}
+
+/* Program-specific headers with brand colors */
+.program-section[data-program="CORE"] .program-header {
+    background: linear-gradient(135deg, var(--program-core) 0%, var(--program-core-dark) 100%) !important;
+    color: var(--brand-white) !important;
+    border-left: 4px solid var(--program-core-dark) !important;
+}
+
+.program-section[data-program="ASCENT"] .program-header {
+    background: linear-gradient(135deg, var(--program-ascent) 0%, var(--program-ascent-dark) 100%) !important;
+    color: var(--brand-white) !important;
+    border-left: 4px solid var(--program-ascent-dark) !important;
+}
+
+.program-section[data-program="EDGE"] .program-header {
+    background: linear-gradient(135deg, var(--program-edge) 0%, var(--program-edge-dark) 100%) !important;
+    color: var(--brand-white) !important;
+    border-left: 4px solid var(--program-edge-dark) !important;
+}
+
+.program-section[data-program="PINNACLE"] .program-header {
+    background: linear-gradient(135deg, var(--program-pinnacle) 0%, var(--program-pinnacle-dark) 100%) !important;
+    color: var(--brand-white) !important;
+    border-left: 4px solid var(--program-pinnacle-dark) !important;
+}
+
+/* ================================
+   EXAM CARDS
+   ================================ */
+.exam-card {
+    background: var(--brand-white) !important;
+    border-radius: var(--border-radius-sm) !important;
+    box-shadow: var(--brand-shadow-sm) !important;
+    transition: all 0.3s !important;
+}
+
+.exam-card:hover {
+    transform: translateX(4px) !important;
+    box-shadow: var(--brand-shadow-md) !important;
+}
+
+/* Program-specific exam card borders */
+.program-section[data-program="CORE"] .exam-card {
+    border-left: 3px solid var(--program-core) !important;
+}
+
+.program-section[data-program="ASCENT"] .exam-card {
+    border-left: 3px solid var(--program-ascent) !important;
+}
+
+.program-section[data-program="EDGE"] .exam-card {
+    border-left: 3px solid var(--program-edge) !important;
+}
+
+.program-section[data-program="PINNACLE"] .exam-card {
+    border-left: 3px solid var(--program-pinnacle) !important;
+}
+
+/* ================================
+   ACTION BUTTONS
+   ================================ */
+.btn {
+    border-radius: var(--border-radius-pill) !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+}
+
+/* View button - Fixed white text for contrast */
+.btn-view {
+    background: linear-gradient(135deg, var(--brand-dark-gray) 0%, #495057 100%) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
+}
+
+.btn-view:hover {
+    background: linear-gradient(135deg, #495057 0%, var(--brand-dark-gray) 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
+    transform: translateY(-2px) !important;
+    box-shadow: var(--brand-shadow-sm) !important;
+}
+
+/* Edit button - Green theme */
+.btn-edit {
+    background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, #43A047 0%, #2E7D32 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3) !important;
+}
+
+/* Copy button - Green theme */
+.btn-copy {
+    background: linear-gradient(135deg, #43A047 0%, #388E3C 100%) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
+}
+
+.btn-copy:hover {
+    background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(67, 160, 71, 0.3) !important;
+}
+
+/* Danger button remains red for safety - Fixed white text for contrast */
+.btn-danger {
+    background: linear-gradient(135deg, var(--brand-danger) 0%, #c82333 100%) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, var(--brand-danger) 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3) !important;
+}
+
+/* ================================
+   ACCESS LEVEL INDICATORS
+   ================================ */
+.global-access-indicator {
+    border-radius: var(--border-radius-sm) !important;
+}
+
+.global-access-indicator.full-access {
+    background: linear-gradient(135deg, var(--brand-light-gray) 0%, var(--brand-white) 100%) !important;
+    border: 2px solid var(--primepath-navy) !important;
+    color: var(--primepath-navy) !important;
+    font-weight: 600 !important;
+}
+
+/* ================================
+   CLASS SECTIONS
+   ================================ */
+.class-section {
+    border-radius: var(--border-radius-sm) !important;
+    background: var(--brand-white) !important;
+}
+
+.class-section.accessible {
+    border: 2px solid var(--primepath-navy) !important;
+    background: linear-gradient(to right, rgba(46, 125, 50, 0.05) 0%, var(--brand-white) 5%) !important;
+}
+
+.class-header {
+    background: linear-gradient(135deg, var(--brand-light-gray) 0%, #f5f5f5 100%) !important;
+    color: var(--primepath-navy) !important;
+    font-weight: 600 !important;
+}
+
+/* ================================
+   BADGES & LABELS
+   ================================ */
+.class-code-badge {
+    background: var(--primepath-navy) !important;
+    color: var(--brand-white) !important;
+    border-radius: var(--border-radius-pill) !important;
+}
+
+/* Program-specific badges */
+.program-badge-core {
+    background: var(--program-core) !important;
+    color: var(--brand-white) !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: var(--border-radius-pill) !important;
+    font-weight: 600 !important;
+}
+
+.program-badge-ascent {
+    background: var(--program-ascent) !important;
+    color: var(--brand-white) !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: var(--border-radius-pill) !important;
+    font-weight: 600 !important;
+}
+
+.program-badge-edge {
+    background: var(--program-edge) !important;
+    color: var(--brand-white) !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: var(--border-radius-pill) !important;
+    font-weight: 600 !important;
+}
+
+.program-badge-pinnacle {
+    background: var(--program-pinnacle) !important;
+    color: var(--brand-white) !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: var(--border-radius-pill) !important;
+    font-weight: 600 !important;
+}
+
+/* ================================
+   ANSWER STATUS INDICATORS
+   ================================ */
+.answer-status.complete {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+    border: 1px solid var(--brand-success) !important;
+    color: #155724 !important;
+    border-radius: var(--border-radius-sm) !important;
+}
+
+.answer-status.partial {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%) !important;
+    border: 1px solid var(--brand-warning) !important;
+    color: #856404 !important;
+    border-radius: var(--border-radius-sm) !important;
+}
+
+.answer-status.not-started {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+    border: 1px solid var(--brand-danger) !important;
+    color: #721c24 !important;
+    border-radius: var(--border-radius-sm) !important;
+}
+
+/* ================================
+   PROGRESS BARS
+   ================================ */
+.answer-progress-bar {
+    background: var(--brand-gray) !important;
+    border-radius: var(--border-radius-sm) !important;
+}
+
+.answer-progress-fill.complete {
+    background: var(--brand-success) !important;
+}
+
+.answer-progress-fill.partial {
+    background: var(--brand-warning) !important;
+}
+
+/* ================================
+   TITLES & TEXT
+   ================================ */
+.library-title {
+    color: var(--primepath-navy) !important;
+    font-weight: 700 !important;
+}
+
+.exam-title {
+    color: var(--primepath-navy) !important;
+    font-weight: 600 !important;
+}
+
+/* ================================
+   FOCUS STATES
+   ================================ */
+.ownership-tab:focus,
+.exam-type-tab:focus {
+    outline: 2px solid var(--primepath-navy) !important;
+    outline-offset: 2px !important;
+}
+
+.btn:focus {
+    outline: 2px solid var(--primepath-navy) !important;
+    outline-offset: 2px !important;
+}
+
+/* ================================
+   CREATE EXAM BUTTON - Fixed white text for contrast
+   ================================ */
+.btn-create-exam,
+.btn-primary {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%) !important;
+    color: #FFFFFF !important;  /* Explicit white for better contrast */
+    border: none !important;
+    border-radius: var(--border-radius-pill) !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+    box-shadow: var(--brand-shadow-sm) !important;
+}
+
+.btn-create-exam:hover,
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%) !important;
+    color: #FFFFFF !important;  /* Maintain white text on hover */
+    transform: translateY(-2px) !important;
+    box-shadow: var(--brand-shadow-md) !important;
+}
+
+/* ================================
+   OWNERSHIP BADGE STYLING
+   ================================ */
+.ownership-badge {
+    padding: 0.25rem 0.75rem !important;
+    border-radius: var(--border-radius-pill) !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+}
+
+.ownership-badge.mine {
+    background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%) !important;
+    color: var(--brand-white) !important;
+}
+
+.ownership-badge.others {
+    background: var(--brand-gray) !important;
+    color: var(--brand-text-light) !important;
+}

@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Account - Step 1{% endblock %}
+
+{% block extra_css %}
+<style>
+    .registration-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        position: relative;
+    }
+    
+    .progress-bar::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e0e0e0;
+        z-index: -1;
+    }
+    
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        position: relative;
+        background: white;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .progress-step.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .progress-step.completed {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    
+    .step-label {
+        position: absolute;
+        top: 50px;
+        width: 100px;
+        text-align: center;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: #666;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+    }
+    
+    .form-section h3 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group label .required {
+        color: #dc3545;
+        margin-left: 3px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 15px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+        display: none;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+    
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    
+    .help-text {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .account-type-selector {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .account-type-option {
+        flex: 1;
+        padding: 20px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .account-type-option:hover {
+        border-color: #007bff;
+        background: #f8f9fa;
+    }
+    
+    .account-type-option.selected {
+        border-color: #007bff;
+        background: #e7f1ff;
+    }
+    
+    .account-type-option input[type="radio"] {
+        display: none;
+    }
+    
+    .account-type-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    
+    .account-type-label {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .account-type-desc {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    
+    .password-requirements {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 10px;
+    }
+    
+    .password-requirements h5 {
+        font-size: 14px;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    
+    .password-requirements ul {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 13px;
+        color: #666;
+    }
+    
+    .password-requirements li {
+        margin-bottom: 5px;
+    }
+    
+    .password-requirements li.met {
+        color: #28a745;
+    }
+    
+    .password-strength {
+        height: 5px;
+        border-radius: 3px;
+        margin-top: 10px;
+        background: #e0e0e0;
+        overflow: hidden;
+    }
+    
+    .password-strength-bar {
+        height: 100%;
+        transition: width 0.3s, background-color 0.3s;
+        width: 0;
+    }
+    
+    .password-strength-bar.weak {
+        width: 33%;
+        background: #dc3545;
+    }
+    
+    .password-strength-bar.medium {
+        width: 66%;
+        background: #ffc107;
+    }
+    
+    .password-strength-bar.strong {
+        width: 100%;
+        background: #28a745;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Create Your Account</h2>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-step active">
+            1
+            <span class="step-label">Basic Info</span>
+        </div>
+        <div class="progress-step">
+            2
+            <span class="step-label">Personal</span>
+        </div>
+        <div class="progress-step">
+            3
+            <span class="step-label">Contact</span>
+        </div>
+        <div class="progress-step">
+            4
+            <span class="step-label">Academic</span>
+        </div>
+        <div class="progress-step">
+            5
+            <span class="step-label">Parent Info</span>
+        </div>
+        <div class="progress-step">
+            6
+            <span class="step-label">Additional</span>
+        </div>
+    </div>
+    
+    <form method="post" id="registrationForm">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3>Account Type</h3>
+            <div class="account-type-selector">
+                <label class="account-type-option" for="account_type_student">
+                    <input type="radio" name="account_type" id="account_type_student" value="STUDENT" checked>
+                    <div class="account-type-icon">👨‍🎓</div>
+                    <div class="account-type-label">Student</div>
+                    <div class="account-type-desc">For students taking courses</div>
+                </label>
+                
+                <label class="account-type-option" for="account_type_parent">
+                    <input type="radio" name="account_type" id="account_type_parent" value="PARENT">
+                    <div class="account-type-icon">👨‍👩‍👧</div>
+                    <div class="account-type-label">Parent</div>
+                    <div class="account-type-desc">For parents managing students</div>
+                </label>
+                
+                <label class="account-type-option" for="account_type_teacher">
+                    <input type="radio" name="account_type" id="account_type_teacher" value="TEACHER">
+                    <div class="account-type-icon">👨‍🏫</div>
+                    <div class="account-type-label">Teacher</div>
+                    <div class="account-type-desc">For instructors and staff</div>
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Login Credentials</h3>
+            
+            <div class="form-group">
+                <label for="email">
+                    Email Address
+                    <span class="required">*</span>
+                </label>
+                <input type="email" 
+                       class="form-control" 
+                       id="email" 
+                       name="email" 
+                       required
+                       placeholder="your.email@example.com">
+                <div class="invalid-feedback">Please enter a valid email address.</div>
+                <div class="help-text">This will be your username for logging in.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password1">
+                    Password
+                    <span class="required">*</span>
+                </label>
+                <input type="password" 
+                       class="form-control" 
+                       id="password1" 
+                       name="password1" 
+                       required
+                       placeholder="Enter a strong password">
+                <div class="invalid-feedback">Password is required.</div>
+                
+                <div class="password-requirements">
+                    <h5>Password Requirements:</h5>
+                    <ul id="passwordRequirements">
+                        <li id="req-length">At least 8 characters</li>
+                        <li id="req-uppercase">At least one uppercase letter</li>
+                        <li id="req-lowercase">At least one lowercase letter</li>
+                        <li id="req-number">At least one number</li>
+                        <li id="req-special">At least one special character (!@#$%^&*)</li>
+                    </ul>
+                </div>
+                
+                <div class="password-strength">
+                    <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password2">
+                    Confirm Password
+                    <span class="required">*</span>
+                </label>
+                <input type="password" 
+                       class="form-control" 
+                       id="password2" 
+                       name="password2" 
+                       required
+                       placeholder="Re-enter your password">
+                <div class="invalid-feedback">Passwords do not match.</div>
+            </div>
+        </div>
+        
+        <!-- Error messages -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-actions">
+            <a href="{% url 'registration:choice' %}" class="btn btn-secondary">
+                ← Back to Options
+            </a>
+            <button type="submit" class="btn btn-primary">
+                Continue to Step 2 →
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Account type selection
+    const accountTypeOptions = document.querySelectorAll('.account-type-option');
+    accountTypeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            accountTypeOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+        
+        // Set initial selected state
+        if (option.querySelector('input[type="radio"]').checked) {
+            option.classList.add('selected');
+        }
+    });
+    
+    // Password validation
+    const password1 = document.getElementById('password1');
+    const password2 = document.getElementById('password2');
+    const strengthBar = document.getElementById('passwordStrengthBar');
+    
+    function checkPasswordRequirements(password) {
+        const requirements = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*]/.test(password)
+        };
+        
+        // Update requirement indicators
+        document.getElementById('req-length').classList.toggle('met', requirements.length);
+        document.getElementById('req-uppercase').classList.toggle('met', requirements.uppercase);
+        document.getElementById('req-lowercase').classList.toggle('met', requirements.lowercase);
+        document.getElementById('req-number').classList.toggle('met', requirements.number);
+        document.getElementById('req-special').classList.toggle('met', requirements.special);
+        
+        // Calculate strength
+        const metCount = Object.values(requirements).filter(met => met).length;
+        
+        // Update strength bar
+        strengthBar.className = 'password-strength-bar';
+        if (metCount <= 2) {
+            strengthBar.classList.add('weak');
+        } else if (metCount <= 4) {
+            strengthBar.classList.add('medium');
+        } else {
+            strengthBar.classList.add('strong');
+        }
+        
+        return metCount === 5;
+    }
+    
+    password1.addEventListener('input', function() {
+        const isValid = checkPasswordRequirements(this.value);
+        this.classList.toggle('is-invalid', this.value && !isValid);
+    });
+    
+    password2.addEventListener('input', function() {
+        const passwordsMatch = this.value === password1.value;
+        this.classList.toggle('is-invalid', this.value && !passwordsMatch);
+    });
+    
+    // Form validation
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        const email = document.getElementById('email');
+        const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value);
+        
+        if (!emailValid) {
+            e.preventDefault();
+            email.classList.add('is-invalid');
+            return;
+        }
+        
+        if (!checkPasswordRequirements(password1.value)) {
+            e.preventDefault();
+            password1.classList.add('is-invalid');
+            return;
+        }
+        
+        if (password1.value !== password2.value) {
+            e.preventDefault();
+            password2.classList.add('is-invalid');
+            return;
+        }
+    });
+});
+</script>
+{% endblock %}

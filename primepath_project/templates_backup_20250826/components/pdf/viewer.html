@@ -1,0 +1,57 @@
+{% comment %}
+PDF Viewer Component
+Usage: {% include 'components/pdf/viewer.html' with pdf_url=exam.pdf_file.url container_id='pdf-container' %}
+{% endcomment %}
+
+<div class="pdf-viewer-component" id="{{ container_id|default:'pdf-container' }}">
+    <div class="pdf-controls mb-3">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-secondary" data-pdf-action="prev">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <button type="button" class="btn btn-secondary" data-pdf-action="next">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <span class="mx-3">
+            Page <input type="number" data-pdf-action="page-input" 
+                       class="form-control d-inline-block" 
+                       style="width: 60px;" min="1" value="1">
+            of <span class="total-pages">0</span>
+        </span>
+        
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-secondary" data-pdf-action="zoom-out">
+                <i class="fas fa-search-minus"></i>
+            </button>
+            <button type="button" class="btn btn-secondary" data-pdf-action="zoom-in">
+                <i class="fas fa-search-plus"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="pdf-canvas-container">
+        <canvas class="pdf-canvas"></canvas>
+    </div>
+</div>
+
+{% if include_script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pdfViewer = new PrimePath.modules.PDFViewer({
+        enableCache: true,
+        scale: 1.5
+    });
+    
+    pdfViewer.init('#{{ container_id|default:"pdf-container" }}', '{{ pdf_url }}');
+    
+    // Update page display
+    pdfViewer.on('navigationUpdated', function(state) {
+        const container = document.getElementById('{{ container_id|default:"pdf-container" }}');
+        container.querySelector('.total-pages').textContent = state.totalPages;
+        container.querySelector('[data-pdf-action="page-input"]').max = state.totalPages;
+    });
+});
+</script>
+{% endif %}

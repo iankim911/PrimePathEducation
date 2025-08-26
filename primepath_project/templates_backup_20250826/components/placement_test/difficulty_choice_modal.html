@@ -1,0 +1,63 @@
+<!-- Difficulty Choice Modal Component -->
+<!-- This modal appears immediately after submitting the test, before showing results -->
+<div id="difficulty-choice-modal" class="modal difficulty-modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Test Completed! 🎉</h2>
+            <p>How was the difficulty level?</p>
+        </div>
+        
+        <div class="modal-body">
+            <div class="difficulty-feedback">
+                <p class="feedback-prompt">
+                    Before seeing your results, would you like to try a different difficulty level?
+                </p>
+                
+                <div class="difficulty-options">
+                    <!-- Try Easier Level -->
+                    <button type="button" 
+                            class="difficulty-btn easier-btn"
+                            data-action="difficulty-choice"
+                            data-adjustment="-1">
+                        <span class="emoji">📉</span>
+                        <span class="title">Too Difficult</span>
+                        <span class="description">Try an easier level</span>
+                    </button>
+                    
+                    <!-- Just Right - See Results -->
+                    <button type="button" 
+                            class="difficulty-btn justright-btn"
+                            data-action="difficulty-choice"
+                            data-adjustment="0">
+                        <span class="emoji">✅</span>
+                        <span class="title">Just Right</span>
+                        <span class="description">See my results</span>
+                    </button>
+                    
+                    <!-- Try Harder Level -->
+                    <button type="button" 
+                            class="difficulty-btn harder-btn"
+                            data-action="difficulty-choice"
+                            data-adjustment="1">
+                        <span class="emoji">📈</span>
+                        <span class="title">Too Easy</span>
+                        <span class="description">Try a harder level</span>
+                    </button>
+                </div>
+                
+                <div class="modal-note">
+                    <p><strong>Note:</strong> If you choose a different level, you'll start a new test immediately. Your current test will be saved.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button type="button" 
+                    class="btn btn-secondary"
+                    data-action="skip-difficulty-choice">
+                Skip to Results →
+            </button>
+        </div>
+    </div>
+</div>

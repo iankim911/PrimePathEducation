@@ -1,0 +1,774 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>{{ exam.name }} - Placement Test</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- Modular CSS with cache busting -->
+    {% load cache %}
+    {% now "U" as current_timestamp %}
+    <link rel="stylesheet" href="{% static 'css/pages/student-test.css' %}?v={{ current_timestamp }}">
+    <link rel="stylesheet" href="{% static 'css/components/difficulty-modal.css' %}?v={{ current_timestamp }}">
+    <!-- Mobile Responsive CSS - Only affects mobile viewports -->
+    <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}?v={{ current_timestamp }}">
+    
+    <style>
+        /* Difficulty Adjustment Buttons */
+        .difficulty-adjustment-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn-difficulty-adjust {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn-difficulty-adjust:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-difficulty-adjust:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #6c757d;
+        }
+        
+        .btn-difficulty-adjust[data-direction="down"] {
+            background: linear-gradient(135deg, #667eea 0%, #4facfe 100%);
+        }
+        
+        .btn-difficulty-adjust[data-direction="up"] {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        @media (max-width: 768px) {
+            .test-header > div {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .difficulty-adjustment-buttons {
+                margin-top: 10px;
+                width: 100%;
+            }
+            
+            .btn-difficulty-adjust {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="test-container">
+            <!-- Test Header -->
+            <div class="test-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>{{ exam.name }}</h1>
+                    {% include 'components/placement_test/timer.html' with timer_seconds=timer_seconds %}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <div id="answer-progress" style="color: #6c757d;">
+                        0 / {{ questions|length }} answered
+                    </div>
+                    <!-- Difficulty Adjustment Buttons -->
+                    <div class="difficulty-adjustment-buttons" style="display: flex; gap: 10px;">
+                        <button type="button" 
+                                id="decrease-difficulty-btn"
+                                class="btn-difficulty-adjust"
+                                data-direction="down"
+                                title="Switch to an easier exam">
+                            📉 Easier Exam
+                        </button>
+                        <button type="button" 
+                                id="increase-difficulty-btn"
+                                class="btn-difficulty-adjust"
+                                data-direction="up"
+                                title="Switch to a harder exam">
+                            📈 Harder Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Question Navigation -->
+            {% include 'components/primepath_routinetest/question_nav.html' with questions=questions %}
+            
+            <!-- Main Content Area -->
+            <div class="question-container">
+                <!-- PDF Section -->
+                {% if exam.pdf_file %}
+                    {% include 'components/primepath_routinetest/pdf_viewer.html' with pdf_url=exam.pdf_file.url enable_navigation=True enable_zoom=True %}
+                {% else %}
+                    {% include 'components/primepath_routinetest/pdf_viewer.html' with pdf_url=None enable_navigation=True enable_zoom=True %}
+                {% endif %}
+                
+                <!-- Question Section with Integrated Submit Button -->
+                <div class="question-section">
+                    <form id="test-form" method="post">
+                        {% csrf_token %}
+                        {% for question in questions %}
+                            {% include 'components/primepath_routinetest/question_panel.html' with question=question questions=questions %}
+                        {% endfor %}
+                    </form>
+                    
+                    <!-- Submit Button - Now inside question section to prevent overlap -->
+                    <div class="submit-container" id="submit-container">
+                        <button type="button" 
+                                id="submit-test-btn"
+                                class="submit-test-btn"
+                                data-action="submit-test"
+                                aria-label="Submit Test">
+                            <span class="btn-text">Submit Test</span>
+                            <span class="btn-icon" style="display: none;">✓</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include Difficulty Choice Modal -->
+    {% include 'components/primepath_routinetest/difficulty_choice_modal.html' %}
+    
+    <!-- Load PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <!-- Store Django configuration data safely using json_script -->
+    {{ js_config|json_script:"django-js-config" }}
+    
+    <!-- Initialize APP_CONFIG BEFORE loading modules -->
+    <script>
+    // Initialize configuration with error handling - MUST be before modules load
+    (function() {
+        let djangoConfig = {};
+        
+        try {
+            // Safely parse JSON configuration from Django
+            const configElement = document.getElementById('django-js-config');
+            if (configElement && configElement.textContent) {
+                djangoConfig = JSON.parse(configElement.textContent);
+                console.log('Django config loaded successfully');
+            } else {
+                console.error('Django config element not found');
+            }
+        } catch (error) {
+            console.error('Error parsing Django config:', error);
+            djangoConfig = {};
+        }
+        
+        // Build complete configuration object with defensive checks
+        window.APP_CONFIG = {
+            csrf: '{{ csrf_token }}',
+            session: djangoConfig.session || {},
+            exam: djangoConfig.exam || {},
+            urls: {
+                saveAnswer: '{% url "RoutineTest:submit_answer" session.id %}',
+                completeTest: '{% url "RoutineTest:complete_test" session.id %}',
+                getAudio: '{% url "RoutineTest:get_audio" 0 %}'.replace('0', '{id}'),
+                adjustDifficulty: '{% url "RoutineTest:manual_adjust_difficulty" session.id %}'
+            },
+            questions: djangoConfig.questions || [],
+            audioFiles: djangoConfig.audioFiles || [],
+            studentAnswers: djangoConfig.studentAnswers || {}
+        };
+        
+        // Validate required data
+        if (!APP_CONFIG.session.id) {
+            console.error('Session ID is missing from configuration');
+        }
+        if (!APP_CONFIG.exam.id) {
+            console.error('Exam ID is missing from configuration');
+        }
+        
+        // Make session ID globally available for backward compatibility
+        window.sessionId = APP_CONFIG.session.id;
+    })();
+    </script>
+    
+    <!-- CRITICAL: Load bootstrap FIRST to ensure namespaces exist -->
+    <script src="{% static 'js/bootstrap.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Load debug configuration BEFORE other modules -->
+    <script src="{% static 'js/config/debug-config.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Load core utilities and config -->
+    <script src="{% static 'js/config/app-config.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/utils/module-loader.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/utils/event-delegation.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Base module and helper -->
+    <script src="{% static 'js/modules/base-module.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/module-init-helper.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/pdf-viewer.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/audio-player.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/timer.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/answer-manager.js' %}?v={{ current_timestamp }}"></script>
+    <script src="{% static 'js/modules/navigation.js' %}?v={{ current_timestamp }}"></script>
+    
+    <!-- Mobile Handler for touch events and responsive behavior -->
+    <script src="{% static 'js/modules/mobile-handler.js' %}?v={{ current_timestamp }}"></script>
+    
+    <script>
+    // Enhanced module initialization with comprehensive error handling and logging
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('===== PRIMEPATH ROUTINE TEST INITIALIZATION STARTING =====');
+        console.log('[INIT] Page loaded at:', new Date().toISOString());
+        console.log('[INIT] Current URL:', window.location.href);
+        
+        // Step 1: Verify bootstrap loaded correctly
+        console.group('[INIT] Step 1: Verifying bootstrap initialization');
+        
+        if (window.PrimePath && window.PrimePath.state && window.PrimePath.state.bootstrapComplete) {
+            console.log('  ✅ Bootstrap loaded successfully');
+            const health = window.PrimePath.healthCheck();
+            console.log(`  ✅ Health Score: ${health.score}%`);
+            console.log(`  ✅ Status: ${health.status}`);
+        } else {
+            console.error('  ❌ Bootstrap not loaded properly!');
+            console.log('  Creating emergency namespaces...');
+            // Emergency namespace creation
+            window.PrimePath = window.PrimePath || {};
+            window.PrimePath.utils = window.PrimePath.utils || {};
+            window.PrimePath.modules = window.PrimePath.modules || {};
+            window.PrimePath.state = window.PrimePath.state || {};
+        }
+        
+        const namespaceChecks = [
+            { path: 'window.PrimePath', exists: !!window.PrimePath },
+            { path: 'window.PrimePath.utils', exists: !!(window.PrimePath && window.PrimePath.utils) },
+            { path: 'window.PrimePath.modules', exists: !!(window.PrimePath && window.PrimePath.modules) },
+            { path: 'window.APP_CONFIG', exists: !!window.APP_CONFIG }
+        ];
+        
+        namespaceChecks.forEach(check => {
+            console.log(`  ${check.exists ? '✅' : '❌'} ${check.path}`);
+        });
+        console.groupEnd();
+        
+        // Step 2: Initialize Event Delegation
+        console.group('[INIT] Step 2: Initializing Event Delegation');
+        if (window.PrimePath && window.PrimePath.utils && window.PrimePath.utils.EventDelegation) {
+            window.PrimePath.utils.EventDelegation.init();
+            console.log('  ✅ EventDelegation initialized successfully');
+        } else {
+            console.error('  ❌ EventDelegation not loaded, creating fallback');
+            // Create minimal fallback
+            window.PrimePath.utils.EventDelegation = {
+                init: function() { console.warn('Using EventDelegation fallback'); },
+                onClick: function(selector, handler) {
+                    document.addEventListener('click', function(e) {
+                        const el = e.target.closest(selector);
+                        if (el) handler.call(el, e);
+                    });
+                },
+                onChange: function(selector, handler) {
+                    document.addEventListener('change', function(e) {
+                        const el = e.target.closest(selector);
+                        if (el) handler.call(el, e);
+                    });
+                }
+            };
+            window.PrimePath.utils.EventDelegation.init();
+        }
+        console.groupEnd();
+        
+        // Step 3: Initialize PDF viewer with error handling
+        console.group('[INIT] Step 3: Initializing PDF Viewer');
+        let pdfViewer = null;
+        try {
+            if (window.PrimePath.modules.PDFViewer) {
+                pdfViewer = new PrimePath.modules.PDFViewer({
+                    // scale: defaults to 1.8 in module for better readability
+                    enableCache: true
+                });
+                
+                // Get PDF URL from multiple sources for robustness
+                const pdfViewerElement = document.querySelector('#pdf-viewer');
+                let pdfUrl = null;
+                
+                // Try to get from data attribute first (most reliable)
+                if (pdfViewerElement && pdfViewerElement.dataset.pdfUrl) {
+                    pdfUrl = pdfViewerElement.dataset.pdfUrl;
+                }
+                // Fallback to APP_CONFIG
+                else if (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.pdfUrl) {
+                    pdfUrl = APP_CONFIG.exam.pdfUrl;
+                }
+                
+                // The PDF viewer will now handle rotation internally:
+                // - Admin-set default rotation is applied automatically
+                // - Per-page student rotations are saved in sessionStorage
+                // - Rotations persist as students navigate between pages
+                
+                if (pdfUrl) {
+                    pdfViewer.init('#pdf-viewer', pdfUrl);
+                    console.log('  ✅ PDF Viewer initialized with URL:', pdfUrl);
+                } else {
+                    console.warn('  ⚠️ PDF URL not found, viewer inactive');
+                    // Show error message to user
+                    const errorDiv = document.querySelector('.pdf-error');
+                    if (errorDiv) {
+                        errorDiv.style.display = 'block';
+                    }
+                }
+            } else {
+                console.error('  ❌ PDFViewer module not found');
+            }
+        } catch (error) {
+            console.error('  ❌ PDF Viewer initialization failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 4: Initialize Timer with error handling
+        console.group('[INIT] Step 4: Initializing Timer');
+        let timer = null;
+        try {
+            if (window.PrimePath.modules.Timer) {
+                timer = new PrimePath.modules.Timer({
+                    warnings: [
+                        { time: 300, message: '5 minutes remaining', class: 'warning' },
+                        { time: 60, message: '1 minute remaining', class: 'danger' }
+                    ],
+                    onExpire: function() {
+                        console.group('[Timer.onExpire] Timer expiry handling for routinetest');
+                        console.warn('[Timer] Timer expired, checking for modal conflicts');
+                        
+                        // Check if difficulty modal is open and handle race condition
+                        const difficultyModal = document.getElementById('difficulty-choice-modal');
+                        if (difficultyModal) {
+                            const modalVisible = difficultyModal.style.display !== 'none';
+                            console.log('[Timer.onExpire] Difficulty modal state:', {
+                                exists: true,
+                                visible: modalVisible,
+                                display: difficultyModal.style.display
+                            });
+                            
+                            if (modalVisible) {
+                                console.warn('[Timer.onExpire] CRITICAL: Modal open during timer expiry - race condition detected');
+                                
+                                // Clear timer monitoring interval if exists
+                                const intervalId = difficultyModal.dataset.timerCheckInterval;
+                                if (intervalId) {
+                                    console.log('[Timer.onExpire] Clearing modal timer monitoring interval:', intervalId);
+                                    clearInterval(parseInt(intervalId));
+                                    delete difficultyModal.dataset.timerCheckInterval;
+                                }
+                                
+                                // Hide modal
+                                difficultyModal.style.display = 'none';
+                                console.log('[Timer.onExpire] Modal hidden due to timer expiry');
+                                
+                                // Show message
+                                alert('Test time has expired. Your test will be submitted automatically.');
+                            }
+                        } else {
+                            console.log('[Timer.onExpire] No difficulty modal found - normal expiry');
+                        }
+                        
+                        console.log('[Timer.onExpire] Clearing session-specific timer state on expiry');
+                        
+                        // Clear this session's timer state when expired
+                        if (timer && timer.clearState) {
+                            timer.clearState();
+                        }
+                        
+                        console.log('[Timer.onExpire] Attempting to submit test');
+                        if (window.answerManager) {
+                            console.log('[Timer.onExpire] Calling answerManager.submitTest with force=true, isTimerExpiry=true');
+                            // Pass true for force, true for isTimerExpiry
+                            window.answerManager.submitTest(true, true);
+                            console.log('[Timer.onExpire] Test submission call completed');
+                        } else {
+                            console.error('[Timer.onExpire] Cannot submit - answerManager not available');
+                            console.error('[Timer.onExpire] Available globals:', Object.keys(window).filter(k => k.includes('answer')));
+                        }
+                        
+                        console.groupEnd();
+                    }
+                });
+                
+                const timerElement = document.querySelector('[data-timer-seconds]');
+                if (timerElement) {
+                    const timerSecondsRaw = timerElement.dataset.timerSeconds;
+                    console.log('[TIMER_INIT] Raw timer seconds value:', timerSecondsRaw);
+                    
+                    if (timerSecondsRaw !== undefined && timerSecondsRaw !== null && timerSecondsRaw !== '') {
+                        const timerSeconds = parseInt(timerSecondsRaw);
+                        if (!isNaN(timerSeconds) && timerSeconds > 0) {
+                            timer.init(timerSeconds, '#timer');
+                            timer.start();
+                            console.log('  ✅ Timer initialized with', timerSeconds, 'seconds');
+                        } else {
+                            console.log('  ℹ️ Timer value is 0 or invalid - no countdown needed');
+                        }
+                    } else {
+                        console.log('  ℹ️ Timer attribute is empty - untimed exam');
+                    }
+                } else {
+                    console.log('  ℹ️ Timer element not found - untimed exam');
+                }
+            } else {
+                console.error('  ❌ Timer module not found');
+            }
+        } catch (error) {
+            console.error('  ❌ Timer initialization failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 5: Initialize Audio Player
+        console.group('[INIT] Step 5: Initializing Audio Player');
+        let audioPlayer = null;
+        try {
+            if (window.PrimePath.modules.AudioPlayer) {
+                audioPlayer = new PrimePath.modules.AudioPlayer({
+                    allowMultiple: false
+                });
+                audioPlayer.init();
+                console.log('  ✅ Audio Player initialized');
+            } else {
+                console.error('  ❌ AudioPlayer module not found');
+            }
+        } catch (error) {
+            console.error('  ❌ Audio Player initialization failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 6: Initialize Answer Manager (CRITICAL MODULE)
+        console.group('[INIT] Step 6: Initializing Answer Manager');
+        let answerManager = null;
+        
+        try {
+            // Check module availability
+            if (!window.PrimePath.modules.AnswerManager) {
+                console.error('  ❌ AnswerManager module not found');
+                console.log('  Available modules:', Object.keys(window.PrimePath.modules || {}));
+            } else {
+                // Extract session and exam IDs with multiple fallbacks
+                const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
+                                  window.sessionId || 
+                                  '{{ session.id }}' || 
+                                  null;
+                
+                const examId = (APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.id) || 
+                               window.examId || 
+                               '{{ exam.id }}' || 
+                               null;
+                
+                console.log('  Session ID:', sessionId);
+                console.log('  Exam ID:', examId);
+                
+                if (sessionId && examId) {
+                    try {
+                        answerManager = new PrimePath.modules.AnswerManager({
+                            session: APP_CONFIG && APP_CONFIG.session,
+                            sessionId: sessionId,
+                            examId: examId,
+                            autoSave: true,
+                            autoSaveInterval: 30000,
+                            saveEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.saveAnswer) || 
+                                          '{% url "RoutineTest:submit_answer" session.id %}',
+                            submitEndpoint: (APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest) || 
+                                            '{% url "RoutineTest:complete_test" session.id %}'
+                        });
+                        
+                        answerManager.init(sessionId);
+                        console.log('  ✅ Answer Manager initialized successfully');
+                        
+                    } catch (error) {
+                        console.error('  ❌ Answer Manager initialization error:', error);
+                        answerManager = null;
+                    }
+                } else {
+                    console.error('  ❌ Cannot initialize: Missing session or exam ID');
+                    console.log('  APP_CONFIG:', APP_CONFIG);
+                }
+            }
+        } catch (error) {
+            console.error('  ❌ Answer Manager setup failed:', error);
+        }
+        console.groupEnd();
+        
+        // Step 7: Make instances globally available
+        console.group('[INIT] Step 7: Registering global instances');
+        window.pdfViewer = pdfViewer;
+        window.audioPlayer = audioPlayer;
+        window.examTimer = timer;
+        window.answerManager = answerManager;
+        console.log('  Global instances registered:');
+        console.log('    pdfViewer:', !!window.pdfViewer);
+        console.log('    audioPlayer:', !!window.audioPlayer);
+        console.log('    examTimer:', !!window.examTimer);
+        console.log('    answerManager:', !!window.answerManager);
+        console.groupEnd();
+        
+        // Step 8: Initialize Navigation Module
+        console.group('[INIT] Step 8: Initializing Navigation');
+        let navigation = null;
+        try {
+            if (window.PrimePath.modules.NavigationModule) {
+                navigation = new PrimePath.modules.NavigationModule({
+                    enableKeyboard: true,
+                    enableUrlState: false,  // Disable URL state for exam security
+                    autoSaveOnNavigate: true,
+                    focusOnNavigate: true,
+                    onBeforeNavigate: async function(from, to) {
+                        // Optional: Add confirmation for unsaved changes
+                        return true;
+                    },
+                    onAfterNavigate: function(to, from) {
+                        console.log(`[Navigation] Question ${from} → ${to}`);
+                    }
+                });
+                
+                // Initialize navigation after dependencies are available
+                navigation.init();
+                window.navigation = navigation;
+                console.log('  ✅ Navigation module initialized');
+            } else {
+                console.error('  ❌ NavigationModule not found');
+            }
+        } catch (error) {
+            console.error('  ❌ Navigation initialization failed:', error);
+        }
+        console.groupEnd();
+        
+        // Setup event delegation for proper event handling
+        const delegation = window.PrimePath.utils.EventDelegation;
+        
+        // NOTE: Navigation module handles these events internally
+        // We don't need to set them up here to avoid duplicate handlers
+        // The navigation.init() call already sets up all navigation event handlers
+        
+        // Submit test with enhanced error handling and fallback
+        delegation.onClick('[data-action="submit-test"]', function() {
+            if (!answerManager) {
+                console.error('Answer manager not initialized, attempting fallback submission...');
+                
+                // Try to create a minimal answer manager just for submission
+                const sessionId = (APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id) || 
+                                  '{{ session.id }}';
+                
+                if (sessionId) {
+                    // Direct submission without answer manager as fallback
+                    if (confirm('There was an issue with the test system. Do you want to submit your test anyway?')) {
+                        const csrfToken = '{{ csrf_token }}';
+                        fetch(`/RoutineTest/session/${sessionId}/complete/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.redirect_url) {
+                                window.location.href = data.redirect_url;
+                            } else {
+                                alert('Error submitting test. Please contact support.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Submission error:', error);
+                            alert('Unable to submit test. Please contact support.');
+                        });
+                    }
+                } else {
+                    alert('Unable to submit test: Session information is missing. Please refresh the page and try again.');
+                }
+                return;
+            }
+            
+            // Normal submission path with answer manager
+            try {
+                const stats = answerManager.getStats();
+                
+                if (stats.unansweredCount > 0) {
+                    const message = `You have ${stats.unansweredCount} unanswered question(s).\\n\\nAre you sure you want to submit?`;
+                    if (!confirm(message)) return;
+                }
+                
+                answerManager.submitTest();
+            } catch (error) {
+                console.error('Error during submission:', error);
+                if (confirm('There was an error preparing your submission. Do you want to try again?')) {
+                    answerManager.submitTest(true); // Force submission
+                }
+            }
+        });
+        
+        // Handle answer input changes (covers all input types: radio, checkbox, text)
+        delegation.onChange('.answer-input', function(e) {
+            const questionPanel = this.closest('.question-panel');
+            if (questionPanel && answerManager) {
+                const questionNum = parseInt(questionPanel.dataset.questionNumber);
+                answerManager.saveAnswer(questionNum);
+                console.log(`Answer saved for question ${questionNum}`);
+            }
+        });
+        
+        // Listen to answer manager events
+        if (answerManager) {
+            answerManager.on('questionAnswered', function(data) {
+            const navBtn = document.querySelector(`.question-nav-btn[data-question="${data.questionNum}"]`);
+            if (navBtn) {
+                navBtn.classList.add('answered');
+            }
+            
+            // Update progress
+            const stats = answerManager.getStats();
+            const progressEl = document.getElementById('answer-progress');
+            if (progressEl) {
+                progressEl.textContent = `${stats.answeredCount} / ${stats.totalQuestions} answered`;
+            }
+            });
+        }
+        
+        // Navigation module handles initial question display
+        // Note: All instances already made globally available above before navigation init
+        
+        // Difficulty Adjustment Feature
+        const difficultyButtons = document.querySelectorAll('.btn-difficulty-adjust');
+        
+        difficultyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const direction = this.dataset.direction;
+                const isIncreasing = direction === 'up';
+                
+                // Create warning message
+                const warningTitle = isIncreasing ? '⚠️ Increase Test Difficulty?' : '⚠️ Decrease Test Difficulty?';
+                const warningMessage = `
+                    This will:
+                    • Load a ${isIncreasing ? 'more challenging' : 'easier'} exam
+                    • RESET all your current answers
+                    • Restart the timer
+                    • You'll lose all progress on this exam
+                    
+                    Are you sure you want a ${isIncreasing ? 'harder' : 'easier'} test?`;
+                
+                // Show confirmation dialog
+                if (!confirm(warningTitle + warningMessage)) {
+                    return;
+                }
+                
+                // Disable buttons during request
+                difficultyButtons.forEach(btn => btn.disabled = true);
+                
+                // Send request to adjust difficulty
+                fetch(APP_CONFIG.urls.adjustDifficulty, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': APP_CONFIG.csrf
+                    },
+                    body: JSON.stringify({
+                        direction: direction
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show success message
+                        alert(`✅ Success!\n\nExam adjusted to: ${data.new_level}\n\nThe page will now reload with your new exam.`);
+                        
+                        // Reload the page to get the new exam
+                        window.location.reload();
+                    } else {
+                        // Handle boundary cases or errors
+                        if (data.at_boundary) {
+                            alert(data.error);
+                        } else {
+                            alert('❌ Error: ' + (data.error || 'Unable to adjust difficulty'));
+                        }
+                        
+                        // Re-enable buttons
+                        difficultyButtons.forEach(btn => btn.disabled = false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adjusting difficulty:', error);
+                    alert('❌ An error occurred while adjusting difficulty. Please try again.');
+                    
+                    // Re-enable buttons
+                    difficultyButtons.forEach(btn => btn.disabled = false);
+                });
+            });
+        });
+        
+        // Step 9: Final Initialization Summary
+        console.group('[INIT] Step 9: Initialization Summary');
+        const initStatus = {
+            core: {
+                'APP_CONFIG': !!window.APP_CONFIG,
+                'PrimePath namespace': !!window.PrimePath,
+                'EventDelegation': !!window.PrimePath.utils.EventDelegation
+            },
+            modules: {
+                'PDFViewer': !!pdfViewer,
+                'Timer': !!timer,
+                'AudioPlayer': !!audioPlayer,
+                'AnswerManager': !!answerManager,
+                'Navigation': !!navigation
+            },
+            critical: {
+                'Session ID': !!(APP_CONFIG && APP_CONFIG.session && APP_CONFIG.session.id),
+                'Exam ID': !!(APP_CONFIG && APP_CONFIG.exam && APP_CONFIG.exam.id),
+                'Submit URL': !!(APP_CONFIG && APP_CONFIG.urls && APP_CONFIG.urls.completeTest)
+            }
+        };
+        
+        // Check overall health
+        let successCount = 0;
+        let totalCount = 0;
+        
+        Object.keys(initStatus).forEach(category => {
+            console.group(`  ${category}:`);
+            Object.keys(initStatus[category]).forEach(item => {
+                const status = initStatus[category][item];
+                console.log(`    ${status ? '✅' : '❌'} ${item}`);
+                totalCount++;
+                if (status) successCount++;
+            });
+            console.groupEnd();
+        });
+        
+        const successRate = Math.round((successCount / totalCount) * 100);
+        console.log(`\n  Overall Success Rate: ${successRate}% (${successCount}/${totalCount})`);
+        
+        if (successRate < 50) {
+            console.error('  ⚠️ CRITICAL: Less than 50% of modules initialized successfully');
+            console.error('  The test interface may not function properly');
+        } else if (successRate < 80) {
+            console.warn('  ⚠️ WARNING: Some modules failed to initialize');
+            console.warn('  Some features may not be available');
+        } else {
+            console.log('  ✅ Initialization completed successfully');
+        }
+        
+        console.groupEnd();
+        console.log('===== PRIMEPATH ROUTINE TEST INITIALIZATION COMPLETE =====\n\n');
+    });
+    </script>
+</body>
+</html>

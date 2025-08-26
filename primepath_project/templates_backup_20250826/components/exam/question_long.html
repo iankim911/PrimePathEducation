@@ -1,0 +1,13 @@
+{% comment %}
+Long Answer Question Component
+{% endcomment %}
+
+<div class="question-long">
+    <textarea class="form-control" 
+              name="question_{{ question.id }}"
+              id="q{{ question.id }}"
+              rows="5"
+              placeholder="Enter your detailed answer"
+              data-question-id="{{ question.id }}"
+              data-question-type="LONG"></textarea>
+</div>

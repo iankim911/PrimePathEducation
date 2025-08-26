@@ -1,0 +1,13 @@
+{% comment %}
+Short Answer Question Component
+{% endcomment %}
+
+<div class="question-short">
+    <input type="text" 
+           class="form-control" 
+           name="question_{{ question.id }}"
+           id="q{{ question.id }}"
+           placeholder="Enter your answer"
+           data-question-id="{{ question.id }}"
+           data-question-type="SHORT">
+</div>

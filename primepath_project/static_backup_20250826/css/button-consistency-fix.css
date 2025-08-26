@@ -1,0 +1,387 @@
+/* ======================================================
+   BUTTON CONSISTENCY FIX - COMPREHENSIVE SOLUTION
+   ====================================================== 
+   
+   Issue: FULL ACCESS and DELETE buttons have different shapes/sizes
+   Solution: Enforce consistent button styling across all admin views
+   Date: August 26, 2025
+   
+   Debug: Enable console logging for button interactions
+*/
+
+/* ======================================================
+   GLOBAL BUTTON RESET & FOUNDATION
+   ====================================================== */
+
+/* Reset all button-like elements to ensure consistency */
+button,
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-danger,
+.btn-warning,
+.btn-info,
+.btn-admin,
+.btn-full-access,
+.btn-delete,
+.btn-delete-class,
+.btn-start-exam,
+.btn-save,
+.btn-edit,
+.btn-remove,
+[class*="btn-"] {
+    /* Foundation Layout */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    
+    /* Consistent Sizing - CRITICAL FIX */
+    min-width: 120px !important;  /* Ensures minimum width */
+    min-height: 40px !important;  /* Ensures minimum height */
+    padding: 10px 20px !important;  /* Consistent padding for all buttons */
+    
+    /* Typography */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 14px !important;  /* Consistent font size */
+    font-weight: 600 !important;  /* Consistent font weight */
+    line-height: 1.2 !important;  /* Consistent line height */
+    text-align: center !important;
+    text-decoration: none !important;
+    text-transform: none !important;  /* Prevent uppercase transformation */
+    white-space: nowrap !important;  /* Prevent text wrapping */
+    
+    /* Shape & Border */
+    border-radius: 8px !important;  /* Consistent border radius */
+    border: 2px solid transparent !important;  /* Consistent border width */
+    
+    /* Interaction States */
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    
+    /* Box Model */
+    box-sizing: border-box !important;
+    margin: 2px !important;  /* Small margin for spacing */
+    
+    /* Visual Effects */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    
+    /* Position */
+    position: relative !important;
+    vertical-align: middle !important;
+    
+    /* Debug logging */
+    --button-type: "standard";
+}
+
+/* Debug: Log button initialization in console */
+button::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+/* ======================================================
+   SPECIFIC BUTTON TYPES - COLOR VARIANTS
+   ====================================================== */
+
+/* FULL ACCESS Button - Green/Success Theme */
+.btn-full-access,
+.btn-success,
+button[onclick*="Full Access"],
+button:contains("FULL ACCESS") {
+    --button-type: "full-access";
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%) !important;
+    color: #FFFFFF !important;
+    border-color: #1B5E20 !important;
+    text-transform: uppercase !important;  /* Full Access should be uppercase */
+}
+
+.btn-full-access:hover,
+.btn-success:hover,
+button[onclick*="Full Access"]:hover {
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%) !important;
+    border-color: #2E7D32 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3) !important;
+}
+
+.btn-full-access:active,
+.btn-success:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 4px rgba(27, 94, 32, 0.2) !important;
+}
+
+/* DELETE Button - Red/Danger Theme */
+.btn-delete,
+.btn-delete-class,
+.btn-danger,
+.btn-remove,
+button[onclick*="delete"],
+button[onclick*="Delete"],
+button[onclick*="DELETE"],
+button:contains("DELETE"),
+button:contains("Delete") {
+    --button-type: "delete";
+    background: linear-gradient(135deg, #DC3545 0%, #C82333 100%) !important;
+    color: #FFFFFF !important;
+    border-color: #DC3545 !important;
+    text-transform: uppercase !important;  /* Delete should be uppercase */
+}
+
+.btn-delete:hover,
+.btn-delete-class:hover,
+.btn-danger:hover,
+.btn-remove:hover,
+button[onclick*="delete"]:hover,
+button[onclick*="Delete"]:hover {
+    background: linear-gradient(135deg, #C82333 0%, #B71C1C 100%) !important;
+    border-color: #C82333 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+}
+
+.btn-delete:active,
+.btn-delete-class:active,
+.btn-danger:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2) !important;
+}
+
+/* Primary Actions */
+.btn-primary,
+.btn-admin-primary,
+.btn-save,
+.btn-start-exam {
+    --button-type: "primary";
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%) !important;
+    color: #FFFFFF !important;
+    border-color: #1B5E20 !important;
+}
+
+.btn-primary:hover,
+.btn-admin-primary:hover {
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%) !important;
+    border-color: #2E7D32 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3) !important;
+}
+
+/* Secondary Actions */
+.btn-secondary,
+.btn-edit {
+    --button-type: "secondary";
+    background: #FFFFFF !important;
+    color: #495057 !important;
+    border-color: #6C757D !important;
+}
+
+.btn-secondary:hover,
+.btn-edit:hover {
+    background: #F8F9FA !important;
+    color: #212529 !important;
+    border-color: #495057 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ======================================================
+   BUTTON GROUP & TABLE CONTEXT
+   ====================================================== */
+
+/* Ensure buttons in tables maintain consistency */
+table button,
+table .btn,
+td button,
+td .btn,
+.table button,
+.table .btn {
+    margin: 2px !important;
+    vertical-align: middle !important;
+}
+
+/* Button groups - ensure equal spacing */
+.btn-group,
+.button-group,
+.class-actions,
+.actions,
+td:last-child {
+    display: inline-flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+}
+
+/* ======================================================
+   RESPONSIVE ADJUSTMENTS
+   ====================================================== */
+
+@media (max-width: 768px) {
+    button,
+    .btn,
+    [class*="btn-"] {
+        min-width: 100px !important;  /* Slightly smaller on mobile */
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    button,
+    .btn,
+    [class*="btn-"] {
+        min-width: 80px !important;  /* Even smaller on small mobile */
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* ======================================================
+   FOCUS & ACCESSIBILITY
+   ====================================================== */
+
+button:focus,
+.btn:focus,
+[class*="btn-"]:focus {
+    outline: 3px solid rgba(27, 94, 32, 0.25) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1) !important;
+}
+
+/* Keyboard navigation highlight */
+button:focus-visible,
+.btn:focus-visible {
+    outline: 3px solid #1B5E20 !important;
+    outline-offset: 2px !important;
+}
+
+/* ======================================================
+   DISABLED STATE
+   ====================================================== */
+
+button:disabled,
+.btn:disabled,
+[class*="btn-"]:disabled,
+button.disabled,
+.btn.disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    transform: none !important;
+}
+
+/* ======================================================
+   LOADING STATE
+   ====================================================== */
+
+button.loading::after,
+.btn.loading::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: button-spin 0.75s linear infinite;
+}
+
+@keyframes button-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ======================================================
+   DEBUG MODE - Console Logging
+   ====================================================== */
+
+/* Add data attributes for debugging */
+button::after {
+    content: attr(data-button-debug);
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #00FF00;
+    padding: 2px 4px;
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    z-index: 10000;
+}
+
+/* Show debug info on hover when debug mode is enabled */
+body.debug-mode button:hover::after {
+    opacity: 1;
+}
+
+/* ======================================================
+   PRINT STYLES
+   ====================================================== */
+
+@media print {
+    button,
+    .btn,
+    [class*="btn-"] {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        background: white !important;
+        color: black !important;
+    }
+}
+
+/* ======================================================
+   FORCED OVERRIDES FOR PROBLEMATIC INLINE STYLES
+   ====================================================== */
+
+/* Override any inline styles with maximum specificity */
+body .admin-container button[style],
+body .admin-dashboard button[style],
+body .class-card button[style],
+body .roster-table button[style],
+body table button[style],
+body td button[style] {
+    /* Force consistent dimensions */
+    min-width: 120px !important;
+    min-height: 40px !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+/* ======================================================
+   ANIMATION & MICRO-INTERACTIONS
+   ====================================================== */
+
+/* Subtle pulse animation for primary actions */
+@keyframes subtle-pulse {
+    0% { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    50% { box-shadow: 0 4px 8px rgba(27, 94, 32, 0.2); }
+    100% { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+}
+
+.btn-primary:not(:hover),
+.btn-full-access:not(:hover) {
+    animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+/* ======================================================
+   END OF BUTTON CONSISTENCY FIX
+   ====================================================== */
+
+/* Debug initialization script */
+console.log('%c[BUTTON_CONSISTENCY_FIX] CSS Loaded Successfully', 'background: #4CAF50; color: white; padding: 5px; font-weight: bold;');
+console.log('[BUTTON_FIX] Version: 1.0.0');
+console.log('[BUTTON_FIX] Enforcing consistent button dimensions across all admin views');
+console.log('[BUTTON_FIX] Min Width: 120px | Min Height: 40px | Padding: 10px 20px');
+console.log('[BUTTON_FIX] Border Radius: 8px | Font Size: 14px | Font Weight: 600');

@@ -1,0 +1,442 @@
+<!-- CRITICAL FUNCTIONS - Must be loaded IMMEDIATELY in global scope -->
+<!-- This script MUST be included right after <body> tag or in <head> -->
+<script>
+(function() {
+    'use strict';
+    
+    console.log('%c[CRITICAL_FUNCTIONS] Initializing global exam functions...', 'color: #FF6B6B; font-weight: bold');
+    
+    // ============================================================================
+    // GLOBAL FUNCTION DEFINITIONS - MUST BE AVAILABLE BEFORE ANY ONCLICK
+    // ============================================================================
+    
+    // Track initialization
+    window.EXAM_FUNCTIONS_READY = false;
+    window.EXAM_FUNCTIONS_INIT_TIME = Date.now();
+    
+    // Track deletion state to prevent multiple requests
+    window.DELETION_IN_PROGRESS = {};
+    
+    // Delete functionality
+    window.confirmDelete = function(examId, examName) {
+        console.log('%c[DELETE] confirmDelete called', 'color: #e74c3c; font-weight: bold', {
+            examId: examId,
+            examName: examName,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (!examId) {
+            console.warn('[DELETE] No exam ID provided');
+            alert('Error: No exam ID provided for deletion');
+            return;
+        }
+        
+        // Check if deletion is already in progress for this exam
+        if (window.DELETION_IN_PROGRESS[examId]) {
+            console.warn('[DELETE] Deletion already in progress for exam:', examId);
+            return;
+        }
+        
+        const confirmMessage = `Are you sure you want to delete "${examName || 'this exam'}"?\n\nThis action cannot be undone.`;
+        
+        if (confirm(confirmMessage)) {
+            console.log('[DELETE] User confirmed deletion');
+            window.deleteExam(examId);
+        } else {
+            console.log('[DELETE] User cancelled deletion');
+        }
+    };
+    
+    window.deleteExam = async function(examId) {
+        // ENHANCED COMPREHENSIVE DEBUGGING
+        const deleteDebugInfo = {
+            examId: examId,
+            timestamp: new Date().toISOString(),
+            user: document.querySelector('meta[name="user-name"]')?.content || 'Unknown',
+            userId: document.querySelector('meta[name="user-id"]')?.content || 'Unknown',
+            isAdmin: document.querySelector('meta[name="user-is-admin"]')?.content === 'true',
+            currentUrl: window.location.href,
+            examCard: document.querySelector(`[data-exam-id="${examId}"]`) ? 'Found' : 'Not Found'
+        };
+        
+        console.log('%c[DELETE] 🚨 Starting exam deletion', 'color: #e74c3c; font-weight: bold', deleteDebugInfo);
+        
+        // Prevent multiple simultaneous deletions
+        if (window.DELETION_IN_PROGRESS[examId]) {
+            console.warn('[DELETE] ⚠️ Already processing deletion for exam:', examId);
+            return;
+        }
+        
+        // Mark as in progress
+        window.DELETION_IN_PROGRESS[examId] = true;
+        
+        // Disable all delete buttons temporarily
+        const deleteButtons = document.querySelectorAll('button[onclick*="confirmDelete"]');
+        deleteButtons.forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes(examId)) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
+        });
+        
+        // Track if this is a permission denial
+        let isPermissionDenied = false;
+        let result = null;  // Initialize result variable in outer scope
+        
+        console.log('[DELETE] Starting deletion process for exam:', examId);
+        
+        try {
+            const deleteUrl = `/RoutineTest/exams/${examId}/delete/`;
+            console.log('[DELETE] Sending DELETE request to:', deleteUrl);
+            
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.querySelector('meta[name="csrf-token"]')?.content || '';
+            
+            if (!csrfToken) {
+                console.warn('[DELETE] No CSRF token found, request may fail');
+            }
+            
+            // ENHANCED REQUEST WITH DEBUGGING
+            console.log('[DELETE] 📡 Sending DELETE request with:', {
+                url: deleteUrl,
+                method: 'DELETE',
+                hasCSRFToken: !!csrfToken,
+                csrfTokenLength: csrfToken ? csrfToken.length : 0
+            });
+            
+            const response = await fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'  // Ensure cookies are sent
+            });
+            
+            // Only log non-permission responses
+            if (response.status !== 403) {
+                console.log('[DELETE] Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok
+                });
+            }
+            
+            if (!response.ok) {
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (jsonError) {
+                    errorData = { error: `HTTP error! status: ${response.status}` };
+                }
+                
+                // Handle permission errors with enhanced debugging
+                if (response.status === 403) {
+                    // COMPREHENSIVE PERMISSION DENIAL DEBUGGING
+                    const permissionDebug = {
+                        status: 'Access Denied (403)',
+                        examId: examId,
+                        errorResponse: errorData,
+                        userInfo: deleteDebugInfo,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    console.group('%c[DELETE] ❌ PERMISSION DENIED', 'color: #e74c3c; font-weight: bold');
+                    console.log('Debug Info:', permissionDebug);
+                    console.log('Server Response:', errorData);
+                    console.log('Detailed Error:', errorData.details || 'No details provided');
+                    console.groupEnd();
+                    
+                    // Clean up the error message for better user experience
+                    let permissionMessage = errorData.error || 
+                        "You do not have permission to delete this exam.";
+                    
+                    // Log permission denial with full context
+                    console.info('%c[DELETE] Permission check result:', 'color: #f39c12', {
+                        status: 'Access Denied',
+                        reason: errorData.details?.reason || 'Insufficient permissions',
+                        required: 'FULL access',
+                        message: 'This is expected behavior - user needs FULL access to delete'
+                    });
+                    
+                    // Clean up message if needed
+                    if (!permissionMessage.includes('Access Denied') && !permissionMessage.includes('FULL access')) {
+                        permissionMessage = "You do not have the required access level to delete this exam. Only teachers with FULL access can delete exams.";
+                    }
+                    
+                    // Show user-friendly notification
+                    if (window.showErrorNotification) {
+                        window.showErrorNotification(permissionMessage);
+                    } else {
+                        alert('Access Denied\n\n' + permissionMessage);
+                    }
+                    
+                    // Mark as permission denied - DON'T throw error, DON'T return early
+                    isPermissionDenied = true;
+                    console.log('[DELETE] Permission denied flag set, skipping further processing');
+                } else {
+                    // Only log non-permission errors
+                    console.error('[DELETE] Server error (non-403):', {
+                        status: response.status,
+                        error: errorData,
+                        examId: examId
+                    });
+                    
+                    // For other errors, throw to be caught by catch block
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+            }
+            
+            // Only process success response if not a permission denial
+            if (!isPermissionDenied && response.ok) {
+                const result = await response.json();
+                console.log('[DELETE] Processing success response:', {
+                    success: result.success,
+                    message: result.message,
+                    examId: examId
+                });
+                
+                if (result.success) {
+                    // Find and remove the exam card from DOM
+                    const examCard = document.querySelector(`button[onclick*="${examId}"]`)?.closest('.exam-card');
+                    if (examCard) {
+                        console.log('[DELETE] Removing exam card from DOM');
+                        const classExams = examCard.closest('.class-exams');
+                        
+                        // Animate removal
+                        examCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                        examCard.style.opacity = '0';
+                        examCard.style.transform = 'scale(0.95)';
+                        
+                        setTimeout(() => {
+                            examCard.remove();
+                            
+                            // Check if this was the last exam
+                            if (classExams && classExams.querySelectorAll('.exam-card').length === 0) {
+                                classExams.innerHTML = '<div class="no-exams">No exams in this class</div>';
+                            }
+                            
+                            // Show success notification
+                            if (window.showSuccessNotification) {
+                                window.showSuccessNotification('Exam deleted successfully');
+                            } else {
+                                alert('Exam deleted successfully');
+                            }
+                        }, 300);
+                    } else {
+                        console.log('[DELETE] Exam card not found, reloading page');
+                        alert('Exam deleted successfully');
+                        setTimeout(() => window.location.reload(), 1500);
+                    }
+                } else if (!isPermissionDenied && result) {
+                    // Log as warning, not error, since this is a controlled response
+                    console.warn('[DELETE] Server returned success:false', result);
+                    alert(result.message || result.error || 'Failed to delete exam');
+                }
+            }
+        } catch (error) {
+            // Don't log or handle if permission was already denied
+            if (isPermissionDenied) {
+                console.log('[DELETE] Skipping error handling - permission already denied');
+                return;
+            }
+            
+            // Only log actual errors, not permission denials
+            if (error && error.message && !error.message.includes('permission') && !error.message.includes('Access Denied')) {
+                console.error('[DELETE] Exception caught:', error);
+            }
+            
+            // Only show error if it's not a permission error (already handled above)
+            if (error && error.message && !error.message.includes('permission') && !error.message.includes('Access Denied')) {
+                if (window.showErrorNotification) {
+                    window.showErrorNotification('Error deleting exam: ' + error.message);
+                } else {
+                    alert('Error deleting exam: ' + error.message);
+                }
+            }
+        } finally {
+            // Always clean up state
+            delete window.DELETION_IN_PROGRESS[examId];
+            
+            // Re-enable delete buttons
+            const deleteButtons = document.querySelectorAll('button[onclick*="confirmDelete"]');
+            deleteButtons.forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes(examId)) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+            
+            console.log('[DELETE] Cleanup complete for exam:', examId);
+        }
+    };
+    
+    // Copy functionality
+    window.openCopyModal = function(examId, examName) {
+        console.log('%c[COPY] openCopyModal called', 'color: #3498db; font-weight: bold', {
+            examId: examId,
+            examName: examName,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (!examId) {
+            console.error('[COPY] No exam ID provided');
+            alert('Error: No exam ID provided for copying');
+            return;
+        }
+        
+        // Check if modal manager is available
+        if (window.CopyModalManager && window.CopyModalManager.open) {
+            console.log('[COPY] Using CopyModalManager');
+            window.CopyModalManager.open(examId, examName);
+        } else if (window.openCopyModalInternal) {
+            console.log('[COPY] Using openCopyModalInternal');
+            window.openCopyModalInternal(examId, examName);
+        } else {
+            console.error('[COPY] No copy modal handler available yet');
+            // Store for later execution
+            window.pendingCopyModal = { examId, examName };
+            alert('Copy modal is still loading. Please try again in a moment.');
+        }
+    };
+    
+    window.closeCopyModal = function() {
+        console.log('%c[COPY] closeCopyModal called', 'color: #3498db; font-weight: bold');
+        
+        if (window.CopyModalManager && window.CopyModalManager.close) {
+            window.CopyModalManager.close();
+        } else if (window.closeCopyModalInternal) {
+            window.closeCopyModalInternal();
+        } else {
+            // Fallback: try to hide modal directly
+            const modal = document.getElementById('copyExamModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+    };
+    
+    // Notification functions
+    window.showSuccessNotification = function(message) {
+        console.log('[NOTIFICATION] Success:', message);
+        if (window.showNotification) {
+            window.showNotification(message, 'success');
+        } else {
+            alert('✓ ' + message);
+        }
+    };
+    
+    window.showErrorNotification = function(message) {
+        console.log('[NOTIFICATION] Error:', message);
+        if (window.showNotification) {
+            window.showNotification(message, 'error');
+        } else {
+            alert('✗ ' + message);
+        }
+    };
+    
+    window.showNotification = function(message, type) {
+        type = type || 'info';
+        console.log(`[NOTIFICATION] ${type}:`, message);
+        
+        // Remove any existing notifications
+        const existingNotification = document.querySelector('.exam-notification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `exam-notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10001;
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+        
+        // Set colors based on type
+        if (type === 'success') {
+            notification.style.backgroundColor = '#4CAF50';
+            notification.style.color = 'white';
+        } else if (type === 'error') {
+            notification.style.backgroundColor = '#f44336';
+            notification.style.color = 'white';
+        } else {
+            notification.style.backgroundColor = '#2196F3';
+            notification.style.color = 'white';
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 5000);
+    };
+    
+    // Toggle functions for collapsible sections
+    window.toggleProgram = function(program) {
+        console.log('%c[TOGGLE] toggleProgram called', 'color: #9b59b6; font-weight: bold', { program });
+        const section = document.querySelector(`.program-section[data-program="${program}"]`);
+        if (section) {
+            section.classList.toggle('collapsed');
+        } else {
+            console.warn('[TOGGLE] Program section not found:', program);
+        }
+    };
+    
+    window.toggleClass = function(classCode) {
+        console.log('%c[TOGGLE] toggleClass called', 'color: #9b59b6; font-weight: bold', { classCode });
+        const section = document.querySelector(`.class-section[data-class="${classCode}"]`);
+        if (section) {
+            section.classList.toggle('collapsed');
+        } else {
+            console.warn('[TOGGLE] Class section not found:', classCode);
+        }
+    };
+    
+    // Mark as ready
+    window.EXAM_FUNCTIONS_READY = true;
+    
+    // Log initialization complete
+    const initTime = Date.now() - window.EXAM_FUNCTIONS_INIT_TIME;
+    console.log('%c[CRITICAL_FUNCTIONS] Global functions ready!', 'color: #27ae60; font-weight: bold', {
+        initTime: initTime + 'ms',
+        functions: ['confirmDelete', 'deleteExam', 'openCopyModal', 'closeCopyModal', 'toggleProgram', 'toggleClass'],
+        ready: window.EXAM_FUNCTIONS_READY
+    });
+    
+    // Verify functions are available
+    console.log('[CRITICAL_FUNCTIONS] Function availability check:', {
+        confirmDelete: typeof window.confirmDelete,
+        deleteExam: typeof window.deleteExam,
+        openCopyModal: typeof window.openCopyModal,
+        closeCopyModal: typeof window.closeCopyModal,
+        toggleProgram: typeof window.toggleProgram,
+        toggleClass: typeof window.toggleClass
+    });
+    
+})();
+
+// Double-check functions are in global scope
+console.log('[GLOBAL_CHECK] Functions in window:', {
+    confirmDelete: typeof window.confirmDelete === 'function',
+    deleteExam: typeof window.deleteExam === 'function',
+    openCopyModal: typeof window.openCopyModal === 'function',
+    closeCopyModal: typeof window.closeCopyModal === 'function',
+    toggleProgram: typeof window.toggleProgram === 'function',
+    toggleClass: typeof window.toggleClass === 'function'
+});
+</script>

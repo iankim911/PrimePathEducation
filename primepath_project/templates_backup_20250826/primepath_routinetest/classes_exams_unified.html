@@ -1,0 +1,1833 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+{% load access_display %}
+
+{% block title %}Classes & Exams Management - RoutineTest{% endblock %}
+
+{% block extra_css %}
+<!-- UI REDESIGN v1.0 - Unified Table with Integrated Teacher Management -->
+<style>
+    /* ===== DESIGN SYSTEM COLORS ===== */
+    :root {
+        --primary-green: #2E7D32;
+        --dark-green: #1B5E20;
+        --light-green-bg: #E8F5E9;
+        --white: #FFFFFF;
+        --light-gray-bg: #F5F5F5;
+        --border-gray: #E0E0E0;
+        --text-primary: #1F2937;
+        --text-secondary: #6B7280;
+        --red-danger: #DC2626;
+        --success-green: #10B981;
+        --warning-amber: #F59E0B;
+    }
+
+    /* ===== PAGE LAYOUT ===== */
+    .unified-container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 24px;
+        background: var(--light-gray-bg);
+    }
+
+    /* ===== CONTROL BAR ===== */
+    .control-bar {
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .search-section {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #CCCCCC;
+        border-radius: 4px;
+        padding: 0 16px;
+        font-size: 14px;
+        background: var(--white);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 2px var(--light-green-bg);
+    }
+
+    .filters-section {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        height: 42px;
+        border: 1px solid #CCCCCC;
+        border-radius: 4px;
+        background: var(--white);
+        padding: 0 12px;
+        font-size: 14px;
+        min-width: 120px;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='m0 0 2 3 2-3z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 12px;
+        appearance: none;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 2px var(--light-green-bg);
+    }
+
+    .actions-section {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .btn-primary {
+        background: var(--primary-green);
+        color: var(--white);
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: var(--dark-green);
+        color: var(--white);
+    }
+
+    .btn-secondary {
+        background: var(--white);
+        color: var(--primary-green);
+        border: 1px solid var(--primary-green);
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+        background: var(--light-green-bg);
+    }
+
+    /* ===== METRICS CARDS ===== */
+    .metrics-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .metric-card {
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        padding: 16px;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .metric-number {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--primary-green);
+        margin-bottom: 4px;
+    }
+
+    .metric-number.alert {
+        color: var(--red-danger);
+    }
+
+    .metric-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ===== DATA TABLE ===== */
+    .table-container {
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .table-header {
+        background: #F9FAFB;
+        border-bottom: 2px solid #E5E7EB;
+        padding: 0;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .data-table th {
+        background: #F9FAFB;
+        border-bottom: 2px solid #E5E7EB;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        color: #4B5563;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+    }
+
+    .data-table th:hover {
+        background: #F3F4F6;
+    }
+
+    .data-table th.sortable::after {
+        content: "↕";
+        position: absolute;
+        right: 8px;
+        color: #9CA3AF;
+        font-size: 12px;
+    }
+
+    .data-table th.sorted-asc::after {
+        content: "↑";
+        color: var(--primary-green);
+    }
+
+    .data-table th.sorted-desc::after {
+        content: "↓";
+        color: var(--primary-green);
+    }
+
+    .data-table td {
+        padding: 12px;
+        border-bottom: 1px solid #F3F4F6;
+        vertical-align: middle;
+    }
+
+    .data-table tr:hover {
+        background: #F9FAFB;
+    }
+
+    /* ===== STATUS BADGES ===== */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        display: inline-block;
+    }
+
+    .status-badge.active {
+        background: var(--success-green);
+        color: var(--white);
+    }
+
+    .status-badge.inactive {
+        background: #9CA3AF;
+        color: var(--white);
+    }
+
+    .status-badge.unassigned {
+        background: var(--red-danger);
+        color: var(--white);
+    }
+
+    .status-badge.pending {
+        background: var(--warning-amber);
+        color: var(--white);
+    }
+
+    /* ===== TEACHER ASSIGNMENT COLUMN ===== */
+    .teacher-cell {
+        min-width: 180px;
+    }
+
+    .teacher-assigned {
+        color: var(--text-primary);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .teacher-assigned:hover {
+        text-decoration: underline;
+    }
+
+    .teacher-assigned::after {
+        content: "Change";
+        position: absolute;
+        right: -45px;
+        color: var(--primary-green);
+        font-size: 11px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .teacher-assigned:hover::after {
+        opacity: 1;
+    }
+
+    .teacher-unassigned {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .assign-link {
+        color: var(--primary-green);
+        font-weight: 500;
+        text-decoration: none;
+        font-size: 12px;
+        padding: 2px 8px;
+        border: 1px solid var(--primary-green);
+        border-radius: 3px;
+        transition: all 0.2s;
+    }
+
+    .assign-link:hover {
+        background: var(--primary-green);
+        color: var(--white);
+    }
+
+    .multi-teacher {
+        color: var(--text-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .multi-teacher .expand-icon {
+        font-size: 10px;
+        transition: transform 0.2s;
+    }
+
+    .multi-teacher.expanded .expand-icon {
+        transform: rotate(180deg);
+    }
+
+    /* ===== PROGRESS BARS ===== */
+    .progress-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 100px;
+    }
+
+    .progress-bar {
+        flex: 1;
+        height: 8px;
+        background: #F3F4F6;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--success-green);
+        border-radius: 4px;
+        transition: width 0.3s;
+    }
+
+    .progress-fill.warning {
+        background: var(--warning-amber);
+    }
+
+    .progress-fill.danger {
+        background: var(--red-danger);
+    }
+
+    .progress-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    /* ===== ACTION MENU ===== */
+    .actions-menu {
+        position: relative;
+        display: inline-block;
+    }
+
+    .actions-button {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 16px;
+        line-height: 1;
+        transition: all 0.2s;
+    }
+
+    .actions-button:hover {
+        background: #F3F4F6;
+        color: var(--text-primary);
+    }
+
+    .actions-dropdown {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        border-radius: 6px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        min-width: 160px;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition: all 0.2s;
+    }
+
+    .actions-dropdown.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .actions-dropdown a {
+        display: block;
+        padding: 8px 16px;
+        color: var(--text-primary);
+        text-decoration: none;
+        font-size: 14px;
+        transition: background 0.2s;
+    }
+
+    .actions-dropdown a:hover {
+        background: #F9FAFB;
+    }
+
+    .actions-dropdown a.danger {
+        color: var(--red-danger);
+    }
+
+    .actions-dropdown a.danger:hover {
+        background: #FEF2F2;
+    }
+
+    /* ===== BULK ACTIONS ===== */
+    .bulk-actions-bar {
+        background: var(--primary-green);
+        color: var(--white);
+        padding: 16px 20px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        animation: slideDown 0.3s ease;
+    }
+
+    .bulk-actions-bar.show {
+        display: flex;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .bulk-actions-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .bulk-actions-buttons {
+        display: flex;
+        gap: 12px;
+    }
+
+    .bulk-btn {
+        background: var(--white);
+        color: var(--primary-green);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .bulk-btn:hover {
+        background: var(--light-green-bg);
+    }
+
+    .bulk-btn.danger {
+        color: var(--red-danger);
+    }
+
+    .bulk-btn.danger:hover {
+        background: #FEF2F2;
+    }
+
+    /* ===== FLOATING ACTION BUTTON ===== */
+    .fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--primary-green);
+        color: var(--white);
+        border: none;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s;
+        z-index: 1000;
+    }
+
+    .fab:hover {
+        background: var(--dark-green);
+        transform: scale(1.1);
+    }
+
+    .fab-menu {
+        position: fixed;
+        bottom: 90px;
+        right: 24px;
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 999;
+    }
+
+    .fab-menu.show {
+        display: flex;
+        animation: fabMenuShow 0.3s ease;
+    }
+
+    @keyframes fabMenuShow {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .fab-menu-item {
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        border-radius: 6px;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+        transition: all 0.2s;
+    }
+
+    .fab-menu-item:hover {
+        background: var(--light-green-bg);
+        color: var(--primary-green);
+    }
+
+    /* ===== PAGINATION ===== */
+    .pagination-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        border-radius: 8px;
+        margin-top: 16px;
+    }
+
+    .pagination-info {
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+
+    .pagination-controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .page-size-select {
+        height: 32px;
+        border: 1px solid var(--border-gray);
+        border-radius: 4px;
+        padding: 0 8px;
+        font-size: 13px;
+        background: var(--white);
+        cursor: pointer;
+    }
+
+    .pagination-buttons {
+        display: flex;
+        gap: 4px;
+    }
+
+    .page-btn {
+        background: var(--white);
+        border: 1px solid var(--border-gray);
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .page-btn:hover {
+        background: var(--light-green-bg);
+    }
+
+    .page-btn.active {
+        background: var(--primary-green);
+        color: var(--white);
+        border-color: var(--primary-green);
+    }
+
+    .page-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 1024px) {
+        .control-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-section {
+            min-width: auto;
+        }
+
+        .filters-section {
+            justify-content: center;
+        }
+
+        .actions-section {
+            justify-content: center;
+        }
+
+        .metrics-section {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .unified-container {
+            padding: 16px;
+        }
+
+        .data-table {
+            font-size: 13px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 8px;
+        }
+
+        /* Hide some columns on mobile */
+        .hide-mobile {
+            display: none;
+        }
+
+        .fab {
+            bottom: 16px;
+            right: 16px;
+        }
+
+        .fab-menu {
+            bottom: 80px;
+            right: 16px;
+        }
+    }
+
+    /* ===== MODALS ===== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal-content {
+        background: var(--white);
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-gray);
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: #F3F4F6;
+        color: var(--text-primary);
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-gray);
+    }
+
+    /* ===== LOADING STATES ===== */
+    .loading-skeleton {
+        background: linear-gradient(90deg, #F0F0F0 25%, #E0E0E0 50%, #F0F0F0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 4px;
+    }
+
+    @keyframes loading {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    .skeleton-row {
+        height: 48px;
+        margin-bottom: 1px;
+    }
+
+    /* ===== EMPTY STATES ===== */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .empty-state-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .empty-state-text {
+        font-size: 16px;
+        margin-bottom: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="unified-container">
+    {% if error %}
+    <!-- Error State -->
+    <div class="alert alert-danger">
+        <h4>Error Loading Classes & Exams</h4>
+        <p>{{ error_message }}</p>
+        <a href="{% url 'RoutineTest:index' %}" class="btn btn-primary">Return to Dashboard</a>
+    </div>
+    {% else %}
+
+    <!-- Control Bar -->
+    <div class="control-bar">
+        <div class="search-section">
+            <input type="text" 
+                   class="search-input" 
+                   placeholder="Search classes, teachers, or codes..." 
+                   id="searchInput"
+                   autocomplete="off">
+        </div>
+        
+        <div class="filters-section">
+            <select class="filter-select" id="programFilter">
+                <option value="">All Programs</option>
+                <option value="CORE">CORE</option>
+                <option value="ASCENT">ASCENT</option>
+                <option value="EDGE">EDGE</option>
+                <option value="PINNACLE">PINNACLE</option>
+            </select>
+            
+            <select class="filter-select" id="levelFilter">
+                <option value="">All Levels</option>
+                <option value="Level 1">Level 1</option>
+                <option value="Level 2">Level 2</option>
+                <option value="Level 3">Level 3</option>
+            </select>
+            
+            <select class="filter-select" id="teacherStatusFilter">
+                <option value="">All Teachers</option>
+                <option value="assigned">Assigned</option>
+                <option value="unassigned">Unassigned</option>
+                <option value="multi">Multi-teacher</option>
+            </select>
+            
+            <select class="filter-select" id="classStatusFilter">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="archived">Archived</option>
+            </select>
+            
+            <select class="filter-select" id="enrollmentFilter">
+                <option value="">All Enrollment</option>
+                <option value="full">Full</option>
+                <option value="available">Available</option>
+                <option value="empty">Empty</option>
+            </select>
+        </div>
+        
+        <div class="actions-section">
+            <select class="filter-select" id="viewMode">
+                <option value="table">Table View</option>
+                <option value="card">Card View</option>
+                <option value="compact">Compact View</option>
+            </select>
+            
+            <select class="filter-select" id="groupBy">
+                <option value="">No Grouping</option>
+                <option value="program">By Program</option>
+                <option value="level">By Level</option>
+                <option value="teacher">By Teacher</option>
+            </select>
+            
+            <button class="btn-secondary" id="bulkActionsBtn">
+                <span>⚡</span>
+                Bulk Actions
+            </button>
+            
+            <button class="btn-secondary" id="exportBtn">
+                <span>📊</span>
+                Export
+            </button>
+            
+            {% if is_admin %}
+            <a href="#" class="btn-primary" id="createClassBtn">
+                <span>➕</span>
+                Create New Class
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="metrics-section">
+        <div class="metric-card">
+            <div class="metric-number">{{ total_classes|default:"0" }}</div>
+            <div class="metric-label">Total Classes</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">{{ assigned_classes_count|default:"0" }}</div>
+            <div class="metric-label">Assigned Teachers</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number alert" id="unassignedCount">{{ unassigned_classes_count|default:"0" }}</div>
+            <div class="metric-label">Unassigned Classes</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number">{{ total_students|default:"0" }}</div>
+            <div class="metric-label">Total Students</div>
+        </div>
+        {% if is_admin and admin_pending_requests_count > 0 %}
+        <div class="metric-card">
+            <div class="metric-number alert">{{ admin_pending_requests_count }}</div>
+            <div class="metric-label">Pending Requests</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bulk Actions Bar -->
+    <div class="bulk-actions-bar" id="bulkActionsBar">
+        <div class="bulk-actions-info">
+            <span id="selectedCount">0</span> classes selected
+        </div>
+        <div class="bulk-actions-buttons">
+            <button class="bulk-btn" id="bulkAssignTeacher">Assign Teacher</button>
+            <button class="bulk-btn" id="bulkChangeStatus">Change Status</button>
+            <button class="bulk-btn" id="bulkExport">Export Selected</button>
+            <button class="bulk-btn danger" id="bulkDelete">Delete</button>
+            <button class="bulk-btn" id="clearSelection">Clear</button>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container">
+        <table class="data-table" id="classesTable">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" id="selectAllCheckbox" title="Select all classes">
+                    </th>
+                    <th class="sortable" data-sort="class_code">Class Code</th>
+                    <th class="sortable" data-sort="class_name">Class Name</th>
+                    <th class="sortable" data-sort="program">Program</th>
+                    <th class="sortable" data-sort="level">Level</th>
+                    <th class="sortable teacher-cell" data-sort="teacher">Teacher(s)</th>
+                    <th class="sortable" data-sort="students">Students</th>
+                    <th class="sortable hide-mobile" data-sort="status">Status</th>
+                    <th class="sortable hide-mobile" data-sort="activity">Last Activity</th>
+                    <th style="width: 80px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="classesTableBody">
+                <!-- Loading skeleton initially -->
+                <tr class="loading-skeleton skeleton-row"><td colspan="10"></td></tr>
+                <tr class="loading-skeleton skeleton-row"><td colspan="10"></td></tr>
+                <tr class="loading-skeleton skeleton-row"><td colspan="10"></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-section">
+        <div class="pagination-info">
+            Showing <span id="showingStart">1</span> to <span id="showingEnd">25</span> of <span id="totalRecords">0</span> classes
+        </div>
+        <div class="pagination-controls">
+            <label for="pageSize" style="font-size: 14px; color: var(--text-secondary); margin-right: 8px;">Show:</label>
+            <select class="page-size-select" id="pageSize">
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            
+            <div class="pagination-buttons">
+                <button class="page-btn" id="prevPageBtn" disabled>Previous</button>
+                <div id="pageNumbers"></div>
+                <button class="page-btn" id="nextPageBtn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    {% if is_admin %}
+    <button class="fab" id="fabButton" title="Quick Actions">+</button>
+    <div class="fab-menu" id="fabMenu">
+        <a href="#" class="fab-menu-item" id="quickCreateClass">
+            <span>➕</span> Create New Class
+        </a>
+        <a href="#" class="fab-menu-item" id="quickBulkAssign">
+            <span>👥</span> Assign Teachers (Bulk)
+        </a>
+        <a href="#" class="fab-menu-item" id="quickImport">
+            <span>📥</span> Import Classes
+        </a>
+        <a href="#" class="fab-menu-item" id="quickReports">
+            <span>📊</span> Generate Reports
+        </a>
+        {% if admin_pending_requests_count > 0 %}
+        <a href="{% url 'RoutineTest:admin_pending_requests' %}" class="fab-menu-item">
+            <span>🔔</span> View Requests ({{ admin_pending_requests_count }})
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Teacher Assignment Modal -->
+    <div class="modal-overlay" id="teacherAssignModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Assign Teacher</div>
+                <button class="modal-close" onclick="closeModal('teacherAssignModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 4px; font-weight: 500;">Class:</label>
+                    <div id="assignClassInfo" style="padding: 8px; background: var(--light-gray-bg); border-radius: 4px; font-weight: 600;"></div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label for="teacherSelect" style="display: block; margin-bottom: 4px; font-weight: 500;">Select Teacher:</label>
+                    <select class="filter-select" id="teacherSelect" style="width: 100%;">
+                        <option value="">Choose a teacher...</option>
+                        <!-- Teachers will be populated dynamically -->
+                    </select>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="multiTeacherMode">
+                        <span>Enable team teaching (multiple teachers)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('teacherAssignModal')">Cancel</button>
+                <button class="btn-primary" id="confirmAssignTeacher">Assign Teacher</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Class Modal -->
+    <div class="modal-overlay" id="createClassModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Create New Class</div>
+                <button class="modal-close" onclick="closeModal('createClassModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label for="newClassCode" style="display: block; margin-bottom: 4px; font-weight: 500;">Class Code:</label>
+                        <input type="text" id="newClassCode" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;" placeholder="e.g., 8A">
+                    </div>
+                    <div>
+                        <label for="newClassName" style="display: block; margin-bottom: 4px; font-weight: 500;">Class Name:</label>
+                        <input type="text" id="newClassName" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;" placeholder="e.g., Grade 8 Class A">
+                    </div>
+                    <div>
+                        <label for="newClassProgram" style="display: block; margin-bottom: 4px; font-weight: 500;">Program:</label>
+                        <select class="filter-select" id="newClassProgram" style="width: 100%;">
+                            <option value="">Select Program</option>
+                            <option value="CORE">CORE</option>
+                            <option value="ASCENT">ASCENT</option>
+                            <option value="EDGE">EDGE</option>
+                            <option value="PINNACLE">PINNACLE</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="newClassLevel" style="display: block; margin-bottom: 4px; font-weight: 500;">Level:</label>
+                        <select class="filter-select" id="newClassLevel" style="width: 100%;">
+                            <option value="">Select Level</option>
+                            <option value="Level 1">Level 1</option>
+                            <option value="Level 2">Level 2</option>
+                            <option value="Level 3">Level 3</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 16px;">
+                    <label for="newClassCapacity" style="display: block; margin-bottom: 4px; font-weight: 500;">Capacity:</label>
+                    <input type="number" id="newClassCapacity" style="width: 100%; padding: 8px; border: 1px solid var(--border-gray); border-radius: 4px;" placeholder="30" min="1" max="50">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('createClassModal')">Cancel</button>
+                <button class="btn-primary" id="confirmCreateClass">Create Class</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-state-icon">🏫</div>
+        <div class="empty-state-title">No classes found</div>
+        <div class="empty-state-text">Try adjusting your search or filter criteria</div>
+        {% if is_admin %}
+        <button class="btn-primary" onclick="openModal('createClassModal')">
+            <span>➕</span>
+            Create Your First Class
+        </button>
+        {% endif %}
+    </div>
+
+    {% endif %}
+</div>
+
+<!-- JavaScript for UI Functionality -->
+<script>
+// UI Redesign v1.0 - Unified Table with Integrated Teacher Management
+// Cache Buster: 2025-08-26-unified-table-design
+
+// ===== GLOBAL STATE =====
+let classesData = [];
+let filteredData = [];
+let selectedClasses = new Set();
+let currentPage = 1;
+let pageSize = 25;
+let sortColumn = '';
+let sortDirection = 'asc';
+
+// ===== MOCK DATA FOR DEMONSTRATION =====
+// In production, this would come from Django context or AJAX calls
+const mockClasses = [
+    {
+        id: 1,
+        class_code: 'C2',
+        class_name: 'Core Grade 2',
+        program: 'CORE',
+        level: 'Level 1',
+        teacher: 'Sarah Johnson',
+        teacher_id: 1,
+        students: 24,
+        capacity: 30,
+        status: 'active',
+        last_activity: '2 hours ago',
+        progress: 80
+    },
+    {
+        id: 2,
+        class_code: 'A5',
+        class_name: 'Ascent Grade 5',
+        program: 'ASCENT',
+        level: 'Level 2',
+        teacher: null,
+        teacher_id: null,
+        students: 0,
+        capacity: 25,
+        status: 'inactive',
+        last_activity: 'Never',
+        progress: 0
+    },
+    {
+        id: 3,
+        class_code: 'E8',
+        class_name: 'Edge Grade 8',
+        program: 'EDGE',
+        level: 'Level 3',
+        teacher: 'Multiple Teachers',
+        teacher_id: 'multi',
+        teacher_count: 2,
+        students: 28,
+        capacity: 30,
+        status: 'active',
+        last_activity: '1 day ago',
+        progress: 95
+    },
+    {
+        id: 4,
+        class_code: 'P10',
+        class_name: 'Pinnacle Grade 10',
+        program: 'PINNACLE',
+        level: 'Level 2',
+        teacher: 'Michael Chen',
+        teacher_id: 3,
+        students: 15,
+        capacity: 20,
+        status: 'active',
+        last_activity: '3 hours ago',
+        progress: 75
+    },
+    {
+        id: 5,
+        class_code: 'C4',
+        class_name: 'Core Grade 4',
+        program: 'CORE',
+        level: 'Level 2',
+        teacher: 'Emily Rodriguez',
+        teacher_id: 4,
+        students: 22,
+        capacity: 25,
+        status: 'active',
+        last_activity: '1 hour ago',
+        progress: 88
+    }
+];
+
+// Mock teachers data
+const mockTeachers = [
+    { id: 1, name: 'Sarah Johnson', email: 'sarah.j@primepath.com' },
+    { id: 2, name: 'David Smith', email: 'david.s@primepath.com' },
+    { id: 3, name: 'Michael Chen', email: 'michael.c@primepath.com' },
+    { id: 4, name: 'Emily Rodriguez', email: 'emily.r@primepath.com' },
+    { id: 5, name: 'Jennifer Lee', email: 'jennifer.l@primepath.com' },
+    { id: 6, name: 'Robert Wilson', email: 'robert.w@primepath.com' }
+];
+
+// ===== INITIALIZATION =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize with mock data (in production, fetch from server)
+    classesData = [...mockClasses];
+    filteredData = [...classesData];
+    
+    // Populate teacher dropdown
+    populateTeacherDropdown();
+    
+    // Initial render
+    renderTable();
+    updateMetrics();
+    updatePagination();
+    
+    // Setup event listeners
+    setupEventListeners();
+    
+    // Remove loading skeletons
+    setTimeout(() => {
+        document.querySelectorAll('.loading-skeleton').forEach(el => el.remove());
+    }, 500);
+});
+
+// ===== EVENT LISTENERS =====
+function setupEventListeners() {
+    // Search
+    document.getElementById('searchInput').addEventListener('input', handleSearch);
+    
+    // Filters
+    document.getElementById('programFilter').addEventListener('change', handleFilters);
+    document.getElementById('levelFilter').addEventListener('change', handleFilters);
+    document.getElementById('teacherStatusFilter').addEventListener('change', handleFilters);
+    document.getElementById('classStatusFilter').addEventListener('change', handleFilters);
+    document.getElementById('enrollmentFilter').addEventListener('change', handleFilters);
+    
+    // View controls
+    document.getElementById('viewMode').addEventListener('change', handleViewChange);
+    document.getElementById('groupBy').addEventListener('change', handleGroupChange);
+    
+    // Select all checkbox
+    document.getElementById('selectAllCheckbox').addEventListener('change', handleSelectAll);
+    
+    // Table headers for sorting
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.addEventListener('click', () => handleSort(header.dataset.sort));
+    });
+    
+    // Page size
+    document.getElementById('pageSize').addEventListener('change', handlePageSizeChange);
+    
+    // Pagination
+    document.getElementById('prevPageBtn').addEventListener('click', () => changePage(currentPage - 1));
+    document.getElementById('nextPageBtn').addEventListener('click', () => changePage(currentPage + 1));
+    
+    // Bulk actions
+    document.getElementById('bulkActionsBtn').addEventListener('click', toggleBulkActions);
+    document.getElementById('clearSelection').addEventListener('click', clearSelection);
+    document.getElementById('bulkAssignTeacher').addEventListener('click', () => openBulkAssignModal());
+    
+    // FAB
+    {% if is_admin %}
+    document.getElementById('fabButton').addEventListener('click', toggleFABMenu);
+    document.getElementById('quickCreateClass').addEventListener('click', () => openModal('createClassModal'));
+    {% endif %}
+    
+    // Modals
+    document.getElementById('confirmAssignTeacher').addEventListener('click', handleAssignTeacher);
+    document.getElementById('confirmCreateClass').addEventListener('click', handleCreateClass);
+    
+    // Close modals on outside click
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(modal.id);
+            }
+        });
+    });
+}
+
+// ===== TABLE RENDERING =====
+function renderTable() {
+    const tbody = document.getElementById('classesTableBody');
+    
+    if (filteredData.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+        document.querySelector('.table-container').style.display = 'none';
+        return;
+    }
+    
+    document.getElementById('emptyState').style.display = 'none';
+    document.querySelector('.table-container').style.display = 'block';
+    
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+    const pageData = filteredData.slice(startIndex, endIndex);
+    
+    tbody.innerHTML = pageData.map(classItem => `
+        <tr data-class-id="${classItem.id}">
+            <td>
+                <input type="checkbox" 
+                       class="class-checkbox" 
+                       value="${classItem.id}"
+                       ${selectedClasses.has(classItem.id) ? 'checked' : ''}>
+            </td>
+            <td>
+                <strong style="color: var(--primary-green); cursor: pointer;" 
+                        onclick="viewClassDetails(${classItem.id})">${classItem.class_code}</strong>
+            </td>
+            <td>
+                <div style="color: var(--text-primary);">${classItem.class_name}</div>
+            </td>
+            <td>
+                <span class="status-badge" style="background: var(--primary-green); color: var(--white);">
+                    ${classItem.program}
+                </span>
+            </td>
+            <td>
+                <span class="status-badge" style="background: var(--text-secondary); color: var(--white);">
+                    ${classItem.level}
+                </span>
+            </td>
+            <td class="teacher-cell">
+                ${renderTeacherCell(classItem)}
+            </td>
+            <td>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill ${getProgressClass(classItem.progress)}" 
+                             style="width: ${classItem.progress}%;"></div>
+                    </div>
+                    <div class="progress-text">${classItem.students}/${classItem.capacity}</div>
+                </div>
+            </td>
+            <td class="hide-mobile">
+                <span class="status-badge ${classItem.status}">
+                    ${classItem.status}
+                </span>
+            </td>
+            <td class="hide-mobile">
+                <span style="color: var(--text-secondary); font-size: 12px;">
+                    ${classItem.last_activity}
+                </span>
+            </td>
+            <td>
+                <div class="actions-menu">
+                    <button class="actions-button" onclick="toggleActionsMenu(this)">⋮</button>
+                    <div class="actions-dropdown">
+                        <a href="#" onclick="viewClassDetails(${classItem.id})">View Details</a>
+                        <a href="#" onclick="editClass(${classItem.id})">Edit Class</a>
+                        <a href="#" onclick="openTeacherAssignModal(${classItem.id})">Manage Teachers</a>
+                        <a href="#" onclick="viewReports(${classItem.id})">View Reports</a>
+                        <a href="#" onclick="duplicateClass(${classItem.id})">Duplicate</a>
+                        <a href="#" onclick="archiveClass(${classItem.id})">Archive</a>
+                        <a href="#" onclick="deleteClass(${classItem.id})" class="danger">Delete</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+    
+    // Re-attach checkbox listeners
+    document.querySelectorAll('.class-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', handleRowSelect);
+    });
+}
+
+function renderTeacherCell(classItem) {
+    if (!classItem.teacher) {
+        return `
+            <div class="teacher-unassigned">
+                <span class="status-badge unassigned">Unassigned</span>
+                <a href="#" class="assign-link" onclick="openTeacherAssignModal(${classItem.id}); return false;">
+                    Assign
+                </a>
+            </div>
+        `;
+    }
+    
+    if (classItem.teacher_id === 'multi') {
+        return `
+            <div class="multi-teacher" onclick="expandMultiTeacher(this, ${classItem.id})">
+                <span>${classItem.teacher_count} teachers</span>
+                <span class="expand-icon">▼</span>
+            </div>
+        `;
+    }
+    
+    return `
+        <div class="teacher-assigned" onclick="openTeacherAssignModal(${classItem.id}); return false;">
+            ${classItem.teacher}
+        </div>
+    `;
+}
+
+function getProgressClass(progress) {
+    if (progress >= 80) return '';
+    if (progress >= 50) return 'warning';
+    return 'danger';
+}
+
+// ===== SEARCH AND FILTERING =====
+function handleSearch() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    applyFilters();
+}
+
+function handleFilters() {
+    applyFilters();
+}
+
+function applyFilters() {
+    const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+    const programFilter = document.getElementById('programFilter').value;
+    const levelFilter = document.getElementById('levelFilter').value;
+    const teacherStatusFilter = document.getElementById('teacherStatusFilter').value;
+    const classStatusFilter = document.getElementById('classStatusFilter').value;
+    const enrollmentFilter = document.getElementById('enrollmentFilter').value;
+    
+    filteredData = classesData.filter(classItem => {
+        // Search filter
+        const matchesSearch = !searchQuery || 
+            classItem.class_code.toLowerCase().includes(searchQuery) ||
+            classItem.class_name.toLowerCase().includes(searchQuery) ||
+            (classItem.teacher && classItem.teacher.toLowerCase().includes(searchQuery));
+        
+        // Program filter
+        const matchesProgram = !programFilter || classItem.program === programFilter;
+        
+        // Level filter
+        const matchesLevel = !levelFilter || classItem.level === levelFilter;
+        
+        // Teacher status filter
+        let matchesTeacherStatus = true;
+        if (teacherStatusFilter === 'assigned') {
+            matchesTeacherStatus = classItem.teacher && classItem.teacher_id !== 'multi';
+        } else if (teacherStatusFilter === 'unassigned') {
+            matchesTeacherStatus = !classItem.teacher;
+        } else if (teacherStatusFilter === 'multi') {
+            matchesTeacherStatus = classItem.teacher_id === 'multi';
+        }
+        
+        // Class status filter
+        const matchesClassStatus = !classStatusFilter || classItem.status === classStatusFilter;
+        
+        // Enrollment filter
+        let matchesEnrollment = true;
+        if (enrollmentFilter === 'full') {
+            matchesEnrollment = classItem.students >= classItem.capacity;
+        } else if (enrollmentFilter === 'available') {
+            matchesEnrollment = classItem.students < classItem.capacity && classItem.students > 0;
+        } else if (enrollmentFilter === 'empty') {
+            matchesEnrollment = classItem.students === 0;
+        }
+        
+        return matchesSearch && matchesProgram && matchesLevel && 
+               matchesTeacherStatus && matchesClassStatus && matchesEnrollment;
+    });
+    
+    currentPage = 1; // Reset to first page
+    renderTable();
+    updateMetrics();
+    updatePagination();
+}
+
+// ===== SORTING =====
+function handleSort(column) {
+    if (sortColumn === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortColumn = column;
+        sortDirection = 'asc';
+    }
+    
+    // Update header styles
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.classList.remove('sorted-asc', 'sorted-desc');
+    });
+    
+    const activeHeader = document.querySelector(`[data-sort="${column}"]`);
+    activeHeader.classList.add(sortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    
+    // Sort data
+    filteredData.sort((a, b) => {
+        let aVal = a[column];
+        let bVal = b[column];
+        
+        // Handle special cases
+        if (column === 'teacher') {
+            aVal = aVal || 'zzz'; // Put unassigned at end
+            bVal = bVal || 'zzz';
+        }
+        
+        if (typeof aVal === 'string') {
+            aVal = aVal.toLowerCase();
+            bVal = bVal.toLowerCase();
+        }
+        
+        let result = 0;
+        if (aVal < bVal) result = -1;
+        if (aVal > bVal) result = 1;
+        
+        return sortDirection === 'desc' ? -result : result;
+    });
+    
+    renderTable();
+}
+
+// ===== PAGINATION =====
+function handlePageSizeChange() {
+    pageSize = parseInt(document.getElementById('pageSize').value);
+    currentPage = 1;
+    renderTable();
+    updatePagination();
+}
+
+function changePage(newPage) {
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    if (newPage >= 1 && newPage <= totalPages) {
+        currentPage = newPage;
+        renderTable();
+        updatePagination();
+    }
+}
+
+function updatePagination() {
+    const totalRecords = filteredData.length;
+    const totalPages = Math.ceil(totalRecords / pageSize);
+    const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+    const endRecord = Math.min(currentPage * pageSize, totalRecords);
+    
+    // Update info
+    document.getElementById('showingStart').textContent = startRecord;
+    document.getElementById('showingEnd').textContent = endRecord;
+    document.getElementById('totalRecords').textContent = totalRecords;
+    
+    // Update buttons
+    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+    
+    // Update page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const button = document.createElement('button');
+        button.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        button.textContent = i;
+        button.onclick = () => changePage(i);
+        pageNumbers.appendChild(button);
+    }
+}
+
+// ===== SELECTION AND BULK ACTIONS =====
+function handleSelectAll() {
+    const isChecked = document.getElementById('selectAllCheckbox').checked;
+    const checkboxes = document.querySelectorAll('.class-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = isChecked;
+        const classId = parseInt(checkbox.value);
+        if (isChecked) {
+            selectedClasses.add(classId);
+        } else {
+            selectedClasses.delete(classId);
+        }
+    });
+    
+    updateBulkActionsBar();
+}
+
+function handleRowSelect() {
+    const classId = parseInt(this.value);
+    
+    if (this.checked) {
+        selectedClasses.add(classId);
+    } else {
+        selectedClasses.delete(classId);
+        document.getElementById('selectAllCheckbox').checked = false;
+    }
+    
+    updateBulkActionsBar();
+}
+
+function updateBulkActionsBar() {
+    const count = selectedClasses.size;
+    const bar = document.getElementById('bulkActionsBar');
+    const countDisplay = document.getElementById('selectedCount');
+    
+    if (count > 0) {
+        bar.classList.add('show');
+        countDisplay.textContent = count;
+    } else {
+        bar.classList.remove('show');
+    }
+}
+
+function clearSelection() {
+    selectedClasses.clear();
+    document.querySelectorAll('.class-checkbox').forEach(cb => cb.checked = false);
+    document.getElementById('selectAllCheckbox').checked = false;
+    updateBulkActionsBar();
+}
+
+// ===== METRICS =====
+function updateMetrics() {
+    const assignedCount = filteredData.filter(c => c.teacher && c.teacher_id !== 'multi').length + 
+                         filteredData.filter(c => c.teacher_id === 'multi').length;
+    const unassignedCount = filteredData.filter(c => !c.teacher).length;
+    const totalStudents = filteredData.reduce((sum, c) => sum + c.students, 0);
+    
+    document.getElementById('unassignedCount').textContent = unassignedCount;
+}
+
+// ===== MODALS =====
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function openTeacherAssignModal(classId) {
+    const classItem = classesData.find(c => c.id === classId);
+    if (!classItem) return;
+    
+    document.getElementById('assignClassInfo').textContent = 
+        `${classItem.class_code} - ${classItem.class_name}`;
+    
+    // Store class ID for assignment
+    document.getElementById('teacherAssignModal').dataset.classId = classId;
+    
+    openModal('teacherAssignModal');
+}
+
+function populateTeacherDropdown() {
+    const select = document.getElementById('teacherSelect');
+    select.innerHTML = '<option value="">Choose a teacher...</option>';
+    
+    mockTeachers.forEach(teacher => {
+        const option = document.createElement('option');
+        option.value = teacher.id;
+        option.textContent = teacher.name;
+        select.appendChild(option);
+    });
+}
+
+function handleAssignTeacher() {
+    const classId = parseInt(document.getElementById('teacherAssignModal').dataset.classId);
+    const teacherId = parseInt(document.getElementById('teacherSelect').value);
+    
+    if (!teacherId) {
+        alert('Please select a teacher');
+        return;
+    }
+    
+    const teacher = mockTeachers.find(t => t.id === teacherId);
+    const classIndex = classesData.findIndex(c => c.id === classId);
+    
+    if (classIndex !== -1) {
+        classesData[classIndex].teacher = teacher.name;
+        classesData[classIndex].teacher_id = teacher.id;
+        
+        // Update filtered data if needed
+        applyFilters();
+        
+        // Show success message
+        showNotification(`Teacher ${teacher.name} assigned to class successfully!`, 'success');
+    }
+    
+    closeModal('teacherAssignModal');
+}
+
+function handleCreateClass() {
+    const code = document.getElementById('newClassCode').value.trim();
+    const name = document.getElementById('newClassName').value.trim();
+    const program = document.getElementById('newClassProgram').value;
+    const level = document.getElementById('newClassLevel').value;
+    const capacity = parseInt(document.getElementById('newClassCapacity').value) || 30;
+    
+    if (!code || !name || !program || !level) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    // Check if class code already exists
+    if (classesData.some(c => c.class_code === code)) {
+        alert('A class with this code already exists');
+        return;
+    }
+    
+    // Create new class
+    const newClass = {
+        id: Math.max(...classesData.map(c => c.id)) + 1,
+        class_code: code,
+        class_name: name,
+        program: program,
+        level: level,
+        teacher: null,
+        teacher_id: null,
+        students: 0,
+        capacity: capacity,
+        status: 'active',
+        last_activity: 'Never',
+        progress: 0
+    };
+    
+    classesData.push(newClass);
+    applyFilters();
+    
+    // Clear form
+    document.getElementById('newClassCode').value = '';
+    document.getElementById('newClassName').value = '';
+    document.getElementById('newClassProgram').value = '';
+    document.getElementById('newClassLevel').value = '';
+    document.getElementById('newClassCapacity').value = '';
+    
+    closeModal('createClassModal');
+    showNotification(`Class ${code} created successfully!`, 'success');
+}
+
+// ===== UTILITY FUNCTIONS =====
+function toggleActionsMenu(button) {
+    const dropdown = button.nextElementSibling;
+    const isShow = dropdown.classList.contains('show');
+    
+    // Close all dropdowns
+    document.querySelectorAll('.actions-dropdown').forEach(d => d.classList.remove('show'));
+    
+    // Toggle current dropdown
+    if (!isShow) {
+        dropdown.classList.add('show');
+    }
+}
+
+function toggleFABMenu() {
+    const menu = document.getElementById('fabMenu');
+    menu.classList.toggle('show');
+}
+
+function showNotification(message, type = 'info') {
+    // Simple notification implementation
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? 'var(--success-green)' : 'var(--primary-green)'};
+        color: white;
+        padding: 16px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        z-index: 3000;
+        animation: slideInRight 0.3s ease;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// ===== PLACEHOLDER FUNCTIONS =====
+// These would be implemented with actual functionality
+function handleViewChange() { console.log('View mode changed'); }
+function handleGroupChange() { console.log('Group by changed'); }
+function toggleBulkActions() { console.log('Bulk actions toggled'); }
+function openBulkAssignModal() { console.log('Bulk assign modal opened'); }
+function viewClassDetails(id) { console.log('View class details:', id); }
+function editClass(id) { console.log('Edit class:', id); }
+function viewReports(id) { console.log('View reports:', id); }
+function duplicateClass(id) { console.log('Duplicate class:', id); }
+function archiveClass(id) { console.log('Archive class:', id); }
+function deleteClass(id) { console.log('Delete class:', id); }
+function expandMultiTeacher(element, id) { console.log('Expand multi-teacher:', id); }
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.actions-menu')) {
+        document.querySelectorAll('.actions-dropdown').forEach(d => d.classList.remove('show'));
+    }
+    if (!e.target.closest('#fabButton')) {
+        document.getElementById('fabMenu')?.classList.remove('show');
+    }
+});
+
+// Add CSS animation for notifications
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+console.log('[UI_REDESIGN] Unified Classes & Exams interface loaded successfully');
+</script>
+{% endblock %}

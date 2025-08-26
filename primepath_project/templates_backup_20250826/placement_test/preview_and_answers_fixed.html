@@ -1,0 +1,336 @@
+<!-- This is the FIXED JavaScript section for points editing -->
+<!-- Replace lines 4004-4078 in preview_and_answers.html with this code -->
+
+<script>
+// Points editing functionality
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[PointsEditor] 🚀 INITIALIZING POINTS EDITING SYSTEM');
+    console.log('[PointsEditor] Timestamp:', new Date().toISOString());
+    
+    // Function to set up edit button event handlers
+    function setupEditButtonHandlers() {
+        const editButtons = document.querySelectorAll('.edit-points-btn');
+        console.log(`[PointsEditor] 🎯 Setting up handlers for ${editButtons.length} edit buttons`);
+        
+        // CRITICAL: Set up event handlers for EACH edit button
+        editButtons.forEach((btn, index) => {
+            console.log(`[PointsEditor] 🔧 Attaching handlers to button ${index + 1} for question ${btn.dataset.questionId}`);
+            
+            // Remove any existing event listeners to prevent duplicates
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            // CLICK HANDLER - Opens the edit interface
+            newBtn.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const questionId = this.dataset.questionId;
+                const container = this.parentElement;
+                const display = container.querySelector('.question-points-display');
+                const editDiv = container.querySelector('.question-points-edit');
+                const input = editDiv ? editDiv.querySelector('.points-input') : null;
+                
+                console.log(`[PointsEditor] 🖱️ CLICK: Edit button clicked for question ${questionId}`);
+                console.log(`[PointsEditor] 📊 Current points display:`, display ? display.textContent : 'NOT FOUND');
+                console.log(`[PointsEditor] 🔍 DOM elements found:`, {
+                    container: !!container,
+                    display: !!display,
+                    editDiv: !!editDiv,
+                    input: !!input
+                });
+                
+                // Validate all required elements exist
+                if (!container) {
+                    console.error(`[PointsEditor] ❌ Container not found for question ${questionId}`);
+                    alert('Error: Container element not found. Please refresh the page.');
+                    return;
+                }
+                if (!display) {
+                    console.error(`[PointsEditor] ❌ Points display not found for question ${questionId}`);
+                    alert('Error: Points display element not found. Please refresh the page.');
+                    return;
+                }
+                if (!editDiv) {
+                    console.error(`[PointsEditor] ❌ Edit div not found for question ${questionId}`);
+                    alert('Error: Edit interface not found. Please refresh the page.');
+                    return;
+                }
+                if (!input) {
+                    console.error(`[PointsEditor] ❌ Points input not found for question ${questionId}`);
+                    alert('Error: Input field not found. Please refresh the page.');
+                    return;
+                }
+                
+                // Get current points value for debugging
+                const currentPoints = input.value;
+                console.log(`[PointsEditor] 📝 Current input value: ${currentPoints}`);
+                
+                // Hide display, show edit interface
+                display.style.display = 'none';
+                editDiv.style.display = 'flex';
+                this.style.display = 'none';
+                
+                console.log(`[PointsEditor] 👁️ UI State Changed:`);
+                console.log(`  • Points display: hidden`);
+                console.log(`  • Edit interface: visible`);
+                console.log(`  • Edit button: hidden`);
+                
+                // Focus and select input for immediate editing
+                try {
+                    input.focus();
+                    input.select();
+                    console.log(`[PointsEditor] 📍 Input focused and text selected`);
+                } catch (focusError) {
+                    console.error(`[PointsEditor] ❌ Failed to focus input:`, focusError);
+                }
+                
+                // Verify state after a short delay
+                setTimeout(() => {
+                    console.log(`[PointsEditor] 🔍 Post-click verification (100ms delay):`, {
+                        displayHidden: display.style.display === 'none',
+                        editVisible: editDiv.style.display === 'flex',
+                        buttonHidden: this.style.display === 'none',
+                        inputFocused: document.activeElement === input,
+                        inputValue: input.value
+                    });
+                }, 100);
+            });
+            
+            // HOVER HANDLERS - Show impact preview tooltip
+            let impactPreviewTimeout;
+            let impactPreview = null;
+            
+            // MOUSEENTER - Show impact preview after delay
+            newBtn.addEventListener('mouseenter', function() {
+                const questionId = this.dataset.questionId;
+                console.log(`[PointsEditor] 🎯 HOVER: Mouse entered button for question ${questionId}`);
+                
+                // Clear any existing timeout
+                if (impactPreviewTimeout) {
+                    clearTimeout(impactPreviewTimeout);
+                }
+                
+                // Show impact preview after 800ms delay
+                impactPreviewTimeout = setTimeout(async () => {
+                    console.log(`[ImpactPreview] 🔍 Loading impact preview for question ${questionId}`);
+                    console.log(`[ImpactPreview] Timestamp: ${new Date().toISOString()}`);
+                    
+                    try {
+                        // Create preview element if it doesn't exist
+                        if (!impactPreview) {
+                            impactPreview = document.createElement('div');
+                            impactPreview.className = 'points-impact-preview';
+                            document.body.appendChild(impactPreview);
+                            console.log('[ImpactPreview] 📝 Created new impact preview element');
+                        }
+                        
+                        // Position the preview relative to the button
+                        const rect = newBtn.getBoundingClientRect();
+                        const leftPos = (rect.left + rect.width / 2);
+                        const topPos = (rect.bottom + window.scrollY);
+                        
+                        impactPreview.style.left = leftPos + 'px';
+                        impactPreview.style.top = topPos + 'px';
+                        
+                        console.log(`[ImpactPreview] 📍 Positioned at (${leftPos.toFixed(0)}, ${topPos.toFixed(0)})`);
+                        
+                        // Show loading state
+                        impactPreview.innerHTML = `
+                            <div class="impact-preview-header">Impact Preview</div>
+                            <div class="impact-preview-loading">Loading affected sessions...</div>
+                        `;
+                        impactPreview.classList.add('show');
+                        console.log('[ImpactPreview] ⏳ Showing loading state');
+                        
+                        // Fetch impact data from API
+                        const apiUrl = `/api/PlacementTest/questions/${questionId}/points/impact-preview/`;
+                        console.log(`[ImpactPreview] 🌐 API call to: ${apiUrl}`);
+                        
+                        const fetchStartTime = performance.now();
+                        const response = await fetch(apiUrl, {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        const fetchDuration = performance.now() - fetchStartTime;
+                        console.log(`[ImpactPreview] 📡 Response received in ${fetchDuration.toFixed(2)}ms with status ${response.status}`);
+                        
+                        // Check response status
+                        if (!response.ok) {
+                            console.error(`[ImpactPreview] ❌ HTTP Error ${response.status}: ${response.statusText}`);
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        // Parse response
+                        const responseText = await response.text();
+                        console.log(`[ImpactPreview] 📄 Response length: ${responseText.length} chars`);
+                        
+                        let data;
+                        try {
+                            data = JSON.parse(responseText);
+                            console.log('[ImpactPreview] ✅ JSON parsed successfully');
+                        } catch (parseError) {
+                            console.error('[ImpactPreview] ❌ JSON parsing failed:', parseError);
+                            console.error('[ImpactPreview] Raw response:', responseText.substring(0, 500));
+                            throw new Error('Invalid JSON response from server');
+                        }
+                        
+                        // Display impact data
+                        if (data.success && data.impact_analysis) {
+                            const impact = data.impact_analysis;
+                            console.log('[ImpactPreview] 📊 Impact data:', impact.impact_summary);
+                            
+                            let content = `<div class="impact-preview-header">Impact Preview</div>`;
+                            content += `<div class="impact-preview-stats">`;
+                            
+                            if (impact.impact_summary.total_affected_sessions === 0) {
+                                content += `<div class="impact-no-sessions">✅ No completed sessions affected</div>`;
+                                console.log('[ImpactPreview] 🟢 Safe to change - no sessions affected');
+                            } else {
+                                const summary = impact.impact_summary;
+                                content += `<div class="impact-sessions-count">📊 ${summary.total_affected_sessions} sessions affected</div>`;
+                                content += `<div>• ✅ ${summary.sessions_with_correct_answers} correct</div>`;
+                                content += `<div>• ❌ ${summary.sessions_with_incorrect_answers} incorrect</div>`;
+                                if (summary.sessions_with_no_answers > 0) {
+                                    content += `<div>• ❓ ${summary.sessions_with_no_answers} no answer</div>`;
+                                }
+                                
+                                // Risk level
+                                const riskLevel = summary.risk_level || 'UNKNOWN';
+                                const riskEmoji = {'LOW': '🟢', 'MEDIUM': '🟡', 'HIGH': '🔴', 'NONE': '✅'}[riskLevel] || '❓';
+                                content += `<div class="risk-level">Risk: ${riskEmoji} ${riskLevel}</div>`;
+                                
+                                console.log(`[ImpactPreview] ⚠️ ${summary.total_affected_sessions} sessions affected, risk: ${riskLevel}`);
+                            }
+                            
+                            content += `</div>`;
+                            impactPreview.innerHTML = content;
+                            
+                        } else {
+                            console.error('[ImpactPreview] ❌ Invalid response structure:', data);
+                            impactPreview.innerHTML = `
+                                <div class="impact-preview-header">Impact Preview</div>
+                                <div class="impact-preview-stats">❌ ${data.error || 'Error loading data'}</div>
+                            `;
+                        }
+                        
+                    } catch (error) {
+                        console.error('[ImpactPreview] ❌ Error:', error);
+                        if (impactPreview) {
+                            impactPreview.innerHTML = `
+                                <div class="impact-preview-header">Impact Preview</div>
+                                <div class="impact-preview-stats">❌ ${error.message || 'Network error'}</div>
+                            `;
+                        }
+                    }
+                }, 800); // 800ms delay before showing preview
+            });
+            
+            // MOUSELEAVE - Hide impact preview
+            newBtn.addEventListener('mouseleave', function() {
+                console.log(`[PointsEditor] 👋 HOVER: Mouse left button`);
+                
+                // Clear timeout and hide preview
+                if (impactPreviewTimeout) {
+                    clearTimeout(impactPreviewTimeout);
+                    console.log('[ImpactPreview] ⏹️ Preview timeout cleared');
+                }
+                if (impactPreview) {
+                    impactPreview.classList.remove('show');
+                    console.log('[ImpactPreview] 🔄 Preview hidden');
+                }
+            });
+            
+            console.log(`[PointsEditor] ✅ Button ${index + 1} fully configured with click and hover handlers`);
+        });
+        
+        console.log(`[PointsEditor] 🎉 All ${editButtons.length} edit buttons configured successfully`);
+    }
+    
+    // CRITICAL DEBUG: Check if points editing elements exist
+    console.log('[PointsEditor] 🔍 Checking for required DOM elements...');
+    
+    const allEditButtons = document.querySelectorAll('.edit-points-btn');
+    const allPointsContainers = document.querySelectorAll('.question-points-container');
+    const allPointsDisplays = document.querySelectorAll('.question-points-display');
+    const allPointsEdits = document.querySelectorAll('.question-points-edit');
+    
+    console.log('[PointsEditor] 📊 Initial element counts:');
+    console.log(`  • Edit buttons found: ${allEditButtons.length}`);
+    console.log(`  • Points containers found: ${allPointsContainers.length}`);
+    console.log(`  • Points displays found: ${allPointsDisplays.length}`);
+    console.log(`  • Points edit divs found: ${allPointsEdits.length}`);
+    
+    if (allEditButtons.length === 0) {
+        console.error('[PointsEditor] ❌ CRITICAL: No edit buttons found! Checking for question entries...');
+        
+        const questionEntries = document.querySelectorAll('.question-entry');
+        console.log(`[PointsEditor] Question entries found: ${questionEntries.length}`);
+        
+        if (questionEntries.length > 0) {
+            console.log('[PointsEditor] 🔧 FALLBACK: Attempting to add missing edit buttons...');
+            let buttonsAdded = 0;
+            
+            questionEntries.forEach(entry => {
+                const container = entry.querySelector('.question-points-container');
+                const questionId = entry.dataset.questionId;
+                
+                if (container && !container.querySelector('.edit-points-btn')) {
+                    console.log(`[PointsEditor] Adding edit button for question ${questionId}`);
+                    
+                    // Create the edit button
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'edit-points-btn';
+                    editBtn.dataset.questionId = questionId;
+                    editBtn.title = 'Edit points';
+                    editBtn.innerHTML = '✏️';
+                    editBtn.style.display = 'inline-block';
+                    editBtn.style.visibility = 'visible';
+                    
+                    // Add to container
+                    container.appendChild(editBtn);
+                    buttonsAdded++;
+                    console.log(`[PointsEditor] ✅ Added button for question ${questionId}`);
+                }
+            });
+            
+            if (buttonsAdded > 0) {
+                console.log(`[PointsEditor] ✅ Added ${buttonsAdded} missing edit buttons via fallback`);
+                // Setup handlers for the newly added buttons
+                setupEditButtonHandlers();
+            } else {
+                console.error('[PointsEditor] ❌ Could not add any buttons - check HTML structure');
+            }
+        } else {
+            console.error('[PointsEditor] ❌ No question entries found - page may not be fully loaded');
+        }
+    } else {
+        console.log('[PointsEditor] ✅ Edit buttons found. Checking visibility...');
+        
+        // Check visibility of first 3 buttons for debugging
+        const checkCount = Math.min(3, allEditButtons.length);
+        for (let i = 0; i < checkCount; i++) {
+            const btn = allEditButtons[i];
+            const computedStyle = window.getComputedStyle(btn);
+            console.log(`[PointsEditor] Button ${i + 1} visibility check:`, {
+                display: computedStyle.display,
+                visibility: computedStyle.visibility,
+                opacity: computedStyle.opacity,
+                width: computedStyle.width,
+                height: computedStyle.height,
+                questionId: btn.dataset.questionId
+            });
+        }
+        
+        // Setup handlers for existing buttons
+        console.log('[PointsEditor] 🚀 Setting up event handlers for existing buttons...');
+        setupEditButtonHandlers();
+    }
+    
+    console.log('[PointsEditor] ✅ Points editing system initialization complete');
+});
+</script>

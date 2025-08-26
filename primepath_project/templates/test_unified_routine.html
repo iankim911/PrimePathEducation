@@ -1,0 +1,72 @@
+{% extends "unified_base.html" %}
+{% load static %}
+
+{% block title %}Test - RoutineTest Module{% endblock %}
+{% block module_name %}routinetest{% endblock %}
+{% block data_module %}routine{% endblock %}
+{% block base_font_size %}17px{% endblock %}  <!-- RoutineTest uses 17px -->
+
+{% block module_css %}
+    <!-- RoutineTest-specific CSS (from routinetest_base.html) -->
+    <link rel="stylesheet" href="{% static 'css/primepath_brand.css' %}">
+    <link rel="stylesheet" href="{% static 'css/unified-design-system.css' %}?v=2.0">
+    <link rel="stylesheet" href="{% static 'css/button-consistency-fix.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/white-text-fix.css' %}?v=1.0">
+{% endblock %}
+
+{% block js_config %}
+    // RoutineTest specific config
+    window.ROUTINETEST_DEBUG = true;
+    window.MATRIX_TAB_VERSION = '3.0';
+{% endblock %}
+
+{% block header_title %}RoutineTest Module{% endblock %}
+{% block header_subtitle %}<p>Continuous Assessment Platform - Testing Unified Base</p>{% endblock %}
+{% block header_bg_color %}#00A65E{% endblock %}  <!-- BCG Green -->
+
+{% block navigation %}
+    <!-- Tab-based navigation from RoutineTest -->
+    <nav class="nav-tabs">
+        <div class="container">
+            <ul class="nav-tabs-list">
+                <li class="active"><a href="#">Dashboard</a></li>
+                <li><a href="#">Exams</a></li>
+                <li><a href="#">Students</a></li>
+                <li><a href="#">Analytics</a></li>
+            </ul>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <h2>RoutineTest - Unified Base Template Test</h2>
+    <p>This template extends unified_base.html and represents a routine test page.</p>
+    
+    <div class="test-content">
+        <h3>Features Working:</h3>
+        <ul>
+            <li>✅ Title block override</li>
+            <li>✅ Module name set to routinetest</li>
+            <li>✅ Custom font size (17px)</li>
+            <li>✅ BCG Green header color</li>
+            <li>✅ Tab navigation</li>
+            <li>✅ RoutineTest CSS loading</li>
+            <li>✅ Custom JS config</li>
+        </ul>
+        
+        <button class="btn">Test Button</button>
+    </div>
+{% endblock %}
+
+{% block module_js %}
+    <script src="{% static 'js/button-consistency-debug.js' %}?v=1.0" defer></script>
+    <script src="{% static 'js/white-text-debug.js' %}?v=1.0" defer></script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    console.log('[TEST] RoutineTest template loaded');
+    console.log('[TEST] Config:', window.PRIMEPATH_CONFIG);
+    console.log('[TEST] RoutineTest Debug:', window.ROUTINETEST_DEBUG);
+</script>
+{% endblock %}

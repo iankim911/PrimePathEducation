@@ -1,0 +1,92 @@
+{% extends 'student_base.html' %}
+
+{% block title %}My Classes - PrimePath Student Portal{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2>My Classes</h2>
+            <p style="color: #666; margin-bottom: 0;">You are enrolled in {{ total_classes }} class{{ total_classes|pluralize:"es" }}</p>
+        </div>
+        <div>
+            <a href="{% url 'primepath_student:exam_history' %}" class="btn" 
+               style="background-color: #2E7D32; color: white; padding: 10px 20px;">
+                📊 View Exam History
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if classes %}
+    {% for class_info in classes %}
+    <div class="class-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3>{{ class_info.class_display }}
+                    {% if class_info.has_active_exam %}
+                    <span class="exam-badge">EXAM AVAILABLE</span>
+                    {% endif %}
+                </h3>
+                <p style="color: #666; margin-top: 5px;">
+                    Enrolled since: {{ class_info.assignment.assigned_at|date:"F j, Y" }}
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'primepath_student:class_detail' class_info.class_code %}" 
+                   class="btn btn-primary">
+                    View Class
+                </a>
+            </div>
+        </div>
+        
+        {% if class_info.has_active_exam %}
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+            <p style="color: #E53935; font-weight: 500;">
+                ⚠️ Active Exam Available
+            </p>
+            <p style="color: #666; margin-top: 5px;">
+                Click "View Class" to access the exam
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card" style="text-align: center; padding: 40px;">
+        <h3 style="color: #999; margin-bottom: 10px;">No Classes Yet</h3>
+        <p style="color: #666;">You haven't been assigned to any classes yet.</p>
+        <p style="color: #666;">Please contact your teacher or administrator for class enrollment.</p>
+    </div>
+{% endif %}
+
+<!-- Account Settings Card -->
+<div class="card" style="margin-top: 30px;">
+    <h3 style="color: #2E7D32; margin-bottom: 15px;">Account Settings</h3>
+    
+    <!-- Kakao integration temporarily disabled -->
+    <!--
+    <div style="padding: 15px; background-color: #F8F9FA; border-radius: 8px; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <p style="margin: 0; font-weight: 500;">Kakao Account</p>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Integration coming soon</p>
+            </div>
+        </div>
+    </div>
+    -->
+    
+    <p style="color: #666; margin-top: 10px;">
+        Your Student ID: <strong>{{ student.student_id }}</strong>
+    </p>
+</div>
+
+<div class="card" style="margin-top: 30px; background-color: #F5F5F5;">
+    <h3 style="color: #2E7D32; margin-bottom: 10px;">Need Help?</h3>
+    <p style="color: #666;">
+        If you're having trouble accessing your classes or exams, please contact your teacher or school administrator.
+    </p>
+</div>
+
+<!-- Kakao unlink script disabled until integration is ready -->
+{% endblock %}

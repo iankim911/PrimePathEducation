@@ -1,0 +1,59 @@
+{% comment %}
+Timer Component
+Usage: {% include 'components/exam/timer.html' with duration_minutes=exam.timer_minutes %}
+{% endcomment %}
+
+<div class="timer-component" id="exam-timer">
+    <div class="timer-display card">
+        <div class="card-body text-center">
+            <h5 class="card-title">Time Remaining</h5>
+            <div class="timer-clock" style="font-size: 2rem; font-weight: bold;">
+                <span class="timer-minutes">{{ duration_minutes|default:60 }}</span>:<span class="timer-seconds">00</span>
+            </div>
+            <div class="timer-progress mt-2">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if include_script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const timer = new PrimePath.modules.Timer({
+        duration: {{ duration_minutes|default:60 }} * 60,
+        warningTime: 300,  // 5 minutes warning
+        criticalTime: 60,   // 1 minute critical
+        autoSubmit: true
+    });
+    
+    timer.init('#exam-timer');
+    
+    // Update display
+    timer.on('tick', function(data) {
+        document.querySelector('.timer-minutes').textContent = Math.floor(data.remaining / 60);
+        document.querySelector('.timer-seconds').textContent = String(data.remaining % 60).padStart(2, '0');
+        document.querySelector('.progress-bar').style.width = data.percentage + '%';
+    });
+    
+    timer.on('warning', function() {
+        document.querySelector('.timer-display').classList.add('bg-warning');
+    });
+    
+    timer.on('critical', function() {
+        document.querySelector('.timer-display').classList.remove('bg-warning');
+        document.querySelector('.timer-display').classList.add('bg-danger', 'text-white');
+    });
+    
+    timer.on('expired', function() {
+        if (typeof submitTest === 'function') {
+            submitTest();
+        }
+    });
+    
+    timer.start();
+});
+</script>
+{% endif %}

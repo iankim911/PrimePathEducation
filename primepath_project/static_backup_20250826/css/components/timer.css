@@ -1,0 +1,86 @@
+/* Timer Component Styles */
+
+.timer-container {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.timer-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-danger);
+    transition: var(--transition-base);
+}
+
+.timer-display.warning {
+    color: var(--color-warning);
+    animation: pulse 1s infinite;
+}
+
+.timer-display.critical {
+    color: var(--color-danger);
+    animation: pulse 0.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Alternative card-based timer display */
+.timer-component .timer-display.card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.timer-component .card-body {
+    padding: var(--spacing-lg);
+}
+
+.timer-component .card-title {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-gray-700);
+}
+
+.timer-clock {
+    font-size: 2rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+}
+
+.timer-progress {
+    margin-top: var(--spacing-md);
+}
+
+.timer-progress .progress {
+    height: 8px;
+    background-color: var(--color-gray-200);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+}
+
+.timer-progress .progress-bar {
+    height: 100%;
+    background-color: var(--color-primary);
+    transition: width 1s linear;
+}
+
+.timer-display.bg-warning .progress-bar {
+    background-color: var(--color-warning);
+}
+
+.timer-display.bg-danger .progress-bar {
+    background-color: var(--color-danger);
+}

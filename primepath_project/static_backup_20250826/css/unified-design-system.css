@@ -1,0 +1,866 @@
+/* =====================================================
+   PrimePath Unified Design System v3.0 - STRICT GREEN PALETTE
+   Complete UI Harmonization - Professional Admin Interface
+   ZERO TOLERANCE for Color Chaos - Dark Green Only
+   ===================================================== */
+
+/* ===================================================
+   1. CSS Variables - STRICT DARK GREEN PALETTE ONLY
+   =================================================== */
+:root {
+    /* PRIMARY DARK GREEN PALETTE - ONLY THESE COLORS ALLOWED */
+    --primary-dark-green: #1B5E20;      /* Main brand color */
+    --primary-green: #2E7D32;           /* Alias for medium green */
+    --primary-medium-green: #2E7D32;     /* Secondary green */
+    --primary-light-green: #388E3C;      /* Lightest green allowed */
+    --primary-green-light: #388E3C;     /* Alias for light green */
+    
+    /* GREEN BACKGROUNDS - Subtle variations only */
+    --green-bg-lightest: #E8F5E9;        /* Very light green background */
+    --green-bg-light: #C8E6C9;           /* Light green background */
+    --green-bg-medium: #A5D6A7;          /* Medium green background */
+    --primary-green-bg: #E8F5E9;         /* Primary green background */
+    
+    /* NEUTRAL COLORS - White and Light Gray ONLY */
+    --neutral-white: #FFFFFF;
+    --neutral-lightest: #FAFAFA;
+    --neutral-light: #F5F5F5;
+    --neutral-gray: #EEEEEE;
+    --neutral-border: #E0E0E0;
+    
+    /* TEXT COLORS - Dark Green and Neutral only */
+    --text-primary: #1B5E20;             /* Primary text - dark green */
+    --text-secondary: #2E7D32;           /* Secondary text - medium green */
+    --text-muted: #616161;               /* Muted text - neutral gray */
+    --text-on-green: #FFFFFF;            /* White text on green backgrounds */
+    
+    /* DANGER COLOR - Red for delete only */
+    --danger-red: #D32F2F;               /* ONLY for delete actions */
+    --danger-bg: #FFEBEE;                /* Light red background */
+    
+    /* FORBIDDEN COLORS - DO NOT USE */
+    /* --secondary-blue: BANNED */
+    /* --accent-orange: BANNED */
+    /* --accent-purple: BANNED */
+    /* --accent-teal: BANNED */
+    /* --status-warning: BANNED */
+    /* --status-info: BANNED */
+    
+    
+    /* TYPOGRAPHY HIERARCHY - STRICT SYSTEM */
+    --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    
+    /* STRICT FONT SIZE HIERARCHY - NO DEVIATION ALLOWED */
+    --font-h1: 32px;          /* H1 Headers only */
+    --font-h2: 24px;          /* H2 Headers only */
+    --font-h3: 20px;          /* H3 Headers only */
+    --font-body: 16px;        /* Body text - main content */
+    --font-small: 14px;       /* Small text - labels, captions */
+    --font-tiny: 12px;        /* Tiny text - metadata only */
+    
+    /* Line Heights - Optimized for readability */
+    --line-height-headers: 1.2;   /* Tight for headers */
+    --line-height-body: 1.5;      /* Standard for body */
+    --line-height-small: 1.4;     /* Small text */
+    
+    /* Font Weights - Limited options */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 600;
+    
+    /* Spacing - 8px Base System */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-xxl: 48px;
+    --spacing-3xl: 64px;
+    --spacing-4xl: 96px;
+    
+    /* Component Specific Spacing */
+    --header-spacing: 32px;  /* Space after header */
+    --section-spacing: 48px;  /* Between major sections */
+    --nav-spacing: 24px;  /* Navigation padding */
+    
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-pill: 50px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.2);
+    
+    /* Transitions */
+    --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================================
+   2. Base Reset & Typography
+   =================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-primary);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: var(--neutral-text);
+    background-color: var(--neutral-lighter);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* TYPOGRAPHY HIERARCHY - STRICT ENFORCEMENT */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-md);
+    line-height: var(--line-height-headers);
+    font-family: var(--font-primary);
+}
+
+/* STRICT FONT SIZE ENFORCEMENT */
+h1 { font-size: var(--font-h1); }      /* 32px - Main page titles */
+h2 { font-size: var(--font-h2); }      /* 24px - Section headers */
+h3 { font-size: var(--font-h3); }      /* 20px - Subsection headers */
+h4, h5, h6 { font-size: var(--font-h3); } /* 20px - No smaller headers */
+
+/* BODY TEXT - CONSISTENT SIZING */
+body, p, div, span, td, th, li {
+    font-size: var(--font-body);
+    line-height: var(--line-height-body);
+    color: var(--text-primary);
+}
+
+/* SMALL TEXT - LIMITED USE */
+small, .small-text, .text-small {
+    font-size: var(--font-small);
+    line-height: var(--line-height-small);
+    color: var(--text-muted);
+}
+
+/* ===================================================
+   3. Navigation Bar - Unified Design
+   =================================================== */
+.unified-nav-tabs {
+    background: linear-gradient(135deg, var(--primary-dark-green) 0%, var(--primary-dark-green) 100%);
+    padding: 0;
+    margin: 0;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.unified-nav-tabs ul {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.unified-nav-tabs li {
+    position: relative;
+}
+
+.unified-nav-tabs a {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: var(--neutral-white);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: var(--font-size-base);
+    transition: var(--transition-base);
+    position: relative;
+    border: none;
+    background: transparent;
+}
+
+.unified-nav-tabs a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.unified-nav-tabs a.active {
+    background: rgba(255, 255, 255, 0.15);
+    font-weight: 600;
+}
+
+.unified-nav-tabs a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--neutral-white);
+}
+
+/* User info in nav */
+.nav-user-info {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-lg);
+    color: var(--neutral-white);
+    font-size: var(--font-size-sm);
+}
+
+.nav-logout, 
+a.nav-logout,
+.btn-logout,
+a[href*="logout"],
+.nav-tabs a[href*="logout"] {
+    background: var(--status-error) !important;
+    color: var(--neutral-white) !important;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+
+.nav-logout:hover,
+a.nav-logout:hover,
+.btn-logout:hover,
+a[href*="logout"]:hover,
+.nav-tabs a[href*="logout"]:hover {
+    background: #D32F2F !important;
+    color: var(--neutral-white) !important;
+}
+
+/* ===================================================
+   4. Page Headers - Consistent Style
+   =================================================== */
+.unified-page-header {
+    background: var(--neutral-white);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    border-bottom: 2px solid var(--neutral-border);
+}
+
+.unified-page-title {
+    font-size: var(--font-size-xl);
+    color: var(--neutral-text);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.unified-page-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--neutral-text-light);
+    font-weight: 400;
+}
+
+/* ===================================================
+   5. Cards & Containers - Unified Design
+   =================================================== */
+.unified-card {
+    background: var(--neutral-white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-base);
+    border: 1px solid var(--neutral-border);
+}
+
+.unified-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.unified-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--neutral-gray);
+}
+
+.unified-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--neutral-text);
+}
+
+/* Welcome/Info Cards */
+.unified-welcome-card {
+    background: linear-gradient(135deg, var(--primary-green-bg) 0%, #F1F8F4 100%);
+    border-left: 4px solid var(--primary-green);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.unified-welcome-card h2 {
+    color: var(--primary-dark-green);
+    margin-bottom: var(--spacing-sm);
+}
+
+.unified-welcome-card p {
+    color: var(--neutral-text);
+    font-size: var(--font-size-base);
+}
+
+/* ===================================================
+   6. BUTTONS - STRICT DARK GREEN SYSTEM ONLY
+   =================================================== */
+
+/* BASE BUTTON - ALL BUTTONS INHERIT FROM THIS */
+.unified-btn, 
+button, 
+.btn, 
+input[type="button"], 
+input[type="submit"],
+a.btn,
+.add-student-btn,
+.manage-students-btn,
+.btn-primary,
+.btn-secondary,
+.btn-start-exam,
+.btn-edit,
+.btn-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-body);
+    border: 2px solid transparent;
+    transition: var(--transition-base);
+    cursor: pointer;
+    text-decoration: none;
+    outline: none;
+    position: relative;
+    min-height: 44px; /* Accessibility - touch target */
+    font-family: var(--font-primary);
+}
+
+/* PRIMARY BUTTON - DARK GREEN SOLID */
+.unified-btn-primary,
+.btn-primary,
+.add-student-btn,
+.manage-students-btn,
+.btn-start-exam,
+.btn-save {
+    background: var(--primary-dark-green) !important;
+    color: var(--text-on-green) !important;
+    border-color: var(--primary-dark-green) !important;
+}
+
+.unified-btn-primary:hover,
+.btn-primary:hover,
+.add-student-btn:hover,
+.manage-students-btn:hover,
+.btn-start-exam:hover,
+.btn-save:hover {
+    background: var(--primary-medium-green) !important;
+    border-color: var(--primary-medium-green) !important;
+    color: var(--text-on-green) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* SECONDARY BUTTON - WHITE WITH GREEN BORDER */
+.unified-btn-secondary,
+.btn-secondary,
+.btn-edit {
+    background: var(--neutral-white) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--primary-dark-green) !important;
+}
+
+.unified-btn-secondary:hover,
+.btn-secondary:hover,
+.btn-edit:hover {
+    background: var(--green-bg-lightest) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--primary-medium-green) !important;
+    transform: translateY(-2px);
+}
+
+/* DELETE BUTTON - ONLY RED BUTTON ALLOWED */
+.unified-btn-delete,
+.btn-delete,
+.btn-delete-exam,
+.btn-remove-student,
+.btn-delete-class {
+    background: var(--danger-red) !important;
+    color: var(--text-on-green) !important;
+    border-color: var(--danger-red) !important;
+}
+
+.unified-btn-delete:hover,
+.btn-delete:hover,
+.btn-delete-exam:hover,
+.btn-remove-student:hover,
+.btn-delete-class:hover {
+    background: #B71C1C !important;
+    border-color: #B71C1C !important;
+    color: var(--text-on-green) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+/* BANNED BUTTON COLORS - OVERRIDE ANY EXISTING STYLES */
+.btn-info, .btn-warning, .btn-success, .btn-light, .btn-dark,
+.unified-btn-upload, .unified-btn-library, .unified-btn-test, .unified-btn-classes {
+    /* Force all non-conforming buttons to use primary style */
+    background: var(--primary-dark-green) !important;
+    color: var(--text-on-green) !important;
+    border-color: var(--primary-dark-green) !important;
+}
+
+/* Focus states for accessibility */
+.unified-btn:focus,
+button:focus,
+.btn:focus {
+    box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.2) !important;
+    outline: none;
+}
+
+/* ===================================================
+   7. Statistics Cards - Unified Design
+   =================================================== */
+.unified-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.unified-stat-card {
+    background: var(--neutral-white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: var(--transition-base);
+    border: 1px solid var(--neutral-border);
+    position: relative;
+    overflow: hidden;
+}
+
+.unified-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+}
+
+.unified-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.unified-stat-number {
+    font-size: var(--font-size-xxl);
+    font-weight: 700;
+    color: var(--primary-green);
+    margin-bottom: var(--spacing-sm);
+}
+
+.unified-stat-label {
+    font-size: var(--font-size-base);
+    color: var(--neutral-text-light);
+    font-weight: 500;
+}
+
+/* ===================================================
+   8. Forms - Consistent Styling
+   =================================================== */
+.unified-form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.unified-form-label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    color: var(--neutral-text);
+    font-size: var(--font-size-base);
+}
+
+.unified-form-input,
+.unified-form-select,
+.unified-form-textarea {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 2px solid var(--neutral-border);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-family: var(--font-primary);
+    transition: var(--transition-base);
+    background: var(--neutral-white);
+}
+
+.unified-form-input:focus,
+.unified-form-select:focus,
+.unified-form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+/* ===================================================
+   9. Tabs & Filters - Unified Design
+   =================================================== */
+.unified-tab-container {
+    background: var(--neutral-white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.unified-tab-list {
+    display: flex;
+    gap: var(--spacing-sm);
+    border-bottom: 2px solid var(--neutral-border);
+    padding-bottom: var(--spacing-sm);
+}
+
+.unified-tab {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: transparent;
+    border: none;
+    color: var(--neutral-text-light);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-base);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    position: relative;
+}
+
+.unified-tab:hover {
+    background: var(--neutral-light);
+    color: var(--primary-green);
+}
+
+.unified-tab.active {
+    background: var(--primary-green-bg);
+    color: var(--primary-dark-green);
+    font-weight: 600;
+}
+
+.unified-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-green);
+}
+
+/* ===================================================
+   10. Badges & Pills - Consistent Design
+   =================================================== */
+.unified-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    transition: var(--transition-base);
+}
+
+.unified-badge-success {
+    background: var(--status-success);
+    color: var(--neutral-white);
+}
+
+.unified-badge-warning {
+    background: var(--status-warning);
+    color: var(--neutral-white);
+}
+
+.unified-badge-info {
+    background: var(--status-info);
+    color: var(--neutral-white);
+}
+
+.unified-badge-count {
+    background: var(--neutral-gray);
+    color: var(--neutral-text);
+    margin-left: var(--spacing-sm);
+}
+
+/* ===================================================
+   11. TABLES - PROFESSIONAL CLEAN DESIGN
+   =================================================== */
+
+/* ALL TABLES - CONSISTENT STYLING */
+.unified-table,
+table,
+.admin-table,
+.data-table {
+    width: 100%;
+    background: var(--neutral-white);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* TABLE HEADERS - DARK GREEN THEME */
+.unified-table thead,
+table thead,
+.admin-table thead,
+.data-table thead {
+    background: var(--primary-dark-green) !important;
+}
+
+.unified-table th,
+table th,
+.admin-table th,
+.data-table th {
+    padding: 16px 20px !important;
+    text-align: left;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-body);
+    color: var(--text-on-green) !important;
+    border: none !important;
+    background: var(--primary-dark-green) !important;
+    position: relative;
+}
+
+/* TABLE CELLS - CLEAN AND READABLE */
+.unified-table td,
+table td,
+.admin-table td,
+.data-table td {
+    padding: 16px 20px !important;
+    border-bottom: 1px solid var(--neutral-border) !important;
+    font-size: var(--font-body);
+    color: var(--text-primary);
+    vertical-align: middle;
+    background: var(--neutral-white);
+}
+
+/* TABLE ROW HOVER - SUBTLE GREEN HIGHLIGHT */
+.unified-table tbody tr:hover,
+table tbody tr:hover,
+.admin-table tbody tr:hover,
+.data-table tbody tr:hover {
+    background: var(--green-bg-lightest) !important;
+    transition: background-color 0.2s ease;
+}
+
+/* ALTERNATING ROWS - VERY SUBTLE */
+.unified-table tbody tr:nth-child(even),
+table tbody tr:nth-child(even),
+.admin-table tbody tr:nth-child(even) {
+    background: var(--neutral-lightest);
+}
+
+.unified-table tbody tr:nth-child(even):hover,
+table tbody tr:nth-child(even):hover,
+.admin-table tbody tr:nth-child(even):hover {
+    background: var(--green-bg-lightest) !important;
+}
+
+/* TABLE ACTION BUTTONS - INLINE STYLING */
+.unified-table .btn,
+table .btn,
+.admin-table .btn {
+    padding: 6px 12px;
+    font-size: var(--font-small);
+    margin: 2px;
+    min-height: auto;
+}
+
+/* TABLE BORDERS - CLEAN LINES */
+.unified-table,
+table,
+.admin-table {
+    border: 1px solid var(--neutral-border);
+}
+
+.unified-table tr:last-child td,
+table tr:last-child td,
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===================================================
+   12. Alerts & Notifications - Consistent Design
+   =================================================== */
+.unified-alert {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.unified-alert-success {
+    background: var(--primary-green-bg);
+    border-left: 4px solid var(--status-success);
+    color: var(--primary-dark-green);
+}
+
+.unified-alert-info {
+    background: var(--secondary-blue-bg);
+    border-left: 4px solid var(--status-info);
+    color: var(--secondary-blue-dark);
+}
+
+.unified-alert-warning {
+    background: #FFF3E0;
+    border-left: 4px solid var(--status-warning);
+    color: var(--accent-orange-dark);
+}
+
+/* ===================================================
+   13. Quick Actions Grid - Dashboard
+   =================================================== */
+.unified-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.unified-quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--neutral-white);
+    border: 2px solid var(--neutral-border);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: var(--transition-base);
+    min-height: 120px;
+}
+
+.unified-quick-action-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-green);
+}
+
+.unified-quick-action-btn i {
+    font-size: 32px;
+    color: var(--primary-green);
+}
+
+.unified-quick-action-btn span {
+    font-weight: 600;
+    color: var(--neutral-text);
+    font-size: var(--font-size-base);
+}
+
+/* ===================================================
+   14. Login Page - Unified Design
+   =================================================== */
+.unified-login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: var(--spacing-lg);
+}
+
+.unified-login-card {
+    background: var(--neutral-white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xxl);
+    box-shadow: var(--shadow-xl);
+    max-width: 450px;
+    width: 100%;
+}
+
+.unified-login-logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-xl) auto;
+    color: var(--neutral-white);
+    font-size: 36px;
+    font-weight: 700;
+}
+
+/* ===================================================
+   15. Responsive Design
+   =================================================== */
+@media (max-width: 768px) {
+    .unified-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .unified-quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .unified-nav-tabs ul {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .unified-nav-tabs a {
+        justify-content: center;
+    }
+    
+    .nav-user-info {
+        margin-left: 0;
+        justify-content: center;
+        padding: var(--spacing-md);
+    }
+}
+
+/* ===================================================
+   16. Utility Classes
+   =================================================== */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+
+.d-flex { display: flex; }
+.d-grid { display: grid; }
+.d-none { display: none; }
+
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }

@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Start Placement Test - PrimePath{% endblock %}
+
+{% block header %}Start Your Placement Test{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <h2 style="text-align: center; margin-bottom: 30px;">Student Information</h2>
+    
+    <form method="post" action="{% url 'PlacementTest:start_test' %}">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="student_name">Student Name (학생 이름) *</label>
+            <input type="text" class="form-control" id="student_name" name="student_name" required placeholder="Enter student's full name">
+        </div>
+        
+        <div class="form-group">
+            <label for="parent_phone">Parent Phone Number (학부모 연락처) *</label>
+            <input type="tel" class="form-control" id="parent_phone" name="parent_phone" required 
+                   placeholder="010-0000-0000" 
+                   maxlength="13"
+                   oninput="formatPhoneNumber(this)">
+            <small style="color: #666;">For admission interview scheduling</small>
+            <small id="phone-error" style="color: #dc3545; display: none;">Korean phone numbers must start with 010</small>
+        </div>
+        
+        <div class="form-group">
+            <label for="school_name">School Name (학교명)</label>
+            <input type="text" class="form-control" id="school_name" name="school_name" placeholder="Enter current school name (optional)">
+        </div>
+        
+        <div class="form-group">
+            <label for="grade">Grade Level (학년) *</label>
+            <select class="form-control" id="grade" name="grade" required>
+                <option value="">Select grade level</option>
+                <optgroup label="Elementary School (초등학교)">
+                    <option value="1">Primary 1 (초1)</option>
+                    <option value="2">Primary 2 (초2)</option>
+                    <option value="3">Primary 3 (초3)</option>
+                    <option value="4">Primary 4 (초4)</option>
+                    <option value="5">Primary 5 (초5)</option>
+                    <option value="6">Primary 6 (초6)</option>
+                </optgroup>
+                <optgroup label="Middle School (중학교)">
+                    <option value="7">Middle 1 (중1)</option>
+                    <option value="8">Middle 2 (중2)</option>
+                    <option value="9">Middle 3 (중3)</option>
+                </optgroup>
+                <optgroup label="High School (고등학교)">
+                    <option value="10">High 1 (고1)</option>
+                    <option value="11">High 2 (고2)</option>
+                    <option value="12">High 3 (고3)</option>
+                </optgroup>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="academic_rank">School English Rankinging (영어 성적 순위) *</label>
+            <select class="form-control" id="academic_rank" name="academic_rank" required>
+                <option value="">Select your English class ranking</option>
+                {% for value, label in academic_ranks %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+            <small style="color: #666;">Your ranking in English class only, not overall academic ranking</small>
+        </div>
+        
+        <div style="background-color: #f0f8ff; padding: 20px; border-radius: 8px; margin: 30px 0;">
+            <h4 style="margin-bottom: 15px;">Important Information:</h4>
+            <ul style="margin-bottom: 15px;">
+                <li>The test will take between <strong>20-90 minutes</strong> depending on the exam you take</li>
+                <li>Once you start, you cannot go back to previous questions</li>
+                <li>Make sure you have a stable internet connection</li>
+                <li>You can adjust the difficulty level during the test if needed</li>
+            </ul>
+            <div style="background-color: #fff3cd; padding: 15px; border-radius: 4px; border: 1px solid #ffeeba;">
+                <strong>⚠️ Device Requirement:</strong> Please use a <strong>laptop, desktop computer, or large tablet</strong>. 
+                Do NOT take this test on a phone as the screen size is too small for optimal test experience.
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{% url 'core:index' %}" class="btn" style="background-color: #6c757d; margin-right: 10px;">Cancel</a>
+            <button type="submit" class="btn">Start Test</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+    
+    select.form-control {
+        height: 44px;
+    }
+</style>
+
+<script>
+function formatPhoneNumber(input) {
+    // Get the current value and cursor position
+    let cursorPosition = input.selectionStart;
+    let originalValue = input.value;
+    
+    // Remove all non-numeric characters
+    let value = input.value.replace(/\D/g, '');
+    
+    // If the user is typing and the field doesn't start with 010, prepend it
+    if (value.length > 0 && !value.startsWith('010')) {
+        // If they typed just one or two digits, prepend 010 to their input
+        value = '010' + value;
+    }
+    
+    // Ensure we don't exceed 11 digits (010 + 8 digits)
+    if (value.length > 11) {
+        value = value.slice(0, 11);
+    }
+    
+    // Format with hyphens for display
+    let formattedValue = '';
+    if (value.length >= 7) {
+        formattedValue = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+    } else if (value.length >= 3) {
+        formattedValue = value.slice(0, 3) + '-' + value.slice(3);
+    } else {
+        formattedValue = value;
+    }
+    
+    // Update the input value
+    input.value = formattedValue;
+    
+    // Adjust cursor position based on formatting changes
+    if (originalValue !== formattedValue) {
+        // Count hyphens before cursor in the new formatted value
+        let hyphensBeforeCursor = (formattedValue.slice(0, cursorPosition).match(/-/g) || []).length;
+        
+        // If we added "010-" at the beginning, move cursor after it
+        if (!originalValue.startsWith('010') && formattedValue.startsWith('010')) {
+            cursorPosition = 4; // Position after "010-"
+        } else {
+            // Adjust cursor position for hyphens
+            cursorPosition = cursorPosition + hyphensBeforeCursor;
+        }
+        
+        // Ensure cursor doesn't go beyond the input length
+        cursorPosition = Math.min(cursorPosition, formattedValue.length);
+        
+        // Set the cursor position after a brief delay
+        setTimeout(() => {
+            input.setSelectionRange(cursorPosition, cursorPosition);
+        }, 0);
+    }
+    
+    // Clear any error messages since we're auto-formatting correctly
+    document.getElementById('phone-error').style.display = 'none';
+    input.setCustomValidity('');
+}
+
+// Add event listener for focus event to prepend "010-" when field is focused
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('parent_phone');
+    
+    // When input gets focus, if empty, add "010-"
+    phoneInput.addEventListener('focus', function() {
+        if (this.value === '') {
+            this.value = '010-';
+            // Place cursor at the end
+            setTimeout(() => {
+                this.setSelectionRange(4, 4);
+            }, 0);
+        }
+    });
+    
+    // If user clears the field, don't keep "010-" alone
+    phoneInput.addEventListener('blur', function() {
+        if (this.value === '010-' || this.value === '010') {
+            this.value = '';
+        }
+    });
+});
+
+// Also validate on form submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    const phoneInput = document.getElementById('parent_phone');
+    const phoneValue = phoneInput.value.replace(/\D/g, '');
+    
+    if (!phoneValue.startsWith('010') || phoneValue.length !== 11) {
+        e.preventDefault();
+        document.getElementById('phone-error').style.display = 'block';
+        phoneInput.focus();
+    }
+});
+</script>
+{% endblock %}

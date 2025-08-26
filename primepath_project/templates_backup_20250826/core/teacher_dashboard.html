@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - PrimePath{% endblock %}
+
+{% block header %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="readme-section">
+    <h2>📚 PrimePath Assessment Platform - Teacher Guide</h2>
+    
+    <h3>System Overview</h3>
+    <p>The PrimePath Assessment Platform is a two-step placement system that automatically assigns students to the appropriate curriculum level and exam based on their grade and English class rank.</p>
+    
+    <h3>How the Placement Process Works</h3>
+    <div class="process-flow">
+        <div class="flow-step">
+            <div class="flow-number">1</div>
+            <div>
+                <strong>Student enters their information:</strong> Grade level and English class rank (e.g., Primary 3, Top 10%)
+            </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+            <div class="flow-number">2</div>
+            <div>
+                <strong>System uses Student Levels:</strong> Determines curriculum level based on student profile (e.g., Primary 3 + Top 10% → PRIME CORE SIGMA - Level 1)
+            </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+            <div class="flow-number">3</div>
+            <div>
+                <strong>System uses Level Exams:</strong> Randomly selects one exam from those mapped to the curriculum level (e.g., if Level 1 has versions a, b, and c, student gets one randomly)
+            </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+            <div class="flow-number">4</div>
+            <div>
+                <strong>Student takes the exam:</strong> The selected exam is presented to the student with timer and audio files
+            </div>
+        </div>
+    </div>
+    
+    <h3>Key Components</h3>
+    <ul>
+        <li><strong>Upload Exam:</strong> Upload PDF exams with naming convention [PlacementTest] followed by level and version (e.g., [PlacementTest] PRIME CORE PHONICS - Level 1_v_a)</li>
+        <li><strong>Manage Exams:</strong> View, preview, and manage all uploaded exams and their audio files</li>
+        <li><strong>Student Levels:</strong> Configure which curriculum level students are assigned to based on grade + English class rank</li>
+        <li><strong>Level Exams:</strong> Map up to 5 exam versions to each curriculum level for random selection</li>
+        <li><strong>Student Sessions:</strong> Monitor and track all student test sessions and results</li>
+    </ul>
+    
+    <h3>Quick Setup Steps</h3>
+    <ol>
+        <li>Upload exam PDFs using the <strong>Upload Exam</strong> tab (system will auto-name with version)</li>
+        <li>Configure <strong>Student Levels</strong> to map student profiles to curriculum levels</li>
+        <li>Set up <strong>Level Exams</strong> to assign exam versions to each level</li>
+        <li>Share the student portal link for students to begin their placement tests</li>
+    </ol>
+</div>
+
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+    
+    .readme-section {
+        background: #f0f7ff;
+        border: 1px solid #d0e5ff;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .readme-section h2 {
+        color: #0066cc;
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+    }
+    
+    .readme-section h3 {
+        color: #333;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+    
+    .readme-section p {
+        line-height: 1.7;
+        margin-bottom: 15px;
+        color: #555;
+    }
+    
+    .readme-section ol, .readme-section ul {
+        margin-left: 20px;
+        margin-bottom: 20px;
+        line-height: 1.8;
+    }
+    
+    .process-flow {
+        background: white;
+        border: 2px solid #e1e8ed;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .flow-step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .flow-number {
+        background: #0066cc;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .flow-arrow {
+        text-align: center;
+        color: #999;
+        font-size: 1.5rem;
+        margin: 10px 0;
+    }
+    
+    .stat-card {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #e9ecef;
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+    }
+    
+    .recent-sessions {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .sessions-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: bold;
+    }
+    
+    .session-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .session-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .session-info {
+        flex: 1;
+    }
+    
+    .session-status {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-in-progress {
+        background: #fff3cd;
+        color: #856404;
+    }
+</style>
+
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ total_sessions }}</div>
+        <div class="stat-label">Total Test Sessions</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-number">{{ active_exams }}</div>
+        <div class="stat-label">Active Exams</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-number">45</div>
+        <div class="stat-label">Curriculum Levels</div>
+    </div>
+</div>
+
+<div class="action-buttons">
+    <a href="{% url 'PlacementTest:exam_list' %}" class="btn btn-primary">Manage Exams</a>
+    <a href="{% url 'PlacementTest:create_exam' %}" class="btn btn-primary">Upload New Exam</a>
+    <a href="{% url 'core:placement_rules' %}" class="btn btn-secondary">Student Levels</a>
+    <a href="{% url 'core:curriculum_levels' %}" class="btn btn-secondary">View Curriculum</a>
+    <a href="/admin/" class="btn btn-secondary">Admin Panel</a>
+</div>
+
+<div class="recent-sessions">
+    <div class="sessions-header">
+        Recent Test Sessions
+    </div>
+    
+    {% if recent_sessions %}
+        {% for session in recent_sessions %}
+        <div class="session-item">
+            <div class="session-info">
+                <strong>{{ session.student_name }}</strong> - Grade {{ session.grade }}<br>
+                <small>{{ session.started_at|date:"Y-m-d H:i" }} | {{ session.exam.name }}</small>
+            </div>
+            <div>
+                {% if session.is_completed %}
+                    <span class="session-status status-completed">Completed</span>
+                {% else %}
+                    <span class="session-status status-in-progress">In Progress</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="padding: 40px; text-align: center; color: #6c757d;">
+            No test sessions yet. Students can start taking tests from the homepage.
+        </div>
+    {% endif %}
+</div>
+
+<div style="margin-top: 40px; padding: 20px; background: #e8f4f8; border-radius: 8px;">
+    <h3 style="margin-bottom: 15px;">Quick Start Guide</h3>
+    <ol style="line-height: 1.8;">
+        <li><strong>Upload Exams:</strong> Click "Upload New Exam" to add PDF tests and audio files</li>
+        <li><strong>Set Rules:</strong> Configure placement rules to match students to appropriate levels</li>
+        <li><strong>Share Link:</strong> Direct students to the homepage to start their placement test</li>
+        <li><strong>Monitor:</strong> Track test sessions and results from this dashboard</li>
+    </ol>
+</div>
+{% endblock %}

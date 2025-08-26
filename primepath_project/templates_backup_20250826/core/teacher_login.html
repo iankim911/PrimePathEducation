@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Login - PrimePath{% endblock %}
+
+{% block header %}Teacher Login{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <h2>🎓 Teacher Portal</h2>
+        <p class="login-subtitle">Access your teacher dashboard to manage exams and monitor student progress</p>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required 
+                       class="form-control" placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required 
+                       class="form-control" placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-login">
+                🔐 Login to Teacher Dashboard
+            </button>
+        </form>
+        
+        <div class="login-help">
+            <p><strong>Need Help?</strong></p>
+            <ul>
+                <li>Use your Django admin username and password</li>
+                <li>Your account must have teacher privileges</li>
+                <li>Contact your system administrator if you can't access your account</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 20px;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        max-width: 450px;
+        width: 100%;
+        border: 1px solid #e1e8ed;
+    }
+    
+    .login-card h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 1.8rem;
+    }
+    
+    .login-subtitle {
+        text-align: center;
+        color: #6c757d;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    
+    .btn-login {
+        width: 100%;
+        padding: 12px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .btn-login:hover {
+        background-color: #2980b9;
+    }
+    
+    .alert {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    .login-help {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .login-help p {
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .login-help ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #6c757d;
+    }
+    
+    .login-help li {
+        margin-bottom: 5px;
+        line-height: 1.4;
+    }
+</style>
+{% endblock %}

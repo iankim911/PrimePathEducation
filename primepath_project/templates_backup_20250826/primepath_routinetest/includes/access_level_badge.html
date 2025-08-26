@@ -1,0 +1,11 @@
+<!-- Access Level Badge Component -->
+<span class="access-level-badge {{ css_class }} {% if size == 'small' %}small{% endif %}" 
+      title="{{ access_level|title }} Access Level">
+    {% if access_level == 'FULL' %}
+        FULL
+    {% elif access_level == 'VIEW' %}
+        VIEW
+    {% else %}
+        {{ access_level|default:"UNKNOWN" }}
+    {% endif %}
+</span>

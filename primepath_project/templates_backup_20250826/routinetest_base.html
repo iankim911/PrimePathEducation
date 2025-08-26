@@ -1,0 +1,810 @@
+{% load static %}
+{% load navigation_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PrimePath RoutineTest - Continuous Assessment Platform{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
+    
+    <!-- Mobile Responsive CSS -->
+    <link rel="stylesheet" href="{% static 'css/mobile-responsive.css' %}">
+    
+    <!-- PrimePath Brand Design System -->
+    <link rel="stylesheet" href="{% static 'css/primepath_brand.css' %}">
+    
+    <!-- Unified Design System - UI Harmonization -->
+    <link rel="stylesheet" href="{% static 'css/unified-design-system.css' %}?v=2.0">
+    
+    <!-- Button Consistency Fix - Critical UI Fix for Admin Buttons -->
+    <link rel="stylesheet" href="{% static 'css/button-consistency-fix.css' %}?v=1.0">
+    
+    <!-- White Text Fix - Ensure White Text on Dark Backgrounds -->
+    <link rel="stylesheet" href="{% static 'css/white-text-fix.css' %}?v=1.0">
+    
+    
+    <!-- Console Debugging for RoutineTest -->
+    <script>
+        console.log('%c[RoutineTest] Page Loading...', 'color: #00A65E; font-weight: bold;');
+        console.log('[RoutineTest] Navigation: Tab-based horizontal layout');
+        console.log('[RoutineTest] Theme: BCG Green (#00A65E)');
+        console.log('[RoutineTest] Module: Continuous Assessment Platform');
+        window.ROUTINETEST_DEBUG = true;
+        window.MATRIX_TAB_VERSION = '3.0';
+        window.NAVIGATION_TIMESTAMP = new Date().toISOString();
+    </script>
+    
+    <!-- Button Consistency Debug Module -->
+    <script src="{% static 'js/button-consistency-debug.js' %}?v=1.0" defer></script>
+    
+    <!-- White Text Debug Module -->
+    <script src="{% static 'js/white-text-debug.js' %}?v=1.0" defer></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            font-size: 17px;  /* Optimal base size */
+            line-height: 1.5;  /* 150% for body text */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Global Typography Hierarchy */
+        h1 {
+            font-size: 32px;
+            line-height: 1.25;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: #212529;
+        }
+        
+        h2 {
+            font-size: 24px;
+            line-height: 1.25;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+        
+        h3 {
+            font-size: 20px;
+            line-height: 1.3;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #212529;
+        }
+        
+        h4 {
+            font-size: 18px;
+            line-height: 1.3;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #212529;
+        }
+        
+        p {
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        /* Ensure consistent spacing between sections */
+        section {
+            margin-bottom: 48px;
+        }
+        
+        /* Header Section - BCG Forest Green Theme */
+        .header {
+            background-color: #1B5E20;  /* Darker, more muted green */
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 0;  /* Remove margin - will use app-header spacing */
+        }
+        
+        .header h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: white; /* Ensure header text is white for readability */
+        }
+        
+        .header {
+            position: relative; /* For mode toggle positioning */
+        }
+        
+        /* Professional App Header */
+        .app-header {
+            background-color: #1B5E20;  /* Darker, more muted green */
+            color: white;
+            padding: 24px 20px;  /* Increased vertical padding */
+            margin-bottom: var(--header-spacing, 32px);  /* Proper spacing before navigation */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 100%;
+        }
+        
+        .header-left {
+            flex: 0 0 auto;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .app-title {
+            margin: 0;
+            font-size: var(--font-size-xxl, 32px);
+            font-weight: var(--font-weight-bold, 700);
+            color: white;
+            line-height: var(--line-height-tight, 1.25);
+            letter-spacing: -0.5px;
+        }
+        
+        .app-subtitle {
+            margin: 4px 0 0;
+            font-size: var(--font-size-md, 16px);
+            font-weight: var(--font-weight-normal, 400);
+            color: rgba(255, 255, 255, 0.9);
+            line-height: var(--line-height-base, 1.5);
+        }
+        
+        .user-welcome {
+            text-align: right;
+        }
+        
+        .welcome-text {
+            font-size: var(--font-size-base, 17px);
+            font-weight: var(--font-weight-medium, 500);
+            color: white;
+            line-height: var(--line-height-base, 1.5);
+        }
+        
+        .user-info {
+            display: flex;
+            gap: 12px;
+            font-size: var(--font-size-sm, 14px);
+            color: rgba(255, 255, 255, 0.85);
+            margin-top: 6px;
+        }
+        
+        .user-role {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+        
+        /* Navigation Tabs - Using Unified Design System */
+        .nav-tabs {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            padding: 0;
+            margin-top: 0;  /* No top margin - spacing handled by header */
+            margin-bottom: var(--section-spacing, 48px);  /* Consistent section spacing */
+            box-shadow: var(--shadow-md, 0 4px 8px rgba(0, 0, 0, 0.1));
+            overflow-x: auto;  /* Allow horizontal scroll for many tabs */
+            -webkit-overflow-scrolling: touch;  /* Smooth scrolling on mobile */
+            border-bottom: 2px solid var(--primary-green-border, #81C784);  /* Visual separation */
+            position: relative;
+            z-index: 100;
+        }
+        
+        /* Custom scrollbar for nav tabs */
+        .nav-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-track {
+            background: #0A3D15;
+        }
+        
+        .nav-tabs::-webkit-scrollbar-thumb {
+            background: #2E7D32;
+            border-radius: 2px;
+        }
+        
+        /* Removed Matrix tab styles - no longer part of V8 navigation */
+        
+        .nav-tabs * {
+            box-sizing: border-box;
+        }
+        
+        .nav-tabs ul {
+            list-style: none;
+            display: flex;
+            margin: 0 auto;
+            max-width: none;  /* Remove width restriction */
+            padding: 0 10px;  /* Minimal padding */
+            overflow-x: auto;  /* Allow scroll if needed for 6+ tabs */
+            width: 100%;
+            flex-wrap: nowrap;  /* Keep tabs in single row */
+        }
+        
+        .nav-tabs li {
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        
+        .nav-tabs a {
+            display: block;
+            padding: 14px 24px;  /* Balanced padding */
+            color: rgba(255, 255, 255, 0.95);
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: var(--font-weight-medium, 500);
+            position: relative;
+            height: 100%;
+            white-space: nowrap;
+            font-size: var(--font-size-md, 16px);  /* Consistent with design system */
+            letter-spacing: 0.2px;
+            min-width: fit-content;  /* Ensure tabs can accommodate content */
+            flex-shrink: 0;  /* Prevent tabs from shrinking too much */
+        }
+        
+        .nav-tabs a:hover {
+            background-color: #1B5E20;  /* Darker muted green on hover */
+            color: white;
+        }
+        
+        /* WCAG AAA Compliant - High Contrast Active Tab */
+        .nav-tabs a.active {
+            background-color: #E8F5E9 !important;  /* Light green background */
+            color: #0D4F1F !important;  /* Very dark green text - contrast ratio > 7:1 */
+            font-weight: 700;
+            box-shadow: inset 0 -3px 0 #2E7D32;
+            border-top: 2px solid #2E7D32;  /* Green accent for better visibility */
+            position: relative;
+        }
+        
+        /* Focus styles for keyboard navigation */
+        .nav-tabs a:focus {
+            outline: 2px solid #2E7D32;
+            outline-offset: 2px;
+            background-color: #1B5E20;
+        }
+        
+        .nav-tabs a.active:focus {
+            outline: 2px solid #2E7D32;
+            outline-offset: 2px;
+        }
+        
+        /* Profile Link Styling */
+        .nav-tabs .profile-link {
+            display: flex !important;
+            align-items: center;
+            white-space: nowrap !important;
+            min-width: fit-content;
+        }
+        
+        .nav-tabs .profile-link span {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* Header Actions - Profile and Logout Buttons */
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .profile-btn,
+        .logout-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md, 8px);
+            text-decoration: none !important;
+            font-weight: var(--font-weight-medium, 500);
+            font-size: var(--font-size-sm, 14px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: white !important;
+            border: 1px solid transparent;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        
+        .profile-btn {
+            background-color: #2E7D32 !important;
+            color: white !important;
+            color: #FFFFFF !important;
+        }
+        
+        .profile-btn:hover {
+            background-color: #1B5E20 !important;
+            color: white !important;
+            color: #FFFFFF !important;
+        }
+        
+        /* Logout Button - Red with WHITE text */
+        #logout-link,
+        a[href="/logout/"],
+        a[href*="logout"],
+        .nav-tabs a[href="/logout/"],
+        .nav-tabs a[style*="background: #e74c3c"],
+        .logout-btn {
+            background-color: #e74c3c !important;
+            color: white !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
+        }
+        
+        #logout-link:hover,
+        a[href="/logout/"]:hover,
+        a[href*="logout"]:hover,
+        .nav-tabs a[href="/logout/"]:hover,
+        .nav-tabs a[style*="background: #e74c3c"]:hover,
+        .logout-btn:hover {
+            background-color: #c0392b !important;
+            color: white !important;
+            color: #FFFFFF !important;
+            text-decoration: none !important;
+        }
+        
+        /* Container - Full width for navigation */
+        .container {
+            max-width: 100%;  /* Full width */
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* Content container with max width */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Content Area */
+        .content {
+            background-color: white;
+            padding: 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+            line-height: 1.5;  /* Ensure good readability */
+        }
+        
+        /* Messages/Alerts - BCG Green Theme */
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-left: 5px solid #4CAF50;
+            color: #1B5E20;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+            animation: slideInDown 0.4s ease, pulse 1s ease;
+            white-space: pre-line;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 60px;
+        }
+        
+        .alert-success::before {
+            content: "🎉";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            animation: bounce 0.6s ease;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(-50%);
+            }
+            25% {
+                transform: translateY(-60%);
+            }
+            75% {
+                transform: translateY(-40%);
+            }
+        }
+        
+        .alert-info {
+            background-color: #E0F2F1;
+            border: 1px solid #00ACC1;
+            color: #004D40;
+        }
+        
+        .alert-warning {
+            background-color: #FFF3E0;
+            border: 1px solid #FF9800;
+            color: #E65100;
+        }
+        
+        .alert-danger {
+            background-color: #FFEBEE;
+            border: 1px solid #F44336;
+            color: #B71C1C;
+        }
+        
+        .close-alert {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: inherit;
+            margin-left: 20px;
+        }
+        
+        /* Buttons - PrimePath Navy Theme */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--primepath-navy) 0%, var(--primepath-navy-dark) 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius-pill);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.5;
+            letter-spacing: 0.3px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--brand-shadow-sm);
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, var(--primepath-navy-light) 0%, var(--primepath-navy) 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--brand-shadow-md);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--brand-dark-gray) 0%, #495057 100%);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #495057 0%, var(--brand-dark-gray) 100%);
+        }
+        
+        /* Danger button - MUST stay red for destructive actions */
+        .btn-danger,
+        button.btn-danger,
+        .btn.btn-danger,
+        button[onclick*="confirmDelete"] {
+            background-color: #dc3545 !important;
+            background-image: none !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .btn-danger:hover,
+        button.btn-danger:hover,
+        .btn.btn-danger:hover,
+        button[onclick*="confirmDelete"]:hover {
+            background-color: #c82333 !important;
+            background-image: none !important;
+            border-color: #bd2130 !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        /* NUCLEAR OVERRIDE - Ensure delete buttons are NEVER green */
+        .routinetest-theme .btn-danger,
+        .routinetest-theme button.btn-danger,
+        .routinetest-theme .btn.btn-danger,
+        .routinetest-theme button[onclick*="confirmDelete"],
+        body.routinetest-theme .btn-danger,
+        body.routinetest-theme button.btn-danger,
+        body.routinetest-theme button[onclick*="confirmDelete"] {
+            background-color: #dc3545 !important;
+            background-image: none !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        /* Form Controls - PrimePath Brand Theme */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--brand-gray);
+            border-radius: var(--border-radius-sm);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primepath-navy);
+            box-shadow: 0 0 0 0.2rem rgba(27, 41, 81, 0.1);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primepath-navy);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+    
+</head>
+<body class="routinetest-theme">
+    <!-- Immediate theme application -->
+    <script>
+        // Apply theme class immediately to prevent FOUC
+        document.documentElement.classList.add('routinetest-theme');
+        if (document.body) {
+            document.body.classList.add('routinetest-theme');
+        }
+    </script>
+    <!-- Debug Console Logger -->
+    <script>
+        console.group('%c🎨 RoutineTest Navigation Loaded', 'background: #1B2951; color: white; padding: 5px; border-radius: 3px;');
+        console.log('Theme: PrimePath Navy (#1B2951)');
+        console.log('Navigation: Horizontal Tab Layout');
+        console.log('Module: Exam Management System');
+        console.log('User: {% if user.is_authenticated %}{{ user.username }}{% else %}Anonymous{% endif %}');
+        console.groupEnd();
+    </script>
+    
+    <!-- Navigation Tabs - Version 8.0 with Complete Cache Busting -->
+    <!-- UNIFIED CLASSES & EXAMS ONLY - NO OLD TABS -->
+    {% include 'primepath_routinetest/includes/navigation_tabs_v8.html' %}
+    
+    
+    <!-- Additional Navigation Verification -->
+    <script>
+        console.log('[ROUTINETEST_BASE] Loading Navigation V8 at', new Date().toISOString());
+        console.log('[ROUTINETEST_BASE] User: {{ user.username|default:"Anonymous" }}');
+        console.log('[ROUTINETEST_BASE] Cache Bust: {% now "U" %}');
+    </script>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Messages/Alerts -->
+        {% if messages %}
+            <div class="messages" id="message-container">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'">&times;</button>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            <script>
+                // Auto-scroll to top when there's a message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Auto-hide success messages after 10 seconds
+                setTimeout(function() {
+                    const successAlerts = document.querySelectorAll('.alert-success');
+                    successAlerts.forEach(function(alert) {
+                        alert.style.transition = 'opacity 0.5s ease-out';
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.style.display = 'none';
+                        }, 500);
+                    });
+                }, 10000);
+                
+                console.log('[RoutineTest] Messages displayed:', document.querySelectorAll('.alert').length);
+            </script>
+        {% endif %}
+        
+        <!-- Page Content -->
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- Load RoutineTest Theme CSS IMMEDIATELY after base styles -->
+    <link rel="stylesheet" href="{% static 'css/routinetest-theme.css' %}?v={% now 'U' %}">
+    
+    <!-- Pre-apply theme class to prevent FOUC and ensure CSS rules work -->
+    <script>
+    (function() {
+        // Apply theme class immediately to prevent flash of unstyled content
+        document.documentElement.classList.add('routinetest-theme');
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!document.body.classList.contains('routinetest-theme')) {
+                document.body.classList.add('routinetest-theme');
+                console.log('[Theme Pre-apply] Added routinetest-theme class to body');
+            }
+        });
+    })();
+    </script>
+    
+    <!-- Load RoutineTest Theme JS -->
+    <script src="{% static 'js/routinetest-theme.js' %}?v={% now 'U' %}"></script>
+    
+    <!-- Removed redundant matrix tab JavaScript files - Navigation V8 handles this -->
+    
+    <!-- Navigation JavaScript with Console Debugging -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.group('%c[RoutineTest Navigation] Initialization', 'color: #1B2951; font-weight: bold;');
+            
+            // Log navigation state
+            const navTabs = document.querySelectorAll('.nav-tabs a');
+            console.log(`Found ${navTabs.length} navigation tabs`);
+            
+            // Log active tab
+            const activeTab = document.querySelector('.nav-tabs a.active');
+            if (activeTab) {
+                console.log('Active Tab:', activeTab.getAttribute('data-nav') || activeTab.textContent.trim());
+                console.log('Active URL:', activeTab.href);
+            }
+            
+            // Add click tracking to all nav items
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    const navName = this.getAttribute('data-nav') || this.textContent.trim();
+                    console.log(`%c[RoutineTest Nav Click] ${navName}`, 'color: #1B2951;');
+                    console.log('Target URL:', this.href);
+                    console.log('Timestamp:', new Date().toISOString());
+                    
+                    // Track navigation in sessionStorage
+                    const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+                    navHistory.push({
+                        tab: navName,
+                        url: this.href,
+                        timestamp: new Date().toISOString()
+                    });
+                    sessionStorage.setItem('routinetest_nav_history', JSON.stringify(navHistory.slice(-10))); // Keep last 10
+                });
+            });
+            
+            // Log authentication state
+            const authState = {
+                authenticated: {% if user.is_authenticated %}true{% else %}false{% endif %},
+                username: {% if user.is_authenticated %}'{{ user.username }}'{% else %}null{% endif %},
+                fullName: {% if user.is_authenticated %}'{{ user.get_full_name }}'{% else %}null{% endif %},
+                is_staff: {% if user.is_authenticated %}{{ user.is_staff|lower }}{% else %}false{% endif %},
+                page: '{{ request.resolver_match.url_name }}',
+                path: '{{ request.path }}',
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log('[RoutineTest Auth State]', authState);
+            
+            // Log theme confirmation
+            console.log('[RoutineTest Theme Check]', {
+                primaryColor: getComputedStyle(document.documentElement).getPropertyValue('--primepath-navy') || '#1B2951',
+                headerBg: getComputedStyle(document.querySelector('.header')).background,
+                navBg: getComputedStyle(document.querySelector('.nav-tabs')).backgroundColor
+            });
+            
+            // Performance metrics
+            if (window.performance) {
+                const perfData = window.performance.timing;
+                const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                console.log(`[RoutineTest Performance] Page load time: ${pageLoadTime}ms`);
+            }
+            
+            console.groupEnd();
+            
+            // Navigation history display
+            const navHistory = JSON.parse(sessionStorage.getItem('routinetest_nav_history') || '[]');
+            if (navHistory.length > 0) {
+                console.group('%c[RoutineTest Navigation History]', 'color: #007C3F;');
+                console.table(navHistory);
+                console.groupEnd();
+            }
+        });
+        
+        // Logout confirmation
+        const logoutLink = document.getElementById('logout-link');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function(e) {
+                console.log('[RoutineTest] Logout initiated');
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                    console.log('[RoutineTest] Logout cancelled');
+                }
+            });
+        }
+        
+        // Global error handler for debugging
+        window.addEventListener('error', function(e) {
+            console.error('[RoutineTest Error]', {
+                message: e.message,
+                filename: e.filename,
+                line: e.lineno,
+                column: e.colno,
+                error: e.error
+            });
+        });
+    </script>
+    
+    <!-- Navigation Error Handler - Prevents Matrix tab errors -->
+    <script src="{% static 'js/routinetest/navigation-error-handler.js' %}"></script>
+    
+    <!-- Enhanced Navigation Debugging -->
+    <script>
+        console.log('%c[ROUTINETEST_BASE] Navigation error handler loaded', 
+            'background: #4CAF50; color: white; padding: 3px 6px; border-radius: 3px;');
+        
+        // Final verification of navigation state
+        document.addEventListener('DOMContentLoaded', function() {
+            console.group('%c[NAV_FINAL_CHECK] RoutineTest Navigation Status', 
+                'background: #2196F3; color: white; padding: 5px; border-radius: 3px; font-weight: bold;');
+            
+            // Check for Matrix-related elements that shouldn't exist
+            const matrixElements = document.querySelectorAll('[href*="matrix"], [data-nav*="matrix"], #matrix-tab-injected');
+            if (matrixElements.length > 0) {
+                console.error(`Found ${matrixElements.length} Matrix elements that should not exist:`, matrixElements);
+                matrixElements.forEach(elem => {
+                    console.log('Removing element:', elem);
+                    const parent = elem.closest('li') || elem;
+                    parent.remove();
+                });
+            } else {
+                console.log('✅ No Matrix elements found (correct)');
+            }
+            
+            // Verify Classes & Exams tab
+            const classesExamsTab = document.querySelector('[data-nav="classes-exams"]');
+            if (classesExamsTab) {
+                console.log('✅ Classes & Exams tab present');
+            } else {
+                console.error('❌ Classes & Exams tab missing!');
+            }
+            
+            // Log final navigation structure
+            const allTabs = document.querySelectorAll('.nav-tabs a[data-nav]');
+            console.log('Final Navigation Structure:');
+            allTabs.forEach((tab, i) => {
+                console.log(`  ${i+1}. ${tab.textContent.trim()} [${tab.getAttribute('data-nav')}]`);
+            });
+            
+            console.groupEnd();
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

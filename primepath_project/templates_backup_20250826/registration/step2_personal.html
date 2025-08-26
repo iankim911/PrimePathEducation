@@ -1,0 +1,643 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Personal Information - Step 2{% endblock %}
+
+{% block extra_css %}
+<style>
+    .registration-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        position: relative;
+    }
+    
+    .progress-bar::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #e0e0e0;
+        z-index: -1;
+    }
+    
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        position: relative;
+        background: white;
+        border: 2px solid #e0e0e0;
+    }
+    
+    .progress-step.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .progress-step.completed {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    
+    .step-label {
+        position: absolute;
+        top: 50px;
+        width: 100px;
+        text-align: center;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: #666;
+    }
+    
+    .form-section {
+        margin-bottom: 30px;
+    }
+    
+    .form-section h3 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+    
+    .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-row .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group label .required {
+        color: #dc3545;
+        margin-left: 3px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 15px;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+        display: none;
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+    
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+    
+    .help-text {
+        font-size: 13px;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .gender-selector {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .gender-option {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .gender-option:hover {
+        border-color: #007bff;
+        background: #f8f9fa;
+    }
+    
+    .gender-option.selected {
+        border-color: #007bff;
+        background: #e7f1ff;
+    }
+    
+    .gender-option input[type="radio"] {
+        display: none;
+    }
+    
+    .gender-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+    
+    .gender-label {
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+    }
+    
+    .date-input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .date-input-group select {
+        flex: 1;
+    }
+    
+    .age-display {
+        padding: 10px 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #666;
+        text-align: center;
+        min-width: 100px;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+    
+    .nationality-select {
+        position: relative;
+    }
+    
+    .nationality-select select {
+        appearance: none;
+        padding-right: 40px;
+    }
+    
+    .nationality-select::after {
+        content: '▼';
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+    <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Personal Information</h2>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-step completed">
+            ✓
+            <span class="step-label">Basic Info</span>
+        </div>
+        <div class="progress-step active">
+            2
+            <span class="step-label">Personal</span>
+        </div>
+        <div class="progress-step">
+            3
+            <span class="step-label">Contact</span>
+        </div>
+        <div class="progress-step">
+            4
+            <span class="step-label">Academic</span>
+        </div>
+        <div class="progress-step">
+            5
+            <span class="step-label">Parent Info</span>
+        </div>
+        <div class="progress-step">
+            6
+            <span class="step-label">Additional</span>
+        </div>
+    </div>
+    
+    <form method="post" id="personalInfoForm">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3>Basic Information</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">
+                        First Name
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="first_name" 
+                           name="first_name" 
+                           required
+                           placeholder="Enter your first name"
+                           value="{{ form.first_name.value|default:'' }}">
+                    <div class="invalid-feedback">First name is required.</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="last_name">
+                        Last Name
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="last_name" 
+                           name="last_name" 
+                           required
+                           placeholder="Enter your last name"
+                           value="{{ form.last_name.value|default:'' }}">
+                    <div class="invalid-feedback">Last name is required.</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="korean_name">
+                    Korean Name (한국이름)
+                </label>
+                <input type="text" 
+                       class="form-control" 
+                       id="korean_name" 
+                       name="korean_name" 
+                       placeholder="한국 이름을 입력하세요"
+                       value="{{ form.korean_name.value|default:'' }}">
+                <div class="help-text">Optional: Enter your name in Korean if applicable</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="gender">
+                    Gender
+                    <span class="required">*</span>
+                </label>
+                <div class="gender-selector">
+                    <label class="gender-option" for="gender_male">
+                        <input type="radio" name="gender" id="gender_male" value="M" required>
+                        <div class="gender-icon">👨</div>
+                        <div class="gender-label">Male</div>
+                    </label>
+                    
+                    <label class="gender-option" for="gender_female">
+                        <input type="radio" name="gender" id="gender_female" value="F" required>
+                        <div class="gender-icon">👩</div>
+                        <div class="gender-label">Female</div>
+                    </label>
+                    
+                    <label class="gender-option" for="gender_other">
+                        <input type="radio" name="gender" id="gender_other" value="O">
+                        <div class="gender-icon">👤</div>
+                        <div class="gender-label">Other</div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Date of Birth & Age</h3>
+            
+            <div class="form-group">
+                <label for="date_of_birth">
+                    Date of Birth
+                    <span class="required">*</span>
+                </label>
+                <div class="date-input-group">
+                    <select class="form-control" id="birth_year" name="birth_year" required>
+                        <option value="">Year</option>
+                        {% for year in years %}
+                        <option value="{{ year }}">{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <select class="form-control" id="birth_month" name="birth_month" required>
+                        <option value="">Month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    
+                    <select class="form-control" id="birth_day" name="birth_day" required>
+                        <option value="">Day</option>
+                        {% for day in days %}
+                        <option value="{{ day }}">{{ day }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <div class="age-display" id="ageDisplay">
+                        Age: --
+                    </div>
+                </div>
+                <input type="hidden" id="date_of_birth" name="date_of_birth">
+                <input type="hidden" id="age" name="age">
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3>Nationality & Language</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nationality">
+                        Nationality
+                        <span class="required">*</span>
+                    </label>
+                    <div class="nationality-select">
+                        <select class="form-control" id="nationality" name="nationality" required>
+                            <option value="">Select nationality</option>
+                            <option value="KR">Korean</option>
+                            <option value="US">American</option>
+                            <option value="CN">Chinese</option>
+                            <option value="JP">Japanese</option>
+                            <option value="VN">Vietnamese</option>
+                            <option value="PH">Filipino</option>
+                            <option value="TH">Thai</option>
+                            <option value="ID">Indonesian</option>
+                            <option value="MY">Malaysian</option>
+                            <option value="SG">Singaporean</option>
+                            <option value="IN">Indian</option>
+                            <option value="GB">British</option>
+                            <option value="CA">Canadian</option>
+                            <option value="AU">Australian</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="preferred_language">
+                        Preferred Language
+                        <span class="required">*</span>
+                    </label>
+                    <select class="form-control" id="preferred_language" name="preferred_language" required>
+                        <option value="">Select language</option>
+                        <option value="ko">Korean (한국어)</option>
+                        <option value="en">English</option>
+                        <option value="zh">Chinese (中文)</option>
+                        <option value="ja">Japanese (日本語)</option>
+                        <option value="vi">Vietnamese</option>
+                        <option value="es">Spanish</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error messages -->
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="form-actions">
+            <a href="{% url 'registration:step' 'basic' %}" class="btn btn-secondary">
+                ← Back to Step 1
+            </a>
+            <button type="submit" class="btn btn-primary">
+                Continue to Step 3 →
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gender selection
+    const genderOptions = document.querySelectorAll('.gender-option');
+    genderOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            genderOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+        });
+        
+        // Set initial selected state
+        if (option.querySelector('input[type="radio"]').checked) {
+            option.classList.add('selected');
+        }
+    });
+    
+    // Age calculation
+    const yearSelect = document.getElementById('birth_year');
+    const monthSelect = document.getElementById('birth_month');
+    const daySelect = document.getElementById('birth_day');
+    const ageDisplay = document.getElementById('ageDisplay');
+    const dobHidden = document.getElementById('date_of_birth');
+    const ageHidden = document.getElementById('age');
+    
+    function calculateAge() {
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const day = parseInt(daySelect.value);
+        
+        if (year && month && day) {
+            const birthDate = new Date(year, month - 1, day);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            ageDisplay.textContent = `Age: ${age}`;
+            ageHidden.value = age;
+            
+            // Format date for hidden field (YYYY-MM-DD)
+            const formattedMonth = month.toString().padStart(2, '0');
+            const formattedDay = day.toString().padStart(2, '0');
+            dobHidden.value = `${year}-${formattedMonth}-${formattedDay}`;
+        } else {
+            ageDisplay.textContent = 'Age: --';
+            ageHidden.value = '';
+            dobHidden.value = '';
+        }
+    }
+    
+    yearSelect.addEventListener('change', calculateAge);
+    monthSelect.addEventListener('change', calculateAge);
+    daySelect.addEventListener('change', calculateAge);
+    
+    // Update days based on month selection
+    monthSelect.addEventListener('change', function() {
+        const month = parseInt(this.value);
+        const year = parseInt(yearSelect.value) || new Date().getFullYear();
+        const daysInMonth = new Date(year, month, 0).getDate();
+        
+        // Clear and rebuild day options
+        daySelect.innerHTML = '<option value="">Day</option>';
+        for (let i = 1; i <= daysInMonth; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            daySelect.appendChild(option);
+        }
+    });
+    
+    // Form validation
+    document.getElementById('personalInfoForm').addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Check required text fields
+        const requiredFields = ['first_name', 'last_name'];
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        // Check gender selection
+        const genderSelected = document.querySelector('input[name="gender"]:checked');
+        if (!genderSelected) {
+            isValid = false;
+            // You might want to show an error message for gender
+        }
+        
+        // Check date of birth
+        if (!dobHidden.value) {
+            yearSelect.classList.add('is-invalid');
+            monthSelect.classList.add('is-invalid');
+            daySelect.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Check nationality and language
+        const nationality = document.getElementById('nationality');
+        const language = document.getElementById('preferred_language');
+        
+        if (!nationality.value) {
+            nationality.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (!language.value) {
+            language.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+    
+    // Generate year options dynamically
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 80;
+    const endYear = currentYear - 5;
+    
+    for (let year = endYear; year >= startYear; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    }
+    
+    // Generate day options (1-31 by default)
+    for (let day = 1; day <= 31; day++) {
+        const option = document.createElement('option');
+        option.value = day;
+        option.textContent = day;
+        daySelect.appendChild(option);
+    }
+});
+</script>
+{% endblock %}

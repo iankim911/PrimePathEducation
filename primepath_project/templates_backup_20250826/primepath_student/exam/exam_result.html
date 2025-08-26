@@ -1,0 +1,402 @@
+{% extends 'student_base.html' %}
+{% load static %}
+
+{% block title %}Exam Results - {{ exam.name }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Results Container */
+    .results-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Score Card */
+    .score-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .score-display {
+        font-size: 72px;
+        font-weight: bold;
+        margin: 20px 0;
+    }
+    
+    .score-excellent {
+        color: #43A047;
+    }
+    
+    .score-good {
+        color: #1976D2;
+    }
+    
+    .score-fair {
+        color: #FFA726;
+    }
+    
+    .score-poor {
+        color: #E53935;
+    }
+    
+    .score-details {
+        font-size: 18px;
+        color: #666;
+        margin: 10px 0;
+    }
+    
+    /* Exam Info */
+    .exam-info {
+        background: #F5F7FA;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .info-item {
+        margin: 10px 20px;
+    }
+    
+    .info-label {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .info-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    /* Questions Review */
+    .questions-review {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .review-header {
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #E0E0E0;
+    }
+    
+    /* Question Card */
+    .question-card {
+        background: #FAFAFA;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #E0E0E0;
+    }
+    
+    .question-card.correct {
+        border-left-color: #4CAF50;
+        background: #F1F8E9;
+    }
+    
+    .question-card.incorrect {
+        border-left-color: #F44336;
+        background: #FFEBEE;
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .question-number {
+        font-weight: bold;
+        color: #666;
+    }
+    
+    .result-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .badge-correct {
+        background: #4CAF50;
+        color: white;
+    }
+    
+    .badge-incorrect {
+        background: #F44336;
+        color: white;
+    }
+    
+    .badge-unanswered {
+        background: #9E9E9E;
+        color: white;
+    }
+    
+    .question-text {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+    
+    .answer-section {
+        margin-top: 15px;
+    }
+    
+    .answer-row {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+    }
+    
+    .answer-label {
+        font-weight: 600;
+        min-width: 140px;
+        color: #666;
+    }
+    
+    .answer-value {
+        padding: 8px 12px;
+        background: white;
+        border-radius: 4px;
+        flex: 1;
+    }
+    
+    .answer-value.student-answer {
+        background: #FFF9C4;
+    }
+    
+    .answer-value.correct-answer {
+        background: #C8E6C9;
+        font-weight: 600;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        margin-top: 30px;
+        text-align: center;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        margin: 0 10px;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: #1565C0;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #1976D2;
+        transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+        background: #757575;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #616161;
+    }
+    
+    /* Summary Stats */
+    .summary-stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 20px 0;
+        padding: 20px 0;
+        border-top: 1px solid #E0E0E0;
+        border-bottom: 1px solid #E0E0E0;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    @media print {
+        .action-buttons {
+            display: none;
+        }
+        
+        .score-card {
+            box-shadow: none;
+            border: 1px solid #ddd;
+        }
+        
+        .questions-review {
+            box-shadow: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <!-- Score Card -->
+    <div class="score-card">
+        <h1 style="margin: 0 0 20px 0; color: #333;">Exam Results</h1>
+        <div class="score-display 
+            {% if percentage >= 80 %}score-excellent
+            {% elif percentage >= 60 %}score-good
+            {% elif percentage >= 40 %}score-fair
+            {% else %}score-poor{% endif %}">
+            {{ percentage }}%
+        </div>
+        <div class="score-details">
+            You answered {{ correct_answers }} out of {{ total_questions }} questions correctly
+        </div>
+        
+        <!-- Summary Statistics -->
+        <div class="summary-stats">
+            <div class="stat-item">
+                <div class="stat-value" style="color: #4CAF50;">{{ correct_answers }}</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" style="color: #F44336;">{{ total_questions|add:"-"|add:correct_answers }}</div>
+                <div class="stat-label">Incorrect</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ total_questions }}</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exam Information -->
+    <div class="exam-info">
+        <div class="info-item">
+            <div class="info-label">Exam Name</div>
+            <div class="info-value">{{ exam.name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Class</div>
+            <div class="info-value">{{ session.class_assignment.get_class_code_display }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Completed On</div>
+            <div class="info-value">{{ completed_at|date:"F j, Y g:i A" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Duration</div>
+            <div class="info-value">{{ exam.duration }} minutes</div>
+        </div>
+    </div>
+    
+    <!-- Questions Review -->
+    <div class="questions-review">
+        <h2 class="review-header">Question Review</h2>
+        
+        {% for result in results %}
+        <div class="question-card {% if result.is_correct %}correct{% elif result.student_answer %}incorrect{% else %}incorrect{% endif %}">
+            <div class="question-header">
+                <span class="question-number">Question {{ result.question_number }}</span>
+                <span class="result-badge 
+                    {% if result.is_correct %}badge-correct
+                    {% elif result.student_answer %}badge-incorrect
+                    {% else %}badge-unanswered{% endif %}">
+                    {% if result.is_correct %}
+                        ✓ Correct
+                    {% elif result.student_answer %}
+                        ✗ Incorrect
+                    {% else %}
+                        — Unanswered
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="question-text">
+                {{ result.question_text }}
+            </div>
+            
+            <div class="answer-section">
+                {% if result.student_answer %}
+                <div class="answer-row">
+                    <span class="answer-label">Your Answer:</span>
+                    <span class="answer-value student-answer">
+                        {% if result.option_1 %}
+                            {{ result.student_answer }}. 
+                            {% if result.student_answer == 'A' %}{{ result.option_1 }}
+                            {% elif result.student_answer == 'B' %}{{ result.option_2 }}
+                            {% elif result.student_answer == 'C' %}{{ result.option_3 }}
+                            {% elif result.student_answer == 'D' %}{{ result.option_4 }}
+                            {% else %}{{ result.student_answer }}{% endif %}
+                        {% else %}
+                            {{ result.student_answer }}
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if not result.is_correct %}
+                <div class="answer-row">
+                    <span class="answer-label">Correct Answer:</span>
+                    <span class="answer-value correct-answer">
+                        {% if result.option_1 %}
+                            {{ result.correct_answer }}. 
+                            {% if result.correct_answer == 'A' %}{{ result.option_1 }}
+                            {% elif result.correct_answer == 'B' %}{{ result.option_2 }}
+                            {% elif result.correct_answer == 'C' %}{{ result.option_3 }}
+                            {% elif result.correct_answer == 'D' %}{{ result.option_4 }}
+                            {% else %}{{ result.correct_answer }}{% endif %}
+                        {% else %}
+                            {{ result.correct_answer }}
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'primepath_student:class_detail' session.class_assignment.class_code %}" class="btn btn-primary">
+            Back to Class
+        </a>
+        <a href="{% url 'primepath_student:dashboard' %}" class="btn btn-secondary">
+            My Classes
+        </a>
+        <button class="btn btn-secondary" onclick="window.print()">
+            Print Results
+        </button>
+    </div>
+</div>
+{% endblock %}

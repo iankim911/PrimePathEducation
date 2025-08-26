@@ -1,0 +1,48 @@
+{% extends "unified_base.html" %}
+{% load static %}
+
+{% block title %}Test - Placement Module{% endblock %}
+{% block module_name %}placement_test{% endblock %}
+{% block data_module %}placement{% endblock %}
+
+{% block module_css %}
+    <!-- Placement-specific CSS -->
+    <link rel="stylesheet" href="{% static 'css/placement-test.css' %}">
+{% endblock %}
+
+{% block header_title %}Placement Test Module{% endblock %}
+{% block header_subtitle %}<p>Testing Unified Base Template</p>{% endblock %}
+
+{% block navigation %}
+    <nav class="placement-nav">
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Exams</a></li>
+            <li><a href="#">Sessions</a></li>
+        </ul>
+    </nav>
+{% endblock %}
+
+{% block content %}
+    <h2>Placement Test - Unified Base Template Test</h2>
+    <p>This template extends unified_base.html and represents a placement test page.</p>
+    
+    <div class="test-content">
+        <h3>Features Working:</h3>
+        <ul>
+            <li>✅ Title block override</li>
+            <li>✅ Module name set to placement_test</li>
+            <li>✅ Custom navigation</li>
+            <li>✅ Content rendering</li>
+        </ul>
+        
+        <button class="btn">Test Button</button>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    console.log('[TEST] Placement test template loaded');
+    console.log('[TEST] Config:', window.PRIMEPATH_CONFIG);
+</script>
+{% endblock %}

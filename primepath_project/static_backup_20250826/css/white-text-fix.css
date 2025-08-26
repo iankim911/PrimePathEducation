@@ -1,0 +1,334 @@
+/* ======================================================
+   WHITE TEXT FIX - ENSURING READABILITY ON DARK BACKGROUNDS
+   ====================================================== 
+   
+   Issue: Text appears dark/black on green backgrounds
+   Solution: Force white text on all dark background elements
+   Date: August 26, 2025
+   
+*/
+
+/* ======================================================
+   PROGRAM HEADERS - FORCE WHITE TEXT
+   ====================================================== */
+
+/* All program headers must have white text */
+.program-header,
+.program-header *,
+.program-header h3,
+.program-header h4,
+.program-header h5,
+.program-header span,
+.program-header div,
+.program-header p,
+.program-header a,
+.program-header strong,
+.program-header em,
+.program-header.core,
+.program-header.ascent,
+.program-header.edge,
+.program-header.pinnacle,
+body .program-header,
+body .program-header * {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* Ensure icons in program headers are white */
+.program-header .program-icon,
+.program-header .toggle-icon,
+.program-header .chevron-icon,
+.program-header .expand-icon {
+    color: white !important;
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+}
+
+/* ======================================================
+   NAVIGATION & HEADERS - WHITE TEXT
+   ====================================================== */
+
+/* Navigation tabs with dark backgrounds */
+.nav-tabs,
+.nav-tabs a,
+.nav-tabs li,
+.nav-tabs span,
+.nav-container,
+.nav-container * {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Active nav tabs should have proper contrast */
+.nav-tabs a.active {
+    background-color: #E8F5E9 !important;
+    color: #0D4F1F !important; /* Dark green for contrast */
+}
+
+/* App header elements */
+.app-header,
+.app-header *,
+.header,
+.header *,
+.header-content,
+.header-content *,
+.app-title,
+.app-subtitle,
+.welcome-text,
+.user-info {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   BADGES & BUTTONS ON DARK BACKGROUNDS
+   ====================================================== */
+
+/* Admin badges */
+.badge-full,
+.badge-admin,
+.access-admin-badge,
+.admin-badge,
+[class*="badge"][style*="background: #2E7D32"],
+[class*="badge"][style*="background: #1B5E20"] {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* Success/Primary buttons */
+.btn-success,
+.btn-primary,
+.btn-full-access,
+button[style*="background: #2E7D32"],
+button[style*="background: #1B5E20"],
+a[style*="background: #2E7D32"],
+a[style*="background: #1B5E20"] {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   MODAL HEADERS - WHITE TEXT
+   ====================================================== */
+
+/* Modal headers with green backgrounds */
+.modal-header[style*="background: #2E7D32"],
+.modal-header[style*="background: #1B5E20"],
+.modal-header.bg-success,
+.modal-title {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+.modal-header[style*="background: #2E7D32"] *,
+.modal-header[style*="background: #1B5E20"] * {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* Close button in modal headers */
+.modal-header .close,
+.modal-header button.close {
+    color: white !important;
+    color: #FFFFFF !important;
+    opacity: 0.8 !important;
+}
+
+.modal-header .close:hover,
+.modal-header button.close:hover {
+    opacity: 1 !important;
+}
+
+/* ======================================================
+   TABLE HEADERS - WHITE TEXT
+   ====================================================== */
+
+/* Admin tables with dark headers */
+.admin-table thead,
+.admin-table thead th,
+.admin-table thead td,
+table thead[style*="background: #1B5E20"],
+table thead[style*="background: #2E7D32"],
+thead.bg-success,
+thead.bg-primary {
+    background: #1B5E20 !important;
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   STATUS INDICATORS & EXAM TYPES
+   ====================================================== */
+
+/* Exam indicators with dark backgrounds */
+.exam-indicator.exam-review,
+.exam-indicator.exam-quarterly,
+.exam-review,
+.exam-quarterly,
+.status-indicator.complete {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* Active exam type tabs */
+.exam-type-tab.active,
+.tab-btn.active {
+    background: #2E7D32 !important;
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   SPECIFIC COMPONENT FIXES
+   ====================================================== */
+
+/* Profile and logout buttons in header */
+.profile-btn,
+.logout-btn,
+#logout-link,
+a[href="/logout/"],
+.header-actions a,
+.header-actions button {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* User welcome section */
+.user-welcome,
+.user-welcome *,
+.welcome-text,
+.user-role {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   HOVER STATES - MAINTAIN WHITE TEXT
+   ====================================================== */
+
+/* Ensure white text persists on hover */
+.program-header:hover,
+.program-header:hover *,
+.btn-success:hover,
+.btn-primary:hover,
+.btn-full-access:hover,
+.badge-full:hover,
+.nav-tabs a:hover {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   FOCUS STATES - MAINTAIN READABILITY
+   ====================================================== */
+
+/* Ensure focus states maintain proper contrast */
+.btn-success:focus,
+.btn-primary:focus,
+.nav-tabs a:focus,
+.program-header:focus,
+.program-header *:focus {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   FORCED OVERRIDES FOR INLINE STYLES
+   ====================================================== */
+
+/* Override any inline styles that set wrong colors */
+[style*="background: #1B5E20"]:not(.nav-tabs a.active),
+[style*="background: #2E7D32"]:not(.nav-tabs a.active),
+[style*="background: linear-gradient"][style*="#1B5E20"],
+[style*="background: linear-gradient"][style*="#2E7D32"] {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* Ensure all children also have white text */
+[style*="background: #1B5E20"] *,
+[style*="background: #2E7D32"] *,
+[style*="background: linear-gradient"][style*="#1B5E20"] *,
+[style*="background: linear-gradient"][style*="#2E7D32"] * {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   CLASS-SPECIFIC FIXES
+   ====================================================== */
+
+/* Classes & Exams page specific */
+.class-card-header[style*="background"],
+.class-card-header[style*="background"] * {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* Admin dashboard specific */
+.admin-stats[style*="background: #2E7D32"],
+.admin-stats[style*="background: #1B5E20"],
+.dashboard-header[style*="background"] {
+    color: white !important;
+    color: #FFFFFF !important;
+}
+
+/* ======================================================
+   ACCESSIBILITY - HIGH CONTRAST MODE
+   ====================================================== */
+
+/* Ensure WCAG AAA compliance for text on dark backgrounds */
+@media (prefers-contrast: high) {
+    .program-header,
+    .program-header *,
+    .nav-tabs,
+    .nav-tabs a,
+    .app-header,
+    .app-header * {
+        color: white !important;
+        color: #FFFFFF !important;
+        text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* ======================================================
+   PRINT STYLES - ENSURE READABILITY
+   ====================================================== */
+
+@media print {
+    /* Convert dark backgrounds to light for printing */
+    .program-header,
+    .nav-tabs,
+    .app-header {
+        background: white !important;
+        color: black !important;
+        border: 1px solid black !important;
+    }
+    
+    .program-header *,
+    .nav-tabs *,
+    .app-header * {
+        color: black !important;
+    }
+}
+
+/* ======================================================
+   DEBUG - LOG WHEN STYLES ARE APPLIED
+   ====================================================== */
+
+/* Add visual indicator that white text fix is active */
+body::before {
+    content: '';
+    position: fixed;
+    top: -100px;
+    left: -100px;
+    width: 1px;
+    height: 1px;
+    z-index: -9999;
+    pointer-events: none;
+    /* This creates an invisible marker that can be detected via JS */
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><rect id="white-text-fix-active"/></svg>');
+}
+
+/* ======================================================
+   END OF WHITE TEXT FIX
+   ====================================================== */

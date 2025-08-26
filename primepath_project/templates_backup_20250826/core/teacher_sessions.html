@@ -1,0 +1,437 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Sessions - Teacher Dashboard{% endblock %}
+
+{% block header %}Student Test Sessions{% endblock %}
+
+{% block content %}
+<div class="sessions-container">
+    <div class="sessions-header">
+        <h2>📊 Student Test Session Management</h2>
+        <p>Monitor and track all student placement test sessions</p>
+        
+        <div class="filter-controls">
+            <form method="get" class="filter-form">
+                <div class="filter-group">
+                    <label for="status">Status:</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">All Sessions</option>
+                        <option value="completed" {% if current_status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="in_progress" {% if current_status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="date">Date Range:</label>
+                    <select name="date" id="date" class="form-control">
+                        <option value="">All Time</option>
+                        <option value="today" {% if current_date_filter == 'today' %}selected{% endif %}>Today</option>
+                        <option value="week" {% if current_date_filter == 'week' %}selected{% endif %}>Last 7 Days</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'PlacementTest:teacher_sessions' %}" class="btn btn-secondary">Clear</a>
+            </form>
+        </div>
+    </div>
+    
+    <div class="sessions-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ sessions|length }}</div>
+            <div class="stat-label">Sessions Displayed</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ sessions|length }}</div>
+            <div class="stat-label">Total Filtered</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">
+                {% for session in sessions %}
+                    {% if session.is_completed %}{{ forloop.counter0|add:1 }}{% endif %}
+                {% empty %}0{% endfor %}
+            </div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+    
+    <div class="sessions-table-container">
+        {% if sessions %}
+            <table class="sessions-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Grade</th>
+                        <th>Exam</th>
+                        <th>Started</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr class="session-row">
+                        <td class="student-info">
+                            <strong>{{ session.student_name }}</strong>
+                            {% if session.parent_phone %}
+                                <br><small>📞 {{ session.parent_phone }}</small>
+                            {% endif %}
+                        </td>
+                        <td>Grade {{ session.grade }}</td>
+                        <td class="exam-info">
+                            <span class="exam-name">{{ session.exam.name|truncatechars:40 }}</span>
+                            {% if session.exam.curriculum_level %}
+                                <br><small>{{ session.exam.curriculum_level }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ session.started_at|date:"M d, Y" }}<br>
+                            <small>{{ session.started_at|time:"H:i" }}</small>
+                        </td>
+                        <td>
+                            {% if session.is_completed %}
+                                {{ session.duration_minutes }} mins
+                            {% else %}
+                                <span class="in-progress">Ongoing...</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.is_completed %}
+                                <span class="status-completed">✅ Completed</span>
+                            {% else %}
+                                <span class="status-in-progress">⏳ In Progress</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.is_completed and session.final_score is not None %}
+                                <span class="score">{{ session.final_score }}%</span>
+                                {% if session.is_passing %}
+                                    <span class="pass-indicator">🎉 Pass</span>
+                                {% else %}
+                                    <span class="fail-indicator">❌ Fail</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="no-score">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="actions">
+                            {% if session.is_completed %}
+                                <a href="#" class="btn btn-sm btn-info view-results" 
+                                   data-session-id="{{ session.id }}">View Results</a>
+                            {% else %}
+                                <a href="{% url 'PlacementTest:student_test' session.id %}" 
+                                   class="btn btn-sm btn-warning" target="_blank">Monitor</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if is_paginated %}
+                <div class="pagination-container">
+                    <div class="pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" class="page-link">First</a>
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Previous</a>
+                        {% endif %}
+                        
+                        <span class="page-info">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">Last</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <div class="no-sessions">
+                <div class="no-sessions-icon">📋</div>
+                <h3>No Test Sessions Found</h3>
+                <p>
+                    {% if current_status_filter or current_date_filter %}
+                        No sessions match your current filters. Try adjusting the filter criteria.
+                    {% else %}
+                        No student test sessions have been started yet. Students can begin tests from the homepage.
+                    {% endif %}
+                </p>
+                <a href="{% url 'core:index' %}" class="btn btn-primary">Go to Student Portal</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .sessions-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .sessions-header h2 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    
+    .sessions-header p {
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    .filter-controls {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .filter-form {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        min-width: 150px;
+    }
+    
+    .filter-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .sessions-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #3498db;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .sessions-table-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e9ecef;
+    }
+    
+    .sessions-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .sessions-table th {
+        background: #f8f9fa;
+        padding: 15px 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .sessions-table td {
+        padding: 15px 10px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: top;
+    }
+    
+    .session-row:hover {
+        background: #f8f9fa;
+    }
+    
+    .student-info strong {
+        color: #2c3e50;
+    }
+    
+    .exam-name {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .status-completed {
+        background: #d4edda;
+        color: #155724;
+        padding: 4px 8px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-in-progress {
+        background: #fff3cd;
+        color: #856404;
+        padding: 4px 8px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .in-progress {
+        color: #856404;
+        font-style: italic;
+    }
+    
+    .score {
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .pass-indicator {
+        background: #d4edda;
+        color: #155724;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        margin-left: 5px;
+    }
+    
+    .fail-indicator {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        margin-left: 5px;
+    }
+    
+    .no-score {
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    .actions {
+        text-align: center;
+    }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+        border: 1px solid #17a2b8;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+        border: 1px solid #ffc107;
+    }
+    
+    .no-sessions {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .no-sessions-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+    
+    .no-sessions h3 {
+        color: #495057;
+        margin-bottom: 15px;
+    }
+    
+    .no-sessions p {
+        margin-bottom: 25px;
+        line-height: 1.6;
+    }
+    
+    .pagination-container {
+        padding: 20px;
+        text-align: center;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .pagination {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .page-link {
+        padding: 8px 15px;
+        background: white;
+        border: 1px solid #dee2e6;
+        color: #007bff;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+    
+    .page-link:hover {
+        background: #e9ecef;
+    }
+    
+    .page-info {
+        padding: 8px 15px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View Results functionality
+    document.querySelectorAll('.view-results').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const sessionId = this.dataset.sessionId;
+            
+            // For now, just show an alert - can be enhanced to show modal or redirect
+            alert(`Viewing results for session ${sessionId}. This feature can be enhanced to show detailed results.`);
+        });
+    });
+    
+    // Auto-refresh for in-progress sessions
+    const hasInProgress = document.querySelector('.status-in-progress');
+    if (hasInProgress) {
+        console.log('[TEACHER_SESSIONS] In-progress sessions detected - enabling auto-refresh');
+        // Refresh every 30 seconds if there are in-progress sessions
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000);
+    }
+});
+</script>
+{% endblock %}

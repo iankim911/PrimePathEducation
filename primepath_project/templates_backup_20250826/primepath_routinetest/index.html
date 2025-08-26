@@ -1,0 +1,455 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - RoutineTest{% endblock %}
+
+{% block header %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Mode Toggle Fix - Inline JavaScript -->
+<script>
+(function() {
+    console.log('[MODE_TOGGLE_FIX_INLINE] Starting inline fix for stats box toggle issue');
+    
+    // Function to fix any "function:" text
+    function fixFunctionText() {
+        // Get all text nodes in the document
+        const walker = document.createTreeWalker(
+            document.body,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+        );
+        
+        let node;
+        let fixedCount = 0;
+        
+        while (node = walker.nextNode()) {
+            if (node.nodeValue && node.nodeValue.includes('function:')) {
+                console.warn('[MODE_TOGGLE_FIX_INLINE] Found "function:" in text:', node.nodeValue);
+                node.nodeValue = node.nodeValue.replace(/function\s*:\s*/gi, '');
+                fixedCount++;
+            }
+        }
+        
+        if (fixedCount > 0) {
+            console.log('[MODE_TOGGLE_FIX_INLINE] Fixed', fixedCount, 'instances of "function:" text');
+        }
+        
+        // Also check for any toggle elements in stats areas
+        const statsAreas = document.querySelectorAll('.class-stats, .class-stat, .stats-box, .stat-box, [class*="stat-"]');
+        statsAreas.forEach(area => {
+            const toggles = area.querySelectorAll('.mode-toggle-container, .mode-toggle-wrapper, .mode-toggle-btn, [class*="toggle"]');
+            toggles.forEach(toggle => {
+                console.warn('[MODE_TOGGLE_FIX_INLINE] Removing toggle from stats area:', toggle);
+                toggle.remove();
+            });
+        });
+    }
+    
+    // Run immediately
+    fixFunctionText();
+    
+    // Run after DOM is fully loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixFunctionText);
+    }
+    
+    // Run after a short delay to catch any dynamic content
+    setTimeout(fixFunctionText, 100);
+    setTimeout(fixFunctionText, 500);
+    setTimeout(fixFunctionText, 1000);
+    
+    // Monitor for changes
+    const observer = new MutationObserver(() => {
+        fixFunctionText();
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+    
+    console.log('[MODE_TOGGLE_FIX_INLINE] Inline fix initialized with monitoring');
+})();
+</script>
+
+<!-- Navigation Verification Script -->
+<script>
+    // CRITICAL: Navigation Tab Verification
+    console.group('%c🔍 [NAVIGATION VERIFICATION] Dashboard Page', 'background: #4CAF50; color: white; padding: 5px 10px; border-radius: 3px;');
+    
+    // Check template information
+    console.log('📄 Template Info:', {
+        currentTemplate: 'primepath_routinetest/index.html',
+        extendsTemplate: 'routinetest_base.html',
+        renderTime: new Date().toISOString(),
+        djangoVersion: '{{ django.VERSION|default:"unknown" }}'
+    });
+    
+    // Check user context
+    console.log('👤 User Context:', {
+        isAuthenticated: {{ user.is_authenticated|lower }},
+        username: '{{ user.username|default:"Anonymous" }}',
+        isStaff: {{ user.is_staff|lower }},
+        isTeacher: {{ is_teacher|default:"false"|lower }},
+        isHeadTeacher: {{ is_head_teacher|default:"false"|lower }}
+    });
+    
+    // Check dashboard stats
+    console.log('📊 Dashboard Stats:', {
+        activeExams: {{ active_exams }},
+        totalSessions: {{ total_sessions }},
+        recentSessions: {{ recent_sessions|length }}
+    });
+    
+    // Verify navigation tabs presence
+    window.addEventListener('DOMContentLoaded', function() {
+        console.group('🎯 Navigation Tabs Check');
+        
+        // Get all navigation tabs
+        const navTabs = document.querySelectorAll('.nav-tabs a');
+        console.log(`Found ${navTabs.length} navigation tabs`);
+        
+        // List all tabs
+        const tabInfo = [];
+        navTabs.forEach((tab, index) => {
+            tabInfo.push({
+                index: index + 1,
+                text: tab.textContent.trim(),
+                href: tab.getAttribute('href'),
+                dataNav: tab.getAttribute('data-nav'),
+                dataTabId: tab.getAttribute('data-tab-id'),
+                isActive: tab.classList.contains('active'),
+                isVisible: tab.offsetParent !== null,
+                style: tab.getAttribute('style') || 'default'
+            });
+        });
+        console.table(tabInfo);
+        
+        // CRITICAL: Check for Matrix Tab specifically
+        const matrixTab = document.querySelector('[data-tab-id="exam-assignments-matrix"]');
+        if (matrixTab) {
+            console.log('%c✅ MATRIX TAB FOUND!', 'background: #FF9800; color: white; padding: 5px 10px; font-weight: bold;');
+            console.log('Matrix Tab Details:', {
+                text: matrixTab.textContent.trim(),
+                href: matrixTab.getAttribute('href'),
+                isVisible: matrixTab.offsetParent !== null,
+                parentVisible: matrixTab.parentElement.offsetParent !== null,
+                computedDisplay: window.getComputedStyle(matrixTab).display,
+                computedVisibility: window.getComputedStyle(matrixTab).visibility
+            });
+        } else {
+            console.error('%c❌ MATRIX TAB NOT FOUND!', 'background: #F44336; color: white; padding: 5px 10px; font-weight: bold;');
+            console.log('Searching for any element with "matrix" in text or attributes...');
+            const allElements = document.querySelectorAll('*');
+            const matrixElements = Array.from(allElements).filter(el => {
+                const text = el.textContent?.toLowerCase() || '';
+                const href = el.getAttribute('href')?.toLowerCase() || '';
+                const dataNav = el.getAttribute('data-nav')?.toLowerCase() || '';
+                return text.includes('matrix') || href.includes('matrix') || dataNav.includes('matrix');
+            });
+            console.log(`Found ${matrixElements.length} elements with "matrix":`, matrixElements);
+        }
+        
+        // Check navigation container
+        const navContainer = document.querySelector('.nav-tabs');
+        if (navContainer) {
+            console.log('Navigation Container:', {
+                id: navContainer.id,
+                dataVersion: navContainer.getAttribute('data-version'),
+                dataTimestamp: navContainer.getAttribute('data-timestamp'),
+                childCount: navContainer.children.length,
+                innerHTML: navContainer.innerHTML.substring(0, 200) + '...'
+            });
+        }
+        
+        console.groupEnd();
+    });
+    
+    console.groupEnd();
+</script>
+
+<!-- Welcome Section with Unified Design -->
+<div class="unified-welcome-card">
+    <h2>Welcome to RoutineTest Dashboard</h2>
+    <p>Comprehensive exam management system for organizing and tracking assessments</p>
+</div>
+
+<!-- Quick Actions with Better Accessibility -->
+<style>
+.quick-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    color: white;
+    min-width: 200px;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    text-decoration: none;
+    color: white;
+}
+
+.quick-action-btn.upload {
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+    border-color: #1B5E20;
+}
+
+.quick-action-btn.upload:hover {
+    background: linear-gradient(135deg, #388E3C 0%, #43A047 100%);
+}
+
+.quick-action-btn.library {
+    background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+    border-color: #0D47A1;
+}
+
+.quick-action-btn.library:hover {
+    background: linear-gradient(135deg, #1976D2 0%, #1E88E5 100%);
+}
+
+.quick-action-btn.test {
+    background: linear-gradient(135deg, #00796B 0%, #00ACC1 100%);
+    border-color: #004D40;
+}
+
+.quick-action-btn.test:hover {
+    background: linear-gradient(135deg, #00ACC1 0%, #26C6DA 100%);
+}
+
+.quick-action-btn.classes {
+    background: linear-gradient(135deg, #E65100 0%, #FF9800 100%);
+    border-color: #BF360C;
+}
+
+.quick-action-btn.classes:hover {
+    background: linear-gradient(135deg, #FF9800 0%, #FFB74D 100%);
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .quick-action-btn {
+        min-width: auto;
+        padding: 14px 20px;
+        font-size: 0.95rem;
+    }
+}
+</style>
+
+<div class="mb-lg">
+    <h3 class="unified-page-title">Quick Actions</h3>
+    <div class="unified-quick-actions" id="quick-actions-container">
+        <a href="{% url 'RoutineTest:create_exam' %}" class="unified-quick-action-btn" onclick="console.log('[RoutineTest] Quick action: Upload Exam')">
+            <i class="fas fa-upload"></i>
+            <span>Upload New Exam</span>
+        </a>
+        <a href="{% url 'RoutineTest:exam_list' %}" class="unified-quick-action-btn" onclick="console.log('[RoutineTest] Quick action: Exam Library')">
+            <i class="fas fa-book"></i>
+            <span>Exam Library</span>
+        </a>
+        <a href="{% url 'RoutineTest:start_test' %}" class="unified-quick-action-btn" onclick="console.log('[RoutineTest] Quick action: Start Test')">
+            <i class="fas fa-play"></i>
+            <span>Start Test Session</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'RoutineTest:my_classes' %}" 
+           class="unified-quick-action-btn" 
+           id="my-classes-btn"
+           onclick="console.log('[RoutineTest] Quick action: My Classes & Access clicked')">
+            <i class="fas fa-users-cog"></i>
+            <span>My Classes & Access</span>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Enhanced Button and Navigation Verification -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.group('%c🔎 [QUICK ACTIONS & NAV VERIFICATION]', 'background: #2196F3; color: white; padding: 5px;');
+    
+    // Check Quick Actions buttons
+    const quickActionButtons = document.querySelectorAll('#quick-actions-container a.btn');
+    console.log(`🎯 Quick Action Buttons: ${quickActionButtons.length}`);
+    quickActionButtons.forEach(btn => {
+        console.log(`  - ${btn.textContent.trim()}: ${btn.href}`);
+    });
+    
+    // Check My Classes button specifically
+    const myClassesBtn = document.getElementById('my-classes-btn');
+    const navMyClasses = document.querySelector('a[data-nav="my-classes"]');
+    
+    if (myClassesBtn) {
+        console.log('✅ My Classes Quick Action button found');
+    } else {
+        console.warn('⚠️ My Classes Quick Action button not found');
+    }
+    
+    if (navMyClasses) {
+        console.log('✅ My Classes nav tab found');
+    } else {
+        console.warn('⚠️ My Classes nav tab not found');
+    }
+    
+    // Check for Classes & Exams unified tab (V8 navigation)
+    const classesExamsTab = document.querySelector('a[data-nav="classes-exams"]');
+    if (classesExamsTab) {
+        console.log('%c✅ Classes & Exams unified tab found!', 'background: #4CAF50; color: white; padding: 5px; font-weight: bold;');
+        console.log('Unified tab details:', {
+            text: classesExamsTab.textContent.trim(),
+            href: classesExamsTab.href,
+            active: classesExamsTab.classList.contains('active')
+        });
+    } else {
+        console.warn('%c⚠️ Classes & Exams tab not found', 'background: orange; color: white; padding: 5px;');
+    }
+    
+    console.groupEnd();
+});
+
+// Additional diagnostic on window load
+window.addEventListener('load', function() {
+    console.group('%c🎯 [FINAL NAV CHECK ON WINDOW LOAD]', 'background: #9C27B0; color: white; padding: 5px;');
+    
+    const allNavLinks = document.querySelectorAll('.nav-tabs a');
+    const navSummary = {
+        totalTabs: allNavLinks.length,
+        tabNames: Array.from(allNavLinks).map(a => a.textContent.trim())
+    };
+    
+    console.table(navSummary);
+    
+    // Check for Classes & Exams unified tab (replaces old Matrix tab)
+    const classesExamsTab = document.querySelector('a[data-nav="classes-exams"]');
+    if (classesExamsTab) {
+        console.log('🟢 SUCCESS: Classes & Exams unified tab found');
+    } else {
+        console.warn('⚠️ Classes & Exams tab not found in navigation');
+    }
+    
+    console.groupEnd();
+});
+</script>
+
+<!-- Statistics Cards with Unified Design -->
+<div class="unified-stats-grid">
+    <!-- Active Exams Card -->
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Active Exams')">
+        <div class="unified-stat-number">{{ active_exams }}</div>
+        <div class="unified-stat-label">Active Exams</div>
+    </div>
+    
+    <!-- Total Sessions Card -->
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Total Sessions')">
+        <div class="unified-stat-number">{{ total_sessions }}</div>
+        <div class="unified-stat-label">Total Sessions</div>
+    </div>
+    
+    <!-- Recent Tests Card -->
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Recent Tests')">
+        <div class="unified-stat-number">{{ recent_sessions|length }}</div>
+        <div class="unified-stat-label">Recent Tests</div>
+    </div>
+    
+    <!-- Pending Grading Card (if teacher) -->
+    {% if is_teacher %}
+    <div class="unified-stat-card" onclick="console.log('[RoutineTest] Stat card clicked: Pending Grading')">
+        <div class="unified-stat-number" style="color: var(--accent-orange);">{{ pending_sessions|default:0 }}</div>
+        <div class="unified-stat-label">Pending Grading</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Recent Activity Section -->
+{% if recent_sessions %}
+<div style="background: white; border: 1px solid #C3E6CB; border-radius: 8px; overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%); color: white; padding: 15px 20px;">
+        <h3 style="margin: 0;">Recent Test Sessions</h3>
+    </div>
+    <div style="padding: 0;">
+        {% for session in recent_sessions %}
+        <div style="padding: 15px 20px; border-bottom: 1px solid #E8F5E9; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s ease;"
+             onmouseover="this.style.background='#F5FAF7'"
+             onmouseout="this.style.background='white'"
+             onclick="console.log('[RoutineTest] Session clicked:', '{{ session.id }}')">
+            <div>
+                <strong style="color: #2E7D32;">{{ session.student_name }}</strong>
+                <span style="color: #6c757d; margin-left: 10px;">{{ session.exam.name }}</span>
+            </div>
+            <div style="text-align: right;">
+                {% if session.score %}
+                <span style="color: #388E3C; font-weight: bold;">{{ session.score }}%</span>
+                {% else %}
+                <span style="color: #FF9800;">In Progress</span>
+                {% endif %}
+                <div style="color: #999; font-size: 0.9rem;">{{ session.completed_at|date:"M d, H:i" }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div style="padding: 15px 20px; background: #F5FAF7; text-align: center;">
+        <a href="{% url 'RoutineTest:session_list' %}" style="color: #388E3C; text-decoration: none; font-weight: 500;"
+           onclick="console.log('[RoutineTest] View all sessions clicked')">
+            View All Sessions →
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Info Section -->
+<div style="margin-top: 30px; padding: 20px; background: #F5FAF7; border-radius: 8px; border: 1px solid #C3E6CB;">
+    <h4 style="color: #2E7D32; margin-bottom: 15px;">📚 About RoutineTest Module</h4>
+    <p style="color: #1B5E20; line-height: 1.6;">
+        The RoutineTest module enables continuous assessment through Review Tests (monthly) and Quarterly Exams. 
+        Track student progress, manage test schedules, and analyze performance trends throughout the academic year.
+    </p>
+    <ul style="color: #1B5E20; line-height: 1.8; margin-top: 10px;">
+        <li><strong>Review Tests:</strong> Monthly assessments for continuous evaluation</li>
+        <li><strong>Quarterly Exams:</strong> Comprehensive quarter-end assessments</li>
+        <li><strong>Test Pools:</strong> Random exam assignment from pools to prevent cheating</li>
+        <li><strong>Progress Tracking:</strong> Monitor individual and class performance trends</li>
+    </ul>
+</div>
+
+<script>
+    // Console logging for dashboard interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        console.group('%c[RoutineTest Dashboard] Interaction Tracking Active', 'color: #00A65E;');
+        console.log('Quick Actions: 3 buttons available');
+        console.log('Statistics Cards: 4 cards displayed');
+        console.log('Recent Sessions: {{ recent_sessions|length }} displayed');
+        console.groupEnd();
+        
+        // Track time on dashboard
+        const startTime = Date.now();
+        window.addEventListener('beforeunload', function() {
+            const timeSpent = (Date.now() - startTime) / 1000;
+            console.log(`[RoutineTest Dashboard] Time spent: ${timeSpent.toFixed(1)}s`);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% comment %}
+Question Navigation Component
+Usage: {% include 'components/placement_test/question_nav.html' with questions=questions %}
+
+Parameters:
+- questions: List of question objects (required)
+- show_answered: Show answered status (default: True)
+{% endcomment %}
+
+<div class="question-nav" id="question-navigation">
+    {% for question in questions %}
+    <button type="button" 
+            class="question-nav-btn{% if question.question_number == 1 %} active{% endif %}" 
+            data-question="{{ question.question_number }}"
+            data-question-id="{{ question.id }}"
+            data-action="navigate-question"
+            aria-label="Go to question {{ question.question_number }}">
+        {{ question.question_number }}
+    </button>
+    {% endfor %}
+</div>

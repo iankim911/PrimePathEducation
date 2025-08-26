@@ -1,0 +1,540 @@
+<!-- Exam Management Modal -->
+<div id="examManagementModal" class="modal" style="display: none;">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <span id="modalClassCode"></span> - <span id="modalTimeslot"></span>
+                </h4>
+                <button type="button" class="close-modal" onclick="closeExamModal()">×</button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item active">
+                        <a class="nav-link" data-tab="overview" href="#overview">Overview</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-tab="exams" href="#exams">Manage Exams</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-tab="schedule" href="#schedule">Schedule</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-tab="students" href="#students">Students</a>
+                    </li>
+                </ul>
+                
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Overview Tab -->
+                    <div id="overview" class="tab-pane active">
+                        <div class="overview-grid">
+                            <div class="overview-card">
+                                <h5>Class Information</h5>
+                                <p><strong>Class Code:</strong> <span id="overviewClassCode"></span></p>
+                                <p><strong>Curriculum:</strong> <span id="overviewCurriculum"></span></p>
+                                <p><strong>Period:</strong> <span id="overviewPeriod"></span></p>
+                                <p><strong>Access Level:</strong> <span id="overviewAccessLevel"></span></p>
+                            </div>
+                            
+                            <div class="overview-card">
+                                <h5>Current Exams</h5>
+                                <div id="currentExamsList">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Manage Exams Tab -->
+                    <div id="exams" class="tab-pane">
+                        <div class="exam-actions">
+                            <button class="btn btn-primary" onclick="showCopyExamDialog()">
+                                <i class="fas fa-copy"></i> Copy from Other Class
+                            </button>
+                            <button class="btn btn-success" onclick="showCreateExamDialog()">
+                                <i class="fas fa-plus"></i> Create New Exam
+                            </button>
+                        </div>
+                        
+                        <div class="exam-list">
+                            <h5>Assigned Exams</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Exam Name</th>
+                                        <th>Type</th>
+                                        <th>Duration</th>
+                                        <th>Questions</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="examTableBody">
+                                    <!-- Dynamically populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Copy Exam Dialog -->
+                        <div id="copyExamDialog" class="sub-dialog" style="display: none;">
+                            <h5>Copy Exam from Another Class</h5>
+                            
+                            <!-- Step 1: Select Source Class -->
+                            <div class="form-group">
+                                <label>Step 1: Select Source Class:</label>
+                                <select id="sourceClassSelect" class="form-control">
+                                    <option value="">-- Select Class --</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Step 2: Select Exam Type -->
+                            <div class="form-group">
+                                <label>Step 2: Select Exam Type:</label>
+                                <select id="examTypeSelect" class="form-control" disabled>
+                                    <option value="">-- Select Exam Type --</option>
+                                    <option value="REVIEW">Review / Monthly</option>
+                                    <option value="QUARTERLY">Quarterly</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Step 3: Select Time Period -->
+                            <div class="form-group">
+                                <label id="timePeriodLabel">Step 3: Select Time Period:</label>
+                                
+                                <!-- Month selector for Review exams -->
+                                <select id="monthSelect" class="form-control" style="display: none;" disabled>
+                                    <option value="">-- Select Month --</option>
+                                    <option value="JAN">January</option>
+                                    <option value="FEB">February</option>
+                                    <option value="MAR">March</option>
+                                    <option value="APR">April</option>
+                                    <option value="MAY">May</option>
+                                    <option value="JUN">June</option>
+                                    <option value="JUL">July</option>
+                                    <option value="AUG">August</option>
+                                    <option value="SEP">September</option>
+                                    <option value="OCT">October</option>
+                                    <option value="NOV">November</option>
+                                    <option value="DEC">December</option>
+                                </select>
+                                
+                                <!-- Quarter selector for Quarterly exams -->
+                                <select id="quarterSelect" class="form-control" style="display: none;" disabled>
+                                    <option value="">-- Select Quarter --</option>
+                                    <option value="Q1">Q1 (Jan-Mar)</option>
+                                    <option value="Q2">Q2 (Apr-Jun)</option>
+                                    <option value="Q3">Q3 (Jul-Sep)</option>
+                                    <option value="Q4">Q4 (Oct-Dec)</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Step 4: Select Matching Exam -->
+                            <div class="form-group">
+                                <label>Step 4: Select Matching Exam:</label>
+                                <select id="sourceExamSelect" class="form-control" disabled>
+                                    <option value="">-- Select Exam --</option>
+                                </select>
+                                <div id="examCount" class="form-text"></div>
+                            </div>
+                            
+                            <div class="dialog-buttons">
+                                <button class="btn btn-primary" onclick="copySelectedExam()" disabled id="copyExamBtn">Copy</button>
+                                <button class="btn btn-secondary" onclick="hideCopyExamDialog()">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Schedule Tab -->
+                    <div id="schedule" class="tab-pane">
+                        <div class="schedule-container">
+                            <h5>Exam Schedule</h5>
+                            <div class="schedule-form">
+                                <div class="form-group">
+                                    <label>Select Exam:</label>
+                                    <select id="scheduleExamSelect" class="form-control">
+                                        <option value="">-- Select Exam --</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Date:</label>
+                                        <input type="date" id="examDate" class="form-control">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Time:</label>
+                                        <input type="time" id="examTime" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Duration (minutes):</label>
+                                    <input type="number" id="examDuration" class="form-control" min="15" max="300">
+                                </div>
+                                <button class="btn btn-primary" onclick="saveSchedule()">Save Schedule</button>
+                            </div>
+                            
+                            <div class="scheduled-exams">
+                                <h6>Scheduled Exams</h6>
+                                <div id="scheduledExamsList">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Students Tab -->
+                    <div id="students" class="tab-pane">
+                        <div class="students-container">
+                            <div class="students-header">
+                                <h5>Class Students</h5>
+                                <div class="student-stats">
+                                    <span>Total: <strong id="totalStudents">0</strong></span>
+                                    <span>Active: <strong id="activeStudents">0</strong></span>
+                                </div>
+                            </div>
+                            
+                            <div class="student-actions">
+                                <input type="text" id="studentSearch" class="form-control" placeholder="Search students...">
+                                <button class="btn btn-primary" onclick="exportStudentList()">
+                                    <i class="fas fa-download"></i> Export List
+                                </button>
+                            </div>
+                            
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Student ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Last Activity</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentTableBody">
+                                    <!-- Dynamically populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeExamModal()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveChanges()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-dialog {
+    width: 90%;
+    max-width: 1200px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #2E7D32, #1B5E20);
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.close-modal:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* Tab Navigation */
+.nav-tabs {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid #E0E0E0;
+}
+
+.nav-item {
+    margin-right: 10px;
+}
+
+.nav-link {
+    display: block;
+    padding: 10px 20px;
+    color: #666;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.nav-item.active .nav-link,
+.nav-link:hover {
+    color: #2E7D32;
+    border-bottom-color: #2E7D32;
+}
+
+/* Tab Content */
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Overview Grid */
+.overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.overview-card {
+    padding: 15px;
+    background: #F5F5F5;
+    border-radius: 8px;
+}
+
+.overview-card h5 {
+    margin-top: 0;
+    color: #2E7D32;
+}
+
+/* Exam Actions */
+.exam-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Tables */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background: #F5F5F5;
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.table td {
+    padding: 10px;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #2E7D32;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1B5E20;
+}
+
+.btn-success {
+    background: #4CAF50;
+    color: white;
+}
+
+.btn-danger {
+    background: #F44336;
+    color: white;
+}
+
+.btn-secondary {
+    background: #757575;
+    color: white;
+}
+
+/* Sub Dialog */
+.sub-dialog {
+    padding: 20px;
+    background: white;
+    border: 1px solid #DDD;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #DDD;
+    border-radius: 4px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Student Section */
+.students-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.student-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.student-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#studentSearch {
+    flex: 1;
+}
+
+/* Modal Footer */
+.modal-footer {
+    padding: 15px 20px;
+    background: #F5F5F5;
+    border-top: 1px solid #E0E0E0;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Enhanced Exam Action Buttons */
+.exam-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    text-transform: none;
+    min-width: 80px;
+    justify-content: center;
+}
+
+.exam-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.exam-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.exam-btn i {
+    font-size: 11px;
+}
+
+/* Specific button color enhancements */
+.btn-primary.exam-btn {
+    background: linear-gradient(135deg, #2E7D32, #1B5E20);
+    border: none;
+}
+
+.btn-primary.exam-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1B5E20, #0E3311);
+}
+
+.btn-warning.exam-btn {
+    background: linear-gradient(135deg, #FF8F00, #E65100);
+    border: none;
+    color: white;
+}
+
+.btn-warning.exam-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #E65100, #BF360C);
+}
+
+.btn-danger.exam-btn {
+    background: linear-gradient(135deg, #D32F2F, #B71C1C);
+    border: none;
+}
+
+.btn-danger.exam-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #B71C1C, #8E0000);
+}
+
+/* Action buttons container spacing */
+.table td:last-child {
+    white-space: nowrap;
+    padding: 8px 10px;
+}
+
+.table td:last-child .exam-btn {
+    margin-right: 5px;
+}
+
+.table td:last-child .exam-btn:last-child {
+    margin-right: 0;
+}
+</style>

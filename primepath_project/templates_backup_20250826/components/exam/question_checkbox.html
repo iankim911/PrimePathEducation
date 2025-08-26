@@ -1,0 +1,20 @@
+{% comment %}
+Checkbox Question Component (Multiple Select)
+{% endcomment %}
+
+<div class="question-checkbox">
+    {% for option in question.options_list %}
+    <div class="form-check">
+        <input class="form-check-input" 
+               type="checkbox" 
+               name="question_{{ question.id }}_{{ option }}"
+               id="q{{ question.id }}_{{ option }}"
+               value="{{ option }}"
+               data-question-id="{{ question.id }}"
+               data-question-type="CHECKBOX">
+        <label class="form-check-label" for="q{{ question.id }}_{{ option }}">
+            {{ option }}
+        </label>
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,99 @@
+{% extends "primepath_routinetest/routinetest_base.html" %}
+
+{% block title %}Filter Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Filter Test Page</h1>
+    
+    <div class="alert alert-info">
+        <h3>Current Status:</h3>
+        <ul>
+            <li>URL: {{ request.get_full_path }}</li>
+            <li>assigned_only parameter: {{ request.GET.assigned_only|default:"not set" }}</li>
+            <li>show_assigned_only boolean: {% if show_assigned_only %}TRUE{% else %}FALSE{% endif %}</li>
+            <li>User: {{ request.user.username }}</li>
+        </ul>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <h4>Filter Control:</h4>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="testFilter" {% if show_assigned_only %}checked{% endif %}>
+                <label class="form-check-label" for="testFilter">
+                    Show Assigned Classes Only
+                </label>
+            </div>
+            
+            <div class="mt-3">
+                <a href="?assigned_only=true" class="btn btn-primary">Manual: Filter ON</a>
+                <a href="?" class="btn btn-secondary">Manual: Filter OFF</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mt-3">
+        <div class="card-body">
+            <h4>Results:</h4>
+            {% if show_assigned_only %}
+                <div class="alert alert-warning">
+                    <strong>Filter is ON</strong> - Should NOT show VIEW ONLY exams
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <strong>Filter is OFF</strong> - Should show ALL exams including VIEW ONLY
+                </div>
+            {% endif %}
+            
+            <h5>Exams shown:</h5>
+            <ul>
+            {% for program, classes in hierarchical_exams.items %}
+                {% for class_code, exams in classes.items %}
+                    {% for exam in exams %}
+                        <li>
+                            {{ exam.name }} - 
+                            <span class="badge {% if exam.access_badge == 'VIEW ONLY' %}badge-warning{% else %}badge-info{% endif %}">
+                                {{ exam.access_badge }}
+                            </span>
+                            {% if exam.access_badge == 'VIEW ONLY' %}
+                                <strong style="color: red;"> ← This should NOT appear when filter is ON!</strong>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('testFilter');
+    
+    if (!checkbox) {
+        console.error('Checkbox not found!');
+        return;
+    }
+    
+    console.log('Test filter checkbox found and ready');
+    
+    checkbox.addEventListener('change', function() {
+        console.log('Checkbox changed to:', this.checked);
+        const url = new URL(window.location.href);
+        
+        if (this.checked) {
+            url.searchParams.set('assigned_only', 'true');
+            console.log('Setting filter ON');
+        } else {
+            url.searchParams.delete('assigned_only');
+            console.log('Setting filter OFF');
+        }
+        
+        console.log('Navigating to:', url.toString());
+        window.location.href = url.toString();
+    });
+});
+</script>
+{% endblock %}

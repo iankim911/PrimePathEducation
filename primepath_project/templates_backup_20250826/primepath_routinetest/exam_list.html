@@ -1,0 +1,2177 @@
+{% extends "routinetest_base.html" %}
+{% load matrix_filters %}
+{# Template Version 6.0 - ANSWER KEYS LIBRARY - Cache Bust: {% now "U" %} #}
+{# Last Modified: August 20, 2025 - Comprehensive Answer Keys Library Enhancement #}
+
+{% block title %}Answer Keys Library - RoutineTest - v6.0{% endblock %}
+
+{% block header %}Answer Keys Library{% endblock %}
+
+{% block content %}
+<style>
+    .exam-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    
+    .exam-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));  /* Slightly wider for 4 buttons */
+        gap: 20px;
+        align-items: start;  /* Align cards to top */
+    }
+    
+    .exam-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        transition: box-shadow 0.2s;
+        position: relative;
+        min-height: 400px;  /* Consistent minimum height for alignment */
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .exam-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* Answer Mapping Status Indicator */
+    .answer-mapping-indicator {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        cursor: help;
+    }
+    
+    .answer-mapping-indicator.complete {
+        background-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+    }
+    
+    .answer-mapping-indicator.partial {
+        background-color: #ffc107;
+        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        animation: pulse 2s infinite;
+    }
+    
+    .answer-mapping-indicator.not-started {
+        background-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+        50% {
+            box-shadow: 0 0 0 6px rgba(255, 193, 7, 0.1);
+        }
+        100% {
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+        }
+    }
+    
+    .answer-mapping-status {
+        margin: 10px 0;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    
+    .answer-mapping-status.complete {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .answer-mapping-status.partial {
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+    }
+    
+    .answer-mapping-status.not-started {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .answer-mapping-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 5px;
+    }
+    
+    .answer-progress-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 5px 0;
+    }
+    
+    .answer-progress-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    
+    .answer-progress-fill.complete {
+        background-color: #28a745;
+    }
+    
+    .answer-progress-fill.partial {
+        background-color: #ffc107;
+    }
+    
+    .answer-progress-fill.not-started {
+        background-color: #dc3545;
+    }
+    
+    .unmapped-list {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .exam-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2c3e50;
+        padding-right: 25px; /* Make room for the indicator */
+        min-height: 2.4rem;  /* Consistent title height (2 lines max) */
+        line-height: 1.2;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    
+    .exam-info {
+        color: #6c757d;
+        margin-bottom: 5px;
+        font-size: 0.95rem;
+    }
+    
+    .exam-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-top: 10px;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    /* Tooltip for answer mapping indicator */
+    .mapping-tooltip {
+        position: absolute;
+        background: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        top: -35px;
+        right: 0;
+    }
+    
+    .mapping-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        right: 10px;
+        border: 5px solid transparent;
+        border-top-color: #333;
+    }
+    
+    .answer-mapping-indicator:hover + .mapping-tooltip {
+        opacity: 1;
+    }
+    
+    /* Summary stats at the top */
+    .mapping-summary {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .summary-stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .summary-stat .stat-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .stat-badge.complete {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .stat-badge.partial {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .stat-badge.not-started {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .exam-actions {
+        margin-top: auto;  /* Push to bottom of card */
+        padding-top: 12px;  /* Reduced padding for more compact layout */
+        display: flex;
+        flex-wrap: nowrap;  /* Always keep buttons horizontal */
+        gap: 8px;  /* Reduced gap for more compact layout */
+        align-items: center;
+        justify-content: flex-start;
+    }
+    
+    .btn-small {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        text-decoration: none;
+        display: inline-block;
+        padding: 6px 12px;  /* Ensure consistent padding */
+        font-size: 0.9rem;  /* Match other button sizes */
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+    }
+    
+    /* Ensure all buttons have generous sizing with available horizontal space */
+    .exam-actions .btn-small {
+        min-width: 85px;  /* Increased from 68px - we have plenty of horizontal space */
+        max-width: 110px;  /* Increased from 80px to accommodate full text */
+        text-align: center;
+        white-space: nowrap;
+        flex: 0 0 auto;  /* Don't grow or shrink */
+        font-size: 0.9rem;  /* Restored to normal size since we have space */
+        padding: 6px 10px;  /* More generous padding */
+        line-height: 1.2;
+        text-overflow: ellipsis;  /* Handle text overflow */
+        overflow: hidden;
+    }
+    
+    /* UPDATE NAME REMOVED: CSS for name editing removed as names are systematically generated */
+    
+    /* Special styling for delete button */
+    .exam-actions .btn-danger {
+        background-color: #dc3545 !important;  /* Force red color */
+        border-color: #dc3545 !important;
+        color: white !important;
+    }
+    
+    .exam-actions .btn-danger:hover {
+        background-color: #c82333 !important;
+        border-color: #bd2130 !important;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    /* ===== REVIEW/QUARTERLY TAB TOGGLE STYLES ===== */
+    .exam-type-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #dee2e6;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .exam-type-tab {
+        flex: 1;
+        padding: 15px 20px;
+        text-align: center;
+        cursor: pointer;
+        background: #f8f9fa;
+        border: none;
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    
+    .exam-type-tab:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+    
+    /* Active tab styling - RoutineTest Green Theme */
+    .exam-type-tab.active {
+        background: #2E7D32;  /* Dark forest green from routinetest theme */
+        color: white;
+        font-weight: 600;
+        box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .exam-type-tab.active:hover {
+        background: #1B5E20;  /* Deeper forest green on hover */
+    }
+    
+    /* Tab badges for counts */
+    .tab-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        min-width: 24px;
+        text-align: center;
+    }
+    
+    .exam-type-tab .tab-badge {
+        background: rgba(0, 0, 0, 0.1);
+        color: inherit;
+    }
+    
+    .exam-type-tab.active .tab-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    /* Tab icons */
+    .tab-icon {
+        font-size: 1.1rem;
+    }
+    
+    /* Mobile responsive tabs */
+    @media (max-width: 768px) {
+        .exam-type-tabs {
+            flex-direction: column;
+            border-radius: 8px;
+        }
+        
+        .exam-type-tab {
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .exam-type-tab:last-child {
+            border-bottom: none;
+        }
+    }
+    
+    /* Tab content transition */
+    .tab-content-wrapper {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
+    
+    .tab-content-wrapper.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    /* Tab description */
+    .tab-description {
+        padding: 15px;
+        background: #f8f9fa;
+        border-left: 4px solid #2E7D32;
+        margin-bottom: 20px;
+        border-radius: 4px;
+    }
+    
+    .tab-description h3 {
+        margin: 0 0 5px 0;
+        color: #2E7D32;
+        font-size: 1.1rem;
+    }
+    
+    .tab-description p {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    /* ===== ANSWER KEYS LIBRARY ENHANCEMENTS ===== */
+    
+    /* Filter Controls */
+    .filter-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .filter-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider {
+        background-color: #2E7D32;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+    
+    /* Hierarchical Display Styles */
+    .program-section {
+        margin-bottom: 40px;
+    }
+    
+    .program-header {
+        background: linear-gradient(135deg, #2E7D32, #388E3C);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .program-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .program-stats {
+        display: flex;
+        gap: 15px;
+        font-size: 0.9rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .class-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        padding: 20px;
+    }
+    
+    .class-header {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        margin: -20px -20px 20px -20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .class-title {
+        font-weight: 600;
+        color: #495057;
+        margin: 0;
+    }
+    
+    .class-access-indicator {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    /* Visual distinction for accessible vs view-only classes */
+    .class-section.accessible {
+        border-left: 4px solid #28a745;
+        background: linear-gradient(to right, rgba(40, 167, 69, 0.05), white);
+    }
+    
+    .class-section.accessible .class-header {
+        background: linear-gradient(to right, rgba(40, 167, 69, 0.1), #f8f9fa);
+    }
+    
+    .class-access-indicator.accessible {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .class-access-indicator.view-only {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .class-access-indicator.admin {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+    
+    /* Permission-based button styling */
+    .exam-actions .btn-copy {
+        background-color: #17a2b8;
+        color: white;
+        border: 1px solid #17a2b8;
+    }
+    
+    .exam-actions .btn-copy:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+    }
+    
+    .exam-actions .btn-copy:disabled {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+    
+    .exam-actions .btn-edit {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+    }
+    
+    .exam-actions .btn-edit:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+    
+    .exam-actions .btn-view {
+        background-color: #6c757d;
+        color: white;
+        border: 1px solid #6c757d;
+    }
+    
+    .exam-actions .btn-view:hover {
+        background-color: #545b62;
+        border-color: #4e555b;
+    }
+    
+    /* Copy Modal Styles */
+    .copy-modal {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .copy-modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .copy-modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .copy-modal-title {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #2E7D32;
+    }
+    
+    .copy-modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6c757d;
+    }
+    
+    .copy-modal-body {
+        padding: 20px;
+    }
+    
+    .copy-form-group {
+        margin-bottom: 20px;
+    }
+    
+    .copy-form-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .copy-form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .copy-form-control:focus {
+        border-color: #2E7D32;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+    }
+    
+    .copy-modal-footer {
+        padding: 20px;
+        border-top: 1px solid #dee2e6;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    
+    .copy-btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        border: 1px solid #6c757d;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .copy-btn-submit {
+        background-color: #2E7D32;
+        color: white;
+        border: 1px solid #2E7D32;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .copy-btn-submit:disabled {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    /* Enhanced permission summary */
+    .permission-summary {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+        border-radius: 8px;
+        border: 1px solid #bbdefb;
+    }
+    
+    .permission-stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .permission-stat .stat-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+    
+    .stat-badge.accessible {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .stat-badge.editable {
+        background: #cce5ff;
+        color: #004085;
+    }
+    
+    /* Empty state for programs */
+    .program-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+        font-style: italic;
+    }
+</style>
+
+<div class="exam-header">
+    <h2>Answer Keys Library</h2>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        {% if permission_summary.is_admin %}
+            <span class="badge" style="background: #d1ecf1; color: #0c5460; padding: 6px 12px; border-radius: 20px;">Admin Access</span>
+        {% elif permission_summary.has_teacher_profile %}
+            <span class="badge" style="background: #d4edda; color: #155724; padding: 6px 12px; border-radius: 20px;">Teacher Access</span>
+        {% endif %}
+        <a href="{% url 'RoutineTest:create_exam' %}" class="btn btn-primary">Upload New Exam</a>
+    </div>
+</div>
+
+<!-- Enhanced Permission Summary -->
+{% if mapping_summary %}
+<div class="permission-summary">
+    <div class="permission-stat">
+        <span>Total Exams:</span>
+        <span class="stat-badge">{{ mapping_summary.total }}</span>
+    </div>
+    <div class="permission-stat">
+        <span>Accessible:</span>
+        <span class="stat-badge accessible">{{ mapping_summary.accessible }}</span>
+    </div>
+    <div class="permission-stat">
+        <span>Editable:</span>
+        <span class="stat-badge editable">{{ mapping_summary.editable }}</span>
+    </div>
+    <div class="permission-stat">
+        <span>Answer Keys Complete:</span>
+        <span class="stat-badge complete">{{ mapping_summary.complete }}</span>
+    </div>
+    <div class="permission-stat">
+        <span>Partial:</span>
+        <span class="stat-badge partial">{{ mapping_summary.partial }}</span>
+    </div>
+    <div class="permission-stat">
+        <span>Not Started:</span>
+        <span class="stat-badge not-started">{{ mapping_summary.not_started }}</span>
+    </div>
+</div>
+{% endif %}
+
+<!-- Filter Controls -->
+<div class="filter-controls">
+    <div class="filter-info">
+        <strong>Current View:</strong> {{ filter_description }}
+        {% if assigned_only_filter %}
+            <span style="color: #2E7D32; font-weight: 600;">(My Classes Only)</span>
+        {% endif %}
+    </div>
+    
+    <div class="filter-toggle">
+        <label for="assigned-only-toggle" style="font-weight: 500; cursor: pointer;">Show My Classes Only</label>
+        <label class="toggle-switch">
+            <input type="checkbox" id="assigned-only-toggle" {% if assigned_only_filter %}checked{% endif %}>
+            <span class="toggle-slider"></span>
+        </label>
+    </div>
+</div>
+
+<!-- REVIEW/QUARTERLY TAB TOGGLE SYSTEM -->
+<div class="exam-type-tabs" role="tablist" aria-label="Exam Type Filter">
+    <a href="?exam_type=REVIEW" 
+       class="exam-type-tab {% if exam_type_filter == 'REVIEW' %}active{% endif %}"
+       role="tab"
+       aria-selected="{% if exam_type_filter == 'REVIEW' %}true{% else %}false{% endif %}"
+       data-exam-type="REVIEW">
+        <span class="tab-icon">📚</span>
+        <span>Review / Monthly</span>
+        <span class="tab-badge">{{ exam_type_counts.review }}</span>
+    </a>
+    
+    <a href="?exam_type=QUARTERLY" 
+       class="exam-type-tab {% if exam_type_filter == 'QUARTERLY' %}active{% endif %}"
+       role="tab"
+       aria-selected="{% if exam_type_filter == 'QUARTERLY' %}true{% else %}false{% endif %}"
+       data-exam-type="QUARTERLY">
+        <span class="tab-icon">📊</span>
+        <span>Quarterly</span>
+        <span class="tab-badge">{{ exam_type_counts.quarterly }}</span>
+    </a>
+    
+    <a href="?exam_type=ALL" 
+       class="exam-type-tab {% if exam_type_filter == 'ALL' %}active{% endif %}"
+       role="tab"
+       aria-selected="{% if exam_type_filter == 'ALL' %}true{% else %}false{% endif %}"
+       data-exam-type="ALL">
+        <span class="tab-icon">📋</span>
+        <span>All Exams</span>
+        <span class="tab-badge">{{ exam_type_counts.all }}</span>
+    </a>
+</div>
+
+<!-- Tab Description -->
+<div class="tab-description">
+    <h3>{{ filter_description }}</h3>
+    <p>
+        {% if exam_type_filter == 'REVIEW' %}
+            Regular monthly review exams for continuous assessment and practice.
+        {% elif exam_type_filter == 'QUARTERLY' %}
+            Comprehensive quarterly assessments covering multiple units.
+        {% else %}
+            Showing all exam types including Review/Monthly and Quarterly assessments.
+        {% endif %}
+    </p>
+</div>
+
+<div class="tab-content-wrapper" id="exam-list-content">
+{% if mapping_summary %}
+<div class="mapping-summary">
+    <div class="summary-stat">
+        <span>Total Exams:</span>
+        <span class="stat-badge">{{ mapping_summary.total }}</span>
+    </div>
+    <div class="summary-stat">
+        <span>Complete:</span>
+        <span class="stat-badge complete">{{ mapping_summary.complete }}</span>
+    </div>
+    <div class="summary-stat">
+        <span>Partial:</span>
+        <span class="stat-badge partial">{{ mapping_summary.partial }}</span>
+    </div>
+    <div class="summary-stat">
+        <span>Not Started:</span>
+        <span class="stat-badge not-started">{{ mapping_summary.not_started }}</span>
+    </div>
+</div>
+{% endif %}
+
+<!-- Hierarchical Display -->
+{% if hierarchical_exams %}
+    {% for program in program_order %}
+        {% if hierarchical_exams|lookup:program %}
+            <div class="program-section">
+                <div class="program-header">
+                    <div>
+                        <h3 class="program-title">PRIME {{ program }}</h3>
+                        <small>{{ program|capfirst }} Level Curriculum</small>
+                    </div>
+                    <div class="program-stats">
+                        {% for class_code, exams in hierarchical_exams|lookup:program|dictsort:"0" %}
+                            <div class="stat-item">
+                                <span>{{ class_code }}</span>
+                                <span class="badge" style="background: rgba(255,255,255,0.2); color: white; padding: 2px 6px; border-radius: 10px;">{{ exams|length }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                {% for class_code, exams in hierarchical_exams|lookup:program|dictsort:"0" %}
+                    {% if exams %}
+                        {% with first_exam=exams.0 %}
+                            {% with class_perms=first_exam.permission_info.class_permissions|lookup:class_code %}
+                                <div class="class-section {% if class_perms.is_accessible %}accessible{% endif %}">
+                                    <div class="class-header">
+                                        <h4 class="class-title">{{ class_code|title|slugify|capfirst }}</h4>
+                                        <div class="class-access-indicator {% if is_admin %}admin{% elif class_perms.is_accessible %}accessible{% else %}view-only{% endif %}">
+                                            {% if is_admin %}
+                                                Admin Access
+                                            {% elif class_perms.is_accessible %}
+                                                {% if class_perms.can_edit %}
+                                                    Edit Access ({{ class_perms.access_level }})
+                                                {% else %}
+                                                    View Access ({{ class_perms.access_level }})
+                                                {% endif %}
+                                            {% else %}
+                                                View Only
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="exam-grid">
+                                        {% for exam in exams %}
+                                            <div class="exam-card" data-exam-id="{{ exam.id }}" 
+                                                 data-mapping-status="{{ exam.answer_mapping_status.status_label|lower|slugify }}"
+                                                 data-mapping-percentage="{{ exam.answer_mapping_status.percentage_complete }}"
+                                                 data-can-edit="{{ exam.permission_info.can_edit|yesno:'true,false' }}"
+                                                 data-can-copy="{{ exam.permission_info.can_copy|yesno:'true,false' }}">
+                                                
+                                                <!-- Answer Mapping Indicator -->
+                                                <div class="answer-mapping-indicator {{ exam.answer_mapping_status.status_label|lower|slugify }}" 
+                                                     title="Answer Mapping: {{ exam.answer_mapping_status.status_label }}"></div>
+                                                <div class="mapping-tooltip">
+                                                    {{ exam.answer_mapping_status.mapped_questions }}/{{ exam.answer_mapping_status.total_questions }} answers mapped
+                                                </div>
+                                                
+                                                <div class="exam-title">{{ exam.get_routinetest_display_name }}</div>
+                                                
+                                                <!-- Answer Mapping Status Section -->
+                                                <div class="answer-mapping-status {{ exam.answer_mapping_status.status_label|lower|slugify }}">
+                                                    <div class="answer-mapping-details">
+                                                        <span>
+                                                            <strong>Answer Keys:</strong> 
+                                                            {% if exam.answer_mapping_status.status_label == 'Complete' %}
+                                                                ✓ All mapped
+                                                            {% elif exam.answer_mapping_status.status_label == 'Partial' %}
+                                                                ⚠ {{ exam.answer_mapping_status.mapped_questions }}/{{ exam.answer_mapping_status.total_questions }} mapped
+                                                            {% elif exam.answer_mapping_status.status_label == 'Not Started' %}
+                                                                ✗ Not mapped
+                                                            {% else %}
+                                                                {{ exam.answer_mapping_status.status_label }}
+                                                            {% endif %}
+                                                        </span>
+                                                        <span style="font-size: 0.85rem; color: #6c757d;">
+                                                            {{ exam.answer_mapping_status.percentage_complete }}%
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <!-- Progress Bar -->
+                                                    <div class="answer-progress-bar">
+                                                        <div class="answer-progress-fill {{ exam.answer_mapping_status.status_label|lower|slugify }}" 
+                                                             style="width: {{ exam.answer_mapping_status.percentage_complete }}%"></div>
+                                                    </div>
+                                                    
+                                                    <!-- Show unmapped questions if any -->
+                                                    {% if exam.answer_mapping_status.unmapped_question_numbers %}
+                                                    <div class="unmapped-list">
+                                                        <small>Missing: Questions 
+                                                            {% for num in exam.answer_mapping_status.unmapped_question_numbers %}
+                                                                {{ num }}{% if not forloop.last %}, {% endif %}
+                                                            {% endfor %}
+                                                            {% if exam.answer_mapping_status.unmapped_questions > 10 %}
+                                                                ... ({{ exam.answer_mapping_status.unmapped_questions|add:"-10" }} more)
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <!-- Exam Type Badge -->
+                                                <div class="exam-info" style="margin-bottom: 8px;">
+                                                    <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: 600;
+                                                                {% if exam.exam_type == 'QUARTERLY' %}
+                                                                    background: #17a2b8; color: white;
+                                                                {% else %}
+                                                                    background: #6c757d; color: white;
+                                                                {% endif %}">
+                                                        {% if exam.exam_type == 'REVIEW' %}
+                                                            Review / Monthly
+                                                        {% elif exam.exam_type == 'QUARTERLY' %}
+                                                            Quarterly
+                                                        {% else %}
+                                                            {{ exam.get_exam_type_display }}
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="exam-info">Questions: {{ exam.total_questions }}</div>
+                                                <div class="exam-info">Duration: {{ exam.timer_minutes }} minutes</div>
+                                                <div class="exam-info">Audio Files: {{ exam.routine_audio_files.count }}</div>
+                                                
+                                                {% if exam.is_active %}
+                                                    <span class="exam-status status-active">Active</span>
+                                                {% else %}
+                                                    <span class="exam-status status-inactive">Inactive</span>
+                                                {% endif %}
+                                                
+                                                <!-- Permission-based action buttons -->
+                                                <div class="exam-actions" data-template-version="6.0-answer-keys-library">
+                                                    {% if exam.permission_info.can_edit %}
+                                                        <a href="{% url 'RoutineTest:preview_exam' exam_id=exam.id %}" class="btn btn-small btn-edit">Edit</a>
+                                                    {% else %}
+                                                        <a href="{% url 'RoutineTest:preview_exam' exam_id=exam.id %}" class="btn btn-small btn-view">View</a>
+                                                    {% endif %}
+                                                    
+                                                    {% if exam.permission_info.can_copy %}
+                                                        <button type="button" class="btn btn-small btn-copy" onclick="openCopyModal('{{ exam.id }}', '{{ exam.name|escapejs }}', '{{ exam.exam_type }}')">Copy</button>
+                                                    {% endif %}
+                                                    
+                                                    {% if exam.permission_info.can_edit %}
+                                                        <form method="post" action="{% url 'RoutineTest:delete_exam' exam_id=exam.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this exam? This action cannot be undone.');">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endwith %}
+                        {% endwith %}
+                    {% endif %}
+                {% empty %}
+                    <div class="class-section">
+                        <div class="program-empty">
+                            No exams found for {{ program }} program.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <h3>No Exams Found</h3>
+        <p>{% if assigned_only_filter %}No exams found in your assigned classes.{% else %}Upload your first exam to get started.{% endif %}</p>
+        <a href="{% url 'RoutineTest:create_exam' %}" class="btn btn-primary" style="margin-top: 20px;">Upload Exam</a>
+    </div>
+{% endif %}
+</div> <!-- End of tab-content-wrapper -->
+
+<!-- Copy Exam Modal -->
+<div id="copyModal" class="copy-modal">
+    <div class="copy-modal-content">
+        <div class="copy-modal-header">
+            <h3 class="copy-modal-title">Copy Exam</h3>
+            <button type="button" class="copy-modal-close" onclick="closeCopyModal()">&times;</button>
+        </div>
+        
+        <div class="copy-modal-body">
+            <form id="copyExamForm">
+                <div class="copy-form-group">
+                    <label class="copy-form-label">Source Exam:</label>
+                    <div id="sourceExamName" style="font-weight: 600; color: #2E7D32; padding: 5px 0;"></div>
+                </div>
+                
+                <div class="copy-form-group">
+                    <label for="targetClasses" class="copy-form-label">Target Classes:</label>
+                    <select id="targetClasses" class="copy-form-control" multiple required>
+                        <!-- Options will be populated via AJAX -->
+                    </select>
+                    <small style="color: #6c757d; font-size: 0.85rem;">Hold Ctrl/Cmd to select multiple classes</small>
+                </div>
+                
+                <div class="copy-form-group">
+                    <label for="examType" class="copy-form-label">Exam Type:</label>
+                    <select id="examType" class="copy-form-control" required>
+                        <option value="REVIEW">Review / Monthly</option>
+                        <option value="QUARTERLY">Quarterly</option>
+                    </select>
+                </div>
+                
+                <div class="copy-form-group">
+                    <label for="timePeriod" class="copy-form-label">Time Period:</label>
+                    <select id="timePeriod" class="copy-form-control" required>
+                        <!-- Options will be populated based on exam type -->
+                    </select>
+                </div>
+                
+                <div class="copy-form-group">
+                    <label for="academicYear" class="copy-form-label">Academic Year:</label>
+                    <select id="academicYear" class="copy-form-control" required>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        
+        <div class="copy-modal-footer">
+            <button type="button" class="copy-btn-cancel" onclick="closeCopyModal()">Cancel</button>
+            <button type="button" class="copy-btn-submit" onclick="submitCopyExam()">Copy Exam</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Answer Keys Library Enhancement v6.0
+(function() {
+    'use strict';
+    
+    console.group('%c[ANSWER_KEYS_LIBRARY_V6] FEATURE IMPLEMENTATION', 'background: #2E7D32; color: white; padding: 5px; font-weight: bold; font-size: 18px');
+    console.log('%c✅ TEMPLATE VERSION 6.0 - ANSWER KEYS LIBRARY ACTIVE', 'color: #2E7D32; font-size: 16px; font-weight: bold');
+    console.log('📅 Template Timestamp:', new Date().toISOString());
+    console.log('🔍 Cache Bust ID:', '{% now "U" %}');
+    console.log('📄 Template File:', 'primepath_routinetest/exam_list.html');
+    console.log('🎯 Current Filter:', '{{ exam_type_filter }}');
+    console.log('📊 Exam Counts:', {
+        review: {{ exam_type_counts.review }},
+        quarterly: {{ exam_type_counts.quarterly }},
+        all: {{ exam_type_counts.all }},
+        displayed: {{ mapping_summary.total }}
+    });
+    
+    // Log current page URL and query parameters
+    console.log('📍 Current URL:', window.location.href);
+    console.log('🔍 Query Params:', new URLSearchParams(window.location.search).toString());
+    console.log('🖥️ User Agent:', navigator.userAgent);
+    console.log('🕐 Client Time:', new Date().toLocaleString());
+    
+    // Tab system initialization logging
+    console.group('%c[TAB_SYSTEM] Initialization', 'color: #4CAF50; font-weight: bold');
+    const tabs = document.querySelectorAll('.exam-type-tab');
+    console.log(`Found ${tabs.length} tabs`);
+    
+    tabs.forEach(tab => {
+        const examType = tab.dataset.examType;
+        const isActive = tab.classList.contains('active');
+        const badge = tab.querySelector('.tab-badge');
+        const count = badge ? badge.textContent : '0';
+        
+        console.log(`Tab: ${examType}`, {
+            active: isActive,
+            count: count,
+            href: tab.href,
+            ariaSelected: tab.getAttribute('aria-selected')
+        });
+    });
+    console.groupEnd();
+    
+    // Enhanced tab click tracking
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            const targetType = this.dataset.examType;
+            const currentType = '{{ exam_type_filter }}';
+            
+            console.group('%c[TAB_CLICK] Navigation Event', 'color: #FF9800; font-weight: bold');
+            console.log('From:', currentType);
+            console.log('To:', targetType);
+            console.log('URL:', this.href);
+            console.log('Timestamp:', new Date().toISOString());
+            
+            // Add loading indicator
+            const contentWrapper = document.getElementById('exam-list-content');
+            if (contentWrapper) {
+                contentWrapper.classList.add('loading');
+                console.log('Loading indicator applied');
+            }
+            
+            console.groupEnd();
+        });
+    });
+    
+    // Check for any Roster buttons in DOM (legacy check)
+    setTimeout(() => {
+        // Find all buttons and links that contain "Roster" text
+        const allButtons = document.querySelectorAll('button, a');
+        const rosterButtons = Array.from(allButtons).filter(el => 
+            el.textContent.includes('Roster') || 
+            (el.href && el.href.includes('roster'))
+        );
+        
+        if (rosterButtons.length > 0) {
+            console.error('%c❌ CRITICAL: ROSTER BUTTONS FOUND IN DOM!', 'background: red; color: white; font-size: 20px; padding: 10px');
+            console.error('FOUND', rosterButtons.length, 'ROSTER BUTTONS - THIS SHOULD NOT HAPPEN!');
+            rosterButtons.forEach((btn, idx) => {
+                console.error(`%c  ROSTER BUTTON ${idx + 1}:`, 'color: red; font-weight: bold');
+                console.error('    Text:', btn.textContent.trim());
+                console.error('    Full HTML:', btn.outerHTML);
+                console.error('    Parent element:', btn.parentElement);
+                console.error('    Parent class:', btn.parentElement?.className);
+                console.error('    Href:', btn.href || 'N/A');
+                console.error('    Button ID:', btn.id || 'no-id');
+                console.error('    Button Classes:', btn.className);
+                
+                // Highlight the button visually
+                btn.style.border = '5px solid red';
+                btn.style.backgroundColor = '#ff9999';
+                btn.style.animation = 'blink 1s infinite';
+            });
+            
+            // Add CSS animation for blinking
+            const style = document.createElement('style');
+            style.textContent = '@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }';
+            document.head.appendChild(style);
+            
+            alert('⚠️ CACHE ISSUE DETECTED! Roster buttons found. Please clear your browser cache completely (Cmd+Shift+Delete) and restart your browser.');
+        } else {
+            console.log('%c✅ SUCCESS: NO ROSTER BUTTONS IN DOM!', 'background: green; color: white; font-size: 14px; padding: 5px');
+            console.log('Template is correctly showing Version 3.0 without Roster functionality');
+        }
+        
+        // Check template version markers
+        const actionDivs = document.querySelectorAll('[data-template-version]');
+        actionDivs.forEach(div => {
+            console.log('✅ Template Version Marker:', div.dataset.templateVersion);
+        });
+        
+        // Log ALL buttons in exam-actions divs
+        console.group('%c[BUTTON_AUDIT] Examining ALL buttons in exam-actions', 'color: #FF5722; font-weight: bold');
+        const examActionsDivs = document.querySelectorAll('.exam-actions');
+        console.log(`Found ${examActionsDivs.length} exam-actions divs`);
+        
+        examActionsDivs.forEach((actionsDiv, idx) => {
+            const buttons = actionsDiv.querySelectorAll('button, a, input[type="submit"]');
+            console.log(`Exam ${idx + 1} has ${buttons.length} action buttons:`);
+            buttons.forEach((btn, btnIdx) => {
+                console.log(`  ${btnIdx + 1}. ${btn.tagName}: "${btn.textContent.trim()}" | Class: ${btn.className}`);
+                if (btn.textContent.includes('Roster')) {
+                    console.error('    ⚠️ THIS IS THE ROSTER BUTTON! Should not exist!');
+                    console.error('    Full HTML:', btn.outerHTML);
+                }
+            });
+        });
+        console.groupEnd();
+        
+        // Check if any scripts are modifying the DOM
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1 && (node.textContent?.includes('Roster') || node.href?.includes('roster'))) {
+                            console.error('🚨 ROSTER ELEMENT ADDED TO DOM:', node);
+                            console.error('   Added to:', mutation.target);
+                            console.trace('   Stack trace:');
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Start observing the entire document for changes
+        observer.observe(document.body, { childList: true, subtree: true });
+        console.log('📍 Mutation observer installed to detect dynamic Roster additions');
+    }, 100);
+    console.groupEnd();
+    
+    console.group('%c[EXAM_TYPE_FILTER] Current State Analysis', 'color: #9C27B0; font-weight: bold');
+    console.log('Active Filter:', '{{ exam_type_filter }}');
+    console.log('Filter Description:', '{{ filter_description }}');
+    console.log('Exams Displayed:', {{ mapping_summary.total }});
+    
+    // Analyze displayed exam types
+    const examCards = document.querySelectorAll('.exam-card');
+    const examTypeDistribution = {
+        REVIEW: 0,
+        QUARTERLY: 0,
+        UNKNOWN: 0
+    };
+    
+    examCards.forEach(card => {
+        const typeSpan = card.querySelector('.exam-info span');
+        if (typeSpan) {
+            const typeText = typeSpan.textContent.trim();
+            if (typeText.includes('Review') || typeText.includes('Monthly')) {
+                examTypeDistribution.REVIEW++;
+            } else if (typeText.includes('Quarterly')) {
+                examTypeDistribution.QUARTERLY++;
+            } else {
+                examTypeDistribution.UNKNOWN++;
+            }
+        }
+    });
+    
+    console.log('Exam Type Distribution in Current View:', examTypeDistribution);
+    
+    // Verify filter is working correctly
+    const currentFilter = '{{ exam_type_filter }}';
+    if (currentFilter === 'REVIEW' && examTypeDistribution.QUARTERLY > 0) {
+        console.error('❌ FILTER ERROR: Quarterly exams showing in Review filter!');
+    } else if (currentFilter === 'QUARTERLY' && examTypeDistribution.REVIEW > 0) {
+        console.error('❌ FILTER ERROR: Review exams showing in Quarterly filter!');
+    } else if (currentFilter !== 'ALL' && examTypeDistribution.UNKNOWN > 0) {
+        console.warn('⚠️ Unknown exam types detected');
+    } else {
+        console.log('✅ Filter working correctly');
+    }
+    console.groupEnd();
+    
+    console.group('%c[ROUTINETEST_UI_OPTIMIZATION] Page Initialization', 'color: #4CAF50; font-weight: bold');
+    
+    // Log UI optimization changes
+    console.log('[UI_OPTIMIZATION] RoutineTest Exam List page loaded with optimized UI');
+    console.log('[UI_OPTIMIZATION] Timestamp:', new Date().toISOString());
+    console.log('[UI_OPTIMIZATION] URL:', window.location.href);
+    console.log('[UI_OPTIMIZATION] UI Changes Applied:');
+    console.log('  ✅ ROSTER BUTTON REMOVED COMPLETELY');
+    console.log('  ✅ Removed scheduling/date displays (scheduling is class-level)');
+    console.log('  ✅ Optimized button sizes to utilize available horizontal space');
+    console.log('  ✅ Delete button styled with danger color');
+    console.log('  ✅ Fixed alignment issues in card grid');
+    console.log('  ✅ Simplified exam type badges');
+    console.log('  ✅ Matched PlacementTest UI standards');
+    
+    // Log summary statistics if available
+    const summaryElement = document.querySelector('.mapping-summary');
+    if (summaryElement) {
+        const stats = {
+            total: summaryElement.querySelector('.summary-stat:nth-child(1) .stat-badge')?.textContent || '0',
+            complete: summaryElement.querySelector('.summary-stat:nth-child(2) .stat-badge')?.textContent || '0',
+            partial: summaryElement.querySelector('.summary-stat:nth-child(3) .stat-badge')?.textContent || '0',
+            notStarted: summaryElement.querySelector('.summary-stat:nth-child(4) .stat-badge')?.textContent || '0'
+        };
+        console.log('[ANSWER_MAPPING_UI] Summary Statistics:', stats);
+    }
+    
+    // Log all exam cards with their mapping status and UI state
+    const examCards = document.querySelectorAll('.exam-card');
+    console.log(`[UI_OPTIMIZATION] Found ${examCards.length} exam cards with optimized UI`);
+    
+    examCards.forEach((card, index) => {
+        const examId = card.dataset.examId;
+        const mappingStatus = card.dataset.mappingStatus;
+        const mappingPercentage = card.dataset.mappingPercentage;
+        const examName = card.querySelector('.exam-title')?.textContent || 'Unknown';
+        const examType = card.querySelector('.exam-info span')?.textContent || 'Unknown Type';
+        const buttonCount = card.querySelectorAll('.exam-actions .btn-small').length;
+        
+        console.group(`[UI_OPTIMIZATION] Exam ${index + 1}: ${examName}`);
+        console.log('Exam ID:', examId);
+        console.log('Display Name:', examName);
+        console.log('Exam Type:', examType.trim());
+        console.log('Action Buttons:', buttonCount, 'buttons');
+        console.log('Mapping Status:', mappingStatus);
+        console.log('Mapping Percentage:', mappingPercentage + '%');
+        console.log('UI Features:');
+        console.log('  • No scheduling displays (class-level only)');
+        console.log('  • Consistent button sizing');
+        console.log('  • Delete button with danger styling');
+        
+        // Log detailed status from the status section
+        const statusSection = card.querySelector('.answer-mapping-status');
+        if (statusSection) {
+            const statusText = statusSection.querySelector('.answer-mapping-details span')?.textContent?.trim();
+            console.log('Status Text:', statusText);
+            
+            // Log unmapped questions if any
+            const unmappedList = statusSection.querySelector('.unmapped-list');
+            if (unmappedList) {
+                const unmappedText = unmappedList.textContent.trim();
+                console.warn('Unmapped Questions:', unmappedText);
+            }
+        }
+        
+        // Check indicator status
+        const indicator = card.querySelector('.answer-mapping-indicator');
+        if (indicator) {
+            const indicatorClasses = Array.from(indicator.classList);
+            console.log('Indicator Classes:', indicatorClasses);
+            console.log('Indicator Title:', indicator.title);
+        }
+        
+        console.groupEnd();
+    });
+    
+    console.groupEnd();
+    
+    // Log performance metrics
+    if (window.performance && window.performance.timing) {
+        const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+        console.log(`[ANSWER_MAPPING_UI] Page load time: ${loadTime}ms`);
+    }
+    
+    // Add event listeners for interactive debugging
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('[UI_OPTIMIZATION] DOM fully loaded and parsed');
+        
+        // Verify UI optimizations
+        console.group('%c[UI_OPTIMIZATION] Button Analysis', 'color: #FF9800; font-weight: bold');
+        
+        // Enhanced button consistency and overflow detection
+        const examCards = document.querySelectorAll('.exam-card');
+        examCards.forEach((card, index) => {
+            const buttons = card.querySelectorAll('.exam-actions .btn-small');
+            const buttonInfo = [];
+            const cardRect = card.getBoundingClientRect();
+            const actionsContainer = card.querySelector('.exam-actions');
+            const actionsRect = actionsContainer.getBoundingClientRect();
+            
+            let totalButtonWidth = 0;
+            let isOverflowing = false;
+            
+            buttons.forEach(btn => {
+                const rect = btn.getBoundingClientRect();
+                const style = window.getComputedStyle(btn);
+                totalButtonWidth += rect.width + 8; // Include gap
+                
+                // Check if button overflows card
+                if (rect.right > cardRect.right - 20) { // 20px for padding
+                    isOverflowing = true;
+                }
+                
+                buttonInfo.push({
+                    text: btn.textContent.trim(),
+                    width: Math.round(rect.width),
+                    height: Math.round(rect.height),
+                    class: btn.className,
+                    backgroundColor: style.backgroundColor,
+                    color: style.color,
+                    fontSize: style.fontSize,
+                    overflowing: rect.right > cardRect.right - 20
+                });
+            });
+            
+            console.log(`[UI_BUTTON_ANALYSIS] Card ${index + 1}:`, {
+                cardWidth: Math.round(cardRect.width),
+                actionsWidth: Math.round(actionsRect.width),
+                totalButtonWidth: Math.round(totalButtonWidth),
+                buttonCount: buttons.length,
+                isOverflowing: isOverflowing,
+                buttons: buttonInfo
+            });
+            
+            // Log warnings for issues
+            if (isOverflowing) {
+                console.warn(`[UI_OVERFLOW] Card ${index + 1} has overflowing buttons!`);
+            }
+            
+            // Check delete button color
+            const deleteBtn = card.querySelector('.btn-danger');
+            if (deleteBtn) {
+                const deleteStyle = window.getComputedStyle(deleteBtn);
+                const bgColor = deleteStyle.backgroundColor;
+                if (!bgColor.includes('220, 53, 69') && !bgColor.includes('#dc3545')) {
+                    console.warn(`[UI_COLOR] Delete button not red! Color: ${bgColor}`);
+                } else {
+                    console.log(`[UI_COLOR] Delete button correctly red: ${bgColor}`);
+                }
+            }
+        });
+        
+        // Verify no scheduling elements exist
+        const schedulingElements = document.querySelectorAll('[class*="schedule"], [class*="Schedule"]');
+        if (schedulingElements.length > 0) {
+            console.warn('[UI_OPTIMIZATION] WARNING: Found scheduling elements that should be removed:', schedulingElements);
+        } else {
+            console.log('[UI_OPTIMIZATION] ✅ No scheduling elements found (correct)');
+        }
+        
+        // Enhanced card alignment and height analysis
+        examCards.forEach((card, index) => {
+            const cardRect = card.getBoundingClientRect();
+            const title = card.querySelector('.exam-title');
+            const titleRect = title ? title.getBoundingClientRect() : null;
+            const actions = card.querySelector('.exam-actions');
+            const actionsRect = actions ? actions.getBoundingClientRect() : null;
+            
+            console.log(`[UI_CARD_ALIGNMENT] Card ${index + 1}:`, {
+                height: Math.round(cardRect.height),
+                titleHeight: titleRect ? Math.round(titleRect.height) : 0,
+                titleText: title ? title.textContent.trim().substring(0, 50) + '...' : 'No title',
+                actionsTop: actionsRect ? Math.round(actionsRect.top - cardRect.top) : 0,
+                minHeightApplied: cardRect.height >= 400
+            });
+        });
+        
+        // Check for text truncation issues and button overflow
+        document.querySelectorAll('.btn-small').forEach((btn, index) => {
+            const text = btn.textContent.trim();
+            const rect = btn.getBoundingClientRect();
+            const style = window.getComputedStyle(btn);
+            
+            // Check for text truncation with ScrollWidth monitoring
+            if (btn.scrollWidth > btn.clientWidth) {
+                console.warn(`[UI_TRUNCATION] Button ${index + 1} text truncated:`, {
+                    text: text,
+                    scrollWidth: btn.scrollWidth,
+                    clientWidth: btn.clientWidth,
+                    fontSize: style.fontSize,
+                    scrollWidthExceeds: btn.scrollWidth - btn.clientWidth
+                });
+            } else {
+                console.log(`[UI_TRUNCATION] Button ${index + 1} text fits:`, {
+                    text: text,
+                    scrollWidth: btn.scrollWidth,
+                    clientWidth: btn.clientWidth
+                });
+            }
+            
+            // Check for button overflow
+            const card = btn.closest('.exam-card');
+            if (card) {
+                const cardRect = card.getBoundingClientRect();
+                if (rect.right > cardRect.right - 20) {
+                    console.warn(`[UI_OVERFLOW] Button ${index + 1} overflowing card:`, {
+                        buttonText: text,
+                        buttonRight: rect.right,
+                        cardRight: cardRect.right,
+                        overflow: rect.right - (cardRect.right - 20)
+                    });
+                }
+            }
+        });
+        
+        // Check for date displays
+        const datePatterns = /\d{4}|January|February|March|April|May|June|July|August|September|October|November|December/gi;
+        examCards.forEach((card, index) => {
+            const examInfo = card.querySelectorAll('.exam-info');
+            examInfo.forEach(info => {
+                if (datePatterns.test(info.textContent)) {
+                    console.warn(`[UI_OPTIMIZATION] Potential date found in card ${index + 1}:`, info.textContent);
+                }
+            });
+        });
+        
+        console.groupEnd();
+        
+        // Monitor hover events on indicators
+        document.querySelectorAll('.answer-mapping-indicator').forEach(indicator => {
+            indicator.addEventListener('mouseenter', function() {
+                const card = this.closest('.exam-card');
+                const examName = card.querySelector('.exam-title')?.textContent || 'Unknown';
+                console.log(`[UI_OPTIMIZATION] Hovering over indicator for exam: ${examName}`);
+            });
+        });
+        
+        // Monitor button clicks with enhanced logging
+        document.querySelectorAll('.exam-actions button, .exam-actions a').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const card = this.closest('.exam-card');
+                const examName = card.querySelector('.exam-title')?.textContent || 'Unknown';
+                const buttonText = this.textContent.trim();
+                const buttonClass = this.className;
+                
+                console.log(`[UI_OPTIMIZATION] Button clicked:`, {
+                    exam: examName,
+                    button: buttonText,
+                    class: buttonClass,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Special logging for delete button
+                if (buttonClass.includes('btn-danger')) {
+                    console.warn(`[UI_OPTIMIZATION] DELETE button clicked for exam: ${examName}`);
+                }
+            });
+        });
+        
+        // Roster functionality removed - not needed for Answer Keys
+    });
+})();
+
+// UPDATE NAME REMOVED: Name editing functions removed as names are systematically generated
+// The following functions have been removed: enableNameEdit, cancelNameEdit, saveExamName
+/*
+function enableNameEdit(examId) {
+    // REMOVED - Names are systematically generated from exam type and curriculum
+    
+    const card = document.querySelector(`[data-exam-id="${examId}"]`);
+    const titleDiv = card.querySelector('.exam-title');
+    const input = card.querySelector('.exam-name-input');
+    const updateNameBtn = card.querySelector('.exam-actions button[onclick*="enableNameEdit"]');
+    const saveBtn = card.querySelector('.save-name-btn');
+    const cancelBtn = card.querySelector('.cancel-name-btn');
+    
+    titleDiv.style.display = 'none';
+    input.style.display = 'block';
+    updateNameBtn.style.display = 'none';
+    saveBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+    
+    input.focus();
+    input.select();
+    
+    console.log(`[ANSWER_MAPPING_UI] Name edit enabled for exam: ${titleDiv.textContent}`);
+}
+
+function cancelNameEdit(examId) {
+    console.log(`[ANSWER_MAPPING_UI] Cancelling name edit for exam: ${examId}`);
+    
+    const card = document.querySelector(`[data-exam-id="${examId}"]`);
+    const titleDiv = card.querySelector('.exam-title');
+    const input = card.querySelector('.exam-name-input');
+    const updateNameBtn = card.querySelector('.exam-actions button[onclick*="enableNameEdit"]');
+    const saveBtn = card.querySelector('.save-name-btn');
+    const cancelBtn = card.querySelector('.cancel-name-btn');
+    
+    titleDiv.style.display = 'block';
+    input.style.display = 'none';
+    updateNameBtn.style.display = 'inline-block';
+    saveBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+    
+    // Reset input value to original
+    input.value = titleDiv.textContent;
+    
+    console.log(`[ANSWER_MAPPING_UI] Name edit cancelled for exam: ${titleDiv.textContent}`);
+}
+
+function saveExamName(examId) {
+    const card = document.querySelector(`[data-exam-id="${examId}"]`);
+    const titleDiv = card.querySelector('.exam-title');
+    const input = card.querySelector('.exam-name-input');
+    const oldName = titleDiv.textContent;
+    const newName = input.value.trim();
+    
+    console.log(`[ANSWER_MAPPING_UI] Saving exam name change:`, {
+        examId: examId,
+        oldName: oldName,
+        newName: newName
+    });
+    
+    if (!newName) {
+        console.error('[ANSWER_MAPPING_UI] Exam name cannot be empty');
+        alert('Exam name cannot be empty');
+        return;
+    }
+    
+    // Send update request
+    console.log(`[ANSWER_MAPPING_UI] Sending name update request to API...`);
+    
+    fetch(`/RoutineTest/exams/${examId}/update-name/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ name: newName })
+    })
+    .then(response => {
+        console.log(`[ANSWER_MAPPING_UI] API Response status: ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            console.log(`[ANSWER_MAPPING_UI] Name update successful:`, data);
+            titleDiv.textContent = newName;
+            cancelNameEdit(examId);
+            
+            // Log the update in the console with the mapping status
+            const mappingStatus = card.dataset.mappingStatus;
+            console.log(`[ANSWER_MAPPING_UI] Exam renamed: "${oldName}" → "${newName}" (Mapping: ${mappingStatus})`);
+        } else {
+            console.error('[ANSWER_MAPPING_UI] Name update failed:', data);
+            alert('Error updating exam name: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[ANSWER_MAPPING_UI] Network error:', error);
+        alert('An error occurred while updating the exam name');
+    });
+}
+*/
+// End of removed name editing functions
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Auto-refresh answer mapping status via API (optional enhancement)
+function refreshAnswerMappingStatus(examId) {
+    console.log(`[ANSWER_MAPPING_UI] Refreshing answer mapping status for exam: ${examId}`);
+    
+    // This could be implemented to fetch updated status via API
+    // For now, it's a placeholder for future enhancement
+    console.log('[ANSWER_MAPPING_UI] Note: Live refresh not yet implemented. Reload page to see latest status.');
+}
+
+// ===== TAB PERSISTENCE WITH SESSION STORAGE =====
+(function() {
+    const STORAGE_KEY = 'routinetest_exam_type_filter';
+    
+    // Save current filter to sessionStorage
+    const currentFilter = '{{ exam_type_filter }}';
+    sessionStorage.setItem(STORAGE_KEY, currentFilter);
+    console.log(`[TAB_PERSISTENCE] Saved filter to session: ${currentFilter}`);
+    
+    // Check if we should restore a different filter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('exam_type')) {
+        // No explicit filter in URL, check sessionStorage
+        const savedFilter = sessionStorage.getItem(STORAGE_KEY);
+        if (savedFilter && savedFilter !== currentFilter) {
+            console.log(`[TAB_PERSISTENCE] Restoring saved filter: ${savedFilter}`);
+            // Optionally redirect to saved filter
+            // window.location.href = `?exam_type=${savedFilter}`;
+        }
+    }
+    
+    // Enhanced tab navigation with smooth transitions
+    document.querySelectorAll('.exam-type-tab').forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            // Allow default navigation but add visual feedback
+            const contentWrapper = document.getElementById('exam-list-content');
+            if (contentWrapper) {
+                contentWrapper.style.transition = 'opacity 0.3s ease';
+                contentWrapper.style.opacity = '0.5';
+            }
+        });
+    });
+})();
+
+// ===== KEYBOARD SHORTCUTS FOR TAB NAVIGATION =====
+document.addEventListener('keydown', function(e) {
+    // Alt+1 for Review, Alt+2 for Quarterly, Alt+3 for All
+    if (e.altKey) {
+        let targetType = null;
+        switch(e.key) {
+            case '1':
+                targetType = 'REVIEW';
+                break;
+            case '2':
+                targetType = 'QUARTERLY';
+                break;
+            case '3':
+                targetType = 'ALL';
+                break;
+        }
+        
+        if (targetType) {
+            e.preventDefault();
+            console.log(`[KEYBOARD_SHORTCUT] Navigating to ${targetType} via Alt+${e.key}`);
+            window.location.href = `?exam_type=${targetType}`;
+        }
+    }
+});
+
+// ===== PERFORMANCE MONITORING =====
+window.addEventListener('load', function() {
+    if (window.performance && window.performance.timing) {
+        const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+        const domReadyTime = window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart;
+        
+        console.group('%c[PERFORMANCE] Page Load Metrics', 'color: #FF5722; font-weight: bold');
+        console.log('Total Load Time:', loadTime + 'ms');
+        console.log('DOM Ready Time:', domReadyTime + 'ms');
+        console.log('Current Filter:', '{{ exam_type_filter }}');
+        console.log('Exams Rendered:', {{ mapping_summary.total }});
+        console.log('Performance Grade:', loadTime < 1000 ? '⚡ Excellent' : loadTime < 2000 ? '✅ Good' : '⚠️ Needs Optimization');
+        console.groupEnd();
+    }
+});
+
+// Log when user leaves the page
+window.addEventListener('beforeunload', function() {
+    console.log('[EXAM_LIST] User leaving page');
+    console.log('[TAB_PERSISTENCE] Final filter state:', '{{ exam_type_filter }}');
+});
+
+// ===== ANSWER KEYS LIBRARY FUNCTIONALITY =====
+
+// Global variables for copy functionality
+let currentCopyExamId = null;
+let availableClasses = [];
+
+// Assigned Only Filter Toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const assignedToggle = document.getElementById('assigned-only-toggle');
+    if (assignedToggle) {
+        assignedToggle.addEventListener('change', function() {
+            const currentParams = new URLSearchParams(window.location.search);
+            
+            if (this.checked) {
+                currentParams.set('assigned_only', 'true');
+            } else {
+                currentParams.delete('assigned_only');
+            }
+            
+            console.log('[ASSIGNED_FILTER] Toggle changed:', this.checked);
+            window.location.href = window.location.pathname + '?' + currentParams.toString();
+        });
+    }
+});
+
+// Copy Exam Modal Functions
+function openCopyModal(examId, examName, examType) {
+    console.log('[COPY_MODAL] Opening copy modal for exam:', examId, examName);
+    
+    currentCopyExamId = examId;
+    document.getElementById('sourceExamName').textContent = examName;
+    document.getElementById('examType').value = examType;
+    
+    // Set current academic year as default
+    const currentYear = new Date().getFullYear();
+    document.getElementById('academicYear').value = currentYear.toString();
+    
+    // Update time period options based on exam type
+    updateTimePeriodOptions(examType);
+    
+    // Load available classes
+    loadAvailableClasses();
+    
+    // Show modal
+    document.getElementById('copyModal').style.display = 'block';
+}
+
+function closeCopyModal() {
+    console.log('[COPY_MODAL] Closing copy modal');
+    document.getElementById('copyModal').style.display = 'none';
+    currentCopyExamId = null;
+    
+    // Reset form
+    document.getElementById('copyExamForm').reset();
+    document.getElementById('targetClasses').innerHTML = '';
+}
+
+function updateTimePeriodOptions(examType) {
+    const timePeriodSelect = document.getElementById('timePeriod');
+    timePeriodSelect.innerHTML = '';
+    
+    if (examType === 'REVIEW') {
+        const months = [
+            {value: 'JAN', label: 'January'},
+            {value: 'FEB', label: 'February'},
+            {value: 'MAR', label: 'March'},
+            {value: 'APR', label: 'April'},
+            {value: 'MAY', label: 'May'},
+            {value: 'JUN', label: 'June'},
+            {value: 'JUL', label: 'July'},
+            {value: 'AUG', label: 'August'},
+            {value: 'SEP', label: 'September'},
+            {value: 'OCT', label: 'October'},
+            {value: 'NOV', label: 'November'},
+            {value: 'DEC', label: 'December'}
+        ];
+        
+        months.forEach(month => {
+            const option = document.createElement('option');
+            option.value = month.value;
+            option.textContent = month.label;
+            timePeriodSelect.appendChild(option);
+        });
+    } else if (examType === 'QUARTERLY') {
+        const quarters = [
+            {value: 'Q1', label: 'Q1 (Jan-Mar)'},
+            {value: 'Q2', label: 'Q2 (Apr-Jun)'},
+            {value: 'Q3', label: 'Q3 (Jul-Sep)'},
+            {value: 'Q4', label: 'Q4 (Oct-Dec)'}
+        ];
+        
+        quarters.forEach(quarter => {
+            const option = document.createElement('option');
+            option.value = quarter.value;
+            option.textContent = quarter.label;
+            timePeriodSelect.appendChild(option);
+        });
+    }
+}
+
+function loadAvailableClasses() {
+    console.log('[COPY_MODAL] Loading available classes');
+    
+    fetch('{% url "RoutineTest:get_teacher_copyable_classes" %}', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            availableClasses = data.classes;
+            populateClassOptions(data.classes);
+            console.log('[COPY_MODAL] Loaded', data.classes.length, 'available classes');
+        } else {
+            console.error('[COPY_MODAL] Error loading classes:', data.error);
+            alert('Error loading available classes: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('[COPY_MODAL] Network error:', error);
+        alert('Network error loading classes');
+    });
+}
+
+function populateClassOptions(classes) {
+    const targetClassesSelect = document.getElementById('targetClasses');
+    targetClassesSelect.innerHTML = '';
+    
+    // Group classes by program
+    const classByProgram = {};
+    classes.forEach(cls => {
+        if (!classByProgram[cls.program]) {
+            classByProgram[cls.program] = [];
+        }
+        classByProgram[cls.program].push(cls);
+    });
+    
+    // Add options grouped by program
+    const programOrder = ['CORE', 'ASCENT', 'EDGE', 'PINNACLE'];
+    programOrder.forEach(program => {
+        if (classByProgram[program]) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = 'PRIME ' + program;
+            
+            classByProgram[program].forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.value;
+                option.textContent = cls.label;
+                optgroup.appendChild(option);
+            });
+            
+            targetClassesSelect.appendChild(optgroup);
+        }
+    });
+}
+
+function submitCopyExam() {
+    if (!currentCopyExamId) {
+        alert('No exam selected for copying');
+        return;
+    }
+    
+    // Get form data
+    const targetClasses = Array.from(document.getElementById('targetClasses').selectedOptions).map(opt => opt.value);
+    const examType = document.getElementById('examType').value;
+    const timePeriod = document.getElementById('timePeriod').value;
+    const academicYear = document.getElementById('academicYear').value;
+    
+    // Validate
+    if (targetClasses.length === 0) {
+        alert('Please select at least one target class');
+        return;
+    }
+    
+    if (!timePeriod) {
+        alert('Please select a time period');
+        return;
+    }
+    
+    // Disable submit button
+    const submitBtn = document.querySelector('.copy-btn-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Copying...';
+    
+    console.log('[COPY_EXAM] Submitting copy request:', {
+        examId: currentCopyExamId,
+        targetClasses: targetClasses,
+        examType: examType,
+        timePeriod: timePeriod,
+        academicYear: academicYear
+    });
+    
+    // Submit copy request
+    fetch(`{% url 'RoutineTest:copy_exam' exam_id='PLACEHOLDER' %}`.replace('PLACEHOLDER', currentCopyExamId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            target_class_codes: targetClasses,
+            exam_type: examType,
+            time_period: timePeriod,
+            academic_year: academicYear
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('[COPY_EXAM] Copy successful:', data);
+            alert('Exam copied successfully!\n\nNew exam: ' + data.new_exam_name);
+            closeCopyModal();
+            
+            // Refresh the page to show the new exam
+            window.location.reload();
+        } else {
+            console.error('[COPY_EXAM] Copy failed:', data.error);
+            alert('Error copying exam: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('[COPY_EXAM] Network error:', error);
+        alert('Network error copying exam');
+    })
+    .finally(() => {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Copy Exam';
+    });
+}
+
+// Event listener for exam type change
+document.addEventListener('DOMContentLoaded', function() {
+    const examTypeSelect = document.getElementById('examType');
+    if (examTypeSelect) {
+        examTypeSelect.addEventListener('change', function() {
+            updateTimePeriodOptions(this.value);
+        });
+    }
+});
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('copyModal');
+    if (event.target === modal) {
+        closeCopyModal();
+    }
+});
+
+// Enhanced permission and hierarchical display logging
+document.addEventListener('DOMContentLoaded', function() {
+    console.group('%c[ANSWER_KEYS_LIBRARY] Initialization', 'color: #2E7D32; font-weight: bold');
+    
+    // Log permission summary
+    {% if permission_summary %}
+    console.log('Permission Summary:', {
+        isAdmin: {{ permission_summary.is_admin|yesno:'true,false' }},
+        hasTeacherProfile: {{ permission_summary.has_teacher_profile|yesno:'true,false' }},
+        assignedClasses: {{ exam_type_counts.assigned }},
+        accessibleExams: {{ mapping_summary.accessible }},
+        editableExams: {{ mapping_summary.editable }}
+    });
+    {% endif %}
+    
+    // Log hierarchical structure
+    console.log('Hierarchical Display:', {
+        totalPrograms: {{ program_order|length }},
+        programs: {{ program_order|safe }},
+        assignedOnlyFilter: {{ assigned_only_filter|yesno:'true,false' }},
+        examTypeFilter: '{{ exam_type_filter }}'
+    });
+    
+    // Log exam statistics
+    console.log('Exam Statistics:', {
+        total: {{ mapping_summary.total }},
+        complete: {{ mapping_summary.complete }},
+        partial: {{ mapping_summary.partial }},
+        notStarted: {{ mapping_summary.not_started }},
+        accessible: {{ mapping_summary.accessible }},
+        editable: {{ mapping_summary.editable }}
+    });
+    
+    // Analyze program sections
+    const programSections = document.querySelectorAll('.program-section');
+    console.log(`Found ${programSections.length} program sections`);
+    
+    programSections.forEach((section, index) => {
+        const programTitle = section.querySelector('.program-title')?.textContent;
+        const classSections = section.querySelectorAll('.class-section');
+        const totalExams = section.querySelectorAll('.exam-card').length;
+        
+        console.log(`Program ${index + 1}: ${programTitle}`, {
+            classCount: classSections.length,
+            examCount: totalExams
+        });
+    });
+    
+    // Analyze access indicators
+    const accessIndicators = document.querySelectorAll('.class-access-indicator');
+    const accessLevels = {
+        admin: 0,
+        accessible: 0,
+        viewOnly: 0
+    };
+    
+    accessIndicators.forEach(indicator => {
+        if (indicator.classList.contains('admin')) {
+            accessLevels.admin++;
+        } else if (indicator.classList.contains('accessible')) {
+            accessLevels.accessible++;
+        } else if (indicator.classList.contains('view-only')) {
+            accessLevels.viewOnly++;
+        }
+    });
+    
+    console.log('Access Level Distribution:', accessLevels);
+    
+    console.groupEnd();
+});
+</script>
+{% endblock %}

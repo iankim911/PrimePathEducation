@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if mode == 'login' %}Sign In{% else %}Sign Up{% endif %} - PrimePath</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .auth-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        width: 100%;
+        max-width: 400px;
+        transition: max-height 0.4s ease;
+    }
+
+    .auth-header {
+        text-align: center;
+        padding: 40px 30px 0;
+    }
+
+    .logo {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: white;
+    }
+
+    .auth-tabs {
+        display: flex;
+        margin: 20px 0;
+        background: #f3f4f6;
+        border-radius: 12px;
+        padding: 4px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        background: transparent;
+        font-size: 15px;
+        font-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+        background: white;
+        color: #667eea;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .auth-form {
+        padding: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.2s; }
+    .form-group:nth-child(3) { animation-delay: 0.3s; }
+    .form-group:nth-child(4) { animation-delay: 0.4s; }
+    .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #4b5563;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 15px;
+        padding-right: 45px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-input.error {
+        border-color: #ef4444;
+    }
+
+    .form-input.success {
+        border-color: #10b981;
+    }
+
+    /* Password visibility toggle */
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .password-toggle:hover {
+        color: #4b5563;
+    }
+
+    /* Input with button (for ID check) */
+    .input-with-btn {
+        display: flex;
+        gap: 10px;
+    }
+
+    .input-with-btn .form-input {
+        flex: 1;
+    }
+
+    .check-btn {
+        padding: 12px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .check-btn:hover {
+        background: #5a67d8;
+        transform: translateY(-1px);
+    }
+
+    .check-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Validation messages */
+    .validation-msg {
+        font-size: 12px;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        opacity: 0;
+        animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+        to { opacity: 1; }
+    }
+
+    .validation-msg.error {
+        color: #ef4444;
+    }
+
+    .validation-msg.success {
+        color: #10b981;
+    }
+
+    /* Password strength indicator */
+    .password-strength {
+        display: flex;
+        gap: 4px;
+        margin-top: 8px;
+    }
+
+    .strength-bar {
+        flex: 1;
+        height: 3px;
+        background: #e5e7eb;
+        border-radius: 2px;
+        transition: background 0.3s ease;
+    }
+
+    .strength-bar.active.weak { background: #ef4444; }
+    .strength-bar.active.medium { background: #f59e0b; }
+    .strength-bar.active.strong { background: #10b981; }
+
+    /* Submit button */
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Divider */
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 25px 0;
+        gap: 15px;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e5e7eb;
+    }
+
+    .divider span {
+        color: #9ca3af;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    /* Social login */
+    .social-login {
+        display: flex;
+        gap: 10px;
+    }
+
+    .social-btn {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #e5e7eb;
+        background: white;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+        color: #374151;
+    }
+
+    .social-btn:hover {
+        border-color: #d1d5db;
+        background: #f9fafb;
+        transform: translateY(-1px);
+    }
+
+    .social-btn.kakao {
+        background: #FEE500;
+        border-color: #FEE500;
+        color: #000000;
+    }
+
+    .social-btn.kakao:hover {
+        background: #FDD835;
+        border-color: #FDD835;
+    }
+
+    /* Loading spinner */
+    .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Remember me checkbox */
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 15px 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .checkbox-group label {
+        font-size: 14px;
+        color: #4b5563;
+        cursor: pointer;
+    }
+
+    /* Footer link */
+    .auth-footer {
+        text-align: center;
+        padding: 20px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+
+    .auth-footer a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Grade select styling */
+    .form-select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 480px) {
+        .auth-container {
+            margin: 0;
+            border-radius: 0;
+            min-height: 100vh;
+            max-width: 100%;
+        }
+
+        body {
+            padding: 0;
+        }
+    }
+
+    /* Success checkmark animation */
+    .success-check {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #10b981;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        animation: scaleIn 0.3s ease;
+    }
+
+    @keyframes scaleIn {
+        from { transform: scale(0); }
+        to { transform: scale(1); }
+    }
+</style>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-header">
+        <div class="logo">P</div>
+        
+        <!-- Tab switcher for login/signup -->
+        <div class="auth-tabs">
+            <button class="tab-btn {% if mode == 'login' %}active{% endif %}" onclick="switchToLogin()">
+                Sign In
+            </button>
+            <button class="tab-btn {% if mode != 'login' %}active{% endif %}" onclick="switchToSignup()">
+                Sign Up
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginForm" class="auth-form" {% if mode != 'login' %}style="display: none;"{% endif %}>
+        {% if mode == 'login' and errors %}
+        <div style="background: #FEE2E2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+            {% for error in errors %}
+            <div style="color: #991B1B; font-size: 14px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{% url 'primepath_student:login' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="loginPhone">Phone Number / Student ID</label>
+                <div class="input-group">
+                    <input type="text" id="loginPhone" name="phone_number" class="form-input" 
+                           placeholder="010-1234-5678 or Student ID" required autofocus>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="loginPassword">Password</label>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" name="password" class="form-input" 
+                           placeholder="Enter your password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                        <svg id="loginPasswordIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember me</label>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Sign In
+            </button>
+        </form>
+
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signupForm" class="auth-form" {% if mode == 'login' %}style="display: none;"{% endif %}>
+        {% if mode != 'login' and errors %}
+        <div style="background: #FEE2E2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+            {% for error in errors %}
+            <div style="color: #991B1B; font-size: 14px;">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{% url 'primepath_student:register' %}" id="registerForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label" for="fullName">Full Name *</label>
+                <div class="input-group">
+                    <input type="text" id="fullName" name="full_name" class="form-input" 
+                           placeholder="Enter your full name" required>
+                </div>
+                <div class="validation-msg" id="nameValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="studentId">Student ID *</label>
+                <div class="input-with-btn">
+                    <input type="text" id="studentId" name="student_id" class="form-input" 
+                           placeholder="Choose unique ID" required>
+                    <button type="button" class="check-btn" onclick="checkAvailability('studentId')">
+                        Check
+                    </button>
+                </div>
+                <div class="validation-msg" id="studentIdValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="phone">Phone Number *</label>
+                <div class="input-group">
+                    <input type="tel" id="phone" name="phone_number" class="form-input" 
+                           placeholder="010-1234-5678" required maxlength="13">
+                </div>
+                <div class="validation-msg" id="phoneValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address *</label>
+                <div class="input-group">
+                    <input type="email" id="email" name="email" class="form-input" 
+                           placeholder="your.email@example.com" required>
+                </div>
+                <div class="validation-msg" id="emailValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="parentName">Parent's Name *</label>
+                <div class="input-group">
+                    <input type="text" id="parentName" name="parent1_name" class="form-input" 
+                           placeholder="Enter parent/guardian name" required>
+                </div>
+                <div class="validation-msg" id="parentNameValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="parentContact">Parent's Contact *</label>
+                <div class="input-group">
+                    <input type="tel" id="parentContact" name="parent1_phone" class="form-input" 
+                           placeholder="010-1234-5678" required maxlength="13">
+                </div>
+                <div class="validation-msg" id="parentContactValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="grade">Grade</label>
+                <select id="grade" name="grade" class="form-select">
+                    <option value="">Select grade</option>
+                    <optgroup label="Elementary">
+                        <option value="1">Grade 1</option>
+                        <option value="2">Grade 2</option>
+                        <option value="3">Grade 3</option>
+                        <option value="4">Grade 4</option>
+                        <option value="5">Grade 5</option>
+                        <option value="6">Grade 6</option>
+                    </optgroup>
+                    <optgroup label="Middle School">
+                        <option value="7">Grade 7</option>
+                        <option value="8">Grade 8</option>
+                        <option value="9">Grade 9</option>
+                    </optgroup>
+                    <optgroup label="High School">
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="signupPassword">Password *</label>
+                <div class="input-group">
+                    <input type="password" id="signupPassword" name="password1" class="form-input" 
+                           placeholder="Min 8 characters" required minlength="8">
+                    <button type="button" class="password-toggle" onclick="togglePassword('signupPassword')">
+                        <svg id="signupPasswordIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="strength-bar" id="strength1"></div>
+                    <div class="strength-bar" id="strength2"></div>
+                    <div class="strength-bar" id="strength3"></div>
+                    <div class="strength-bar" id="strength4"></div>
+                </div>
+                <div class="validation-msg" id="passwordValidation"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password *</label>
+                <div class="input-group">
+                    <input type="password" id="confirmPassword" name="password2" class="form-input" 
+                           placeholder="Re-enter your password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                        <svg id="confirmPasswordIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="validation-msg" id="confirmPasswordValidation"></div>
+            </div>
+
+            <!-- Hidden fields for backend -->
+            <input type="hidden" name="username" id="usernameField">
+            <input type="hidden" name="first_name" id="firstNameField">
+            <input type="hidden" name="last_name" id="lastNameField">
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Create Account
+            </button>
+        </form>
+
+    </div>
+
+    <div class="auth-footer">
+        <span id="footerText">
+            {% if mode == 'login' %}
+                Don't have an account? <a href="#" onclick="switchToSignup(); return false;">Sign up</a>
+            {% else %}
+                Already have an account? <a href="#" onclick="switchToLogin(); return false;">Sign in</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<script>
+// Modern Auth Form JavaScript
+(function() {
+    'use strict';
+
+    // Toggle between login and signup
+    window.switchToLogin = function() {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('signupForm').style.display = 'none';
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+        document.getElementById('footerText').innerHTML = 
+            'Don\'t have an account? <a href="#" onclick="switchToSignup(); return false;">Sign up</a>';
+        
+        // Update URL without reload
+        history.pushState({mode: 'login'}, '', '{% url "primepath_student:login" %}');
+    };
+
+    window.switchToSignup = function() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'block';
+        document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('footerText').innerHTML = 
+            'Already have an account? <a href="#" onclick="switchToLogin(); return false;">Sign in</a>';
+        
+        // Update URL without reload
+        history.pushState({mode: 'signup'}, '', '{% url "primepath_student:register" %}');
+    };
+
+    // Password visibility toggle
+    window.togglePassword = function(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(inputId + 'Icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+        } else {
+            input.type = 'password';
+            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+        }
+    };
+
+    // Check availability (Student ID or Phone)
+    window.checkAvailability = async function(fieldId) {
+        const input = document.getElementById(fieldId);
+        const value = input.value.trim();
+        const validationDiv = document.getElementById(fieldId + 'Validation');
+        const checkBtn = event.target;
+        
+        if (!value) {
+            showValidation(validationDiv, 'Please enter a value', 'error');
+            return;
+        }
+
+        // Show loading
+        checkBtn.disabled = true;
+        checkBtn.innerHTML = '<span class="spinner"></span>';
+        
+        try {
+            const response = await fetch('{% url "primepath_student:check_availability" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    type: fieldId === 'studentId' ? 'student_id' : 'phone',
+                    value: value
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.available) {
+                showValidation(validationDiv, '✓ Available', 'success');
+                input.classList.remove('error');
+                input.classList.add('success');
+            } else {
+                showValidation(validationDiv, '✗ Already taken', 'error');
+                input.classList.add('error');
+                input.classList.remove('success');
+            }
+        } catch (error) {
+            showValidation(validationDiv, 'Error checking availability', 'error');
+        } finally {
+            checkBtn.disabled = false;
+            checkBtn.textContent = 'Check';
+        }
+    };
+
+    // Show validation message
+    function showValidation(element, message, type) {
+        element.textContent = message;
+        element.className = `validation-msg ${type}`;
+        element.style.display = 'flex';
+    }
+
+    // Get CSRF token
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    // Password strength checker
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        const bars = ['strength1', 'strength2', 'strength3', 'strength4'];
+        
+        // Reset bars
+        bars.forEach(bar => {
+            document.getElementById(bar).classList.remove('active', 'weak', 'medium', 'strong');
+        });
+        
+        if (password.length >= 8) strength++;
+        if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        if (password.match(/[^a-zA-Z0-9]/)) strength++;
+        
+        // Update bars
+        for (let i = 0; i < strength; i++) {
+            const bar = document.getElementById(bars[i]);
+            bar.classList.add('active');
+            
+            if (strength <= 2) bar.classList.add('weak');
+            else if (strength === 3) bar.classList.add('medium');
+            else bar.classList.add('strong');
+        }
+        
+        // Update validation message
+        const validationDiv = document.getElementById('passwordValidation');
+        if (strength <= 2) {
+            showValidation(validationDiv, 'Weak password', 'error');
+        } else if (strength === 3) {
+            showValidation(validationDiv, 'Medium strength', 'success');
+        } else {
+            showValidation(validationDiv, 'Strong password', 'success');
+        }
+    }
+
+    // Real-time validation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password strength on input
+        const passwordInput = document.getElementById('signupPassword');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+            });
+        }
+
+        // Phone number formatting with automatic 010 prefix and validation
+        function formatPhoneNumber(input, validationDiv) {
+            // Initialize with 010- if empty
+            function ensurePrefix() {
+                if (input.value === '' || input.value === '010') {
+                    input.value = '010-';
+                    input.setSelectionRange(4, 4);
+                }
+            }
+            
+            // Set initial value immediately
+            ensurePrefix();
+            
+            input.addEventListener('input', function() {
+                let value = this.value;
+                
+                // Always ensure 010- prefix
+                if (!value.startsWith('010-')) {
+                    // Extract just the digits the user typed
+                    let userDigits = value.replace(/[^\d]/g, '').replace(/^010/, '');
+                    value = '010-' + userDigits;
+                }
+                
+                // Get all digits and limit to 11 total (010 + 8)
+                let digits = value.replace(/[^\d]/g, '');
+                if (digits.length > 11) {
+                    digits = digits.slice(0, 11);
+                }
+                
+                // Format as 010-XXXX-XXXX
+                if (digits.length >= 3) {
+                    if (digits.length <= 7) {
+                        value = '010-' + digits.slice(3);
+                    } else {
+                        value = '010-' + digits.slice(3, 7) + '-' + digits.slice(7);
+                    }
+                } else {
+                    value = '010-';
+                }
+                
+                this.value = value;
+                
+                // Position cursor correctly
+                if (value === '010-') {
+                    this.setSelectionRange(4, 4);
+                }
+                
+                // Validation
+                const userDigits = digits.slice(3); // Remove 010 prefix
+                if (userDigits.length === 0) {
+                    validationDiv.style.display = 'none';
+                    this.classList.remove('error', 'success');
+                } else if (userDigits.length !== 8 || !userDigits.match(/^\d{8}$/)) {
+                    showValidation(validationDiv, 'Enter 8 digits (010 prefix added automatically)', 'error');
+                    this.classList.add('error');
+                    this.classList.remove('success');
+                } else {
+                    showValidation(validationDiv, '✓ Valid phone number', 'success');
+                    this.classList.remove('error');
+                    this.classList.add('success');
+                }
+            });
+            
+            // Handle focus - ensure prefix and position cursor
+            input.addEventListener('focus', function() {
+                ensurePrefix();
+            });
+            
+            // Handle click - position cursor after prefix
+            input.addEventListener('click', function() {
+                if (this.selectionStart < 4) {
+                    this.setSelectionRange(4, 4);
+                }
+            });
+            
+            // Prevent deleting/modifying 010- prefix
+            input.addEventListener('keydown', function(e) {
+                if (this.selectionStart < 4) {
+                    if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'ArrowLeft') {
+                        if (e.key !== 'ArrowLeft') {
+                            e.preventDefault();
+                        }
+                        this.setSelectionRange(4, 4);
+                    }
+                }
+                
+                // Handle backspace at position 4 (right after 010-)
+                if (e.key === 'Backspace' && this.selectionStart === 4) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        const phoneInput = document.getElementById('phone');
+        const phoneValidation = document.getElementById('phoneValidation');
+        if (phoneInput && phoneValidation) {
+            formatPhoneNumber(phoneInput, phoneValidation);
+        }
+
+        // Parent contact formatting
+        const parentContactInput = document.getElementById('parentContact');
+        const parentContactValidation = document.getElementById('parentContactValidation');
+        if (parentContactInput && parentContactValidation) {
+            formatPhoneNumber(parentContactInput, parentContactValidation);
+        }
+
+        // Email validation
+        const emailInput = document.getElementById('email');
+        const emailValidation = document.getElementById('emailValidation');
+        if (emailInput && emailValidation) {
+            emailInput.addEventListener('input', function() {
+                const email = this.value.trim();
+                
+                if (email === '') {
+                    emailValidation.style.display = 'none';
+                    this.classList.remove('error', 'success');
+                    return;
+                }
+                
+                // Comprehensive email validation regex
+                const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+                
+                if (!emailRegex.test(email)) {
+                    showValidation(emailValidation, 'Please enter a valid email address', 'error');
+                    this.classList.add('error');
+                    this.classList.remove('success');
+                } else {
+                    // Additional checks for common issues
+                    const issues = [];
+                    
+                    // Check for consecutive dots
+                    if (email.includes('..')) {
+                        issues.push('consecutive dots');
+                    }
+                    
+                    // Check for common typos in popular domains
+                    const domain = email.split('@')[1];
+                    if (domain) {
+                        const commonDomains = {
+                            'gmial.com': 'gmail.com',
+                            'gmai.com': 'gmail.com',
+                            'gmail.co': 'gmail.com',
+                            'yahooo.com': 'yahoo.com',
+                            'yahho.com': 'yahoo.com',
+                            'hotmial.com': 'hotmail.com',
+                            'hotmai.com': 'hotmail.com',
+                            'naver.co': 'naver.com',
+                            'naver.kr': 'naver.com',
+                            'daum.co': 'daum.net',
+                            'hanmail.co': 'hanmail.net'
+                        };
+                        
+                        if (commonDomains[domain.toLowerCase()]) {
+                            showValidation(emailValidation, `Did you mean ${email.split('@')[0]}@${commonDomains[domain.toLowerCase()]}?`, 'error');
+                            this.classList.add('error');
+                            this.classList.remove('success');
+                            return;
+                        }
+                    }
+                    
+                    // Check minimum length
+                    if (email.length < 5) {
+                        showValidation(emailValidation, 'Email address seems too short', 'error');
+                        this.classList.add('error');
+                        this.classList.remove('success');
+                    } else if (issues.length > 0) {
+                        showValidation(emailValidation, `Invalid format: ${issues.join(', ')}`, 'error');
+                        this.classList.add('error');
+                        this.classList.remove('success');
+                    } else {
+                        showValidation(emailValidation, '✓ Valid email format', 'success');
+                        this.classList.remove('error');
+                        this.classList.add('success');
+                    }
+                }
+            });
+        }
+
+        // Password confirmation validation
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const signupPasswordInput = document.getElementById('signupPassword');
+        if (confirmPasswordInput && signupPasswordInput) {
+            confirmPasswordInput.addEventListener('input', function() {
+                const password = signupPasswordInput.value;
+                const confirm = this.value;
+                const validationDiv = document.getElementById('confirmPasswordValidation');
+                
+                if (confirm === '') {
+                    validationDiv.style.display = 'none';
+                } else if (password !== confirm) {
+                    showValidation(validationDiv, 'Passwords do not match', 'error');
+                    this.classList.add('error');
+                    this.classList.remove('success');
+                } else {
+                    showValidation(validationDiv, '✓ Passwords match', 'success');
+                    this.classList.remove('error');
+                    this.classList.add('success');
+                }
+            });
+        }
+
+        // Form submission handler for signup
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Prepare hidden fields
+                const fullName = document.getElementById('fullName').value.trim();
+                const nameParts = fullName.split(' ');
+                
+                document.getElementById('firstNameField').value = nameParts[0] || fullName;
+                document.getElementById('lastNameField').value = nameParts.slice(1).join(' ') || nameParts[0] || fullName;
+                document.getElementById('usernameField').value = document.getElementById('studentId').value;
+                
+                // Show loading state
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Creating...';
+                
+                // Submit form
+                this.submit();
+            });
+        }
+    });
+})();
+</script>
+</body>
+</html>

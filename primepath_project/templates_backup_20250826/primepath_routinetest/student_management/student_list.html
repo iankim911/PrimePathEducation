@@ -1,0 +1,135 @@
+{% extends 'routinetest_base.html' %}
+
+{% block title %}All Students{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Student Directory</h2>
+            <div>
+                <a href="{% url 'RoutineTest:create_student' %}" class="btn btn-primary" 
+                   style="background-color: #00A65E; color: white; padding: 10px 20px; 
+                          text-decoration: none; border-radius: 4px; margin-right: 10px;">
+                    + Create New Student
+                </a>
+                <a href="{% url 'RoutineTest:classes_exams_unified' %}" class="btn" 
+                   style="background-color: #666; color: white; padding: 10px 20px; 
+                          text-decoration: none; border-radius: 4px;">
+                    ← Back to Classes
+                </a>
+            </div>
+        </div>
+        
+        <div style="background-color: #E8F5E9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            <p style="margin: 0;">
+                <strong>Total Students:</strong> {{ students.count }}
+                {% if is_head_teacher %}
+                <span style="margin-left: 20px; color: #00A65E;">
+                    (Viewing all students as Head Teacher)
+                </span>
+                {% else %}
+                <span style="margin-left: 20px; color: #666;">
+                    (Viewing students in your classes only)
+                </span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <div class="card">
+        {% if students.count > 0 %}
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background-color: #f5f5f5;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Student Name</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Student ID</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Phone Number</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Classes</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">Registered</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {{ student.user.get_full_name }}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        <strong>{{ student.student_id }}</strong>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {{ student.phone_number }}
+                    </td>
+                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee;">
+                        <span style="background-color: #E3F2FD; color: #1565C0; padding: 4px 8px; 
+                                   border-radius: 4px; font-size: 14px;">
+                            {{ student.class_count }} class{{ student.class_count|pluralize:"es" }}
+                        </span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;">
+                        {{ student.created_at|date:"M j, Y" }}
+                    </td>
+                    <td style="padding: 12px; text-align: center; border-bottom: 1px solid #eee;">
+                        <button onclick="viewStudentDetails('{{ student.id }}')" class="btn" 
+                                style="background-color: #1976D2; color: white; padding: 5px 10px; 
+                                       border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                            View Details
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 40px; background-color: #f5f5f5; border-radius: 4px;">
+            <p style="color: #999; margin: 0;">No students found</p>
+            <p style="color: #666; margin-top: 10px;">
+                {% if is_head_teacher %}
+                Create the first student account to get started
+                {% else %}
+                Students in your classes will appear here
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Student Details Modal -->
+<div id="studentDetailsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                                     background-color: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="background: white; margin: 50px auto; max-width: 600px; padding: 20px; border-radius: 8px; 
+                max-height: 80vh; overflow-y: auto;">
+        <h3 id="modalStudentName">Student Details</h3>
+        <div id="modalContent">
+            <!-- Student details will be loaded here -->
+        </div>
+        <div style="text-align: right; margin-top: 20px;">
+            <button onclick="closeStudentDetails()" class="btn" 
+                    style="background-color: #666; color: white; padding: 10px 20px; 
+                           border: none; border-radius: 4px; cursor: pointer;">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewStudentDetails(studentId) {
+    // This would fetch student details via AJAX
+    // For now, show a placeholder
+    document.getElementById('studentDetailsModal').style.display = 'block';
+    document.getElementById('modalContent').innerHTML = `
+        <p>Loading student details...</p>
+        <p style="color: #666;">Student ID: ${studentId}</p>
+        <p style="color: #666;">Feature coming soon: View enrolled classes, exam history, and manage assignments</p>
+    `;
+}
+
+function closeStudentDetails() {
+    document.getElementById('studentDetailsModal').style.display = 'none';
+}
+</script>
+{% endblock %}
