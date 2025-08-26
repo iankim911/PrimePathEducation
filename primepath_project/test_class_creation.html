@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Class Creation Fix</title>
+</head>
+<body>
+    <h1>Class Creation Fix Test</h1>
+    
+    <h2>Before Fix: Invalid Class Code (should fail)</h2>
+    <button onclick="testInvalidCode()">Test Invalid Class Code</button>
+    <div id="invalidResult"></div>
+    
+    <h2>After Fix: Valid Class Code (should work if authenticated)</h2>
+    <button onclick="testValidCode()">Test Valid Class Code</button>
+    <div id="validResult"></div>
+    
+    <script>
+        async function testInvalidCode() {
+            try {
+                const response = await fetch('/RoutineTest/api/admin/class/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: "test class 1", // This should fail
+                        name: "test class 1",
+                        program: "CORE",
+                        subprogram: "Sigma",
+                        level: "1"
+                    })
+                });
+                
+                const result = await response.json();
+                document.getElementById('invalidResult').innerHTML = 
+                    `<p>Status: ${response.status}</p><p>Response: ${JSON.stringify(result, null, 2)}</p>`;
+                    
+            } catch (error) {
+                document.getElementById('invalidResult').innerHTML = 
+                    `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testValidCode() {
+            try {
+                const response = await fetch('/RoutineTest/api/admin/class/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: "PS1", // This should work (if authenticated)
+                        name: "PS1",
+                        program: "CORE",
+                        subprogram: "Sigma",
+                        level: "1"
+                    })
+                });
+                
+                const result = await response.json();
+                document.getElementById('validResult').innerHTML = 
+                    `<p>Status: ${response.status}</p><p>Response: ${JSON.stringify(result, null, 2)}</p>`;
+                    
+            } catch (error) {
+                document.getElementById('validResult').innerHTML = 
+                    `<p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -6,6 +6,107 @@
 
 {% block extra_css %}
 <style>
+    /* Standardized Admin Button Styles - CONSISTENT ACROSS ALL ADMIN PAGES */
+    .btn-admin-primary {
+        padding: 8px 15px !important;
+        background: #1B5E20 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
+    }
+
+    .btn-admin-primary:hover {
+        background: #2E7D32 !important;
+    }
+
+    .btn-admin-danger {
+        padding: 8px 15px !important;
+        background: #DC3545 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
+    }
+
+    .btn-admin-danger:hover {
+        background: #c82333 !important;
+    }
+
+    .btn-admin-success {
+        padding: 8px 15px !important;
+        background: #28A745 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
+    }
+
+    .btn-admin-success:hover {
+        background: #218838 !important;
+    }
+
+    .btn-admin-secondary {
+        padding: 8px 15px !important;
+        background: #6C757D !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
+    }
+
+    .btn-admin-secondary:hover {
+        background: #5a6268 !important;
+    }
+
+    .btn-admin-create {
+        padding: 8px 20px !important;
+        background: #1B5E20 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        min-width: 140px !important;
+        transition: background-color 0.3s ease !important;
+    }
+
+    .btn-admin-create:hover {
+        background: #2E7D32 !important;
+    }
     /* Container */
     .admin-container {
         max-width: 1600px;
@@ -167,18 +268,19 @@
         background: none;
         border: none;
         cursor: pointer;
-        padding: 5px;
-        border-radius: 4px;
-        transition: all 0.2s;
+        padding: 8px 10px !important;
+        border-radius: 5px !important;
+        transition: all 0.3s ease !important;
+        font-size: 14px !important;
     }
     
     .btn-icon:hover {
-        background: #f0f0f0;
+        background: #f0f0f0 !important;
     }
     
     .btn-icon.delete:hover {
-        background: #ffebee;
-        color: #c62828;
+        background: #ffebee !important;
+        color: #c62828 !important;
     }
     
     .class-info {
@@ -260,20 +362,21 @@
     
     .add-teacher-btn {
         width: 100%;
-        padding: 10px;
-        border: 2px dashed #667eea;
-        background: transparent;
-        color: #667eea;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s;
-        margin-top: 10px;
+        padding: 8px 15px !important;
+        border: 2px solid #1B5E20 !important;
+        background: transparent !important;
+        color: #1B5E20 !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-weight: 500 !important;
+        font-size: 14px !important;
+        transition: all 0.3s ease !important;
+        margin-top: 10px !important;
     }
     
     .add-teacher-btn:hover {
-        background: #667eea;
-        color: white;
+        background: #1B5E20 !important;
+        color: white !important;
     }
     
     /* Add New Class Button */
@@ -366,33 +469,45 @@
     }
     
     .btn-approve {
-        background: #4caf50;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s;
+        padding: 8px 15px !important;
+        background: #28A745 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
     }
     
     .btn-approve:hover {
-        background: #388e3c;
+        background: #218838 !important;
     }
     
     .btn-deny {
-        background: #f44336;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s;
+        padding: 8px 15px !important;
+        background: #DC3545 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
     }
     
     .btn-deny:hover {
-        background: #d32f2f;
+        background: #c82333 !important;
     }
     
     /* Modal Styles */
@@ -483,33 +598,45 @@
     }
     
     .btn-cancel {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        padding: 8px 15px !important;
+        background: #6C757D !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
     }
     
     .btn-cancel:hover {
-        background: #5a6268;
+        background: #5a6268 !important;
     }
     
     .btn-primary {
-        background: #667eea;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        padding: 8px 15px !important;
+        background: #1B5E20 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        min-width: 100px !important;
+        transition: background-color 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-block !important;
+        text-align: center !important;
+        margin: 2px !important;
     }
     
     .btn-primary:hover {
-        background: #5a67d8;
+        background: #2E7D32 !important;
     }
     
     /* Empty States */

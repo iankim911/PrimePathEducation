@@ -1004,3 +1004,25 @@ def admin_revoke_access(request):
     except Exception as e:
         logger.error(f"Error in admin_revoke_access: {e}")
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def get_pending_requests_count(request):
+    """API endpoint to get current pending requests count for admin notifications"""
+    try:
+        # Check if user is admin
+        is_admin, admin_teacher = is_admin_or_head_teacher(request.user)
+        if not is_admin:
+            return JsonResponse({'success': False, 'error': 'Admin access required'})
+        
+        # Get current pending requests count
+        pending_count = ClassAccessRequest.objects.filter(status='PENDING').count()
+        
+        return JsonResponse({
+            'success': True,
+            'pending_count': pending_count
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in get_pending_requests_count: {e}")
+        return JsonResponse({'success': False, 'error': str(e)})

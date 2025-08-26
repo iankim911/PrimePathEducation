@@ -3,6 +3,112 @@
 
 {% block title %}Manage Classes - Admin{% endblock %}
 
+{% block extra_css %}
+<style>
+/* Standardized Admin Button Styles */
+.btn-admin-primary {
+    padding: 8px 15px !important;
+    background: #1B5E20 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-primary:hover {
+    background: #2E7D32 !important;
+}
+
+.btn-admin-danger {
+    padding: 8px 15px !important;
+    background: #DC3545 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-danger:hover {
+    background: #c82333 !important;
+}
+
+.btn-admin-success {
+    padding: 8px 15px !important;
+    background: #28A745 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-success:hover {
+    background: #218838 !important;
+}
+
+.btn-admin-secondary {
+    padding: 8px 15px !important;
+    background: #6C757D !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-secondary:hover {
+    background: #5a6268 !important;
+}
+
+.btn-admin-create {
+    padding: 8px 20px !important;
+    background: #1B5E20 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    min-width: 140px !important;
+    transition: background-color 0.3s ease !important;
+}
+
+.btn-admin-create:hover {
+    background: #2E7D32 !important;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div style="padding: 20px;">
     <h1>📚 Manage Classes</h1>
@@ -24,7 +130,7 @@
                 <label for="section">Section</label>
                 <input type="text" id="section" name="section" placeholder="e.g., A, B, C" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
             </div>
-            <button type="submit" style="padding: 8px 20px; background: #1B5E20; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: background-color 0.3s; font-size: 14px; min-width: 140px;" onmouseover="this.style.backgroundColor='#2E7D32'" onmouseout="this.style.backgroundColor='#1B5E20'">
+            <button type="submit" class="btn-admin-create">
                 ➕ Create Class
             </button>
         </form>
@@ -58,7 +164,7 @@
                                 {% for teacher in class.assigned_teachers.all %}
                                     <span style="display: inline-block; padding: 3px 8px; background: #E3F2FD; border-radius: 15px; margin: 2px; font-size: 14px;">
                                         {{ teacher.name }}
-                                        <button onclick="removeTeacher('{{ class.id }}', '{{ teacher.id }}')" style="background: none; border: none; color: red; cursor: pointer;">×</button>
+                                        <button onclick="removeTeacher('{{ class.id }}', '{{ teacher.id }}')" style="background: none; border: none; color: #DC3545; cursor: pointer; font-size: 16px; font-weight: bold; padding: 0 4px;">×</button>
                                     </span>
                                 {% endfor %}
                             {% else %}
@@ -70,10 +176,10 @@
                         {{ class.student_count }}
                     </td>
                     <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center;">
-                        <button onclick="showAssignTeacherModal('{{ class.id }}', '{{ class.name }}')" style="padding: 8px 15px; background: #1B5E20; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 2px; transition: background-color 0.3s; font-size: 14px; font-weight: 500; min-width: 100px;" onmouseover="this.style.backgroundColor='#2E7D32'" onmouseout="this.style.backgroundColor='#1B5E20'">
+                        <button onclick="showAssignTeacherModal('{{ class.id }}', '{{ class.name }}')" class="btn-admin-primary">
                             Add Teacher
                         </button>
-                        <button onclick="deleteClass('{{ class.id }}', '{{ class.name }}')" style="padding: 8px 15px; background: #DC3545; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 2px; transition: background-color 0.3s; font-size: 14px; font-weight: 500; min-width: 100px;" onmouseover="this.style.backgroundColor='#c82333'" onmouseout="this.style.backgroundColor='#DC3545'">
+                        <button onclick="deleteClass('{{ class.id }}', '{{ class.name }}')" class="btn-admin-danger">
                             Delete
                         </button>
                     </td>
@@ -88,7 +194,7 @@
     
     <!-- Back to Dashboard -->
     <div style="margin-top: 30px;">
-        <a href="{% url 'RoutineTest:admin_dashboard' %}" style="display: inline-block; padding: 10px 20px; background: #6C757D; color: white; text-decoration: none; border-radius: 5px; transition: background-color 0.3s; font-size: 14px; font-weight: 500; min-width: 160px; text-align: center;" onmouseover="this.style.backgroundColor='#5a6268'" onmouseout="this.style.backgroundColor='#6C757D'">
+        <a href="{% url 'RoutineTest:admin_dashboard' %}" class="btn-admin-secondary" style="min-width: 160px;">
             ← Back to Dashboard
         </a>
     </div>
@@ -105,10 +211,10 @@
             {% endfor %}
         </select>
         <div style="text-align: right;">
-            <button onclick="closeModal()" style="padding: 8px 15px; background: #6C757D; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px; transition: background-color 0.3s; font-size: 14px; font-weight: 500; min-width: 80px;" onmouseover="this.style.backgroundColor='#5a6268'" onmouseout="this.style.backgroundColor='#6C757D'">
+            <button onclick="closeModal()" class="btn-admin-secondary" style="margin-right: 10px; min-width: 80px;">
                 Cancel
             </button>
-            <button onclick="assignTeacher()" style="padding: 8px 15px; background: #28A745; color: white; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; font-size: 14px; font-weight: 500; min-width: 80px;" onmouseover="this.style.backgroundColor='#218838'" onmouseout="this.style.backgroundColor='#28A745'">
+            <button onclick="assignTeacher()" class="btn-admin-success" style="min-width: 80px;">
                 Assign
             </button>
         </div>

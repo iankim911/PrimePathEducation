@@ -139,7 +139,14 @@ def get_curriculum_for_class(class_code):
         str: The display name or None if not found
     """
     print(f"[CLASS_CODE_MAPPING] Getting display for class: {class_code}")
-    return CLASS_CODE_CURRICULUM_MAPPING.get(class_code)
+    result = CLASS_CODE_CURRICULUM_MAPPING.get(class_code)
+    
+    # CRITICAL: Never return generic placeholder text
+    if result == "Curriculum Level" or result == "Curriculum level":
+        print(f"[CLASS_CODE_MAPPING] WARNING: Placeholder text detected for {class_code}, returning class code instead")
+        return class_code
+    
+    return result
 
 def get_classes_for_curriculum(curriculum_level):
     """

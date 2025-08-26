@@ -32,6 +32,10 @@ urlpatterns = [
     path('class/<str:class_code>/delete-exam/', class_details.delete_exam_from_schedule, name='delete_exam_from_schedule'),
     path('student/<uuid:student_id>/details/', class_details.get_student_details, name='get_student_details'),
     
+    # NEW: Class-Contextual Exam Selection API Endpoints
+    path('api/class/<str:class_code>/available-exams/', class_details.get_available_exams_for_class, name='get_available_exams_for_class'),
+    path('api/class/<str:class_code>/assign-exams/', class_details.assign_exam_to_schedule, name='assign_exam_to_schedule'),
+    
     # Admin Classes & Teachers Management
     path('admin/classes-teachers/', admin_classes_teachers.admin_classes_teachers, name='admin_classes_teachers'),
     path('admin/classes-teachers/create-class/', admin_classes_teachers.create_class, name='admin_create_class'),

@@ -27,6 +27,66 @@ from primepath_routinetest.services import ExamService
 logger = logging.getLogger(__name__)
 
 
+def get_available_exam_summary_for_class(class_code):
+    """
+    Get a summary of available exams for a class without full exam details.
+    This is used for the main class_details view to provide context data.
+    """
+    try:
+        summary = {
+            'total_count': 0,
+            'by_type': {'REVIEW': 0, 'QUARTERLY': 0},
+            'by_model': {'Exam': 0, 'RoutineExam': 0},
+            'has_curriculum_mapped': False,
+            'newest_exam_date': None
+        }
+        
+        # Quick count from Exam model (class_code field)
+        from primepath_routinetest.models import Exam
+        exam_count_by_class_code = Exam.objects.filter(
+            class_code=class_code,
+            is_active=True
+        ).count()
+        
+        # Quick count from Exam model (class_codes field) - SQLite compatible
+        exam_count_by_class_codes = 0
+        try:
+            exams_with_class_codes = Exam.objects.filter(is_active=True)
+            for exam in exams_with_class_codes:
+                if exam.class_codes and isinstance(exam.class_codes, list) and class_code in exam.class_codes:
+                    exam_count_by_class_codes += 1
+        except Exception as e:
+            logger.warning(f"[GET_AVAILABLE_EXAM_SUMMARY] Error counting class_codes exams: {e}")
+        
+        # Quick count from RoutineExam model (via ExamScheduleMatrix)
+        routine_exam_count = 0
+        try:
+            scheduled_routine_exam_ids = ExamScheduleMatrix.objects.filter(
+                class_code=class_code
+            ).values_list('exams__id', flat=True)
+            routine_exam_count = len(set(scheduled_routine_exam_ids))
+        except Exception as e:
+            logger.warning(f"[GET_AVAILABLE_EXAM_SUMMARY] Error counting routine exams: {e}")
+        
+        summary['total_count'] = exam_count_by_class_code + exam_count_by_class_codes + routine_exam_count
+        summary['by_model']['Exam'] = exam_count_by_class_code + exam_count_by_class_codes
+        summary['by_model']['RoutineExam'] = routine_exam_count
+        
+        logger.debug(f"[GET_AVAILABLE_EXAM_SUMMARY] Class {class_code}: {summary['total_count']} total exams")
+        
+        return summary
+        
+    except Exception as e:
+        logger.error(f"[GET_AVAILABLE_EXAM_SUMMARY] Error getting summary for class {class_code}: {e}")
+        return {
+            'total_count': 0,
+            'by_type': {'REVIEW': 0, 'QUARTERLY': 0},
+            'by_model': {'Exam': 0, 'RoutineExam': 0},
+            'has_curriculum_mapped': False,
+            'newest_exam_date': None
+        }
+
+
 @login_required
 def class_details(request, class_code):
     """
@@ -214,6 +274,11 @@ def class_details(request, class_code):
                 'grade_level': student.current_grade_level
             })
     
+    # Get available exams for this class for the exam selection feature
+    available_exam_summary = get_available_exam_summary_for_class(class_code)
+    
+    logger.info(f"[CLASS_DETAILS] Available exam summary: {available_exam_summary}")
+    
     # Context for template
     context = {
         'class_code': class_code,
@@ -233,12 +298,18 @@ def class_details(request, class_code):
         'quarterly_schedules': quarterly_data,
         'current_year': current_year,
         
+        # NEW: Available Exams for Selection Feature
+        'available_exam_summary': available_exam_summary,
+        'has_available_exams': available_exam_summary['total_count'] > 0,
+        'can_assign_exams': (access_level == 'FULL' or is_admin) and available_exam_summary['total_count'] > 0,
+        
         # For debugging
         'debug_info': {
             'user': request.user.username,
             'is_admin': is_admin,
             'access_level': access_level,
-            'class_exists': class_obj is not None
+            'class_exists': class_obj is not None,
+            'available_exams_count': available_exam_summary['total_count']
         }
     }
     
@@ -829,3 +900,387 @@ def get_student_details(request, student_id):
     except Exception as e:
         logger.error(f"Error getting student details: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["GET"])
+def get_available_exams_for_class(request, class_code):
+    """
+    API endpoint to get all exams available for assignment to a specific class.
+    This endpoint supports the class-contextual exam selection feature.
+    
+    Returns exams that were previously assigned to this class through upload/copy operations.
+    """
+    console_log = {
+        "view": "get_available_exams_for_class",
+        "user": request.user.username,
+        "class_code": class_code,
+        "timestamp": timezone.now().isoformat(),
+        "request_path": request.path,
+        "method": request.method
+    }
+    logger.info(f"[GET_AVAILABLE_EXAMS] Starting: {json.dumps(console_log)}")
+    print(f"[GET_AVAILABLE_EXAMS] === REQUEST START ===")
+    print(f"[GET_AVAILABLE_EXAMS] User: {request.user.username}")
+    print(f"[GET_AVAILABLE_EXAMS] Class: {class_code}")
+    
+    try:
+        # Check permissions - same logic as class_details view
+        is_admin = request.user.is_superuser or request.user.is_staff
+        teacher_profile = getattr(request.user, 'teacher_profile', None)
+        
+        # Verify access to this class
+        if not is_admin:
+            if not teacher_profile:
+                logger.error(f"[GET_AVAILABLE_EXAMS] No teacher profile for user {request.user.username}")
+                return JsonResponse({'success': False, 'error': 'Teacher profile not found'}, status=403)
+            
+            assignment = TeacherClassAssignment.objects.filter(
+                teacher=teacher_profile,
+                class_code=class_code,
+                is_active=True
+            ).first()
+            
+            if not assignment:
+                logger.error(f"[GET_AVAILABLE_EXAMS] No class access for {request.user.username} to class {class_code}")
+                return JsonResponse({'success': False, 'error': 'No access to this class'}, status=403)
+        
+        # Query available exams for this class from both exam models
+        available_exams = []
+        
+        # Method 1: Query Exam model (with class_codes JSONField and class_code CharField)
+        from primepath_routinetest.models import Exam
+        
+        # Get exams where class_code matches (one-to-one relationship)
+        exams_by_class_code = Exam.objects.filter(
+            class_code=class_code,
+            is_active=True
+        ).select_related('curriculum_level').order_by('name')
+        
+        logger.info(f"[GET_AVAILABLE_EXAMS] Found {exams_by_class_code.count()} exams with class_code='{class_code}'")
+        
+        # Get exams where class_codes contains this class_code (legacy many-to-many)
+        # Using JSON containment for PostgreSQL compatibility
+        try:
+            # For SQLite, we need to check manually since it doesn't support JSON containment
+            exams_by_class_codes = Exam.objects.filter(
+                is_active=True
+            ).select_related('curriculum_level')
+            
+            # Filter in Python for SQLite compatibility
+            exams_by_class_codes_filtered = []
+            for exam in exams_by_class_codes:
+                if exam.class_codes and isinstance(exam.class_codes, list) and class_code in exam.class_codes:
+                    exams_by_class_codes_filtered.append(exam)
+            
+            logger.info(f"[GET_AVAILABLE_EXAMS] Found {len(exams_by_class_codes_filtered)} exams with class_codes containing '{class_code}'")
+        except Exception as e:
+            logger.warning(f"[GET_AVAILABLE_EXAMS] Error querying class_codes field: {e}")
+            exams_by_class_codes_filtered = []
+        
+        # Method 2: Query RoutineExam model (might have class assignments through ExamScheduleMatrix)
+        routine_exams_for_class = []
+        try:
+            # Get RoutineExams that are already scheduled for this class
+            scheduled_routine_exams = ExamScheduleMatrix.objects.filter(
+                class_code=class_code
+            ).prefetch_related('exams').values_list('exams__id', flat=True)
+            
+            # Get all RoutineExams that match these IDs
+            if scheduled_routine_exams:
+                from primepath_routinetest.models.exam_management import RoutineExam
+                routine_exams_for_class = RoutineExam.objects.filter(
+                    id__in=scheduled_routine_exams,
+                    is_active=True
+                ).order_by('name')
+                
+            logger.info(f"[GET_AVAILABLE_EXAMS] Found {len(routine_exams_for_class)} RoutineExams scheduled for '{class_code}'")
+        except Exception as e:
+            logger.warning(f"[GET_AVAILABLE_EXAMS] Error querying RoutineExam schedules: {e}")
+        
+        # Process all found exams into a unified structure
+        processed_exam_ids = set()  # Prevent duplicates
+        
+        # Process Exam model results (class_code field)
+        for exam in exams_by_class_code:
+            if str(exam.id) in processed_exam_ids:
+                continue
+                
+            exam_data = process_exam_for_selection(exam, 'Exam', class_code)
+            if exam_data:
+                available_exams.append(exam_data)
+                processed_exam_ids.add(str(exam.id))
+        
+        # Process Exam model results (class_codes field)  
+        for exam in exams_by_class_codes_filtered:
+            if str(exam.id) in processed_exam_ids:
+                continue
+                
+            exam_data = process_exam_for_selection(exam, 'Exam', class_code)
+            if exam_data:
+                available_exams.append(exam_data)
+                processed_exam_ids.add(str(exam.id))
+        
+        # Process RoutineExam model results
+        for exam in routine_exams_for_class:
+            if str(exam.id) in processed_exam_ids:
+                continue
+                
+            exam_data = process_exam_for_selection(exam, 'RoutineExam', class_code)
+            if exam_data:
+                available_exams.append(exam_data)
+                processed_exam_ids.add(str(exam.id))
+        
+        # Sort exams by name for consistent display
+        available_exams.sort(key=lambda x: x['name'].lower())
+        
+        # Get filter options
+        exam_types = list(set([exam['exam_type'] for exam in available_exams]))
+        curriculum_levels = list(set([exam['curriculum_level'] for exam in available_exams if exam['curriculum_level']]))
+        
+        response_data = {
+            'success': True,
+            'class_code': class_code,
+            'class_display_name': ExamService.get_class_display_name(class_code),
+            'available_exams': available_exams,
+            'total_count': len(available_exams),
+            'filters': {
+                'exam_types': sorted(exam_types),
+                'curriculum_levels': sorted(curriculum_levels)
+            },
+            'debug_info': {
+                'exams_by_class_code': exams_by_class_code.count(),
+                'exams_by_class_codes': len(exams_by_class_codes_filtered),
+                'routine_exams_scheduled': len(routine_exams_for_class),
+                'total_processed': len(available_exams)
+            }
+        }
+        
+        logger.info(f"[GET_AVAILABLE_EXAMS] SUCCESS: Found {len(available_exams)} available exams for class {class_code}")
+        print(f"[GET_AVAILABLE_EXAMS] === SUCCESS ===")
+        print(f"[GET_AVAILABLE_EXAMS] Total exams found: {len(available_exams)}")
+        print(f"[GET_AVAILABLE_EXAMS] Exam types: {exam_types}")
+        
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        logger.error(f"[GET_AVAILABLE_EXAMS] Error: {e}", exc_info=True)
+        print(f"[GET_AVAILABLE_EXAMS] === ERROR ===")
+        print(f"[GET_AVAILABLE_EXAMS] {str(e)}")
+        return JsonResponse({
+            'success': False, 
+            'error': f'Error retrieving available exams: {str(e)}'
+        }, status=500)
+
+
+def process_exam_for_selection(exam, model_type, class_code):
+    """
+    Process an exam (either Exam or RoutineExam) into a standardized format
+    for the exam selection interface.
+    """
+    try:
+        # Get curriculum level safely
+        curriculum_level = None
+        if hasattr(exam, 'curriculum_level'):
+            if hasattr(exam.curriculum_level, 'full_name'):
+                curriculum_level = exam.curriculum_level.full_name
+            elif isinstance(exam.curriculum_level, str):
+                curriculum_level = exam.curriculum_level
+        
+        # Get exam type safely
+        exam_type = getattr(exam, 'exam_type', 'REVIEW')
+        
+        # Get time period information
+        time_period = None
+        if exam_type == 'REVIEW' and hasattr(exam, 'time_period_month') and exam.time_period_month:
+            time_period = dict(exam.MONTH_CHOICES if hasattr(exam, 'MONTH_CHOICES') else []).get(exam.time_period_month, exam.time_period_month)
+        elif exam_type == 'QUARTERLY' and hasattr(exam, 'time_period_quarter') and exam.time_period_quarter:
+            time_period = dict(exam.QUARTER_CHOICES if hasattr(exam, 'QUARTER_CHOICES') else []).get(exam.time_period_quarter, exam.time_period_quarter)
+        
+        # Get question count (try different approaches)
+        question_count = 0
+        if hasattr(exam, 'total_questions'):
+            question_count = exam.total_questions
+        elif hasattr(exam, 'questions') and hasattr(exam.questions, 'count'):
+            question_count = exam.questions.count()
+        
+        # Get timing information
+        duration = getattr(exam, 'duration', getattr(exam, 'timer_minutes', 60))
+        
+        # Get academic year
+        academic_year = getattr(exam, 'academic_year', 'N/A')
+        
+        exam_data = {
+            'id': str(exam.id),
+            'name': exam.name,
+            'model_type': model_type,
+            'exam_type': exam_type,
+            'exam_type_display': dict(exam.EXAM_TYPE_CHOICES if hasattr(exam, 'EXAM_TYPE_CHOICES') else []).get(exam_type, exam_type),
+            'curriculum_level': curriculum_level,
+            'time_period': time_period,
+            'academic_year': academic_year,
+            'duration_minutes': duration,
+            'question_count': question_count,
+            'is_active': getattr(exam, 'is_active', True),
+            'created_at': exam.created_at.isoformat() if hasattr(exam, 'created_at') and exam.created_at else None,
+            'has_pdf': bool(getattr(exam, 'pdf_file', None)),
+            'has_answer_key': bool(getattr(exam, 'answer_key', None)),
+            'can_assign': True  # Will be determined by permissions
+        }
+        
+        logger.debug(f"[PROCESS_EXAM_FOR_SELECTION] Processed {model_type} exam: {exam.name}")
+        return exam_data
+        
+    except Exception as e:
+        logger.error(f"[PROCESS_EXAM_FOR_SELECTION] Error processing {model_type} exam {exam.name}: {e}")
+        return None
+
+
+@login_required
+@require_http_methods(["POST"])
+def assign_exam_to_schedule(request, class_code):
+    """
+    API endpoint to assign selected exams to ExamScheduleMatrix for a specific class and time period.
+    This supports the class-contextual exam assignment feature.
+    """
+    console_log = {
+        "view": "assign_exam_to_schedule",
+        "user": request.user.username,
+        "class_code": class_code,
+        "timestamp": timezone.now().isoformat(),
+        "method": request.method
+    }
+    logger.info(f"[ASSIGN_EXAM_TO_SCHEDULE] Starting: {json.dumps(console_log)}")
+    print(f"[ASSIGN_EXAM_TO_SCHEDULE] === REQUEST START ===")
+    print(f"[ASSIGN_EXAM_TO_SCHEDULE] User: {request.user.username}")
+    print(f"[ASSIGN_EXAM_TO_SCHEDULE] Class: {class_code}")
+    
+    try:
+        # Check permissions - same as other class detail operations
+        is_admin = request.user.is_superuser or request.user.is_staff
+        teacher_profile = getattr(request.user, 'teacher_profile', None)
+        
+        if not is_admin:
+            if not teacher_profile:
+                return JsonResponse({'success': False, 'error': 'Teacher profile not found'}, status=403)
+            
+            assignment = TeacherClassAssignment.objects.filter(
+                teacher=teacher_profile,
+                class_code=class_code,
+                is_active=True,
+                access_level='FULL'  # Only FULL access can assign exams
+            ).first()
+            
+            if not assignment:
+                return JsonResponse({'success': False, 'error': 'Full access required to assign exams'}, status=403)
+        
+        # Parse request data
+        data = json.loads(request.body)
+        exam_ids = data.get('exam_ids', [])
+        time_period_type = data.get('time_period_type')  # 'MONTHLY' or 'QUARTERLY'
+        time_period_value = data.get('time_period_value')  # e.g., 'JAN' or 'Q1'
+        academic_year = data.get('academic_year', str(datetime.now().year))
+        
+        logger.info(f"[ASSIGN_EXAM_TO_SCHEDULE] Assignment request: {len(exam_ids)} exams to {time_period_type}:{time_period_value} {academic_year}")
+        print(f"[ASSIGN_EXAM_TO_SCHEDULE] Exams: {exam_ids}")
+        print(f"[ASSIGN_EXAM_TO_SCHEDULE] Target: {time_period_type}:{time_period_value} {academic_year}")
+        
+        if not exam_ids:
+            return JsonResponse({'success': False, 'error': 'No exams selected for assignment'}, status=400)
+        
+        if not time_period_type or not time_period_value:
+            return JsonResponse({'success': False, 'error': 'Time period information required'}, status=400)
+        
+        # Get or create the ExamScheduleMatrix cell
+        matrix_cell, created = ExamScheduleMatrix.get_or_create_cell(
+            class_code=class_code,
+            academic_year=academic_year,
+            time_period_type=time_period_type,
+            time_period_value=time_period_value,
+            user=request.user
+        )
+        
+        if created:
+            logger.info(f"[ASSIGN_EXAM_TO_SCHEDULE] Created new matrix cell: {matrix_cell.id}")
+        
+        # Assign exams to the matrix cell
+        assigned_exams = []
+        assignment_errors = []
+        
+        for exam_id in exam_ids:
+            try:
+                # Try to get exam from Exam model first
+                exam = None
+                model_type = None
+                
+                from primepath_routinetest.models import Exam
+                try:
+                    exam = Exam.objects.get(id=exam_id, is_active=True)
+                    model_type = 'Exam'
+                except Exam.DoesNotExist:
+                    # Try RoutineExam model
+                    from primepath_routinetest.models.exam_management import RoutineExam
+                    try:
+                        exam = RoutineExam.objects.get(id=exam_id, is_active=True)
+                        model_type = 'RoutineExam'
+                    except RoutineExam.DoesNotExist:
+                        assignment_errors.append(f"Exam {exam_id} not found")
+                        continue
+                
+                if exam:
+                    # For RoutineExam, we can add directly to matrix
+                    if model_type == 'RoutineExam':
+                        matrix_cell.add_exam(exam, request.user)
+                        assigned_exams.append({
+                            'id': str(exam.id),
+                            'name': exam.name,
+                            'model_type': model_type
+                        })
+                    else:
+                        # For Exam model, we need to convert or create equivalent RoutineExam
+                        # This is a design decision - for now, let's log and skip
+                        logger.warning(f"[ASSIGN_EXAM_TO_SCHEDULE] Cannot assign Exam model to RoutineExam matrix: {exam.name}")
+                        assignment_errors.append(f"Exam {exam.name} (Exam model) cannot be assigned to schedule matrix")
+                
+            except Exception as e:
+                logger.error(f"[ASSIGN_EXAM_TO_SCHEDULE] Error assigning exam {exam_id}: {e}")
+                assignment_errors.append(f"Error assigning exam {exam_id}: {str(e)}")
+        
+        # Update matrix cell status
+        if assigned_exams:
+            if matrix_cell.status == 'EMPTY':
+                matrix_cell.status = 'SCHEDULED'
+                matrix_cell.save()
+        
+        response_data = {
+            'success': len(assigned_exams) > 0,
+            'message': f"Assigned {len(assigned_exams)} exam(s) to {time_period_type.lower()} {time_period_value}",
+            'assigned_exams': assigned_exams,
+            'assignment_errors': assignment_errors,
+            'matrix_cell_id': str(matrix_cell.id),
+            'time_period': {
+                'type': time_period_type,
+                'value': time_period_value,
+                'display': matrix_cell.get_time_period_display(),
+                'academic_year': academic_year
+            }
+        }
+        
+        logger.info(f"[ASSIGN_EXAM_TO_SCHEDULE] SUCCESS: Assigned {len(assigned_exams)} exams, {len(assignment_errors)} errors")
+        print(f"[ASSIGN_EXAM_TO_SCHEDULE] === SUCCESS ===")
+        print(f"[ASSIGN_EXAM_TO_SCHEDULE] Assigned: {len(assigned_exams)}")
+        print(f"[ASSIGN_EXAM_TO_SCHEDULE] Errors: {len(assignment_errors)}")
+        
+        return JsonResponse(response_data)
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"[ASSIGN_EXAM_TO_SCHEDULE] Invalid JSON: {e}")
+        return JsonResponse({'success': False, 'error': 'Invalid request data'}, status=400)
+    except Exception as e:
+        logger.error(f"[ASSIGN_EXAM_TO_SCHEDULE] Error: {e}", exc_info=True)
+        print(f"[ASSIGN_EXAM_TO_SCHEDULE] === ERROR ===")
+        print(f"[ASSIGN_EXAM_TO_SCHEDULE] {str(e)}")
+        return JsonResponse({
+            'success': False, 
+            'error': f'Error assigning exams: {str(e)}'
+        }, status=500)

@@ -321,6 +321,11 @@ def classes_exams_unified_view(request):
         
         # Filter out classes user already has access to + pending/approved requests
         for code, curriculum in CLASS_CODE_CURRICULUM_MAPPING.items():
+            # Debug logging for the issue where "Curriculum Level" appears
+            if code in ['PS1', 'P1', 'P2', 'A2', 'B2'] and curriculum != code:
+                logger.error(f"[CURRICULUM_BUG] Code '{code}' has unexpected curriculum: '{curriculum}' (should be '{code}')")
+                print(f"[CURRICULUM_BUG] ALERT: {code} -> {curriculum} (expected {code})")
+            
             # Skip if user already has access to this class
             if code not in my_class_codes and code not in existing_requests:
                 # ENHANCED FIX: Smart deduplication for various redundancy patterns
@@ -355,35 +360,42 @@ def classes_exams_unified_view(request):
                 # Case 5: Character-based similarity check for tricky cases
                 # Handle cases like "Hight1_SaiSun_3-5" vs "Hight SaiSun 3-5" (high similarity, minor differences)
                 else:
-                    # Calculate character-based similarity
-                    code_chars = set(code.replace('_', '').replace('-', '').replace(' ', '').lower())
-                    curriculum_chars = set(curriculum.replace('_', '').replace('-', '').replace(' ', '').lower())
-                    
-                    if code_chars and curriculum_chars:  # Avoid division by zero
-                        intersection = code_chars & curriculum_chars
-                        union = code_chars | curriculum_chars
-                        similarity = len(intersection) / len(union) if union else 0
+                    # CRITICAL FIX: Never append generic text like "Curriculum Level"
+                    # If curriculum is a generic placeholder, just use the code
+                    if curriculum == "Curriculum Level" or curriculum == "Curriculum level":
+                        class_display_name = code
+                        dedup_reason = "PLACEHOLDER_DETECTED"
+                        logger.warning(f"[PLACEHOLDER_FIX] Code '{code}' had placeholder curriculum text, using code only")
+                    else:
+                        # Calculate character-based similarity
+                        code_chars = set(code.replace('_', '').replace('-', '').replace(' ', '').lower())
+                        curriculum_chars = set(curriculum.replace('_', '').replace('-', '').replace(' ', '').lower())
                         
-                        # Also check length difference
-                        code_clean = code.replace('_', '').replace('-', '').replace(' ', '').lower()
-                        curriculum_clean = curriculum.replace('_', '').replace('-', '').replace(' ', '').lower()
-                        length_diff = abs(len(code_clean) - len(curriculum_clean))
-                        
-                        # High similarity + small length difference = probably the same thing formatted differently
-                        if similarity > 0.85 and length_diff <= 3:
-                            class_display_name = curriculum  # Show the more readable version
-                            dedup_reason = "HIGH_SIMILARITY"
+                        if code_chars and curriculum_chars:  # Avoid division by zero
+                            intersection = code_chars & curriculum_chars
+                            union = code_chars | curriculum_chars
+                            similarity = len(intersection) / len(union) if union else 0
                             
-                            # DEBUG: Log similarity matches for troubleshooting
-                            logger.debug(f"[HIGH_SIMILARITY] {code} vs {curriculum}: similarity={similarity:.2f}, length_diff={length_diff}")
-                            if code in debug_codes:
-                                print(f"[SIMILARITY_DEBUG] {code} -> {curriculum} (similarity: {similarity:.2f}, length_diff: {length_diff})")
+                            # Also check length difference
+                            code_clean = code.replace('_', '').replace('-', '').replace(' ', '').lower()
+                            curriculum_clean = curriculum.replace('_', '').replace('-', '').replace(' ', '').lower()
+                            length_diff = abs(len(code_clean) - len(curriculum_clean))
+                            
+                            # High similarity + small length difference = probably the same thing formatted differently
+                            if similarity > 0.85 and length_diff <= 3:
+                                class_display_name = curriculum  # Show the more readable version
+                                dedup_reason = "HIGH_SIMILARITY"
+                                
+                                # DEBUG: Log similarity matches for troubleshooting
+                                logger.debug(f"[HIGH_SIMILARITY] {code} vs {curriculum}: similarity={similarity:.2f}, length_diff={length_diff}")
+                                if code in debug_codes:
+                                    print(f"[SIMILARITY_DEBUG] {code} -> {curriculum} (similarity: {similarity:.2f}, length_diff: {length_diff})")
+                            else:
+                                class_display_name = f"{code} - {curriculum}"
+                                dedup_reason = "DIFFERENT_CONTENT"
                         else:
                             class_display_name = f"{code} - {curriculum}"
                             dedup_reason = "DIFFERENT_CONTENT"
-                    else:
-                        class_display_name = f"{code} - {curriculum}"
-                        dedup_reason = "DIFFERENT_CONTENT"
                     
                 available_classes.append({
                     'class_code': code,

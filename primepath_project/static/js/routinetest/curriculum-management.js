@@ -47,7 +47,6 @@ async function loadAdminClasses() {
             tableBody.innerHTML = data.classes.map(cls => `
                 <tr id="class-row-${cls.code}">
                     <td>${cls.code}</td>
-                    <td>${cls.name}</td>
                     <td>
                         <span class="curriculum-display" id="curr-display-${cls.code}">
                             ${cls.curriculum || 'Not Assigned'}
@@ -81,9 +80,9 @@ async function loadAdminClasses() {
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button type="button" class="btn-save" onclick="saveCurriculumMapping('${cls.code}'); return false;" title="Save curriculum mapping" style="width: 75px !important; padding: 8px 15px !important; background: #2E7D32 !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 13px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.4 !important; box-sizing: border-box !important; white-space: nowrap !important;">Save</button>
-                            <button type="button" class="btn-edit" onclick="editClass('${cls.code}'); return false;" title="Edit class details" style="width: 75px !important; padding: 8px 15px !important; background: #1976D2 !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 13px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.4 !important; box-sizing: border-box !important; white-space: nowrap !important;">Edit</button>
-                            <button type="button" class="btn-delete" onclick="deleteClass('${cls.code}'); return false;" title="Delete class" style="width: 75px !important; padding: 8px 15px !important; background: #D32F2F !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 13px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.4 !important; box-sizing: border-box !important; white-space: nowrap !important;">Delete</button>
+                            <button type="button" class="btn-save" onclick="saveCurriculumMapping('${cls.code}'); return false;" title="Save curriculum mapping" style="width: 80px !important; padding: 6px 10px !important; background: #2E7D32 !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 12px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.2 !important; box-sizing: border-box !important; white-space: nowrap !important; margin: 0 2px !important;">Save</button>
+                            <button type="button" class="btn-edit" onclick="editClass('${cls.code}'); return false;" title="Edit class details" style="width: 80px !important; padding: 6px 10px !important; background: #1976D2 !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 12px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.2 !important; box-sizing: border-box !important; white-space: nowrap !important; margin: 0 2px !important;">Edit</button>
+                            <button type="button" class="btn-delete" onclick="deleteClass('${cls.code}'); return false;" title="Delete class" style="width: 80px !important; padding: 6px 10px !important; background: #D32F2F !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 12px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.2 !important; box-sizing: border-box !important; white-space: nowrap !important; margin: 0 2px !important;">Delete</button>
                         </div>
                     </td>
                 </tr>
@@ -318,7 +317,7 @@ async function editClass(classCode) {
         const data = await response.json();
         
         document.getElementById('classCode').value = data.code;
-        document.getElementById('className').value = data.name;
+        // Class name field has been removed from UI
         
         if (data.program) {
             document.getElementById('programSelect').value = data.program;
@@ -420,13 +419,14 @@ function closeClassModal() {
 // Save class (create or update)
 async function saveClass() {
     const classCode = document.getElementById('classCode').value;
-    const className = document.getElementById('className').value;
+    // Class name is now auto-generated from class code
+    const className = classCode; // Use class code as the name
     const program = document.getElementById('programSelect').value;
     const subprogram = document.getElementById('subProgramSelect').value;
     const level = document.getElementById('levelSelect').value;
     
-    if (!classCode || !className) {
-        alert('Please fill in Class Code and Class Name');
+    if (!classCode) {
+        alert('Please fill in Class Code');
         return;
     }
     
@@ -461,7 +461,7 @@ async function saveClass() {
             loadAdminClasses();
         } else {
             const error = await response.json();
-            alert('Failed to save class: ' + (error.message || 'Unknown error'));
+            alert('Failed to save class: ' + (error.error || error.message || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving class:', error);

@@ -66,6 +66,11 @@ urlpatterns = [
          class_access.api_class_current_teachers, 
          name='api_class_teachers'),
     
+    # API endpoint for pending requests count (for notification refresh)
+    path('access/api/pending-requests-count/', 
+         class_access.get_pending_requests_count, 
+         name='api_pending_requests_count'),
+    
     # Admin management - Legacy endpoints (kept for compatibility)
     path('access/admin/teacher-assignments/', 
          class_access.admin_teacher_assignments, 

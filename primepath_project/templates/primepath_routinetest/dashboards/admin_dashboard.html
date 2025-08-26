@@ -1,5 +1,6 @@
 {% extends "routinetest_base.html" %}
 {% load static %}
+<!-- BUTTON CONSISTENCY FIX v4.2 - FORCE CACHE CLEAR 2025-08-26-15:09 -->
 
 {% block title %}{{ page_title }}{% endblock %}
 
@@ -174,29 +175,41 @@
     z-index: 2;
 }
 
-/* Enhanced Button Styling */
-.admin-dashboard .btn-admin-primary,
-.admin-dashboard .btn-admin-primary:link,
-.admin-dashboard .btn-admin-primary:visited,
-.admin-dashboard .btn-admin-primary:active {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
+/* STANDARDIZED ADMIN DASHBOARD BUTTONS - CONSISTENT DIMENSIONS & TYPOGRAPHY */
+
+/* PRIMARY BUTTON (Green - Manage Classes) */
+.admin-dashboard .admin-card .btn-admin-primary,
+.admin-dashboard .admin-card .btn-admin-primary:link,
+.admin-dashboard .admin-card .btn-admin-primary:visited,
+.admin-dashboard .admin-card .btn-admin-primary:active,
+.admin-dashboard .admin-grid .admin-card .btn-admin-primary {
+    /* Base properties */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    position: relative !important;
+    z-index: 2 !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    min-height: 44px !important;
+    min-width: 160px !important;
+    box-sizing: border-box !important;
+    /* Primary button specific */
     background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%) !important;
     color: #FFFFFF !important;
-    text-decoration: none !important;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1.05rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    cursor: pointer;
-    position: relative;
-    z-index: 2;
     box-shadow: 
-        0 4px 12px rgba(27, 94, 32, 0.3),
-        0 2px 4px rgba(0, 0, 0, 0.1);
+        0 3px 8px rgba(27, 94, 32, 0.25),
+        0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .admin-dashboard .btn-admin-primary::after {
@@ -210,63 +223,114 @@
     background: linear-gradient(135deg, #2E7D32 0%, #00A65E 100%) !important;
     color: #FFFFFF !important;
     text-decoration: none !important;
-    transform: translateY(-2px) scale(1.05);
+    transform: translateY(-1px) scale(1.02) !important;
     box-shadow: 
-        0 8px 24px rgba(27, 94, 32, 0.4),
-        0 4px 8px rgba(0, 0, 0, 0.15);
+        0 4px 12px rgba(27, 94, 32, 0.35),
+        0 2px 6px rgba(0, 0, 0, 0.12) !important;
 }
 
 .admin-dashboard .btn-admin-primary:hover::after {
     transform: translateX(4px);
 }
 
-.admin-dashboard .btn-admin-logout,
-.admin-dashboard .btn-admin-logout:link,
-.admin-dashboard .btn-admin-logout:visited,
-.admin-dashboard .btn-admin-logout:active {
-    display: inline-block;
-    padding: 12px 24px;
-    background: #e74c3c !important;
-    color: #FFFFFF !important;
+/* SECONDARY BUTTON (Yellow/Cream - Status badges) */
+.admin-dashboard .admin-card .status-coming-soon,
+.admin-dashboard .admin-grid .admin-card .status-coming-soon,
+div[style*="justify-content: center"] .status-coming-soon {
+    /* Base properties */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer !important;
     text-decoration: none !important;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: none;
-    cursor: pointer;
-}
-
-.admin-dashboard .btn-admin-logout:hover,
-.admin-dashboard .btn-admin-logout:focus {
-    background: #c0392b !important;
-    color: #FFFFFF !important;
-    text-decoration: none !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(192, 57, 43, 0.3);
-}
-
-/* Enhanced Status indicators */
-.status-coming-soon {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #FFF9C4 0%, #FFFDE7 100%);
-    color: #F57C00;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-top: 12px;
-    box-shadow: 0 2px 8px rgba(245, 124, 0, 0.15);
-    border: 1px solid rgba(245, 124, 0, 0.2);
-    position: relative;
-    z-index: 2;
+    position: relative !important;
+    z-index: 2 !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    min-height: 44px !important;
+    min-width: 160px !important;
+    box-sizing: border-box !important;
+    /* Secondary button specific */
+    background: linear-gradient(135deg, #FFF9C4 0%, #FFFDE7 100%) !important;
+    color: #F57C00 !important;
+    border: 1px solid rgba(245, 124, 0, 0.2) !important;
+    box-shadow: 
+        0 3px 8px rgba(245, 124, 0, 0.25), 
+        0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .status-coming-soon::before {
     content: '⏳';
     font-size: 0.9em;
+}
+
+.status-coming-soon:hover {
+    background: linear-gradient(135deg, #FFF8C4 0%, #FFF59D 100%) !important;
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow: 
+        0 4px 12px rgba(245, 124, 0, 0.35), 
+        0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* DANGER BUTTON (Red - Logout) */
+.admin-dashboard .btn-admin-logout,
+.admin-dashboard .btn-admin-logout:link,
+.admin-dashboard .btn-admin-logout:visited,
+.admin-dashboard .btn-admin-logout:active {
+    /* Base properties */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    position: relative !important;
+    z-index: 2 !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+    min-height: 44px !important;
+    min-width: 160px !important;
+    box-sizing: border-box !important;
+    /* Danger button specific */
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 
+        0 3px 8px rgba(231, 76, 60, 0.25),
+        0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.admin-dashboard .btn-admin-logout:hover,
+.admin-dashboard .btn-admin-logout:focus {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%) !important;
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow: 
+        0 4px 12px rgba(192, 57, 43, 0.35),
+        0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+
+/* FORCE CENTER ALIGNMENT - HIGHEST PRIORITY */
+div[style*="justify-content: center"] .btn-admin-primary,
+div[style*="justify-content: center"] .status-coming-soon,
+div[style*="justify-content: center"] .btn-admin-logout {
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 /* Responsive adjustments */
@@ -316,26 +380,32 @@
         <div class="admin-card">
             <h3>🏫 Manage Classes</h3>
             <p>Create, configure, and manage all class structures in the system. Assign teachers and organize curriculum.</p>
-            <a href="{% url 'RoutineTest:manage_classes' %}" class="btn-admin-primary">
-                Manage Classes
-            </a>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <a href="{% url 'RoutineTest:manage_classes' %}" class="btn-admin-primary" style="margin: 0 auto !important; display: inline-flex !important; justify-content: center !important;">
+                    Manage Classes
+                </a>
+            </div>
         </div>
         
         <div class="admin-card">
             <h3>👥 Teachers</h3>
             <p>View all registered teachers and their assignments. Manage teacher permissions and access levels.</p>
-            <div class="status-coming-soon">Assign via Classes</div>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <div class="status-coming-soon" style="margin: 0 auto !important; display: inline-flex !important; justify-content: center !important;">Assign via Classes</div>
+            </div>
         </div>
         
         <div class="admin-card">
             <h3>🎓 Students</h3>
             <p>Complete student management system including registration, progress tracking, and performance analytics.</p>
-            <div class="status-coming-soon">Coming Day 3</div>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <div class="status-coming-soon" style="margin: 0 auto !important; display: inline-flex !important; justify-content: center !important;">Coming Day 3</div>
+            </div>
         </div>
     </div>
     
     <!-- Logout Section -->
-    <div style="margin-top: 40px;">
+    <div style="margin-top: 40px; display: flex; justify-content: center; align-items: center;">
         <a href="{% url 'RoutineTest:logout' %}" class="btn-admin-logout">
             🔓 Logout
         </a>

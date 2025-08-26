@@ -127,15 +127,21 @@ def create_class(request):
     
     try:
         data = json.loads(request.body)
+        logger.info(f"[CREATE_CLASS] Request data: {data}")
         code = data.get('code')
         
         if not code:
+            logger.error("[CREATE_CLASS] Missing class code in request")
             return JsonResponse({'error': 'Class code is required'}, status=400)
         
         # Check if class code exists in constants
         class_exists = any(c[0] == code for c in CLASS_CODE_CHOICES)
         if not class_exists:
-            return JsonResponse({'error': 'Invalid class code. Use predefined class codes.'}, status=400)
+            valid_codes = [c[0] for c in CLASS_CODE_CHOICES[:10]]  # Show first 10 examples
+            logger.error(f"[CREATE_CLASS] Invalid class code '{code}'. Valid codes: {[c[0] for c in CLASS_CODE_CHOICES]}")
+            return JsonResponse({
+                'error': f'Invalid class code "{code}". Use predefined class codes like: {", ".join(valid_codes)}...'
+            }, status=400)
         
         # Create curriculum mapping if provided
         program_code = data.get('program')
@@ -203,6 +209,7 @@ def create_class(request):
                 modified_by=request.user
             )
         
+        logger.info(f"[CREATE_CLASS] Successfully created class mapping for {code}")
         return JsonResponse({
             'success': True,
             'message': 'Class mapping created successfully',
