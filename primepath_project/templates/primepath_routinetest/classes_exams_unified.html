@@ -269,12 +269,30 @@
         border: none;
     }
     
-    .program-header.core { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
-    .program-header.ascent { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
-    .program-header.edge { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
-    .program-header.pinnacle { background: linear-gradient(135deg, #1B5E20, #2E7D32) !important; }
+    /* STANDARDIZED PROGRAM HEADERS - All programs use PINNACLE styling (v2.1) */
+    .program-header.core,
+    .program-header.ascent, 
+    .program-header.edge,
+    .program-header.pinnacle,
+    .programs-container .program-header.core,
+    .programs-container .program-header.ascent,
+    .programs-container .program-header.edge,
+    .programs-container .program-header.pinnacle,
+    body .program-header.core,
+    body .program-header.ascent,
+    body .program-header.edge,
+    body .program-header.pinnacle {
+        background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%) !important;
+        background-color: #1B5E20 !important;
+        border: none !important;
+        color: white !important;
+        border-radius: 12px 12px 0 0 !important;
+    }
     
-    .program-title {
+    /* STANDARDIZED PROGRAM TITLES - Consistent white text */
+    .program-title,
+    .program-header .program-title,
+    .programs-container .program-title {
         font-size: 20px;
         font-weight: 600;
         display: flex;
@@ -283,8 +301,12 @@
         color: white !important;
     }
     
-    /* Force all text inside program-title to be white */
-    .program-title * {
+    /* Force ALL text inside program headers to be white */
+    .program-title *,
+    .program-header *,
+    .program-summary,
+    .program-summary *,
+    .program-toggle {
         color: white !important;
     }
     

@@ -4,9 +4,9 @@
 {% block title %}Class Details - {{ class_display }}{% endblock %}
 
 {% block extra_css %}
-<!-- STRICT DARK GREEN DESIGN SYSTEM - CLASS DETAILS -->
+<!-- PROFESSIONAL CLASS DETAILS - BENCHMARK DESIGN SYSTEM -->
 <style>
-    /* Container and Layout - Enhanced */
+    /* Container and Layout - Clean and Professional */
     .class-details-container {
         max-width: 1400px;
         margin: 0 auto;
@@ -25,78 +25,80 @@
         }
     }
     
-    /* HEADER SECTION - PROFESSIONAL DARK GREEN THEME */
+    /* HEADER SECTION - BENCHMARK DESIGN PATTERN */
     .class-header {
-        background: var(--neutral-white);
-        padding: var(--spacing-xl);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-xl);
-        box-shadow: var(--shadow-md);
-        border: 2px solid var(--primary-dark-green);
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border: 1px solid #dee2e6;
     }
     
     .class-header h1 {
-        font-size: var(--font-h1);
-        margin: 0 0 var(--spacing-lg) 0;
+        font-size: 32px;
+        margin: 0 0 20px 0;
         display: flex;
         align-items: center;
-        gap: var(--spacing-lg);
-        color: var(--text-primary);
-        font-weight: var(--font-weight-bold);
+        gap: 15px;
+        color: #2E7D32;
+        font-weight: bold;
     }
     
     .class-meta {
         display: flex;
         gap: 30px;
         margin-top: 15px;
-        font-size: 1rem;
+        font-size: 16px;
     }
     
     .class-meta-item {
         display: flex;
         align-items: center;
         gap: 8px;
-        color: #6c757d;
+        color: #495057;
+        font-weight: 500;
     }
     
     .access-badge {
-        background: var(--primary-dark-green);
-        color: var(--text-on-green);
-        padding: var(--spacing-sm) var(--spacing-lg);
-        border-radius: var(--radius-pill);
-        font-size: var(--font-small);
-        font-weight: var(--font-weight-bold);
+        background: linear-gradient(135deg, #1B5E20, #2E7D32);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    /* TAB NAVIGATION - DARK GREEN PROFESSIONAL */
+    /* TAB NAVIGATION - BENCHMARK CLEAN DESIGN */
     .tab-navigation {
-        background: var(--green-bg-lightest);
-        margin-bottom: var(--spacing-xl);
+        background: white;
+        margin-bottom: 30px;
         display: flex;
-        gap: var(--spacing-sm);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-sm);
-        border: 2px solid var(--primary-medium-green);
-        box-shadow: var(--shadow-md);
+        gap: 8px;
+        border-radius: 12px;
+        padding: 8px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
     .tab-btn {
-        padding: var(--spacing-lg) var(--spacing-xl);
+        padding: 15px 25px;
         border: 2px solid transparent;
-        background: var(--neutral-white);
-        color: var(--text-muted);
-        font-size: var(--font-body);
-        font-weight: var(--font-weight-medium);
+        background: white;
+        color: #6c757d;
+        font-size: 16px;
+        font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
+        gap: 10px;
         position: relative;
-        border-radius: var(--radius-md);
+        border-radius: 8px;
         flex: 1;
         justify-content: center;
         text-align: center;
@@ -104,26 +106,26 @@
     }
     
     .tab-btn:hover {
-        color: var(--text-primary);
-        background: var(--green-bg-lightest);
-        border-color: var(--primary-medium-green);
+        color: #495057;
+        background: #f8f9fa;
+        border-color: #dee2e6;
         transform: translateY(-1px);
     }
     
     .tab-btn.active {
-        color: var(--text-on-green);
-        background: var(--primary-dark-green);
-        border-color: var(--primary-dark-green);
-        font-weight: var(--font-weight-bold);
-        box-shadow: var(--shadow-lg);
+        color: white;
+        background: linear-gradient(135deg, #1B5E20, #2E7D32);
+        border-color: #2E7D32;
+        font-weight: 600;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         transform: translateY(-2px);
     }
     
     .tab-icon {
         font-size: 1.4rem;
-        padding: var(--spacing-sm);
+        padding: 6px;
         border-radius: 50%;
-        background: rgba(27, 94, 32, 0.1);
+        background: rgba(108, 117, 125, 0.1);
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
@@ -135,17 +137,16 @@
     .tab-btn.active .tab-icon {
         background: rgba(255, 255, 255, 0.2);
         transform: scale(1.1);
-        box-shadow: var(--shadow-sm);
     }
     
-    /* TAB CONTENT - PROFESSIONAL STYLING */
+    /* TAB CONTENT - BENCHMARK CLEAN STYLING */
     .tab-content {
-        background: var(--neutral-white);
-        border-radius: var(--radius-md);
-        padding: var(--spacing-xl);
-        box-shadow: var(--shadow-md);
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         min-height: 500px;
-        border: 2px solid var(--neutral-border);
+        border: 1px solid #dee2e6;
     }
     
     .tab-pane {
@@ -162,23 +163,23 @@
         to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Student Management Styles */
+    /* Student Management Styles - Benchmark Clean Design */
     .student-management-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 25px;
         padding-bottom: 15px;
-        border-bottom: 2px solid rgba(46, 125, 50, 0.1);
+        border-bottom: 3px solid #2E7D32;
     }
     
     .student-management-header h2 {
-        color: var(--text-primary);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-h2);
+        color: #2E7D32;
+        font-weight: bold;
+        font-size: 24px;
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
+        gap: 15px;
     }
     
     .student-management-header h2::before {
@@ -196,51 +197,51 @@
     }
     
     .add-student-btn {
-        background: var(--primary-dark-green) !important;
-        color: var(--text-on-green) !important;
-        border: 2px solid var(--primary-dark-green) !important;
-        padding: var(--spacing-md) var(--spacing-xl) !important;
-        border-radius: var(--radius-md) !important;
-        font-size: var(--font-body) !important;
-        font-weight: var(--font-weight-bold) !important;
+        background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
+        color: white !important;
+        border: 2px solid #2E7D32 !important;
+        padding: 12px 20px !important;
+        border-radius: 8px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
         cursor: pointer;
         display: inline-flex !important;
         align-items: center !important;
-        gap: var(--spacing-sm) !important;
+        gap: 8px !important;
         transition: all 0.3s ease;
         text-decoration: none !important;
-        box-shadow: var(--shadow-md);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         height: auto !important;
         line-height: normal !important;
     }
     
     .add-student-btn:hover {
-        background: var(--primary-medium-green) !important;
-        color: var(--text-on-green) !important;
-        border-color: var(--primary-medium-green) !important;
+        background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
+        color: white !important;
+        border-color: #388E3C !important;
         transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
-    /* Special style for Manage Students button - matches Add Student button */
+    /* Manage Students button - Professional outline style */
     .manage-students-btn,
     a.manage-students-btn,
     .manage-students-btn:link,
     .manage-students-btn:visited {
-        background: var(--neutral-white) !important;
-        color: var(--text-primary) !important;
-        border: 2px solid var(--primary-dark-green) !important;
-        padding: var(--spacing-md) var(--spacing-xl) !important;
-        border-radius: var(--radius-md) !important;
-        font-size: var(--font-body) !important;
-        font-weight: var(--font-weight-bold) !important;
+        background: white !important;
+        color: #2E7D32 !important;
+        border: 2px solid #2E7D32 !important;
+        padding: 12px 20px !important;
+        border-radius: 8px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
         cursor: pointer;
         display: inline-flex !important;
         align-items: center !important;
-        gap: var(--spacing-sm) !important;
+        gap: 8px !important;
         transition: all 0.3s ease;
         text-decoration: none !important;
-        box-shadow: var(--shadow-sm);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         height: auto !important;
         line-height: normal !important;
     }
@@ -249,11 +250,11 @@
     a.manage-students-btn:hover,
     .manage-students-btn:focus,
     .manage-students-btn:active {
-        background: var(--green-bg-lightest) !important;
-        color: var(--text-primary) !important;
+        background: #f8f9fa !important;
+        color: #2E7D32 !important;
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-        border-color: var(--primary-medium-green) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border-color: #388E3C !important;
         text-decoration: none !important;
     }
 
@@ -271,24 +272,25 @@
     }
     
     .student-card {
-        background: #f8f9fa;
+        background: white;
         border: 1px solid #dee2e6;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 20px;
         transition: all 0.3s ease;
         position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
     .student-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         border-color: #2E7D32;
     }
     
     .student-name {
         font-size: 1.2rem;
         font-weight: 600;
-        color: #2c3e50;
+        color: #495057;
         margin-bottom: 10px;
     }
     
@@ -345,23 +347,23 @@
         background: #c82333;
     }
     
-    /* Exam Schedule Styles */
+    /* Exam Schedule Styles - Benchmark Design */
     .schedule-controls {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 25px;
         padding-bottom: 15px;
-        border-bottom: 2px solid rgba(46, 125, 50, 0.1);
+        border-bottom: 3px solid #2E7D32;
     }
     
     .schedule-controls h2 {
-        color: var(--text-primary);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-h2);
+        color: #2E7D32;
+        font-weight: bold;
+        font-size: 24px;
         display: flex;
         align-items: center;
-        gap: var(--spacing-md);
+        gap: 15px;
     }
     
     .schedule-controls h2::before {
@@ -389,10 +391,10 @@
     }
     
     .toggle-btn.active {
-        background: var(--primary-dark-green);
-        color: var(--text-on-green);
-        font-weight: var(--font-weight-bold);
-        box-shadow: var(--shadow-md);
+        background: linear-gradient(135deg, #1B5E20, #2E7D32);
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .schedule-grid {
@@ -404,10 +406,11 @@
     .schedule-slot {
         background: white;
         border: 1px solid #dee2e6;
-        border-radius: 8px;
+        border-radius: 12px;
         padding: 20px;
         transition: all 0.3s ease;
         position: relative;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
     .schedule-slot::before {
@@ -427,7 +430,7 @@
     
     .schedule-slot:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         border-color: #2E7D32;
     }
     
@@ -443,7 +446,7 @@
     .slot-time-period {
         font-size: 1.1rem;
         font-weight: 600;
-        color: #2c3e50;
+        color: #495057;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -525,7 +528,7 @@
     
     .exam-name {
         font-weight: 600;
-        color: #2c3e50;
+        color: #495057;
         margin-bottom: 5px;
     }
     
@@ -542,25 +545,26 @@
     }
     
     .btn-start-exam {
-        background: var(--primary-dark-green) !important;
-        color: var(--text-on-green) !important;
-        border: 2px solid var(--primary-dark-green) !important;
-        padding: var(--spacing-sm) var(--spacing-lg);
-        border-radius: var(--radius-md);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-small);
+        background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
+        color: white !important;
+        border: 2px solid #2E7D32 !important;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
+        gap: 6px;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .btn-start-exam:hover {
-        background: var(--primary-medium-green) !important;
-        border-color: var(--primary-medium-green) !important;
+        background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
+        border-color: #388E3C !important;
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
     .btn-start-exam:active {
@@ -569,20 +573,20 @@
     }
     
     .btn-delete-exam {
-        background: var(--danger-red) !important;
-        color: var(--text-on-green) !important;
-        border: 2px solid var(--danger-red) !important;
-        padding: var(--spacing-md) var(--spacing-lg);
-        border-radius: var(--radius-md);
-        font-weight: var(--font-weight-bold);
-        font-size: var(--font-small);
+        background: #D32F2F !important;
+        color: white !important;
+        border: 2px solid #D32F2F !important;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: var(--spacing-sm);
+        gap: 6px;
         transition: all 0.3s ease;
-        box-shadow: var(--shadow-sm);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -591,7 +595,7 @@
         background: #B71C1C !important;
         border-color: #B71C1C !important;
         transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 4px 8px rgba(211, 47, 47, 0.2);
     }
     
     .btn-delete-exam:active {
@@ -641,6 +645,8 @@
         animation: slideUp 0.3s ease;
         display: flex;
         flex-direction: column;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        border: 1px solid #dee2e6;
     }
     
     @keyframes slideUp {
@@ -730,18 +736,20 @@
         font-size: 0.95rem;
         cursor: pointer;
         transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     
     .btn-cancel:hover {
         background: #f8f9fa;
         border-color: #6c757d;
         color: #495057;
+        transform: translateY(-1px);
     }
     
     .btn-primary {
-        background: #2E7D32;
+        background: linear-gradient(135deg, #1B5E20, #2E7D32);
         color: white;
-        border: none;
+        border: 2px solid #2E7D32;
         padding: 10px 24px;
         border-radius: 8px;
         font-weight: 600;
@@ -751,10 +759,11 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .btn-primary:hover:not(:disabled) {
-        background: #236027;
+        background: linear-gradient(135deg, #2E7D32, #388E3C);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
     }
@@ -817,12 +826,14 @@
         margin-bottom: 8px;
         background: white;
         border: 2px solid transparent;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     
     .student-option:hover {
-        background: #f0f4f8;
+        background: #f8f9fa;
         border-color: #dee2e6;
         transform: translateX(4px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     }
     
     .student-option.selected {
@@ -874,9 +885,9 @@
         text-align: center;
         padding: 50px;
         color: #6c757d;
-        background: rgba(46, 125, 50, 0.02);
+        background: #f8f9fa;
         border-radius: 12px;
-        border: 2px dashed rgba(46, 125, 50, 0.2);
+        border: 2px dashed #dee2e6;
     }
     
     .empty-state-icon {
@@ -987,8 +998,8 @@
     }
     
     .launch-summary {
-        background: #e8f5e8;
-        border: 1px solid #c3e6cb;
+        background: #E8F5E9;
+        border: 1px solid #2E7D32;
         padding: 15px;
         border-radius: 8px;
         margin-top: 20px;
@@ -996,7 +1007,7 @@
     
     .launch-summary-title {
         font-weight: 600;
-        color: #155724;
+        color: #1B5E20;
         margin-bottom: 10px;
         display: flex;
         align-items: center;
@@ -1008,7 +1019,7 @@
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 10px;
         font-size: 0.9rem;
-        color: #155724;
+        color: #1B5E20;
     }
     
     /* Responsive Design */
