@@ -8,6 +8,7 @@ from .dashboard_service import DashboardService
 from .file_service import FileService
 from .config_service import ConfigurationService
 from .security_service import SecurityService
+from .data_service import DataService
 
 __all__ = [
     'CurriculumService',
@@ -17,4 +18,5 @@ __all__ = [
     'FileService',
     'ConfigurationService',
     'SecurityService',
+    'DataService',
 ]

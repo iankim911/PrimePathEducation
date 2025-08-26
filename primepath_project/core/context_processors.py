@@ -2,9 +2,13 @@
 Context Processors for PrimePath
 Makes configuration and common data available to all templates
 Created: August 26, 2025
+
+Phase 3 Enhancement: Data Configuration Context
+Provides dynamic data constraints and validation rules to templates
 """
 
 from .services.config_service import ConfigurationService, get_config_for_frontend
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -180,4 +184,52 @@ def app_info_context(request):
                 'support_email': 'support@example.com',
                 'build_date': '2025-08-26',
             }
+        }
+
+
+def data_config_context(request):
+    """
+    Add data configuration to templates - Phase 3 Enhancement
+    Provides dynamic field constraints, validation rules, and business logic
+    """
+    try:
+        from .services.data_service import DataService
+        
+        # Get all data configurations
+        data_config = {
+            'user_fields': DataService.get_user_field_lengths(),
+            'student_profile': DataService.get_student_profile_constraints(),
+            'teacher_profile': DataService.get_teacher_profile_constraints(),
+            'exam_constraints': DataService.get_exam_constraints(),
+            'question_constraints': DataService.get_question_constraints(),
+            'pagination': DataService.get_pagination_settings(),
+            'validation': DataService.get_validation_rules(),
+            'business_rules': DataService.get_business_rules(),
+            'file_upload': DataService.get_file_upload_constraints(),
+        }
+        
+        # Make available as both template variable and JavaScript
+        context = {
+            'data_config': data_config,
+            'data_config_json': json.dumps(data_config, default=str),
+        }
+        
+        logger.debug(f"[DATA_CONFIG_PROCESSOR] Data configuration provided for {request.path}")
+        return context
+        
+    except Exception as e:
+        logger.error(f"[DATA_CONFIG_PROCESSOR] Error providing data configuration: {e}")
+        # Return safe fallbacks on error
+        fallback_config = {
+            'user_fields': {'username_max_length': 150, 'email_max_length': 254},
+            'student_profile': {'name_max_length': 100, 'student_id_max_length': 20},
+            'pagination': {'default_page_size': 25, 'max_page_size': 100},
+            'validation': {'password_min_length': 8, 'phone_number_formats': []},
+            'business_rules': {'max_concurrent_sessions': 3, 'session_timeout_minutes': 120},
+            'file_upload': {'pdf_max_size_mb': 10, 'audio_max_size_mb': 50},
+        }
+        
+        return {
+            'data_config': fallback_config,
+            'data_config_json': json.dumps(fallback_config),
         }

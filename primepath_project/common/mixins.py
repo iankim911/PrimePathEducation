@@ -146,13 +146,25 @@ class RequestValidationMixin:
 
 
 class PaginationMixin(ContextMixin):
-    """Add pagination support to views."""
+    """Add pagination support to views with dynamic configuration from DataService."""
     
-    paginate_by = 20
+    # Dynamic pagination using DataService - Phase 3 Enhancement
+    @property
+    def paginate_by(self):
+        """Get pagination size from DataService dynamically"""
+        try:
+            from core.services.data_service import get_pagination_size
+            page_size = get_pagination_size('default')
+            logger.debug(f"[PAGINATION_MIXIN] Using dynamic pagination size: {page_size}")
+            return page_size
+        except ImportError:
+            logger.warning("[PAGINATION_MIXIN] DataService not available, using fallback: 20")
+            return 20
     
     def get_paginate_by(self, queryset=None):
         """
         Get the number of items to paginate by.
+        Phase 3: Now uses DataService for dynamic configuration
         
         Returns:
             Integer

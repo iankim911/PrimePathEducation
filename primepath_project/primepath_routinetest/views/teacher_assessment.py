@@ -97,8 +97,14 @@ def teacher_assessment_view(request):
         status='PENDING'
     ).select_related('teacher').order_by('-requested_at')
     
-    # Get recent audit logs
-    recent_logs = AccessAuditLog.objects.all()[:20]
+    # Get recent audit logs - Phase 3: Dynamic limit using DataService
+    try:
+        from core.services.data_service import get_query_limit
+        audit_limit = get_query_limit('dashboard_recent')
+    except ImportError:
+        audit_limit = 20  # Fallback
+    
+    recent_logs = AccessAuditLog.objects.all()[:audit_limit]
     
     # Statistics
     stats = {

@@ -1,6 +1,9 @@
 """
 CRUD Base Views - Common patterns for Create, Read, Update, Delete operations
 Part of Phase 11: Final Integration & Testing
+
+Phase 3 Enhancement: Dynamic pagination using DataService
+Removes hardcoded pagination values for environment flexibility
 """
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,21 +12,36 @@ from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.db.models import Q
 from common.mixins import AjaxResponseMixin, TeacherRequiredMixin
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BaseListView(LoginRequiredMixin, ListView):
     """
     Base class for list views with common functionality:
-    - Pagination
+    - Dynamic pagination using DataService
     - Search
     - Filtering
     - Sorting
     """
-    paginate_by = 20
     search_fields = []
     filter_fields = {}
     ordering_fields = []
     default_ordering = '-created_at'
+    
+    # Dynamic pagination using DataService
+    @property
+    def paginate_by(self):
+        """Get pagination size from DataService"""
+        try:
+            from core.services.data_service import get_pagination_size
+            page_size = get_pagination_size('default')
+            logger.debug(f"[CRUD] Using pagination size: {page_size}")
+            return page_size
+        except ImportError:
+            logger.warning("[CRUD] DataService not available, using fallback pagination: 20")
+            return 20
     
     def get_queryset(self):
         """Get queryset with search, filter, and ordering applied"""

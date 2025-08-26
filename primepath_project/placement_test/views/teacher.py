@@ -269,7 +269,16 @@ class TeacherSessionListView(TeacherRequiredMixin, ListView):
     """
     template_name = 'core/teacher_sessions.html'
     context_object_name = 'sessions'
-    paginate_by = 25
+    
+    # Phase 3: Dynamic pagination using DataService
+    @property
+    def paginate_by(self):
+        """Get pagination size from DataService for sessions"""
+        try:
+            from core.services.data_service import get_pagination_size
+            return get_pagination_size('sessions')
+        except ImportError:
+            return 25  # Fallback for early initialization
     
     def get_queryset(self):
         queryset = StudentSession.objects.select_related('exam').order_by('-started_at')

@@ -132,6 +132,8 @@ TEMPLATES = [
                 'core.context_processors.user_context',  # User role information
                 'core.context_processors.feature_flags_context',  # Feature flags
                 'core.context_processors.app_info_context',  # App information
+                # Phase 3 Data Configuration Context Processor
+                'core.context_processors.data_config_context',  # Data constraints and validation rules
             ],
         },
     },
