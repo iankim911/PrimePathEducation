@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from primepath_routinetest.models import RoutineExam as Exam
-from primepath_routinetest.services.exam_service import ExamService
+from ..services import ExamService
 import logging
 
 logger = logging.getLogger(__name__)
