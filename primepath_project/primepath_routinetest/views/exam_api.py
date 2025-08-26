@@ -12,8 +12,8 @@ import logging
 
 from ..models import ExamAssignment, Class, StudentEnrollment
 from ..models.class_access import TeacherClassAssignment  # Import from correct module
-from ..models.exam_management import RoutineExam  # Use RoutineExam for exam management
-# Removed legacy Exam import - only use RoutineExam for RoutineTest module
+from ..models.exam_management import ManagedExam  # Use ManagedExam from exam_management
+from ..models import RoutineExam as Exam  # Use RoutineExam from main models
 from core.models import Student, Teacher
 from placement_test.models import StudentSession
 
@@ -61,7 +61,7 @@ def get_class_overview(request, class_code):
             ).select_related('exam')
             
             for assignment in assignments:
-                exam = assignment.exam  # This is a RoutineExam instance
+                exam = assignment.exam  # This is a Exam instance
                 exam_name = exam.name
                 exam_type = getattr(exam, 'exam_type', 'monthly_review')
                 
@@ -73,7 +73,7 @@ def get_class_overview(request, class_code):
                     'name': exam_name,
                     'type': type_display,
                     'status': 'Assigned',
-                    'duration': 60  # RoutineExam doesn't have timer_minutes field
+                    'duration': 60  # Exam doesn't have timer_minutes field
                 })
         
         # Method 2: Get exams from ExamScheduleMatrix
@@ -101,7 +101,7 @@ def get_class_overview(request, class_code):
                     if str(exam.id) not in existing_ids:
                         exam_type = getattr(exam, 'exam_type', None)
                         if exam_type:
-                            # RoutineExam
+                            # Exam
                             type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
                             duration = 60
                         else:
@@ -157,7 +157,7 @@ def get_class_exams(request, class_code):
                 ).select_related('exam')
                 
                 for assignment in assignments:
-                    exam = assignment.exam  # This is a RoutineExam instance
+                    exam = assignment.exam  # This is a Exam instance
                     exam_type = getattr(exam, 'exam_type', 'monthly_review')
                     type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
                     
@@ -165,10 +165,10 @@ def get_class_exams(request, class_code):
                         'id': str(exam.id),
                         'name': exam.name,
                         'type': type_display,
-                        'duration': 60,  # Default duration for RoutineExam
+                        'duration': 60,  # Default duration for Exam
                         'question_count': len(exam.get_questions()) if hasattr(exam, 'get_questions') else 0,
                         'created_date': exam.created_at.strftime('%Y-%m-%d') if hasattr(exam, 'created_at') else '',
-                        'status': 'Active',  # RoutineExam.is_active field
+                        'status': 'Active',  # Exam.is_active field
                         'source': 'ExamAssignment'
                     })
         except Exception as e:
@@ -196,10 +196,10 @@ def get_class_exams(request, class_code):
                         # Check if this exam is already in the list from ExamAssignment
                         existing_exam_ids = [e['id'] for e in exams]
                         if str(exam.id) not in existing_exam_ids:
-                            # Handle both RoutineExam and legacy Exam
+                            # Handle both Exam and legacy Exam
                             exam_type = getattr(exam, 'exam_type', None)
                             if exam_type:
-                                # This is a RoutineExam
+                                # This is a Exam
                                 type_display = 'Review' if exam_type == 'monthly_review' else 'Quarterly'
                                 duration = 60
                                 question_count = len(exam.get_questions()) if hasattr(exam, 'get_questions') else 0
@@ -483,7 +483,7 @@ def get_class_filtered_exams(request, class_code):
         
         exams = []
         
-        # Use RoutineExam for routine test management (already imported at top)
+        # Use Exam for routine test management (already imported at top)
         
         # Build filter conditions with defensive programming
         filter_conditions = {
@@ -509,17 +509,17 @@ def get_class_filtered_exams(request, class_code):
                 # Try both new and legacy fields for backward compatibility
                 time_period_q = Q(time_period_month=time_period) | Q(quarter=time_period)
                 filter_conditions_combined = {**filter_conditions}
-                filtered_exams = RoutineExam.objects.filter(Q(**filter_conditions_combined) & time_period_q)
+                filtered_exams = Exam.objects.filter(Q(**filter_conditions_combined) & time_period_q)
                 
             elif exam_type == 'QUARTERLY':
                 # Try both new and legacy fields for backward compatibility
                 time_period_q = Q(time_period_quarter=time_period) | Q(quarter=time_period)
                 filter_conditions_combined = {**filter_conditions}
-                filtered_exams = RoutineExam.objects.filter(Q(**filter_conditions_combined) & time_period_q)
+                filtered_exams = Exam.objects.filter(Q(**filter_conditions_combined) & time_period_q)
             else:
-                filtered_exams = RoutineExam.objects.filter(**filter_conditions)
+                filtered_exams = Exam.objects.filter(**filter_conditions)
         else:
-            filtered_exams = RoutineExam.objects.filter(**filter_conditions)
+            filtered_exams = Exam.objects.filter(**filter_conditions)
         
         logger.info(f"Initial filter found {filtered_exams.count()} exams before class association check")
         
@@ -669,11 +669,10 @@ def copy_exam(request):
         # Enhanced console logging
         logger.info(f"[COPY_EXAM_REQUEST] exam={source_exam_id}, class={target_class_code}, timeslot={target_timeslot}, year={academic_year}, suffix={custom_suffix}")
         
-        # Get source exam - Use RoutineExam model for compatibility with ExamScheduleMatrix
-        from primepath_routinetest.models.exam_management import RoutineExam
-        source_exam = RoutineExam.objects.filter(id=source_exam_id).first()
+        # Get source exam - Use Exam model for compatibility with ExamScheduleMatrix
+        source_exam = Exam.objects.filter(id=source_exam_id).first()
         if not source_exam:
-            logger.error(f"[COPY_EXAM_ERROR] Source exam not found in RoutineExam model: {source_exam_id}")
+            logger.error(f"[COPY_EXAM_ERROR] Source exam not found in Exam model: {source_exam_id}")
             # Try Exam as fallback (from primepath_routinetest.models)
             source_exam_alt = Exam.objects.filter(id=source_exam_id).first()
             if source_exam_alt:
@@ -708,7 +707,7 @@ def copy_exam(request):
         
         # Create a copy of the exam with the new name
         try:
-            # Use the user directly for RoutineExam.created_by field
+            # Use the user directly for Exam.created_by field
             created_by = request.user if request.user.is_authenticated else None
             
             # Create the copied exam
@@ -852,8 +851,8 @@ def update_exam_duration(request, exam_id):
         data = json.loads(request.body)
         duration = data.get('duration', 60)
         
-        # Get exam from RoutineExam only
-        exam = get_object_or_404(RoutineExam, id=exam_id)
+        # Get exam from Exam only
+        exam = get_object_or_404(Exam, id=exam_id)
         
         # Update the timer_minutes field which stores the exam duration
         exam.timer_minutes = duration
@@ -908,7 +907,7 @@ def generate_exam_name(exam_type, time_period, academic_year, source_exam, custo
     Generate exam name following the same convention as Upload Exam
     Format: [RT/QTR] - [Mon Year] - [Program] [SubProgram] Lv[X]_[custom]
     """
-    from primepath_routinetest.models import RoutineExam as Exam
+    # Already imported: from ..models import RoutineExam as Exam
     
     name_parts = []
     
@@ -974,14 +973,14 @@ def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time
     Create a copy of an exam with a new name and metadata
     UPDATED: Creates a new exam instance for ONE-TO-ONE relationship
     """
-    from primepath_routinetest.models import RoutineExam, Question, AudioFile, Exam
+    from primepath_routinetest.models import Question, AudioFile
     from django.db import transaction
     import uuid
     
     logger.info(f"[ONE_TO_ONE_FIX] Creating new exam copy for class {target_class_code}")
     
     with transaction.atomic():
-        # Create the new exam as RoutineExam (compatible with ExamScheduleMatrix)
+        # Create the new exam as Exam (compatible with ExamScheduleMatrix)
         # Extract curriculum level as string
         curriculum_level_str = ""
         if hasattr(source_exam, 'curriculum_level'):
@@ -995,7 +994,7 @@ def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time
             elif isinstance(curriculum, str):
                 curriculum_level_str = curriculum
         
-        copied_exam = RoutineExam.objects.create(
+        copied_exam = Exam.objects.create(
             id=uuid.uuid4(),
             name=new_name,
             exam_type=exam_type,
@@ -1020,8 +1019,8 @@ def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time
         # If source exam is an Exam instance, create an Exam copy
         if hasattr(source_exam, 'class_code') or hasattr(source_exam, 'class_codes'):
             logger.info(f"[ONE_TO_ONE_FIX] Source is Exam model, creating Exam copy with single class")
-            # Create Exam instance instead of RoutineExam
-            from primepath_routinetest.models import RoutineExam as Exam
+            # Create Exam instance
+            # Already imported: from ..models import RoutineExam as Exam
             
             copied_exam = Exam.objects.create(
                 id=uuid.uuid4(),
@@ -1065,12 +1064,12 @@ def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time
             logger.info(f"[ONE_TO_ONE_FIX] Successfully created Exam copy {copied_exam.id} for class {target_class_code}")
             return copied_exam
         
-        # Otherwise continue with RoutineExam creation
-        logger.info(f"[ONE_TO_ONE_FIX] Creating RoutineExam copy (no class_code field)")
-        # Note: RoutineExam doesn't have class_code field - classes are managed through ExamScheduleMatrix
+        # Otherwise continue with Exam creation
+        logger.info(f"[ONE_TO_ONE_FIX] Creating Exam copy (no class_code field)")
+        # Note: Exam doesn't have class_code field - classes are managed through ExamScheduleMatrix
         
-        # Note: Skipping questions and audio files for RoutineExam copy
-        # because Question and AudioFile models expect primepath_routinetest.Exam, not RoutineExam
+        # Note: Skipping questions and audio files for Exam copy
+        # because Question and AudioFile models expect primepath_routinetest.Exam
         # The copied exam will need questions to be added separately through the exam editor
         
         logger.info(f"[CREATE_COPIED_EXAM] Successfully created exam copy: {copied_exam.id} - {copied_exam.name}")

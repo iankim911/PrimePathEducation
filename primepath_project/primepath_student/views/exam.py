@@ -11,7 +11,8 @@ from django.views.decorators.csrf import csrf_protect
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from primepath_student.models import StudentProfile, StudentClassAssignment, StudentExamSession
-from primepath_routinetest.models.exam_management import RoutineExam, ExamLaunchSession
+from primepath_routinetest.models import RoutineExam as Exam
+from primepath_routinetest.models.exam_management import ExamLaunchSession
 from primepath_student.decorators import rate_limit, student_required
 import json
 

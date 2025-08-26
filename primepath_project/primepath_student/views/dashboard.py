@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Prefetch, Q
 from primepath_student.models import StudentProfile, StudentClassAssignment
-from primepath_routinetest.models.exam import Exam
+from primepath_routinetest.models import RoutineExam as Exam
 from primepath_routinetest.models.exam_management import ExamLaunchSession
 from django.utils import timezone
 from collections import defaultdict

@@ -45,6 +45,7 @@ class PlacementExam(models.Model):
     is_active = models.BooleanField(default=True)
 
     class Meta:
+        db_table = 'placement_test_exam'  # Maintain compatibility with existing database
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['curriculum_level', 'is_active']),
@@ -188,6 +189,7 @@ class PlacementAudioFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = 'placement_test_audiofile'  # Maintain compatibility with existing database
         ordering = ['order', 'start_question']
         indexes = [
             models.Index(fields=['exam', 'order']),
