@@ -10,14 +10,20 @@ All existing imports will continue to work:
 """
 
 # Import all models from their respective modules
-from .exam import Exam, AudioFile
+from .exam import PlacementExam, PlacementAudioFile
 from .question import Question
 from .session import StudentSession, StudentAnswer, DifficultyAdjustment
 
+# Backward compatibility aliases
+Exam = PlacementExam  # Legacy import compatibility
+AudioFile = PlacementAudioFile  # Legacy import compatibility
+
 # Re-export all models for backward compatibility
 __all__ = [
-    'Exam',
-    'AudioFile',
+    'PlacementExam',
+    'PlacementAudioFile', 
+    'Exam',  # Legacy compatibility
+    'AudioFile',  # Legacy compatibility
     'Question',
     'StudentSession',
     'StudentAnswer',

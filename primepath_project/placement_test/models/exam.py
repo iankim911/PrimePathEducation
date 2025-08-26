@@ -7,7 +7,7 @@ from django.core.validators import FileExtensionValidator, MinValueValidator, Ma
 import uuid
 
 
-class Exam(models.Model):
+class PlacementExam(models.Model):
     """Main exam model containing test information and configuration"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
@@ -170,9 +170,9 @@ class Exam(models.Model):
         return status['is_complete']
 
 
-class AudioFile(models.Model):
+class PlacementAudioFile(models.Model):
     """Audio file model for listening comprehension questions"""
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='audio_files')
+    exam = models.ForeignKey(PlacementExam, on_delete=models.CASCADE, related_name='audio_files')
     name = models.CharField(
         max_length=200, 
         help_text="Descriptive name for this audio file", 

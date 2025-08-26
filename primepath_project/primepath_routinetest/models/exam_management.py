@@ -15,8 +15,8 @@ from core.models import Teacher, Student
 from .class_model import Class
 
 
-class RoutineExam(models.Model):
-    """Represents a routine test exam (monthly review or quarterly)"""
+class ManagedExam(models.Model):
+    """Represents a routine test exam (monthly review or quarterly) - BUILDER Day 4 version"""
     
     EXAM_TYPES = [
         ('REVIEW', 'Monthly Review'),
@@ -110,7 +110,7 @@ class RoutineExam(models.Model):
     
     def clone_exam(self, new_name=None):
         """Create a copy of this exam"""
-        cloned = RoutineExam.objects.create(
+        cloned = ManagedExam.objects.create(
             name=new_name or f"{self.name} (Copy)",
             exam_type=self.exam_type,
             curriculum_level=self.curriculum_level,
@@ -147,7 +147,7 @@ class ExamAssignment(models.Model):
     """Represents assignment of an exam to a class or students"""
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    exam = models.ForeignKey(RoutineExam, on_delete=models.CASCADE, related_name='assignments')
+    exam = models.ForeignKey(ManagedExam, on_delete=models.CASCADE, related_name='assignments')
     class_assigned = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='exam_assignments')
     assigned_by = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, related_name='exam_assignments')
     
@@ -254,7 +254,7 @@ class ExamAttempt(models.Model):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='exam_attempts')
-    exam = models.ForeignKey(RoutineExam, on_delete=models.CASCADE, related_name='attempts')
+    exam = models.ForeignKey(ManagedExam, on_delete=models.CASCADE, related_name='attempts')
     assignment = models.ForeignKey(StudentExamAssignment, on_delete=models.CASCADE, related_name='attempts')
     
     # Attempt details
@@ -352,7 +352,7 @@ class ExamLaunchSession(models.Model):
     
     # Exam being launched
     exam = models.ForeignKey(
-        RoutineExam,
+        ManagedExam,
         on_delete=models.CASCADE,
         related_name='launch_sessions'
     )

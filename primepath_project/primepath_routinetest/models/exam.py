@@ -7,7 +7,7 @@ from django.core.validators import FileExtensionValidator, MinValueValidator, Ma
 import uuid
 
 
-class Exam(models.Model):
+class RoutineExam(models.Model):
     """Main exam model containing test information and configuration"""
     # Exam Type choices for RoutineTest module
     EXAM_TYPE_CHOICES = [
@@ -789,7 +789,7 @@ class Exam(models.Model):
             created_by: Teacher creating the copy
             
         Returns:
-            Exam: New exam instance
+            RoutineExam: New exam instance
         """
         import copy
         from django.db import transaction
@@ -856,7 +856,7 @@ class StudentRoster(models.Model):
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='student_roster')
+    exam = models.ForeignKey(RoutineExam, on_delete=models.CASCADE, related_name='student_roster')
     
     # Student information
     student_name = models.CharField(max_length=100)
@@ -867,7 +867,7 @@ class StudentRoster(models.Model):
     )
     class_code = models.CharField(
         max_length=20,
-        choices=Exam.CLASS_CODE_CHOICES,
+        choices=RoutineExam.CLASS_CODE_CHOICES,
         help_text="Student's class"
     )
     
@@ -934,9 +934,9 @@ class StudentRoster(models.Model):
         return f"{icons.get(self.completion_status, '')} {self.get_completion_status_display()}"
 
 
-class AudioFile(models.Model):
+class RoutineAudioFile(models.Model):
     """Audio file model for listening comprehension questions"""
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='routine_audio_files')
+    exam = models.ForeignKey(RoutineExam, on_delete=models.CASCADE, related_name='routine_audio_files')
     name = models.CharField(
         max_length=200, 
         help_text="Descriptive name for this audio file", 
