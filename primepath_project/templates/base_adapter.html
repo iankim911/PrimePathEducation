@@ -1,0 +1,35 @@
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Base Adapter Template
+This template provides backward compatibility for templates that extend base.html
+It extends unified_base.html but provides the same blocks as the original base.html
+Date: August 26, 2025
+{% endcomment %}
+
+{% block module_name %}core{% endblock %}
+{% block data_module %}core{% endblock %}
+
+{# Preserve base.html's default header color #}
+{% block header_bg_color %}#2c3e50{% endblock %}
+
+{# Map old blocks to new blocks for compatibility #}
+{% block header %}
+    <div class="container">
+        <h1>{% block site_header %}PrimePath Assessment Platform{% endblock %}</h1>
+        {% block header_content %}{% endblock %}
+    </div>
+{% endblock %}
+
+{# Ensure navigation compatibility #}
+{% block navigation %}
+    {% block navbar %}
+        {# Old base.html navbar block content goes here #}
+    {% endblock %}
+{% endblock %}
+
+{# Additional compatibility blocks from base.html #}
+{% block main %}
+    {% block content %}
+        {# Main content compatibility #}
+    {% endblock %}
+{% endblock %}

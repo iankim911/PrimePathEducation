@@ -1,0 +1,58 @@
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: RoutineTest Base Adapter Template
+This template provides backward compatibility for templates that extend routinetest_base.html
+It extends unified_base.html but provides the same blocks as the original routinetest_base.html
+Date: August 26, 2025
+{% endcomment %}
+
+{% load static %}
+{% load navigation_tags %}
+
+{# Set module to routinetest #}
+{% block module_name %}primepath_routinetest{% endblock %}
+{% block data_module %}routine{% endblock %}
+
+{# RoutineTest uses 17px base font #}
+{% block base_font_size %}17px{% endblock %}
+
+{# BCG Green header color #}
+{% block header_bg_color %}#00A65E{% endblock %}
+
+{# Load RoutineTest specific CSS #}
+{% block module_css %}
+    <link rel="stylesheet" href="{% static 'css/primepath_brand.css' %}">
+    <link rel="stylesheet" href="{% static 'css/unified-design-system.css' %}?v=2.0">
+    <link rel="stylesheet" href="{% static 'css/button-consistency-fix.css' %}?v=1.0">
+    <link rel="stylesheet" href="{% static 'css/white-text-fix.css' %}?v=1.0">
+    {% block additional_css %}{% endblock %}
+{% endblock %}
+
+{# RoutineTest specific JavaScript config #}
+{% block js_config %}
+    window.ROUTINETEST_DEBUG = {% if debug %}true{% else %}false{% endif %};
+    window.MATRIX_TAB_VERSION = '3.0';
+    {% block additional_js_config %}{% endblock %}
+{% endblock %}
+
+{# Map routinetest_base.html blocks to unified_base.html #}
+{% block header %}
+    <div class="container">
+        <h1>{% block page_title %}PrimePath RoutineTest{% endblock %}</h1>
+        {% block header_subtitle %}<p>Continuous Assessment Platform</p>{% endblock %}
+    </div>
+{% endblock %}
+
+{# Tab navigation compatibility #}
+{% block navigation %}
+    {% block tab_navigation %}
+        {# Tab navigation content from routinetest templates goes here #}
+    {% endblock %}
+{% endblock %}
+
+{# Module JS compatibility #}
+{% block module_js %}
+    <script src="{% static 'js/button-consistency-debug.js' %}?v=1.0" defer></script>
+    <script src="{% static 'js/white-text-debug.js' %}?v=1.0" defer></script>
+    {% block page_specific_js %}{% endblock %}
+{% endblock %}
