@@ -447,30 +447,60 @@ class ExamService:
     
     @classmethod
     def get_teacher_assignments(cls, user: User) -> Dict[str, str]:
-        """Get all class assignments for a teacher"""
+        """Get all class assignments for a teacher with GLOBAL ACCESS SYSTEM support"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
         if not user.is_authenticated:
             return {}
         
         # Admins have full access to everything
         if user.is_superuser or user.is_staff:
+            # Get ALL class codes from the Class model for admins
+            from ..models import Class
             all_classes = {}
-            for program_classes in ExamService.PROGRAM_CLASS_MAPPING.values():
-                for class_code in program_classes:
+            
+            # Use Class model to get all active classes
+            active_classes = Class.objects.filter(is_active=True).values_list('section', flat=True)
+            for class_code in active_classes:
+                if class_code:  # Skip empty sections
                     all_classes[class_code] = 'FULL'
+            
+            logger.info(f"[GET_TEACHER_ASSIGNMENTS] Admin {user.username} gets {len(all_classes)} classes with FULL access")
             return all_classes
         
-        # Get teacher assignments (excluding expired ones)
+        # Get teacher assignments using GLOBAL ACCESS SYSTEM
         if hasattr(user, 'teacher_profile'):
             from django.db.models import Q
             from django.utils import timezone
             
+            teacher = user.teacher_profile
+            
+            # Get base assignments from TeacherClassAssignment
             assignments = TeacherClassAssignment.objects.filter(
-                teacher=user.teacher_profile,
+                teacher=teacher,
                 is_active=True
             ).filter(
                 Q(expires_on__isnull=True) | Q(expires_on__gt=timezone.now())
-            ).values_list('class_code', 'access_level')
-            return dict(assignments)
+            )
+            
+            # Apply GLOBAL ACCESS LEVEL to determine effective access
+            result = {}
+            for assignment in assignments:
+                # Check teacher's global access level
+                if teacher.global_access_level == 'VIEW_ONLY' or teacher.has_view_only_access():
+                    # VIEW_ONLY global access means all classes are view-only
+                    result[assignment.class_code] = 'VIEW_ONLY'
+                else:
+                    # FULL global access means use the per-class assignment level
+                    # But for Upload/Create, we typically want FULL access
+                    result[assignment.class_code] = assignment.access_level or 'FULL'
+            
+            logger.info(f"[GET_TEACHER_ASSIGNMENTS] Teacher {teacher.name} ({teacher.global_access_level} global) gets {len(result)} classes")
+            if result:
+                logger.debug(f"[GET_TEACHER_ASSIGNMENTS] Sample classes: {list(result.items())[:3]}")
+            
+            return result
         
         return {}
     
@@ -2164,7 +2194,21 @@ class ExamPermissionService:
     
     @classmethod
     def get_teacher_assignments(cls, user):
-        """Get all class assignments for a teacher"""
+        """Get all class assignments for a teacher with GLOBAL ACCESS SYSTEM support"""
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # For admins, return all classes
+        if user.is_superuser or user.is_staff:
+            from ..models import Class
+            all_classes = {}
+            active_classes = Class.objects.filter(is_active=True).values_list('section', flat=True)
+            for class_code in active_classes:
+                if class_code:
+                    all_classes[class_code] = 'FULL'
+            return all_classes
+        
+        # For teachers, use global access system
         if not hasattr(user, 'teacher_profile'):
             return {}
         
@@ -2172,14 +2216,24 @@ class ExamPermissionService:
         from django.utils import timezone
         from ..models import TeacherClassAssignment
         
+        teacher = user.teacher_profile
         assignments = TeacherClassAssignment.objects.filter(
-            teacher=user.teacher_profile,
+            teacher=teacher,
             is_active=True
         ).filter(
             Q(expires_on__isnull=True) | Q(expires_on__gt=timezone.now())
-        ).values_list('class_code', 'access_level')
+        )
         
-        return dict(assignments)
+        # Apply global access level
+        result = {}
+        for assignment in assignments:
+            if teacher.global_access_level == 'VIEW_ONLY' or teacher.has_view_only_access():
+                result[assignment.class_code] = 'VIEW_ONLY'
+            else:
+                result[assignment.class_code] = assignment.access_level or 'FULL'
+        
+        logger.info(f"[EXAM_PERMISSION_SERVICE] Teacher {teacher.name} gets {len(result)} classes")
+        return result
     
     @classmethod
     def get_enhanced_teacher_assignments(cls, user, hierarchical_exams=None):

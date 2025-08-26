@@ -109,6 +109,20 @@ class StudentProfile(models.Model):
     def __str__(self):
         return f"{self.student_id} - {self.user.get_full_name() or self.user.username}"
     
+    def get_full_name(self):
+        """Get the student's full name from the User model"""
+        if self.user:
+            full_name = self.user.get_full_name()
+            if full_name:
+                return full_name
+            return self.user.username
+        return self.student_id
+    
+    @property
+    def name(self):
+        """Alias for get_full_name for compatibility"""
+        return self.get_full_name()
+    
     @staticmethod
     def generate_student_id():
         """Generate a unique student ID if student doesn't provide one"""

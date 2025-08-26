@@ -17,6 +17,7 @@ import uuid
 from datetime import datetime, timedelta
 
 from core.models import Teacher, Student
+from primepath_student.models import StudentProfile, StudentClassAssignment
 from primepath_routinetest.models import (
     Class, StudentEnrollment, RoutineExam, Exam,
     ExamScheduleMatrix, StudentSession,
@@ -260,19 +261,74 @@ def class_details(request, class_code):
             })
     
     # Get available students to add (not enrolled in this class)
+    # This now includes both StudentProfile and legacy Student models
     available_students = []
     if class_obj:
         enrolled_student_ids = enrollments.values_list('student_id', flat=True)
-        available = Student.objects.filter(
-            is_active=True
-        ).exclude(id__in=enrolled_student_ids).order_by('name')
         
-        for student in available:
+        # Log the search operation
+        logger.info(f"[STUDENT_SEARCH] Getting available students for class {class_code}")
+        logger.info(f"[STUDENT_SEARCH] Enrolled student IDs: {list(enrolled_student_ids)}")
+        
+        # First, get students from StudentProfile (new registration system)
+        student_profiles = StudentProfile.objects.filter(
+            user__is_active=True
+        ).select_related('user')
+        
+        logger.info(f"[STUDENT_SEARCH] Found {student_profiles.count()} StudentProfiles")
+        
+        # Map StudentProfiles to legacy Student model for compatibility
+        profile_user_ids = set()
+        for profile in student_profiles:
+            # Check if this profile has a corresponding legacy Student record
+            legacy_student = Student.objects.filter(user=profile.user).first()
+            
+            if not legacy_student:
+                # Create legacy Student record for new StudentProfile
+                logger.info(f"[STUDENT_SYNC] Creating legacy Student for profile {profile.student_id}")
+                legacy_student = Student.objects.create(
+                    user=profile.user,
+                    name=profile.get_full_name() or profile.student_id,
+                    current_grade_level=profile.get_grade_display() if profile.grade else 'Unknown',
+                    parent_phone=profile.phone_number or '',
+                    parent_email=profile.user.email or '',
+                    date_of_birth=profile.date_of_birth,
+                    is_active=True
+                )
+                logger.info(f"[STUDENT_SYNC] Created legacy Student ID: {legacy_student.id}")
+            
+            # Add to available list if not enrolled
+            if legacy_student.id not in enrolled_student_ids:
+                available_students.append({
+                    'id': str(legacy_student.id),
+                    'student_id': profile.student_id,  # Add student_id for search
+                    'name': profile.get_full_name() or profile.student_id,
+                    'grade_level': profile.get_grade_display() if profile.grade else 'Unknown'
+                })
+                profile_user_ids.add(profile.user.id)
+                logger.info(f"[STUDENT_SEARCH] Added {profile.student_id} to available students")
+        
+        # Also get legacy Students not linked to StudentProfile
+        legacy_students = Student.objects.filter(
+            is_active=True
+        ).exclude(
+            id__in=enrolled_student_ids
+        ).exclude(
+            user__id__in=profile_user_ids  # Exclude users already added from profiles
+        ).order_by('name')
+        
+        logger.info(f"[STUDENT_SEARCH] Found {legacy_students.count()} legacy Students")
+        
+        for student in legacy_students:
             available_students.append({
                 'id': str(student.id),
+                'student_id': student.name,  # Use name as student_id for legacy
                 'name': student.name,
                 'grade_level': student.current_grade_level
             })
+            logger.info(f"[STUDENT_SEARCH] Added legacy student {student.name} to available students")
+        
+        logger.info(f"[STUDENT_SEARCH] Total available students: {len(available_students)}")
     
     # Get available exams for this class for the exam selection feature
     available_exam_summary = get_available_exam_summary_for_class(class_code)
@@ -389,10 +445,17 @@ def add_student_to_class(request, class_code):
             }
         )
         
-        # Get student
-        student = Student.objects.get(id=student_id)
+        # Get student (handle both legacy and new profile system)
+        logger.info(f"[ADD_STUDENT] Looking for student with ID: {student_id}")
         
-        # Create enrollment
+        try:
+            student = Student.objects.get(id=student_id)
+            logger.info(f"[ADD_STUDENT] Found legacy student: {student.name}")
+        except Student.DoesNotExist:
+            logger.error(f"[ADD_STUDENT] Student not found with ID: {student_id}")
+            return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
+        
+        # Create enrollment in legacy system
         enrollment, created = StudentEnrollment.objects.get_or_create(
             student=student,
             class_assigned=class_obj,
@@ -405,6 +468,45 @@ def add_student_to_class(request, class_code):
         if not created:
             enrollment.status = 'active'
             enrollment.save()
+            logger.info(f"[ADD_STUDENT] Reactivated existing enrollment for {student.name}")
+        else:
+            logger.info(f"[ADD_STUDENT] Created new enrollment for {student.name}")
+        
+        # Also create assignment in new StudentProfile system if profile exists
+        if student.user:
+            try:
+                profile = StudentProfile.objects.get(user=student.user)
+                logger.info(f"[ADD_STUDENT] Found StudentProfile for user: {student.user.username}")
+                
+                # Get the teacher who is adding the student
+                teacher = None
+                try:
+                    teacher = Teacher.objects.get(user=request.user)
+                except Teacher.DoesNotExist:
+                    logger.warning(f"[ADD_STUDENT] No teacher profile for user: {request.user.username}")
+                
+                # Create or update StudentClassAssignment
+                class_assignment, class_created = StudentClassAssignment.objects.get_or_create(
+                    student=profile,
+                    class_code=class_code,
+                    defaults={
+                        'assigned_by': teacher,
+                        'is_active': True
+                    }
+                )
+                
+                if not class_created and not class_assignment.is_active:
+                    class_assignment.reactivate()
+                    logger.info(f"[ADD_STUDENT] Reactivated StudentClassAssignment for {profile.student_id}")
+                elif class_created:
+                    logger.info(f"[ADD_STUDENT] Created StudentClassAssignment for {profile.student_id}")
+                    
+            except StudentProfile.DoesNotExist:
+                logger.info(f"[ADD_STUDENT] No StudentProfile for user {student.user.username}, only legacy enrollment created")
+            except Exception as e:
+                logger.warning(f"[ADD_STUDENT] Error creating StudentClassAssignment: {e}")
+        
+        logger.info(f"[ADD_STUDENT] Successfully completed enrollment of {student.name} in {class_code}")
         
         return JsonResponse({
             'success': True,
@@ -415,9 +517,6 @@ def add_student_to_class(request, class_code):
                 'enrollment_id': str(enrollment.id)
             }
         })
-        
-    except Student.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Student not found'}, status=404)
     except Exception as e:
         logger.error(f"Error adding student to class: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)

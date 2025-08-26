@@ -48,6 +48,7 @@ async function loadAdminClasses() {
         
         allClasses = data.classes || [];
         filteredClasses = [...allClasses];
+        renderSearchAndFilterBar(); // Add search bar first
         renderClassTable(filteredClasses);
         updateClassCount();
         initializeSearchAndFilters();
@@ -56,79 +57,332 @@ async function loadAdminClasses() {
     }
 }
 
-// Render the optimized class table
-function renderClassTable(classes) {
-    console.log('[CURRICULUM_UI] Rendering optimized table with', classes.length, 'classes');
+// Render search and filter bar
+function renderSearchAndFilterBar() {
+    const container = document.getElementById('adminClassTableBody') || document.getElementById('adminClassCardsContainer');
+    if (!container) return;
     
-    const tableBody = document.getElementById('adminClassTableBody');
-    if (!tableBody) return;
+    // Create parent wrapper if not exists
+    if (!container.parentElement.querySelector('.search-filter-bar')) {
+        const searchBar = document.createElement('div');
+        searchBar.className = 'search-filter-bar';
+        searchBar.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+                padding: 20px;
+                border-radius: 12px 12px 0 0;
+                margin-bottom: 0;
+            ">
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 15px;
+                ">
+                    <!-- Search Input -->
+                    <div style="flex: 1; min-width: 280px;">
+                        <div style="position: relative;">
+                            <input type="text" 
+                                   id="classSearchFilter" 
+                                   placeholder="🔍 Search by Class Code, Program, or Sub-Program..." 
+                                   style="
+                                width: 100%;
+                                padding: 12px 20px 12px 45px;
+                                border: 2px solid rgba(255,255,255,0.3);
+                                border-radius: 8px;
+                                font-size: 14px;
+                                background: rgba(255,255,255,0.95);
+                                color: #333;
+                                transition: all 0.3s ease;
+                                outline: none;
+                            " 
+                            onfocus="this.style.borderColor='white'; this.style.background='white';"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.3)'; this.style.background='rgba(255,255,255,0.95)';">
+                            <span style="
+                                position: absolute;
+                                left: 15px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                font-size: 18px;
+                            ">🔍</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Filters -->
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="filterByMappingStatus('all')" 
+                                class="filter-btn active"
+                                id="filter-all"
+                                style="
+                            padding: 8px 16px;
+                            border: 2px solid white;
+                            background: white;
+                            color: #1B5E20;
+                            border-radius: 20px;
+                            font-size: 13px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">All Classes</button>
+                        
+                        <button onclick="filterByMappingStatus('mapped')"
+                                class="filter-btn"
+                                id="filter-mapped"
+                                style="
+                            padding: 8px 16px;
+                            border: 2px solid rgba(255,255,255,0.3);
+                            background: transparent;
+                            color: white;
+                            border-radius: 20px;
+                            font-size: 13px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">✓ Mapped</button>
+                        
+                        <button onclick="filterByMappingStatus('unmapped')"
+                                class="filter-btn"
+                                id="filter-unmapped"
+                                style="
+                            padding: 8px 16px;
+                            border: 2px solid rgba(255,255,255,0.3);
+                            background: transparent;
+                            color: white;
+                            border-radius: 20px;
+                            font-size: 13px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">○ Not Mapped</button>
+                        
+                        <div style="
+                            padding: 8px 16px;
+                            background: rgba(0,0,0,0.2);
+                            border-radius: 20px;
+                            color: white;
+                            font-size: 13px;
+                            font-weight: 600;
+                        ">
+                            <span id="filteredCount">${filteredClasses.length}</span> of 
+                            <span id="totalCount">${allClasses.length}</span> classes
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.parentElement.insertBefore(searchBar, container);
+    }
+}
+
+// Render the optimized class cards (responsive card-based layout)
+function renderClassTable(classes) {
+    console.log('[CURRICULUM_UI] Rendering responsive card layout with', classes.length, 'classes');
+    
+    const container = document.getElementById('adminClassTableBody') || document.getElementById('adminClassCardsContainer');
+    if (!container) return;
+    
+    // Check if we should use cards or table based on screen size or preference
+    const useCards = true; // Force card view to eliminate horizontal scrolling
     
     if (classes && classes.length > 0) {
-        tableBody.innerHTML = classes.map(cls => {
-            const curriculumStatus = getCurriculumStatus(cls);
-            return `
-                <tr id="class-row-${cls.code}" class="class-table-row fade-in">
-                    <td class="checkbox-column">
-                        <input type="checkbox" class="class-checkbox" data-class="${cls.code}" onchange="handleClassSelection()">
-                    </td>
-                    <td class="class-code-column sticky-column">
-                        <strong>${cls.code}</strong>
-                    </td>
-                    <td class="curriculum-status-column">
-                        <div class="curriculum-status-badge ${curriculumStatus.assigned ? 'assigned' : 'not-assigned'}" id="curr-display-${cls.code}">
-                            ${curriculumStatus.display}
-                            <span class="save-indicator" id="save-indicator-${cls.code}"></span>
-                        </div>
-                    </td>
-                    <td class="program-column">
-                        <select class="curriculum-select" id="prog-${cls.code}" onchange="handleCurriculumChange('${cls.code}', 'program')">
-                            <option value="">Select Program</option>
-                            ${Object.keys(CURRICULUM_STRUCTURE).map(key => 
-                                `<option value="${key}" ${cls.program === key ? 'selected' : ''}>${CURRICULUM_STRUCTURE[key].name}</option>`
-                            ).join('')}
-                        </select>
-                    </td>
-                    <td class="subprogram-column">
-                        <select class="curriculum-select" id="subprog-${cls.code}" onchange="handleCurriculumChange('${cls.code}', 'subprogram')" 
-                                ${!cls.program ? 'disabled' : ''}>
-                            <option value="">Select Sub-Program</option>
-                            ${cls.program ? CURRICULUM_STRUCTURE[cls.program].subPrograms.map(sp => 
-                                `<option value="${sp}" ${cls.subprogram === sp ? 'selected' : ''}>${sp}</option>`
-                            ).join('') : ''}
-                        </select>
-                    </td>
-                    <td class="level-column">
-                        <select class="curriculum-select" id="level-${cls.code}" onchange="handleCurriculumChange('${cls.code}', 'level')"
-                                ${!cls.subprogram ? 'disabled' : ''}>
-                            <option value="">Select Level</option>
-                            ${cls.program ? CURRICULUM_STRUCTURE[cls.program].levels.map(level => 
-                                `<option value="${level}" ${cls.level === level ? 'selected' : ''}>Level ${level}</option>`
-                            ).join('') : ''}
-                        </select>
-                    </td>
-                    <td class="actions-column">
-                        <div class="action-menu">
-                            <button class="action-menu-trigger" onclick="toggleActionMenu('${cls.code}')" title="More actions">
-                                ⋯
-                            </button>
-                            <div class="action-menu-dropdown" id="action-menu-${cls.code}">
-                                <button class="action-menu-item" onclick="editClass('${cls.code}')">
-                                    ✏️ Edit Details
-                                </button>
-                                <button class="action-menu-item delete-item" onclick="deleteClass('${cls.code}')">
-                                    🗑️ Delete Class
-                                </button>
+        if (useCards) {
+            // Card-based responsive layout
+            container.innerHTML = `
+                <div class="curriculum-cards-grid" style="
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+                    gap: 20px;
+                    padding: 20px;
+                ">
+                    ${classes.map(cls => {
+                        const curriculumStatus = getCurriculumStatus(cls);
+                        return `
+                            <div id="class-card-${cls.code}" class="curriculum-card fade-in" style="
+                                background: white;
+                                border: 1px solid #e0e0e0;
+                                border-radius: 12px;
+                                padding: 20px;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                                transition: all 0.3s ease;
+                                position: relative;
+                            " onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08)'">
+                                
+                                <!-- Card Header -->
+                                <div style="
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                    margin-bottom: 15px;
+                                    padding-bottom: 15px;
+                                    border-bottom: 2px solid #f0f0f0;
+                                ">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" class="class-checkbox" data-class="${cls.code}" onchange="handleClassSelection()">
+                                        <h3 style="
+                                            margin: 0;
+                                            font-size: 18px;
+                                            font-weight: 600;
+                                            color: #1B5E20;
+                                        ">${cls.code}</h3>
+                                    </div>
+                                    <div class="curriculum-status-badge ${curriculumStatus.assigned ? 'assigned' : 'not-assigned'}" 
+                                         id="curr-display-${cls.code}" style="
+                                        padding: 4px 12px;
+                                        border-radius: 20px;
+                                        font-size: 12px;
+                                        font-weight: 600;
+                                        background: ${curriculumStatus.assigned ? '#E8F5E9' : '#FFEBEE'};
+                                        color: ${curriculumStatus.assigned ? '#2E7D32' : '#C62828'};
+                                        border: 1px solid ${curriculumStatus.assigned ? '#4CAF50' : '#EF5350'};
+                                    ">
+                                        ${curriculumStatus.assigned ? '✓ Mapped' : '○ Not Mapped'}
+                                        <span class="save-indicator" id="save-indicator-${cls.code}"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Curriculum Dropdowns -->
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <!-- Program -->
+                                    <div>
+                                        <label style="
+                                            display: block;
+                                            font-size: 11px;
+                                            color: #666;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.5px;
+                                            margin-bottom: 4px;
+                                        ">Program</label>
+                                        <select class="curriculum-select" id="prog-${cls.code}" 
+                                                onchange="handleCurriculumChange('${cls.code}', 'program')" style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            border: 1px solid #ddd;
+                                            border-radius: 6px;
+                                            font-size: 14px;
+                                            background: white;
+                                            cursor: pointer;
+                                            transition: all 0.2s ease;
+                                        " onfocus="this.style.borderColor='#2E7D32'" onblur="this.style.borderColor='#ddd'">
+                                            <option value="">Select Program</option>
+                                            ${Object.keys(CURRICULUM_STRUCTURE).map(key => 
+                                                `<option value="${key}" ${cls.program === key ? 'selected' : ''}>${CURRICULUM_STRUCTURE[key].name}</option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- SubProgram -->
+                                    <div>
+                                        <label style="
+                                            display: block;
+                                            font-size: 11px;
+                                            color: #666;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.5px;
+                                            margin-bottom: 4px;
+                                        ">Sub-Program</label>
+                                        <select class="curriculum-select" id="subprog-${cls.code}" 
+                                                onchange="handleCurriculumChange('${cls.code}', 'subprogram')" 
+                                                ${!cls.program ? 'disabled' : ''} style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            border: 1px solid #ddd;
+                                            border-radius: 6px;
+                                            font-size: 14px;
+                                            background: ${!cls.program ? '#f5f5f5' : 'white'};
+                                            cursor: ${!cls.program ? 'not-allowed' : 'pointer'};
+                                            opacity: ${!cls.program ? '0.6' : '1'};
+                                            transition: all 0.2s ease;
+                                        " onfocus="this.style.borderColor='#2E7D32'" onblur="this.style.borderColor='#ddd'">
+                                            <option value="">Select Sub-Program</option>
+                                            ${cls.program ? CURRICULUM_STRUCTURE[cls.program].subPrograms.map(sp => 
+                                                `<option value="${sp}" ${cls.subprogram === sp ? 'selected' : ''}>${sp}</option>`
+                                            ).join('') : ''}
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Level -->
+                                    <div>
+                                        <label style="
+                                            display: block;
+                                            font-size: 11px;
+                                            color: #666;
+                                            text-transform: uppercase;
+                                            letter-spacing: 0.5px;
+                                            margin-bottom: 4px;
+                                        ">Level</label>
+                                        <select class="curriculum-select" id="level-${cls.code}" 
+                                                onchange="handleCurriculumChange('${cls.code}', 'level')"
+                                                ${!cls.subprogram ? 'disabled' : ''} style="
+                                            width: 100%;
+                                            padding: 8px 12px;
+                                            border: 1px solid #ddd;
+                                            border-radius: 6px;
+                                            font-size: 14px;
+                                            background: ${!cls.subprogram ? '#f5f5f5' : 'white'};
+                                            cursor: ${!cls.subprogram ? 'not-allowed' : 'pointer'};
+                                            opacity: ${!cls.subprogram ? '0.6' : '1'};
+                                            transition: all 0.2s ease;
+                                        " onfocus="this.style.borderColor='#2E7D32'" onblur="this.style.borderColor='#ddd'">
+                                            <option value="">Select Level</option>
+                                            ${cls.program ? CURRICULUM_STRUCTURE[cls.program].levels.map(level => 
+                                                `<option value="${level}" ${cls.level === level ? 'selected' : ''}>Level ${level}</option>`
+                                            ).join('') : ''}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div style="
+                                    display: flex;
+                                    justify-content: flex-end;
+                                    gap: 8px;
+                                    margin-top: 20px;
+                                    padding-top: 15px;
+                                    border-top: 1px solid #f0f0f0;
+                                ">
+                                    <button onclick="editClass('${cls.code}')" style="
+                                        padding: 6px 14px;
+                                        border: 1px solid #1976D2;
+                                        background: white;
+                                        color: #1976D2;
+                                        border-radius: 6px;
+                                        font-size: 13px;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.background='#1976D2'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#1976D2';">
+                                        ✏️ Edit
+                                    </button>
+                                    <button onclick="deleteClass('${cls.code}')" style="
+                                        padding: 6px 14px;
+                                        border: 1px solid #D32F2F;
+                                        background: white;
+                                        color: #D32F2F;
+                                        border-radius: 6px;
+                                        font-size: 13px;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.background='#D32F2F'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#D32F2F';">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
+                        `;
+                    }).join('')}
+                </div>
             `;
-        }).join('');
+        } else {
+            // Original table layout (kept as fallback)
+            container.innerHTML = classes.map(cls => {
+                const curriculumStatus = getCurriculumStatus(cls);
+                return `<tr><!-- Original table row code --></tr>`;
+            }).join('');
+        }
         
-        console.log('[CURRICULUM_UI] Rendered', classes.length, 'classes in optimized table');
+        console.log('[CURRICULUM_UI] Rendered', classes.length, 'classes in responsive layout');
         initializeEnhancedTable();
     } else {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No classes found. Create your first class!</td></tr>';
+        container.innerHTML = '<div style="text-align: center; padding: 60px; color: #666;">No classes found. Create your first class!</div>';
         console.log('[CURRICULUM_UI] No classes to display');
     }
 }
@@ -422,6 +676,57 @@ function filterClasses(searchTerm) {
             cls.program?.toLowerCase().includes(term) ||
             cls.subprogram?.toLowerCase().includes(term)
         );
+    }
+    
+    renderClassTable(filteredClasses);
+    updateFilteredCount();
+}
+
+// Filter by mapping status
+function filterByMappingStatus(status) {
+    console.log('[CURRICULUM_UI] Filtering by mapping status:', status);
+    
+    // Update button states
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = 'white';
+        btn.style.borderColor = 'rgba(255,255,255,0.3)';
+    });
+    
+    const activeBtn = document.getElementById(`filter-${status}`);
+    if (activeBtn) {
+        activeBtn.style.background = 'white';
+        activeBtn.style.color = '#1B5E20';
+        activeBtn.style.borderColor = 'white';
+    }
+    
+    // Filter classes
+    if (status === 'all') {
+        filteredClasses = [...allClasses];
+    } else if (status === 'mapped') {
+        filteredClasses = allClasses.filter(cls => 
+            cls.program && cls.subprogram && cls.level
+        );
+    } else if (status === 'unmapped') {
+        filteredClasses = allClasses.filter(cls => 
+            !cls.program || !cls.subprogram || !cls.level
+        );
+    }
+    
+    renderClassTable(filteredClasses);
+    updateFilteredCount();
+}
+
+// Update filtered count display
+function updateFilteredCount() {
+    const filteredCountEl = document.getElementById('filteredCount');
+    const totalCountEl = document.getElementById('totalCount');
+    
+    if (filteredCountEl) {
+        filteredCountEl.textContent = filteredClasses.length;
+    }
+    if (totalCountEl) {
+        totalCountEl.textContent = allClasses.length;
     }
     
     renderClassTable(filteredClasses);
