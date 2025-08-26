@@ -73,10 +73,10 @@ class TemplateMigrator:
         )
         
         # Add migration comment
-        migration_comment = f"""{{%% comment %%}}
+        migration_comment = f"""{{% comment %}}
 Migrated to unified_base.html on {datetime.now().strftime('%Y-%m-%d')}
 Original base template: {base_template}
-{{%% endcomment %%}}
+{{% endcomment %}}
 """
         content = content.replace('{% extends "unified_base.html" %}', 
                                  f'{{% extends "unified_base.html" %}}\n{migration_comment}')

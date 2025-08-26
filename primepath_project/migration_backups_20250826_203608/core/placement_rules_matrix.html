@@ -1,0 +1,655 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load grade_tags %}
+
+{% block title %}Student Levels Configuration{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<!-- Success Notification Container (matching Upload Exam style) -->
+<div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 500px;">
+    <div class="alert alert-success" style="margin: 0; padding: 25px 30px; font-size: 1.3rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 5px solid #28a745; position: relative;">
+        <button type="button" class="close-alert" onclick="document.getElementById('success-notification').style.display='none'" style="float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; margin-left: 20px;">&times;</button>
+        <span id="success-message">Placement rules saved successfully!</span>
+        <span style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); font-size: 2rem;">🎉</span>
+    </div>
+</div>
+
+<style>
+    .placement-container {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 4px;
+    }
+    
+    .info-box h3 {
+        margin: 0 0 15px 0;
+        color: #1976d2;
+        font-size: 1.3rem;
+    }
+    
+    .info-box p {
+        margin: 0 0 10px 0;
+        line-height: 1.6;
+    }
+    
+    .info-box ul {
+        margin: 10px 0;
+        padding-left: 25px;
+    }
+    
+    .info-box li {
+        margin-bottom: 8px;
+    }
+    
+    .example-box {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 15px;
+        font-style: italic;
+    }
+    
+    .program-section {
+        margin-bottom: 40px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+    
+    .program-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    
+    .placement-matrix {
+        overflow-x: auto;
+        margin-bottom: 30px;
+    }
+    
+    .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        text-align: center;
+    }
+    
+    .matrix-table th:not(:first-child),
+    .matrix-table td:not(:first-child) {
+        width: 140px;
+        max-width: 140px;
+    }
+    
+    .matrix-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .matrix-table th:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #e9ecef;
+        z-index: 11;
+        min-width: 150px;
+    }
+    
+    .matrix-table td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .level-select {
+        width: 100%;
+        padding: 8px 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        height: 40px;
+    }
+    
+    .save-button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        float: right;
+        margin-top: 20px;
+    }
+    
+    .save-button:hover {
+        background-color: #218838;
+    }
+    
+    .grade-header {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    /* Success notification animations (matching Upload Exam) */
+    @keyframes slideDown {
+        from {
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: translateX(-50%) scale(1);
+        }
+        50% {
+            transform: translateX(-50%) scale(1.02);
+        }
+    }
+</style>
+
+<div class="placement-container">
+    <h1>Student Levels Configuration</h1>
+    
+    <div class="info-box">
+        <h3>What are Student Levels?</h3>
+        <p>Student Levels determine which curriculum level a student is assigned to based on their grade and English class rank. This is the first step in the placement process.</p>
+        
+        <p><strong>How it works:</strong></p>
+        <ul>
+            <li>Each cell in the matrix represents a combination of student grade and English class rank</li>
+            <li>Select the appropriate curriculum level for each combination</li>
+            <li>When a student takes a placement test, the system will use these rules to determine their curriculum level</li>
+            <li>Once the curriculum level is determined, the system will randomly select one of the exams mapped to that level</li>
+        </ul>
+        
+        <div class="example-box">
+            <strong>Example:</strong> If you set Primary 3 + Top 10% → PRIME CORE SIGMA - Level 1, then any Primary 3 student in the top 10% of their English class will be placed in PRIME CORE SIGMA - Level 1.
+        </div>
+    </div>
+    
+    <!-- PRIME CORE Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME CORE</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in core_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in core_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="CORE" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in core_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- PRIME ASCENT Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME ASCENT</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in ascent_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in ascent_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="ASCENT" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in ascent_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- PRIME EDGE Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME EDGE</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in edge_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in edge_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="EDGE" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in edge_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- PRIME PINNACLE Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME PINNACLE</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in pinnacle_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in pinnacle_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="PINNACLE" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in pinnacle_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <button type="button" class="save-button" onclick="savePlacementRules()">Save All Student Levels</button>
+    <div style="clear: both;"></div>
+</div>
+
+<script>
+// Load existing placement rules
+document.addEventListener('DOMContentLoaded', function() {
+    loadExistingRules();
+});
+
+function loadExistingRules() {
+    // Fetch existing rules and populate the dropdowns
+    fetch('{% url "core:get_placement_rules" %}')
+        .then(response => response.json())
+        .then(data => {
+            data.rules.forEach(rule => {
+                const selector = `.level-select[data-grade="${rule.grade}"][data-rank="${rule.rank}"]`;
+                const select = document.querySelector(selector);
+                if (select) {
+                    select.value = rule.curriculum_level_id;
+                }
+            });
+        })
+        .catch(error => console.error('Error loading rules:', error));
+}
+
+function savePlacementRules() {
+    const rules = [];
+    
+    document.querySelectorAll('.level-select').forEach(select => {
+        if (select.value) {
+            rules.push({
+                program: select.dataset.program,
+                grade: parseInt(select.dataset.grade),
+                rank: select.dataset.rank,
+                curriculum_level_id: parseInt(select.value)
+            });
+        }
+    });
+    
+    // Get CSRF token and log for debugging
+    const csrfToken = getCookie('csrftoken');
+    if (!csrfToken) {
+        console.error('CSRF token not found!');
+        alert('Security token not found. Please refresh the page and try again.');
+        return;
+    }
+    console.log('CSRF token found, proceeding with save...');
+    
+    fetch('{% url "core:save_placement_rules" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({ rules: rules })
+    })
+    .then(response => {
+        // Check if response is OK before trying to parse JSON
+        if (!response.ok) {
+            // Handle non-200 responses
+            if (response.status === 403) {
+                throw new Error('Authentication failed. Please refresh the page and try again.');
+            } else if (response.status === 500) {
+                throw new Error('Server error. Please try again later.');
+            } else {
+                throw new Error(`Server returned ${response.status} ${response.statusText}`);
+            }
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Show the enhanced success notification (matching Upload Exam style)
+            const notification = document.getElementById('success-notification');
+            const alertDiv = notification.querySelector('.alert');
+            notification.style.display = 'block';
+            
+            // Apply animations
+            alertDiv.style.animation = 'slideDown 0.5s ease-out, pulse 2s ease-in-out';
+            
+            // Scroll to top to ensure notification is visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Auto-hide the notification after 10 seconds
+            setTimeout(() => {
+                const notif = document.getElementById('success-notification');
+                const alert = notif.querySelector('.alert');
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    notif.style.display = 'none';
+                    alert.style.opacity = '1';
+                }, 500);
+            }, 10000);
+        } else {
+            alert('Error saving placement rules: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'An error occurred while saving placement rules');
+    });
+}
+
+function getCookie(name) {
+    // First try to get CSRF token from the DOM (more secure)
+    if (name === 'csrftoken') {
+        const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (tokenInput) {
+            return tokenInput.value;
+        }
+    }
+    
+    // Fallback to cookie method
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Comprehensive console logging for curriculum level debugging
+(function() {
+    'use strict';
+    
+    console.group('%c[PLACEMENT_RULES] Page Initialization', 'color: #2196F3; font-weight: bold');
+    
+    // Log page load information
+    console.log('[STUDENT_LEVELS] Student Levels Matrix page loaded');
+    console.log('[PLACEMENT_RULES] Timestamp:', new Date().toISOString());
+    console.log('[PLACEMENT_RULES] URL:', window.location.href);
+    
+    // Count and log curriculum levels by program
+    const levelCounts = {
+        CORE: 0,
+        ASCENT: 0,
+        EDGE: 0,
+        PINNACLE: 0
+    };
+    
+    // Collect all displayed curriculum levels
+    const displayedLevels = [];
+    
+    // Check CORE levels
+    const coreSection = document.querySelector('.program-section:nth-of-type(1)');
+    if (coreSection) {
+        const coreHeaders = coreSection.querySelectorAll('th.level-header');
+        levelCounts.CORE = coreHeaders.length;
+        coreHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'CORE', level: levelName });
+        });
+    }
+    
+    // Check ASCENT levels
+    const ascentSection = document.querySelector('.program-section:nth-of-type(2)');
+    if (ascentSection) {
+        const ascentHeaders = ascentSection.querySelectorAll('th.level-header');
+        levelCounts.ASCENT = ascentHeaders.length;
+        ascentHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'ASCENT', level: levelName });
+        });
+    }
+    
+    // Check EDGE levels
+    const edgeSection = document.querySelector('.program-section:nth-of-type(3)');
+    if (edgeSection) {
+        const edgeHeaders = edgeSection.querySelectorAll('th.level-header');
+        levelCounts.EDGE = edgeHeaders.length;
+        edgeHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'EDGE', level: levelName });
+        });
+    }
+    
+    // Check PINNACLE levels
+    const pinnacleSection = document.querySelector('.program-section:nth-of-type(4)');
+    if (pinnacleSection) {
+        const pinnacleHeaders = pinnacleSection.querySelectorAll('th.level-header');
+        levelCounts.PINNACLE = pinnacleHeaders.length;
+        pinnacleHeaders.forEach(header => {
+            const levelName = header.textContent.trim();
+            displayedLevels.push({ program: 'PINNACLE', level: levelName });
+        });
+    }
+    
+    // Log summary
+    console.log('[PLACEMENT_RULES] Curriculum Level Counts:', levelCounts);
+    console.log('[PLACEMENT_RULES] Total Levels Displayed:', 
+        levelCounts.CORE + levelCounts.ASCENT + levelCounts.EDGE + levelCounts.PINNACLE);
+    
+    // Log all displayed levels
+    console.group('[PLACEMENT_RULES] Displayed Curriculum Levels');
+    displayedLevels.forEach((item, index) => {
+        console.log(`${index + 1}. ${item.program}: ${item.level}`);
+    });
+    console.groupEnd();
+    
+    // Check for test/QA subprograms
+    const testIndicators = ['Test', 'TEST', 'SHORT Answer', 'SHORT Display', 'Comprehensive Test', 'Management Test'];
+    const foundTestSubprograms = [];
+    
+    displayedLevels.forEach(item => {
+        testIndicators.forEach(indicator => {
+            if (item.level.includes(indicator)) {
+                foundTestSubprograms.push(item.level);
+            }
+        });
+    });
+    
+    if (foundTestSubprograms.length > 0) {
+        console.warn('[PLACEMENT_RULES] ⚠️ WARNING: Test/QA subprograms detected in display!');
+        console.warn('[PLACEMENT_RULES] Found test subprograms:', foundTestSubprograms);
+        console.warn('[PLACEMENT_RULES] These should have been filtered out by the backend.');
+    } else {
+        console.log('[PLACEMENT_RULES] ✅ No test/QA subprograms detected - filtering working correctly');
+    }
+    
+    // Monitor save operations
+    const saveButton = document.querySelector('button[onclick*="savePlacementRules"]');
+    if (saveButton) {
+        saveButton.addEventListener('click', function() {
+            console.group('[PLACEMENT_RULES] Save Operation');
+            console.log('Timestamp:', new Date().toISOString());
+            console.log('User action: Saving placement rules');
+            console.groupEnd();
+        });
+    }
+    
+    // Log the exam-to-level mapping tab status
+    const examMappingTab = document.querySelector('a[href="#exam-level-mapping"]');
+    if (examMappingTab) {
+        examMappingTab.addEventListener('click', function() {
+            console.group('[STUDENT_LEVELS] Level Exams Tab');
+            console.log('Tab clicked at:', new Date().toISOString());
+            
+            // Count exam mappings after a short delay for content to load
+            setTimeout(() => {
+                const mappingRows = document.querySelectorAll('#exam-level-mapping .level-row');
+                console.log('Total mapping rows displayed:', mappingRows.length);
+                
+                // Check each row for test subprograms
+                mappingRows.forEach((row, index) => {
+                    const levelName = row.querySelector('.level-name')?.textContent?.trim();
+                    if (levelName) {
+                        testIndicators.forEach(indicator => {
+                            if (levelName.includes(indicator)) {
+                                console.warn(`Row ${index + 1} contains test subprogram: ${levelName}`);
+                            }
+                        });
+                    }
+                });
+                console.groupEnd();
+            }, 100);
+        });
+    }
+    
+    console.groupEnd();
+    
+    // Add a global function to check current state
+    window.checkPlacementRulesState = function() {
+        console.group('[PLACEMENT_RULES] Current State Check');
+        console.log('Timestamp:', new Date().toISOString());
+        
+        // Re-count levels
+        const currentCounts = {
+            CORE: document.querySelectorAll('.program-section:nth-of-type(1) th.level-header').length,
+            ASCENT: document.querySelectorAll('.program-section:nth-of-type(2) th.level-header').length,
+            EDGE: document.querySelectorAll('.program-section:nth-of-type(3) th.level-header').length,
+            PINNACLE: document.querySelectorAll('.program-section:nth-of-type(4) th.level-header').length
+        };
+        
+        console.log('Current level counts:', currentCounts);
+        
+        // Check for test subprograms again
+        const allHeaders = document.querySelectorAll('th.level-header');
+        const currentTestSubprograms = [];
+        allHeaders.forEach(header => {
+            const text = header.textContent.trim();
+            testIndicators.forEach(indicator => {
+                if (text.includes(indicator)) {
+                    currentTestSubprograms.push(text);
+                }
+            });
+        });
+        
+        if (currentTestSubprograms.length > 0) {
+            console.warn('Test subprograms still present:', currentTestSubprograms);
+        } else {
+            console.log('✅ No test subprograms found');
+        }
+        
+        console.groupEnd();
+    };
+    
+    // Log when user leaves the page
+    window.addEventListener('beforeunload', function() {
+        console.log('[STUDENT_LEVELS] User leaving Student Levels page');
+    });
+})();
+</script>
+{% endblock %}
