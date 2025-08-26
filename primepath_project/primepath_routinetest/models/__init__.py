@@ -19,11 +19,13 @@ from .exam_schedule_matrix import ExamScheduleMatrix  # Class × Timeslot Matrix
 from .exam_abstraction import ExamAbstraction  # Unified exam interface
 from .curriculum_mapping import ClassCurriculumMapping  # Admin curriculum mapping
 from .class_model import Class, StudentEnrollment  # BUILDER: Day 2 - Class management
-from .exam_management import ManagedExam, ExamAssignment, StudentExamAssignment, ExamAttempt, ExamLaunchSession  # BUILDER: Day 4 - Exam management
+from .exam_management import ExamAssignment, StudentExamAssignment, ExamAttempt, ExamLaunchSession  # BUILDER: Day 4 - Exam management
+# ManagedExam is now unified with RoutineExam (Phase 2: Model Unification)
 
 # Backward compatibility aliases
 Exam = RoutineExam  # Legacy import compatibility
 AudioFile = RoutineAudioFile  # Legacy import compatibility
+ManagedExam = RoutineExam  # Phase 2: ManagedExam unified with RoutineExam
 
 # Re-export all models for backward compatibility
 __all__ = [
@@ -44,7 +46,7 @@ __all__ = [
     'ClassCurriculumMapping',  # Admin curriculum mapping
     'Class',  # BUILDER: Day 2
     'StudentEnrollment',  # BUILDER: Day 2
-    'ManagedExam',  # BUILDER: Day 4 (renamed from RoutineExam to avoid conflict)
+    'ManagedExam',  # PHASE 2: Unified with RoutineExam (backward compatibility alias)
     'ExamAssignment',  # BUILDER: Day 4
     'StudentExamAssignment',  # BUILDER: Day 4
     'ExamAttempt',  # BUILDER: Day 4

@@ -12,7 +12,7 @@ import logging
 
 from ..models import ExamAssignment, Class, StudentEnrollment
 from ..models.class_access import TeacherClassAssignment  # Import from correct module
-from ..models.exam_management import ManagedExam  # Use ManagedExam from exam_management
+# PHASE 2: ManagedExam unified with RoutineExam - import from main models instead
 from ..models import RoutineExam as Exam  # Use RoutineExam from main models
 from core.models import Student, Teacher
 from placement_test.models import StudentSession
