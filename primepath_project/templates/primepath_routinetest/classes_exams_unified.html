@@ -1454,6 +1454,375 @@
         display: block;
         color: #495057;
     }
+    
+    /* ========== CARD-BASED CURRICULUM MANAGEMENT UI v2.0 ========== */
+    .curriculum-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 20px;
+        padding: 20px;
+        animation: fadeIn 0.3s ease-in;
+    }
+    
+    .curriculum-list {
+        padding: 20px;
+    }
+    
+    .curriculum-list-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .list-header, .list-row {
+        display: grid;
+        grid-template-columns: 40px 120px 100px 1fr 1fr 100px 120px;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .list-header {
+        background: #1B5E20;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .list-row:hover {
+        background: #f5f5f5;
+    }
+    
+    .curriculum-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .curriculum-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .curriculum-card .card-header {
+        padding: 15px 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .curriculum-card .class-code {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1B5E20;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-badge.status-assigned {
+        background: #C8E6C9;
+        color: #2E7D32;
+    }
+    
+    .status-badge.status-unassigned {
+        background: #FFCCBC;
+        color: #D84315;
+    }
+    
+    .curriculum-card .card-body {
+        padding: 20px;
+    }
+    
+    .curriculum-selectors {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .selector-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .selector-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .curriculum-card .curriculum-select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .curriculum-card .curriculum-select:hover:not(:disabled) {
+        border-color: #2E7D32;
+    }
+    
+    .curriculum-card .curriculum-select:focus {
+        outline: none;
+        border-color: #1B5E20;
+        box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+    }
+    
+    .curriculum-card .curriculum-select:disabled {
+        background: #f5f5f5;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    .curriculum-card .card-footer {
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .card-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .btn-save {
+        background: #4CAF50;
+        color: white;
+    }
+    
+    .btn-save:hover {
+        background: #45A049;
+        transform: scale(1.05);
+    }
+    
+    .btn-edit {
+        background: #2196F3;
+        color: white;
+    }
+    
+    .btn-edit:hover {
+        background: #1976D2;
+    }
+    
+    .btn-delete {
+        background: #f44336;
+        color: white;
+    }
+    
+    .btn-delete:hover {
+        background: #da190b;
+    }
+    
+    .view-toggle {
+        position: relative;
+        display: inline-block;
+        width: 120px;
+        height: 34px;
+    }
+    
+    .view-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #ccc;
+        border-radius: 34px;
+        transition: .4s;
+    }
+    
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background: white;
+        border-radius: 50%;
+        transition: .4s;
+    }
+    
+    .view-toggle input:checked + .toggle-slider {
+        background: #2E7D32;
+    }
+    
+    .view-toggle input:checked + .toggle-slider:before {
+        transform: translateX(86px);
+    }
+    
+    .toggle-label {
+        position: absolute;
+        top: 7px;
+        font-size: 12px;
+        font-weight: 600;
+        color: white;
+        user-select: none;
+        pointer-events: none;
+    }
+    
+    .toggle-label:first-of-type {
+        left: 12px;
+    }
+    
+    .toggle-label:last-of-type {
+        right: 18px;
+    }
+    
+    .view-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .status-filter {
+        padding: 8px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+    }
+    
+    .status-filter:focus {
+        outline: none;
+        border-color: #2E7D32;
+    }
+    
+    .class-counter {
+        font-size: 13px;
+        color: #666;
+        margin-left: 10px;
+    }
+    
+    @media (max-width: 1200px) {
+        .curriculum-grid {
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .curriculum-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            padding: 15px;
+        }
+        
+        .header-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .search-filter-container {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .view-controls {
+            justify-content: space-between;
+            width: 100%;
+        }
+    }
+    
+    .card-based-ui .admin-classes-table-container {
+        display: none;
+    }
+    
+    .card-based-ui.optimized-curriculum-management {
+        background: #f8f9fa;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+    }
+    
+    .card-based-ui .section-header {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .curriculum-card.save-success {
+        animation: successFlash 0.6s ease;
+        border-color: #4CAF50;
+    }
+    
+    @keyframes successFlash {
+        0% { background-color: white; }
+        50% { background-color: #E8F5E9; }
+        100% { background-color: white; }
+    }
+    
+    .curriculum-card.removing {
+        animation: fadeOut 0.3s ease;
+        opacity: 0;
+    }
+    
+    .save-indicator {
+        margin-left: 10px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .save-indicator.saving {
+        color: #FFA726;
+    }
+    
+    .save-indicator.saved {
+        color: #66BB6A;
+    }
+    
+    .save-indicator.error {
+        color: #EF5350;
+    }
 </style>
 {% endblock %}
 
@@ -1796,20 +2165,11 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
                 <span style="font-size: 18px; color: #1B5E20;">→</span>
             </a>
             
-            <!-- Classes & Teachers Configuration -->
-            <a href="{% url 'RoutineTest:admin_classes_teachers' %}" 
-               style="background: white; border: 1px solid #1B5E20; color: #1B5E20; padding: 20px; border-radius: 8px; text-decoration: none; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease;"
-               onmouseover="this.style.background='#f8f9fa'" 
-               onmouseout="this.style.background='white'">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <span style="font-size: 24px; color: #1B5E20;">⚙️</span>
-                    <div>
-                        <div style="font-weight: 600; font-size: 16px; color: #1B5E20;">Classes & Curriculum Configuration</div>
-                        <div style="font-size: 14px; color: #6c757d; margin-top: 2px;">Set curriculum recommendations and manage class settings</div>
-                    </div>
-                </div>
-                <span style="font-size: 18px; color: #1B5E20;">→</span>
-            </a>
+            <!-- Classes & Curriculum Configuration Link Removed -->
+            <script>
+                console.log('[CURRICULUM_REMOVAL] Navigation link to Classes & Curriculum Configuration removed');
+                console.log('[CURRICULUM_REMOVAL] Previous link URL was: admin_classes_teachers');
+            </script>
             
             <!-- Pending Requests Alert - Special Notification -->
             <a href="{% url 'RoutineTest:admin_pending_requests' %}" 
@@ -1863,115 +2223,17 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
     
     {% endif %}
     
-    <!-- Admin-Only Curriculum Management Section - CARD-BASED UI v2.0 -->
-    {% if user.is_superuser %}
-    <div class="admin-section optimized-curriculum-management card-based-ui">
-        <div class="section-header enhanced-header">
-            <div class="header-left">
-                <div class="section-title">🔐 Admin: Curriculum Management</div>
-                <div class="section-subtitle">Card-based curriculum assignment interface</div>
-            </div>
-            <div class="header-actions">
-                <div class="search-filter-container">
-                    <input type="text" id="curriculumSearchInput" placeholder="🔍 Search class codes..." class="search-input">
-                    <select id="statusFilter" class="status-filter">
-                        <option value="all">All Classes</option>
-                        <option value="assigned">Assigned</option>
-                        <option value="unassigned">Not Assigned</option>
-                    </select>
-                </div>
-                <div class="view-controls">
-                    <label class="view-toggle">
-                        <input type="checkbox" id="viewModeToggle">
-                        <span class="toggle-slider"></span>
-                        <span class="toggle-label">Grid</span>
-                        <span class="toggle-label">List</span>
-                    </label>
-                    <span class="class-counter" id="classCounter">Showing 0 of 0 classes</span>
-                </div>
-                <div class="action-buttons-header">
-                    <button class="btn-create-class" onclick="showCreateClassDialog()">
-                        <span class="btn-icon">➕</span>
-                        Create New Class
-                    </button>
-                    <button class="btn-refresh" onclick="CurriculumManager.init()">
-                        <span class="btn-icon">🔄</span>
-                        Refresh
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Bulk Actions Toolbar -->
-        <div class="bulk-actions-toolbar" id="bulkActions" style="display: none;">
-            <div class="bulk-actions-left">
-                <input type="checkbox" id="selectAllClasses">
-                <label for="selectAllClasses">Select All</label>
-                <span class="selected-count"><span id="selectedCount">0</span> selected</span>
-            </div>
-            <div class="bulk-actions-right">
-                <button class="btn-bulk-assign" onclick="CurriculumManager.bulkAssign()">
-                    <span class="btn-icon">📚</span>
-                    Bulk Assign
-                </button>
-                <button class="btn-bulk-delete" onclick="CurriculumManager.bulkDelete()">
-                    <span class="btn-icon">🗑️</span>
-                    Bulk Delete
-                </button>
-            </div>
-        </div>
-        
-        <!-- Curriculum Container - Cards or List view -->
-        <div id="curriculumContainer" class="curriculum-grid">
-            <!-- Dynamically populated with cards or list items -->
-        </div>
-    </div>
-    
-    <!-- Bulk Assignment Modal -->
-    <div id="bulkAssignModal" class="modal bulk-assign-modal" style="display: none;">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Bulk Curriculum Assignment</h4>
-                    <button type="button" class="close-modal" onclick="closeBulkAssignModal()">×</button>
-                </div>
-                <div class="modal-body">
-                    <p class="bulk-description">Assign curriculum to <span id="bulkSelectedCount">0</span> selected classes:</p>
-                    <div class="bulk-curriculum-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Program:</label>
-                                <select id="bulkProgramSelect" class="form-control" onchange="loadBulkSubPrograms()">
-                                    <option value="">Select Program</option>
-                                    <option value="CORE">CORE</option>
-                                    <option value="ASCENT">ASCENT</option>
-                                    <option value="EDGE">EDGE</option>
-                                    <option value="PINNACLE">PINNACLE</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Sub-Program:</label>
-                                <select id="bulkSubProgramSelect" class="form-control" onchange="loadBulkLevels()" disabled>
-                                    <option value="">Select Sub-Program</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Level:</label>
-                                <select id="bulkLevelSelect" class="form-control" disabled>
-                                    <option value="">Select Level</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeBulkAssignModal()">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="executeBulkAssignment()">Assign to Selected Classes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+    <!-- Curriculum Management Section Removed as per request -->
+    <!-- Console debug logging for curriculum removal -->
+    <script>
+        console.log('[CURRICULUM_REMOVAL] ====================================');
+        console.log('[CURRICULUM_REMOVAL] Classes & Curriculum Configuration section has been successfully removed');
+        console.log('[CURRICULUM_REMOVAL] Timestamp:', new Date().toISOString());
+        console.log('[CURRICULUM_REMOVAL] Page:', window.location.pathname);
+        console.log('[CURRICULUM_REMOVAL] User is superuser:', {{ user.is_superuser|yesno:"true,false" }});
+        console.log('[CURRICULUM_REMOVAL] Section previously located after line 1866');
+        console.log('[CURRICULUM_REMOVAL] ====================================');
+    </script>
     
 </div>
 
@@ -2555,9 +2817,10 @@ document.head.appendChild(style);
 <!-- Exam Management Script -->
 <script src="{% static 'js/routinetest/exam-management.js' %}?v={{ cache_bust }}"></script>
 
-<!-- Optimized Curriculum Management Script (Admin Only) -->
-{% if user.is_superuser %}
-<script src="{% static 'js/routinetest/curriculum-management-optimized.js' %}?v={{ cache_bust }}"></script>
-{% endif %}
+<!-- Curriculum Management Script Removed -->
+<script>
+    console.log('[CURRICULUM_REMOVAL] curriculum-management-optimized.js script removed');
+    console.log('[CURRICULUM_REMOVAL] All curriculum management JavaScript functionality disabled');
+</script>
 
 {% endblock %}

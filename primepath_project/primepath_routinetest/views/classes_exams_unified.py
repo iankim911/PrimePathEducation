@@ -24,7 +24,7 @@ from primepath_routinetest.models import (
     AccessAuditLog,
     Exam,
     ExamScheduleMatrix,
-    ClassCurriculumMapping,
+    # ClassCurriculumMapping removed - curriculum configuration section deleted
     StudentSession
 )
 from core.models import Teacher
