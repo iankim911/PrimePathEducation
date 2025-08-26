@@ -1,9 +1,8 @@
 {
-  "timestamp": "2025-08-26T11:05:28.236413",
-  "request": "Fix UI issues in class management table: 1. Center align Save, Edit, Delete buttons 2. Add background color for Edit button 3. Fix text overlay issue with Save button showing extra 'e' character",
+  "timestamp": "2025-08-26T11:06:48.344255",
+  "request": "Fix program assignment persistence issue: User changes program assignments using dropdown boxes and clicks Save, gets success message, but changes are lost after page refresh. The assignments revert back to 'Not Assigned' status.",
   "agents_involved": [
-    "implementation",
-    "ui"
+    "implementation"
   ],
   "primary_agent": "implementation",
   "consolidated_recommendations": [
