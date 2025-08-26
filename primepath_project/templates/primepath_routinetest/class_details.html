@@ -236,46 +236,6 @@
         color: white !important;
     }
     
-    /* Manage Students button - Professional outline style */
-    .manage-students-btn,
-    a.manage-students-btn,
-    .manage-students-btn:link,
-    .manage-students-btn:visited {
-        background: white !important;
-        color: #2E7D32 !important;
-        border: 2px solid #2E7D32 !important;
-        padding: 12px 20px !important;
-        border-radius: 8px !important;
-        font-size: 16px !important;
-        font-weight: 600 !important;
-        cursor: pointer;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        transition: all 0.3s ease;
-        text-decoration: none !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        height: auto !important;
-        line-height: normal !important;
-    }
-    
-    .manage-students-btn:hover,
-    a.manage-students-btn:hover,
-    .manage-students-btn:focus,
-    .manage-students-btn:active {
-        background: #f8f9fa !important;
-        color: #2E7D32 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        border-color: #388E3C !important;
-        text-decoration: none !important;
-    }
-
-    /* Additional accessibility and visibility enhancements */
-    .manage-students-btn span {
-        color: inherit !important;
-        font-weight: inherit !important;
-    }
     
     .student-grid {
         display: grid;
@@ -1184,11 +1144,6 @@
                 <h2>Students Enrolled in {{ class_display }}</h2>
                 {% if can_edit %}
                 <div style="display: flex; gap: 10px;">
-                    <a href="{% url 'RoutineTest:manage_class_students' class_code %}" 
-                       class="manage-students-btn">
-                        <span>⚙️</span>
-                        <span>Manage Students</span>
-                    </a>
                     <button class="add-student-btn" onclick="openAddStudentModal()">
                         <span>👥</span>
                         <span>Add Student</span>

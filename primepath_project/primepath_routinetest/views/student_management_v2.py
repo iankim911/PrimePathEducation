@@ -186,12 +186,24 @@ def search_students(request):
     if len(query) < 2:
         return JsonResponse({'students': []})
     
-    students = StudentProfile.objects.filter(
-        Q(student_id__icontains=query) |
-        Q(phone_number__icontains=query) |
-        Q(user__first_name__icontains=query) |
-        Q(user__last_name__icontains=query)
-    ).select_related('user')[:20]
+    # Create base search query
+    search_query = Q(student_id__icontains=query) | Q(phone_number__icontains=query)
+    
+    # Handle name searches - check both individual fields and full name combinations
+    search_query |= Q(user__first_name__icontains=query)
+    search_query |= Q(user__last_name__icontains=query)
+    
+    # If query contains space, also search by splitting first/last name
+    if ' ' in query:
+        name_parts = query.split()
+        if len(name_parts) == 2:
+            first_name, last_name = name_parts
+            search_query |= Q(
+                user__first_name__icontains=first_name,
+                user__last_name__icontains=last_name
+            )
+    
+    students = StudentProfile.objects.filter(search_query).select_related('user')[:20]
     
     results = []
     for student in students:
