@@ -171,6 +171,23 @@ class RoutineExam(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(270)],
         help_text="PDF rotation angle in degrees (0, 90, 180, 270)"
     )
+    
+    # ============= PHASE 2: FIELDS FROM MANAGEDEXAM UNIFICATION =============
+    # Added during Phase 2 Model Unification to support ManagedExam data migration
+    answer_key = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Answer key data (from ManagedExam unification)"
+    )
+    version = models.IntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        help_text="Exam version number (from ManagedExam unification)"
+    )
+    # Note: 'duration' field from ManagedExam maps to existing 'timer_minutes' field
+    # Note: 'quarter' field from ManagedExam maps to existing 'time_period_quarter' field
+    # =======================================================================
+    
     created_by = models.ForeignKey('core.Teacher', on_delete=models.SET_NULL, null=True, related_name='routine_exams_created')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
