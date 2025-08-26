@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 from core.models import Teacher, Student
 from primepath_student.models import StudentProfile, StudentClassAssignment
 from primepath_routinetest.models import (
-    Class, StudentEnrollment, RoutineExam, Exam,
+    Class, StudentEnrollment, RoutineExam as Exam,
     ExamScheduleMatrix, StudentSession,
     TeacherClassAssignment, ExamLaunchSession
 )
@@ -43,7 +43,7 @@ def get_available_exam_summary_for_class(class_code):
         }
         
         # Quick count from Exam model (class_code field)
-        from primepath_routinetest.models import Exam
+        from primepath_routinetest.models import RoutineExam as Exam
         exam_count_by_class_code = Exam.objects.filter(
             class_code=class_code,
             is_active=True
@@ -1048,7 +1048,7 @@ def get_available_exams_for_class(request, class_code):
         available_exams = []
         
         # Method 1: Query Exam model (with class_codes JSONField and class_code CharField)
-        from primepath_routinetest.models import Exam
+        from primepath_routinetest.models import RoutineExam as Exam
         
         # Get exams where class_code matches (one-to-one relationship)
         exams_by_class_code = Exam.objects.filter(
@@ -1312,7 +1312,7 @@ def assign_exam_to_schedule(request, class_code):
                 exam = None
                 model_type = None
                 
-                from primepath_routinetest.models import Exam
+                from primepath_routinetest.models import RoutineExam as Exam
                 try:
                     exam = Exam.objects.get(id=exam_id, is_active=True)
                     model_type = 'Exam'

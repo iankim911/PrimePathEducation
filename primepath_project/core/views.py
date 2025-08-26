@@ -72,7 +72,7 @@ def curriculum_levels(request):
 
 @login_required
 def placement_rules(request):
-    from placement_test.models import Exam
+    from placement_test.models import PlacementExam as Exam
     
     # Log the start of student levels loading
     logger.info("[STUDENT_LEVELS] Loading student levels matrix")
@@ -307,7 +307,7 @@ def save_placement_rules(request):
 @login_required
 def exam_mapping(request):
     """View for managing curriculum level to exam mappings - FIXED VERSION"""
-    from placement_test.models import Exam
+    from placement_test.models import PlacementExam as Exam
     from .models import ExamLevelMapping
     
     # === PHASE 1: INITIALIZATION AND LOGGING ===
@@ -526,7 +526,7 @@ def exam_mapping(request):
 def save_exam_mappings(request):
     """Save curriculum level to exam mappings"""
     from .models import ExamLevelMapping
-    from placement_test.models import Exam
+    from placement_test.models import PlacementExam as Exam
     import logging
     
     logger = logging.getLogger(__name__)

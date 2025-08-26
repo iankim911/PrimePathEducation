@@ -16,7 +16,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 django.setup()
 
 from django.utils import timezone
-from placement_test.models import Exam, Question, StudentSession, StudentAnswer
+from placement_test.models import PlacementExam as Exam, Question, StudentSession, StudentAnswer
 from core.models import CurriculumLevel, SubProgram, Program
 
 def test_submit_answer_fix():

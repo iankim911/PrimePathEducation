@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 django.setup()
 
 from django.contrib.auth import get_user_model
-from primepath_routinetest.models import Exam, TeacherClassAssignment
+from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
 from primepath_routinetest.services.exam_service import ExamService
 
 User = get_user_model()

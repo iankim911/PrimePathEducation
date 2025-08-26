@@ -18,7 +18,7 @@ django.setup()
 from django.test import Client, TestCase
 from django.contrib.auth.models import User
 from core.models import Teacher, CurriculumLevel, SubProgram, Program
-from primepath_routinetest.models import Exam, TeacherClassAssignment
+from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
 
 def run_comprehensive_test():
     """Run comprehensive test of copy modal preview functionality"""

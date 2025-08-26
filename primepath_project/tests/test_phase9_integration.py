@@ -313,7 +313,7 @@ class TestPhase9Integration:
     
     def test_model_service_view_integration(self):
         """Test Model → Service → View integration."""
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         from placement_test.services import ExamService
         
         # Model layer - count active exams only (since service filters by is_active=True)
@@ -396,7 +396,7 @@ class TestPhase9Integration:
     
     def test_database_relationships_valid(self):
         """Test all database relationships are valid."""
-        from placement_test.models import StudentSession, Exam, Question
+        from placement_test.models import StudentSession, PlacementExam as Exam, Question
         from core.models import School, CurriculumLevel
         
         # Test foreign key access

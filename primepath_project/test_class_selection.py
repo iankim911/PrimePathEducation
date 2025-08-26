@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 django.setup()
 
-from primepath_routinetest.models import Exam, Class
+from primepath_routinetest.models import RoutineExam as Exam, Class
 from primepath_routinetest.class_code_mapping import CLASS_CODE_CURRICULUM_MAPPING
 
 print("=" * 80)

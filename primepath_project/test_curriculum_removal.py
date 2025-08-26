@@ -196,7 +196,7 @@ def test_curriculum_removal():
     print_section("TEST 7: Database Integrity Check")
     
     try:
-        from primepath_routinetest.models import Exam, TeacherClassAssignment
+        from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
         from core.models import Teacher
         
         exam_count = Exam.objects.count()

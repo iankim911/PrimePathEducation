@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 sys.path.append('.')
 django.setup()
 
-from placement_test.models import Exam, Question, StudentSession
+from placement_test.models import PlacementExam as Exam, Question, StudentSession
 
 def analyze_answer_input_interface():
     print("=" * 60)

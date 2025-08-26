@@ -156,7 +156,7 @@ class PerformanceMonitor:
         
         # Check database connectivity
         try:
-            from placement_test.models import Exam
+            from placement_test.models import PlacementExam as Exam
             Exam.objects.exists()
             health_status['checks']['database'] = 'ok'
         except Exception as e:

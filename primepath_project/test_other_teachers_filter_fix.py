@@ -14,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 django.setup()
 
 from django.contrib.auth.models import User
-from primepath_routinetest.models import Exam
+from primepath_routinetest.models import RoutineExam as Exam
 from primepath_routinetest.services.exam_service import ExamService
 
 def test_ownership_filter():

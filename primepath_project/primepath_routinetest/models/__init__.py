@@ -4,7 +4,7 @@ Part of Phase 9: Model Modularization
 
 This file re-exports all models for backward compatibility.
 All existing imports will continue to work:
-- from primepath_routinetest.models import Exam
+- from primepath_routinetest.models import RoutineExam as Exam
 - from primepath_routinetest.models import Question, AudioFile
 - etc.
 """

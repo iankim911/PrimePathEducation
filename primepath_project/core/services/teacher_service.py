@@ -104,7 +104,7 @@ class TeacherService:
         Returns:
             Dictionary with teacher statistics
         """
-        from placement_test.models import Exam, StudentSession
+        from placement_test.models import PlacementExam as Exam, StudentSession
         
         teacher = Teacher.objects.get(id=teacher_id)
         

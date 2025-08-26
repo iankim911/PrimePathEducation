@@ -14,7 +14,7 @@ django.setup()
 
 from django.test import Client
 from django.contrib.auth.models import User
-from primepath_routinetest.models import Exam, TeacherClassAssignment
+from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
 from core.models import Teacher
 from bs4 import BeautifulSoup
 

@@ -4,7 +4,7 @@ Part of Phase 9: Model Modularization
 
 This file re-exports all models for backward compatibility.
 All existing imports will continue to work:
-- from placement_test.models import Exam
+- from placement_test.models import PlacementExam as Exam
 - from placement_test.models import Question, AudioFile
 - etc.
 """

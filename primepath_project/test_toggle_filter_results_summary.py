@@ -12,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 django.setup()
 
 from django.contrib.auth.models import User
-from primepath_routinetest.models import Exam, TeacherClassAssignment
+from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
 from primepath_routinetest.services.exam_service import ExamService
 from core.models import Teacher
 

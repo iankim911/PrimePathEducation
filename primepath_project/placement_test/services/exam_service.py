@@ -6,7 +6,10 @@ from django.db import transaction
 from django.core.files.uploadedfile import UploadedFile
 from core.exceptions import ValidationException, ExamConfigurationException
 from core.constants import DEFAULT_OPTIONS_COUNT, DEFAULT_QUESTION_POINTS
-from ..models import Exam, Question, AudioFile
+from ..models import PlacementExam, Question, PlacementAudioFile
+# Backward compatibility aliases
+Exam = PlacementExam  
+AudioFile = PlacementAudioFile
 import logging
 
 logger = logging.getLogger(__name__)

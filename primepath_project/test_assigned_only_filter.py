@@ -15,7 +15,7 @@ sys.path.append('/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project')
 django.setup()
 
 from primepath_routinetest.services.exam_service import ExamService
-from primepath_routinetest.models import Exam
+from primepath_routinetest.models import RoutineExam as Exam
 from django.contrib.auth import get_user_model
 
 User = get_user_model()

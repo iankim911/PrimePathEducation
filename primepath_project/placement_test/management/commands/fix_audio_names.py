@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from placement_test.models import AudioFile
+from placement_test.models import PlacementAudioFile as AudioFile
 import os
 
 

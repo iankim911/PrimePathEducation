@@ -13,7 +13,7 @@ django.setup()
 
 from django.test import Client
 from django.urls import reverse
-from placement_test.models import Exam, StudentSession, Question
+from placement_test.models import PlacementExam as Exam, StudentSession, Question
 from placement_test.services import SessionService
 
 def print_test(test_name, result, details=""):

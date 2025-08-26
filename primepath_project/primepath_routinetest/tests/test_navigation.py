@@ -13,7 +13,7 @@ django.setup()
 
 from django.test import Client
 from django.urls import reverse
-from primepath_routinetest.models import Exam, StudentSession, Question
+from primepath_routinetest.models import RoutineExam as Exam, StudentSession, Question
 from primepath_routinetest.services import SessionService
 
 def print_test(test_name, result, details=""):

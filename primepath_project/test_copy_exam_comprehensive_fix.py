@@ -17,7 +17,7 @@ django.setup()
 
 from django.test import Client
 from django.contrib.auth.models import User
-from primepath_routinetest.models import Exam
+from primepath_routinetest.models import RoutineExam as Exam
 from primepath_routinetest.models.exam_management import RoutineExam
 from core.models import CurriculumLevel, SubProgram, Program
 

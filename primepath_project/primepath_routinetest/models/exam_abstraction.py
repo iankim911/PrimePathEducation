@@ -33,7 +33,7 @@ class ExamAbstraction:
             logger.debug(f"[EXAM_ABSTRACTION] Handling RoutineExam object")
             
             # Try to find corresponding Exam by matching criteria
-            from primepath_routinetest.models import Exam
+            from primepath_routinetest.models import RoutineExam as Exam
             try:
                 # Match by name and time period
                 matching_exam = Exam.objects.filter(
@@ -72,7 +72,7 @@ class ExamAbstraction:
             logger.debug(f"[EXAM_ABSTRACTION] Handling RoutineExam object for audio files")
             
             # Try to find corresponding Exam
-            from primepath_routinetest.models import Exam
+            from primepath_routinetest.models import RoutineExam as Exam
             try:
                 matching_exam = Exam.objects.filter(
                     name=exam_obj.name,
@@ -89,7 +89,7 @@ class ExamAbstraction:
                 logger.error(f"[EXAM_ABSTRACTION] Error finding matching Exam for audio: {str(e)}")
         
         # Return empty queryset if no audio files found
-        from primepath_routinetest.models import AudioFile
+        from primepath_routinetest.models import RoutineAudioFile as AudioFile
         return AudioFile.objects.none()
     
     @staticmethod

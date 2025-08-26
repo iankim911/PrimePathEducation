@@ -17,7 +17,7 @@ django.setup()
 
 from django.test import RequestFactory
 from django.contrib.auth.models import User
-from primepath_routinetest.models import Exam
+from primepath_routinetest.models import RoutineExam as Exam
 from primepath_routinetest.views.exam_api import copy_exam, generate_exam_name
 
 def test_copy_exam_backend():

@@ -20,7 +20,7 @@ django.setup()
 
 from django.contrib.auth.models import User
 from django.test import Client
-from primepath_routinetest.models import Exam, Question
+from primepath_routinetest.models import RoutineExam as Exam, Question
 from placement_test.models import StudentSession
 from core.models import Teacher
 

@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Exam, AudioFile, Question, StudentSession, StudentAnswer, DifficultyAdjustment
+from .models import PlacementExam, PlacementAudioFile, Question, StudentSession, StudentAnswer, DifficultyAdjustment
+# Backward compatibility aliases
+Exam = PlacementExam
+AudioFile = PlacementAudioFile
 
 
 class AudioFileInline(admin.TabularInline):

@@ -16,7 +16,7 @@ django.setup()
 
 from django.test import Client
 from django.urls import reverse
-from placement_test.models import Exam, Question, AudioFile, StudentSession
+from placement_test.models import PlacementExam as Exam, Question, AudioFile, StudentSession
 from core.models import CurriculumLevel, PlacementRule
 
 def run_tests():

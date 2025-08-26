@@ -20,7 +20,7 @@ def test_backward_compatibility():
     
     # Test placement_test model imports
     try:
-        from placement_test.models import Exam, Question, AudioFile, StudentSession, StudentAnswer, DifficultyAdjustment
+        from placement_test.models import PlacementExam as Exam, Question, AudioFile, StudentSession, StudentAnswer, DifficultyAdjustment
         print("✅ placement_test.models imports successful")
         
         # Test model functionality
@@ -73,7 +73,7 @@ def test_model_relationships():
     print("\n🔗 Testing Model Relationships...")
     
     try:
-        from placement_test.models import Exam, Question
+        from placement_test.models import PlacementExam as Exam, Question
         from core.models import CurriculumLevel
         
         # Test forward relationships
@@ -113,7 +113,7 @@ def test_service_integration():
     
     try:
         from placement_test.services import ExamService, SessionService, GradingService
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         
         exam = Exam.objects.first()
         if exam:
@@ -137,7 +137,7 @@ def test_admin_integration():
     
     try:
         from django.contrib import admin
-        from placement_test.models import Exam, Question
+        from placement_test.models import PlacementExam as Exam, Question
         from core.models import School, Program
         
         # Check if models are registered in admin

@@ -20,7 +20,7 @@ from django.test import Client
 from django.contrib.auth.models import User
 from django.urls import reverse
 from core.models import ExamLevelMapping
-from placement_test.models import Exam
+from placement_test.models import PlacementExam as Exam
 from core.models import CurriculumLevel
 
 def test_exam_mapping_save():

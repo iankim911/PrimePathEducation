@@ -19,7 +19,7 @@ from django.test import Client
 from django.urls import reverse
 from django.template.loader import get_template
 from django.template import TemplateDoesNotExist
-from placement_test.models import Exam, StudentSession, Question
+from placement_test.models import PlacementExam as Exam, StudentSession, Question
 from django.conf import settings
 
 

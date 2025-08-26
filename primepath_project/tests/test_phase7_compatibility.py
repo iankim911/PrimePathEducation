@@ -275,7 +275,7 @@ class TestPhase7Compatibility:
     def test_query_cache(self):
         """Test query cache functionality."""
         from core.cache_service import QueryCache
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         
         # Create a queryset
         queryset = Exam.objects.all()[:5]

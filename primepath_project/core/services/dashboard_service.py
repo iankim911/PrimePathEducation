@@ -16,7 +16,7 @@ class DashboardService:
     @staticmethod
     def get_dashboard_stats():
         """Get comprehensive dashboard statistics."""
-        from placement_test.models import StudentSession, Exam, StudentAnswer
+        from placement_test.models import StudentSession, PlacementExam as Exam, StudentAnswer
         from core.models import School, CurriculumLevel
         
         try:
@@ -112,7 +112,7 @@ class DashboardService:
     @staticmethod
     def get_exam_statistics():
         """Get statistics for each exam."""
-        from placement_test.models import Exam, StudentSession
+        from placement_test.models import PlacementExam as Exam, StudentSession
         
         try:
             exams = Exam.objects.filter(is_active=True).annotate(

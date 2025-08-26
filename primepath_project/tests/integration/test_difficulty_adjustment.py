@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 django.setup()
 
 from django.test import Client
-from placement_test.models import StudentSession, Exam, DifficultyAdjustment
+from placement_test.models import StudentSession, PlacementExam as Exam, DifficultyAdjustment
 from core.models import CurriculumLevel, ExamLevelMapping
 from placement_test.services import PlacementService
 

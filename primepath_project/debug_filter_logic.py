@@ -40,7 +40,7 @@ def debug_filter_logic():
     print("-"*30)
     
     # Get all exams first
-    from primepath_routinetest.models import Exam
+    from primepath_routinetest.models import RoutineExam as Exam
     all_exams = Exam.objects.all()
     
     result_off = ExamService.organize_exams_hierarchically(

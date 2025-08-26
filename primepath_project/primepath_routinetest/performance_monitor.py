@@ -156,7 +156,7 @@ class PerformanceMonitor:
         
         # Check database connectivity
         try:
-            from primepath_routinetest.models import Exam
+            from primepath_routinetest.models import RoutineExam as Exam
             Exam.objects.exists()
             health_status['checks']['database'] = 'ok'
         except Exception as e:

@@ -19,7 +19,7 @@ sys.path.append('/Users/ian/Desktop/VIBECODE/PrimePath/primepath_project')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqlite')
 django.setup()
 
-from placement_test.models import Exam, Question, StudentSession, StudentAnswer
+from placement_test.models import PlacementExam as Exam, Question, StudentSession, StudentAnswer
 from placement_test.views.student import submit_answer
 from core.models import CurriculumLevel
 from core.exceptions import SessionAlreadyCompletedException

@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 django.setup()
 
 from django.test import Client
-from placement_test.models import Exam
+from placement_test.models import PlacementExam as Exam
 
 def test_gap_fix():
     """Test that the gap fix CSS is properly applied"""

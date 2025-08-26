@@ -11,7 +11,7 @@ django.setup()
 
 from django.test import Client
 from django.urls import reverse
-from primepath_routinetest.models import Exam, StudentSession, Question
+from primepath_routinetest.models import RoutineExam as Exam, StudentSession, Question
 from datetime import datetime
 import json
 

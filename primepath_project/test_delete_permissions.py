@@ -7,7 +7,7 @@ django.setup()
 
 from django.contrib.auth.models import User
 from core.models import Teacher
-from primepath_routinetest.models import Exam, TeacherClassAssignment
+from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
 from primepath_routinetest.services.exam_service import ExamPermissionService
 
 print("\n" + "="*80)

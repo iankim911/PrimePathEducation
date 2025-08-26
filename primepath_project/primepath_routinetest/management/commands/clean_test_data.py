@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from core.models import Student, SubProgram
 from core.curriculum_constants import is_test_subprogram
-from primepath_routinetest.models import Exam, StudentSession
+from primepath_routinetest.models import RoutineExam as Exam, StudentSession
 import logging
 
 logger = logging.getLogger(__name__)

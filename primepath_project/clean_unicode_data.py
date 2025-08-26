@@ -14,8 +14,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 django.setup()
 
-from placement_test.models import Exam, Question, AudioFile
-from primepath_routinetest.models import Exam as RoutineExam, Question as RoutineQuestion
+from placement_test.models import PlacementExam as Exam, Question, AudioFile
+from primepath_routinetest.models import RoutineExam as Exam as RoutineExam, Question as RoutineQuestion
 from core.models import Program, SubProgram
 
 def clean_unicode(text):

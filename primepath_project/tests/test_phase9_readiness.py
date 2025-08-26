@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 django.setup()
 
 from django.db import models
-from placement_test.models import Exam, Question, AudioFile, StudentSession, StudentAnswer
+from placement_test.models import PlacementExam as Exam, Question, AudioFile, StudentSession, StudentAnswer
 from core.models import CurriculumLevel, School, Teacher, PlacementRule, Program, SubProgram
 from placement_test.services import ExamService, SessionService, PlacementService, GradingService
 import inspect
@@ -133,7 +133,7 @@ class Phase9ReadinessCheck:
             self.log("Checking for circular dependencies...", "INFO")
             
             # Placement models importing from core
-            from placement_test.models import Exam
+            from placement_test.models import PlacementExam as Exam
             if hasattr(Exam, 'curriculum_level'):
                 self.log("Exam -> CurriculumLevel: OK", "PASS")
             if hasattr(Exam, 'created_by'):

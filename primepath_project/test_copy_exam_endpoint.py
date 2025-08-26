@@ -12,7 +12,7 @@ django.setup()
 
 from django.test import Client
 from django.contrib.auth.models import User
-from primepath_routinetest.models import Exam
+from primepath_routinetest.models import RoutineExam as Exam
 from core.models import CurriculumLevel
 
 def test_copy_exam_endpoint():

@@ -233,7 +233,7 @@ class FileService:
     @staticmethod
     def cleanup_orphaned_files():
         """Clean up files that are no longer referenced in the database."""
-        from placement_test.models import Exam, AudioFile
+        from placement_test.models import PlacementExam as Exam, AudioFile
         
         try:
             cleaned = 0

@@ -18,7 +18,7 @@ django.setup()
 from django.test import RequestFactory, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
-from placement_test.models import Exam, Question, StudentSession, StudentAnswer, AudioFile
+from placement_test.models import PlacementExam as Exam, Question, StudentSession, StudentAnswer, AudioFile
 from placement_test.views.student import take_test, submit_answer, complete_test, test_result
 from core.models import CurriculumLevel, PlacementRule, School
 import uuid

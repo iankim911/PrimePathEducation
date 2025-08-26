@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqli
 django.setup()
 
 from django.test import Client
-from placement_test.models import Exam
+from placement_test.models import PlacementExam as Exam
 from datetime import datetime
 
 def test_pdf_rotation_flow():
@@ -171,7 +171,7 @@ def check_model_field():
     print("\n📋 MODEL FIELD CHECK")
     print("-" * 40)
     
-    from placement_test.models import Exam
+    from placement_test.models import PlacementExam as Exam
     from django.db import connection
     
     # Check model attribute

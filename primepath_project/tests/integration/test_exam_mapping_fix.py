@@ -16,7 +16,7 @@ django.setup()
 
 from django.test import Client
 from core.models import CurriculumLevel, ExamLevelMapping
-from placement_test.models import Exam
+from placement_test.models import PlacementExam as Exam
 from django.db import connection
 
 print("="*80)

@@ -129,7 +129,7 @@ class ComprehensiveFeatureTest:
             assert 'question' in content.lower() or 'timer' in content.lower()
         else:
             # Create a test session
-            from placement_test.models import Exam
+            from placement_test.models import PlacementExam as Exam
             exam = Exam.objects.filter(is_active=True).first()
             if exam:
                 session = StudentSession.objects.create(
@@ -150,7 +150,7 @@ class ComprehensiveFeatureTest:
         assert response.status_code == 200
         content = response.content.decode('utf-8')
         
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         if Exam.objects.exists():
             # Should show at least one exam
             exam = Exam.objects.first()
@@ -167,7 +167,7 @@ class ComprehensiveFeatureTest:
     
     def test_exam_detail_page(self):
         """Test exam detail page."""
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         
         exam = Exam.objects.first()
         if exam:
@@ -178,7 +178,7 @@ class ComprehensiveFeatureTest:
     
     def test_preview_exam_page(self):
         """Test exam preview with questions."""
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         
         exam = Exam.objects.first()
         if exam:
@@ -192,7 +192,7 @@ class ComprehensiveFeatureTest:
     
     def test_question_creation(self):
         """Test questions are created for exams."""
-        from placement_test.models import Exam, Question
+        from placement_test.models import PlacementExam as Exam, Question
         
         exam = Exam.objects.first()
         if exam:
@@ -213,7 +213,7 @@ class ComprehensiveFeatureTest:
     
     def test_save_exam_answers(self):
         """Test saving exam question answers."""
-        from placement_test.models import Exam, Question
+        from placement_test.models import PlacementExam as Exam, Question
         
         exam = Exam.objects.first()
         if exam and exam.questions.exists():
@@ -244,7 +244,7 @@ class ComprehensiveFeatureTest:
     
     def test_audio_file_associations(self):
         """Test audio file to question associations."""
-        from placement_test.models import Exam, AudioFile, Question
+        from placement_test.models import PlacementExam as Exam, PlacementAudioFile as AudioFile, Question
         
         exam = Exam.objects.filter(audio_files__isnull=False).first()
         if exam:
@@ -375,7 +375,7 @@ class ComprehensiveFeatureTest:
     
     def test_model_relationships_intact(self):
         """Test all model relationships work."""
-        from placement_test.models import Exam, Question, AudioFile, StudentSession
+        from placement_test.models import PlacementExam as Exam, Question, AudioFile, StudentSession
         from core.models import School, CurriculumLevel
         
         # Test forward relationships

@@ -176,7 +176,7 @@ class TestPhase8Compatibility:
     def test_serializer_functionality(self):
         """Test that serializers work correctly."""
         from api.serializers import ExamSerializer
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         
         # Get an exam if available
         exam = Exam.objects.first()
@@ -195,7 +195,7 @@ class TestPhase8Compatibility:
     
     def test_models_unchanged(self):
         """Test that existing models are unchanged."""
-        from placement_test.models import Exam, Question, StudentSession
+        from placement_test.models import PlacementExam as Exam, Question, StudentSession
         from core.models import School, Program, CurriculumLevel
         
         # Test model fields exist
@@ -303,7 +303,7 @@ class TestPhase8Compatibility:
     
     def test_database_integrity(self):
         """Test that database operations still work."""
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         from core.models import School
         
         # Test basic queries work

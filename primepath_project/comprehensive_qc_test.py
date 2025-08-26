@@ -19,8 +19,8 @@ from django.test import Client
 from django.urls import reverse
 from django.contrib.auth.models import User
 from core.models import Teacher, Student, Program, SubProgram, PlacementRule
-from placement_test.models import Exam as PlacementExam, Question as PlacementQuestion
-from primepath_routinetest.models import Exam as RoutineExam, Question as RoutineQuestion
+from placement_test.models import PlacementExam as Exam as PlacementExam, Question as PlacementQuestion
+from primepath_routinetest.models import RoutineExam as Exam as RoutineExam, Question as RoutineQuestion
 from primepath_routinetest.models import TeacherClassAssignment
 
 class ComprehensiveQCTest:

@@ -7,7 +7,7 @@ but only if they are truly unassigned (not intentionally assigned to Question 1)
 """
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from placement_test.models import AudioFile
+from placement_test.models import PlacementAudioFile as AudioFile
 
 
 class Command(BaseCommand):

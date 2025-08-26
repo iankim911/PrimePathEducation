@@ -5,7 +5,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings')
 django.setup()
 
 from core.models import ExamLevelMapping, CurriculumLevel
-from placement_test.models import Exam
+from placement_test.models import PlacementExam as Exam
 from placement_test.services import PlacementService
 
 # Check if exam mappings exist

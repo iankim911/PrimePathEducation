@@ -30,7 +30,7 @@ def process_exam_pdf(exam_id: str, pdf_path: str):
         pdf_path: Path to the PDF file
     """
     try:
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         from core.services import FileService
         
         logger.info(f"Processing PDF for exam {exam_id}")
@@ -70,7 +70,7 @@ def process_audio_files(exam_id: str, audio_file_ids: list):
         audio_file_ids: List of AudioFile IDs
     """
     try:
-        from placement_test.models import AudioFile
+        from placement_test.models import PlacementAudioFile as AudioFile
         
         logger.info(f"Processing {len(audio_file_ids)} audio files for exam {exam_id}")
         
@@ -246,7 +246,7 @@ def cleanup_old_sessions(days: int = 30):
 def cleanup_orphaned_files():
     """Clean up orphaned files not linked to any exam."""
     try:
-        from placement_test.models import Exam, AudioFile
+        from placement_test.models import PlacementExam as Exam, AudioFile
         from core.services import FileService
         
         logger.info("Cleaning up orphaned files")

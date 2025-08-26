@@ -15,7 +15,7 @@ django.setup()
 
 from django.test import Client
 from django.contrib.auth.models import User
-from primepath_routinetest.models import Exam
+from primepath_routinetest.models import RoutineExam as Exam
 from primepath_routinetest.services import ExamService
 from primepath_routinetest.services.exam_service import ExamPermissionService
 from bs4 import BeautifulSoup

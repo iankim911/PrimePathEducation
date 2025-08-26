@@ -16,7 +16,7 @@ django.setup()
 from django.test import Client
 from django.urls import reverse
 from core.models import School, Program, SubProgram, CurriculumLevel
-from placement_test.models import Exam, StudentSession
+from placement_test.models import PlacementExam as Exam, StudentSession
 from core.services import CurriculumService, SchoolService, TeacherService
 
 

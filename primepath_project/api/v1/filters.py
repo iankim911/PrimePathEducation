@@ -3,7 +3,7 @@ API Filters - Phase 8
 Filter classes for API endpoints
 """
 from django_filters import rest_framework as filters
-from placement_test.models import Exam, StudentSession
+from placement_test.models import PlacementExam as Exam, StudentSession
 from core.models import PlacementRule
 
 

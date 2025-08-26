@@ -7,7 +7,10 @@ from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.models import User
 from core.exceptions import ValidationException, ExamConfigurationException
 from core.constants import DEFAULT_OPTIONS_COUNT, DEFAULT_QUESTION_POINTS
-from ..models import Exam, Question, AudioFile, TeacherClassAssignment
+from ..models import RoutineExam, Question, RoutineAudioFile, TeacherClassAssignment
+# Backward compatibility aliases
+Exam = RoutineExam  
+AudioFile = RoutineAudioFile
 from collections import defaultdict
 import logging
 import json

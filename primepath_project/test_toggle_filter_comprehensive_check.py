@@ -17,7 +17,7 @@ django.setup()
 from django.contrib.auth.models import User
 from django.test import RequestFactory, Client
 from django.urls import reverse
-from primepath_routinetest.models import Exam, TeacherClassAssignment
+from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
 from primepath_routinetest.services.exam_service import ExamService
 from primepath_routinetest.views.exam import exam_list
 from primepath_routinetest.views.classes_exams_unified import classes_exams_unified_view

@@ -15,7 +15,7 @@ django.setup()
 
 from django.test import Client, TestCase
 from django.urls import reverse
-from placement_test.models import Exam, Question, AudioFile
+from placement_test.models import PlacementExam as Exam, Question, AudioFile
 from core.models import Program, SubProgram, CurriculumLevel
 import json
 import uuid

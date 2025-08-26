@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @login_required
 def exam_mapping(request):
     """View for managing curriculum level to exam mappings - FIXED VERSION"""
-    from placement_test.models import Exam
+    from placement_test.models import PlacementExam as Exam
     from .models import ExamLevelMapping, Program
     from .curriculum_constants import is_test_subprogram, is_valid_subprogram
     from .utils import get_curriculum_level_display_data, log_filtered_subprograms

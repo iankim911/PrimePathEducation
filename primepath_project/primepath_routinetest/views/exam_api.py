@@ -908,7 +908,7 @@ def generate_exam_name(exam_type, time_period, academic_year, source_exam, custo
     Generate exam name following the same convention as Upload Exam
     Format: [RT/QTR] - [Mon Year] - [Program] [SubProgram] Lv[X]_[custom]
     """
-    from primepath_routinetest.models import Exam
+    from primepath_routinetest.models import RoutineExam as Exam
     
     name_parts = []
     
@@ -1021,7 +1021,7 @@ def create_copied_exam(source_exam, new_name, target_class_code, exam_type, time
         if hasattr(source_exam, 'class_code') or hasattr(source_exam, 'class_codes'):
             logger.info(f"[ONE_TO_ONE_FIX] Source is Exam model, creating Exam copy with single class")
             # Create Exam instance instead of RoutineExam
-            from primepath_routinetest.models import Exam
+            from primepath_routinetest.models import RoutineExam as Exam
             
             copied_exam = Exam.objects.create(
                 id=uuid.uuid4(),

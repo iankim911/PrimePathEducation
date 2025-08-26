@@ -16,7 +16,7 @@ django.setup()
 from django.test import Client, RequestFactory
 from django.urls import reverse
 from django.http import HttpRequest
-from placement_test.models import Exam, StudentSession, Question, StudentAnswer
+from placement_test.models import PlacementExam as Exam, StudentSession, Question, StudentAnswer
 from core.models import School, Program, SubProgram, CurriculumLevel, PlacementRule
 import traceback
 
@@ -258,7 +258,7 @@ class TestPhase6Compatibility:
     def test_backwards_compatibility(self):
         """Test that old code patterns still work."""
         # Direct model access should still work
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         from core.models import School
         
         # These queries should work

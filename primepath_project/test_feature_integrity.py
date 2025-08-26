@@ -14,7 +14,7 @@ django.setup()
 
 from django.contrib.auth.models import User
 from django.test import RequestFactory, Client
-from primepath_routinetest.models import Exam, TeacherClassAssignment
+from primepath_routinetest.models import RoutineExam as Exam, TeacherClassAssignment
 from primepath_routinetest.services import ExamService, ExamPermissionService
 from core.models import Teacher
 import json

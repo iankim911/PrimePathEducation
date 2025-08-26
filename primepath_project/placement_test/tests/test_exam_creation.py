@@ -16,7 +16,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'primepath_project.settings_sqlite')
 django.setup()
 
-from placement_test.models import Exam, Question
+from placement_test.models import PlacementExam as Exam, Question
 from placement_test.services import ExamService
 from core.models import CurriculumLevel
 from django.core.files.uploadedfile import SimpleUploadedFile

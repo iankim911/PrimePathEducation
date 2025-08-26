@@ -90,7 +90,7 @@ class TestExistingFeatures:
     
     def test_exam_detail_page(self):
         """Test exam detail page with existing exam."""
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         exam = Exam.objects.first()
         if exam:
             response = self.client.get(f'/api/PlacementTest/exams/{exam.id}/')
@@ -98,7 +98,7 @@ class TestExistingFeatures:
     
     def test_preview_exam_page(self):
         """Test preview exam page."""
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         exam = Exam.objects.first()
         if exam:
             response = self.client.get(f'/api/PlacementTest/exams/{exam.id}/preview/')
@@ -136,7 +136,7 @@ class TestExistingFeatures:
     def test_exam_service_works(self):
         """Test ExamService functionality."""
         from placement_test.services import ExamService
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         
         # Test get_next_version_letter
         if Exam.objects.exists():
@@ -159,7 +159,7 @@ class TestExistingFeatures:
     
     def test_models_accessible(self):
         """Test all models are accessible."""
-        from placement_test.models import Exam, Question, AudioFile, StudentSession, StudentAnswer
+        from placement_test.models import PlacementExam as Exam, Question, AudioFile, StudentSession, StudentAnswer
         from core.models import School, CurriculumLevel, Program, SubProgram
         
         # Try to access each model
@@ -175,7 +175,7 @@ class TestExistingFeatures:
     
     def test_relationships_work(self):
         """Test model relationships work correctly."""
-        from placement_test.models import Exam
+        from placement_test.models import PlacementExam as Exam
         
         exam = Exam.objects.first()
         if exam:
