@@ -2558,9 +2558,9 @@ document.head.appendChild(style);
 <!-- Exam Management Script -->
 <script src="{% static 'js/routinetest/exam-management.js' %}?v={{ cache_bust }}"></script>
 
-<!-- Curriculum Management Script (Admin Only) -->
+<!-- Optimized Curriculum Management Script (Admin Only) -->
 {% if user.is_superuser %}
-<script src="{% static 'js/routinetest/curriculum-management.js' %}"></script>
+<script src="{% static 'js/routinetest/curriculum-management-optimized.js' %}?v={{ cache_bust }}"></script>
 {% endif %}
 
 {% endblock %}

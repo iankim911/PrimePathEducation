@@ -245,13 +245,16 @@ def create_student_account(request):
         # Validation
         errors = []
         
-        if StudentProfile.objects.filter(phone_number=phone_number).exists():
-            errors.append("This phone number is already registered")
+        # Check if a user with this phone already exists
+        if User.objects.filter(username=f"student_{phone_number}").exists():
+            errors.append(f"A student account with phone number {phone_number} already exists. Please use a different phone number.")
+        elif StudentProfile.objects.filter(phone_number=phone_number).exists():
+            errors.append(f"Phone number {phone_number} is already registered to another student.")
         
         if not student_id:
             student_id = StudentProfile.generate_student_id()
         elif StudentProfile.objects.filter(student_id=student_id).exists():
-            errors.append("This student ID already exists")
+            errors.append(f"Student ID '{student_id}' is already taken. Please choose a different ID.")
         
         if len(password) < 8:
             errors.append("Password must be at least 8 characters")
@@ -294,7 +297,18 @@ def create_student_account(request):
                             is_active=True
                         )
                 
-                messages.success(request, f"Student account created: {student_id}")
+                # Create a more detailed success message
+                success_msg = f"✅ Student account successfully created!\n\n"
+                success_msg += f"📋 Student ID: {student_id}\n"
+                success_msg += f"👤 Name: {first_name} {last_name}\n"
+                success_msg += f"📱 Login Phone: {phone_number}\n"
+                success_msg += f"🔑 Password: Set by you\n"
+                if class_codes:
+                    class_names = [dict(CLASS_CODE_CHOICES).get(code, code) for code in class_codes]
+                    success_msg += f"📚 Enrolled in: {', '.join(class_names)}\n"
+                success_msg += f"\nThe student can now login using their phone number and password."
+                
+                messages.success(request, success_msg)
                 
                 # Redirect based on context
                 if len(class_codes) == 1:

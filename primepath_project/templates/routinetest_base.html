@@ -392,9 +392,58 @@
         }
         
         .alert-success {
-            background-color: #F1F8E9;
-            border: 1px solid #689F38;  /* Muted olive green border */
-            color: #33691E;  /* Dark olive green text */
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            border-left: 5px solid #4CAF50;
+            color: #1B5E20;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.15);
+            animation: slideInDown 0.4s ease, pulse 1s ease;
+            white-space: pre-line;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 60px;
+        }
+        
+        .alert-success::before {
+            content: "🎉";
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            animation: bounce 0.6s ease;
+        }
+        
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(-50%);
+            }
+            25% {
+                transform: translateY(-60%);
+            }
+            75% {
+                transform: translateY(-40%);
+            }
         }
         
         .alert-info {
