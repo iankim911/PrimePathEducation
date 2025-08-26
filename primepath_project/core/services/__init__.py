@@ -7,6 +7,7 @@ from .teacher_service import TeacherService
 from .dashboard_service import DashboardService
 from .file_service import FileService
 from .config_service import ConfigurationService
+from .security_service import SecurityService
 
 __all__ = [
     'CurriculumService',
@@ -15,4 +16,5 @@ __all__ = [
     'DashboardService',
     'FileService',
     'ConfigurationService',
+    'SecurityService',
 ]

@@ -81,31 +81,109 @@ async function loadAdminClasses() {
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button type="button" class="btn-save" onclick="saveCurriculumMapping('${cls.code}'); return false;" title="Save curriculum mapping">Save</button>
-                            <button type="button" class="btn-edit" onclick="editClass('${cls.code}'); return false;" title="Edit class details">Edit</button>
-                            <button type="button" class="btn-delete" onclick="deleteClass('${cls.code}'); return false;" title="Delete class">Delete</button>
+                            <button type="button" class="btn-save" onclick="saveCurriculumMapping('${cls.code}'); return false;" title="Save curriculum mapping" style="width: 75px !important; padding: 8px 15px !important; background: #2E7D32 !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 13px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.4 !important; box-sizing: border-box !important; white-space: nowrap !important;">Save</button>
+                            <button type="button" class="btn-edit" onclick="editClass('${cls.code}'); return false;" title="Edit class details" style="width: 75px !important; padding: 8px 15px !important; background: #1976D2 !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 13px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.4 !important; box-sizing: border-box !important; white-space: nowrap !important;">Edit</button>
+                            <button type="button" class="btn-delete" onclick="deleteClass('${cls.code}'); return false;" title="Delete class" style="width: 75px !important; padding: 8px 15px !important; background: #D32F2F !important; color: white !important; border: none !important; border-radius: 5px !important; font-size: 13px !important; font-weight: 500 !important; cursor: pointer !important; display: inline-block !important; text-align: center !important; line-height: 1.4 !important; box-sizing: border-box !important; white-space: nowrap !important;">Delete</button>
                         </div>
                     </td>
                 </tr>
             `).join('');
-            console.log('[BUTTON_FIX] Rendered', data.classes.length, 'classes with fixed button alignment');
+            console.log('[BUTTON_FIX] Rendered', data.classes.length, 'classes with INLINE STYLES for uniform button width');
             
-            // Add debug logging for button rendering
+            // Enhanced debug logging for button rendering with width measurements
             setTimeout(() => {
                 const buttons = document.querySelectorAll('.action-buttons');
                 console.log('[BUTTON_FIX] Action button containers found:', buttons.length);
+                console.log('[BUTTON_FIX] === DETAILED BUTTON ANALYSIS ===');
+                
                 buttons.forEach((container, index) => {
                     const saveBtn = container.querySelector('.btn-save');
                     const editBtn = container.querySelector('.btn-edit');
                     const deleteBtn = container.querySelector('.btn-delete');
-                    console.log(`[BUTTON_FIX] Row ${index + 1} buttons:`, {
-                        save: saveBtn ? 'Present' : 'Missing',
-                        edit: editBtn ? 'Present' : 'Missing',
-                        delete: deleteBtn ? 'Present' : 'Missing',
-                        alignment: window.getComputedStyle(container).justifyContent
+                    
+                    console.log(`[BUTTON_FIX] Row ${index + 1} Analysis:`);
+                    
+                    if (saveBtn) {
+                        const saveBtnStyles = window.getComputedStyle(saveBtn);
+                        const saveBtnRect = saveBtn.getBoundingClientRect();
+                        console.log(`  Save Button: ${saveBtnRect.width}px wide, ${saveBtnRect.height}px high`);
+                        console.log(`    CSS width: ${saveBtnStyles.width}, padding: ${saveBtnStyles.padding}`);
+                        console.log(`    Background: ${saveBtnStyles.backgroundColor}`);
+                    }
+                    
+                    if (editBtn) {
+                        const editBtnStyles = window.getComputedStyle(editBtn);
+                        const editBtnRect = editBtn.getBoundingClientRect();
+                        console.log(`  Edit Button: ${editBtnRect.width}px wide, ${editBtnRect.height}px high`);
+                        console.log(`    CSS width: ${editBtnStyles.width}, padding: ${editBtnStyles.padding}`);
+                        console.log(`    Background: ${editBtnStyles.backgroundColor}`);
+                    }
+                    
+                    if (deleteBtn) {
+                        const deleteBtnStyles = window.getComputedStyle(deleteBtn);
+                        const deleteBtnRect = deleteBtn.getBoundingClientRect();
+                        console.log(`  Delete Button: ${deleteBtnRect.width}px wide, ${deleteBtnRect.height}px high`);
+                        console.log(`    CSS width: ${deleteBtnStyles.width}, padding: ${deleteBtnStyles.padding}`);
+                        console.log(`    Background: ${deleteBtnStyles.backgroundColor}`);
+                    }
+                    
+                    // Check for width consistency
+                    const widths = [saveBtn, editBtn, deleteBtn].map(btn => btn ? btn.getBoundingClientRect().width : 0);
+                    const uniqueWidths = [...new Set(widths.filter(w => w > 0))];
+                    
+                    if (uniqueWidths.length === 1) {
+                        console.log(`  ✅ Row ${index + 1}: All buttons have consistent width (${uniqueWidths[0]}px)`);
+                    } else {
+                        console.log(`  ❌ Row ${index + 1}: INCONSISTENT widths detected:`, widths);
+                    }
+                    
+                    console.log(`  Container alignment: ${window.getComputedStyle(container).justifyContent}`);
+                    console.log('  ---');
+                });
+                
+                // Overall width consistency check
+                const allButtons = document.querySelectorAll('.btn-save, .btn-edit, .btn-delete');
+                const allWidths = Array.from(allButtons).map(btn => btn.getBoundingClientRect().width);
+                const allUniqueWidths = [...new Set(allWidths)];
+                
+                console.log(`[BUTTON_FIX] === OVERALL CONSISTENCY CHECK ===`);
+                console.log(`Total buttons found: ${allButtons.length}`);
+                console.log(`Unique widths: ${allUniqueWidths.length} (${allUniqueWidths.join(', ')}px)`);
+                
+                if (allUniqueWidths.length === 1) {
+                    console.log('✅ SUCCESS: All buttons have consistent width!');
+                } else {
+                    console.log('❌ FAILURE: Buttons still have inconsistent widths');
+                    console.log('Width distribution:', allWidths);
+                }
+                
+                // Add hover effects using JavaScript since inline styles can't handle :hover
+                allButtons.forEach(btn => {
+                    const originalBg = btn.style.backgroundColor;
+                    const hoverColors = {
+                        'rgb(46, 125, 50)': '#1B5E20',  // Save hover
+                        'rgb(25, 118, 210)': '#1565C0', // Edit hover  
+                        'rgb(211, 47, 47)': '#B71C1C'   // Delete hover
+                    };
+                    
+                    btn.addEventListener('mouseenter', () => {
+                        const hoverColor = hoverColors[originalBg];
+                        if (hoverColor) {
+                            btn.style.backgroundColor = hoverColor + ' !important';
+                            btn.style.transform = 'translateY(-1px)';
+                            btn.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        }
+                    });
+                    
+                    btn.addEventListener('mouseleave', () => {
+                        btn.style.backgroundColor = originalBg + ' !important';
+                        btn.style.transform = 'none';
+                        btn.style.boxShadow = 'none';
                     });
                 });
-            }, 100);
+                
+                console.log('[BUTTON_FIX] Hover effects applied to all buttons');
+            }, 200);
         } else {
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No classes found. Create your first class!</td></tr>';
             console.log('[BUTTON_FIX] No classes to display');

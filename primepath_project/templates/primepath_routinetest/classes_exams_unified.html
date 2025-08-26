@@ -788,54 +788,55 @@
     }
     
     /* Button Styling - FIXED: Consistent styling for all three buttons */
-    /* Uniform button styling - FIXED: All buttons same width */
-    .btn-save,
-    .btn-edit,
-    .btn-delete {
-        border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 500;
-        white-space: nowrap;
-        width: 75px; /* FIXED: Set uniform width instead of min-width */
-        transition: all 0.3s ease;
-        display: inline-block;
-        text-align: center;
-        line-height: 1.4;
-        color: white;
-        box-sizing: border-box; /* Include padding in width calculation */
+    /* HIGH SPECIFICITY BUTTON STYLING - OVERRIDES BASE.HTML */
+    .admin-table .action-buttons .btn-save,
+    .admin-table .action-buttons .btn-edit,
+    .admin-table .action-buttons .btn-delete {
+        border: none !important;
+        padding: 8px 15px !important;
+        border-radius: 5px !important;
+        cursor: pointer !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        width: 75px !important; /* ENFORCED: Set uniform width */
+        transition: all 0.3s ease !important;
+        display: inline-block !important;
+        text-align: center !important;
+        line-height: 1.4 !important;
+        color: white !important;
+        box-sizing: border-box !important;
+        text-decoration: none !important; /* Override base.html .btn */
     }
     
-    .btn-save {
-        background: #2E7D32;
+    .admin-table .action-buttons .btn-save {
+        background: #2E7D32 !important;
     }
     
-    .btn-save:hover {
-        background: #1B5E20;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    .admin-table .action-buttons .btn-save:hover {
+        background: #1B5E20 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
     }
     
-    .btn-edit {
-        background: #1976D2;
+    .admin-table .action-buttons .btn-edit {
+        background: #1976D2 !important;
     }
     
-    .btn-edit:hover {
-        background: #1565C0;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    .admin-table .action-buttons .btn-edit:hover {
+        background: #1565C0 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
     }
     
-    .btn-delete {
-        background: #D32F2F;
+    .admin-table .action-buttons .btn-delete {
+        background: #D32F2F !important;
     }
     
-    .btn-delete:hover {
-        background: #B71C1C;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    .admin-table .action-buttons .btn-delete:hover {
+        background: #B71C1C !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
     }
     
     /* Actions column styling - FIXED: Centered buttons without absolute positioning */

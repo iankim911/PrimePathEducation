@@ -18,11 +18,41 @@ import os
 from django.core.management.utils import get_random_secret_key
 import warnings
 
-# PHASE 8 SECURITY IMPROVEMENTS
-# Generate a new secret key if not provided
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production')
-if not os.environ.get('SECRET_KEY'):
-    warnings.warn("WARNING: Using default SECRET_KEY. Set SECRET_KEY environment variable in production!", UserWarning)
+# PHASE 8 SECURITY IMPROVEMENTS - Enhanced in Phase 2
+# Enhanced SECRET_KEY security with dynamic generation
+def get_secret_key():
+    """Get SECRET_KEY with enhanced security and dynamic generation"""
+    # First priority: Environment variable
+    env_secret = os.environ.get('SECRET_KEY')
+    if env_secret and not env_secret.startswith('django-insecure-your-secret'):
+        return env_secret
+    
+    # Second priority: Local secret file (for development)
+    secret_file = BASE_DIR / '.env.secret'
+    if secret_file.exists():
+        try:
+            with open(secret_file, 'r') as f:
+                file_secret = f.read().strip()
+                if file_secret and not file_secret.startswith('django-insecure-your-secret'):
+                    return file_secret
+        except Exception:
+            pass
+    
+    # Development fallback: Generate and save a new secret key
+    from django.core.management.utils import get_random_secret_key
+    new_secret = get_random_secret_key()
+    
+    # Save to local file for consistency across runs
+    try:
+        with open(secret_file, 'w') as f:
+            f.write(new_secret)
+            warnings.warn("Generated new SECRET_KEY for development. Saved to .env.secret", UserWarning)
+    except Exception:
+        warnings.warn("Generated new SECRET_KEY for development session.", UserWarning)
+        
+    return new_secret
+
+SECRET_KEY = get_secret_key()
 
 # Debug should be False in production - PHASE 8 ENHANCED
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'

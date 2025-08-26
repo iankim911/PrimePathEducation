@@ -113,12 +113,16 @@
     }
     
     .tab-btn.active {
-        color: white;
+        color: white !important;
         background: linear-gradient(135deg, #1B5E20, #2E7D32);
         border-color: #2E7D32;
         font-weight: 600;
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         transform: translateY(-2px);
+    }
+    
+    .tab-btn.active span {
+        color: white !important;
     }
     
     .tab-icon {
@@ -137,6 +141,7 @@
     .tab-btn.active .tab-icon {
         background: rgba(255, 255, 255, 0.2);
         transform: scale(1.1);
+        color: white !important;
     }
     
     /* TAB CONTENT - BENCHMARK CLEAN STYLING */
@@ -215,12 +220,20 @@
         line-height: normal !important;
     }
     
+    .add-student-btn span {
+        color: white !important;
+    }
+    
     .add-student-btn:hover {
         background: linear-gradient(135deg, #2E7D32, #388E3C) !important;
         color: white !important;
         border-color: #388E3C !important;
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .add-student-btn:hover span {
+        color: white !important;
     }
     
     /* Manage Students button - Professional outline style */
@@ -392,7 +405,7 @@
     
     .toggle-btn.active {
         background: linear-gradient(135deg, #1B5E20, #2E7D32);
-        color: white;
+        color: white !important;
         font-weight: 600;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
@@ -1385,14 +1398,14 @@
         <div class="modal-body">
             <div class="student-search">
                 <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" id="studentSearchInput" placeholder="Search students by name...">
+                <input type="text" class="search-input" id="studentSearchInput" placeholder="Search students by name or student ID...">
             </div>
             <div class="student-list">
                 {% for student in available_students %}
-                <div class="student-option" data-student-id="{{ student.id }}" onclick="selectStudent(this, '{{ student.id }}', '{{ student.name|escapejs }}')">
+                <div class="student-option" data-student-id="{{ student.id }}" data-student-code="{{ student.student_id }}" onclick="selectStudent(this, '{{ student.id }}', '{{ student.name|escapejs }}')">
                     <div>
                         <strong>{{ student.name }}</strong>
-                        <div style="font-size: 0.9rem; color: #6c757d;">Grade: {{ student.grade_level }}</div>
+                        <div style="font-size: 0.9rem; color: #6c757d;">Student ID: {{ student.student_id }} • Grade: {{ student.grade_level }}</div>
                     </div>
                     <span class="select-icon">✓</span>
                 </div>
@@ -1643,18 +1656,24 @@
         closeAddStudentModal();
     }
     
-    // Student Search
+    // Student Search - Enhanced to search by name and student ID
     document.getElementById('studentSearchInput')?.addEventListener('input', function(e) {
         const searchTerm = e.target.value.toLowerCase();
         
         document.querySelectorAll('.student-option').forEach(opt => {
             const studentName = opt.querySelector('strong').textContent.toLowerCase();
-            if (studentName.includes(searchTerm)) {
+            const studentId = opt.getAttribute('data-student-code')?.toLowerCase() || '';
+            
+            // Search both name and student ID
+            if (studentName.includes(searchTerm) || studentId.includes(searchTerm)) {
                 opt.style.display = 'flex';
             } else {
                 opt.style.display = 'none';
             }
         });
+        
+        // Log search activity for debugging
+        console.log('[STUDENT_SEARCH]', { searchTerm, totalOptions: document.querySelectorAll('.student-option').length });
     });
     
     // Remove Student

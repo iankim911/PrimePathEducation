@@ -20,11 +20,23 @@ def get_oauth_base_url():
         # Use ConfigurationService as fallback
         return ConfigurationService.get_base_url()
 
-# Google OAuth 2.0 Configuration
-GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', 'your-google-client-id.apps.googleusercontent.com')
-GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', 'your-google-client-secret')
+# Google OAuth 2.0 Configuration - SECURE DEFAULTS
+# Note: These will raise errors if not properly configured, preventing accidental credential exposure
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 # Dynamic redirect URI based on environment
 GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', f'{get_oauth_base_url()}/auth/google/callback/')
+
+# Validation: Ensure OAuth credentials are properly configured
+if not GOOGLE_CLIENT_ID or GOOGLE_CLIENT_ID == 'your-google-client-id.apps.googleusercontent.com':
+    import warnings
+    warnings.warn("Google OAuth not configured. Set GOOGLE_CLIENT_ID environment variable.", UserWarning)
+    GOOGLE_CLIENT_ID = None
+
+if not GOOGLE_CLIENT_SECRET or GOOGLE_CLIENT_SECRET == 'your-google-client-secret':
+    import warnings
+    warnings.warn("Google OAuth not configured. Set GOOGLE_CLIENT_SECRET environment variable.", UserWarning)
+    GOOGLE_CLIENT_SECRET = None
 
 GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -36,11 +48,23 @@ GOOGLE_SCOPES = [
     'profile',
 ]
 
-# Kakao OAuth Configuration
-KAKAO_CLIENT_ID = os.environ.get('KAKAO_REST_API_KEY', 'your-kakao-rest-api-key')
-KAKAO_CLIENT_SECRET = os.environ.get('KAKAO_CLIENT_SECRET', 'your-kakao-client-secret')
+# Kakao OAuth Configuration - SECURE DEFAULTS
+# Note: These will raise errors if not properly configured, preventing accidental credential exposure
+KAKAO_CLIENT_ID = os.environ.get('KAKAO_REST_API_KEY')
+KAKAO_CLIENT_SECRET = os.environ.get('KAKAO_CLIENT_SECRET')
 # Dynamic redirect URI based on environment
 KAKAO_REDIRECT_URI = os.environ.get('KAKAO_REDIRECT_URI', f'{get_oauth_base_url()}/auth/kakao/callback/')
+
+# Validation: Ensure Kakao OAuth credentials are properly configured
+if not KAKAO_CLIENT_ID or KAKAO_CLIENT_ID == 'your-kakao-rest-api-key':
+    import warnings
+    warnings.warn("Kakao OAuth not configured. Set KAKAO_REST_API_KEY environment variable.", UserWarning)
+    KAKAO_CLIENT_ID = None
+
+if not KAKAO_CLIENT_SECRET or KAKAO_CLIENT_SECRET == 'your-kakao-client-secret':
+    import warnings
+    warnings.warn("Kakao OAuth not configured. Set KAKAO_CLIENT_SECRET environment variable.", UserWarning)
+    KAKAO_CLIENT_SECRET = None
 
 KAKAO_AUTH_URL = 'https://kauth.kakao.com/oauth/authorize'
 KAKAO_TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
