@@ -15,6 +15,29 @@ class Class(models.Model):
     section = models.CharField(max_length=50, blank=True)
     academic_year = models.CharField(max_length=20, default='2024-2025')
     
+    # Program assignment field (Direct mapping to CORE, ASCENT, EDGE, PINNACLE)
+    program = models.CharField(
+        max_length=20,
+        choices=[
+            ('CORE', 'CORE'),
+            ('ASCENT', 'ASCENT'),
+            ('EDGE', 'EDGE'),
+            ('PINNACLE', 'PINNACLE')
+        ],
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Program this class belongs to"
+    )
+    
+    # SubProgram field for more specific curriculum mapping
+    subprogram = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Specific subprogram within the program"
+    )
+    
     # Teacher assignment (ManyToMany doesn't cascade delete by default)
     assigned_teachers = models.ManyToManyField(
         Teacher,
@@ -43,6 +66,7 @@ class Class(models.Model):
         indexes = [
             models.Index(fields=['is_active', 'academic_year']),
             models.Index(fields=['grade_level', 'section']),
+            models.Index(fields=['program', 'is_active']),  # New index for program queries
         ]
     
     def __str__(self):

@@ -602,21 +602,11 @@ def classes_exams_unified_view(request):
         
         # SECTION 4: Organize classes by program for new Class Management section
         from collections import defaultdict
-        from primepath_routinetest.class_code_mapping import get_class_codes_by_program
+        from primepath_routinetest.class_code_mapping import get_class_codes_by_program, CLASS_CODE_CURRICULUM_MAPPING
         
-        # FIXED: Use correct program mapping function instead of broken string matching
-        PROGRAM_MAPPING = {
-            'CORE': get_class_codes_by_program('CORE'),
-            'ASCENT': get_class_codes_by_program('ASCENT'), 
-            'EDGE': get_class_codes_by_program('EDGE'),
-            'PINNACLE': get_class_codes_by_program('PINNACLE')
-        }
-        
-        # Log the program mapping for debugging
-        logger.info(f"[PROGRAM_MAPPING_FIX] CORE: {len(PROGRAM_MAPPING['CORE'])} classes, ASCENT: {len(PROGRAM_MAPPING['ASCENT'])} classes")
-        logger.info(f"[PROGRAM_MAPPING_FIX] EDGE: {len(PROGRAM_MAPPING['EDGE'])} classes, PINNACLE: {len(PROGRAM_MAPPING['PINNACLE'])} classes")
-        print(f"[PROGRAM_MAPPING_FIX] Fixed program mapping - CORE: {PROGRAM_MAPPING['CORE'][:3]}..., EDGE: {PROGRAM_MAPPING['EDGE'][:3]}...")
-        print(f"[PROGRAM_MAPPING_FIX] Total mapped classes: {sum(len(classes) for classes in PROGRAM_MAPPING.values())}")
+        # NEW IMPLEMENTATION: Use direct program field from Class model
+        # First, we need to get the actual Class objects with their program assignments
+        from primepath_routinetest.models.class_model import Class
         
         # Get all exams for counting
         all_class_exams = Exam.objects.filter(
@@ -624,8 +614,12 @@ def classes_exams_unified_view(request):
             academic_year=current_year
         )
         
-        # Build program-organized data structure
+        # Build program-organized data structure using DIRECT program assignment
         programs_data = []
+        
+        # Log the program organization for debugging
+        logger.info(f"[PROGRAM_DIRECT] Starting program-based class organization using Class.program field")
+        print(f"[PROGRAM_DIRECT] Organizing classes by their assigned programs from database")
         
         for program_name in ['CORE', 'ASCENT', 'EDGE', 'PINNACLE']:
             program_classes = []
@@ -633,34 +627,32 @@ def classes_exams_unified_view(request):
             total_exams = 0
             incomplete_assignments = 0
             
-            # Get classes for this program that the user has access to
-            program_mapping_debug = []
-            for assignment in my_assignments:  # Check all assignments, not just first 20
-                if assignment.class_code in PROGRAM_MAPPING[program_name]:
-                    program_mapping_debug.append(assignment.class_code)
+            # NEW LOGIC: Get classes directly assigned to this program
+            # For admin, get all classes with this program
+            # For teacher, filter by their assignments
+            if is_admin:
+                # Admin sees all classes assigned to this program
+                program_class_objects = Class.objects.filter(
+                    program=program_name,
+                    is_active=True
+                ).order_by('section')
+                
+                logger.info(f"[PROGRAM_DIRECT] Admin mode - {program_name}: Found {program_class_objects.count()} classes")
+                print(f"[PROGRAM_DIRECT] {program_name}: {program_class_objects.count()} classes in database")
+                
+                for class_obj in program_class_objects:
                     # Get class details
-                    class_name = assignment.get_class_code_display() if hasattr(assignment, 'get_class_code_display') else assignment.class_code
+                    class_code = class_obj.section
+                    class_name = class_obj.name  # Use name as the display name
                     
-                    # Get full curriculum information from mapping
-                    curriculum_full = CLASS_CODE_CURRICULUM_MAPPING.get(assignment.class_code, '')
-                    
-                    # Parse curriculum components (e.g., "CORE Phonics Level 1")
-                    if curriculum_full:
-                        parts = curriculum_full.split()
-                        if len(parts) >= 3:
-                            # Format: "CORE • Phonics • Level 1"
-                            curriculum_display = f"{parts[0]} • {' '.join(parts[1:-1])} • {parts[-1]}"
-                        else:
-                            curriculum_display = curriculum_full
-                    else:
-                        curriculum_display = "Level 1"
-                    
-                    curriculum_level = curriculum_full.split(' ')[-1] if curriculum_full else 'Level 1'
+                    # Get curriculum display - subprogram if available
+                    curriculum_display = class_obj.subprogram if class_obj.subprogram else f"{program_name} Program"
+                    curriculum_level = curriculum_display  # Simplified for now
                     
                     # Count active exams for this class
                     class_exam_count = 0
                     for exam in all_class_exams:
-                        if exam.class_codes and assignment.class_code in exam.class_codes:
+                        if exam.class_codes and class_code in exam.class_codes:
                             class_exam_count += 1
                     
                     # Check if all required exams are assigned (simplified logic)
@@ -677,7 +669,7 @@ def classes_exams_unified_view(request):
                     # For SQLite compatibility, we'll use simplified counts
                     try:
                         sessions = StudentSession.objects.filter(
-                            exam__class_codes__contains=assignment.class_code
+                            exam__class_codes__contains=class_code
                         )[:100]  # Limit for performance
                         
                         for session in sessions:
@@ -694,12 +686,90 @@ def classes_exams_unified_view(request):
                     avg_score = round(total_score / score_count) if score_count > 0 else None
                     
                     class_data = {
-                        'class_code': assignment.class_code,
+                        'class_code': class_code,
                         'class_name': class_name,
-                        'access_level': 'FULL ACCESS',  # CLASS ACCESS: You either have access or you don't - no "VIEW ONLY" for class access
+                        'access_level': 'FULL ACCESS',  # Admin has full access
                         'curriculum_level': curriculum_level,
                         'curriculum_full': curriculum_display,  # Full curriculum display
-                        'student_count': 0,  # Simplified for now
+                        'student_count': class_obj.student_count if hasattr(class_obj, 'student_count') else 0,
+                        'active_exams': class_exam_count,
+                        'all_exams_assigned': all_exams_assigned,
+                        'completed_sessions': completed_sessions,
+                        'pending_sessions': pending_sessions,
+                        'avg_score': avg_score
+                    }
+                    
+                    program_classes.append(class_data)
+                    total_students += class_data['student_count']
+                    total_exams += class_data['active_exams']
+                    if not all_exams_assigned:
+                        incomplete_assignments += 1
+                        
+            else:
+                # Teacher mode - filter classes by their assignments and program
+                # Get the class codes from teacher assignments
+                teacher_class_codes = [a.class_code for a in my_assignments]
+                
+                # Get actual Class objects for these codes that belong to this program
+                program_class_objects = Class.objects.filter(
+                    section__in=teacher_class_codes,
+                    program=program_name,
+                    is_active=True
+                ).order_by('section')
+                
+                logger.info(f"[PROGRAM_DIRECT] Teacher mode - {program_name}: Found {program_class_objects.count()} classes")
+                print(f"[PROGRAM_DIRECT] Teacher {teacher.name} - {program_name}: {program_class_objects.count()} accessible classes")
+                
+                for class_obj in program_class_objects:
+                    # Get class details
+                    class_code = class_obj.section
+                    class_name = class_obj.name
+                    
+                    # Get curriculum display - subprogram if available
+                    curriculum_display = class_obj.subprogram if class_obj.subprogram else f"{program_name} Program"
+                    curriculum_level = curriculum_display
+                    
+                    # Count active exams for this class
+                    class_exam_count = 0
+                    for exam in all_class_exams:
+                        if exam.class_codes and class_code in exam.class_codes:
+                            class_exam_count += 1
+                    
+                    # Check if all required exams are assigned
+                    required_assignments = 16
+                    all_exams_assigned = class_exam_count >= required_assignments
+                    
+                    # Get student sessions for this class
+                    completed_sessions = 0
+                    pending_sessions = 0
+                    total_score = 0
+                    score_count = 0
+                    
+                    try:
+                        sessions = StudentSession.objects.filter(
+                            exam__class_codes__contains=class_code
+                        )[:100]
+                        
+                        for session in sessions:
+                            if session.completed_at:
+                                completed_sessions += 1
+                                if hasattr(session, 'final_score') and session.final_score:
+                                    total_score += session.final_score
+                                    score_count += 1
+                            else:
+                                pending_sessions += 1
+                    except:
+                        pass
+                    
+                    avg_score = round(total_score / score_count) if score_count > 0 else None
+                    
+                    class_data = {
+                        'class_code': class_code,
+                        'class_name': class_name,
+                        'access_level': 'FULL ACCESS',  # Teacher has access to assigned classes
+                        'curriculum_level': curriculum_level,
+                        'curriculum_full': curriculum_display,
+                        'student_count': class_obj.student_count if hasattr(class_obj, 'student_count') else 0,
                         'active_exams': class_exam_count,
                         'all_exams_assigned': all_exams_assigned,
                         'completed_sessions': completed_sessions,
@@ -722,9 +792,11 @@ def classes_exams_unified_view(request):
                     'total_exams': total_exams,
                     'incomplete_assignments': incomplete_assignments
                 })
-                print(f"[PROGRAM_MAPPING_FIX] {program_name}: {len(program_classes)} classes mapped: {program_mapping_debug}")
+                logger.info(f"[PROGRAM_DIRECT] {program_name}: Added {len(program_classes)} classes to display")
+                print(f"[PROGRAM_DIRECT] {program_name}: {len(program_classes)} classes ready for display")
             else:
-                print(f"[PROGRAM_MAPPING_FIX] {program_name}: SKIPPED - no classes found (available: {PROGRAM_MAPPING[program_name][:3] if PROGRAM_MAPPING[program_name] else 'none'})")
+                logger.info(f"[PROGRAM_DIRECT] {program_name}: No classes found for this program")
+                print(f"[PROGRAM_DIRECT] {program_name}: No classes assigned to this program")
         
         context['programs_data'] = programs_data
         

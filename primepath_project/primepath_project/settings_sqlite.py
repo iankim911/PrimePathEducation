@@ -97,6 +97,11 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
                 'primepath_routinetest.context_processors.routinetest_context',  # RoutineTest theme context
+                # Phase 1 Configuration Context Processors
+                'core.context_processors.config_context',  # Configuration service
+                'core.context_processors.user_context',  # User role information
+                'core.context_processors.feature_flags_context',  # Feature flags
+                'core.context_processors.app_info_context',  # App information
             ],
         },
     },
@@ -330,12 +335,26 @@ REST_FRAMEWORK = {
 # Social OAuth Configuration - Removed
 # This is an in-house tool, social login not needed
 
-# CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React development server
-    "http://localhost:8000",  # Django development server
-    "http://127.0.0.1:8000",  # Alternative Django dev server
-]
+# CORS Configuration - Dynamic based on environment
+CORS_ALLOWED_ORIGINS_ENV = os.environ.get('CORS_ALLOWED_ORIGINS', '')
+if CORS_ALLOWED_ORIGINS_ENV:
+    CORS_ALLOWED_ORIGINS = [url.strip() for url in CORS_ALLOWED_ORIGINS_ENV.split(',')]
+else:
+    # Default development origins
+    if DEBUG:
+        CORS_ALLOWED_ORIGINS = [
+            "http://localhost:3000",  # React development server
+            "http://localhost:8000",  # Django development server
+            "http://127.0.0.1:8000",  # Alternative Django dev server
+        ]
+        # Add BASE_URL if configured
+        if os.environ.get('BASE_URL'):
+            CORS_ALLOWED_ORIGINS.append(os.environ.get('BASE_URL'))
+    else:
+        # Production - must be explicitly configured
+        CORS_ALLOWED_ORIGINS = []
+        if os.environ.get('BASE_URL'):
+            CORS_ALLOWED_ORIGINS.append(os.environ.get('BASE_URL'))
 
 CORS_ALLOW_CREDENTIALS = True
 

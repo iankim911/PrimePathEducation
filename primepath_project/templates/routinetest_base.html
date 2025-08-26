@@ -21,6 +21,12 @@
     <!-- Unified Design System - UI Harmonization -->
     <link rel="stylesheet" href="{% static 'css/unified-design-system.css' %}?v=2.0">
     
+    <!-- Button Consistency Fix - Critical UI Fix for Admin Buttons -->
+    <link rel="stylesheet" href="{% static 'css/button-consistency-fix.css' %}?v=1.0">
+    
+    <!-- White Text Fix - Ensure White Text on Dark Backgrounds -->
+    <link rel="stylesheet" href="{% static 'css/white-text-fix.css' %}?v=1.0">
+    
     
     <!-- Console Debugging for RoutineTest -->
     <script>
@@ -32,6 +38,12 @@
         window.MATRIX_TAB_VERSION = '3.0';
         window.NAVIGATION_TIMESTAMP = new Date().toISOString();
     </script>
+    
+    <!-- Button Consistency Debug Module -->
+    <script src="{% static 'js/button-consistency-debug.js' %}?v=1.0" defer></script>
+    
+    <!-- White Text Debug Module -->
+    <script src="{% static 'js/white-text-debug.js' %}?v=1.0" defer></script>
     
     <style>
         * {

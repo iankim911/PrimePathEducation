@@ -31,9 +31,14 @@ let editingClassCode = null;
 
 // Load all classes for admin management
 async function loadAdminClasses() {
+    console.log('[CURRICULUM_ADMIN] Loading admin classes...');
     try {
-        const response = await fetch('/RoutineTest/api/admin/classes/');
+        // Use ConfigService for dynamic year resolution
+        const currentYear = window.PrimePath?.config?.getCurrentYear?.() || new Date().getFullYear();
+        console.log(`[CURRICULUM_ADMIN] Using year: ${currentYear}`);
+        const response = await fetch(`/RoutineTest/api/admin/classes/?year=${currentYear}`);
         const data = await response.json();
+        console.log('[BUTTON_FIX] Received classes data:', data);
         
         const tableBody = document.getElementById('adminClassTableBody');
         if (!tableBody) return;
@@ -76,18 +81,37 @@ async function loadAdminClasses() {
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-save" onclick="saveCurriculumMapping('${cls.code}')">Save</button>
-                            <button class="btn-edit" onclick="editClass('${cls.code}')">Edit</button>
-                            <button class="btn-delete" onclick="deleteClass('${cls.code}')">Delete</button>
+                            <button type="button" class="btn-save" onclick="saveCurriculumMapping('${cls.code}'); return false;" title="Save curriculum mapping">Save</button>
+                            <button type="button" class="btn-edit" onclick="editClass('${cls.code}'); return false;" title="Edit class details">Edit</button>
+                            <button type="button" class="btn-delete" onclick="deleteClass('${cls.code}'); return false;" title="Delete class">Delete</button>
                         </div>
                     </td>
                 </tr>
             `).join('');
+            console.log('[BUTTON_FIX] Rendered', data.classes.length, 'classes with fixed button alignment');
+            
+            // Add debug logging for button rendering
+            setTimeout(() => {
+                const buttons = document.querySelectorAll('.action-buttons');
+                console.log('[BUTTON_FIX] Action button containers found:', buttons.length);
+                buttons.forEach((container, index) => {
+                    const saveBtn = container.querySelector('.btn-save');
+                    const editBtn = container.querySelector('.btn-edit');
+                    const deleteBtn = container.querySelector('.btn-delete');
+                    console.log(`[BUTTON_FIX] Row ${index + 1} buttons:`, {
+                        save: saveBtn ? 'Present' : 'Missing',
+                        edit: editBtn ? 'Present' : 'Missing',
+                        delete: deleteBtn ? 'Present' : 'Missing',
+                        alignment: window.getComputedStyle(container).justifyContent
+                    });
+                });
+            }, 100);
         } else {
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No classes found. Create your first class!</td></tr>';
+            console.log('[BUTTON_FIX] No classes to display');
         }
     } catch (error) {
-        console.error('Error loading admin classes:', error);
+        console.error('[BUTTON_FIX] Error loading admin classes:', error);
     }
 }
 
@@ -160,6 +184,7 @@ function updateCurriculumDisplay(classCode) {
 
 // Save curriculum mapping
 async function saveCurriculumMapping(classCode) {
+    console.log('[BUTTON_FIX] Save button clicked for class:', classCode);
     const progSelect = document.getElementById(`prog-${classCode}`);
     const subProgSelect = document.getElementById(`subprog-${classCode}`);
     const levelSelect = document.getElementById(`level-${classCode}`);
@@ -168,7 +193,8 @@ async function saveCurriculumMapping(classCode) {
         class_code: classCode,
         program: progSelect.value,
         subprogram: subProgSelect.value,
-        level: levelSelect.value
+        level: levelSelect.value,
+        academic_year: (window.PrimePath?.config?.getCurrentYear?.() || new Date().getFullYear()).toString()  // Use ConfigService
     };
     
     try {
@@ -205,6 +231,7 @@ function showCreateClassDialog() {
 
 // Edit existing class
 async function editClass(classCode) {
+    console.log('[BUTTON_FIX] Edit button clicked for class:', classCode);
     editingClassCode = classCode;
     document.getElementById('classModalTitle').textContent = 'Edit Class';
     
@@ -242,7 +269,9 @@ async function editClass(classCode) {
 
 // Delete class
 async function deleteClass(classCode) {
+    console.log('[BUTTON_FIX] Delete button clicked for class:', classCode);
     if (!confirm(`Are you sure you want to delete class ${classCode}? This action cannot be undone.`)) {
+        console.log('[BUTTON_FIX] Delete cancelled by user');
         return;
     }
     
@@ -328,7 +357,8 @@ async function saveClass() {
         name: className,
         program: program,
         subprogram: subprogram,
-        level: level
+        level: level,
+        academic_year: (window.PrimePath?.config?.getCurrentYear?.() || new Date().getFullYear()).toString()  // Use ConfigService
     };
     
     try {
@@ -384,9 +414,36 @@ function getCookie(name) {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('[BUTTON_FIX] DOM loaded, checking for admin section...');
     // Check if admin section exists
     const adminSection = document.querySelector('.admin-section');
     if (adminSection) {
+        console.log('[BUTTON_FIX] Admin section found, loading classes...');
         loadAdminClasses();
+        
+        // Additional debug check for button visibility
+        setTimeout(() => {
+            const allButtons = document.querySelectorAll('.btn-save, .btn-edit, .btn-delete');
+            console.log('[BUTTON_FIX] Total buttons rendered:', allButtons.length);
+            console.log('[BUTTON_FIX] Button breakdown:', {
+                save: document.querySelectorAll('.btn-save').length,
+                edit: document.querySelectorAll('.btn-edit').length,
+                delete: document.querySelectorAll('.btn-delete').length
+            });
+            
+            // Check for any text overlay issues
+            allButtons.forEach(btn => {
+                const rect = btn.getBoundingClientRect();
+                const styles = window.getComputedStyle(btn);
+                if (rect.width < 50 || rect.height < 20) {
+                    console.warn('[BUTTON_FIX] Potential button size issue:', btn.textContent, rect);
+                }
+                if (styles.position === 'absolute') {
+                    console.warn('[BUTTON_FIX] Button has absolute positioning which may cause overlay:', btn.textContent);
+                }
+            });
+        }, 500);
+    } else {
+        console.log('[BUTTON_FIX] No admin section found, skipping class load');
     }
 });

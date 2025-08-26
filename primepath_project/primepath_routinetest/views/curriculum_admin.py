@@ -13,6 +13,7 @@ import logging
 from ..models import ClassCurriculumMapping
 from ..models.class_constants import CLASS_CODE_CHOICES, get_class_category, get_class_stream
 from core.models import Program, SubProgram, CurriculumLevel
+from core.services.config_service import ConfigurationService, get_current_year
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +31,11 @@ def get_all_classes_admin(request):
         # Get all class codes from constants
         for class_code, class_name in CLASS_CODE_CHOICES:
             # Get curriculum mapping if exists
+            from django.utils import timezone
+            current_year = request.GET.get('year', str(get_current_year()))
             mapping = ClassCurriculumMapping.get_primary_curriculum(
                 class_code, 
-                request.GET.get('year', 2024)
+                current_year
             )
             
             class_data = {
@@ -83,9 +86,11 @@ def get_class_details(request, class_code):
             return JsonResponse({'error': 'Class not found'}, status=404)
         
         # Get curriculum mapping
+        from django.utils import timezone
+        current_year = request.GET.get('year', str(get_current_year()))
         mapping = ClassCurriculumMapping.get_primary_curriculum(
             class_code,
-            request.GET.get('year', 2024)
+            current_year
         )
         
         class_data = {
@@ -185,10 +190,13 @@ def create_class(request):
             )
             
             # Create curriculum mapping
+            from django.utils import timezone
+            academic_year = data.get('academic_year', str(get_current_year()))
+            
             ClassCurriculumMapping.objects.create(
                 class_code=code,
                 curriculum_level=curriculum_level,
-                academic_year='2024',
+                academic_year=academic_year,
                 priority=1,
                 is_active=True,
                 created_by=request.user,
@@ -215,6 +223,9 @@ def update_class(request, class_code):
         return JsonResponse({'error': 'Admin access required'}, status=403)
     
     try:
+        # Import Class model to update program field directly
+        from ..models.class_model import Class
+        
         # Verify class exists in constants
         class_exists = any(c[0] == class_code for c in CLASS_CODE_CHOICES)
         if not class_exists:
@@ -222,10 +233,30 @@ def update_class(request, class_code):
         
         data = json.loads(request.body)
         
+        # Use current year from request or default to current year
+        from django.utils import timezone
+        academic_year = data.get('academic_year', str(get_current_year()))
+        
         # Update curriculum mapping
         program_code = data.get('program')
         subprogram_name = data.get('subprogram')
         level_number = data.get('level')
+        
+        # NEW: Update the Class model's program field directly
+        try:
+            class_obj = Class.objects.get(section=class_code)
+            if program_code:
+                # Remove "PRIME" prefix if present (clean up)
+                clean_program = program_code.replace('PRIME ', '').replace('PRIME_', '')
+                if clean_program in ['CORE', 'ASCENT', 'EDGE', 'PINNACLE']:
+                    class_obj.program = clean_program
+                    class_obj.subprogram = subprogram_name
+                    class_obj.save()
+                    logger.info(f"[PROGRAM_ASSIGN] Updated class {class_code} -> Program: {clean_program}, SubProgram: {subprogram_name}")
+                    print(f"[PROGRAM_ASSIGN] Class {class_code} assigned to {clean_program} program")
+        except Class.DoesNotExist:
+            logger.warning(f"[PROGRAM_ASSIGN] Class object not found for section: {class_code}")
+            print(f"[PROGRAM_ASSIGN] Warning: Class {class_code} not found in Class model")
         
         if program_code and subprogram_name and level_number:
             # Get or create program
@@ -277,7 +308,7 @@ def update_class(request, class_code):
             # Update or create curriculum mapping
             mapping, created = ClassCurriculumMapping.objects.update_or_create(
                 class_code=class_code,
-                academic_year='2024',
+                academic_year=academic_year,
                 defaults={
                     'curriculum_level': curriculum_level,
                     'priority': 1,
@@ -333,6 +364,10 @@ def save_curriculum_mapping(request):
         program_code = data.get('program')
         subprogram_name = data.get('subprogram')
         level_number = data.get('level')
+        
+        # Use current year from request or default to current year
+        from django.utils import timezone
+        academic_year = data.get('academic_year', str(get_current_year()))
         
         if not class_code:
             return JsonResponse({'error': 'Class code is required'}, status=400)
@@ -392,7 +427,7 @@ def save_curriculum_mapping(request):
             # Update or create curriculum mapping
             mapping, created = ClassCurriculumMapping.objects.update_or_create(
                 class_code=class_code,
-                academic_year='2024',
+                academic_year=academic_year,
                 defaults={
                     'curriculum_level': curriculum_level,
                     'priority': 1,
@@ -410,7 +445,7 @@ def save_curriculum_mapping(request):
             # Remove mapping if incomplete
             ClassCurriculumMapping.objects.filter(
                 class_code=class_code,
-                academic_year='2024'
+                academic_year=academic_year
             ).delete()
             
             return JsonResponse({

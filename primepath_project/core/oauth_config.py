@@ -4,11 +4,27 @@ Google and Kakao OAuth settings
 """
 import os
 from django.conf import settings
+from .services.config_service import ConfigurationService
+
+# Helper function to get dynamic base URL for OAuth
+def get_oauth_base_url():
+    """Get the base URL for OAuth callbacks dynamically"""
+    # In OAuth, we can't use request object, so we prioritize environment variables
+    if os.environ.get('OAUTH_BASE_URL'):
+        return os.environ.get('OAUTH_BASE_URL')
+    elif os.environ.get('BASE_URL'):
+        return os.environ.get('BASE_URL')
+    elif hasattr(settings, 'BASE_URL'):
+        return settings.BASE_URL
+    else:
+        # Use ConfigurationService as fallback
+        return ConfigurationService.get_base_url()
 
 # Google OAuth 2.0 Configuration
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', 'your-google-client-id.apps.googleusercontent.com')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', 'your-google-client-secret')
-GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', 'http://127.0.0.1:8000/auth/google/callback/')
+# Dynamic redirect URI based on environment
+GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI', f'{get_oauth_base_url()}/auth/google/callback/')
 
 GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -23,7 +39,8 @@ GOOGLE_SCOPES = [
 # Kakao OAuth Configuration
 KAKAO_CLIENT_ID = os.environ.get('KAKAO_REST_API_KEY', 'your-kakao-rest-api-key')
 KAKAO_CLIENT_SECRET = os.environ.get('KAKAO_CLIENT_SECRET', 'your-kakao-client-secret')
-KAKAO_REDIRECT_URI = os.environ.get('KAKAO_REDIRECT_URI', 'http://127.0.0.1:8000/auth/kakao/callback/')
+# Dynamic redirect URI based on environment
+KAKAO_REDIRECT_URI = os.environ.get('KAKAO_REDIRECT_URI', f'{get_oauth_base_url()}/auth/kakao/callback/')
 
 KAKAO_AUTH_URL = 'https://kauth.kakao.com/oauth/authorize'
 KAKAO_TOKEN_URL = 'https://kauth.kakao.com/oauth/token'
