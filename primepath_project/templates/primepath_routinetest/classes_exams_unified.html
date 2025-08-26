@@ -2235,6 +2235,133 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
         console.log('[CURRICULUM_REMOVAL] ====================================');
     </script>
     
+    <!-- Admin-Only: Curriculum Management Section -->
+    {% if user.is_superuser %}
+    <div class="curriculum-management-section" style="margin-top: 40px; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 5px solid #1B5E20;">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #E8F5E8;">
+            <div>
+                <h2 style="color: #1B5E20; font-size: 24px; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 28px;">🔐</span>
+                    Admin: Curriculum Management
+                </h2>
+                <p style="color: #666; margin: 8px 0 0 0; font-size: 14px;">Direct assignment of curriculum configurations to class codes</p>
+            </div>
+            <div class="header-actions" style="display: flex; gap: 12px; align-items: center;">
+                <div class="year-selector" style="position: relative;">
+                    <select id="academicYearSelect" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white;">
+                        <option value="2025" {% if current_year == '2025' %}selected{% endif %}>2025</option>
+                        <option value="2026" {% if current_year == '2026' %}selected{% endif %}>2026</option>
+                        <option value="2027" {% if current_year == '2027' %}selected{% endif %}>2027</option>
+                    </select>
+                </div>
+                <button class="btn-create-class" onclick="showCreateClassModal()" style="padding: 10px 20px; background: linear-gradient(135deg, #4CAF50, #2E7D32); color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(76,175,80,0.3);">
+                    <span style="margin-right: 6px;">➕</span>
+                    Create New Class
+                </button>
+            </div>
+        </div>
+        
+        <div class="curriculum-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="stat-card" style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 28px; font-weight: bold; color: #1976D2;">{{ classes_info|length }}</div>
+                <div style="color: #1976D2; font-weight: 500; margin-top: 5px;">Total Classes</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #E8F5E8, #C8E6C9); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 28px; font-weight: bold; color: #388E3C;" id="mappedClassesCount">0</div>
+                <div style="color: #388E3C; font-weight: 500; margin-top: 5px;">Configured Classes</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #FFF3E0, #FFE0B2); padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 28px; font-weight: bold; color: #F57C00;" id="unmappedClassesCount">{{ classes_info|length }}</div>
+                <div style="color: #F57C00; font-weight: 500; margin-top: 5px;">Pending Classes</div>
+            </div>
+        </div>
+        
+        <!-- Class Configuration Cards Grid -->
+        <div class="curriculum-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-bottom: 30px;" id="curriculumGrid">
+            {% for class in classes_info %}
+            <div class="class-curriculum-card" data-class-code="{{ class.class_code }}" style="background: white; border: 2px solid #E0E0E0; border-radius: 12px; padding: 20px; transition: all 0.3s ease; position: relative; overflow: hidden;">
+                <!-- Card Header -->
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div class="class-info">
+                        <h3 style="margin: 0; color: #1B5E20; font-size: 18px; font-weight: 600;">{{ class.class_code }}</h3>
+                        <p style="margin: 4px 0 0 0; color: #666; font-size: 13px;">{{ class.class_name|truncatechars:30 }}</p>
+                    </div>
+                    <div class="card-actions" style="display: flex; gap: 8px;">
+                        <button class="btn-edit-class" onclick="editClassCurriculum('{{ class.class_code }}')" style="padding: 6px 10px; background: #2196F3; color: white; border: none; border-radius: 5px; font-size: 12px; cursor: pointer; opacity: 0; transition: opacity 0.3s ease;" title="Edit">
+                            ✏️
+                        </button>
+                        <button class="btn-delete-class" onclick="deleteClassCurriculum('{{ class.class_code }}')" style="padding: 6px 10px; background: #F44336; color: white; border: none; border-radius: 5px; font-size: 12px; cursor: pointer; opacity: 0; transition: opacity 0.3s ease;" title="Delete">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Curriculum Assignment Form -->
+                <div class="curriculum-form">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="display: block; color: #555; font-weight: 500; font-size: 13px; margin-bottom: 6px;">Program</label>
+                        <select class="program-select" data-class="{{ class.class_code }}" onchange="updateSubPrograms(this)" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white;">
+                            <option value="">-- Select Program --</option>
+                            <option value="CORE">PRIME CORE</option>
+                            <option value="ASCENT">PRIME ASCENT</option>
+                            <option value="EDGE">PRIME EDGE</option>
+                            <option value="PINNACLE">PRIME PINNACLE</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="display: block; color: #555; font-weight: 500; font-size: 13px; margin-bottom: 6px;">Sub-Program</label>
+                        <select class="subprogram-select" data-class="{{ class.class_code }}" onchange="updateLevels(this)" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white;" disabled>
+                            <option value="">-- Select Sub-Program --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="display: block; color: #555; font-weight: 500; font-size: 13px; margin-bottom: 6px;">Level</label>
+                        <select class="level-select" data-class="{{ class.class_code }}" onchange="markCardChanged(this)" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white;" disabled>
+                            <option value="">-- Select Level --</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Save Button (appears when changes made) -->
+                    <button class="btn-save-curriculum" onclick="saveCurriculumMapping('{{ class.class_code }}')" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #4CAF50, #2E7D32); color: white; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; opacity: 0; transition: all 0.3s ease; transform: translateY(10px);">
+                        <span class="save-text">💾 Save Configuration</span>
+                        <span class="save-loader" style="display: none;">
+                            <span style="display: inline-block; width: 16px; height: 16px; border: 2px solid #ffffff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></span>
+                            Saving...
+                        </span>
+                    </button>
+                </div>
+                
+                <!-- Current Assignment Display -->
+                <div class="current-assignment" style="margin-top: 16px; padding: 12px; background: #F5F5F5; border-radius: 6px; font-size: 13px; border-left: 4px solid #4CAF50; display: none;">
+                    <div style="color: #388E3C; font-weight: 500; margin-bottom: 4px;">✅ Currently Assigned:</div>
+                    <div class="assignment-details" style="color: #666;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Bulk Actions -->
+        <div class="bulk-actions" style="background: #F8F9FA; padding: 20px; border-radius: 10px; border: 2px dashed #ddd;">
+            <div style="display: flex; justify-content: between; align-items: center; gap: 15px;">
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 8px 0; color: #1B5E20; font-size: 16px;">Bulk Operations</h4>
+                    <p style="margin: 0; color: #666; font-size: 13px;">Apply curriculum settings to multiple classes at once</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-bulk-assign" onclick="showBulkAssignModal()" style="padding: 10px 16px; background: #FF9800; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+                        📋 Bulk Assign
+                    </button>
+                    <button class="btn-export-config" onclick="exportConfiguration()" style="padding: 10px 16px; background: #607D8B; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;">
+                        📤 Export Config
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
 </div>
 
 <!-- Create/Edit Class Modal -->
@@ -2817,10 +2944,500 @@ document.head.appendChild(style);
 <!-- Exam Management Script -->
 <script src="{% static 'js/routinetest/exam-management.js' %}?v={{ cache_bust }}"></script>
 
-<!-- Curriculum Management Script Removed -->
+<!-- Curriculum Management JavaScript -->
 <script>
-    console.log('[CURRICULUM_REMOVAL] curriculum-management-optimized.js script removed');
-    console.log('[CURRICULUM_REMOVAL] All curriculum management JavaScript functionality disabled');
+console.log('[CURRICULUM_MANAGEMENT] Initializing curriculum management system...');
+
+// Curriculum data structure
+const curriculumData = {
+    'CORE': {
+        'CORE Phonics': [1, 2, 3],
+        'CORE Sigma': [1, 2, 3], 
+        'CORE Elite': [1, 2, 3],
+        'CORE Pro': [1, 2, 3]
+    },
+    'ASCENT': {
+        'ASCENT Nova': [1, 2, 3],
+        'ASCENT Drive': [1, 2, 3],
+        'ASCENT Pro': [1, 2, 3]
+    },
+    'EDGE': {
+        'EDGE Spark': [1, 2, 3],
+        'EDGE Rise': [1, 2, 3],
+        'EDGE Pursuit': [1, 2, 3],
+        'EDGE Pro': [1, 2, 3]
+    },
+    'PINNACLE': {
+        'PINNACLE Vision': [1, 2],
+        'PINNACLE Endeavor': [1, 2],
+        'PINNACLE Success': [1, 2],
+        'PINNACLE Pro': [1, 2]
+    }
+};
+
+// Track current mappings
+let currentMappings = {};
+
+// Initialize curriculum management on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[CURRICULUM_MANAGEMENT] DOM loaded, initializing...');
+    
+    // Load existing mappings
+    loadExistingMappings();
+    
+    // Add hover effects to cards
+    setupCardHoverEffects();
+    
+    // Initialize year selector
+    setupYearSelector();
+    
+    console.log('[CURRICULUM_MANAGEMENT] Initialization complete');
+});
+
+// Update Sub-Programs based on selected Program
+function updateSubPrograms(selectElement) {
+    const program = selectElement.value;
+    const classCode = selectElement.dataset.class;
+    const subprogramSelect = document.querySelector(`.subprogram-select[data-class="${classCode}"]`);
+    const levelSelect = document.querySelector(`.level-select[data-class="${classCode}"]`);
+    
+    console.log(`[CURRICULUM_MANAGEMENT] Updating sub-programs for ${classCode}, program: ${program}`);
+    
+    // Clear sub-program and level selects
+    subprogramSelect.innerHTML = '<option value="">-- Select Sub-Program --</option>';
+    levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
+    levelSelect.disabled = true;
+    
+    if (program && curriculumData[program]) {
+        // Enable sub-program select
+        subprogramSelect.disabled = false;
+        
+        // Populate sub-programs
+        Object.keys(curriculumData[program]).forEach(subProgram => {
+            const option = document.createElement('option');
+            option.value = subProgram;
+            option.textContent = subProgram;
+            subprogramSelect.appendChild(option);
+        });
+        
+        console.log(`[CURRICULUM_MANAGEMENT] Added ${Object.keys(curriculumData[program]).length} sub-programs for ${program}`);
+    } else {
+        subprogramSelect.disabled = true;
+    }
+    
+    markCardChanged(selectElement);
+}
+
+// Update Levels based on selected Sub-Program
+function updateLevels(selectElement) {
+    const subProgram = selectElement.value;
+    const classCode = selectElement.dataset.class;
+    const programSelect = document.querySelector(`.program-select[data-class="${classCode}"]`);
+    const program = programSelect.value;
+    const levelSelect = document.querySelector(`.level-select[data-class="${classCode}"]`);
+    
+    console.log(`[CURRICULUM_MANAGEMENT] Updating levels for ${classCode}, sub-program: ${subProgram}`);
+    
+    // Clear level select
+    levelSelect.innerHTML = '<option value="">-- Select Level --</option>';
+    
+    if (program && subProgram && curriculumData[program] && curriculumData[program][subProgram]) {
+        // Enable level select
+        levelSelect.disabled = false;
+        
+        // Populate levels
+        curriculumData[program][subProgram].forEach(level => {
+            const option = document.createElement('option');
+            option.value = level;
+            option.textContent = `Level ${level}`;
+            levelSelect.appendChild(option);
+        });
+        
+        console.log(`[CURRICULUM_MANAGEMENT] Added ${curriculumData[program][subProgram].length} levels for ${subProgram}`);
+    } else {
+        levelSelect.disabled = true;
+    }
+    
+    markCardChanged(selectElement);
+}
+
+// Mark card as changed and show save button
+function markCardChanged(selectElement) {
+    const classCode = selectElement.dataset.class;
+    const card = document.querySelector(`[data-class-code="${classCode}"]`);
+    const saveButton = card.querySelector('.btn-save-curriculum');
+    
+    // Check if all fields are selected
+    const program = card.querySelector('.program-select').value;
+    const subProgram = card.querySelector('.subprogram-select').value;
+    const level = card.querySelector('.level-select').value;
+    
+    if (program && subProgram && level) {
+        // Show save button with animation
+        saveButton.style.opacity = '1';
+        saveButton.style.transform = 'translateY(0)';
+        
+        // Add border animation to indicate change
+        card.style.borderColor = '#4CAF50';
+        card.style.boxShadow = '0 4px 16px rgba(76,175,80,0.2)';
+        
+        console.log(`[CURRICULUM_MANAGEMENT] Card ${classCode} ready to save: ${program} > ${subProgram} > Level ${level}`);
+    } else {
+        // Hide save button
+        saveButton.style.opacity = '0';
+        saveButton.style.transform = 'translateY(10px)';
+        
+        // Reset card appearance
+        card.style.borderColor = '#E0E0E0';
+        card.style.boxShadow = 'none';
+    }
+}
+
+// Save curriculum mapping
+async function saveCurriculumMapping(classCode) {
+    const card = document.querySelector(`[data-class-code="${classCode}"]`);
+    const saveButton = card.querySelector('.btn-save-curriculum');
+    const saveText = saveButton.querySelector('.save-text');
+    const saveLoader = saveButton.querySelector('.save-loader');
+    
+    // Get selected values
+    const program = card.querySelector('.program-select').value;
+    const subProgram = card.querySelector('.subprogram-select').value;
+    const level = card.querySelector('.level-select').value;
+    const academicYear = document.getElementById('academicYearSelect').value;
+    
+    if (!program || !subProgram || !level) {
+        alert('Please select Program, Sub-Program, and Level before saving.');
+        return;
+    }
+    
+    console.log(`[CURRICULUM_MANAGEMENT] Saving mapping for ${classCode}: ${program} > ${subProgram} > Level ${level} (${academicYear})`);
+    
+    // Show loading state
+    saveText.style.display = 'none';
+    saveLoader.style.display = 'inline-flex';
+    saveButton.disabled = true;
+    
+    try {
+        // Find the curriculum level ID (this would normally come from the backend)
+        const curriculumLevelId = await getCurriculumLevelId(program, subProgram, level);
+        
+        // Make API call to save mapping
+        const response = await fetch('/RoutineTest/curriculum-mapping/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                class_code: classCode,
+                curriculum_level_id: curriculumLevelId,
+                academic_year: academicYear,
+                priority: 1
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Success animation
+            card.style.borderColor = '#4CAF50';
+            card.style.background = 'linear-gradient(135deg, #E8F5E8, #F1F8E9)';
+            
+            // Show current assignment
+            showCurrentAssignment(card, program, subProgram, level);
+            
+            // Hide save button
+            saveButton.style.opacity = '0';
+            saveButton.style.transform = 'translateY(10px)';
+            
+            // Update stats
+            updateStats();
+            
+            console.log(`[CURRICULUM_MANAGEMENT] Successfully saved mapping for ${classCode}`);
+            
+            // Store mapping
+            currentMappings[classCode] = {
+                program: program,
+                subProgram: subProgram,
+                level: level,
+                academicYear: academicYear
+            };
+            
+            // Show success notification
+            showNotification(`✅ Successfully configured ${classCode}`, 'success');
+            
+        } else {
+            throw new Error(data.error || 'Failed to save mapping');
+        }
+        
+    } catch (error) {
+        console.error(`[CURRICULUM_MANAGEMENT] Error saving mapping for ${classCode}:`, error);
+        
+        // Error animation
+        card.style.borderColor = '#F44336';
+        card.style.boxShadow = '0 4px 16px rgba(244,67,54,0.2)';
+        
+        // Show error notification
+        showNotification(`❌ Failed to save ${classCode}: ${error.message}`, 'error');
+        
+    } finally {
+        // Reset button state
+        saveText.style.display = 'inline';
+        saveLoader.style.display = 'none';
+        saveButton.disabled = false;
+    }
+}
+
+// Show current assignment display
+function showCurrentAssignment(card, program, subProgram, level) {
+    const assignmentDiv = card.querySelector('.current-assignment');
+    const detailsDiv = assignmentDiv.querySelector('.assignment-details');
+    
+    detailsDiv.textContent = `${program} ${subProgram} - Level ${level}`;
+    assignmentDiv.style.display = 'block';
+}
+
+// Setup card hover effects
+function setupCardHoverEffects() {
+    document.querySelectorAll('.class-curriculum-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            const editBtn = this.querySelector('.btn-edit-class');
+            const deleteBtn = this.querySelector('.btn-delete-class');
+            editBtn.style.opacity = '1';
+            deleteBtn.style.opacity = '1';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            const editBtn = this.querySelector('.btn-edit-class');
+            const deleteBtn = this.querySelector('.btn-delete-class');
+            editBtn.style.opacity = '0';
+            deleteBtn.style.opacity = '0';
+        });
+    });
+}
+
+// Setup year selector
+function setupYearSelector() {
+    const yearSelect = document.getElementById('academicYearSelect');
+    if (yearSelect) {
+        yearSelect.addEventListener('change', function() {
+            console.log('[CURRICULUM_MANAGEMENT] Academic year changed to:', this.value);
+            loadExistingMappings();
+        });
+    }
+}
+
+// Load existing mappings from backend
+async function loadExistingMappings() {
+    console.log('[CURRICULUM_MANAGEMENT] Loading existing mappings...');
+    
+    try {
+        // This would call the existing curriculum mapping view
+        const academicYear = document.getElementById('academicYearSelect').value;
+        const response = await fetch(`/RoutineTest/curriculum-mapping/?year=${academicYear}`);
+        
+        if (response.ok) {
+            // In a real implementation, this would parse the response and populate the forms
+            console.log('[CURRICULUM_MANAGEMENT] Successfully loaded existing mappings');
+        }
+    } catch (error) {
+        console.error('[CURRICULUM_MANAGEMENT] Error loading existing mappings:', error);
+    }
+    
+    updateStats();
+}
+
+// Update statistics
+function updateStats() {
+    const totalClasses = document.querySelectorAll('.class-curriculum-card').length;
+    const mappedClasses = Object.keys(currentMappings).length;
+    const unmappedClasses = totalClasses - mappedClasses;
+    
+    document.getElementById('mappedClassesCount').textContent = mappedClasses;
+    document.getElementById('unmappedClassesCount').textContent = unmappedClasses;
+    
+    console.log(`[CURRICULUM_MANAGEMENT] Stats updated: ${mappedClasses}/${totalClasses} classes configured`);
+}
+
+// Show notification
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        max-width: 400px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        transform: translateX(100%);
+    `;
+    
+    if (type === 'success') {
+        notification.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
+    } else {
+        notification.style.background = 'linear-gradient(135deg, #F44336, #C62828)';
+    }
+    
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Animate out and remove
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Helper function to get curriculum level ID (mock implementation)
+async function getCurriculumLevelId(program, subProgram, level) {
+    // In a real implementation, this would query the backend
+    // For now, return a mock ID
+    return `${program}_${subProgram.replace(/ /g, '_')}_${level}`;
+}
+
+// Additional functions for modals and advanced features
+function showCreateClassModal() {
+    console.log('[CURRICULUM_MANAGEMENT] Opening create class modal...');
+    // This would integrate with existing class creation modal
+    alert('Create New Class modal would open here');
+}
+
+function editClassCurriculum(classCode) {
+    console.log(`[CURRICULUM_MANAGEMENT] Editing curriculum for class: ${classCode}`);
+    // Focus on the card and highlight it
+    const card = document.querySelector(`[data-class-code="${classCode}"]`);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.borderColor = '#2196F3';
+    card.style.boxShadow = '0 4px 16px rgba(33,150,243,0.3)';
+}
+
+function deleteClassCurriculum(classCode) {
+    console.log(`[CURRICULUM_MANAGEMENT] Deleting curriculum for class: ${classCode}`);
+    if (confirm(`Are you sure you want to remove the curriculum configuration for ${classCode}?`)) {
+        // Call delete API
+        deleteCurriculumMapping(classCode);
+    }
+}
+
+async function deleteCurriculumMapping(classCode) {
+    console.log(`[CURRICULUM_MANAGEMENT] Deleting mapping for ${classCode}`);
+    
+    try {
+        // In real implementation, call the remove endpoint
+        const response = await fetch('/RoutineTest/curriculum-mapping/remove/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                class_code: classCode
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reset the card
+            const card = document.querySelector(`[data-class-code="${classCode}"]`);
+            card.querySelector('.program-select').value = '';
+            card.querySelector('.subprogram-select').innerHTML = '<option value="">-- Select Sub-Program --</option>';
+            card.querySelector('.level-select').innerHTML = '<option value="">-- Select Level --</option>';
+            card.querySelector('.current-assignment').style.display = 'none';
+            card.style.borderColor = '#E0E0E0';
+            card.style.background = 'white';
+            card.style.boxShadow = 'none';
+            
+            // Remove from currentMappings
+            delete currentMappings[classCode];
+            
+            // Update stats
+            updateStats();
+            
+            showNotification(`✅ Removed curriculum configuration for ${classCode}`, 'success');
+        } else {
+            throw new Error(data.error || 'Failed to delete mapping');
+        }
+        
+    } catch (error) {
+        console.error('[CURRICULUM_MANAGEMENT] Error deleting mapping:', error);
+        showNotification(`❌ Failed to delete ${classCode}: ${error.message}`, 'error');
+    }
+}
+
+function showBulkAssignModal() {
+    console.log('[CURRICULUM_MANAGEMENT] Opening bulk assign modal...');
+    alert('Bulk Assign modal would open here - allow selecting multiple classes and assigning same curriculum');
+}
+
+function exportConfiguration() {
+    console.log('[CURRICULUM_MANAGEMENT] Exporting configuration...');
+    // Create CSV or JSON export of current mappings
+    const exportData = Object.entries(currentMappings).map(([classCode, mapping]) => ({
+        classCode,
+        program: mapping.program,
+        subProgram: mapping.subProgram,
+        level: mapping.level,
+        academicYear: mapping.academicYear
+    }));
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + "Class Code,Program,Sub-Program,Level,Academic Year\n"
+        + exportData.map(row => `${row.classCode},${row.program},${row.subProgram},${row.level},${row.academicYear}`).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `curriculum_configuration_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('✅ Configuration exported successfully', 'success');
+}
+
+// Add CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .class-curriculum-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+    }
+    
+    .btn-save-curriculum:hover {
+        background: linear-gradient(135deg, #66BB6A, #43A047) !important;
+        box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+    }
+    
+    .btn-create-class:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(76,175,80,0.4) !important;
+    }
+`;
+document.head.appendChild(style);
+
+console.log('[CURRICULUM_MANAGEMENT] JavaScript loaded successfully');
 </script>
 
 {% endblock %}
