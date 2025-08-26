@@ -397,3 +397,4 @@ class PlacementService:
             logger.warning(f"Current level {current_level.id} has no internal_difficulty set")
         
         return None
+# No backward compatibility alias needed - PlacementService is the original name

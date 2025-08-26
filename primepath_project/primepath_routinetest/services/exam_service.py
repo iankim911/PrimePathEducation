@@ -18,8 +18,8 @@ import json
 logger = logging.getLogger(__name__)
 
 
-class ExamService:
-    """Handles exam creation, management, and question operations."""
+class RoutineExamService:
+    """Handles routine exam creation, management, and question operations."""
     
     @staticmethod
     @transaction.atomic
@@ -73,8 +73,8 @@ class ExamService:
         print(f"[EXAM_SERVICE_CREATE] {json.dumps(console_log)}")
         
         # CRITICAL: Validate PDF file before creating exam - PDF IS REQUIRED
-        ExamService.validate_pdf_file(pdf_file)  # This will raise ValidationException if pdf_file is None
-        ExamService.log_pdf_save_attempt(None, pdf_file, "before_create")
+        RoutineRoutineExamService.validate_pdf_file(pdf_file)  # This will raise ValidationException if pdf_file is None
+        RoutineRoutineExamService.log_pdf_save_attempt(None, pdf_file, "before_create")
         
         # Create the exam
         exam = Exam.objects.create(
@@ -98,7 +98,7 @@ class ExamService:
         
         # Log successful exam object creation with PDF validation
         if pdf_file:
-            ExamService.log_pdf_save_attempt(exam, pdf_file, "after_save")
+            RoutineExamService.log_pdf_save_attempt(exam, pdf_file, "after_save")
         
         console_log = {
             "service": "ExamService",
@@ -113,11 +113,11 @@ class ExamService:
         print(f"[EXAM_SERVICE_CREATED] {json.dumps(console_log)}")
         
         # Create placeholder questions
-        ExamService.create_questions_for_exam(exam)
+        RoutineExamService.create_questions_for_exam(exam)
         
         # Handle audio files
         if audio_files:
-            ExamService.attach_audio_files(exam, audio_files, audio_names or [])
+            RoutineExamService.attach_audio_files(exam, audio_files, audio_names or [])
         
         logger.info(
             f"Created exam {exam.id}: {exam.name}",
@@ -254,7 +254,7 @@ class ExamService:
                     # Calculate correct options_count based on answer data
                     if question.question_type in ['SHORT', 'LONG', 'MIXED']:
                         # For SHORT/LONG/MIXED, calculate from actual answer data
-                        calculated_count = ExamService._calculate_options_count(
+                        calculated_count = RoutineExamService._calculate_options_count(
                             question.question_type, 
                             question.correct_answer
                         )
@@ -278,7 +278,7 @@ class ExamService:
                 
                 # Calculate options_count for SHORT/LONG/MIXED questions
                 if question_type in ['SHORT', 'LONG', 'MIXED']:
-                    options_count = ExamService._calculate_options_count(
+                    options_count = RoutineExamService._calculate_options_count(
                         question_type, 
                         correct_answer
                     )
@@ -539,7 +539,7 @@ class ExamService:
             return all_choices
         
         # For teachers, filter based on assignments
-        teacher_assignments = ExamService.get_teacher_assignments(user)
+        teacher_assignments = RoutineExamService.get_teacher_assignments(user)
         
         if not teacher_assignments:
             logger.warning(f"[CLASS_FILTER] User {user.username} has NO class assignments")
@@ -601,7 +601,7 @@ class ExamService:
             return True
         
         # Get teacher's assignments
-        assignments = ExamService.get_teacher_assignments(user)
+        assignments = RoutineExamService.get_teacher_assignments(user)
         
         # Log teacher's assignments for debugging
         logger.debug(f"[PERMISSION_EDIT] Teacher {teacher.name} has assignments: {list(assignments.keys())}")
@@ -641,15 +641,15 @@ class ExamService:
         logger = logging.getLogger(__name__)
         
         # Get teacher assignments
-        assignments = ExamService.get_teacher_assignments(user)
+        assignments = RoutineExamService.get_teacher_assignments(user)
         is_admin = user.is_superuser or user.is_staff
         
         # Initialize structure
-        organized = {program: defaultdict(list) for program in ExamService.PROGRAM_CLASS_MAPPING.keys()}
+        organized = {program: defaultdict(list) for program in RoutineExamService.PROGRAM_CLASS_MAPPING.keys()}
         
         # Map class codes to programs
         class_to_program = {}
-        for program, classes in ExamService.PROGRAM_CLASS_MAPPING.items():
+        for program, classes in RoutineExamService.PROGRAM_CLASS_MAPPING.items():
             for class_code in classes:
                 class_to_program[class_code] = program
         
@@ -908,7 +908,7 @@ class ExamService:
                     logger.info(f"[PERMISSION_DEBUG] ✅ Exam '{exam.name}' marked as OWNER for {user.username}")
                 else:
                     # Check edit/delete permissions through class assignments
-                    if ExamService.can_teacher_edit_exam(user, exam):
+                    if RoutineExamService.can_teacher_edit_exam(user, exam):
                         exam.can_edit = True
                         # Determine if FULL ACCESS or just EDIT
                         has_full_access = False
@@ -948,7 +948,7 @@ class ExamService:
                     logger.info(f"[PERMISSION_DEBUG] ✅ Exam '{exam.name}' marked as OWNER in assigned mode")
                 else:
                     # Non-owner in MY_EXAMS mode: set permissions based on actual access
-                    exam.can_edit = ExamService.can_teacher_edit_exam(user, exam)
+                    exam.can_edit = RoutineExamService.can_teacher_edit_exam(user, exam)
                     exam.can_copy = len(assignments) > 0
                     exam.can_delete = ExamPermissionService.can_teacher_delete_exam(user, exam)
                     exam.is_owner = False
@@ -991,7 +991,7 @@ class ExamService:
                     if class_code.startswith('PROGRAM_'):
                         # This is a program-level exam without specific class assignment
                         program = class_code.replace('PROGRAM_', '')
-                        if program in ExamService.PROGRAM_CLASS_MAPPING:
+                        if program in RoutineExamService.PROGRAM_CLASS_MAPPING:
                             exam.class_access_level = 'FULL' if is_admin else 'VIEW'
                             exam.is_accessible = is_admin
                             organized[program]['All Classes'].append(exam)
@@ -1514,7 +1514,7 @@ class ExamService:
                     errors.append("Missing class_code in schedule data")
                     continue
                 
-                schedule = ExamService.create_class_schedule(
+                schedule = RoutineExamService.create_class_schedule(
                     exam=exam,
                     class_code=class_code,
                     schedule_data=schedule_data,
@@ -1836,7 +1836,7 @@ class ExamService:
         
         try:
             # Start with the existing hierarchy method (which now returns OrderedDict)
-            base_hierarchy = ExamService.get_routinetest_curriculum_hierarchy()
+            base_hierarchy = RoutineExamService.get_routinetest_curriculum_hierarchy()
             
             # Enhance with frontend-specific features (maintain order with OrderedDict)
             from collections import OrderedDict
@@ -2353,7 +2353,7 @@ class ExamPermissionService:
         if ExamPermissionService.is_admin(user):
             return 'ALL'
         
-        assignments = ExamService.get_teacher_assignments(user)
+        assignments = RoutineExamService.get_teacher_assignments(user)
         return [class_code for class_code, access_level in assignments.items() 
                 if access_level == 'FULL']
     
@@ -2555,7 +2555,7 @@ class ExamPermissionService:
         """
         is_admin = cls.is_admin(user)
         access_level = cls.get_exam_access_level(user, exam)
-        teacher_assignments = ExamService.get_teacher_assignments(user)
+        teacher_assignments = RoutineExamService.get_teacher_assignments(user)
         
         # Check permissions for each class code
         class_permissions = {}
@@ -2626,7 +2626,7 @@ class ExamPermissionService:
         if not hasattr(user, 'teacher_profile'):
             return exams  # Non-teachers see everything in view mode
         
-        teacher_assignments = ExamService.get_teacher_assignments(user)
+        teacher_assignments = RoutineExamService.get_teacher_assignments(user)
         assigned_class_codes = list(teacher_assignments.keys())
         
         if filter_type == 'assigned_only':
@@ -2656,7 +2656,7 @@ class ExamPermissionService:
     @classmethod
     def get_permission_summary(cls, user):
         """Get summary of user's permissions for debugging"""
-        teacher_assignments = ExamService.get_teacher_assignments(user)
+        teacher_assignments = RoutineExamService.get_teacher_assignments(user)
         accessible_classes = cls.get_teacher_accessible_classes(user)
         editable_classes = cls.get_teacher_editable_classes(user)
         copyable_classes = cls.get_teacher_copyable_classes(user)
@@ -2673,9 +2673,12 @@ class ExamPermissionService:
     @classmethod
     def organize_exams_hierarchically(cls, exams, user, filter_assigned_only=False):
         """
-        Delegate to ExamService.organize_exams_hierarchically for backward compatibility.
+        Delegate to RoutineExamService.organize_exams_hierarchically for backward compatibility.
         This prevents AttributeError if code tries to call this method on ExamPermissionService.
         """
-        return ExamService.organize_exams_hierarchically(
+        return RoutineExamService.organize_exams_hierarchically(
             exams, user, filter_assigned_only=filter_assigned_only
         )
+
+# Backward compatibility alias
+ExamService = RoutineExamService

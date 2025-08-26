@@ -15,8 +15,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ExamService:
-    """Handles exam creation, management, and question operations."""
+class PlacementExamService:
+    """Handles placement exam creation, management, and question operations."""
     
     @staticmethod
     @transaction.atomic
@@ -44,8 +44,8 @@ class ExamService:
         logger = logging.getLogger(__name__)
         
         # CRITICAL: Validate PDF file before creating exam - PDF IS REQUIRED
-        ExamService.validate_pdf_file(pdf_file)  # This will raise ValidationException if pdf_file is None
-        ExamService.log_pdf_save_attempt(None, pdf_file, "before_create")
+        PlacementExamService.validate_pdf_file(pdf_file)  # This will raise ValidationException if pdf_file is None
+        PlacementExamService.log_pdf_save_attempt(None, pdf_file, "before_create")
         
         # Create the exam
         exam = Exam.objects.create(
@@ -63,7 +63,7 @@ class ExamService:
         
         # Log successful exam object creation with PDF validation
         if pdf_file:
-            ExamService.log_pdf_save_attempt(exam, pdf_file, "after_save")
+            PlacementExamService.log_pdf_save_attempt(exam, pdf_file, "after_save")
         
         console_log = {
             "service": "ExamService",
@@ -78,11 +78,11 @@ class ExamService:
         print(f"[PLACEMENT_EXAM_CREATED] {json.dumps(console_log)}")
         
         # Create placeholder questions
-        ExamService.create_questions_for_exam(exam)
+        PlacementExamService.create_questions_for_exam(exam)
         
         # Handle audio files
         if audio_files:
-            ExamService.attach_audio_files(exam, audio_files, audio_names or [])
+            PlacementExamService.attach_audio_files(exam, audio_files, audio_names or [])
         
         logger.info(
             f"Created exam {exam.id}: {exam.name}",
@@ -234,7 +234,7 @@ class ExamService:
                     # Calculate correct options_count based on answer data
                     if question.question_type in ['SHORT', 'LONG', 'MIXED']:
                         # For SHORT/LONG/MIXED, calculate from actual answer data
-                        calculated_count = ExamService._calculate_options_count(
+                        calculated_count = PlacementExamService._calculate_options_count(
                             question.question_type, 
                             question.correct_answer
                         )
@@ -258,7 +258,7 @@ class ExamService:
                 
                 # Calculate options_count for SHORT/LONG/MIXED questions
                 if question_type in ['SHORT', 'LONG', 'MIXED']:
-                    options_count = ExamService._calculate_options_count(
+                    options_count = PlacementExamService._calculate_options_count(
                         question_type, 
                         correct_answer
                     )
@@ -651,3 +651,7 @@ class ExamService:
         logger.info(f"[PDF_SAVE_LOG] {json.dumps(log_data)}")
         print(f"[PDF_SAVE_LOG] {json.dumps(log_data)}")
     # ========== END PDF ROTATION PERSISTENCE FIX ==========
+
+
+# Backward compatibility alias
+ExamService = PlacementExamService

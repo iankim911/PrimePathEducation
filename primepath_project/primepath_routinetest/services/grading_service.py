@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class GradingService:
+class RoutineGradingService:
     """Handles grading logic for different question types."""
     
     @staticmethod
@@ -152,19 +152,19 @@ class GradingService:
         }
         
         if question.question_type == 'MCQ':
-            result['is_correct'] = GradingService.grade_mcq_answer(
+            result['is_correct'] = RoutineGradingService.grade_mcq_answer(
                 answer.answer,
                 question.correct_answer
             )
             
         elif question.question_type == 'CHECKBOX':
-            result['is_correct'] = GradingService.grade_checkbox_answer(
+            result['is_correct'] = RoutineGradingService.grade_checkbox_answer(
                 answer.answer,
                 question.correct_answer
             )
             
         elif question.question_type == 'SHORT':
-            result['is_correct'] = GradingService.grade_short_answer(
+            result['is_correct'] = RoutineGradingService.grade_short_answer(
                 answer.answer,
                 question.correct_answer
             )
@@ -214,7 +214,7 @@ class GradingService:
                 manual_graded += 1
             else:
                 # Auto grade
-                grade_result = GradingService.auto_grade_answer(answer)
+                grade_result = RoutineGradingService.auto_grade_answer(answer)
                 answer.is_correct = grade_result['is_correct']
                 answer.points_earned = grade_result['points_earned']
                 
@@ -325,4 +325,6 @@ class GradingService:
         """
         from ..models import StudentSession
         session = StudentSession.objects.get(id=session_id)
-        return GradingService.get_session_analytics(session)
+        return RoutineGradingService.get_session_analytics(session)
+# Backward compatibility alias
+GradingService = RoutineGradingService

@@ -12,8 +12,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SessionService:
-    """Handles student session creation and management."""
+class PlacementSessionService:
+    """Handles placement test student session creation and management."""
     
     @staticmethod
     @transaction.atomic
@@ -290,3 +290,5 @@ class SessionService:
         )
         
         return session
+# Backward compatibility alias
+SessionService = PlacementSessionService

@@ -406,3 +406,4 @@ class PlacementService:
         except ExamNotFoundException:
             logger.warning(f"No exam available for adjusted level {new_level.id}")
             return None
+# No backward compatibility alias needed - PlacementService is the original name

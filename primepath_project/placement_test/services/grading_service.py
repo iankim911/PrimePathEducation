@@ -9,8 +9,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class GradingService:
-    """Handles grading logic for different question types."""
+class PlacementGradingService:
+    """Handles grading logic for different question types in placement tests."""
     
     @staticmethod
     def grade_mcq_answer(student_answer: str, correct_answer: str) -> bool:
@@ -372,21 +372,21 @@ class GradingService:
         logger.debug(f"[AUTO_GRADE] Q{question.question_number} ({question.question_type})")
         
         if question.question_type == 'MCQ':
-            result['is_correct'] = GradingService.grade_mcq_answer(
+            result['is_correct'] = PlacementGradingService.grade_mcq_answer(
                 answer.answer,
                 question.correct_answer
             )
             logger.debug(f"[AUTO_GRADE] MCQ result: {result['is_correct']}")
             
         elif question.question_type == 'CHECKBOX':
-            result['is_correct'] = GradingService.grade_checkbox_answer(
+            result['is_correct'] = PlacementGradingService.grade_checkbox_answer(
                 answer.answer,
                 question.correct_answer
             )
             logger.debug(f"[AUTO_GRADE] CHECKBOX result: {result['is_correct']}")
             
         elif question.question_type == 'SHORT':
-            result['is_correct'] = GradingService.grade_short_answer(
+            result['is_correct'] = PlacementGradingService.grade_short_answer(
                 answer.answer,
                 question.correct_answer
             )
@@ -400,7 +400,7 @@ class GradingService:
                 
         elif question.question_type == 'MIXED':
             # Grade only MCQ/SHORT sub-parts with all-or-nothing scoring
-            result['is_correct'] = GradingService.grade_mixed_question(
+            result['is_correct'] = PlacementGradingService.grade_mixed_question(
                 answer.answer,
                 question.correct_answer
             )
@@ -441,7 +441,7 @@ class GradingService:
         Returns:
             Summary of grading results with adjusted scoring
         """
-        console_group = f"[GradingService.grade_session] Session {session.id}"
+        console_group = f"[PlacementGradingService.grade_session] Session {session.id}"
         logger.info(f"{console_group} - Starting ENHANCED grading (LONG excluded)")
         
         total_score = 0
@@ -483,7 +483,7 @@ class GradingService:
                 logger.debug(f"{console_group} - Q{answer.question.question_number}: Manual grade applied")
             else:
                 # Auto grade with enhanced logic
-                grade_result = GradingService.auto_grade_answer(answer)
+                grade_result = PlacementGradingService.auto_grade_answer(answer)
                 answer.is_correct = grade_result['is_correct']
                 answer.points_earned = grade_result['points_earned']
                 
@@ -685,4 +685,8 @@ class GradingService:
         """
         from ..models import StudentSession
         session = StudentSession.objects.get(id=session_id)
-        return GradingService.get_session_analytics(session)
+        return PlacementGradingService.get_session_analytics(session)
+
+
+# Backward compatibility alias
+GradingService = PlacementGradingService
