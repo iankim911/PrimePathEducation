@@ -1863,25 +1863,38 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
     
     {% endif %}
     
-    <!-- Admin-Only Curriculum Management Section - OPTIMIZED UI -->
+    <!-- Admin-Only Curriculum Management Section - CARD-BASED UI v2.0 -->
     {% if user.is_superuser %}
-    <div class="admin-section optimized-curriculum-management">
+    <div class="admin-section optimized-curriculum-management card-based-ui">
         <div class="section-header enhanced-header">
             <div class="header-left">
                 <div class="section-title">🔐 Admin: Curriculum Management</div>
-                <div class="section-subtitle">Streamlined class-curriculum assignment interface</div>
+                <div class="section-subtitle">Card-based curriculum assignment interface</div>
             </div>
             <div class="header-actions">
                 <div class="search-filter-container">
-                    <input type="text" id="classSearchFilter" placeholder="Search class codes..." class="search-input">
-                    <span class="class-count-indicator" id="classCountIndicator">Showing 0 of 0 classes</span>
+                    <input type="text" id="curriculumSearchInput" placeholder="🔍 Search class codes..." class="search-input">
+                    <select id="statusFilter" class="status-filter">
+                        <option value="all">All Classes</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="unassigned">Not Assigned</option>
+                    </select>
+                </div>
+                <div class="view-controls">
+                    <label class="view-toggle">
+                        <input type="checkbox" id="viewModeToggle">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Grid</span>
+                        <span class="toggle-label">List</span>
+                    </label>
+                    <span class="class-counter" id="classCounter">Showing 0 of 0 classes</span>
                 </div>
                 <div class="action-buttons-header">
                     <button class="btn-create-class" onclick="showCreateClassDialog()">
                         <span class="btn-icon">➕</span>
                         Create New Class
                     </button>
-                    <button class="btn-refresh" onclick="refreshClassList()">
+                    <button class="btn-refresh" onclick="CurriculumManager.init()">
                         <span class="btn-icon">🔄</span>
                         Refresh
                     </button>
@@ -1890,43 +1903,27 @@ console.log('[MATRIX_REMOVAL] Matrix debugging and analysis code removed from te
         </div>
         
         <!-- Bulk Actions Toolbar -->
-        <div class="bulk-actions-toolbar" id="bulkActionsToolbar" style="display: none;">
+        <div class="bulk-actions-toolbar" id="bulkActions" style="display: none;">
             <div class="bulk-actions-left">
-                <input type="checkbox" id="selectAllClasses" onchange="toggleSelectAllClasses()">
+                <input type="checkbox" id="selectAllClasses">
                 <label for="selectAllClasses">Select All</label>
-                <span class="selected-count" id="selectedCount">0 selected</span>
+                <span class="selected-count"><span id="selectedCount">0</span> selected</span>
             </div>
             <div class="bulk-actions-right">
-                <button class="btn-bulk-assign" onclick="showBulkAssignModal()">
+                <button class="btn-bulk-assign" onclick="CurriculumManager.bulkAssign()">
                     <span class="btn-icon">📚</span>
-                    Bulk Assign Curriculum
+                    Bulk Assign
                 </button>
-                <button class="btn-bulk-delete" onclick="confirmBulkDelete()">
+                <button class="btn-bulk-delete" onclick="CurriculumManager.bulkDelete()">
                     <span class="btn-icon">🗑️</span>
                     Bulk Delete
                 </button>
             </div>
         </div>
         
-        <div class="admin-classes-table-container">
-            <table class="admin-table optimized-table">
-                <thead>
-                    <tr>
-                        <th class="checkbox-column">
-                            <input type="checkbox" id="headerSelectAll" onchange="toggleSelectAllClasses()">
-                        </th>
-                        <th class="class-code-column sticky-column">Class Code</th>
-                        <th class="curriculum-status-column">Current Assignment</th>
-                        <th class="program-column">Program</th>
-                        <th class="subprogram-column">Sub-Program</th>
-                        <th class="level-column">Level</th>
-                        <th class="actions-column">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="adminClassTableBody">
-                    <!-- Dynamically populated -->
-                </tbody>
-            </table>
+        <!-- Curriculum Container - Cards or List view -->
+        <div id="curriculumContainer" class="curriculum-grid">
+            <!-- Dynamically populated with cards or list items -->
         </div>
     </div>
     
