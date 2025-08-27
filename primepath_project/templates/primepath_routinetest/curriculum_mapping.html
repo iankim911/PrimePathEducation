@@ -1,4 +1,12 @@
-{% extends 'routinetest_base.html' %}
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from routinetest_base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
+{% block module_name %}primepath_routinetest{% endblock %}
+{% block data_module %}primepath_routinetest{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
 {% load static %}
 
 {% block title %}Curriculum Mapping - RoutineTest Admin{% endblock %}
@@ -340,7 +348,7 @@
 
 {% block header %}🎯 Curriculum Mapping (Admin Only){% endblock %}
 
-{% block content %}
+{% block main %}
 <!-- Admin Check Notice -->
 <div class="alert alert-info" style="margin: 20px;">
     <i class="fas fa-shield-alt"></i> <strong>Admin Access:</strong> This page is only accessible to administrators and head teachers.

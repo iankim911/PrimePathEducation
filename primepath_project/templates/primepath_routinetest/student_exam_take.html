@@ -1,4 +1,12 @@
-{% extends 'routinetest_base.html' %}
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from routinetest_base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
+{% block module_name %}primepath_routinetest{% endblock %}
+{% block data_module %}primepath_routinetest{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
 {% load static %}
 
 {% block title %}{{ exam.name }} - Take Exam{% endblock %}
@@ -191,7 +199,7 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block main %}
 <div class="warning-banner" id="warningBanner">
     ⚠️ Warning: Tab switching detected! Your activity is being monitored.
 </div>

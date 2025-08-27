@@ -65,7 +65,12 @@ class TemplateCompatibilityMiddleware:
         'placement_test/start_test.html',          # Batch 3 - Migrated Aug 27, 2025
         'placement_test/test_result.html',         # Batch 3 - Migrated Aug 27, 2025
         
-        # RoutineTest (37 templates - ALL migrated)
+        # RoutineTest (42 templates - BATCH 4 additions - August 27, 2025)
+        'primepath_routinetest/student_exam_take.html',           # Batch 4 - Migrated Aug 27, 2025
+        'primepath_routinetest/curriculum_mapping.html',          # Batch 4 - Migrated Aug 27, 2025
+        'primepath_routinetest/student_management/class_students.html',  # Batch 4 - Migrated Aug 27, 2025
+        'primepath_routinetest/student_management/student_list.html',    # Batch 4 - Migrated Aug 27, 2025
+        'primepath_routinetest/student_management/create_student.html',  # Batch 4 - Migrated Aug 27, 2025
         'primepath_routinetest/admin_classes_teachers.html',
         'primepath_routinetest/admin_pending_requests.html',
         'primepath_routinetest/admin_teacher_management.html',
@@ -102,9 +107,13 @@ class TemplateCompatibilityMiddleware:
         'primepath_routinetest/teacher_assessment.html',
         'primepath_routinetest/test_result.html',
         
-        # Student Portal (8 templates - BATCH 2 - August 27, 2025)
+        # Student Portal (12 templates - BATCH 2 & 4 - August 27, 2025)
         'primepath_student/auth/login.html',
         'primepath_student/auth/register.html',
+        'primepath_student/auth/register_simple.html',      # Batch 4 - Migrated Aug 27, 2025
+        'primepath_student/auth/password_reset.html',       # Batch 4 - Migrated Aug 27, 2025
+        'primepath_student/auth/password_reset_confirm.html', # Batch 4 - Migrated Aug 27, 2025
+        'primepath_student/admin/dashboard.html',           # Batch 4 - Migrated Aug 27, 2025
         'primepath_student/dashboard.html',
         'primepath_student/profile.html',
         'primepath_student/class_detail.html',
@@ -112,7 +121,7 @@ class TemplateCompatibilityMiddleware:
         'primepath_student/exam/exam_result.html',
         'primepath_student/exam/exam_history.html',
         
-        # Total: 83 templates migrated to unified_base.html (62.4% complete)
+        # Total: 92 templates migrated to unified_base.html (69.2% complete)
     ])
     
     # Map of old base templates to new unified base
