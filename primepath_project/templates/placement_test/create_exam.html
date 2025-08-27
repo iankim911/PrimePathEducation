@@ -1,6 +1,15 @@
-{% extends 'base.html' %}
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
 
 {% block title %}Upload New Exam - PrimePath{% endblock %}
+
+{% block module_name %}placement_test{% endblock %}
+{% block data_module %}placement_test{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
 
 {% block header %}Upload New Exam{% endblock %}
 
@@ -368,7 +377,7 @@ if (typeof pdfjsLib !== 'undefined') {
 </script>
 {% endblock %}
 
-{% block content %}
+{% block main %}
 <form method="post" enctype="multipart/form-data" class="upload-form" id="examForm">
     {% csrf_token %}
     <input type="hidden" name="pdf_rotation" id="pdf_rotation" value="0">

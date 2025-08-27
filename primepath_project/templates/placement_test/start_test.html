@@ -1,10 +1,19 @@
-{% extends 'base.html' %}
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
 
 {% block title %}Start Placement Test - PrimePath{% endblock %}
 
+{% block module_name %}placement_test{% endblock %}
+{% block data_module %}placement_test{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
+
 {% block header %}Start Your Placement Test{% endblock %}
 
-{% block content %}
+{% block main %}
 <div style="max-width: 600px; margin: 0 auto;">
     <h2 style="text-align: center; margin-bottom: 30px;">Student Information</h2>
     

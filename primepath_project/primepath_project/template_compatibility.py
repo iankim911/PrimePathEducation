@@ -50,9 +50,20 @@ class TemplateCompatibilityMiddleware:
         'registration/step5_parent.html',
         'registration/step6_additional.html',
         
-        # PlacementTest (2 templates)
+        # PlacementTest (13 templates - BATCH 3 - August 27, 2025)
         'placement_test/index.html',
         'placement_test/auth/login.html',
+        'placement_test/create_exam.html',         # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/edit_exam.html',           # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/error.html',               # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/exam_detail.html',         # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/grade_session.html',       # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/manage_questions.html',    # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/preview_and_answers.html', # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/session_detail.html',      # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/session_list.html',        # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/start_test.html',          # Batch 3 - Migrated Aug 27, 2025
+        'placement_test/test_result.html',         # Batch 3 - Migrated Aug 27, 2025
         
         # RoutineTest (37 templates - ALL migrated)
         'primepath_routinetest/admin_classes_teachers.html',
@@ -101,7 +112,7 @@ class TemplateCompatibilityMiddleware:
         'primepath_student/exam/exam_result.html',
         'primepath_student/exam/exam_history.html',
         
-        # Total: 72 templates migrated to unified_base.html (54.1% complete)
+        # Total: 83 templates migrated to unified_base.html (62.4% complete)
     ])
     
     # Map of old base templates to new unified base

@@ -1,6 +1,15 @@
-{% extends 'base.html' %}
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
 
 {% block title %}Preview & Answer Keys - {{ exam.name }} - PrimePath{% endblock %}
+
+{% block module_name %}placement_test{% endblock %}
+{% block data_module %}placement_test{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
 
 {% block header %}{{ exam.name }} - Preview & Answer Keys{% endblock %}
 
@@ -1244,7 +1253,7 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block main %}
 {% csrf_token %}
 <!-- Success Notification Container -->
 <div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 400px;">

@@ -1,8 +1,17 @@
-{% extends 'base.html' %}
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
 
 {% block title %}Error{% endblock %}
 
-{% block content %}
+{% block module_name %}placement_test{% endblock %}
+{% block data_module %}placement_test{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
+
+{% block main %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">

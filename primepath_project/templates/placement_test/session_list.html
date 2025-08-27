@@ -1,9 +1,18 @@
-{% extends 'base.html' %}
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
 {% load static %}
 
 {% block title %}Student Placement Test Sessions{% endblock %}
 
-{% block content %}
+{% block module_name %}placement_test{% endblock %}
+{% block data_module %}placement_test{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
+
+{% block main %}
 <style>
     .sessions-container {
         max-width: 1400px;
