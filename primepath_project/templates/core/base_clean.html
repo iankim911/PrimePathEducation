@@ -1,170 +1,117 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PrimePath Assessment Platform{% endblock %}</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
-    <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        
-        /* Messages styling for logout/login messages */
-        .messages {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            max-width: 400px;
-        }
-        
-        .alert {
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideIn 0.3s ease-out;
-            position: relative;
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        
-        .alert-error,
-        .alert-danger {
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        
-        .alert-info {
-            background-color: #cce7ff;
-            border: 1px solid #b8daff;
-            color: #004085;
-        }
-        
-        .close-alert {
-            float: right;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: inherit;
-            margin-left: 20px;
-            opacity: 0.7;
-        }
-        
-        .close-alert:hover {
-            opacity: 1;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        /* Authentication info in top-right corner (subtle) */
-        .auth-info {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(10px);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: #666;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 999;
-        }
-        
-        .auth-info a {
-            color: #666;
-            text-decoration: none;
-            margin-left: 10px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-        
-        .auth-info a:hover {
-            background: rgba(0,0,0,0.05);
-            color: #333;
-        }
-        
-        .auth-info .logout-btn {
-            color: #dc3545;
-            font-weight: 500;
-        }
-        
-        .auth-info .logout-btn:hover {
-            background: rgba(220, 53, 69, 0.1);
-        }
-    </style>
-    {% block extra_css %}{% endblock %}
-</head>
-<body>
-    <!-- Authentication Info (top-right, subtle) -->
-    {% if user.is_authenticated %}
-        <div class="auth-info">
-            <span>👤 {{ user.get_full_name|default:user.username }}</span>
-            <a href="{% url 'core:profile' %}" title="My Profile">Profile</a>
-            <a href="{% url 'core:logout' %}" class="logout-btn" title="Sign out">Logout</a>
-        </div>
-    {% endif %}
-    
-    <!-- Messages -->
-    {% if messages %}
-        <div class="messages" id="message-container">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'" title="Close">&times;</button>
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-        <script>
-            // Auto-hide success messages after 5 seconds
-            setTimeout(function() {
-                const successAlerts = document.querySelectorAll('.alert-success');
-                successAlerts.forEach(function(alert) {
-                    alert.style.animation = 'slideIn 0.3s ease-out reverse';
-                    setTimeout(function() {
-                        alert.style.display = 'none';
-                    }, 300);
-                });
-            }, 5000);
-        </script>
-    {% endif %}
-    
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-    
-    {% block extra_js %}{% endblock %}
-</body>
-</html>
+{% extends "unified_base.html" %}
+{% comment %}
+PHASE 3: LEGACY TEMPLATE ADAPTER
+Date: August 27, 2025
+Purpose: Redirect core/base_clean.html to unified_base.html with clean configuration
+Status: MIGRATED - Now extends unified_base.html
+
+This template is kept for backward compatibility during migration.
+New templates should use unified_base.html directly with clean configuration.
+{% endcomment %}
+
+{# Configure unified_base to be clean (no header/navigation) #}
+{% block module_name %}core{% endblock %}
+{% block body_class %}clean-page{% endblock %}
+
+{# Hide header and navigation for clean pages #}
+{% block header_wrapper %}{% endblock %}
+{% block navigation_wrapper %}{% endblock %}
+
+{# Override content wrapper to remove default container styling #}
+{% block content_wrapper %}
+    {% block content %}{% endblock %}
+{% endblock %}
+
+{# Add clean-specific styles #}
+{% block base_styles %}
+/* Clean page overrides */
+.main-content {
+    min-height: auto !important;
+}
+
+/* Messages styling for logout/login messages */
+.messages {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease-out;
+    position: relative;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-error,
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert-info {
+    background-color: #cce7ff;
+    border: 1px solid #b8daff;
+    color: #004085;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Authentication info in top-right corner (subtle) */
+.auth-info {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #666;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+}
+
+.auth-info a {
+    color: #666;
+    text-decoration: none;
+    margin-left: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.auth-info a:hover {
+    background: rgba(0,0,0,0.05);
+    color: #333;
+}
+
+.auth-info .logout-btn {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.auth-info .logout-btn:hover {
+    background: rgba(220, 53, 69, 0.1);
+}
+{% endblock %}

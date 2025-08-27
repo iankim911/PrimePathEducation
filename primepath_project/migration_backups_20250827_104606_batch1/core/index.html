@@ -1,12 +1,4 @@
-{% extends "unified_base.html" %}
-{% load static %}
-
-{% block module_name %}core{% endblock %}
-{% block data_module %}core-home{% endblock %}
-
-{# Configure unified_base to be clean (no header/navigation) #}
-{% block header_wrapper %}{% endblock %}
-{% block navigation_wrapper %}{% endblock %}
+{% extends 'core/base_clean.html' %}
 
 {% block title %}Choose Application - PrimePath{% endblock %}
 

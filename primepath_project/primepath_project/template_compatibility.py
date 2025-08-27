@@ -23,7 +23,12 @@ class TemplateCompatibilityMiddleware:
         'test_unified_placement.html',
         'test_unified_routine.html',
         
-        # Core module (10 templates)
+        # Core module (15 templates) - BATCH 1 COMPLETED
+        'core/auth/login.html',           # Batch 1 - Migrated Aug 27, 2025
+        'core/index.html',                # Batch 1 - Migrated Aug 27, 2025  
+        'core/auth/profile.html',         # Batch 1 - Migrated Aug 27, 2025
+        'core/auth/logout_confirm.html',  # Batch 1 - Migrated Aug 27, 2025
+        'core/base_clean.html',           # Batch 1 - Legacy adapter created Aug 27, 2025
         'core/exam_mapping.html',
         'core/login_with_kakao.html',
         'core/placement_configuration.html',
@@ -86,7 +91,7 @@ class TemplateCompatibilityMiddleware:
         'primepath_routinetest/teacher_assessment.html',
         'primepath_routinetest/test_result.html',
         
-        # Total: 59 templates migrated to unified_base.html
+        # Total: 64 templates migrated to unified_base.html (was 59 + 5 Batch 1)
     ])
     
     # Map of old base templates to new unified base

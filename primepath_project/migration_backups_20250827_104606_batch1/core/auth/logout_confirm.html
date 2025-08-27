@@ -1,13 +1,5 @@
-{% extends "unified_base.html" %}
+{% extends "core/base_clean.html" %}
 {% load static %}
-
-{% block module_name %}core{% endblock %}
-{% block data_module %}core-logout{% endblock %}
-{% block body_class %}logout-page clean{% endblock %}
-
-{# Hide header and navigation for clean logout page #}
-{% block header_wrapper %}{% endblock %}
-{% block navigation_wrapper %}{% endblock %}
 
 {% block title %}Logout - PrimePath{% endblock %}
 
@@ -188,7 +180,7 @@
                 </button>
             </form>
             
-            <a href="/" class="btn-cancel">
+            <a href="{% url 'core:dashboard' %}" class="btn-cancel">
                 Cancel
             </a>
         </div>
