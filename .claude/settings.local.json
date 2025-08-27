@@ -426,7 +426,8 @@
       "Bash(do:*)",
       "Bash(if grep -q 'extends \"\"base.html\"\"\\|extends \"\"routinetest_base.html\"\"' \"$file\")",
       "Bash(then)",
-      "Bash(../../../venv/bin/python:*)"
+      "Bash(../../../venv/bin/python:*)",
+      "Bash(if [ -f \"$file\" ])"
     ],
     "deny": []
   }

@@ -91,7 +91,17 @@ class TemplateCompatibilityMiddleware:
         'primepath_routinetest/teacher_assessment.html',
         'primepath_routinetest/test_result.html',
         
-        # Total: 64 templates migrated to unified_base.html (was 59 + 5 Batch 1)
+        # Student Portal (8 templates - BATCH 2 - August 27, 2025)
+        'primepath_student/auth/login.html',
+        'primepath_student/auth/register.html',
+        'primepath_student/dashboard.html',
+        'primepath_student/profile.html',
+        'primepath_student/class_detail.html',
+        'primepath_student/exam/take_exam.html',
+        'primepath_student/exam/exam_result.html',
+        'primepath_student/exam/exam_history.html',
+        
+        # Total: 72 templates migrated to unified_base.html (54.1% complete)
     ])
     
     # Map of old base templates to new unified base

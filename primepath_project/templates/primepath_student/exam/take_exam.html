@@ -1,7 +1,15 @@
-{% extends 'student_base.html' %}
+{% extends 'unified_base.html' %}
+{% comment %}
+Phase 3: Template Migration
+Migrated from student_base.html to unified_base.html
+Date: August 27, 2025
+{% endcomment %}
 {% load static %}
 
 {% block title %}{{ exam.name }} - Exam{% endblock %}
+{% block module_name %}primepath_student{% endblock %}
+{% block data_module %}primepath_student{% endblock %}
+{% block header_bg_color %}#1B5E20{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -224,7 +232,7 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block main %}
 <div class="exam-container">
     <!-- Timer -->
     <div class="exam-timer" id="examTimer">
