@@ -20,7 +20,7 @@ class ClassExamSchedule(models.Model):
     
     # Link to exam and class
     exam = models.ForeignKey(
-        'primepath_routinetest.Exam',
+        'primepath_routinetest.RoutineExam',
         on_delete=models.CASCADE,
         related_name='class_schedules'
     )

@@ -1,0 +1,230 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+
+{% block title %}Pending Class Access Requests - RoutineTest Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    
+    <!-- Header Section -->
+    <div class="admin-header" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 24px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h1 style="margin: 0; font-size: 28px; font-weight: 600;">
+                    <span style="margin-right: 12px;">🔔</span>
+                    Class Access Requests
+                </h1>
+                <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 16px;">
+                    Review and approve teacher access requests
+                </p>
+            </div>
+            <div style="text-align: right;">
+                <div style="background: rgba(255,255,255,0.2); padding: 12px 20px; border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: 600; margin: 0;">{{ pending_requests.count }}</div>
+                    <div style="font-size: 14px; opacity: 0.9;">Pending</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <div style="margin-bottom: 20px;">
+        <a href="{% url 'RoutineTest:classes_exams_unified' %}" 
+           style="display: inline-flex; align-items: center; gap: 8px; color: #666; text-decoration: none; font-size: 14px; padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: white; transition: all 0.2s;"
+           onmouseover="this.style.background='#f8f9fa'; this.style.color='#333';" 
+           onmouseout="this.style.background='white'; this.style.color='#666';">
+            <span>←</span>
+            <span>Back to Classes & Exams</span>
+        </a>
+    </div>
+
+    <!-- Pending Requests -->
+    {% if pending_requests %}
+        <div class="requests-container">
+            {% for request in pending_requests %}
+            <div class="request-card" style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s;" 
+                 onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.1)'; this.style.transform='translateY(-2px)';" 
+                 onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)'; this.style.transform='translateY(0)';">
+                
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="margin: 0 0 8px 0; color: #2c3e50; font-size: 18px; font-weight: 600;">
+                            {{ request.teacher.name }}
+                        </h3>
+                        <div style="font-size: 14px; color: #7f8c8d; margin-bottom: 4px;">
+                            <strong>Email:</strong> {{ request.teacher.user.email|default:"Not provided" }}
+                        </div>
+                        <div style="font-size: 14px; color: #7f8c8d;">
+                            <strong>Username:</strong> {{ request.teacher.user.username }}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 500; margin-bottom: 8px;">
+                            PENDING
+                        </div>
+                        <div style="font-size: 12px; color: #999;">
+                            {{ request.requested_at|date:"M j, Y g:i A" }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="request-details" style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500; margin-bottom: 4px;">Class Requested</div>
+                            <div style="font-size: 16px; font-weight: 600; color: #2c3e50;">{{ request.get_class_code_display }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500; margin-bottom: 4px;">Access Level</div>
+                            <div style="font-size: 16px; font-weight: 600; color: {% if request.requested_access_level == 'FULL' %}#27ae60{% else %}#3498db{% endif %};">
+                                {% if request.requested_access_level == 'FULL' %}
+                                    Full Access
+                                {% else %}
+                                    View Access
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500; margin-bottom: 4px;">Reason</div>
+                        <div style="font-size: 14px; color: #2c3e50;">{{ request.get_reason_display }}</div>
+                    </div>
+                    
+                    {% if request.notes %}
+                    <div>
+                        <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: 500; margin-bottom: 4px;">Additional Notes</div>
+                        <div style="font-size: 14px; color: #2c3e50; font-style: italic;">{{ request.notes }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="request-actions" style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="denyRequest('{{ request.id }}')" 
+                            class="btn-deny" 
+                            style="background: #dc3545 !important; color: #FFFFFF !important; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: inline-block;"
+                            onmouseover="this.style.background='#c82333'" 
+                            onmouseout="this.style.background='#dc3545'">
+                        Deny Request
+                    </button>
+                    <button onclick="approveRequest('{{ request.id }}')" 
+                            class="btn-approve" 
+                            style="background: #28a745 !important; color: #FFFFFF !important; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; display: inline-block;"
+                            onmouseover="this.style.background='#218838'" 
+                            onmouseout="this.style.background='#28a745'">
+                        Approve Request
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Bulk Actions -->
+        {% if pending_requests.count > 1 %}
+        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-top: 30px; text-align: center;">
+            <h4 style="margin: 0 0 16px 0; color: #2c3e50;">Bulk Actions</h4>
+            <button onclick="bulkApproveAll()" 
+                    style="background: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; margin-right: 12px;"
+                    onmouseover="this.style.background='#229954';" 
+                    onmouseout="this.style.background='#27ae60';">
+                Approve All {{ pending_requests.count }} Requests
+            </button>
+            <div style="font-size: 12px; color: #7f8c8d; margin-top: 8px;">
+                This will approve all pending requests at once.
+            </div>
+        </div>
+        {% endif %}
+        
+    {% else %}
+        <!-- No Pending Requests -->
+        <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px solid #e0e0e0;">
+            <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+            <h3 style="color: #2c3e50; margin: 0 0 8px 0;">All caught up!</h3>
+            <p style="color: #7f8c8d; margin: 0; font-size: 16px;">No pending class access requests to review.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function approveRequest(requestId) {
+    if (!confirm('Are you sure you want to approve this access request?')) {
+        return;
+    }
+    
+    fetch(`{% url 'RoutineTest:approve_request' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', requestId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Request approved successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to approve request'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+function denyRequest(requestId) {
+    if (!confirm('Are you sure you want to deny this access request?')) {
+        return;
+    }
+    
+    fetch(`{% url 'RoutineTest:deny_request' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', requestId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Request denied.');
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to deny request'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+function bulkApproveAll() {
+    if (!confirm('Are you sure you want to approve ALL pending requests? This action cannot be undone.')) {
+        return;
+    }
+    
+    fetch('{% url "RoutineTest:bulk_approve" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Successfully approved ${data.approved_count} request(s)!`);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to approve requests'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+</script>
+{% endblock %}

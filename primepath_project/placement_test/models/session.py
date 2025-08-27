@@ -29,7 +29,7 @@ class StudentSession(models.Model):
     school_name_manual = models.CharField(max_length=200, blank=True)
     grade = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
     academic_rank = models.CharField(max_length=20, choices=ACADEMIC_RANKS)
-    exam = models.ForeignKey('placement_test.Exam', on_delete=models.CASCADE, related_name='sessions')
+    exam = models.ForeignKey('placement_test.PlacementExam', on_delete=models.CASCADE, related_name='sessions')
     original_curriculum_level = models.ForeignKey(
         'core.CurriculumLevel', 
         on_delete=models.SET_NULL, 

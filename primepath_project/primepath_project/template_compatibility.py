@@ -22,7 +22,71 @@ class TemplateCompatibilityMiddleware:
     MIGRATED_TEMPLATES = set([
         'test_unified_placement.html',
         'test_unified_routine.html',
-        # Add templates here as they're migrated
+        
+        # Core module (10 templates)
+        'core/exam_mapping.html',
+        'core/login_with_kakao.html',
+        'core/placement_configuration.html',
+        'core/placement_rules_matrix.html',
+        'core/placement_rules.html',
+        'core/teacher_dashboard.html',
+        'core/teacher_exams.html',
+        'core/teacher_login.html',
+        'core/teacher_sessions.html',
+        'core/teacher_settings.html',
+        
+        # Registration (8 templates)
+        'registration/choice.html',
+        'registration/complete.html',
+        'registration/step1_basic.html',
+        'registration/step2_personal.html',
+        'registration/step3_contact.html',
+        'registration/step4_academic.html',
+        'registration/step5_parent.html',
+        'registration/step6_additional.html',
+        
+        # PlacementTest (2 templates)
+        'placement_test/index.html',
+        'placement_test/auth/login.html',
+        
+        # RoutineTest (37 templates - ALL migrated)
+        'primepath_routinetest/admin_classes_teachers.html',
+        'primepath_routinetest/admin_pending_requests.html',
+        'primepath_routinetest/admin_teacher_management.html',
+        'primepath_routinetest/admin/manage_classes.html',
+        'primepath_routinetest/analytics/dashboard.html',
+        'primepath_routinetest/auth/login.html',
+        'primepath_routinetest/class_access_admin.html',
+        'primepath_routinetest/class_access.html',
+        'primepath_routinetest/class_code_overview.html',
+        'primepath_routinetest/class_details.html',
+        'primepath_routinetest/classes_exams_unified_backup.html',
+        'primepath_routinetest/classes_exams_unified.html',
+        'primepath_routinetest/create_exam_fixed.html',
+        'primepath_routinetest/create_exam.html',
+        'primepath_routinetest/dashboards/admin_dashboard.html',
+        'primepath_routinetest/dashboards/student_dashboard.html',
+        'primepath_routinetest/dashboards/teacher_dashboard.html',
+        'primepath_routinetest/edit_exam.html',
+        'primepath_routinetest/error.html',
+        'primepath_routinetest/exam_detail.html',
+        'primepath_routinetest/exam_list_hierarchical_backup.html',
+        'primepath_routinetest/exam_list_hierarchical_fixed.html',
+        'primepath_routinetest/exam_list_hierarchical.html',
+        'primepath_routinetest/exam_list.html',
+        'primepath_routinetest/exam_results.html',
+        'primepath_routinetest/grade_session.html',
+        'primepath_routinetest/index.html',
+        'primepath_routinetest/manage_questions.html',
+        'primepath_routinetest/manage_roster.html',
+        'primepath_routinetest/preview_and_answers.html',
+        'primepath_routinetest/session_detail.html',
+        'primepath_routinetest/session_list.html',
+        'primepath_routinetest/start_test.html',
+        'primepath_routinetest/teacher_assessment.html',
+        'primepath_routinetest/test_result.html',
+        
+        # Total: 59 templates migrated to unified_base.html
     ])
     
     # Map of old base templates to new unified base

@@ -1,4 +1,9 @@
-{% extends "routinetest_base.html" %}
+{% extends "primepath_routinetest/routinetest_unified_base.html" %}
+{% comment %}
+Updated 2025-08-27: Using routinetest_unified_base.html for navigation
+Original base template: routinetest_base.html
+{% endcomment %}
+
 {% load static %}
 {% load access_display %}
 
@@ -817,7 +822,7 @@
 </style>
 {% endblock %}
 
-{% block content %}
+{% block page_content %}
 <div class="unified-container">
     {% if error %}
     <!-- Error State -->

@@ -1,0 +1,418 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+
+{% block title %}My Classes & Access - RoutineTest{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Admin-specific styling */
+    .admin-banner {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        color: #1B5E20;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .admin-banner .badge {
+        background: #1B5E20;
+        color: #FFD700;
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    
+    .switch-view-btn {
+        background: white;
+        color: #1B5E20;
+        border: 2px solid #1B5E20;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .switch-view-btn:hover {
+        background: #1B5E20;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .full-access-indicator {
+        background: #4CAF50;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        margin-left: 10px;
+    }
+    
+    .admin-class-card {
+        background: linear-gradient(135deg, #F5F5F5 0%, #E8F5E9 100%);
+        border: 2px solid #4CAF50;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-class-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 8px rgba(76,175,80,0.3);
+    }
+    
+    /* Desktop layout for admin view */
+    @media (min-width: 768px) {
+        .access-container {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .left-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .right-panel {
+            flex: 0 0 350px;
+            min-width: 0;
+        }
+    }
+    
+    /* Console debugging styles */
+    .debug-info {
+        background: #333;
+        color: #0F0;
+        font-family: monospace;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-size: 12px;
+        display: none;
+    }
+    
+    .debug-info.show {
+        display: block;
+    }
+</style>
+
+<!-- Enhanced Console Debugging -->
+<script>
+    console.group('%c🔓 CLASS ACCESS VIEW LOADED', 'background: #4CAF50; color: white; padding: 5px; font-weight: bold;');
+    console.log('User: {{ request.user.username }}');
+    console.log('Is Admin: {{ is_admin|yesno:"true,false" }}');
+    console.log('Is Head Teacher: {{ is_head_teacher|yesno:"true,false" }}');
+    console.log('Show Admin View: {{ show_admin_view|yesno:"true,false" }}');
+    console.log('Can Switch View: {{ can_switch_view|yesno:"true,false" }}');
+    console.log('Total Classes: {{ my_class_count }}');
+    console.log('Timestamp:', new Date().toISOString());
+    console.groupEnd();
+    
+    // Track admin actions
+    window.AdminAccessTracker = {
+        user: '{{ request.user.username }}',
+        isAdmin: {{ is_admin|lower }},
+        viewMode: '{{ show_admin_view|yesno:"admin,teacher" }}',
+        classCount: {{ my_class_count|default:0 }},
+        
+        logAction: function(action, data) {
+            console.log(`%c[ADMIN_ACTION] ${action}`, 'background: #FF9800; color: white; padding: 2px 5px;', data);
+        },
+        
+        switchView: function(toAdminView) {
+            this.logAction('SWITCH_VIEW', {
+                from: this.viewMode,
+                to: toAdminView ? 'admin' : 'teacher',
+                timestamp: new Date().toISOString()
+            });
+            
+            const url = new URL(window.location);
+            url.searchParams.set('admin_view', toAdminView ? 'true' : 'false');
+            window.location.href = url.toString();
+        }
+    };
+</script>
+{% endblock %}
+
+{% block header %}My Classes & Access{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Debug Info (shown if ?debug=true) -->
+    {% if debug_mode %}
+    <div class="debug-info show">
+        <strong>DEBUG MODE</strong><br>
+        User: {{ request.user.username }} | 
+        Is Admin: {{ is_admin }} | 
+        Show Admin View: {{ show_admin_view }} | 
+        Classes: {{ my_class_count }}
+    </div>
+    {% endif %}
+    
+    <!-- Admin Banner for Full Access -->
+    {% if is_admin and show_admin_view %}
+    <div class="admin-banner">
+        <div>
+            <span class="badge">ADMIN MODE</span>
+            <span style="margin-left: 15px;">🔓 You have FULL ACCESS to ALL {{ total_classes|default:my_class_count }} classes</span>
+        </div>
+        <a href="?admin_view=false" class="switch-view-btn" onclick="AdminAccessTracker.switchView(false); return false;">
+            Switch to Teacher View
+        </a>
+    </div>
+    {% elif is_admin and not show_admin_view %}
+    <div class="admin-banner" style="background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);">
+        <div>
+            <span class="badge" style="background: #1B5E20;">TEACHER MODE</span>
+            <span style="margin-left: 15px; color: #0D4F1F;">Viewing as regular teacher (limited access)</span>
+        </div>
+        <a href="?admin_view=true" class="switch-view-btn" onclick="AdminAccessTracker.switchView(true); return false;">
+            Switch to Admin View
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Info Box -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> 
+        {% if is_admin and show_admin_view %}
+            <strong>Admin Access:</strong> You have automatic access to all classes. No need to request access.
+        {% else %}
+            <strong>How it works:</strong> View your assigned classes on the left. Request access to additional classes on the right. Admin approval required for new class assignments.
+        {% endif %}
+    </div>
+    
+    <div class="access-container">
+        <!-- Left Panel: My Classes -->
+        <div class="left-panel">
+            <h3>
+                My Current Classes 
+                {% if is_admin and show_admin_view %}
+                    <span class="full-access-indicator">FULL ADMIN ACCESS</span>
+                {% else %}
+                    <span class="text-muted">({{ my_class_count|default:"0" }} assigned)</span>
+                {% endif %}
+            </h3>
+            
+            {% if my_classes %}
+                <div class="class-list">
+                    {% for class in my_classes %}
+                    <div class="{% if is_admin and show_admin_view %}admin-class-card{% else %}class-card{% endif %}">
+                        <div class="class-header">
+                            <h4>
+                                {{ class.class_name }}
+                                {% if class.is_admin_access %}
+                                    <span class="badge badge-warning">Admin Access</span>
+                                {% endif %}
+                            </h4>
+                            <span class="class-code text-muted">{{ class.class_code }}</span>
+                        </div>
+                        
+                        <div class="class-info">
+                            <div class="info-row">
+                                <span>Students: {{ class.student_count|default:"0" }}</span>
+                                <span>Active Exams: {{ class.active_exams|default:"0" }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>Access Level: 
+                                    <strong>
+                                        {% if is_admin and show_admin_view %}
+                                            ADMIN FULL ACCESS
+                                        {% else %}
+                                            {{ class.access_level }}
+                                        {% endif %}
+                                    </strong>
+                                </span>
+                                {% if class.assigned_date %}
+                                    <span>Since: {{ class.assigned_date|date:"M d, Y" }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if class.assigned_teachers %}
+                            <div class="teacher-list mt-2">
+                                <small class="text-muted">Other Teachers:</small>
+                                {% for teacher in class.assigned_teachers %}
+                                    <span class="badge badge-secondary">{{ teacher.name }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="class-actions">
+                            <a href="{% url 'RoutineTest:create_exam' %}?class={{ class.class_code }}" class="btn btn-sm btn-primary">
+                                Create Exam
+                            </a>
+                            <a href="{% url 'RoutineTest:exam_list' %}?class={{ class.class_code }}" class="btn btn-sm btn-secondary">
+                                View Exams
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-classes-message">
+                    <p class="text-center text-muted">
+                        {% if is_admin and show_admin_view %}
+                            <strong>System Error:</strong> Admin should have access to all classes. Please contact support.
+                        {% else %}
+                            <i class="fas fa-folder-open fa-3x mb-3"></i><br>
+                            <strong>No Classes Assigned Yet</strong><br>
+                            You haven't been assigned to any classes.<br>
+                            ➡️ Use the right panel to request access to available classes.
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Panel: Request Access (Hidden for Admin View) -->
+        {% if not is_admin or not show_admin_view %}
+        <div class="right-panel">
+            <h3>Request New Access</h3>
+            
+            <!-- Tabs -->
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#available">
+                        Available Classes ({{ available_count|default:"0" }})
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#requests">
+                        My Requests
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <div id="available" class="tab-pane active">
+                    {% if available_classes %}
+                        {% for class in available_classes %}
+                        <div class="available-class-item">
+                            <div class="class-info">
+                                <strong>{{ class.class_name }}</strong><br>
+                                <small class="text-muted">
+                                    {% if class.teacher_count > 0 %}
+                                        {{ class.teacher_count }} teacher{{ class.teacher_count|pluralize }} assigned
+                                    {% else %}
+                                        No teacher assigned
+                                    {% endif %}
+                                </small>
+                            </div>
+                            {% if class.is_pending %}
+                                <button class="btn btn-sm btn-warning" disabled>Pending</button>
+                            {% else %}
+                                <button class="btn btn-sm btn-success" onclick="requestAccess('{{ class.class_code }}')">
+                                    Request
+                                </button>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mt-3">
+                            All classes have been assigned to you.
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div id="requests" class="tab-pane">
+                    {% if my_requests %}
+                        {% for request in my_requests %}
+                        <div class="request-item">
+                            <div class="request-info">
+                                <strong>{{ request.get_class_code_display }}</strong><br>
+                                <small>{{ request.requested_at|date:"M d, Y" }}</small>
+                            </div>
+                            <span class="badge badge-{{ request.status|lower }}">
+                                {{ request.get_status_display }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mt-3">
+                            No requests made yet.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Admin Panel: Management Tools -->
+        <div class="right-panel">
+            <h3>Admin Tools</h3>
+            
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <h4>{{ total_classes|default:my_class_count }}</h4>
+                    <p>Total Classes</p>
+                </div>
+                
+                {% if pending_count %}
+                <div class="stat-card">
+                    <h4>{{ pending_count }}</h4>
+                    <p>Pending Requests</p>
+                    <a href="{% url 'RoutineTest:admin_pending_requests' %}" class="btn btn-sm btn-warning">
+                        Review
+                    </a>
+                </div>
+                {% endif %}
+                
+                <div class="admin-actions mt-3">
+                    <a href="{% url 'RoutineTest:admin_teacher_assignments' %}" class="btn btn-primary btn-block">
+                        Manage All Assignments
+                    </a>
+                    <a href="{% url 'RoutineTest:curriculum_mapping' %}" class="btn btn-success btn-block mt-2">
+                        🎯 Curriculum Mapping
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- JavaScript for interactions -->
+<script>
+    function requestAccess(classCode) {
+        console.log('[REQUEST_ACCESS] Requesting access to:', classCode);
+        AdminAccessTracker.logAction('REQUEST_ACCESS', {classCode: classCode});
+        
+        // AJAX request would go here
+        fetch('{% url "RoutineTest:request_access" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({class_code: classCode})
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('[REQUEST_ACCESS] Response:', data);
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('[REQUEST_ACCESS] Error:', error);
+        });
+    }
+    
+    // Log page view
+    console.log('%c[PAGE_VIEW] Class Access Page Loaded', 'background: #2196F3; color: white; padding: 3px;', {
+        user: '{{ request.user.username }}',
+        isAdmin: {{ is_admin|lower }},
+        viewMode: '{{ show_admin_view|yesno:"admin,teacher" }}',
+        classes: {{ my_class_count|default:0 }},
+        timestamp: new Date().toISOString()
+    });
+</script>
+{% endblock %}

@@ -23,7 +23,7 @@ from primepath_routinetest.models import (
     ExamScheduleMatrix, StudentSession,
     TeacherClassAssignment, ExamLaunchSession
 )
-from primepath_routinetest.services import ExamService
+from core.service_registry import ServiceRegistry
 
 logger = logging.getLogger(__name__)
 

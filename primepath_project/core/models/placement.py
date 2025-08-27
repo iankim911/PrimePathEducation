@@ -33,7 +33,7 @@ class ExamLevelMapping(models.Model):
         related_name='exam_mappings'
     )
     exam = models.ForeignKey(
-        'placement_test.Exam', 
+        'placement_test.PlacementExam', 
         on_delete=models.CASCADE, 
         related_name='level_mappings'
     )

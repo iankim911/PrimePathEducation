@@ -1,0 +1,506 @@
+{% extends "routinetest_base.html" %}
+
+{% block title %}Manage Student Roster - {{ exam.name }}{% endblock %}
+
+{% block header %}Student Roster: {{ exam.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .roster-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+    }
+    
+    .roster-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    .roster-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .roster-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .roster-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .roster-table th {
+        background: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .roster-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .roster-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-badge.not-started {
+        background: #ffeaa7;
+        color: #74501e;
+    }
+    
+    .status-badge.in-progress {
+        background: #74b9ff;
+        color: #0c3966;
+    }
+    
+    .status-badge.completed {
+        background: #55efc4;
+        color: #00613d;
+    }
+    
+    .status-badge.excused {
+        background: #fd79a8;
+        color: #5f0824;
+    }
+    
+    .add-student-form {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr 1fr auto;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .btn-remove {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-remove:hover {
+        background: #c82333;
+    }
+    
+    .import-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .csv-template {
+        background: white;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        margin: 10px 0;
+    }
+    
+    .completion-chart {
+        width: 100%;
+        height: 40px;
+        background: #e9ecef;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        margin: 20px 0;
+    }
+    
+    .completion-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        transition: width 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+</style>
+
+<div class="roster-header">
+    <div>
+        <h2 style="margin: 0;">{{ exam.name }}</h2>
+        <p style="margin: 5px 0; opacity: 0.9;">
+            {{ exam.get_exam_type_display_short }} | {{ exam.get_time_period_display }}
+            {% if exam.class_codes %}
+                | Classes: {{ exam.get_class_codes_display }}
+            {% endif %}
+        </p>
+    </div>
+    <div>
+        <a href="{% url 'RoutineTest:exam_list' %}" class="btn btn-secondary">Back to Exams</a>
+    </div>
+</div>
+
+<!-- Roster Statistics -->
+<div class="roster-stats">
+    <div class="stat-card">
+        <div class="stat-value">{{ roster_stats.total_assigned }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" style="color: #ffc107;">{{ roster_stats.not_started }}</div>
+        <div class="stat-label">Not Started</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" style="color: #17a2b8;">{{ roster_stats.in_progress }}</div>
+        <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" style="color: #28a745;">{{ roster_stats.completed }}</div>
+        <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" style="color: #6c757d;">{{ roster_stats.excused }}</div>
+        <div class="stat-label">Excused</div>
+    </div>
+</div>
+
+<!-- Completion Chart -->
+{% if roster_stats.total_assigned > 0 %}
+<div class="completion-chart">
+    <div class="completion-bar" style="width: {{ roster_stats.completion_rate }}%;">
+        {{ roster_stats.completion_rate }}% Complete
+    </div>
+</div>
+{% endif %}
+
+<!-- Action Buttons -->
+<div class="roster-actions">
+    <button class="btn btn-primary" onclick="toggleAddStudentForm()">+ Add Students</button>
+    <button class="btn btn-secondary" onclick="toggleImportSection()">📥 Import CSV</button>
+    <a href="{% url 'RoutineTest:export_roster' exam_id=exam.id %}" class="btn btn-secondary">📤 Export CSV</a>
+    <a href="{% url 'RoutineTest:roster_report' exam_id=exam.id %}" class="btn btn-info">📊 View Report</a>
+</div>
+
+<!-- Add Student Form (Initially Hidden) -->
+<div id="addStudentForm" class="add-student-form" style="display: none;">
+    <h3>Add Students to Roster</h3>
+    <form id="rosterForm" onsubmit="return submitRoster(event)">
+        <div id="studentRows">
+            <div class="form-row">
+                <input type="text" name="student_name[]" placeholder="Student Name" required class="form-control">
+                <input type="text" name="student_id[]" placeholder="ID (optional)" class="form-control">
+                <select name="class_code[]" required class="form-control">
+                    <option value="">Select Class</option>
+                    {% for code, label in class_codes %}
+                    <option value="{{ code }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="notes[]" placeholder="Notes (optional)" class="form-control">
+                <button type="button" class="btn btn-secondary" onclick="addStudentRow()">+</button>
+            </div>
+        </div>
+        <div style="margin-top: 15px;">
+            <button type="submit" class="btn btn-primary">Save Students</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleAddStudentForm()">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<!-- CSV Import Section (Initially Hidden) -->
+<div id="importSection" class="import-section" style="display: none;">
+    <h3>Import Students from CSV</h3>
+    <p>Upload a CSV file with the following format:</p>
+    <div class="csv-template">
+student_name,student_id,class_code,notes
+John Doe,12345,CLASS_7A,Transfer student
+Jane Smith,12346,CLASS_7B,
+Bob Johnson,12347,CLASS_8A,Needs extra support
+    </div>
+    <form id="importForm" enctype="multipart/form-data" onsubmit="return importCSV(event)">
+        <input type="file" name="csv_file" accept=".csv" required class="form-control" style="margin: 10px 0;">
+        <button type="submit" class="btn btn-primary">Import CSV</button>
+        <button type="button" class="btn btn-secondary" onclick="toggleImportSection()">Cancel</button>
+    </form>
+</div>
+
+<!-- Student Roster Table -->
+<div class="roster-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Student ID</th>
+                <th>Class</th>
+                <th>Status</th>
+                <th>Assigned</th>
+                <th>Completed</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="rosterTableBody">
+            {% for entry in roster_entries %}
+            <tr data-roster-id="{{ entry.id }}">
+                <td><strong>{{ entry.student_name }}</strong></td>
+                <td>{{ entry.student_id|default:"-" }}</td>
+                <td>{{ entry.get_class_code_display|default:entry.class_code }}</td>
+                <td>
+                    <span class="status-badge {{ entry.completion_status|lower|slugify }}">
+                        {{ entry.get_completion_status_display }}
+                    </span>
+                </td>
+                <td>{{ entry.assigned_at|date:"M d, Y" }}</td>
+                <td>{{ entry.completed_at|date:"M d, Y"|default:"-" }}</td>
+                <td>
+                    <select onchange="updateStatus('{{ entry.id }}', this.value)" class="form-control" style="width: auto; display: inline-block;">
+                        {% for status_code, status_label in completion_statuses %}
+                        <option value="{{ status_code }}" {% if entry.completion_status == status_code %}selected{% endif %}>
+                            {{ status_label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <button class="btn-remove" onclick="removeStudent('{{ entry.id }}')">Remove</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: #6c757d;">
+                    No students assigned to this exam yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Phase 5: Roster Management JavaScript
+console.log('[PHASE5_ROSTER_UI] Initialized roster management for exam: {{ exam.id }}');
+
+function toggleAddStudentForm() {
+    const form = document.getElementById('addStudentForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    console.log('[PHASE5_ROSTER_UI] Toggled add student form');
+}
+
+function toggleImportSection() {
+    const section = document.getElementById('importSection');
+    section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    console.log('[PHASE5_ROSTER_UI] Toggled import section');
+}
+
+function addStudentRow() {
+    const container = document.getElementById('studentRows');
+    const newRow = document.createElement('div');
+    newRow.className = 'form-row';
+    newRow.innerHTML = `
+        <input type="text" name="student_name[]" placeholder="Student Name" required class="form-control">
+        <input type="text" name="student_id[]" placeholder="ID (optional)" class="form-control">
+        <select name="class_code[]" required class="form-control">
+            <option value="">Select Class</option>
+            {% for code, label in class_codes %}
+            <option value="{{ code }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="notes[]" placeholder="Notes (optional)" class="form-control">
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">-</button>
+    `;
+    container.appendChild(newRow);
+    console.log('[PHASE5_ROSTER_UI] Added new student row');
+}
+
+function submitRoster(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const students = [];
+    
+    const names = formData.getAll('student_name[]');
+    const ids = formData.getAll('student_id[]');
+    const classes = formData.getAll('class_code[]');
+    const notes = formData.getAll('notes[]');
+    
+    for (let i = 0; i < names.length; i++) {
+        if (names[i]) {
+            students.push({
+                student_name: names[i],
+                student_id: ids[i] || '',
+                class_code: classes[i],
+                notes: notes[i] || ''
+            });
+        }
+    }
+    
+    console.log('[PHASE5_ROSTER_UI] Submitting roster:', students);
+    
+    fetch('{% url "RoutineTest:manage_roster" exam_id=exam.id %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ students: students })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[PHASE5_ROSTER_UI] Roster submission response:', data);
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[PHASE5_ROSTER_ERROR]', error);
+        alert('Error submitting roster');
+    });
+    
+    return false;
+}
+
+function importCSV(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    console.log('[PHASE5_ROSTER_UI] Importing CSV file');
+    
+    fetch('{% url "RoutineTest:import_roster_csv" exam_id=exam.id %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[PHASE5_ROSTER_UI] CSV import response:', data);
+        if (data.success) {
+            alert(`Import successful: ${data.results.created} added, ${data.results.updated} updated`);
+            location.reload();
+        } else {
+            alert('Import error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[PHASE5_ROSTER_ERROR]', error);
+        alert('Error importing CSV');
+    });
+    
+    return false;
+}
+
+function updateStatus(rosterId, newStatus) {
+    console.log('[PHASE5_ROSTER_UI] Updating status for:', rosterId, 'to:', newStatus);
+    
+    fetch(`{% url "RoutineTest:update_roster_status" roster_id='00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', rosterId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[PHASE5_ROSTER_UI] Status update response:', data);
+        if (data.success) {
+            // Update the status badge
+            const row = document.querySelector(`[data-roster-id="${rosterId}"]`);
+            const badge = row.querySelector('.status-badge');
+            badge.className = `status-badge ${newStatus.toLowerCase().replace('_', '-')}`;
+            badge.textContent = data.message.split(' to ')[1];
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[PHASE5_ROSTER_ERROR]', error);
+        alert('Error updating status');
+    });
+}
+
+function removeStudent(rosterId) {
+    if (!confirm('Are you sure you want to remove this student from the roster?')) {
+        return;
+    }
+    
+    console.log('[PHASE5_ROSTER_UI] Removing student:', rosterId);
+    
+    fetch(`{% url "RoutineTest:remove_roster_entry" roster_id='00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', rosterId), {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('[PHASE5_ROSTER_UI] Remove response:', data);
+        if (data.success) {
+            const row = document.querySelector(`[data-roster-id="${rosterId}"]`);
+            row.remove();
+            alert(data.message);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('[PHASE5_ROSTER_ERROR]', error);
+        alert('Error removing student');
+    });
+}
+</script>
+{% endblock %}

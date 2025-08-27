@@ -17,7 +17,7 @@ class Question(models.Model):
     ]
 
     exam = models.ForeignKey(
-        'primepath_routinetest.Exam', 
+        'primepath_routinetest.RoutineExam', 
         on_delete=models.CASCADE, 
         related_name='routine_questions'
     )
@@ -32,7 +32,7 @@ class Question(models.Model):
         validators=[MinValueValidator(2), MaxValueValidator(10)]
     )
     audio_file = models.ForeignKey(
-        'primepath_routinetest.AudioFile', 
+        'primepath_routinetest.RoutineAudioFile', 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 

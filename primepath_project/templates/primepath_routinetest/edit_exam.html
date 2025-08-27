@@ -1,8 +1,13 @@
-{% extends "routinetest_base.html" %}
+{% extends "primepath_routinetest/routinetest_unified_base.html" %}
+{% comment %}
+Updated 2025-08-27: Using routinetest_unified_base.html for navigation
+Original base template: routinetest_base.html
+{% endcomment %}
+
 
 {% block title %}Edit {{ exam.name }}{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <div class="container mt-4">
     <h2>Edit Exam: {{ exam.name }}</h2>
     

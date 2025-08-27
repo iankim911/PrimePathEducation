@@ -1,0 +1,77 @@
+{% extends "unified_base.html" %}
+{% comment %}
+RoutineTest Unified Base Template
+Date: August 27, 2025
+Purpose: Base template for all RoutineTest pages with navigation included
+{% endcomment %}
+
+{% load static %}
+
+{% block module_name %}primepath_routinetest{% endblock %}
+
+{% block extra_css %}
+<style>
+/* RoutineTest Navigation Tab Styles */
+.nav-tabs {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-tabs ul {
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.nav-tabs li {
+    display: flex;
+}
+
+.nav-tabs a {
+    display: block;
+    padding: 15px 20px;
+    color: white !important;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.nav-tabs a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-tabs a[data-nav="classes-exams"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    font-weight: bold !important;
+    padding: 12px 20px !important;
+    border: 2px solid #667eea !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+}
+
+.nav-tabs a[href*="logout"] {
+    background: #e74c3c !important;
+}
+
+/* Active tab styling */
+.nav-tabs a.active,
+.nav-tabs a[data-nav="{{ active_tab }}"] {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+</style>
+{% block page_css %}{% endblock %}
+{% endblock %}
+
+{% block navigation %}
+    {% include "primepath_routinetest/includes/navigation_tabs.html" %}
+{% endblock %}
+
+{% block content %}
+    {% block page_content %}
+    <!-- Page-specific content goes here -->
+    {% endblock %}
+{% endblock %}

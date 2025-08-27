@@ -1,7 +1,6 @@
-{% extends "unified_base.html" %}
-{% block module_name %}primepath_routinetest{% endblock %}
+{% extends "primepath_routinetest/routinetest_unified_base.html" %}
 {% comment %}
-Migrated to unified_base.html on 2025-08-26
+Updated 2025-08-27: Using routinetest_unified_base.html for navigation
 Original base template: routinetest_base.html
 {% endcomment %}
 
@@ -13,7 +12,7 @@ Original base template: routinetest_base.html
 
 {% block header %}Answer Keys Library{% endblock %}
 
-{% block content %}
+{% block page_content %}
 <style>
     .exam-header {
         display: flex;

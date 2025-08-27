@@ -17,7 +17,7 @@ class Question(models.Model):
     ]
 
     exam = models.ForeignKey(
-        'placement_test.Exam', 
+        'placement_test.PlacementExam', 
         on_delete=models.CASCADE, 
         related_name='questions'
     )
@@ -32,7 +32,7 @@ class Question(models.Model):
         validators=[MinValueValidator(2), MaxValueValidator(10)]
     )
     audio_file = models.ForeignKey(
-        'placement_test.AudioFile', 
+        'placement_test.PlacementAudioFile', 
         on_delete=models.SET_NULL, 
         null=True, 
         blank=True, 

@@ -1,0 +1,37 @@
+{% extends "unified_base.html" %}
+{% comment %}
+Phase 3: Student Base Adapter Template
+This template provides backward compatibility for templates that extend student_base.html
+It extends unified_base.html but provides the same blocks as the original student_base.html
+Date: August 26, 2025
+{% endcomment %}
+
+{% block module_name %}primepath_student{% endblock %}
+{% block data_module %}primepath_student{% endblock %}
+
+{# Student portal uses dark green header like teacher portal #}
+{% block header_bg_color %}#1B5E20{% endblock %}
+
+{# Map student_base blocks to unified blocks #}
+{% block header %}
+    <div class="container">
+        <h1>{% block site_header %}PrimePath Student Portal{% endblock %}</h1>
+        {% block header_content %}{% endblock %}
+    </div>
+{% endblock %}
+
+{# Student portal specific navigation #}
+{% block navigation %}
+    {% block student_nav %}
+        {# Student navigation content goes here #}
+    {% endblock %}
+{% endblock %}
+
+{# Main content area #}
+{% block main %}
+    <div class="student-content-wrapper">
+        {% block content %}
+            {# Main student content #}
+        {% endblock %}
+    </div>
+{% endblock %}

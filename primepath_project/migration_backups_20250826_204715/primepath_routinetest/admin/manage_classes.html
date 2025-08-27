@@ -1,0 +1,361 @@
+{% extends "routinetest_base.html" %}
+{% load static %}
+
+{% block title %}Manage Classes - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Standardized Admin Button Styles */
+.btn-admin-primary {
+    padding: 8px 15px !important;
+    background: #1B5E20 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-primary:hover {
+    background: #2E7D32 !important;
+}
+
+.btn-admin-danger {
+    padding: 8px 15px !important;
+    background: #DC3545 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-danger:hover {
+    background: #c82333 !important;
+}
+
+.btn-admin-success {
+    padding: 8px 15px !important;
+    background: #28A745 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-success:hover {
+    background: #218838 !important;
+}
+
+.btn-admin-secondary {
+    padding: 8px 15px !important;
+    background: #6C757D !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    min-width: 100px !important;
+    transition: background-color 0.3s ease !important;
+    text-decoration: none !important;
+    display: inline-block !important;
+    text-align: center !important;
+    margin: 2px !important;
+}
+
+.btn-admin-secondary:hover {
+    background: #5a6268 !important;
+}
+
+.btn-admin-create {
+    padding: 8px 20px !important;
+    background: #1B5E20 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    min-width: 140px !important;
+    transition: background-color 0.3s ease !important;
+}
+
+.btn-admin-create:hover {
+    background: #2E7D32 !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h1>📚 Manage Classes</h1>
+    
+    <!-- Create New Class Form -->
+    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h2>Create New Class</h2>
+        <form id="createClassForm" style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+            {% csrf_token %}
+            <div>
+                <label for="className">Class Name*</label>
+                <input type="text" id="className" name="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            <div>
+                <label for="gradeLevel">Grade Level*</label>
+                <input type="text" id="gradeLevel" name="grade_level" required placeholder="e.g., Grade 5" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            <div>
+                <label for="section">Section</label>
+                <input type="text" id="section" name="section" placeholder="e.g., A, B, C" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+            </div>
+            <button type="submit" class="btn-admin-create">
+                ➕ Create Class
+            </button>
+        </form>
+    </div>
+    
+    <!-- Existing Classes -->
+    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <h2>Existing Classes ({{ classes|length }})</h2>
+        
+        {% if classes %}
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #1B5E20;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Class Name</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Grade Level</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Section</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Assigned Teachers</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Students</th>
+                    <th style="padding: 12px; text-align: center; border-bottom: 2px solid #1B5E20; color: white; font-weight: 600;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for class in classes %}
+                <tr style="transition: background-color 0.2s ease;" onmouseover="this.style.background='#E8F5E9'" onmouseout="this.style.background='white'">
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6; font-size: 14px; color: #333;">{{ class.name }}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6; font-size: 14px; color: #333;">{{ class.grade_level }}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6; font-size: 14px; color: #333;">{{ class.section|default:"-" }}</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #dee2e6;">
+                        <div class="teacher-list" data-class-id="{{ class.id }}">
+                            {% if class.assigned_teachers.all %}
+                                {% for teacher in class.assigned_teachers.all %}
+                                    <span style="display: inline-block; padding: 3px 8px; background: #E3F2FD; border-radius: 15px; margin: 2px; font-size: 14px;">
+                                        {{ teacher.name }}
+                                        <button onclick="removeTeacher('{{ class.id }}', '{{ teacher.id }}')" style="background: none; border: none; color: #DC3545; cursor: pointer; font-size: 16px; font-weight: bold; padding: 0 4px;">×</button>
+                                    </span>
+                                {% endfor %}
+                            {% else %}
+                                <span style="color: #999;">No teachers assigned</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center;">
+                        {{ class.student_count }}
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center;">
+                        <button onclick="showAssignTeacherModal('{{ class.id }}', '{{ class.name }}')" class="btn-admin-primary">
+                            Add Teacher
+                        </button>
+                        <button onclick="deleteClass('{{ class.id }}', '{{ class.name }}')" class="btn-admin-danger">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: #666; text-align: center; padding: 20px;">No classes created yet. Create your first class above!</p>
+        {% endif %}
+    </div>
+    
+    <!-- Back to Dashboard -->
+    <div style="margin-top: 30px;">
+        <a href="{% url 'RoutineTest:admin_dashboard' %}" class="btn-admin-secondary" style="min-width: 160px;">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Assign Teacher Modal -->
+<div id="assignTeacherModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 400px;">
+        <h3>Assign Teacher to <span id="modalClassName"></span></h3>
+        <select id="teacherSelect" style="width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ddd; border-radius: 5px;">
+            <option value="">Select a teacher...</option>
+            {% for teacher in teachers %}
+            <option value="{{ teacher.id }}">{{ teacher.name }}</option>
+            {% endfor %}
+        </select>
+        <div style="text-align: right;">
+            <button onclick="closeModal()" class="btn-admin-secondary" style="margin-right: 10px; min-width: 80px;">
+                Cancel
+            </button>
+            <button onclick="assignTeacher()" class="btn-admin-success" style="min-width: 80px;">
+                Assign
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// CSRF token for AJAX requests
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+let currentClassId = null;
+
+// Create new class
+document.getElementById('createClassForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+        name: document.getElementById('className').value,
+        grade_level: document.getElementById('gradeLevel').value,
+        section: document.getElementById('section').value
+    };
+    
+    try {
+        const response = await fetch('{% url "RoutineTest:create_class" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Error creating class: ' + error);
+    }
+});
+
+// Show assign teacher modal
+function showAssignTeacherModal(classId, className) {
+    currentClassId = classId;
+    document.getElementById('modalClassName').textContent = className;
+    document.getElementById('assignTeacherModal').style.display = 'block';
+}
+
+// Close modal
+function closeModal() {
+    document.getElementById('assignTeacherModal').style.display = 'none';
+    document.getElementById('teacherSelect').value = '';
+    currentClassId = null;
+}
+
+// Assign teacher
+async function assignTeacher() {
+    const teacherId = document.getElementById('teacherSelect').value;
+    
+    if (!teacherId) {
+        alert('Please select a teacher');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/RoutineTest/admin/classes/${currentClassId}/assign-teacher/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ teacher_id: teacherId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Error assigning teacher: ' + error);
+    }
+    
+    closeModal();
+}
+
+// Remove teacher
+async function removeTeacher(classId, teacherId) {
+    if (!confirm('Remove this teacher from the class?')) return;
+    
+    try {
+        const response = await fetch(`/RoutineTest/admin/classes/${classId}/remove-teacher/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ teacher_id: teacherId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Error removing teacher: ' + error);
+    }
+}
+
+// Delete class
+async function deleteClass(classId, className) {
+    if (!confirm(`Delete class "${className}"? This action cannot be undone.`)) return;
+    
+    try {
+        const response = await fetch(`/RoutineTest/admin/classes/${classId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (error) {
+        alert('Error deleting class: ' + error);
+    }
+}
+</script>
+{% endblock %}
