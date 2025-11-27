@@ -1,0 +1,1332 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load grade_tags %}
+
+{% block title %}Exam-to-Level Mapping - Curriculum to Exam Configuration{% endblock %}
+
+{% block content %}
+<style>
+    .mapping-container {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    /* Login Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 400px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .login-form input {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+    
+    .login-form button {
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    
+    .login-form button:hover {
+        background-color: #0056b3;
+    }
+    
+    .login-form button[type="button"] {
+        background-color: #6c757d;
+    }
+    
+    .login-form button[type="button"]:hover {
+        background-color: #5a6268;
+    }
+    
+    .error-message {
+        color: #dc3545;
+        margin-top: 10px;
+    }
+    
+    .mapping-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .mapping-header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    
+    .mapping-header p {
+        font-size: 1.1rem;
+        color: #666;
+    }
+    
+    .info-box {
+        background: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        padding: 15px;
+        margin-bottom: 30px;
+        border-radius: 4px;
+    }
+    
+    .info-box h4 {
+        margin: 0 0 10px 0;
+        color: #2e7d32;
+    }
+    
+    .program-mapping-section {
+        margin-bottom: 50px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 25px;
+    }
+    
+    .program-header {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid;
+    }
+    
+    .program-header.core {
+        color: #3498db;
+        border-color: #3498db;
+    }
+    
+    .program-header.ascent {
+        color: #e74c3c;
+        border-color: #e74c3c;
+    }
+    
+    .program-header.edge {
+        color: #f39c12;
+        border-color: #f39c12;
+    }
+    
+    .program-header.pinnacle {
+        color: #9b59b6;
+        border-color: #9b59b6;
+    }
+    
+    .mapping-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .mapping-table th,
+    .mapping-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+    }
+    
+    .mapping-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+    }
+    
+    .mapping-table tr:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .subprogram-name {
+        font-weight: 600;
+        color: #555;
+    }
+    
+    .level-name {
+        margin-left: 20px;
+    }
+    
+    .exam-mapping-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .exam-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .exam-number {
+        min-width: 25px;
+        font-weight: 600;
+        color: #666;
+    }
+    
+    .exam-select {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+    
+    .exam-select:disabled {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+    }
+    
+    .remove-exam-btn {
+        padding: 6px 12px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        min-width: 70px;
+    }
+    
+    .remove-exam-btn:hover {
+        background-color: #c82333;
+    }
+    
+    .remove-exam-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .add-exam-btn {
+        padding: 6px 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+    
+    .add-exam-btn:hover {
+        background-color: #0056b3;
+    }
+    
+    .add-exam-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .save-button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 40px;
+        border-radius: 4px;
+        font-size: 18px;
+        cursor: pointer;
+        float: right;
+        margin-top: 20px;
+    }
+    
+    .save-button:hover {
+        background-color: #218838;
+    }
+    
+    .stats-box {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+    
+    .stats-box span {
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .no-exams-msg {
+        color: #999;
+        font-style: italic;
+        padding: 10px;
+        text-align: center;
+    }
+    
+    /* Style for unselected dropdowns */
+    .exam-select option[value=""] {
+        color: #999 !important;
+        font-style: italic !important;
+    }
+    
+    /* Style for exams without PDFs */
+    .exam-select option.no-pdf {
+        color: #dc3545 !important;
+        font-style: italic !important;
+    }
+    
+    .level-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+    
+    .save-level-btn {
+        padding: 6px 16px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+    
+    .save-level-btn:hover {
+        background-color: #218838;
+    }
+    
+    .delete-mapping-btn {
+        padding: 4px 8px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        margin-left: 5px;
+    }
+    
+    .delete-mapping-btn:hover {
+        background-color: #c82333;
+    }
+    
+    /* Fixed Global Save Button */
+    .global-save-container {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 999;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    }
+    
+    .global-save-button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        border-radius: 50px;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .global-save-button:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+    }
+    
+    .global-save-button:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        transform: scale(1);
+    }
+    
+    .global-save-button.saving {
+        background-color: #ffc107;
+    }
+    
+    .global-save-button .spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #ffffff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    
+    .global-save-button.saving .spinner {
+        display: inline-block;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Top Save Bar */
+    .top-save-bar {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        padding: 15px 30px;
+        position: sticky;
+        top: 0;
+        z-index: 998;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .top-save-bar .info-text {
+        font-size: 16px;
+        color: #495057;
+    }
+    
+    .top-save-bar .save-button-top {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .top-save-bar .save-button-top:hover {
+        background-color: #218838;
+    }
+    
+    .top-save-bar .save-button-top:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    /* Success/Error Messages */
+    .save-message {
+        position: fixed;
+        top: 80px;
+        right: 30px;
+        padding: 15px 25px;
+        border-radius: 4px;
+        font-size: 16px;
+        font-weight: 500;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    }
+    
+    .save-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .save-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <h2>Admin Login Required</h2>
+        <p>Please login to edit exam mappings</p>
+        <form class="login-form" onsubmit="return window.ExamMapping.handleLogin(event)">
+            <input type="text" id="adminId" placeholder="Admin ID" required>
+            <input type="password" id="adminPassword" placeholder="Password" required>
+            <button type="submit">Login</button>
+            <button type="button" onclick="window.location.href='{% url 'core:teacher_dashboard' %}'" style="background-color: #6c757d;">
+                Exit
+            </button>
+            <div id="loginError" class="error-message" style="display: none;"></div>
+        </form>
+    </div>
+</div>
+
+<div class="mapping-container">
+    <noscript>
+        <div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+            JavaScript is required for this page to function properly. Please enable JavaScript and refresh the page.
+        </div>
+    </noscript>
+    
+    <!-- Top Save Bar -->
+    <div class="top-save-bar">
+        <span class="info-text">Remember to save your changes!</span>
+        <button type="button" class="save-button-top" onclick="window.ExamMapping.saveAllMappingsWithFeedback()">Save All Mappings</button>
+    </div>
+    
+    <div class="mapping-header">
+        <h1>Exam-to-Level Mapping Configuration</h1>
+        <p>Map curriculum levels to exam versions. Each level can have up to 5 different exam versions.</p>
+    </div>
+    
+    <div class="info-box">
+        <h4>What is Exam-to-Level Mapping?</h4>
+        <p>This is the second step in the placement process. After a student is assigned to a curriculum level (based on Placement Rules), the system needs to know which exam papers are available for that level.</p>
+        
+        <p><strong>How it works:</strong></p>
+        <ul style="margin: 0; padding-left: 20px;">
+            <li>Each curriculum level can have multiple exam versions (e.g., [PlacementTest] PRIME CORE PHONICS - Level 1_v_a, _v_b, etc.)</li>
+            <li>When a student is placed in a level, the system will randomly select one of the mapped exams</li>
+            <li>You can map up to 5 different exam versions per curriculum level</li>
+            <li><strong>The same exam can be mapped to multiple curriculum levels</strong> (e.g., Exam C can be used for both Core Phonics Level 1 and Core Phonics Level 2)</li>
+            <li>Use the "+" button to add more exam slots and "-" button to remove exams</li>
+        </ul>
+        
+        <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin-top: 15px;">
+            <strong>Example:</strong> If PRIME CORE PHONICS - Level 1 has three exam versions (a, b, c) mapped to it, then students placed in this level will randomly receive one of these three exams.
+        </div>
+    </div>
+    
+    <!-- PRIME CORE Section -->
+    <div class="program-mapping-section">
+        <h2 class="program-header core">PRIME CORE</h2>
+        <div class="stats-box">
+            <span id="core-mapped">0</span> of <span id="core-total">{{ core_levels|length }}</span> levels have exams mapped
+        </div>
+        <table class="mapping-table">
+            <thead>
+                <tr>
+                    <th width="35%">Curriculum Level</th>
+                    <th width="65%">Mapped Exams (Max 5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for level in core_levels %}
+                <tr>
+                    <td>
+                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="core" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="level-actions">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'core')" id="add-btn-{{ level.id }}">
+                                + Add Another Exam
+                            </button>
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
+                                Save
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME CORE</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- PRIME ASCENT Section -->
+    <div class="program-mapping-section">
+        <h2 class="program-header ascent">PRIME ASCENT</h2>
+        <div class="stats-box">
+            <span id="ascent-mapped">0</span> of <span id="ascent-total">{{ ascent_levels|length }}</span> levels have exams mapped
+        </div>
+        <table class="mapping-table">
+            <thead>
+                <tr>
+                    <th width="35%">Curriculum Level</th>
+                    <th width="65%">Mapped Exams (Max 5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for level in ascent_levels %}
+                <tr>
+                    <td>
+                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="ascent" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="level-actions">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'ascent')" id="add-btn-{{ level.id }}">
+                                + Add Another Exam
+                            </button>
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
+                                Save
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME ASCENT</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- PRIME EDGE Section -->
+    <div class="program-mapping-section">
+        <h2 class="program-header edge">PRIME EDGE</h2>
+        <div class="stats-box">
+            <span id="edge-mapped">0</span> of <span id="edge-total">{{ edge_levels|length }}</span> levels have exams mapped
+        </div>
+        <table class="mapping-table">
+            <thead>
+                <tr>
+                    <th width="35%">Curriculum Level</th>
+                    <th width="65%">Mapped Exams (Max 5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for level in edge_levels %}
+                <tr>
+                    <td>
+                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="edge" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="level-actions">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'edge')" id="add-btn-{{ level.id }}">
+                                + Add Another Exam
+                            </button>
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
+                                Save
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME EDGE</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- PRIME PINNACLE Section -->
+    <div class="program-mapping-section">
+        <h2 class="program-header pinnacle">PRIME PINNACLE</h2>
+        <div class="stats-box">
+            <span id="pinnacle-mapped">0</span> of <span id="pinnacle-total">{{ pinnacle_levels|length }}</span> levels have exams mapped
+        </div>
+        <table class="mapping-table">
+            <thead>
+                <tr>
+                    <th width="35%">Curriculum Level</th>
+                    <th width="65%">Mapped Exams (Max 5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for level in pinnacle_levels %}
+                <tr>
+                    <td>
+                        <div class="subprogram-name">{{ level.subprogram.name }}</div>
+                        <div class="level-name">Level {{ level.level_number }}</div>
+                    </td>
+                    <td>
+                        <div class="exam-mapping-container" id="mapping-{{ level.id }}" data-level-id="{{ level.id }}">
+                            {% if level.existing_mappings %}
+                                {% for mapping in level.existing_mappings %}
+                                <div class="exam-row">
+                                    <span class="exam-number">{{ mapping.slot }}.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="{{ mapping.slot }}" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" 
+                                            {% if exam.id == mapping.exam_id %}selected{% endif %}
+                                            {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if forloop.first and forloop.last %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, {{ mapping.slot }})">Clear</button>
+                                    {% else %}
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot({{ level.id }}, {{ mapping.slot }})">Remove</button>
+                                    {% endif %}
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, {{ mapping.slot }})" title="Delete this mapping">×</button>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="exam-row">
+                                    <span class="exam-number">1.</span>
+                                    <select class="exam-select" data-level-id="{{ level.id }}" data-program="pinnacle" data-slot="1" onchange="window.ExamMapping.updateStats()">
+                                        <option value="" style="color: #999; font-style: italic;">Select</option>
+                                        {% for exam in level.available_exams %}
+                                        <option value="{{ exam.id }}" {% if not exam.has_pdf %}style="color: #dc3545; font-style: italic;"{% endif %}>
+                                            {{ exam.display_name }}{% if not exam.has_pdf %} (No PDF){% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="remove-exam-btn" onclick="window.ExamMapping.clearExamSlot({{ level.id }}, 1)" disabled>Clear</button>
+                                    <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping({{ level.id }}, 1)" title="Delete this mapping">×</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="level-actions">
+                            <button class="add-exam-btn" onclick="window.ExamMapping.addExamSlot({{ level.id }}, 'pinnacle')" id="add-btn-{{ level.id }}">
+                                + Add Another Exam
+                            </button>
+                            <button class="save-level-btn" onclick="window.ExamMapping.saveLevelMappings({{ level.id }})">
+                                Save
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="no-exams-msg">No curriculum levels found for PRIME PINNACLE</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="clear: both;"></div>
+</div>
+
+<!-- Fixed Global Save Button -->
+<div class="global-save-container">
+    <button type="button" class="global-save-button" id="globalSaveBtn" onclick="window.ExamMapping.saveAllMappingsWithFeedback()">
+        <span class="spinner"></span>
+        <span id="saveButtonText">Save All Mappings</span>
+    </button>
+</div>
+
+<!-- Success/Error Message Container -->
+<div id="saveMessage" class="save-message" style="display: none;"></div>
+
+<script>
+(function() {
+    'use strict';
+    
+    // Check authentication on page load
+    let isAuthenticated = false;
+    
+    // Store all functions in a global object to ensure availability
+    window.ExamMapping = {};
+
+    window.ExamMapping.handleLogin = function(event) {
+    event.preventDefault();
+    
+    const adminId = document.getElementById('adminId').value;
+    const password = document.getElementById('adminPassword').value;
+    
+    // Check credentials
+    if (adminId === 'admin' && password === 'admin123') {
+        isAuthenticated = true;
+        document.getElementById('loginModal').style.display = 'none';
+        window.ExamMapping.enableAllInputs();
+        
+        // Initialize after authentication
+        setTimeout(() => {
+                window.ExamMapping.updateStats();
+                window.ExamMapping.updateAllClearButtons();
+        }, 100);
+    } else {
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginError').textContent = 'Invalid credentials. Please try again.';
+    }
+    
+    return false;
+}
+
+    window.ExamMapping.disableAllInputs = function() {
+    document.querySelectorAll('select, button').forEach(element => {
+        if (!element.closest('#loginModal')) {
+            element.disabled = true;
+        }
+    });
+}
+
+    window.ExamMapping.enableAllInputs = function() {
+    document.querySelectorAll('select, button').forEach(element => {
+        element.disabled = false;
+    });
+        window.ExamMapping.updateAllClearButtons();
+        // Also enable the global save buttons
+        const globalBtn = document.getElementById('globalSaveBtn');
+        const topBtn = document.querySelector('.save-button-top');
+        if (globalBtn) globalBtn.disabled = false;
+        if (topBtn) topBtn.disabled = false;
+}
+
+// Store available exams for each level
+const availableExams = {};
+
+// Initialize available exams from server data
+{% for level in core_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+{% for level in ascent_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+{% for level in edge_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+{% for level in pinnacle_levels %}
+{% if level.id %}
+availableExams['{{ level.id }}'] = [
+    {% for exam in level.available_exams %}{% if exam.id %}
+    { 
+        id: '{{ exam.id }}', 
+        name: '{{ exam.name|escapejs }}',
+        display_name: '{{ exam.display_name|escapejs }}',
+        has_pdf: {% if exam.has_pdf %}true{% else %}false{% endif %}
+    },
+    {% endif %}{% endfor %}
+].filter(x => x); // Remove any undefined entries
+{% endif %}
+{% endfor %}
+
+// Debug: Log available exams
+console.log('Available exams loaded:', availableExams);
+
+    window.ExamMapping.addExamSlot = function(levelId, program) {
+    const container = document.getElementById(`mapping-${levelId}`);
+    const existingRows = container.querySelectorAll('.exam-row').length;
+    
+    if (existingRows >= 5) {
+        alert('Maximum 5 exams per curriculum level');
+        return;
+    }
+    
+    const newSlot = existingRows + 1;
+    const exams = availableExams[levelId] || [];
+    
+    const newRow = document.createElement('div');
+    newRow.className = 'exam-row';
+    newRow.innerHTML = `
+        <span class="exam-number">${newSlot}.</span>
+        <select class="exam-select" data-level-id="${levelId}" data-program="${program}" data-slot="${newSlot}" onchange="window.ExamMapping.updateStats()">
+            <option value="" style="color: #999; font-style: italic;">Select</option>
+            ${exams.map(exam => {
+                const style = !exam.has_pdf ? 'style="color: #dc3545; font-style: italic;"' : '';
+                const suffix = !exam.has_pdf ? ' (No PDF)' : '';
+                return `<option value="${exam.id}" ${style}>${exam.display_name}${suffix}</option>`;
+            }).join('')}
+        </select>
+        <button class="remove-exam-btn" onclick="window.ExamMapping.removeExamSlot(${levelId}, ${newSlot})">Remove</button>
+        <button class="delete-mapping-btn" onclick="window.ExamMapping.deleteExamMapping(${levelId}, ${newSlot})" title="Delete this mapping">×</button>
+    `;
+    
+    container.appendChild(newRow);
+    
+    // Update add button state
+    if (existingRows + 1 >= 5) {
+        document.getElementById(`add-btn-${levelId}`).disabled = true;
+    }
+    
+        window.ExamMapping.updateStats();
+}
+
+    window.ExamMapping.removeExamSlot = function(levelId, slot) {
+    const container = document.getElementById(`mapping-${levelId}`);
+    const rows = container.querySelectorAll('.exam-row');
+    
+    // Remove the specific slot
+    rows[slot - 1].remove();
+    
+    // Renumber remaining slots
+    const remainingRows = container.querySelectorAll('.exam-row');
+    remainingRows.forEach((row, index) => {
+        row.querySelector('.exam-number').textContent = `${index + 1}.`;
+        row.querySelector('.exam-select').dataset.slot = index + 1;
+        
+        // Update remove button
+        const removeBtn = row.querySelector('.remove-exam-btn');
+        if (index === 0 && remainingRows.length === 1) {
+            removeBtn.textContent = 'Clear';
+            removeBtn.onclick = () => window.ExamMapping.clearExamSlot(levelId, 1);
+        } else {
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = () => window.ExamMapping.removeExamSlot(levelId, index + 1);
+        }
+    });
+    
+    // Enable add button
+    document.getElementById(`add-btn-${levelId}`).disabled = false;
+    
+        window.ExamMapping.updateStats();
+}
+
+    window.ExamMapping.clearExamSlot = function(levelId, slot) {
+    const container = document.getElementById(`mapping-${levelId}`);
+    const select = container.querySelector(`.exam-select[data-slot="${slot}"]`);
+    if (select) {
+        select.value = '';
+            window.ExamMapping.updateStats();
+        window.ExamMapping.updateClearButton(levelId, slot);
+    }
+}
+
+    window.ExamMapping.updateClearButton = function(levelId, slot) {
+    const container = document.getElementById(`mapping-${levelId}`);
+    const row = container.querySelectorAll('.exam-row')[slot - 1];
+    if (row) {
+        const select = row.querySelector('.exam-select');
+        const button = row.querySelector('.remove-exam-btn');
+        
+        if (container.querySelectorAll('.exam-row').length === 1) {
+            button.disabled = !select.value;
+        }
+    }
+}
+
+    window.ExamMapping.updateAllClearButtons = function() {
+    document.querySelectorAll('.exam-mapping-container').forEach(container => {
+        const levelId = container.id.replace('mapping-', '');
+        const rows = container.querySelectorAll('.exam-row');
+        
+        rows.forEach((row, index) => {
+            if (rows.length === 1) {
+                window.ExamMapping.updateClearButton(levelId, index + 1);
+            }
+        });
+    });
+}
+
+    window.ExamMapping.updateStats = function() {
+    const programs = ['core', 'ascent', 'edge', 'pinnacle'];
+    
+    programs.forEach(program => {
+        const selects = document.querySelectorAll(`.exam-select[data-program="${program}"]`);
+        const levelIds = new Set();
+        
+        selects.forEach(select => {
+            if (select.value) {
+                levelIds.add(select.dataset.levelId);
+            }
+        });
+        
+        document.getElementById(`${program}-mapped`).textContent = levelIds.size;
+    });
+    
+    // Update clear buttons
+    document.querySelectorAll('.exam-select').forEach(select => {
+        select.addEventListener('change', function() {
+            window.ExamMapping.updateClearButton(this.dataset.levelId, this.dataset.slot);
+        });
+    });
+}
+
+
+    window.ExamMapping.getCookie = function(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    window.ExamMapping.deleteExamMapping = function(levelId, slot) {
+    const container = document.getElementById(`mapping-${levelId}`);
+    const select = container.querySelector(`.exam-select[data-slot="${slot}"]`);
+    if (select) {
+        select.value = '';
+            window.ExamMapping.updateStats();
+    }
+}
+
+    window.ExamMapping.saveLevelMappings = function(levelId) {
+    const mappings = [];
+    const container = document.getElementById(`mapping-${levelId}`);
+    
+    container.querySelectorAll('.exam-select').forEach(select => {
+        if (select.value) {
+            mappings.push({
+                curriculum_level_id: parseInt(levelId),
+                exam_id: select.value,  // Keep as string - it's a UUID
+                slot: parseInt(select.dataset.slot)
+            });
+        }
+    });
+    
+    fetch('{% url "core:save_exam_mappings" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
+        },
+        body: JSON.stringify({ 
+            mappings: mappings,
+            level_id: levelId 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Mappings saved successfully for this level!');
+        } else {
+            alert('Error saving mappings: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving mappings');
+    });
+}
+
+    window.ExamMapping.saveAllMappings = function() {
+    const mappings = [];
+    
+    document.querySelectorAll('.exam-select').forEach(select => {
+        if (select.value) {
+            mappings.push({
+                curriculum_level_id: parseInt(select.dataset.levelId),
+                exam_id: select.value,  // Keep as string - it's a UUID
+                slot: parseInt(select.dataset.slot)
+            });
+        }
+    });
+    
+    fetch('{% url "core:save_exam_mappings" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
+        },
+        body: JSON.stringify({ mappings: mappings })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('All exam mappings saved successfully!');
+        } else {
+            alert('Error saving exam mappings: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving exam mappings');
+    });
+}
+
+    window.ExamMapping.showMessage = function(message, type) {
+        const messageDiv = document.getElementById('saveMessage');
+        messageDiv.textContent = message;
+        messageDiv.className = `save-message ${type}`;
+        messageDiv.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    window.ExamMapping.saveAllMappingsWithFeedback = function() {
+        const globalBtn = document.getElementById('globalSaveBtn');
+        const topBtn = document.querySelector('.save-button-top');
+        const btnText = document.getElementById('saveButtonText');
+        
+        // Disable buttons and show loading state
+        globalBtn.disabled = true;
+        globalBtn.classList.add('saving');
+        if (topBtn) {
+            topBtn.disabled = true;
+            topBtn.textContent = 'Saving...';
+        }
+        btnText.textContent = 'Saving...';
+        
+        const mappings = [];
+        
+        document.querySelectorAll('.exam-select').forEach(select => {
+            if (select.value) {
+                mappings.push({
+                    curriculum_level_id: parseInt(select.dataset.levelId),
+                    exam_id: select.value,  // Keep as string - it's a UUID
+                    slot: parseInt(select.dataset.slot)
+                });
+            }
+        });
+        
+        fetch('{% url "core:save_exam_mappings" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.ExamMapping.getCookie('csrftoken')
+            },
+            body: JSON.stringify({ mappings: mappings })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Re-enable buttons
+            globalBtn.disabled = false;
+            globalBtn.classList.remove('saving');
+            if (topBtn) {
+                topBtn.disabled = false;
+                topBtn.textContent = 'Save All Mappings';
+            }
+            btnText.textContent = 'Save All Mappings';
+            
+            if (data.success) {
+                window.ExamMapping.showMessage('All exam mappings saved successfully!', 'success');
+                
+                // Flash the button green
+                globalBtn.style.backgroundColor = '#28a745';
+                setTimeout(() => {
+                    globalBtn.style.backgroundColor = '';
+                }, 1000);
+            } else {
+                window.ExamMapping.showMessage('Error saving exam mappings: ' + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            
+            // Re-enable buttons
+            globalBtn.disabled = false;
+            globalBtn.classList.remove('saving');
+            if (topBtn) {
+                topBtn.disabled = false;
+                topBtn.textContent = 'Save All Mappings';
+            }
+            btnText.textContent = 'Save All Mappings';
+            
+            window.ExamMapping.showMessage('An error occurred while saving exam mappings', 'error');
+        });
+    }
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Show login modal
+    document.getElementById('loginModal').style.display = 'block';
+    
+    // Disable all inputs until authenticated
+    window.ExamMapping.disableAllInputs();
+    
+    // Update stats based on existing mappings
+    window.ExamMapping.updateStats();
+    
+    // Update button states for existing mappings
+    document.querySelectorAll('.exam-mapping-container').forEach(container => {
+        const levelId = container.dataset.levelId;
+        const rows = container.querySelectorAll('.exam-row');
+        const addBtn = document.getElementById(`add-btn-${levelId}`);
+        
+        // Disable add button if we have 5 mappings
+        if (addBtn && rows.length >= 5) {
+            addBtn.disabled = true;
+        }
+        
+        // Update clear/remove button states
+        rows.forEach((row, index) => {
+            const select = row.querySelector('.exam-select');
+            const removeBtn = row.querySelector('.remove-exam-btn');
+            
+            if (select && select.value && removeBtn) {
+                removeBtn.disabled = false;
+            }
+        });
+    });
+});
+
+})();
+
+// Add safe function wrappers for inline event handlers
+function safeCall(funcName, ...args) {
+    try {
+        if (typeof window[funcName] === 'function') {
+            return window[funcName](...args);
+        } else {
+            console.error(`Function ${funcName} is not defined`);
+        }
+    } catch (error) {
+        console.error(`Error calling ${funcName}:`, error);
+    }
+}
+</script>
+{% endblock %}

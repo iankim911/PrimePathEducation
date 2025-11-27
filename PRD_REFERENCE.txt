@@ -1,0 +1,245 @@
+📘 PrimePath Assessment Platform — Product Requirements Document (PRD)
+
+1. Executive Summary
+
+Product Vision
+
+PrimePath is a two-part educational assessment platform for K–12 English learners in Korea.
+
+Module 1: Placement_Test
+A web-based assessment tool for prospective students to take level tests online. Teachers upload exam PDFs (scanned), audio files, and answer keys. The system matches test difficulty to the student's input (grade and academic rank). Students may adjust difficulty mid-test via a button (+1 or -1 level). Results are auto-graded (except long answers) and mapped to the appropriate curriculum level.
+
+Module 2: Progress_Tracker (Future Phase)
+A logged-in system for enrolled students to take monthly assessments, track improvement, and receive personalized feedback. Teachers can assign exams by class, upload new tests, and view dashboards showing student progress. (Stretch: smart vocab tool, AI-powered diagnostics, mobile interface.)
+
+Mission Statement
+
+Empower schools and academies to onboard students efficiently and manage student progress using structured, data-driven assessment tools.
+
+Target Market
+
+Korean private academies (학원)
+
+Elementary to high school students (Grade 1–12)
+
+Teachers and directors managing curriculum mapping and performance analytics
+
+Key Value Propositions
+
+Automates student placement test process → saves counseling time
+
+Offers early-stage marketing gain through pre-consultation assessments
+
+Provides clear curriculum mapping
+
+Allows longitudinal tracking of student improvements (Module 2)
+
+2. Core Features Overview
+
+Placement_Test (Module 1)
+
+Prospective students enter their profile → system matches to correct test
+
+PDFs + audio uploaded by teachers
+
+Questions can be multiple choice, select-all, short/long written (or mixed)
+
+Auto-grading for most question types
+
+Student can adjust difficulty mid-test
+
+Result is shown to teachers + optionally exported to Kakao
+
+Progress_Tracker (Module 2)
+
+Enrolled students sign in via Gmail or Kakao
+
+Teachers assign exams to classes
+
+Students take tests on tablets
+
+Track performance, deltas, and flags (🟢/🟡/🔴)
+
+Reports generated per student
+
+Stretch: Smart vocab flashcards, AI-generated feedback, auto-generated weak-point questions
+
+3. Personas
+
+👤 Prospective Student
+
+High tech comfort
+
+Uses PC or tablet (not mobile)
+
+Simple UI (exam on left, answer sheet on right)
+
+👤 Enrolled Student
+
+High tech comfort
+
+Takes exams in supervised setting at the academy
+
+Signs in via Google or Kakao
+
+👩‍🏫 Teacher / Head Teacher
+
+Age 30–50
+
+Moderate tech comfort
+
+Uploads PDFs and audio files
+
+Can name or delete tests, set timers, assign to students
+
+Generates student-level reports
+
+👨‍💼 Admin / Director
+
+Views test volume, curriculum mapping analytics
+
+No need for ROI dashboards or cohort analytics
+
+4. Curriculum Mapping Structure
+
+PRIME CORE (Grades 1–4): CORE PHONICS → CORE SIGMA → CORE ELITE → CORE PRO (Each sub-program has 3 levels)
+
+PRIME ASCENT (Grades 5–6): ASCENT NOVA → ASCENT DRIVE → ASCENT PRO (3 levels each)
+
+PRIME EDGE (Middle School): EDGE SPARK → EDGE RISE → EDGE PURSUIT → EDGE PRO (3 levels each)
+
+PRIME PINNACLE (High School): PINNACLE VISION → ENDEAVOR → SUCCESS → PRO (3 levels each)
+
+5. System Features (Placement_Test)
+
+5.1 Teacher/Admin Tools
+
+Upload PDF (limit file size; recommend compression via Google PDF tool popup)
+
+Upload multiple audio files; map to question ranges
+
+Custom name exam using predefined structure or custom label
+
+Set answer types (MCQ, checkbox, short/long answer — or combo)
+
+Set timer for test
+
+QA preview (auto-generate random answers)
+
+Edit test later (change answer type, number of questions, etc.)
+
+5.2 Student Experience
+
+Enter credentials (name, school, grade, rank, etc.)
+
+View notification: "Test will start. No going back. Timer will run."
+
+Take test with exam on left, answer sheet on right
+
+Adjust difficulty (+1 or -1 level) via top button
+
+Play audio before designated questions
+
+All autosaved
+
+5.3 Test Assignment Logic
+
+Teacher can define mapping rules (e.g., Grade 4, Top 20% → ASCENT NOVA – Level 2)
+
+System uses first matching rule
+
+5.4 Grading Logic
+
+All auto-graded except long answers (currently not scored)
+
+Score saved per student session
+
+Curriculum tag assigned to result
+
+Teacher dashboard shows score change if +30% vs previous
+
+6. Architecture Overview
+
+🔧 Simplified Architecture
+
+Backend: Django (Python)
+
+Frontend: Django templates (basic HTML forms rendered by backend)
+
+Storage: Firebase or AWS S3 (for PDFs, audio)
+
+Database: PostgreSQL
+
+Hosting: Render.com (free tier with autoscaling)
+
+Login: None for Module 1; Firebase/Kakao Auth for Module 2
+
+📦 Media Notes
+
+PDFs and audio stored externally (not embedded in DB)
+
+File size limit for PDFs: 10MB (example threshold)
+
+Auto-compression popup for larger files
+
+7. Git & Deployment
+
+Git Best Practices (Solo Dev)
+
+✅ Commit often with clear messages ("feat: add QA preview")
+
+✅ Push to GitHub main + use feature branches (feature/test-upload-form)
+
+✅ Use .gitignore to exclude:
+
+/media/
+
+__pycache__
+
+.env
+
+.DS_Store
+
+✅ Backup requirements:
+
+requirements.txt or Pipfile
+
+README.md
+
+✅ Protect main branch (even if solo)
+
+✅ Store secrets in .env file, never commit them
+
+Deployment (Render)
+
+Auto-deploy via GitHub connection
+
+Add environment variables via Render dashboard
+
+Use Gunicorn for Django server process
+
+Setup /media/ path if local file storage is used (avoid long-term)
+
+8. Future Roadmap (Module 2: Progress_Tracker)
+
+Student login via Gmail or Kakao
+
+Teachers assign test to class (Class A → Test X)
+
+Teachers can edit/move students between classes; scores move with them
+
+Reports generated per student (PDF or HTML)
+
+🧠 Stretch: AI-generated insights (where the student is weak, what vocab to study)
+
+📱 Stretch: Mobile vocab trainer with adaptive spaced repetition
+
+9. Final Notes
+
+Emphasize: "Employ best practices wherever possible for an LMS solution"
+
+Key logic: keep cost low, avoid complexity unless needed, build scalable data model now
+
+Claude should begin by scaffolding Placement_Test module and building student/teacher views as described
+
+End of PRD v1.0

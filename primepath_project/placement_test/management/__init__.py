@@ -1,0 +1,1 @@
+# Management package for placement_test app

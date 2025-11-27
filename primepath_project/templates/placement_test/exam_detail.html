@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ exam.name }} - Exam Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>{{ exam.name }}</h2>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Exam Information</h5>
+                    <p><strong>Curriculum Level:</strong> {{ exam.curriculum_level.full_name|default:"N/A" }}</p>
+                    <p><strong>Total Questions:</strong> {{ exam.total_questions }}</p>
+                    <p><strong>Timer:</strong> {{ exam.timer_minutes }} minutes</p>
+                    <p><strong>Status:</strong> {% if exam.is_active %}Active{% else %}Inactive{% endif %}</p>
+                    <p><strong>Created:</strong> {{ exam.created_at|date:"Y-m-d H:i" }}</p>
+                </div>
+            </div>
+
+            {% if exam.pdf_file %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Exam PDF</h5>
+                    <p>
+                        <a href="{{ exam.pdf_file.url }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-file-pdf"></i> View PDF
+                        </a>
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if audio_files %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Audio Files</h5>
+                    <ul class="list-group">
+                        {% for audio in audio_files %}
+                        <li class="list-group-item">
+                            <strong>{{ audio.name|default:"Audio File" }}</strong> 
+                            (Questions {{ audio.start_question }}-{{ audio.end_question }})
+                            <audio controls class="float-right">
+                                <source src="{% url 'placement_test:get_audio' audio.id %}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Questions ({{ questions.count }})</h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Question #</th>
+                                <th>Type</th>
+                                <th>Correct Answer</th>
+                                <th>Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for question in questions %}
+                            <tr>
+                                <td>{{ question.question_number }}</td>
+                                <td>{{ question.get_question_type_display }}</td>
+                                <td>
+                                    {% if question.question_type == 'MCQ' %}
+                                        {{ question.correct_answer|default:"Not set" }}
+                                    {% elif question.question_type == 'SHORT' %}
+                                        {{ question.correct_answer|truncatechars:50|default:"Not set" }}
+                                    {% else %}
+                                        {% if question.correct_answer %}Set{% else %}Not set{% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>{{ question.points }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'placement_test:preview_exam' exam.id %}" class="btn btn-primary">Preview & Edit Answers</a>
+                <a href="{% url 'placement_test:manage_questions' exam.id %}" class="btn btn-secondary">Manage Questions</a>
+                <a href="{% url 'placement_test:exam_list' %}" class="btn btn-light">Back to Exam List</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,2674 @@
+{% extends 'base.html' %}
+
+{% block title %}🔥 UPDATED TEMPLATE 🔥 Preview & Answer Keys - {{ exam.name }} - PrimePath{% endblock %}
+
+{% block header %}{{ exam.name }} - Preview & Answer Keys{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container-main {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .exam-info-bar {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .info-items {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 2px;
+    }
+    
+    .info-value {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #212529;
+    }
+    
+    .status-active {
+        color: #28a745;
+    }
+    
+    .status-inactive {
+        color: #dc3545;
+    }
+    
+    .pdf-title-section {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px 0;
+        background-color: #f0f4f8;
+        border-radius: 8px;
+    }
+    
+    .pdf-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+    
+    /* Responsive Design for 8-18 year olds */
+    
+    /* Desktop optimizations (1024px+) */
+    @media (min-width: 1024px) {
+        .container-main {
+            max-width: 1800px;
+            padding: 25px;
+        }
+        
+        .pdf-section {
+            height: 800px;
+        }
+        
+        .pdf-title {
+            font-size: 2.8rem;
+        }
+        
+        .pdf-controls {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .pdf-controls button {
+            min-width: 120px;
+            font-size: 1rem;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        #pdf-page-info {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0 30px;
+        }
+    }
+    
+    /* Tablet optimizations (768px to 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .container-main {
+            max-width: 100%;
+            padding: 20px 15px;
+        }
+        
+        .pdf-section {
+            height: 650px;
+        }
+        
+        .pdf-title {
+            font-size: 2.2rem;
+        }
+        
+        .pdf-controls {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pdf-controls button {
+            min-width: 100px;
+            min-height: 44px;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 6px;
+            touch-action: manipulation;
+            transition: all 0.2s ease;
+        }
+        
+        #pdf-page-info {
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+        }
+    }
+    
+    /* Touch-friendly improvements for all sizes */
+    .pdf-controls button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .pdf-controls button:active {
+        transform: translateY(0);
+        transition: all 0.1s ease;
+    }
+    
+    .pdf-controls button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Enhanced visual feedback */
+    #pdf-canvas {
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
+    }
+    
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .pdf-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 700px;
+        width: 100%;
+    }
+    
+    .answers-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 600px;
+        width: 100%;
+    }
+    
+    .audio-files-section {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .audio-files-content {
+        padding: 20px;
+    }
+    
+    .audio-file-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        margin-bottom: 15px;
+    }
+    
+    .audio-actions {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    
+    .rename-btn {
+        padding: 2px 8px;
+        font-size: 0.875rem;
+    }
+    
+    .delete-btn {
+        padding: 2px 8px;
+        font-size: 0.875rem;
+    }
+    
+    .audio-file-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .audio-file-name-input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    
+    .audio-player {
+        width: 200px;
+    }
+    
+    .audio-save-indicator {
+        color: #28a745;
+        font-size: 0.85rem;
+        display: none;
+    }
+    
+    .section-header {
+        background-color: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .pdf-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .pdf-viewer {
+        flex: 1;
+        overflow: auto;
+        text-align: center;
+        background-color: #f5f5f5;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+    
+    .answers-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    
+    .question-entry {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .question-number {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+    
+    .question-points {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .question-controls {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 15px;
+        margin-bottom: 12px;
+    }
+    
+    .type-selector {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .type-selector label {
+        font-size: 0.9rem;
+        color: #495057;
+        margin: 0;
+    }
+    
+    .type-selector select {
+        padding: 6px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .options-count-selector {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 15px;
+    }
+    
+    .options-count-selector input {
+        width: 50px;
+        padding: 4px 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    /* Mixed question type styles */
+    .mixed-answer-section {
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 12px;
+        background: #fbfcfd;
+    }
+    
+    .mixed-type-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .mixed-type-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .remove-section-btn {
+        padding: 4px 10px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+    
+    .add-section-btn {
+        padding: 8px 16px;
+        background: #17a2b8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+    
+    .add-section-btn:hover {
+        background: #138496;
+    }
+    
+    .audio-button {
+        padding: 6px 15px;
+        font-size: 0.85rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+    
+    .audio-button:hover {
+        background: #e9ecef;
+    }
+    
+    .audio-button.has-audio {
+        background: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+    }
+    
+    .answer-input-group {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .answer-input {
+        flex: 1;
+    }
+    
+    .answer-input input, 
+    .answer-input textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+    
+    .answer-input textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .answer-help {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+    
+    /* Multiple choice buttons */
+    .mcq-options {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .mcq-button {
+        width: 55px;
+        height: 55px;
+        border: 2px solid #dee2e6;
+        background: white;
+        border-radius: 8px;
+        font-size: 1.3rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .mcq-button:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+    }
+    
+    .mcq-button.selected {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .mcq-button.selected:hover {
+        background: #0056b3;
+        border-color: #0056b3;
+    }
+    
+    /* Checkbox options */
+    .checkbox-options {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+    }
+    
+    .checkbox-option {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .checkbox-option input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .checkbox-option label {
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        margin: 0;
+    }
+    
+    /* Short answer responses */
+    .short-answer-responses {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .response-item {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    .response-item input {
+        flex: 1;
+        padding: 6px 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+    
+    .remove-response {
+        padding: 4px 8px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+    
+    .remove-response:hover {
+        background: #c82333;
+    }
+    
+    .add-response {
+        align-self: flex-start;
+        padding: 6px 12px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+    
+    .add-response:hover {
+        background: #218838;
+    }
+    
+    .save-indicator {
+        color: #28a745;
+        font-size: 0.85rem;
+        display: none;
+    }
+    
+    .audio-section {
+        background-color: #f0f8ff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .audio-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .audio-label {
+        font-weight: 500;
+        min-width: 150px;
+    }
+    
+    .save-all-section {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        border-top: 2px solid #dee2e6;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .unsaved-indicator {
+        color: #ffc107;
+        display: none;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .pdf-section {
+            height: 500px;
+        }
+        
+        .answers-content {
+            padding: 20px;
+        }
+    }
+    
+    /* PDF Canvas Styles */
+    #pdf-canvas {
+        max-width: 90%;
+        height: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background: white;
+        margin: 0 auto;
+    }
+    
+    .pdf-navigation {
+        margin: 0 15px;
+        font-size: 0.9rem;
+    }
+    
+    .zoom-controls {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+    
+    .zoom-level {
+        min-width: 50px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+    
+    /* Success notification animations */
+    @keyframes slideDown {
+        from {
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: translateX(-50%) scale(1);
+        }
+        50% {
+            transform: translateX(-50%) scale(1.02);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Success Notification Container -->
+<div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 500px;">
+    <div class="alert alert-success" style="margin: 0; padding: 25px 30px; font-size: 1.3rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 5px solid #28a745; position: relative;">
+        <button type="button" class="close-alert" onclick="document.getElementById('success-notification').style.display='none'" style="float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; margin-left: 20px;">&times;</button>
+        <span id="success-message">All answers saved successfully!</span>
+        <span style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); font-size: 2rem;">🎉</span>
+    </div>
+</div>
+<div class="container-main">
+    <!-- PDF Title -->
+    <div class="pdf-title-section">
+        <h1 class="pdf-title">
+            {{ exam.name }}
+            <span style="background: red; color: white; padding: 5px; font-size: 12px; border-radius: 3px;">🔥 TEMPLATE UPDATED</span>
+        </h1>
+        
+        <!-- DEBUG SECTION -->
+        <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 2px solid #333;">
+            <h4>🔍 DEBUG INFO</h4>
+            <p><strong>Total Questions:</strong> {{ questions.count }}</p>
+            <p><strong>Questions with Audio:</strong></p>
+            <ul>
+            {% for question in questions %}
+                {% if question.audio_file %}
+                <li>Q{{ question.question_number }} → Audio {{ question.audio_file.id }} ({{ question.audio_file.name }})</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Exam Info Bar -->
+    <div class="exam-info-bar">
+        <div class="info-items">
+            <div class="info-item">
+                <span class="info-label">Duration</span>
+                <span class="info-value">{{ exam.timer_minutes }} min</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Questions</span>
+                <span class="info-value">{{ exam.total_questions }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status</span>
+                <span class="info-value {% if exam.is_active %}status-active{% else %}status-inactive{% endif %}">
+                    {% if exam.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Created</span>
+                <span class="info-value">{{ exam.created_at|date:"M d, Y" }}</span>
+            </div>
+        </div>
+        <a href="{% url 'placement_test:exam_list' %}" class="btn btn-secondary btn-sm">Back to List</a>
+    </div>
+    
+    
+    <!-- Main Content Grid -->
+    <div class="main-content">
+        <!-- PDF Preview Section -->
+        <div class="pdf-section">
+            <div class="section-header">
+                <h3 class="section-title">PDF Preview</h3>
+                <div class="pdf-controls">
+                    <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
+                        <span class="d-none d-md-inline">← Previous</span>
+                        <span class="d-md-none">←</span>
+                    </button>
+                    <div class="pdf-navigation" id="pdf-page-info">
+                        Page <span id="current-page">1</span> of <span id="total-pages">1</span>
+                    </div>
+                    <button type="button" id="pdf-next" class="btn btn-primary">
+                        <span class="d-none d-md-inline">Next →</span>
+                        <span class="d-md-none">→</span>
+                    </button>
+                    <div class="zoom-controls">
+                        <button type="button" id="pdf-zoom-out" class="btn btn-sm btn-outline-secondary">−</button>
+                        <span class="zoom-level" id="pdf-zoom-level">100%</span>
+                        <button type="button" id="pdf-zoom-in" class="btn btn-sm btn-outline-secondary">+</button>
+                    </div>
+                    <!-- Skip First Left Half Status (Read-only) -->
+                    {% if exam.skip_first_left_half %}
+                    <div class="skip-status" style="margin-left: 15px; border-left: 1px solid #dee2e6; padding-left: 15px;">
+                        <span style="font-size: 0.875rem; color: #6c757d;">
+                            <i class="fas fa-eye-slash" style="margin-right: 5px;"></i>
+                            First Page (Left Half) Hidden
+                        </span>
+                        <small class="d-block" style="font-size: 0.75rem; color: #6c757d; margin-top: 2px;">
+                            This setting was configured during exam upload
+                        </small>
+                    </div>
+                    {% endif %}
+                    <a href="{{ exam.pdf_file.url }}" class="btn btn-sm btn-primary" download>
+                        Download PDF
+                    </a>
+                </div>
+            </div>
+            <div class="pdf-viewer" id="pdf-viewer">
+                <div id="pdf-loading" style="padding: 50px;">
+                    <p>Loading PDF...</p>
+                </div>
+                <canvas id="pdf-canvas" style="display: none;"></canvas>
+                <div id="pdf-error" style="display: none; padding: 50px; color: #dc3545;">
+                    <p>Error loading PDF. Please try refreshing the page.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Audio Files Management Section -->
+        {% if exam.audio_files.exists %}
+        <div class="audio-files-section">
+            <div class="section-header">
+                <h3 class="section-title">Audio Files</h3>
+                <button type="button" class="btn btn-sm btn-success" onclick="saveAllAudioNames()">
+                    Save Audio Names
+                </button>
+            </div>
+            <div class="audio-files-content">
+                {% for audio in exam.audio_files.all %}
+                <div class="audio-file-item" data-audio-id="{{ audio.id }}" id="audio-item-{{ audio.id }}">
+                    <div class="audio-file-info">
+                        <input type="text" 
+                               class="audio-file-name-input" 
+                               id="audio-name-{{ audio.id }}"
+                               value="{{ audio.name }}"
+                               placeholder="Enter display name for this exam"
+                               onchange="markAudioNameChanged({{ audio.id }})">
+                        <span class="text-muted" style="font-size: 0.8rem; margin-left: 10px;">(Original: {{ audio.name }})</span>
+                    </div>
+                    <audio controls class="audio-player">
+                        <source src="{% url 'placement_test:get_audio' audio.id %}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="audio-actions">
+                        <button type="button" 
+                                class="btn btn-sm btn-primary rename-btn" 
+                                onclick="renameAudioFile({{ audio.id }})"
+                                title="Rename this audio file">
+                            Rename
+                        </button>
+                        <button type="button" 
+                                class="btn btn-sm btn-danger delete-btn" 
+                                onclick="deleteAudioFile({{ audio.id }})"
+                                title="Remove this audio file from exam">
+                            Delete
+                        </button>
+                    </div>
+                    <span class="audio-save-indicator" id="audio-saved-{{ audio.id }}">✓ Saved</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Answer Keys Section -->
+        <div class="answers-section">
+            <div class="section-header">
+                <h3 class="section-title">Answer Keys</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-sm btn-warning" onclick="randomizeAnswers()">
+                        🎲 Randomize for QA
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="saveAllAnswers()">
+                        Save All
+                    </button>
+                </div>
+            </div>
+            <div class="answers-content">
+                {% for question in questions %}
+                <div class="question-entry" data-question-number="{{ question.question_number }}" data-question-id="{{ question.id }}">
+                    <div class="question-header">
+                        <span class="question-number">Question {{ question.question_number }}</span>
+                        <span class="question-points">{{ question.points }} point{% if question.points != 1 %}s{% endif %}</span>
+                    </div>
+                    
+                    <div class="question-controls">
+                        <div class="type-selector">
+                            <label for="type-{{ question.question_number }}">Question Type:</label>
+                            <select id="type-{{ question.question_number }}" 
+                                    data-question="{{ question.question_number }}"
+                                    class="question-type-select">
+                                <option value="MCQ" {% if question.question_type == 'MCQ' or question.question_type == 'CHECKBOX' %}selected{% endif %}>Multiple Choice</option>
+                                <option value="SHORT" {% if question.question_type == 'SHORT' %}selected{% endif %}>Short Answer</option>
+                                <option value="LONG" {% if question.question_type == 'LONG' %}selected{% endif %}>Long Answer</option>
+                                <option value="MIXED" {% if question.question_type == 'MIXED' %}selected{% endif %}>Mixed</option>
+                            </select>
+                            <span id="mcq-options-{{ question.question_number }}" style="{% if question.question_type != 'MCQ' and question.question_type != 'CHECKBOX' %}display:none;{% endif %}">
+                                <label style="margin-left: 15px;">
+                                    <input type="checkbox" 
+                                           id="multi-{{ question.question_number }}"
+                                           {% if question.question_type == 'CHECKBOX' or ',' in question.correct_answer %}checked{% endif %}
+                                           onchange="toggleMultipleAnswers({{ question.question_number }})">
+                                    Allow multiple
+                                </label>
+                                <span class="options-count-selector">
+                                    <label>Options:</label>
+                                    <input type="number" 
+                                           id="options-count-{{ question.question_number }}"
+                                           value="{{ question.options_count|default:5 }}"
+                                           min="2" max="10"
+                                           onchange="updateOptionsCount({{ question.question_number }})">
+                                </span>
+                            </span>
+                        </div>
+                        <button type="button" 
+                                class="audio-button"
+                                data-question="{{ question.question_number }}"
+                                onclick="toggleAudio({{ question.question_number }})">
+                            🎵 Audio
+                        </button>
+                    </div>
+                    
+                    <div class="answer-input-group">
+                        <div class="answer-input" id="answer-container-{{ question.question_number }}">
+                            {% if question.question_type == 'MCQ' or question.question_type == 'CHECKBOX' %}
+                                {% with selected=question.correct_answer|upper %}
+                                <div class="mcq-options" id="mcq-buttons-{{ question.question_number }}">
+                                    {% for i in "ABCDEFGHIJ"|slice:":5" %}
+                                        <button type="button" 
+                                                class="mcq-button {% if i in selected %}selected{% endif %}"
+                                                data-question="{{ question.question_number }}"
+                                                data-value="{{ i }}"
+                                                data-multiple="{% if question.question_type == 'CHECKBOX' or ',' in question.correct_answer %}true{% else %}false{% endif %}"
+                                                onclick="selectMCQ({{ question.question_number }}, '{{ i }}')">
+                                            {{ i }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                                <input type="hidden" 
+                                       id="answer-{{ question.question_number }}" 
+                                       data-question="{{ question.question_number }}"
+                                       value="{{ question.correct_answer }}"
+                                       class="answer-field">
+                                <div class="answer-help" id="mcq-help-{{ question.question_number }}">
+                                    {% if question.question_type == 'CHECKBOX' or ',' in question.correct_answer %}
+                                        Click to select correct answer(s) - multiple selections allowed
+                                    {% else %}
+                                        Click to select the correct answer
+                                    {% endif %}
+                                </div>
+                                {% endwith %}
+                            {% elif question.question_type == 'SHORT' %}
+                                <div class="short-answer-responses" id="responses-{{ question.question_number }}">
+                                    {% if question.response_list %}
+                                        {% for response in question.response_list %}
+                                            <div class="response-item">
+                                                <input type="text" 
+                                                       value="{{ response }}"
+                                                       placeholder="Acceptable response {{ forloop.counter }}"
+                                                       onchange="updateShortAnswers({{ question.question_number }})">
+                                                {% if not forloop.first %}
+                                                    <button type="button" class="remove-response" onclick="removeResponse({{ question.question_number }}, this)">Remove</button>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="response-item">
+                                            <input type="text" 
+                                                   value=""
+                                                   placeholder="Acceptable response 1"
+                                                   onchange="updateShortAnswers({{ question.question_number }})">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <button type="button" class="add-response" onclick="addResponse({{ question.question_number }})">+ Add Response</button>
+                                <input type="hidden" 
+                                       id="answer-{{ question.question_number }}" 
+                                       data-question="{{ question.question_number }}"
+                                       value="{{ question.correct_answer }}"
+                                       class="answer-field">
+                                <div class="answer-help">Add multiple acceptable responses</div>
+                            {% elif question.question_type == 'LONG' %}
+                                <div class="short-answer-responses" id="responses-{{ question.question_number }}">
+                                    {% if question.long_response_list %}
+                                        {% for response in question.long_response_list %}
+                                            <div class="response-item">
+                                                <textarea placeholder="Grading guideline or sample answer {{ forloop.counter }}"
+                                                          onchange="updateLongAnswers({{ question.question_number }})"
+                                                          style="min-height: 80px; width: 100%;">{{ response }}</textarea>
+                                                {% if not forloop.first %}
+                                                    <button type="button" class="remove-response" onclick="removeResponse({{ question.question_number }}, this)">Remove</button>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="response-item">
+                                            <textarea placeholder="Grading guideline or sample answer 1"
+                                                      onchange="updateLongAnswers({{ question.question_number }})"
+                                                      style="min-height: 80px; width: 100%;">{{ question.correct_answer }}</textarea>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <button type="button" class="add-response" onclick="addLongResponse({{ question.question_number }})">+ Add Grading Guideline</button>
+                                <input type="hidden" 
+                                       id="answer-{{ question.question_number }}" 
+                                       data-question="{{ question.question_number }}"
+                                       value="{{ question.correct_answer }}"
+                                       class="answer-field">
+                                <div class="answer-help">Add multiple grading guidelines or sample answers</div>
+                            {% elif question.question_type == 'MIXED' %}
+                                <div id="mixed-container-{{ question.question_number }}">
+                                    <div class="mixed-sections" id="mixed-sections-{{ question.question_number }}">
+                                        <!-- Mixed sections will be populated via JS if data exists -->
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button type="button" class="add-section-btn" onclick="addMixedSection({{ question.question_number }}, 'MCQ')">+ Add Multiple Choice</button>
+                                        <button type="button" class="add-section-btn" onclick="addMixedSection({{ question.question_number }}, 'SHORT')">+ Add Short Answer</button>
+                                        <button type="button" class="add-section-btn" onclick="addMixedSection({{ question.question_number }}, 'LONG')">+ Add Long Answer</button>
+                                    </div>
+                                </div>
+                                <input type="hidden" 
+                                       id="answer-{{ question.question_number }}" 
+                                       data-question="{{ question.question_number }}"
+                                       value="{{ question.correct_answer }}"
+                                       class="answer-field">
+                                <div class="answer-help">Create a mixed question with multiple answer types</div>
+                            {% endif %}
+                        </div>
+                        <span class="save-indicator" id="saved-{{ question.question_number }}">✓ Saved</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="save-all-section">
+                <span class="unsaved-indicator" id="unsaved-changes">
+                    <i>⚠ Unsaved changes</i>
+                </span>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="clearAllAnswers()">
+                        Clear All
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveAllAnswers()">
+                        Save All Answers
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// Set worker source and CMap configuration
+if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    // Add CMap configuration to prevent font loading errors
+    pdfjsLib.GlobalWorkerOptions.cMapUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/';
+    pdfjsLib.GlobalWorkerOptions.cMapPacked = true;
+}
+
+// Exam ID
+const examId = "{{ exam.id }}";
+
+// PDF viewer variables
+let pdfDoc = null;
+let virtualPageNum = 1; // Virtual page number (includes left/right columns)
+let totalVirtualPages = 0; // Total virtual pages (actual * 2)
+let currentPdfPage = null; // Store current page for fit calculations
+
+// Answer tracking
+let unsavedChanges = false;
+const answers = {};
+
+// Audio assignments tracking
+const audioAssignments = {};
+
+// Track changed audio names
+const changedAudioNames = new Set();
+
+// Track local audio display names
+const localAudioNames = {};
+
+// Answers are already loaded in the input fields from the backend
+
+// Get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+console.log('🚀 NUCLEAR DEBUG - Script loading at ' + new Date().toISOString());
+
+// NUCLEAR OVERRIDE - Clear any existing assignments
+window.audioAssignments = {};
+console.log('💥 NUCLEAR: Cleared audioAssignments');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔥 NUCLEAR DEBUG - DOMContentLoaded fired! Timestamp: ' + new Date().toISOString());
+    
+    // NUCLEAR: Override any existing loading
+    window.audioAssignments = {};
+    console.log('💥 NUCLEAR: Re-cleared audioAssignments in DOMContentLoaded');
+    
+    console.log('🔍 DEBUG: audioAssignments initial state:', audioAssignments);
+    
+    // Initialize PDF viewer
+    initializePdfViewer();
+    
+    // Initialize answer tracking
+    initializeAnswerTracking();
+    
+    // Load saved local audio names
+    loadLocalAudioNames();
+    
+    // Load audio assignments from Question.audio_file relationships
+    console.log('🔍 DEBUG: Template rendering questions...');
+    {% for question in questions %}
+        console.log('🔍 Question {{ question.question_number }}: audio_file = {% if question.audio_file %}{{ question.audio_file.id }}{% else %}null{% endif %}');
+    {% endfor %}
+    
+    const questionAudioData = [
+        {% for question in questions %}
+        {% if question.audio_file %}
+        {
+            questionNum: {{ question.question_number }},
+            audioId: {{ question.audio_file.id }},
+            audioName: "{{ question.audio_file.name|escapejs }}"
+        },
+        {% endif %}
+        {% endfor %}
+    ];
+    
+    console.log('🔍 DEBUG: questionAudioData length:', questionAudioData.length);
+    
+    console.log('=== NEW AUDIO ASSIGNMENT LOADING DEBUG ===');
+    console.log('questionAudioData:', questionAudioData);
+    console.log('audioAssignments before loading:', audioAssignments);
+    
+    // NUCLEAR: Clear before loading new assignments
+    window.audioAssignments = {};
+    console.log('💥 NUCLEAR: Final clear before loading assignments');
+    
+    questionAudioData.forEach((data, index) => {
+        console.log(`🚀 NUCLEAR LOADING assignment ${index + 1}: Q${data.questionNum} -> Audio ${data.audioId}`);
+        
+        // Load direct Question -> AudioFile relationships
+        audioAssignments[data.questionNum] = data.audioId;
+        console.log('✅ NUCLEAR ASSIGNMENT: Q' + data.questionNum + ' -> Audio ID ' + data.audioId);
+        
+        const buttonSelector = `[data-question="${data.questionNum}"].audio-button`;
+        console.log('🔍 Looking for button with selector:', buttonSelector);
+        
+        const button = document.querySelector(buttonSelector);
+        console.log('🔍 Button found:', button ? 'YES' : 'NO');
+        
+        if (button) {
+            button.classList.add('has-audio');
+            // Use local name if available, otherwise use original
+            const name = localAudioNames[data.audioId] || data.audioName;
+            const displayName = name.substring(0, 20) + (name.length > 20 ? '...' : '');
+            const newText = `🎵 Audio: ${displayName}`;
+            button.innerHTML = newText;
+            console.log(`✅ Updated button for Q${data.questionNum}: "${newText}"`);
+        } else {
+            console.log(`❌ Button not found for Q${data.questionNum} with selector: ${buttonSelector}`);
+        }
+    });
+    
+    console.log('audioAssignments after loading:', audioAssignments);
+    console.log('=== END AUDIO ASSIGNMENT LOADING DEBUG ===');
+    
+    // NUCLEAR: Final check and protection
+    console.log('💥 NUCLEAR FINAL CHECK - audioAssignments contains:', Object.keys(audioAssignments).length, 'assignments');
+    for (const [q, audioId] of Object.entries(audioAssignments)) {
+        console.log(`💥 FINAL: Q${q} -> Audio ${audioId}`);
+    }
+});
+
+function initializePdfViewer() {
+    console.log('🔥 [PREVIEW_EXAM] initializePdfViewer() called');
+    console.log('🔥 [PREVIEW_EXAM] pdfjsLib available:', typeof pdfjsLib !== 'undefined');
+    
+    if (typeof pdfjsLib === 'undefined') {
+        console.error('❌ [PREVIEW_EXAM] pdfjsLib is undefined');
+        document.getElementById('pdf-loading').style.display = 'none';
+        document.getElementById('pdf-error').style.display = 'block';
+        return;
+    }
+    
+    const pdfUrl = "{{ exam.pdf_file.url }}";
+    console.log('🔥 [PREVIEW_EXAM] PDF URL:', pdfUrl);
+    
+    console.log('🔥 [PREVIEW_EXAM] Calling pdfjsLib.getDocument...');
+    pdfjsLib.getDocument({
+        url: pdfUrl,
+        // Disable CMap loading to avoid CORS issues
+        disableFontFace: false,
+        disableStream: false,
+        disableAutoFetch: false
+    }).promise.then(function(pdf) {
+        console.log('✅ [PREVIEW_EXAM] PDF loaded successfully');
+        pdfDoc = pdf;
+        
+        // Convert to virtual pages (each actual page = 2 virtual pages for split view)
+        totalVirtualPages = pdf.numPages * 2;
+        
+        // Respect skip_first_left_half setting for starting page
+        const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+        virtualPageNum = skipFirstLeftHalf ? 2 : 1; // Start from page 2 if first left half is hidden
+        
+        console.log('🔥 [PREVIEW_EXAM] PDF info:', {
+            actualPages: pdf.numPages,
+            totalVirtualPages,
+            startingVirtualPage: virtualPageNum
+        });
+        
+        const totalPagesElement = document.getElementById('total-pages');
+        if (totalPagesElement) {
+            totalPagesElement.textContent = totalVirtualPages;
+            console.log('🔥 [PREVIEW_EXAM] Total pages element updated to:', totalVirtualPages);
+        } else {
+            console.warn('⚠️ [PREVIEW_EXAM] Total pages element not found');
+        }
+        
+        console.log('🔥 [PREVIEW_EXAM] Starting virtual page set to:', virtualPageNum);
+        
+        console.log('🔥 [PREVIEW_EXAM] Updating navigation buttons...');
+        updateNavigationButtons();
+        
+        const loadingElement = document.getElementById('pdf-loading');
+        const canvasElement = document.getElementById('pdf-canvas');
+        
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+            console.log('🔥 [PREVIEW_EXAM] Loading element hidden');
+        } else {
+            console.warn('⚠️ [PREVIEW_EXAM] Loading element not found');
+        }
+        
+        if (canvasElement) {
+            canvasElement.style.display = 'block';
+            console.log('🔥 [PREVIEW_EXAM] Canvas element shown');
+        } else {
+            console.warn('⚠️ [PREVIEW_EXAM] Canvas element not found');
+        }
+        
+        console.log('🔥 [PREVIEW_EXAM] Starting first virtual page render...');
+        renderPage(virtualPageNum);
+    }).catch(function(error) {
+        console.error('❌ [PREVIEW_EXAM] Error loading PDF:', error);
+        
+        const loadingElement = document.getElementById('pdf-loading');
+        const errorElement = document.getElementById('pdf-error');
+        
+        if (loadingElement) {
+            loadingElement.style.display = 'none';
+            console.log('🔥 [PREVIEW_EXAM] Loading element hidden after error');
+        }
+        
+        if (errorElement) {
+            errorElement.style.display = 'block';
+            console.log('🔥 [PREVIEW_EXAM] Error element shown');
+        }
+    });
+}
+
+function renderPage(vPageNum) {
+    console.log('🔥 [PREVIEW_EXAM] renderPage() called with vPageNum:', vPageNum);
+    console.log('🔥 [PREVIEW_EXAM] pdfDoc exists:', !!pdfDoc);
+    console.log('🔥 [PREVIEW_EXAM] totalVirtualPages:', totalVirtualPages);
+    
+    if (!pdfDoc) {
+        console.error('❌ [PREVIEW_EXAM] No pdfDoc available for rendering');
+        return;
+    }
+    
+    virtualPageNum = vPageNum;
+    
+    // Calculate actual PDF page based on virtual page
+    let actualPageNum = Math.ceil(vPageNum / 2);
+    let isLeftColumn = (vPageNum % 2) === 1;
+    
+    console.log('🔥 [PREVIEW_EXAM] Virtual to actual page mapping:', {
+        virtualPage: vPageNum,
+        actualPage: actualPageNum,
+        isLeftColumn,
+        columnText: isLeftColumn ? 'Left' : 'Right'
+    });
+    
+    console.log('🔥 [PREVIEW_EXAM] Getting actual page', actualPageNum, 'from PDF...');
+    pdfDoc.getPage(actualPageNum).then(function(page) {
+        console.log('✅ [PREVIEW_EXAM] Successfully got actual page', actualPageNum);
+        
+        currentPdfPage = page; // Store for fit calculations
+        const canvas = document.getElementById('pdf-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        console.log('🔥 [PREVIEW_EXAM] Canvas element found:', !!canvas);
+        console.log('🔥 [PREVIEW_EXAM] Canvas context obtained:', !!ctx);
+        
+        // Get container dimensions
+        const container = document.getElementById('pdf-viewer');
+        const containerWidth = container.clientWidth - 20;
+        const containerHeight = container.clientHeight - 20;
+        
+        console.log('🔥 [PREVIEW_EXAM] Container dimensions:', {
+            containerWidth,
+            containerHeight,
+            containerClientWidth: container.clientWidth,
+            containerClientHeight: container.clientHeight
+        });
+        
+        // Get page viewport at scale 1
+        const viewport = page.getViewport({ scale: 1 });
+        
+        console.log('🔥 [PREVIEW_EXAM] Page viewport at scale 1:', {
+            width: viewport.width,
+            height: viewport.height
+        });
+        
+        // Calculate scale to fit half-width in container (match Student interface approach)
+        const scaleX = (containerWidth * 2) / viewport.width; // Scale for half-width fitting
+        const scaleY = containerHeight / viewport.height;
+        const scale = Math.min(scaleX, scaleY) * 0.95; // 95% to add some padding
+        
+        console.log('🔥 [PREVIEW_EXAM] Scale calculations for column view:', {
+            originalViewportWidth: viewport.width,
+            halfPageWidth: viewport.width / 2,
+            scaleX,
+            scaleY,
+            finalScale: scale,
+            scalingPercentage: Math.round(scale * 100)
+        });
+        
+        // Get scaled viewport for rendering
+        const scaledViewport = page.getViewport({ scale: scale });
+        
+        console.log('🔥 [PREVIEW_EXAM] Scaled viewport:', {
+            width: scaledViewport.width,
+            height: scaledViewport.height
+        });
+        
+        // Set canvas size for column view (true half of original page width - match Student interface)
+        canvas.width = scaledViewport.width / 2; // Half of scaled viewport = true 50% of original
+        canvas.height = scaledViewport.height;
+        
+        console.log('🔥 [PREVIEW_EXAM] Canvas dimensions for column view:', {
+            width: canvas.width,
+            height: canvas.height,
+            originalPageWidth: scaledViewport.width
+        });
+        
+        // Create a temporary canvas for full page rendering
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = scaledViewport.width;
+        tempCanvas.height = scaledViewport.height;
+        
+        console.log('🔥 [PREVIEW_EXAM] Temporary canvas created for full page:', {
+            width: tempCanvas.width,
+            height: tempCanvas.height
+        });
+        
+        // Render full page to temp canvas
+        const renderContext = {
+            canvasContext: tempCtx,
+            viewport: scaledViewport
+        };
+        
+        console.log('🔥 [PREVIEW_EXAM] Starting full page render to temp canvas...');
+        
+        const renderPromise = page.render(renderContext);
+        
+        renderPromise.promise.then(() => {
+            console.log('✅ [PREVIEW_EXAM] Full page rendered to temp canvas successfully');
+            
+            // Clear main canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Copy the half we want (left or right column)
+            const sourceX = isLeftColumn ? 0 : canvas.width;
+            
+            console.log('🔥 [PREVIEW_EXAM] Copying column from temp canvas:', {
+                isLeftColumn,
+                sourceX,
+                sourceWidth: canvas.width,
+                sourceHeight: canvas.height
+            });
+            
+            ctx.drawImage(
+                tempCanvas,
+                sourceX, 0, canvas.width, canvas.height,  // source (which half to copy)
+                0, 0, canvas.width, canvas.height         // destination (full canvas)
+            );
+            
+            console.log('✅ [PREVIEW_EXAM] Column copied to main canvas successfully');
+            
+            // Update zoom level display
+            const zoomElement = document.getElementById('pdf-zoom-level');
+            if (zoomElement) {
+                zoomElement.textContent = Math.round(scale * 100) + '%';
+                console.log('🔥 [PREVIEW_EXAM] Zoom level updated to:', Math.round(scale * 100) + '%');
+            } else {
+                console.warn('⚠️ [PREVIEW_EXAM] Zoom level element not found');
+            }
+            
+        }).catch((error) => {
+            console.error('❌ [PREVIEW_EXAM] Error rendering page:', error);
+        });
+        
+    }).catch(function(error) {
+        console.error('❌ [PREVIEW_EXAM] Error getting page', actualPageNum, ':', error);
+    });
+    
+    // Update page counter
+    const pageCountElement = document.getElementById('current-page');
+    if (pageCountElement) {
+        const columnText = (vPageNum % 2) === 1 ? '(Left)' : '(Right)';
+        pageCountElement.textContent = `${vPageNum} ${columnText}`;
+        console.log('🔥 [PREVIEW_EXAM] Page counter updated to:', `${vPageNum} ${columnText}`);
+    } else {
+        console.warn('⚠️ [PREVIEW_EXAM] Page counter element not found');
+    }
+}
+
+function updateNavigationButtons() {
+    const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+    const minPage = skipFirstLeftHalf ? 2 : 1;
+    document.getElementById('pdf-prev').disabled = virtualPageNum <= minPage;
+    document.getElementById('pdf-next').disabled = virtualPageNum >= totalVirtualPages;
+}
+
+// PDF navigation
+document.getElementById('pdf-prev').addEventListener('click', function() {
+    const skipFirstLeftHalf = {{ exam.skip_first_left_half|yesno:"true,false" }};
+    const minPage = skipFirstLeftHalf ? 2 : 1;
+    
+    if (!pdfDoc || virtualPageNum <= minPage) {
+        return;
+    }
+    virtualPageNum--;
+    console.log('🔥 [PREVIEW_EXAM] Previous page clicked, new virtualPageNum:', virtualPageNum);
+    renderPage(virtualPageNum);
+    updateNavigationButtons();
+});
+
+document.getElementById('pdf-next').addEventListener('click', function() {
+    if (!pdfDoc || virtualPageNum >= totalVirtualPages) {
+        return;
+    }
+    virtualPageNum++;
+    console.log('🔥 [PREVIEW_EXAM] Next page clicked, new virtualPageNum:', virtualPageNum);
+    renderPage(virtualPageNum);
+    updateNavigationButtons();
+});
+
+// Zoom controls - simplified to use CSS transform
+document.getElementById('pdf-zoom-in').addEventListener('click', function() {
+    const container = document.getElementById('pdf-viewer');
+    const currentTransform = container.style.transform || 'scale(1)';
+    const currentScale = parseFloat(currentTransform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
+    const newScale = Math.min(currentScale * 1.2, 2.0);
+    container.style.transform = `scale(${newScale})`;
+    container.style.transformOrigin = 'top center';
+});
+
+document.getElementById('pdf-zoom-out').addEventListener('click', function() {
+    const container = document.getElementById('pdf-viewer');
+    const currentTransform = container.style.transform || 'scale(1)';
+    const currentScale = parseFloat(currentTransform.match(/scale\(([\d.]+)\)/)?.[1] || 1);
+    const newScale = Math.max(currentScale / 1.2, 0.5);
+    container.style.transform = `scale(${newScale})`;
+    container.style.transformOrigin = 'top center';
+});
+
+// Note: Skip First Left Half control removed - setting is now configured during exam upload
+// Display behavior still respects the skip_first_left_half setting from the database
+
+// Answer tracking functions
+function initializeAnswerTracking() {
+    // Initialize questions from saved data
+    document.querySelectorAll('.question-entry').forEach(entry => {
+        const questionNum = entry.dataset.questionNumber;
+        const typeSelect = entry.querySelector('.question-type-select');
+        const answerField = entry.querySelector('.answer-field');
+        
+        // Initialize SHORT answers with multiple responses
+        if (typeSelect.value === 'SHORT' && answerField.value && answerField.value.includes('|')) {
+            const responses = answerField.value.split('|').filter(r => r.trim());
+            if (responses.length > 1) {
+                const container = document.getElementById(`responses-${questionNum}`);
+                if (container) {
+                    container.innerHTML = '';
+                    responses.forEach((response, index) => {
+                        const responseDiv = document.createElement('div');
+                        responseDiv.className = 'response-item';
+                        responseDiv.innerHTML = `
+                            <input type="text" 
+                                   value="${response}"
+                                   placeholder="Acceptable response ${index + 1}"
+                                   onchange="updateShortAnswers(${questionNum})">
+                            ${index > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                        `;
+                        container.appendChild(responseDiv);
+                    });
+                }
+            }
+        }
+        
+        // Initialize LONG answers with multiple responses
+        if (typeSelect.value === 'LONG' && answerField.value && answerField.value.includes('|||')) {
+            const responses = answerField.value.split('|||').filter(r => r.trim());
+            if (responses.length > 1) {
+                const container = document.getElementById(`responses-${questionNum}`);
+                if (container) {
+                    container.innerHTML = '';
+                    responses.forEach((response, index) => {
+                        const responseDiv = document.createElement('div');
+                        responseDiv.className = 'response-item';
+                        responseDiv.innerHTML = `
+                            <textarea placeholder="Grading guideline or sample answer ${index + 1}"
+                                      onchange="updateLongAnswers(${questionNum})"
+                                      style="min-height: 80px; width: 100%;">${response}</textarea>
+                            ${index > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                        `;
+                        container.appendChild(responseDiv);
+                    });
+                }
+            }
+        }
+        
+        // Initialize MIXED questions
+        if (typeSelect.value === 'MIXED' && answerField.value) {
+            try {
+                const mixedData = JSON.parse(answerField.value);
+                initializeMixedQuestion(questionNum, mixedData);
+            } catch (e) {
+                console.error('Error parsing mixed data for question', questionNum, e);
+            }
+        }
+    });
+    
+    // Handle answer field changes
+    document.querySelectorAll('.answer-field').forEach(input => {
+        input.addEventListener('input', function() {
+            const questionNum = this.dataset.question;
+            answers[questionNum] = this.value;
+            unsavedChanges = true;
+            document.getElementById('unsaved-changes').style.display = 'inline';
+            document.getElementById(`saved-${questionNum}`).style.display = 'none';
+        });
+        
+        // Auto-save on blur
+        input.addEventListener('blur', function() {
+            if (this.value && unsavedChanges) {
+                saveAnswer(this.dataset.question, this.value);
+            }
+        });
+    });
+    
+    // Handle question type changes
+    document.querySelectorAll('.question-type-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const questionNum = this.dataset.question;
+            const newType = this.value;
+            updateAnswerInput(questionNum, newType);
+            
+            // Show/hide MCQ options
+            const mcqOptions = document.getElementById(`mcq-options-${questionNum}`);
+            if (newType === 'MCQ') {
+                mcqOptions.style.display = 'inline';
+            } else {
+                mcqOptions.style.display = 'none';
+            }
+            
+            unsavedChanges = true;
+            document.getElementById('unsaved-changes').style.display = 'inline';
+            document.getElementById(`saved-${questionNum}`).style.display = 'none';
+        });
+    });
+}
+
+// Update answer input based on question type
+function updateAnswerInput(questionNum, questionType) {
+    const container = document.getElementById(`answer-container-${questionNum}`);
+    const currentValue = document.getElementById(`answer-${questionNum}`) ? 
+                        document.getElementById(`answer-${questionNum}`).value : '';
+    
+    let newHtml = '';
+    
+    switch(questionType) {
+        case 'MCQ':
+            const selectedLetters = currentValue.split(',').map(v => v.trim().toUpperCase());
+            const optionsCount = parseInt(document.getElementById(`options-count-${questionNum}`)?.value || 5);
+            const isMultiple = document.getElementById(`multi-${questionNum}`)?.checked || false;
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].slice(0, optionsCount);
+            
+            newHtml = `
+                <div class="mcq-options">
+                    ${letters.map(letter => `
+                        <button type="button" 
+                                class="mcq-button ${selectedLetters.includes(letter) ? 'selected' : ''}"
+                                data-question="${questionNum}"
+                                data-value="${letter}"
+                                data-multiple="${isMultiple}"
+                                onclick="selectMCQ(${questionNum}, '${letter}')">
+                            ${letter}
+                        </button>
+                    `).join('')}
+                </div>
+                <input type="hidden" 
+                       id="answer-${questionNum}" 
+                       data-question="${questionNum}"
+                       value="${currentValue}"
+                       class="answer-field">
+                <div class="answer-help" id="mcq-help-${questionNum}">
+                    ${isMultiple ? 'Click to select correct answer(s) - multiple selections allowed' : 'Click to select the correct answer'}
+                </div>
+            `;
+            break;
+            
+        case 'CHECKBOX':
+            const selectedValues = currentValue.split(',').map(v => v.trim().toUpperCase());
+            newHtml = `
+                <div class="checkbox-options">
+                    ${['A', 'B', 'C', 'D', 'E'].map(letter => `
+                        <div class="checkbox-option">
+                            <input type="checkbox" 
+                                   id="check-${questionNum}-${letter}"
+                                   value="${letter}"
+                                   ${selectedValues.includes(letter) ? 'checked' : ''}
+                                   onchange="updateCheckboxes(${questionNum})">
+                            <label for="check-${questionNum}-${letter}">${letter}</label>
+                        </div>
+                    `).join('')}
+                </div>
+                <input type="hidden" 
+                       id="answer-${questionNum}" 
+                       data-question="${questionNum}"
+                       value="${currentValue}"
+                       class="answer-field">
+                <div class="answer-help">Select all correct answers</div>
+            `;
+            break;
+            
+        case 'SHORT':
+            const responses = currentValue ? currentValue.split('|').filter(r => r.trim()) : [''];
+            newHtml = `
+                <div class="short-answer-responses" id="responses-${questionNum}">
+                    ${responses.map((response, index) => `
+                        <div class="response-item">
+                            <input type="text" 
+                                   value="${response}"
+                                   placeholder="Acceptable response ${index + 1}"
+                                   onchange="updateShortAnswers(${questionNum})">
+                            ${index > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="add-response" onclick="addResponse(${questionNum})">+ Add Response</button>
+                <input type="hidden" 
+                       id="answer-${questionNum}" 
+                       data-question="${questionNum}"
+                       value="${currentValue}"
+                       class="answer-field">
+                <div class="answer-help">Add multiple acceptable responses</div>
+            `;
+            break;
+            
+        case 'LONG':
+            const longResponses = currentValue ? currentValue.split('|||').filter(r => r.trim()) : [''];
+            newHtml = `
+                <div class="short-answer-responses" id="responses-${questionNum}">
+                    ${longResponses.map((response, index) => `
+                        <div class="response-item">
+                            <textarea placeholder="Grading guideline or sample answer ${index + 1}"
+                                      onchange="updateLongAnswers(${questionNum})"
+                                      style="min-height: 80px; width: 100%;">${response}</textarea>
+                            ${index > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="add-response" onclick="addLongResponse(${questionNum})">+ Add Grading Guideline</button>
+                <input type="hidden" 
+                       id="answer-${questionNum}" 
+                       data-question="${questionNum}"
+                       value="${currentValue}"
+                       class="answer-field">
+                <div class="answer-help">Add multiple grading guidelines or sample answers</div>
+            `;
+            break;
+            
+        case 'MIXED':
+            newHtml = `
+                <div id="mixed-container-${questionNum}">
+                    <div class="mixed-sections" id="mixed-sections-${questionNum}">
+                        <!-- Mixed sections will be added here -->
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="add-section-btn" onclick="addMixedSection(${questionNum}, 'MCQ')">+ Add Multiple Choice</button>
+                        <button type="button" class="add-section-btn" onclick="addMixedSection(${questionNum}, 'SHORT')">+ Add Short Answer</button>
+                        <button type="button" class="add-section-btn" onclick="addMixedSection(${questionNum}, 'LONG')">+ Add Long Answer</button>
+                    </div>
+                </div>
+                <input type="hidden" 
+                       id="answer-${questionNum}" 
+                       data-question="${questionNum}"
+                       value="${currentValue}"
+                       class="answer-field">
+                <div class="answer-help">Create a mixed question with multiple answer types</div>
+            `;
+            break;
+    }
+    
+    container.innerHTML = newHtml;
+    
+    // Re-attach event listeners based on type
+    if (questionType === 'LONG') {
+        // Long answers use hidden input, update immediately
+        updateLongAnswers(questionNum);
+    } else if (questionType === 'SHORT') {
+        updateShortAnswers(questionNum);
+    } else if (questionType === 'MIXED') {
+        // Initialize mixed with empty data
+        updateMixedAnswers(questionNum);
+    }
+}
+
+// Helper function to mark as unsaved
+function markUnsaved(questionNum) {
+    unsavedChanges = true;
+    document.getElementById('unsaved-changes').style.display = 'inline';
+    document.getElementById(`saved-${questionNum}`).style.display = 'none';
+}
+
+// MCQ selection (now supports multiple answers)
+function selectMCQ(questionNum, letter) {
+    const button = event.target;
+    const hiddenInput = document.getElementById(`answer-${questionNum}`);
+    const isMultiple = button.dataset.multiple === 'true';
+    let currentAnswers = hiddenInput.value.split(',').filter(a => a.trim()).map(a => a.toUpperCase());
+    
+    if (isMultiple) {
+        // Toggle selection for multiple answers
+        if (button.classList.contains('selected')) {
+            button.classList.remove('selected');
+            currentAnswers = currentAnswers.filter(a => a !== letter);
+        } else {
+            button.classList.add('selected');
+            if (!currentAnswers.includes(letter)) {
+                currentAnswers.push(letter);
+            }
+        }
+    } else {
+        // Single selection - clear others first
+        document.querySelectorAll(`[data-question="${questionNum}"].mcq-button`).forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        button.classList.add('selected');
+        currentAnswers = [letter];
+    }
+    
+    // Sort answers alphabetically
+    currentAnswers.sort();
+    
+    // Update hidden input
+    const newValue = currentAnswers.join(',');
+    hiddenInput.value = newValue;
+    answers[questionNum] = newValue;
+    markUnsaved(questionNum);
+}
+
+// Update checkboxes
+function updateCheckboxes(questionNum) {
+    const checkboxes = document.querySelectorAll(`#answer-container-${questionNum} input[type="checkbox"]:checked`);
+    const values = Array.from(checkboxes).map(cb => cb.value).join(',');
+    document.getElementById(`answer-${questionNum}`).value = values;
+    answers[questionNum] = values;
+    markUnsaved(questionNum);
+}
+
+// Update short answers
+function updateShortAnswers(questionNum) {
+    const inputs = document.querySelectorAll(`#responses-${questionNum} input[type="text"]`);
+    const values = Array.from(inputs).map(input => input.value).filter(v => v.trim()).join('|');
+    document.getElementById(`answer-${questionNum}`).value = values;
+    answers[questionNum] = values;
+    markUnsaved(questionNum);
+}
+
+// Add response for short answer
+function addResponse(questionNum) {
+    const container = document.getElementById(`responses-${questionNum}`);
+    const responseCount = container.querySelectorAll('.response-item').length;
+    const newResponse = document.createElement('div');
+    newResponse.className = 'response-item';
+    newResponse.innerHTML = `
+        <input type="text" 
+               placeholder="Acceptable response ${responseCount + 1}"
+               onchange="updateShortAnswers(${questionNum})">
+        <button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>
+    `;
+    container.appendChild(newResponse);
+}
+
+// Remove response for short/long answer
+function removeResponse(questionNum, button) {
+    button.parentElement.remove();
+    
+    // Check if it's a long answer by looking for textareas
+    const container = document.getElementById(`responses-${questionNum}`);
+    if (container.querySelector('textarea')) {
+        updateLongAnswers(questionNum);
+    } else {
+        updateShortAnswers(questionNum);
+    }
+}
+
+// Toggle multiple answers checkbox
+function toggleMultipleAnswers(questionNum) {
+    const isMultiple = document.getElementById(`multi-${questionNum}`).checked;
+    const buttons = document.querySelectorAll(`[data-question="${questionNum}"].mcq-button`);
+    
+    buttons.forEach(btn => {
+        btn.dataset.multiple = isMultiple;
+    });
+    
+    // Update help text
+    const helpText = document.getElementById(`mcq-help-${questionNum}`);
+    if (helpText) {
+        helpText.textContent = isMultiple ? 
+            'Click to select correct answer(s) - multiple selections allowed' : 
+            'Click to select the correct answer';
+    }
+    
+    // If switching to single answer, keep only first selected
+    if (!isMultiple) {
+        const hiddenInput = document.getElementById(`answer-${questionNum}`);
+        const currentAnswers = hiddenInput.value.split(',').filter(a => a.trim());
+        if (currentAnswers.length > 1) {
+            hiddenInput.value = currentAnswers[0];
+            answers[questionNum] = currentAnswers[0];
+            
+            // Update visual selection
+            buttons.forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.value === currentAnswers[0]) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+    }
+    
+    markUnsaved(questionNum);
+}
+
+// Update options count
+function updateOptionsCount(questionNum) {
+    const newCount = parseInt(document.getElementById(`options-count-${questionNum}`).value);
+    updateAnswerInput(questionNum, 'MCQ');
+    markUnsaved(questionNum);
+}
+
+// Update long answers
+function updateLongAnswers(questionNum) {
+    const textareas = document.querySelectorAll(`#responses-${questionNum} textarea`);
+    const values = Array.from(textareas).map(ta => ta.value).filter(v => v.trim()).join('|||');
+    document.getElementById(`answer-${questionNum}`).value = values;
+    answers[questionNum] = values;
+    markUnsaved(questionNum);
+}
+
+// Add long response
+function addLongResponse(questionNum) {
+    const container = document.getElementById(`responses-${questionNum}`);
+    const responseCount = container.querySelectorAll('.response-item').length;
+    const newResponse = document.createElement('div');
+    newResponse.className = 'response-item';
+    newResponse.innerHTML = `
+        <textarea placeholder="Grading guideline or sample answer ${responseCount + 1}"
+                  onchange="updateLongAnswers(${questionNum})"
+                  style="min-height: 80px; width: 100%;"></textarea>
+        <button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>
+    `;
+    container.appendChild(newResponse);
+}
+
+// Add mixed section
+function addMixedSection(questionNum, type) {
+    const container = document.getElementById(`mixed-sections-${questionNum}`);
+    const sectionId = `mixed-${questionNum}-${Date.now()}`;
+    
+    let sectionHtml = '';
+    const sectionDiv = document.createElement('div');
+    sectionDiv.className = 'mixed-answer-section';
+    sectionDiv.id = sectionId;
+    
+    switch(type) {
+        case 'MCQ':
+            sectionDiv.innerHTML = `
+                <div class="mixed-type-header">
+                    <span class="mixed-type-label">Multiple Choice</span>
+                    <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                </div>
+                <div class="mcq-options">
+                    ${['A', 'B', 'C', 'D', 'E'].map(letter => `
+                        <button type="button" 
+                                class="mcq-button"
+                                data-section="${sectionId}"
+                                data-value="${letter}"
+                                onclick="selectMixedMCQ('${sectionId}', '${letter}', ${questionNum})">
+                            ${letter}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            break;
+            
+        case 'SHORT':
+            sectionDiv.innerHTML = `
+                <div class="mixed-type-header">
+                    <span class="mixed-type-label">Short Answer</span>
+                    <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                </div>
+                <input type="text" 
+                       placeholder="Enter acceptable answer"
+                       onchange="updateMixedAnswers(${questionNum})"
+                       style="width: 100%; padding: 8px;">
+            `;
+            break;
+            
+        case 'LONG':
+            sectionDiv.innerHTML = `
+                <div class="mixed-type-header">
+                    <span class="mixed-type-label">Long Answer</span>
+                    <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                </div>
+                <textarea placeholder="Enter grading guidelines"
+                          onchange="updateMixedAnswers(${questionNum})"
+                          style="width: 100%; min-height: 80px; padding: 8px;"></textarea>
+            `;
+            break;
+    }
+    
+    container.appendChild(sectionDiv);
+    updateMixedAnswers(questionNum);
+}
+
+// Remove mixed section
+function removeMixedSection(sectionId, questionNum) {
+    document.getElementById(sectionId).remove();
+    updateMixedAnswers(questionNum);
+}
+
+// Update mixed answers
+function updateMixedAnswers(questionNum) {
+    const sections = document.querySelectorAll(`#mixed-sections-${questionNum} .mixed-answer-section`);
+    const mixedData = [];
+    
+    sections.forEach(section => {
+        const typeLabel = section.querySelector('.mixed-type-label').textContent;
+        let value = '';
+        
+        if (typeLabel === 'Multiple Choice') {
+            const selected = Array.from(section.querySelectorAll('.mcq-button.selected'))
+                .map(btn => btn.dataset.value);
+            value = selected.join(',');
+        } else if (typeLabel === 'Short Answer') {
+            value = section.querySelector('input').value;
+        } else if (typeLabel === 'Long Answer') {
+            value = section.querySelector('textarea').value;
+        }
+        
+        if (value) {
+            mixedData.push({type: typeLabel, value: value});
+        }
+    });
+    
+    const jsonValue = JSON.stringify(mixedData);
+    document.getElementById(`answer-${questionNum}`).value = jsonValue;
+    answers[questionNum] = jsonValue;
+    markUnsaved(questionNum);
+}
+
+// Select MCQ in mixed section
+function selectMixedMCQ(sectionId, letter, questionNum) {
+    const button = event.target;
+    button.classList.toggle('selected');
+    updateMixedAnswers(questionNum);
+}
+
+// Initialize mixed question from saved data
+function initializeMixedQuestion(questionNum, mixedData) {
+    const container = document.getElementById(`mixed-sections-${questionNum}`);
+    if (!container) return;
+    
+    container.innerHTML = ''; // Clear existing content
+    
+    mixedData.forEach(section => {
+        const sectionId = `mixed-${questionNum}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'mixed-answer-section';
+        sectionDiv.id = sectionId;
+        
+        switch(section.type) {
+            case 'Multiple Choice':
+                sectionDiv.innerHTML = `
+                    <div class="mixed-type-header">
+                        <span class="mixed-type-label">Multiple Choice</span>
+                        <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                    </div>
+                    <div class="mcq-options">
+                        ${['A', 'B', 'C', 'D', 'E'].map(letter => `
+                            <button type="button" 
+                                    class="mcq-button ${section.value && section.value.includes(letter) ? 'selected' : ''}"
+                                    data-section="${sectionId}"
+                                    data-value="${letter}"
+                                    onclick="selectMixedMCQ('${sectionId}', '${letter}', ${questionNum})">
+                                ${letter}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                break;
+                
+            case 'Short Answer':
+                sectionDiv.innerHTML = `
+                    <div class="mixed-type-header">
+                        <span class="mixed-type-label">Short Answer</span>
+                        <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                    </div>
+                    <input type="text" 
+                           value="${section.value || ''}"
+                           placeholder="Enter acceptable answer"
+                           onchange="updateMixedAnswers(${questionNum})"
+                           style="width: 100%; padding: 8px;">
+                `;
+                break;
+                
+            case 'Long Answer':
+                sectionDiv.innerHTML = `
+                    <div class="mixed-type-header">
+                        <span class="mixed-type-label">Long Answer</span>
+                        <button type="button" class="remove-section-btn" onclick="removeMixedSection('${sectionId}', ${questionNum})">Remove</button>
+                    </div>
+                    <textarea placeholder="Enter grading guidelines"
+                              onchange="updateMixedAnswers(${questionNum})"
+                              style="width: 100%; min-height: 80px; padding: 8px;">${section.value || ''}</textarea>
+                `;
+                break;
+        }
+        
+        container.appendChild(sectionDiv);
+    });
+}
+
+// Toggle audio for a question
+function toggleAudio(questionNum) {
+    console.log('Current audio assignments:', audioAssignments);
+    console.log('Toggling audio for question:', questionNum);
+    
+    // Get existing audio files for this exam (for assignment interface only)
+    const audioFiles = [
+        {% for audio in exam.audio_files.all %}
+        {
+            id: {{ audio.id }},
+            name: "{{ audio.name|escapejs }}",
+            url: "{% url 'placement_test:get_audio' audio.id %}",
+            filename: "{{ audio.audio_file.name|escapejs }}"
+        },
+        {% endfor %}
+    ];
+    
+    if (audioFiles.length === 0) {
+        alert('No audio files have been uploaded for this exam.\n\nTo add audio files:\n1. Go to Exam List\n2. Click "Upload New Exam" to create a new exam with audio files');
+        return;
+    }
+    
+    // Check if this question has an assigned audio (from our tracking)
+    const currentAssignedAudioId = audioAssignments[questionNum];
+    let currentAssignedAudio = null;
+    if (currentAssignedAudioId) {
+        currentAssignedAudio = audioFiles.find(a => a.id === currentAssignedAudioId);
+    }
+    
+    // Current assignment is already handled by audioAssignments object
+    
+    // Build audio list with clear indication of current assignment
+    let audioList = '🎵 ASSIGN AUDIO TO QUESTION ' + questionNum + '\n';
+    audioList += '════════════════════════════════\n\n';
+    audioList += 'Available Audio Files:\n';
+    audioFiles.forEach((audio, index) => {
+        // Display the audio name, or extract filename if name is generic
+        let displayName = audio.name;
+        if (displayName === 'Audio File' || displayName.startsWith('Audio ')) {
+            // Extract filename from path and remove extension
+            const parts = audio.filename.split('/');
+            const filename = parts[parts.length - 1];
+            displayName = filename.replace(/\.[^/.]+$/, ''); // Remove extension
+        }
+        
+        // Check localStorage for updated name
+    const localAudioNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
+    const storedName = localAudioNames[audio.id];
+    if (storedName) {
+        displayName = storedName;
+    }
+    
+    audioList += `${index + 1}. ${displayName}`;
+        if (currentAssignedAudio && currentAssignedAudio.id === audio.id) {
+            audioList += ' ← CURRENTLY ASSIGNED';
+        }
+        audioList += '\n';
+    });
+    
+    audioList += '\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+    audioList += 'To assign audio: Enter the number (1-' + audioFiles.length + ')\n';
+    audioList += 'To remove audio: Enter 0\n';
+    audioList += 'To cancel: Click Cancel\n\n';
+    audioList += 'Example: Enter "2" to assign "ss" to this question';
+    
+    const choice = prompt(audioList);
+    if (choice !== null && choice !== '') {
+        const choiceNum = parseInt(choice);
+        if (choiceNum === 0) {
+            // Remove assignment
+            removeAudioAssignment(questionNum);
+        } else if (!isNaN(choiceNum)) {
+            const index = choiceNum - 1;
+            if (index >= 0 && index < audioFiles.length) {
+                const selectedAudio = audioFiles[index];
+                assignAudioToQuestion(questionNum, selectedAudio);
+            }
+        }
+    }
+}
+
+// Assign audio to question
+function assignAudioToQuestion(questionNum, audio) {
+    console.log('Assigning audio:', audio, 'to question:', questionNum);
+    
+    // Track the assignment
+    audioAssignments[questionNum] = audio.id;
+    
+    // Get the display name from localStorage or use original
+    const localAudioNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
+    const displayName = localAudioNames[audio.id] || audio.name;
+    console.log('Display name:', displayName, 'for audio ID:', audio.id);
+    
+    // Update the UI
+    const button = document.querySelector(`[data-question="${questionNum}"].audio-button`);
+    if (button) {
+        button.classList.add('has-audio');
+        // Update button text to show which audio is assigned
+        const shortName = displayName.substring(0, 20) + (displayName.length > 20 ? '...' : '');
+        button.innerHTML = `🎵 Audio: ${shortName}`;
+    }
+    
+    // Mark as unsaved
+    markUnsaved(questionNum);
+    
+    // Show confirmation
+    alert(`Audio "${displayName}" assigned to Question ${questionNum}!\n\nNote: This assignment is temporary. Click "Save All" to save changes.`);
+}
+
+// Remove audio assignment
+function removeAudioAssignment(questionNum) {
+    // Remove from tracking
+    delete audioAssignments[questionNum];
+    
+    // Update the UI
+    const button = document.querySelector(`[data-question="${questionNum}"].audio-button`);
+    if (button) {
+        button.classList.remove('has-audio');
+        button.innerHTML = '🎵 Audio';
+    }
+    
+    // Mark as unsaved
+    markUnsaved(questionNum);
+    
+    alert(`Audio assignment removed from Question ${questionNum}.`);
+}
+
+function saveAnswer(questionNum, answer) {
+    // This would make an API call to save individual answer
+    // For now, we'll just show the saved indicator
+    document.getElementById(`saved-${questionNum}`).style.display = 'inline';
+}
+
+function saveAllAnswers() {
+    const questionsData = [];
+    
+    document.querySelectorAll('.question-entry').forEach(entry => {
+        const questionNum = entry.dataset.questionNumber;
+        const questionId = entry.dataset.questionId;
+        const answerField = entry.querySelector('.answer-field');
+        const typeSelect = entry.querySelector('.question-type-select');
+        const optionsCount = document.getElementById(`options-count-${questionNum}`);
+        
+        let correctAnswer = answerField.value;
+        
+        // For SHORT answers, collect from multiple input fields
+        if (typeSelect.value === 'SHORT') {
+            const responseContainer = document.getElementById(`responses-${questionNum}`);
+            if (responseContainer) {
+                const inputs = responseContainer.querySelectorAll('input[type="text"]');
+                if (inputs.length > 0) {
+                    const values = Array.from(inputs).map(input => input.value).filter(v => v.trim());
+                    correctAnswer = values.join('|');
+                }
+            }
+        }
+        
+        // For LONG answers, collect from multiple textareas
+        if (typeSelect.value === 'LONG') {
+            const responseContainer = document.getElementById(`responses-${questionNum}`);
+            if (responseContainer) {
+                const textareas = responseContainer.querySelectorAll('textarea');
+                if (textareas.length > 0) {
+                    const values = Array.from(textareas).map(ta => ta.value).filter(v => v.trim());
+                    correctAnswer = values.join('|||');
+                }
+            }
+        }
+        
+        // For MIXED answers, collect the JSON data
+        if (typeSelect.value === 'MIXED') {
+            const sections = document.querySelectorAll(`#mixed-sections-${questionNum} .mixed-answer-section`);
+            const mixedData = [];
+            
+            sections.forEach(section => {
+                const typeLabel = section.querySelector('.mixed-type-label').textContent;
+                let value = '';
+                
+                if (typeLabel === 'Multiple Choice') {
+                    const selected = Array.from(section.querySelectorAll('.mcq-button.selected'))
+                        .map(btn => btn.dataset.value);
+                    value = selected.join(',');
+                } else if (typeLabel === 'Short Answer') {
+                    value = section.querySelector('input').value;
+                } else if (typeLabel === 'Long Answer') {
+                    value = section.querySelector('textarea').value;
+                }
+                
+                if (value) {
+                    mixedData.push({type: typeLabel, value: value});
+                }
+            });
+            
+            correctAnswer = JSON.stringify(mixedData);
+        }
+        
+        const data = {
+            id: questionId,
+            question_number: questionNum,
+            question_type: typeSelect.value,
+            correct_answer: correctAnswer
+        };
+        
+        // Add options count for MCQ
+        if (typeSelect.value === 'MCQ' && optionsCount) {
+            data.options_count = parseInt(optionsCount.value);
+        }
+        
+        questionsData.push(data);
+    });
+    
+    // Debug: Log the URL being called
+    const saveUrl = `/api/placement/exams/{{ exam.id }}/save-answers/`;
+    console.log('Saving to URL:', saveUrl);
+    console.log('Data being sent:', questionsData);
+    console.log('Audio assignments being saved:', audioAssignments);
+    
+    // Make API call to save all answers and types INCLUDING audio assignments
+    fetch(saveUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+            questions: questionsData,
+            audio_assignments: audioAssignments 
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            unsavedChanges = false;
+            document.getElementById('unsaved-changes').style.display = 'none';
+            
+            // Show the prominent success notification
+            const notification = document.getElementById('success-notification');
+            const alertDiv = notification.querySelector('.alert');
+            notification.style.display = 'block';
+            
+            // Apply animations
+            alertDiv.style.animation = 'slideDown 0.5s ease-out, pulse 2s ease-in-out';
+            
+            // Scroll to top to ensure notification is visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Also show the small save indicators
+            document.querySelectorAll('.save-indicator').forEach(indicator => {
+                indicator.style.display = 'inline';
+            });
+            
+            // Auto-hide the notification after 8 seconds
+            setTimeout(() => {
+                const notif = document.getElementById('success-notification');
+                const alert = notif.querySelector('.alert');
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    notif.style.display = 'none';
+                    alert.style.opacity = '1';
+                }, 500);
+            }, 8000);
+            
+            // Hide small indicators after 3 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.save-indicator').forEach(indicator => {
+                    indicator.style.display = 'none';
+                });
+            }, 3000);
+        } else {
+            console.error('Save error:', data);
+            alert('Error saving answers: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Save request failed:', error);
+        alert('Error saving answers: ' + error.message);
+    });
+}
+
+function clearAllAnswers() {
+    if (confirm('Are you sure you want to clear all answers?')) {
+        document.querySelectorAll('.answer-field').forEach(input => {
+            input.value = '';
+        });
+        unsavedChanges = true;
+        document.getElementById('unsaved-changes').style.display = 'inline';
+        document.querySelectorAll('.save-indicator').forEach(indicator => {
+            indicator.style.display = 'none';
+        });
+    }
+}
+
+// Randomize answers for QA testing
+function randomizeAnswers() {
+    if (!confirm('This will randomize all answers for QA testing. Continue?')) {
+        return;
+    }
+    
+    document.querySelectorAll('.question-entry').forEach(entry => {
+        const questionNum = entry.dataset.questionNumber;
+        const typeSelect = entry.querySelector('.question-type-select');
+        const questionType = typeSelect.value;
+        
+        switch(questionType) {
+            case 'MCQ':
+                // For MCQ, randomly select answer(s)
+                const isMultiple = document.getElementById(`multi-${questionNum}`)?.checked || false;
+                const optionsCount = parseInt(document.getElementById(`options-count-${questionNum}`)?.value || 5);
+                const availableOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].slice(0, optionsCount);
+                
+                // Clear all selections first
+                document.querySelectorAll(`[data-question="${questionNum}"].mcq-button`).forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                if (isMultiple) {
+                    // Select 1-3 random answers for multiple choice
+                    const numAnswers = Math.floor(Math.random() * 3) + 1;
+                    const selectedAnswers = [];
+                    for (let i = 0; i < numAnswers; i++) {
+                        const randomIndex = Math.floor(Math.random() * availableOptions.length);
+                        const option = availableOptions[randomIndex];
+                        if (!selectedAnswers.includes(option)) {
+                            selectedAnswers.push(option);
+                            const btn = document.querySelector(`[data-question="${questionNum}"][data-value="${option}"]`);
+                            if (btn) btn.classList.add('selected');
+                        }
+                    }
+                    document.getElementById(`answer-${questionNum}`).value = selectedAnswers.sort().join(',');
+                } else {
+                    // Select one random answer
+                    const randomOption = availableOptions[Math.floor(Math.random() * availableOptions.length)];
+                    const btn = document.querySelector(`[data-question="${questionNum}"][data-value="${randomOption}"]`);
+                    if (btn) btn.classList.add('selected');
+                    document.getElementById(`answer-${questionNum}`).value = randomOption;
+                }
+                break;
+                
+            case 'SHORT':
+                // Generate random short answers
+                const shortAnswers = [
+                    ['answer', 'response', 'solution'],
+                    ['cat', 'dog', 'bird'],
+                    ['red', 'blue', 'green'],
+                    ['yes', 'correct', 'true'],
+                    ['10', 'ten', '10.0']
+                ];
+                const randomShortSet = shortAnswers[Math.floor(Math.random() * shortAnswers.length)];
+                
+                // Clear existing responses
+                const shortContainer = document.getElementById(`responses-${questionNum}`);
+                shortContainer.innerHTML = '';
+                
+                // Add random responses
+                randomShortSet.forEach((answer, index) => {
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = 'response-item';
+                    responseDiv.innerHTML = `
+                        <input type="text" 
+                               value="${answer}"
+                               placeholder="Acceptable response ${index + 1}"
+                               onchange="updateShortAnswers(${questionNum})">
+                        ${index > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                    `;
+                    shortContainer.appendChild(responseDiv);
+                });
+                updateShortAnswers(questionNum);
+                break;
+                
+            case 'LONG':
+                // Generate random grading guidelines
+                const guidelines = [
+                    'Student should demonstrate clear understanding of the concept',
+                    'Answer must include specific examples',
+                    'Response should be 2-3 paragraphs',
+                    'Must reference the main topic',
+                    'Should show critical thinking'
+                ];
+                
+                // Clear existing responses
+                const longContainer = document.getElementById(`responses-${questionNum}`);
+                longContainer.innerHTML = '';
+                
+                // Add 2-3 random guidelines
+                const numGuidelines = Math.floor(Math.random() * 2) + 2;
+                for (let i = 0; i < numGuidelines; i++) {
+                    const responseDiv = document.createElement('div');
+                    responseDiv.className = 'response-item';
+                    const guideline = guidelines[Math.floor(Math.random() * guidelines.length)];
+                    responseDiv.innerHTML = `
+                        <textarea placeholder="Grading guideline or sample answer ${i + 1}"
+                                  onchange="updateLongAnswers(${questionNum})"
+                                  style="min-height: 80px; width: 100%;">${guideline}</textarea>
+                        ${i > 0 ? `<button type="button" class="remove-response" onclick="removeResponse(${questionNum}, this)">Remove</button>` : ''}
+                    `;
+                    longContainer.appendChild(responseDiv);
+                }
+                updateLongAnswers(questionNum);
+                break;
+                
+            case 'MIXED':
+                // For mixed type, add random sections
+                const mixedContainer = document.getElementById(`mixed-sections-${questionNum}`);
+                mixedContainer.innerHTML = '';
+                
+                // Add MCQ section
+                addMixedSection(questionNum, 'MCQ');
+                setTimeout(() => {
+                    const mcqSection = mixedContainer.querySelector('.mcq-button');
+                    if (mcqSection) {
+                        mcqSection.click(); // Select option A
+                    }
+                }, 100);
+                
+                // Add short answer section
+                addMixedSection(questionNum, 'SHORT');
+                setTimeout(() => {
+                    const shortInput = mixedContainer.querySelector('input[type="text"]');
+                    if (shortInput) {
+                        shortInput.value = 'Sample answer';
+                        updateMixedAnswers(questionNum);
+                    }
+                }, 200);
+                break;
+        }
+        
+        markUnsaved(questionNum);
+    });
+    
+    alert('Answers have been randomized for QA testing!');
+}
+
+// Mark audio name as changed
+function markAudioNameChanged(audioId) {
+    changedAudioNames.add(audioId);
+    document.getElementById(`audio-saved-${audioId}`).style.display = 'none';
+    
+    // Store the local name
+    const nameInput = document.getElementById(`audio-name-${audioId}`);
+    if (nameInput) {
+        localAudioNames[audioId] = nameInput.value.trim();
+    }
+}
+
+// Delete audio file from exam
+function renameAudioFile(audioId) {
+    const input = document.getElementById(`audio-name-${audioId}`);
+    const currentName = input.value;
+    const newName = prompt('Enter new name for this audio file:', currentName);
+    
+    if (newName && newName !== currentName) {
+        input.value = newName;
+        markAudioNameChanged(audioId);
+    }
+}
+
+function deleteAudioFile(audioId) {
+    if (!confirm('Are you sure you want to remove this audio file from the exam?')) {
+        return;
+    }
+    
+    // Make API call to delete audio
+    fetch(`/api/placement/exams/{{ exam.id }}/audio/${audioId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Remove the audio item from the UI
+            const audioItem = document.getElementById(`audio-item-${audioId}`);
+            if (audioItem) {
+                audioItem.remove();
+            }
+            
+            // Remove from local tracking
+            delete localAudioNames[audioId];
+            changedAudioNames.delete(audioId);
+            
+            alert('Audio file removed from exam successfully!');
+            
+            // If no audio files left, hide the entire section
+            const audioSection = document.querySelector('.audio-files-section');
+            const remainingItems = audioSection.querySelectorAll('.audio-file-item');
+            if (remainingItems.length === 0) {
+                audioSection.style.display = 'none';
+            }
+        } else {
+            alert('Error removing audio file: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Delete request failed:', error);
+        alert('Error removing audio file: ' + error.message);
+    });
+}
+
+// Save all audio names (locally for this exam view only)
+function saveAllAudioNames() {
+    if (changedAudioNames.size === 0) {
+        alert('No audio names have been changed.');
+        return;
+    }
+    
+    // Save to localStorage for this specific exam
+    const storageKey = `exam_${examId}_audio_names`;
+    
+    // Update localAudioNames with all current values
+    changedAudioNames.forEach(audioId => {
+        const nameInput = document.getElementById(`audio-name-${audioId}`);
+        if (nameInput) {
+            localAudioNames[audioId] = nameInput.value.trim();
+        }
+    });
+    
+    // Save to localStorage
+    localStorage.setItem(storageKey, JSON.stringify(localAudioNames));
+    
+    // Clear the changed set and show saved indicators
+    changedAudioNames.forEach(audioId => {
+        document.getElementById(`audio-saved-${audioId}`).style.display = 'inline';
+    });
+    changedAudioNames.clear();
+    
+    // Update audio buttons in the answer section
+    updateAudioButtonNames();
+    
+    // Hide saved indicators after 3 seconds
+    setTimeout(() => {
+        document.querySelectorAll('.audio-save-indicator').forEach(indicator => {
+            indicator.style.display = 'none';
+        });
+    }, 3000);
+    
+    alert('Audio display names saved locally for this exam!');
+}
+
+// Load local audio names from localStorage
+function loadLocalAudioNames() {
+    const storageKey = `exam_${examId}_audio_names`;
+    const saved = localStorage.getItem(storageKey);
+    
+    if (saved) {
+        try {
+            const savedNames = JSON.parse(saved);
+            Object.assign(localAudioNames, savedNames);
+            
+            // Apply saved names to input fields
+            Object.keys(savedNames).forEach(audioId => {
+                const input = document.getElementById(`audio-name-${audioId}`);
+                if (input) {
+                    input.value = savedNames[audioId];
+                }
+            });
+        } catch (e) {
+            console.error('Error loading saved audio names:', e);
+        }
+    }
+}
+
+// Update audio button names after saving
+function updateAudioButtonNames() {
+    // Get the latest saved names from localStorage
+    const savedNames = JSON.parse(localStorage.getItem(`exam_${examId}_audio_names`) || '{}');
+    
+    // Update all audio buttons based on current assignments
+    Object.entries(audioAssignments).forEach(([questionNum, audioId]) => {
+        const button = document.querySelector(`[data-question="${questionNum}"].audio-button`);
+        if (button) {
+            // Get the display name
+            const displayName = savedNames[audioId] || 
+                               document.getElementById(`audio-name-${audioId}`)?.value || 
+                               'Audio ' + audioId;
+            
+            const shortName = displayName.substring(0, 20) + (displayName.length > 20 ? '...' : '');
+            button.innerHTML = `🎵 Audio: ${shortName}`;
+        }
+    });
+}
+
+
+
+// Warn before leaving with unsaved changes
+window.addEventListener('beforeunload', function(e) {
+    if (unsavedChanges || changedAudioNames.size > 0) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,442 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load grade_tags %}
+
+{% block title %}Placement Rules Configuration{% endblock %}
+
+{% block content %}
+<!-- Success Notification Container (matching Upload Exam style) -->
+<div id="success-notification" style="display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 500px;">
+    <div class="alert alert-success" style="margin: 0; padding: 25px 30px; font-size: 1.3rem; font-weight: 600; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border-left: 5px solid #28a745; position: relative;">
+        <button type="button" class="close-alert" onclick="document.getElementById('success-notification').style.display='none'" style="float: right; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; margin-left: 20px;">&times;</button>
+        <span id="success-message">Placement rules saved successfully!</span>
+        <span style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); font-size: 2rem;">🎉</span>
+    </div>
+</div>
+
+<style>
+    .placement-container {
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 4px;
+    }
+    
+    .info-box h3 {
+        margin: 0 0 15px 0;
+        color: #1976d2;
+        font-size: 1.3rem;
+    }
+    
+    .info-box p {
+        margin: 0 0 10px 0;
+        line-height: 1.6;
+    }
+    
+    .info-box ul {
+        margin: 10px 0;
+        padding-left: 25px;
+    }
+    
+    .info-box li {
+        margin-bottom: 8px;
+    }
+    
+    .example-box {
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 15px;
+        font-style: italic;
+    }
+    
+    .program-section {
+        margin-bottom: 40px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+    }
+    
+    .program-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+    }
+    
+    .placement-matrix {
+        overflow-x: auto;
+        margin-bottom: 30px;
+    }
+    
+    .matrix-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    
+    .matrix-table th,
+    .matrix-table td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        text-align: center;
+    }
+    
+    .matrix-table th:not(:first-child),
+    .matrix-table td:not(:first-child) {
+        width: 140px;
+        max-width: 140px;
+    }
+    
+    .matrix-table th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .matrix-table th:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #e9ecef;
+        z-index: 11;
+        min-width: 150px;
+    }
+    
+    .matrix-table td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .level-select {
+        width: 100%;
+        padding: 8px 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        height: 40px;
+    }
+    
+    .save-button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 30px;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        float: right;
+        margin-top: 20px;
+    }
+    
+    .save-button:hover {
+        background-color: #218838;
+    }
+    
+    .grade-header {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    /* Success notification animations (matching Upload Exam) */
+    @keyframes slideDown {
+        from {
+            transform: translateX(-50%) translateY(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: translateX(-50%) scale(1);
+        }
+        50% {
+            transform: translateX(-50%) scale(1.02);
+        }
+    }
+</style>
+
+<div class="placement-container">
+    <h1>Placement Rules Configuration</h1>
+    
+    <div class="info-box">
+        <h3>What are Placement Rules?</h3>
+        <p>Placement Rules determine which curriculum level a student is assigned to based on their grade and English class rank. This is the first step in the placement process.</p>
+        
+        <p><strong>How it works:</strong></p>
+        <ul>
+            <li>Each cell in the matrix represents a combination of student grade and English class rank</li>
+            <li>Select the appropriate curriculum level for each combination</li>
+            <li>When a student takes a placement test, the system will use these rules to determine their curriculum level</li>
+            <li>Once the curriculum level is determined, the system will randomly select one of the exams mapped to that level</li>
+        </ul>
+        
+        <div class="example-box">
+            <strong>Example:</strong> If you set Primary 3 + Top 10% → PRIME CORE SIGMA - Level 1, then any Primary 3 student in the top 10% of their English class will be placed in PRIME CORE SIGMA - Level 1.
+        </div>
+    </div>
+    
+    <!-- PRIME CORE Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME CORE</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in core_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in core_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="CORE" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in core_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- PRIME ASCENT Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME ASCENT</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in ascent_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in ascent_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="ASCENT" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in ascent_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- PRIME EDGE Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME EDGE</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in edge_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in edge_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="EDGE" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in edge_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- PRIME PINNACLE Section -->
+    <div class="program-section">
+        <h2 class="program-title">PRIME PINNACLE</h2>
+        <div class="placement-matrix">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>School English Ranking</th>
+                        {% for grade in pinnacle_grades %}
+                        <th class="grade-header">{{ grade|format_grade }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rank in rank_options %}
+                    <tr>
+                        <td>{{ rank.label }}</td>
+                        {% for grade in pinnacle_grades %}
+                        <td>
+                            <select class="level-select" 
+                                    data-program="PINNACLE" 
+                                    data-grade="{{ grade }}" 
+                                    data-rank="{{ rank.value }}">
+                                <option value="">Select Level</option>
+                                {% for level in pinnacle_levels %}
+                                <option value="{{ level.id }}">{{ level.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <button type="button" class="save-button" onclick="savePlacementRules()">Save All Placement Rules</button>
+    <div style="clear: both;"></div>
+</div>
+
+<script>
+// Load existing placement rules
+document.addEventListener('DOMContentLoaded', function() {
+    loadExistingRules();
+});
+
+function loadExistingRules() {
+    // Fetch existing rules and populate the dropdowns
+    fetch('{% url "core:get_placement_rules" %}')
+        .then(response => response.json())
+        .then(data => {
+            data.rules.forEach(rule => {
+                const selector = `.level-select[data-grade="${rule.grade}"][data-rank="${rule.rank}"]`;
+                const select = document.querySelector(selector);
+                if (select) {
+                    select.value = rule.curriculum_level_id;
+                }
+            });
+        })
+        .catch(error => console.error('Error loading rules:', error));
+}
+
+function savePlacementRules() {
+    const rules = [];
+    
+    document.querySelectorAll('.level-select').forEach(select => {
+        if (select.value) {
+            rules.push({
+                program: select.dataset.program,
+                grade: parseInt(select.dataset.grade),
+                rank: select.dataset.rank,
+                curriculum_level_id: parseInt(select.value)
+            });
+        }
+    });
+    
+    fetch('{% url "core:save_placement_rules" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ rules: rules })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show the enhanced success notification (matching Upload Exam style)
+            const notification = document.getElementById('success-notification');
+            const alertDiv = notification.querySelector('.alert');
+            notification.style.display = 'block';
+            
+            // Apply animations
+            alertDiv.style.animation = 'slideDown 0.5s ease-out, pulse 2s ease-in-out';
+            
+            // Scroll to top to ensure notification is visible
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Auto-hide the notification after 10 seconds
+            setTimeout(() => {
+                const notif = document.getElementById('success-notification');
+                const alert = notif.querySelector('.alert');
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    notif.style.display = 'none';
+                    alert.style.opacity = '1';
+                }, 500);
+            }, 10000);
+        } else {
+            alert('Error saving placement rules: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving placement rules');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

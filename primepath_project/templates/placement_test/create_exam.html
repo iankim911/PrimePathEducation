@@ -1,0 +1,1069 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload New Exam - PrimePath{% endblock %}
+
+{% block header %}Upload New Exam{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Enhanced success message for exam upload */
+    .alert-success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border-left: 5px solid #28a745;
+        margin: 20px 0 30px 0;
+    }
+    
+    .alert-success::after {
+        content: "🎉";
+        position: absolute;
+        right: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.02);
+        }
+    }
+    .upload-form {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-section {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: box-shadow 0.2s ease;
+    }
+    
+    .form-section:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: #2c3e50;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-title::before {
+        content: "";
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        margin-right: 12px;
+        border-radius: 2px;
+    }
+    
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+    
+    .file-input-wrapper input[type=file] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-input-label {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .file-input-label:hover {
+        background: linear-gradient(45deg, #2980b9, #1f618d);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .file-input-label:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .file-name {
+        margin-left: 10px;
+        color: #666;
+    }
+    
+    .help-text {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .error-text {
+        color: #dc3545;
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+    }
+    
+    .audio-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .audio-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .audio-item-title {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .remove-audio-btn {
+        padding: 4px 12px !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .audio-item-fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .audio-field {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .audio-field label {
+        font-size: 0.85rem;
+        margin-bottom: 3px;
+    }
+    
+    .audio-field input {
+        padding: 5px;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+    }
+    
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        cursor: pointer;
+    }
+    
+    .form-switch .form-check-input {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,.25)'/%3e%3c/svg%3e");
+        background-position: left center;
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-color: #dee2e6;
+        border: 1px solid #dee2e6;
+        transition: background-position .15s ease-in-out, background-color .15s ease-in-out;
+    }
+    
+    .form-switch .form-check-input:checked {
+        background-position: right center;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+        background-color: #3498db;
+        border-color: #3498db;
+    }
+    
+    #pdf-preview-container {
+        background-color: #f8f9fa;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    #pdf-preview-container::before {
+        content: "Loading PDF...";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #6c757d;
+        font-size: 1.1rem;
+        z-index: 0;
+    }
+    
+    /* Responsive Design for 8-18 year olds */
+    
+    /* Desktop optimizations (1024px+) */
+    @media (min-width: 1024px) {
+        .upload-form {
+            max-width: 1000px;
+        }
+        
+        #pdf-preview-container {
+            height: 700px;
+        }
+        
+        .pdf-controls {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        
+        .pdf-controls button {
+            min-width: 120px;
+            font-size: 1rem;
+            padding: 8px 16px;
+        }
+        
+        #pdf-page-info {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 0 30px;
+        }
+    }
+    
+    /* Tablet optimizations (768px to 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+        .upload-form {
+            max-width: 100%;
+            padding: 0 15px;
+        }
+        
+        #pdf-preview-container {
+            height: 600px;
+        }
+        
+        .pdf-controls {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .pdf-controls button {
+            min-width: 100px;
+            min-height: 44px;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 6px;
+            touch-action: manipulation;
+        }
+        
+        #pdf-page-info {
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            flex: 1;
+        }
+    }
+    
+    /* Mobile-friendly improvements for all sizes */
+    .pdf-controls button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+    }
+    
+    .pdf-controls button:active {
+        transform: translateY(0);
+        transition: all 0.1s ease;
+    }
+    
+    .pdf-controls button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Enhanced visual feedback */
+    #pdf-canvas {
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
+    }
+    
+    /* Touch-friendly form elements */
+    .form-control, .btn {
+        min-height: 44px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+    
+    /* Enhanced checkbox styling for better visibility */
+    .form-check-input {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-top: 0.25rem;
+        cursor: pointer;
+        border-radius: 4px;
+        border: 2px solid #dee2e6;
+        transition: all 0.2s ease;
+    }
+    
+    .form-check-input:checked {
+        background-color: #3498db;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+        user-select: none;
+        margin-left: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" class="upload-form" id="examForm">
+    {% csrf_token %}
+    
+    <!-- PDF Upload - Moved to top -->
+    <div class="form-section">
+        <h3 class="section-title">Exam PDF File</h3>
+        
+        <div class="form-group">
+            <label>Upload PDF *</label>
+            <div class="file-input-wrapper">
+                <label for="pdf_file" class="file-input-label">Choose PDF File</label>
+                <input type="file" id="pdf_file" name="pdf_file" accept=".pdf" required>
+                <span class="file-name" id="pdf-file-name">No file selected</span>
+            </div>
+            <div class="help-text">Maximum file size: 10MB. PDF only.</div>
+        </div>
+    </div>
+    
+    <!-- PDF Preview -->
+    <div class="form-section" id="pdf-preview-section" style="display: none;">
+        <h3 class="section-title">PDF Preview</h3>
+        
+        <!-- Skip First Left Half Setting -->
+        <div class="form-group" style="margin-bottom: 20px;">
+            <div class="form-check" style="padding: 15px; background-color: #f8f9fa; border-radius: 5px; border-left: 4px solid #3498db;">
+                <input type="checkbox" class="form-check-input" id="skip_first_left_half" name="skip_first_left_half" value="1">
+                <label class="form-check-label" for="skip_first_left_half" style="font-weight: 500;">
+                    Hide First Page (Left Half)
+                </label>
+                <small class="form-text text-muted d-block" style="margin-top: 5px;">
+                    When enabled, the first left half of page 1 will be hidden from students during the test. 
+                    This setting will be applied to both preview and student interfaces.
+                </small>
+            </div>
+        </div>
+        
+        <div class="pdf-controls">
+            <button type="button" id="pdf-prev" class="btn btn-primary" disabled>
+                <span class="d-none d-md-inline">← Previous</span>
+                <span class="d-md-none">←</span>
+            </button>
+            <div id="pdf-page-info">Page 1 of 1</div>
+            <button type="button" id="pdf-next" class="btn btn-primary">
+                <span class="d-none d-md-inline">Next →</span>
+                <span class="d-md-none">→</span>
+            </button>
+        </div>
+        <div id="pdf-preview-container" style="border: 1px solid #dee2e6; border-radius: 5px; height: 600px; overflow: auto; text-align: center;">
+            <canvas id="pdf-canvas"></canvas>
+        </div>
+        <div class="help-text" style="margin-top: 10px;">
+            Review your PDF to ensure it uploaded correctly. Use the navigation buttons to browse through pages.
+        </div>
+    </div>
+    
+    <!-- Basic Information -->
+    <div class="form-section">
+        <h3 class="section-title">Exam Information</h3>
+        
+        <div class="form-group">
+            <label>Exam Name Selection *</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="naming_choice" id="preset_name" value="preset" checked>
+                <label class="form-check-label" for="preset_name">
+                    Choose from pre-designed names
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="naming_choice" id="custom_name" value="custom">
+                <label class="form-check-label" for="custom_name">
+                    Enter custom name
+                </label>
+            </div>
+        </div>
+        
+        <div class="form-group" id="preset_name_group">
+            <label for="preset_exam_name">Select Pre-designed Name *</label>
+            <select class="form-control" id="preset_exam_name" name="preset_exam_name" required>
+                <option value="">Select exam name</option>
+                {% for level in curriculum_levels %}
+                    <option value="{{ level.id }}" data-level-name="{{ level.full_name }}">
+                        {{ level.full_name }} Placement 
+                        {% if level.existing_versions != 'none' %}
+                            (existing: {{ level.existing_versions }})
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+            <div class="help-text">
+                <strong>Note:</strong> Version (e.g., _v_a, _v_b) will be automatically added based on existing exams for this level.
+            </div>
+        </div>
+        
+        <div class="form-group" id="custom_name_group" style="display: none;">
+            <label for="custom_exam_name">Custom Exam Name *</label>
+            <input type="text" class="form-control" id="custom_exam_name" name="custom_exam_name" 
+                   placeholder="Enter your custom exam name">
+            <div class="help-text">
+                <strong>Naming Guidelines:</strong><br>
+                • Be descriptive and include grade/level information<br>
+                • Consider adding version info if you plan multiple versions<br>
+                • Example: "Grade 5 Advanced Math Assessment - Version A"
+            </div>
+        </div>
+        
+        <!-- Hidden field to store the curriculum level ID -->
+        <input type="hidden" id="curriculum_level" name="curriculum_level">
+        
+        <div class="form-group">
+            <label for="timer_minutes">Test Duration (minutes) *</label>
+            <input type="number" class="form-control" id="timer_minutes" name="timer_minutes" 
+                   value="60" min="1" max="180" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="total_questions">Total Number of Questions *</label>
+            <input type="number" class="form-control" id="total_questions" name="total_questions" 
+                   min="1" max="100" required placeholder="e.g., 50">
+        </div>
+        
+        <div class="form-group">
+            <label for="default_options_count">Default Options for Multiple Choice Questions</label>
+            <input type="number" class="form-control" id="default_options_count" name="default_options_count" 
+                   value="5" min="2" max="10">
+            <small class="form-text text-muted">Number of answer options (A, B, C, etc.) for MCQ questions</small>
+        </div>
+        
+        
+    </div>
+    
+    <!-- Audio Files Upload -->
+    <div class="form-section">
+        <h3 class="section-title">Audio Files (Optional)</h3>
+        
+        <div class="form-group">
+            <label>Upload Audio Files</label>
+            <div class="file-input-wrapper">
+                <label for="audio_files" class="file-input-label">Choose Audio Files</label>
+                <input type="file" id="audio_files" name="audio_files" accept=".mp3,.wav,.m4a" multiple>
+                <span class="file-name" id="audio-file-names">No files selected</span>
+            </div>
+            <div class="help-text">Supported formats: MP3, WAV, M4A. Maximum file size: 50MB per file. You can select multiple files.</div>
+        </div>
+        
+        <!-- Audio File Details -->
+        <div id="audio-details" style="display: none; margin-top: 20px;">
+            <h4 style="font-size: 1.1rem; margin-bottom: 15px;">Audio File Details</h4>
+            <div id="audio-list"></div>
+        </div>
+    </div>
+    
+    <div class="btn-group">
+        <a href="{% url 'core:teacher_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Upload Exam</button>
+    </div>
+</form>
+
+<script>
+// PDF preview variables
+let pdfDoc = null;
+let virtualPageNum = 1; // Virtual page number (includes left/right columns)
+let totalVirtualPages = 0; // Total virtual pages (actual * 2)
+let currentPdfPage = null; // Store current page for fit calculations
+
+// Check if there's a success message and clear form
+document.addEventListener('DOMContentLoaded', function() {
+    const successAlert = document.querySelector('.alert-success');
+    if (successAlert && successAlert.textContent.includes('uploaded successfully')) {
+        // Add pulse animation to success message
+        successAlert.style.animation = 'pulse 2s ease-in-out';
+        
+        // Clear the form
+        document.getElementById('examForm').reset();
+        // Clear PDF preview
+        document.getElementById('pdf-preview-section').style.display = 'none';
+        document.getElementById('pdf-file-name').textContent = 'No file selected';
+        document.getElementById('audio-file-names').textContent = 'No files selected';
+        document.getElementById('audio-details').style.display = 'none';
+        document.getElementById('audio-list').innerHTML = '';
+        // Reset PDF and audio variables
+        pdfDoc = null;
+        selectedAudioFiles = [];
+        virtualPageNum = 1;
+        totalVirtualPages = 0;
+    }
+});
+
+// File name display and preview
+document.getElementById('pdf_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const fileName = file?.name || 'No file selected';
+    document.getElementById('pdf-file-name').textContent = fileName;
+    
+    // Handle PDF preview
+    const previewSection = document.getElementById('pdf-preview-section');
+    
+    if (file && file.type === 'application/pdf') {
+        // Show preview section
+        previewSection.style.display = 'block';
+        
+        // Read the file
+        const fileReader = new FileReader();
+        fileReader.onload = function() {
+            console.log('🔥 [CREATE_EXAM] FileReader onload triggered');
+            const typedarray = new Uint8Array(this.result);
+            console.log('🔥 [CREATE_EXAM] Created typedarray of length:', typedarray.length);
+            
+            // Load PDF with PDF.js
+            console.log('🔥 [CREATE_EXAM] Calling pdfjsLib.getDocument...');
+            pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                console.log('✅ [CREATE_EXAM] PDF loaded successfully');
+                pdfDoc = pdf;
+                
+                // Convert to virtual pages (each actual page = 2 virtual pages for split view)
+                totalVirtualPages = pdf.numPages * 2;
+                virtualPageNum = 1; // Start with first virtual page (left column of page 1)
+                
+                console.log('🔥 [CREATE_EXAM] PDF info:', {
+                    actualPages: pdf.numPages,
+                    totalVirtualPages,
+                    startingVirtualPage: virtualPageNum
+                });
+                
+                // Update page display to show virtual pages
+                const pageInfoElement = document.getElementById('pdf-page-info');
+                if (pageInfoElement) {
+                    const columnText = (virtualPageNum % 2) === 1 ? '(Left)' : '(Right)';
+                    pageInfoElement.textContent = `Page ${virtualPageNum} of ${totalVirtualPages} ${columnText}`;
+                    console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${virtualPageNum} of ${totalVirtualPages} ${columnText}`);
+                } else {
+                    console.warn('⚠️ [CREATE_EXAM] Page info element not found');
+                }
+                
+                // Update navigation buttons
+                console.log('🔥 [CREATE_EXAM] Updating navigation buttons...');
+                updateNavigationButtons();
+                
+                // Render first virtual page
+                console.log('🔥 [CREATE_EXAM] Starting first virtual page render...');
+                renderPage(virtualPageNum);
+            }).catch(function(error) {
+                console.error('❌ [CREATE_EXAM] Error loading PDF:', error);
+            });
+        };
+        fileReader.readAsArrayBuffer(file);
+        
+        // Smooth scroll to preview
+        setTimeout(() => {
+            previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    } else {
+        // Hide preview if no file or not PDF
+        previewSection.style.display = 'none';
+        pdfDoc = null;
+    }
+});
+
+// Update navigation buttons
+function updateNavigationButtons() {
+    document.getElementById('pdf-prev').disabled = virtualPageNum <= 1;
+    document.getElementById('pdf-next').disabled = virtualPageNum >= totalVirtualPages;
+}
+
+// Render PDF page - Split-column approach (matching student interface)
+function renderPage(vPageNum) {
+    console.log('🔥 [CREATE_EXAM] renderPage() called with vPageNum:', vPageNum);
+    console.log('🔥 [CREATE_EXAM] pdfDoc exists:', !!pdfDoc);
+    console.log('🔥 [CREATE_EXAM] totalVirtualPages:', totalVirtualPages);
+    
+    if (!pdfDoc) {
+        console.error('❌ [CREATE_EXAM] No pdfDoc available for rendering');
+        return;
+    }
+    
+    virtualPageNum = vPageNum;
+    
+    // Calculate actual PDF page based on virtual page
+    let actualPageNum = Math.ceil(vPageNum / 2);
+    let isLeftColumn = (vPageNum % 2) === 1;
+    
+    console.log('🔥 [CREATE_EXAM] Virtual to actual page mapping:', {
+        virtualPage: vPageNum,
+        actualPage: actualPageNum,
+        isLeftColumn,
+        columnText: isLeftColumn ? 'Left' : 'Right'
+    });
+    
+    console.log('🔥 [CREATE_EXAM] Getting actual page', actualPageNum, 'from PDF...');
+    pdfDoc.getPage(actualPageNum).then(function(page) {
+        console.log('✅ [CREATE_EXAM] Successfully got actual page', actualPageNum);
+        
+        currentPdfPage = page; // Store for fit calculations
+        const canvas = document.getElementById('pdf-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        console.log('🔥 [CREATE_EXAM] Canvas element found:', !!canvas);
+        console.log('🔥 [CREATE_EXAM] Canvas context obtained:', !!ctx);
+        
+        // Get container dimensions
+        const container = document.getElementById('pdf-preview-container');
+        const containerWidth = container.clientWidth - 20;
+        const containerHeight = container.clientHeight - 20;
+        
+        console.log('🔥 [CREATE_EXAM] Container dimensions:', {
+            containerWidth,
+            containerHeight,
+            containerClientWidth: container.clientWidth,
+            containerClientHeight: container.clientHeight,
+            cssHeight: '600px (from CSS)',
+            dynamicHeight: containerHeight
+        });
+        
+        // Get page viewport at scale 1
+        const viewport = page.getViewport({ scale: 1 });
+        
+        console.log('🔥 [CREATE_EXAM] Page viewport at scale 1:', {
+            width: viewport.width,
+            height: viewport.height
+        });
+        
+        // Adaptive scaling based on device type
+        const isTablet = window.innerWidth >= 768 && window.innerWidth <= 1023;
+        const isDesktop = window.innerWidth >= 1024;
+        
+        // Calculate scale to fit half-width in container (match Student interface approach)
+        const scaleX = (containerWidth * 2) / viewport.width; // Scale for half-width fitting
+        const scaleY = containerHeight / viewport.height;
+        
+        // Adjust scale based on device type for optimal readability
+        let scaleFactor;
+        if (isDesktop) {
+            scaleFactor = 0.98; // Larger on desktop for better detail
+        } else if (isTablet) {
+            scaleFactor = 0.95; // Standard for tablets
+        } else {
+            scaleFactor = 0.92; // Slightly smaller on mobile for better fit
+        }
+        
+        const scale = Math.min(scaleX, scaleY) * scaleFactor;
+        
+        console.log('🔥 [CREATE_EXAM] Scale calculations for column view:', {
+            originalViewportWidth: viewport.width,
+            halfPageWidth: viewport.width / 2,
+            scaleX,
+            scaleY,
+            finalScale: scale
+        });
+        
+        // Get scaled viewport for rendering
+        const scaledViewport = page.getViewport({ scale: scale });
+        
+        console.log('🔥 [CREATE_EXAM] Scaled viewport:', {
+            width: scaledViewport.width,
+            height: scaledViewport.height
+        });
+        
+        // Set canvas size for column view (match Student interface approach)
+        canvas.width = viewport.width / 2; // Half of ORIGINAL viewport (not scaled) = true 50% width
+        canvas.height = viewport.height;
+        
+        console.log('🔥 [CREATE_EXAM] Canvas dimensions for column view:', {
+            width: canvas.width,
+            height: canvas.height,
+            originalPageWidth: viewport.width,
+            scaledPageWidth: scaledViewport.width,
+            note: 'Canvas width = original viewport / 2 (not scaled viewport / 2)'
+        });
+        
+        // Create a temporary canvas for full page rendering
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = viewport.width; // Use original viewport for temp canvas
+        tempCanvas.height = viewport.height;
+        
+        console.log('🔥 [CREATE_EXAM] Temporary canvas created for full page:', {
+            width: tempCanvas.width,
+            height: tempCanvas.height
+        });
+        
+        // Render full page to temp canvas
+        const renderContext = {
+            canvasContext: tempCtx,
+            viewport: viewport // Use original viewport for rendering
+        };
+        
+        console.log('🔥 [CREATE_EXAM] Starting full page render to temp canvas...');
+        
+        page.render(renderContext).promise.then(function() {
+            console.log('✅ [CREATE_EXAM] Full page rendered to temp canvas successfully');
+            
+            // Clear main canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Copy the half we want (left or right column)
+            const sourceX = isLeftColumn ? 0 : canvas.width;
+            
+            console.log('🔥 [CREATE_EXAM] Copying column from temp canvas:', {
+                isLeftColumn,
+                sourceX,
+                sourceWidth: canvas.width,
+                sourceHeight: canvas.height
+            });
+            
+            ctx.drawImage(
+                tempCanvas,
+                sourceX, 0, canvas.width, canvas.height,  // source (which half to copy)
+                0, 0, canvas.width, canvas.height         // destination (full canvas)
+            );
+            
+            console.log('✅ [CREATE_EXAM] Column copied to main canvas successfully');
+            
+            // Update page info display
+            const pageInfoElement = document.getElementById('pdf-page-info');
+            if (pageInfoElement) {
+                const columnText = isLeftColumn ? '(Left)' : '(Right)';
+                pageInfoElement.textContent = `Page ${vPageNum} of ${totalVirtualPages} ${columnText}`;
+                console.log('🔥 [CREATE_EXAM] Page info updated to:', `Page ${vPageNum} of ${totalVirtualPages} ${columnText}`);
+            }
+            
+        }).catch(function(error) {
+            console.error('❌ [CREATE_EXAM] Error rendering full page to temp canvas:', error);
+        });
+        
+    }).catch(function(error) {
+        console.error('❌ [CREATE_EXAM] Error getting page', actualPageNum, ':', error);
+    });
+}
+
+
+// Previous page
+document.getElementById('pdf-prev').addEventListener('click', function() {
+    if (!pdfDoc || virtualPageNum <= 1) {
+        return;
+    }
+    virtualPageNum--;
+    console.log('🔥 [CREATE_EXAM] Previous page clicked, new virtualPageNum:', virtualPageNum);
+    renderPage(virtualPageNum);
+    updateNavigationButtons();
+});
+
+// Next page
+document.getElementById('pdf-next').addEventListener('click', function() {
+    if (!pdfDoc || virtualPageNum >= totalVirtualPages) {
+        return;
+    }
+    virtualPageNum++;
+    console.log('🔥 [CREATE_EXAM] Next page clicked, new virtualPageNum:', virtualPageNum);
+    renderPage(virtualPageNum);
+    updateNavigationButtons();
+});
+
+// Touch gesture support for PDF navigation
+let touchStartX = 0;
+let touchStartY = 0;
+let isSwiping = false;
+
+document.getElementById('pdf-canvas').addEventListener('touchstart', function(e) {
+    if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        isSwiping = false;
+    }
+}, { passive: true });
+
+document.getElementById('pdf-canvas').addEventListener('touchmove', function(e) {
+    if (e.touches.length === 1) {
+        const touchCurrentX = e.touches[0].clientX;
+        const touchCurrentY = e.touches[0].clientY;
+        const deltaX = Math.abs(touchCurrentX - touchStartX);
+        const deltaY = Math.abs(touchCurrentY - touchStartY);
+        
+        // Detect horizontal swipe (more horizontal than vertical movement)
+        if (deltaX > deltaY && deltaX > 30) {
+            isSwiping = true;
+            e.preventDefault(); // Prevent scrolling during swipe
+        }
+    }
+}, { passive: false });
+
+document.getElementById('pdf-canvas').addEventListener('touchend', function(e) {
+    if (isSwiping && e.changedTouches.length === 1) {
+        const touchEndX = e.changedTouches[0].clientX;
+        const deltaX = touchEndX - touchStartX;
+        const threshold = 50; // Minimum swipe distance
+        
+        if (Math.abs(deltaX) > threshold) {
+            if (deltaX > 0) {
+                // Swipe right - previous page
+                if (virtualPageNum > 1) {
+                    virtualPageNum--;
+                    renderPage(virtualPageNum);
+                    updateNavigationButtons();
+                }
+            } else {
+                // Swipe left - next page
+                if (virtualPageNum < totalVirtualPages) {
+                    virtualPageNum++;
+                    renderPage(virtualPageNum);
+                    updateNavigationButtons();
+                }
+            }
+        }
+    }
+    isSwiping = false;
+}, { passive: true });
+
+// Keyboard navigation support
+document.addEventListener('keydown', function(e) {
+    if (!pdfDoc) return;
+    
+    // Arrow keys for navigation
+    if (e.key === 'ArrowLeft' && virtualPageNum > 1) {
+        e.preventDefault();
+        virtualPageNum--;
+        renderPage(virtualPageNum);
+        updateNavigationButtons();
+    } else if (e.key === 'ArrowRight' && virtualPageNum < totalVirtualPages) {
+        e.preventDefault();
+        virtualPageNum++;
+        renderPage(virtualPageNum);
+        updateNavigationButtons();
+    }
+});
+
+
+// Store audio files in a variable we can manipulate
+let selectedAudioFiles = [];
+
+// Audio files display and details
+document.getElementById('audio_files').addEventListener('change', function(e) {
+    selectedAudioFiles = Array.from(e.target.files);
+    updateAudioDisplay();
+});
+
+// Function to update audio display
+function updateAudioDisplay() {
+    const audioDetails = document.getElementById('audio-details');
+    const audioList = document.getElementById('audio-list');
+    const fileCount = selectedAudioFiles.length;
+    
+    if (fileCount > 0) {
+        document.getElementById('audio-file-names').textContent = fileCount > 1 ? `${fileCount} files selected` : selectedAudioFiles[0].name;
+        
+        // Show audio details section
+        audioDetails.style.display = 'block';
+        audioList.innerHTML = '';
+        
+        // Create input fields for each audio file
+        selectedAudioFiles.forEach((file, index) => {
+            const audioItem = document.createElement('div');
+            audioItem.className = 'audio-item';
+            audioItem.innerHTML = `
+                <div class="audio-item-header">
+                    <span class="audio-item-title">Audio File ${index + 1}: ${file.name}</span>
+                    <button type="button" class="btn btn-danger btn-sm remove-audio-btn" onclick="removeAudioFile(${index})">Remove</button>
+                </div>
+                <div class="audio-item-fields">
+                    <div class="audio-field" style="grid-column: 1 / -1;">
+                        <label for="audio_name_${index}">Display Name (Optional)</label>
+                        <input type="text" id="audio_name_${index}" name="audio_names[]" 
+                               placeholder="e.g., Listening Section Part 1" 
+                               value="${file.name.replace(/\.[^/.]+$/, '')}">
+                    </div>
+                </div>
+                <div class="help-text" style="margin-top: 8px;">
+                    You can assign this audio to specific questions after creating the exam
+                </div>
+            `;
+            audioList.appendChild(audioItem);
+        });
+    } else {
+        document.getElementById('audio-file-names').textContent = 'No files selected';
+        audioDetails.style.display = 'none';
+    }
+}
+
+// Function to remove audio file
+function removeAudioFile(index) {
+    selectedAudioFiles.splice(index, 1);
+    
+    // Update the file input to reflect the change
+    const audioInput = document.getElementById('audio_files');
+    const dataTransfer = new DataTransfer();
+    
+    selectedAudioFiles.forEach(file => {
+        dataTransfer.items.add(file);
+    });
+    
+    audioInput.files = dataTransfer.files;
+    updateAudioDisplay();
+}
+
+// Handle naming choice
+const presetNameRadio = document.getElementById('preset_name');
+const customNameRadio = document.getElementById('custom_name');
+const presetNameGroup = document.getElementById('preset_name_group');
+const customNameGroup = document.getElementById('custom_name_group');
+const presetSelect = document.getElementById('preset_exam_name');
+const customNameInput = document.getElementById('custom_exam_name');
+const curriculumLevelHidden = document.getElementById('curriculum_level');
+
+// Store the final exam name with version
+let finalExamName = '';
+
+function updateNameFields() {
+    if (presetNameRadio.checked) {
+        presetNameGroup.style.display = 'block';
+        customNameGroup.style.display = 'none';
+        presetSelect.required = true;
+        customNameInput.required = false;
+        if (presetSelect.value) {
+            generateVersionedName();
+        }
+    } else {
+        presetNameGroup.style.display = 'none';
+        customNameGroup.style.display = 'block';
+        presetSelect.required = false;
+        customNameInput.required = true;
+        curriculumLevelHidden.value = ''; // Clear curriculum level for custom names
+    }
+}
+
+presetNameRadio.addEventListener('change', updateNameFields);
+customNameRadio.addEventListener('change', updateNameFields);
+
+// When preset selection changes, update the name with version
+presetSelect.addEventListener('change', function() {
+    if (this.value) {
+        curriculumLevelHidden.value = this.value;
+        generateVersionedName();
+    } else {
+        curriculumLevelHidden.value = '';
+    }
+});
+
+// Function to generate versioned name
+function generateVersionedName() {
+    const selectedOption = presetSelect.options[presetSelect.selectedIndex];
+    if (selectedOption.value) {
+        // Get the next available version
+        fetch(`/api/placement/exams/check-version/?curriculum_level=${selectedOption.value}`)
+            .then(response => response.json())
+            .then(data => {
+                const version = data.next_version || 'a';
+                const baseName = selectedOption.getAttribute('data-level-name');
+                finalExamName = `[PlacementTest] ${baseName}_v_${version}`;
+                // Update the help text to show what name will be used
+                const helpText = presetNameGroup.querySelector('.help-text');
+                helpText.innerHTML = `<strong>This exam will be named:</strong> ${finalExamName}<br>` +
+                    '<strong>Note:</strong> Version (e.g., _v_a, _v_b) is automatically added based on existing exams for this level.';
+            })
+            .catch(error => {
+                // Fallback if API fails
+                const baseName = selectedOption.getAttribute('data-level-name');
+                finalExamName = `[PlacementTest] ${baseName}_v_a`;
+            });
+    }
+}
+
+// Override form submission to set the correct name
+document.getElementById('examForm').addEventListener('submit', function(e) {
+    // Validate PDF file
+    const pdfFile = document.getElementById('pdf_file').files[0];
+    if (!pdfFile) {
+        e.preventDefault();
+        alert('Please select a PDF file before uploading.');
+        return;
+    }
+    
+    // Validate exam name
+    if (presetNameRadio.checked && !finalExamName) {
+        e.preventDefault();
+        alert('Please select a pre-designed exam name.');
+        return;
+    }
+    
+    if (customNameRadio.checked && !customNameInput.value.trim()) {
+        e.preventDefault();
+        alert('Please enter a custom exam name.');
+        return;
+    }
+    
+    // Set the final exam name based on choice
+    if (presetNameRadio.checked) {
+        // Create a hidden input with the final name
+        let nameInput = document.createElement('input');
+        nameInput.type = 'hidden';
+        nameInput.name = 'name';
+        nameInput.value = finalExamName;
+        this.appendChild(nameInput);
+    } else {
+        // Use custom name
+        let nameInput = document.createElement('input');
+        nameInput.type = 'hidden';
+        nameInput.name = 'name';
+        nameInput.value = customNameInput.value;
+        this.appendChild(nameInput);
+    }
+});
+
+</script>
+{% endblock %}

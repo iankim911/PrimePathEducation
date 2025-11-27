@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Placement Test Sessions{% endblock %}
+
+{% block content %}
+<style>
+    .sessions-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    
+    .page-header p {
+        font-size: 1.1rem;
+        color: #666;
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+        border-top: 4px solid;
+    }
+    
+    .stat-card.total {
+        border-color: #007bff;
+    }
+    
+    .stat-card.completed {
+        border-color: #28a745;
+    }
+    
+    .stat-card.in-progress {
+        border-color: #ffc107;
+    }
+    
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+    
+    .filters-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+    
+    .filters-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: end;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .filter-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #555;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .sessions-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .sessions-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .sessions-table th,
+    .sessions-table td {
+        padding: 12px 8px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        font-size: 0.95rem;
+    }
+    
+    .sessions-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #555;
+        position: sticky;
+        top: 0;
+    }
+    
+    .sessions-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .status-badge.completed {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-badge.in-progress {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-badge.not-started {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .btn-sm {
+        padding: 4px 12px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-view {
+        background: #17a2b8;
+        color: white;
+    }
+    
+    .btn-export {
+        background: #28a745;
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #ccc;
+        margin-bottom: 20px;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        gap: 5px;
+    }
+    
+    .page-link {
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .page-link.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    
+    .page-link:hover {
+        background: #e9ecef;
+    }
+</style>
+
+<div class="sessions-container">
+    <div class="page-header">
+        <h1>Student Placement Test Sessions</h1>
+        <p>Monitor and manage all placement test sessions</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-cards">
+        <div class="stat-card total">
+            <div class="stat-label">Total Sessions</div>
+            <div class="stat-number">{{ total_sessions|default:"0" }}</div>
+        </div>
+        <div class="stat-card completed">
+            <div class="stat-label">Completed</div>
+            <div class="stat-number">{{ completed_sessions|default:"0" }}</div>
+        </div>
+        <div class="stat-card in-progress">
+            <div class="stat-label">In Progress</div>
+            <div class="stat-number">{{ in_progress_sessions|default:"0" }}</div>
+        </div>
+    </div>
+    
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <form method="get" action="">
+            <div class="filters-row">
+                <div class="filter-group" style="flex: 2;">
+                    <label for="search">Search</label>
+                    <input type="text" name="search" id="search" value="{{ request.GET.search }}" placeholder="Search by student name or school...">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="status">Status</label>
+                    <select name="status" id="status">
+                        <option value="">All Statuses</option>
+                        <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                        <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="grade">Grade</label>
+                    <select name="grade" id="grade">
+                        <option value="">All Grades</option>
+                        <option value="1" {% if request.GET.grade == '1' %}selected{% endif %}>Grade 1</option>
+                        <option value="2" {% if request.GET.grade == '2' %}selected{% endif %}>Grade 2</option>
+                        <option value="3" {% if request.GET.grade == '3' %}selected{% endif %}>Grade 3</option>
+                        <option value="4" {% if request.GET.grade == '4' %}selected{% endif %}>Grade 4</option>
+                        <option value="5" {% if request.GET.grade == '5' %}selected{% endif %}>Grade 5</option>
+                        <option value="6" {% if request.GET.grade == '6' %}selected{% endif %}>Grade 6</option>
+                        <option value="7" {% if request.GET.grade == '7' %}selected{% endif %}>Grade 7</option>
+                        <option value="8" {% if request.GET.grade == '8' %}selected{% endif %}>Grade 8</option>
+                        <option value="9" {% if request.GET.grade == '9' %}selected{% endif %}>Grade 9</option>
+                        <option value="10" {% if request.GET.grade == '10' %}selected{% endif %}>Grade 10</option>
+                        <option value="11" {% if request.GET.grade == '11' %}selected{% endif %}>Grade 11</option>
+                        <option value="12" {% if request.GET.grade == '12' %}selected{% endif %}>Grade 12</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="academic_rank">Academic Rank</label>
+                    <select name="academic_rank" id="academic_rank">
+                        <option value="">All Ranks</option>
+                        <option value="TOP_10" {% if request.GET.academic_rank == 'TOP_10' %}selected{% endif %}>Top 10%</option>
+                        <option value="TOP_20" {% if request.GET.academic_rank == 'TOP_20' %}selected{% endif %}>Top 20%</option>
+                        <option value="TOP_30" {% if request.GET.academic_rank == 'TOP_30' %}selected{% endif %}>Top 30%</option>
+                        <option value="TOP_40" {% if request.GET.academic_rank == 'TOP_40' %}selected{% endif %}>Top 40%</option>
+                        <option value="TOP_50" {% if request.GET.academic_rank == 'TOP_50' %}selected{% endif %}>Top 50%</option>
+                        <option value="BELOW_50" {% if request.GET.academic_rank == 'BELOW_50' %}selected{% endif %}>Below 50%</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="date_from">Date From</label>
+                    <input type="date" name="date_from" id="date_from" value="{{ request.GET.date_from }}">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="date_to">Date To</label>
+                    <input type="date" name="date_to" id="date_to" value="{{ request.GET.date_to }}">
+                </div>
+                
+                <div class="filter-buttons">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="{% url 'placement_test:session_list' %}" class="btn btn-secondary">Clear</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Sessions Table -->
+    <div class="sessions-table">
+        {% if sessions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>School</th>
+                    <th>Grade</th>
+                    <th>Academic Rank</th>
+                    <th>Start Time</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Assigned Level</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td><strong>{{ session.student_name|default:"Anonymous" }}</strong></td>
+                    <td>
+                        {% if session.school %}
+                            {{ session.school.name }}
+                        {% elif session.school_name_manual %}
+                            {{ session.school_name_manual }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>Grade {{ session.grade }}</td>
+                    <td>
+                        {% if session.academic_rank == 'TOP_10' %}Top 10%
+                        {% elif session.academic_rank == 'TOP_20' %}Top 20%
+                        {% elif session.academic_rank == 'TOP_30' %}Top 30%
+                        {% elif session.academic_rank == 'TOP_40' %}Top 40%
+                        {% elif session.academic_rank == 'TOP_50' %}Top 50%
+                        {% elif session.academic_rank == 'BELOW_50' %}Below 50%
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>{{ session.started_at|date:"M d, H:i" }}</td>
+                    <td>
+                        {% if session.time_spent_seconds %}
+                            {% widthratio session.time_spent_seconds 60 1 %} min
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if session.is_completed %}
+                            <span class="status-badge completed">Completed</span>
+                        {% else %}
+                            <span class="status-badge in-progress">In Progress</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if session.percentage_score %}
+                            <strong>{{ session.percentage_score|floatformat:1 }}%</strong>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if session.original_curriculum_level %}
+                            <small>{{ session.original_curriculum_level.full_name }}</small>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{% url 'placement_test:session_detail' session.id %}" class="btn btn-sm btn-view" title="View Details">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            {% if session.is_completed %}
+                            <a href="{% url 'placement_test:export_result' session.id %}" class="btn btn-sm btn-export" title="Export Results">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?page=1" class="page-link">First</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Previous</a>
+            {% endif %}
+            
+            <span class="page-link active">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">Last</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No sessions found</h3>
+            <p>No placement test sessions match your current filters.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Auto-refresh for in-progress sessions
+{% if has_in_progress %}
+setTimeout(function() {
+    location.reload();
+}, 30000); // Refresh every 30 seconds
+{% endif %}
+</script>
+{% endblock %}
