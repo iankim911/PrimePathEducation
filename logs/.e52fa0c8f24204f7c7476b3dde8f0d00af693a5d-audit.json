@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/ian/Desktop/VIBECODE/PrimePath_v2/logs/.e52fa0c8f24204f7c7476b3dde8f0d00af693a5d-audit.json",
+    "files": [
+        {
+            "date": 1764637734164,
+            "name": "/Users/ian/Desktop/VIBECODE/PrimePath_v2/logs/mcp-puppeteer-2025-12-02.log",
+            "hash": "743553243a61945ca1f0256568b1da2880fae0fa35b4a075b4a74e76b97f0041"
+        }
+    ],
+    "hashType": "sha256"
+}
